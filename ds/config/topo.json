@@ -1,0 +1,24 @@
+{
+  "name": "net",
+  "devices": [
+    {
+      "name": "alpha",
+      "ifces": [
+        {
+          "name": "xe-1/1/0",
+          "reservableBw": 1000,
+          "reservableVlans": [
+            {
+              "floor": 2,
+              "ceiling": 100
+            },
+            {
+              "floor": 500,
+              "ceiling": 550
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

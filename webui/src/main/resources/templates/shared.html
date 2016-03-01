@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head th:fragment="headerFragment (pageTitle)">
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+    <title th:text="${pageTitle}">Page title</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+
+    <link th:href="@{/webjars/bootstrap/3.3.6/css/bootstrap.min.css}" rel="stylesheet" media="screen"/>
+
+    <link th:src="@{/webjars/x-editable-bootstrap/1.5.1/css/bootstrap-editable.css}" rel="stylesheet" />
+
+    <script th:src="@{/webjars/x-editable-bootstrap/1.5.1/js/bootstrap-editable.min.js}"></script>
+
+    <script th:src="@{/webjars/jquery/1.12.0/jquery.min.js}"></script>
+
+    <script th:src="@{/webjars/bootstrap/3.3.6/js/bootstrap.min.js}"></script>
+
+    <script th:src="@{/webjars/typeahead.js/0.11.1/dist/typeahead.bundle.min.js}"></script>
+    <style>
+
+        .typeahead,
+        .tt-query,
+        .tt-hint {
+            width: 396px;
+            height: 30px;
+            padding: 8px 12px;
+            font-size: 16px;
+            line-height: 30px;
+            border: 2px solid #ccc;
+            -webkit-border-radius: 8px;
+            -moz-border-radius: 8px;
+            border-radius: 8px;
+            outline: none;
+        }
+
+        .typeahead {
+            background-color: #fff;
+        }
+
+        .typeahead:focus {
+            border: 2px solid #0097cf;
+        }
+
+        .tt-query {
+            -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+            -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+            box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+        }
+
+        .tt-hint {
+            color: #999
+        }
+
+        .tt-menu {
+            width: 422px;
+            margin: 12px 0;
+            padding: 8px 0;
+            background-color: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            -webkit-border-radius: 8px;
+            -moz-border-radius: 8px;
+            border-radius: 8px;
+            -webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, .2);
+            -moz-box-shadow: 0 5px 10px rgba(0, 0, 0, .2);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, .2);
+        }
+
+        .tt-suggestion {
+            padding: 3px 20px;
+            font-size: 18px;
+            line-height: 24px;
+        }
+
+        .tt-suggestion:hover {
+            cursor: pointer;
+            color: #fff;
+            background-color: #0097cf;
+        }
+
+        .tt-suggestion.tt-cursor {
+            color: #fff;
+            background-color: #0097cf;
+
+        }
+
+        .tt-suggestion p {
+            margin: 0;
+        }
+
+    </style>
+</head>
+
+<body>
+
+
+<nav class="navbar navbar-default" th:fragment="navbar">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                    data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">OSCARS</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+                <li><a href="/">Home</a></li>
+                <li sec:authorize="isAuthenticated()"><a href="/resv_list">Reservations</a></li>
+                <li class="dropdown" sec:authorize="hasAuthority('ADMIN')">
+
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"
+                       role="button" aria-haspopup="true" aria-expanded="false">Administration <span
+                            class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="/admin/user_list">User List</a></li>
+                        <li><a href="/admin/user_add">Add a user</a></li>
+                        <li><a href="/admin/comp_list">Components</a></li>
+                        <li><a href="/admin/group_list">Topology</a></li>
+                        <li><a href="/admin/cust_list">Accounting</a></li>
+                    </ul>
+                </li>
+                <li sec:authorize="isAuthenticated()"><a href="/logout">Log out</a></li>
+
+
+            </ul>
+        </div><!-- /.navbar-collapse -->
+    </div><!-- /.container-fluid -->
+</nav>
+
+
+</body>
+</html>

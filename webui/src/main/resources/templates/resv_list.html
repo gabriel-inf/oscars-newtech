@@ -1,0 +1,33 @@
+<!DOCTYPE HTML>
+<html xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head th:include="shared :: headerFragment (pageTitle='List reservations')"/>
+
+<body>
+    <div th:include="shared :: navbar"></div>
+
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th style="width: 150px;">GRI</th>
+            <th style="width: 200px;">Description</th>
+            <th style="width: 200px;">Username</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="resv : ${resvs}">
+            <td>
+                <a th:href="@{|/resvs/resv)view/${resv.gri}|}"
+                   th:text="|${resv.gri}|"/>
+            </td>
+            <td th:text="${resv.description}"/>
+            <td th:text="${resv.username}"/>
+        </tr>
+        </tbody>
+    </table>
+
+
+</body>
+</html>
