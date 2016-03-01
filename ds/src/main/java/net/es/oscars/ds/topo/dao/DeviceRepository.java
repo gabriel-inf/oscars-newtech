@@ -12,7 +12,7 @@ import java.util.Optional;
 public interface DeviceRepository extends RevisionRepository<EDevice, Long, Integer>, CrudRepository<EDevice, Long> {
 
     List<EDevice> findAll();
-    Optional<EDevice> findByName(String name);
+    Optional<EDevice> findByUrn(String urn);
 
 
 }

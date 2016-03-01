@@ -2,21 +2,17 @@ package net.es.oscars.ds.topo.ent;
 
 import lombok.Data;
 import lombok.NonNull;
+import net.es.oscars.common.topo.Layer;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
-import org.hibernate.envers.Audited;
-import org.hibernate.envers.RelationTargetAuditMode;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
+import java.net.InetAddress;
 import java.util.HashSet;
 import java.util.Set;
 
 @Data
 @Entity
-@Audited
 public class EDevice {
 
     @Id
@@ -24,12 +20,19 @@ public class EDevice {
     private Long id;
 
     @NonNull
-    private String name;
+    @Column(unique = true)
+    private String urn;
+
+    @ElementCollection
+    @CollectionTable
+    private Set<Layer> capabilities = new HashSet<>();
+
+    private String model;
+    private String vendor;
 
 
     @OneToMany
     @NonNull
-    @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
     @Cascade(CascadeType.ALL)
     private Set<EIfce> ifces = new HashSet<>();
 
@@ -38,8 +41,8 @@ public class EDevice {
     }
 
 
-    public EDevice(String name) {
-        this.name = name;
+    public EDevice(String urn) {
+        this.urn = urn;
     }
 
 }

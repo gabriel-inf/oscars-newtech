@@ -4,7 +4,6 @@ import lombok.Data;
 import lombok.NonNull;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
-import org.hibernate.envers.Audited;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -13,8 +12,7 @@ import java.util.Set;
 
 @Data
 @Entity
-@Audited
-public class EDevGroup {
+public class ETopology {
 
     @Id
     @GeneratedValue
@@ -29,25 +27,30 @@ public class EDevGroup {
     @Cascade(CascadeType.ALL)
     private Set<EDevice> devices = new HashSet<>();
 
-    public EDevGroup(String name, Set<EDevice> devices) {
+    @OneToMany
+    @NonNull
+    @Cascade(CascadeType.ALL)
+    private Set<EUrnAdjcy> adjcies = new HashSet<>();
+
+    public ETopology(String name, Set<EDevice> devices) {
         this.name = name;
         this.devices = devices;
     }
 
-    public Optional<EDevice> byName(String devName) {
+    public Optional<EDevice> byUrn(String devUrn) {
         for (EDevice dev :devices) {
-            if (dev.getName().equals(devName)) {
+            if (dev.getUrn().equals(devUrn)) {
                 return Optional.of(dev);
             }
         }
         return Optional.empty();
     }
 
-    public EDevGroup(String name) {
+    public ETopology(String name) {
         this.name = name;
     }
 
-    public EDevGroup() {
+    public ETopology() {
 
     }
 

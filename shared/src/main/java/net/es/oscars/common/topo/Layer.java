@@ -4,6 +4,7 @@ package net.es.oscars.common.topo;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public enum Layer {
     LAYER_ONE("LAYER_ONE"),
@@ -29,8 +30,13 @@ public enum Layer {
         }
     }
 
-    public static Layer get(String code) {
-        return lookup.get(code);
+    public static Optional<Layer> get(String code) {
+        Optional<Layer> result;
+        if (lookup.containsKey(code)) {
+            return Optional.of(lookup.get(code));
+        } else {
+            return Optional.empty();
+        }
     }
 
 }

@@ -3,6 +3,7 @@ package net.es.oscars.st.prov;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public enum ProvEvent {
 
@@ -42,7 +43,12 @@ public enum ProvEvent {
         }
     }
 
-    public static ProvEvent get(String code) {
-        return lookup.get(code);
+    public static Optional<ProvEvent> get(String code) {
+        Optional<ProvEvent> result;
+        if (lookup.containsKey(code)) {
+            return Optional.of(lookup.get(code));
+        } else {
+            return Optional.empty();
+        }
     }
 }

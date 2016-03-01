@@ -2,10 +2,20 @@
   "name": "net",
   "devices": [
     {
-      "name": "alpha",
+      "urn": "nersc-tb1",
+      "model": "SR7750",
+      "vendor": "Alcatel",
+      "capabilities": [
+        "ETHERNET",
+        "MPLS"
+      ],
       "ifces": [
         {
-          "name": "xe-1/1/0",
+          "urn": "nersc-tb1:3/1/1",
+          "capabilities": [
+            "ETHERNET",
+            "MPLS"
+          ],
           "reservableBw": 1000,
           "reservableVlans": [
             {
@@ -17,6 +27,57 @@
               "ceiling": 550
             }
           ]
+        },
+        {
+          "urn": "nersc-tb1:1/1/1:to_star-tb1",
+          "capabilities": [
+            "MPLS"
+          ],
+          "reservableBw": 1000
+        }
+      ]
+    },
+    {
+      "urn": "star-tb1",
+      "model": "SR7750",
+      "vendor": "Alcatel",
+      "capabilities": [
+        "ETHERNET",
+        "MPLS"
+      ],
+      "ifces": [
+        {
+          "urn": "star-tb1:1/1/1",
+          "capabilities": [
+            "ETHERNET",
+            "MPLS"
+          ],
+          "reservableBw": 1000,
+          "reservableVlans": [
+            {
+              "floor": 2,
+              "ceiling": 3000
+            }
+          ]
+        },
+        {
+          "urn": "star-tb1:2/1/1:to_nersc-tb1",
+          "capabilities": [
+            "MPLS"
+          ],
+          "reservableBw": 1000
+        }
+      ]
+    }
+  ],
+  "adjcies": [
+    {
+      "a": "star-tb1:2/1/1:to_nersc-tb1",
+      "z": "nersc-tb1:1/1/1:to_star-tb1",
+      "metrics": [
+        {
+          "layer": "MPLS",
+          "value": 100
         }
       ]
     }

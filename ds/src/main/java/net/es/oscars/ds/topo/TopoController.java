@@ -2,7 +2,9 @@ package net.es.oscars.ds.topo;
 
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.common.topo.Layer;
-import net.es.oscars.ds.topo.dao.DevGroupRepository;
+import net.es.oscars.ds.topo.dao.TopologyRepository;
+import net.es.oscars.ds.topo.dao.DeviceRepository;
+import net.es.oscars.ds.topo.ent.EDevice;
 import net.es.oscars.dto.topo.TopoEdge;
 import net.es.oscars.dto.topo.TopoVertex;
 import net.es.oscars.dto.topo.Topology;
@@ -20,7 +22,10 @@ import java.util.NoSuchElementException;
 public class TopoController {
 
     @Autowired
-    private DevGroupRepository devGrpRepo;
+    private TopologyRepository topoRepo;
+
+    @Autowired
+    private DeviceRepository devRepo;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -40,12 +45,24 @@ public class TopoController {
 
 
 
+
+    @RequestMapping(value = "/device/{urn}", method = RequestMethod.GET)
+    @ResponseBody
+    public EDevice device(@PathVariable("urn") String urn) {
+        EDevice eDevice = devRepo.findByUrn(urn).orElseThrow(NoSuchElementException::new);
+        log.info(eDevice.toString());
+        return eDevice;
+    }
+
+
+
+
     @RequestMapping(value = "/topo/layer/{layer}", method = RequestMethod.GET)
     @ResponseBody
-    public Topology groupDevs(@PathVariable("layer") String layer) {
+    public Topology layer(@PathVariable("layer") String layer) {
 
         log.info("topology for layer " + layer);
-        Layer l_enum = Layer.get(layer);
+        Layer l_enum = Layer.get(layer).orElseThrow(NoSuchElementException::new);
 
         Topology topo = new Topology();
         topo.setLayer(l_enum);

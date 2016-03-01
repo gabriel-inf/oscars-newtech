@@ -2,9 +2,9 @@ package net.es.oscars.ds.topo.pop;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.ds.topo.dao.DevGroupRepository;
+import net.es.oscars.ds.topo.dao.TopologyRepository;
 import net.es.oscars.ds.topo.dao.DeviceRepository;
-import net.es.oscars.ds.topo.ent.EDevGroup;
+import net.es.oscars.ds.topo.ent.ETopology;
 import net.es.oscars.ds.topo.svc.TopoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -23,7 +23,7 @@ public class TopoPopulator {
     private TopoService service;
 
     @Autowired
-    private DevGroupRepository grpRepo;
+    private TopologyRepository grpRepo;
 
     @Autowired
     private DeviceRepository devRepo;
@@ -31,11 +31,11 @@ public class TopoPopulator {
     @PostConstruct
     public void fill() throws IOException {
 
-        List<EDevGroup> groups = grpRepo.findAll();
+        List<ETopology> groups = grpRepo.findAll();
 
         if (groups.isEmpty()) {
             ObjectMapper mapper = new ObjectMapper();
-            EDevGroup group = mapper.readValue(new File("./config/topo.json"), EDevGroup.class);
+            ETopology group = mapper.readValue(new File("./config/topo.json"), ETopology.class);
             service.save(group);
 
         } else {

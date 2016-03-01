@@ -3,6 +3,7 @@ package net.es.oscars.st.oper;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public enum OperEvent {
 
@@ -32,7 +33,12 @@ public enum OperEvent {
         }
     }
 
-    public static OperEvent get(String code) {
-        return lookup.get(code);
+    public static Optional<OperEvent> get(String code) {
+        Optional<OperEvent> result;
+        if (lookup.containsKey(code)) {
+            return Optional.of(lookup.get(code));
+        } else {
+            return Optional.empty();
+        }
     }
 }

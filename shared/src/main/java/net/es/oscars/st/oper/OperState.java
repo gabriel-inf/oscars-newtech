@@ -3,6 +3,7 @@ package net.es.oscars.st.oper;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public enum OperState {
     ADMIN_DOWN_OPER_DOWN("ADMIN_DOWN_OPER_DOWN"),
@@ -31,7 +32,12 @@ public enum OperState {
         }
     }
 
-    public static OperState get(String code) {
-        return lookup.get(code);
+    public static Optional<OperState> get(String code) {
+        Optional<OperState> result;
+        if (lookup.containsKey(code)) {
+            return Optional.of(lookup.get(code));
+        } else {
+            return Optional.empty();
+        }
     }
 }

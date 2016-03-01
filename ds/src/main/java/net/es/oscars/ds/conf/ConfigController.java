@@ -95,9 +95,7 @@ public class ConfigController {
     public StartupConfig update(@RequestBody StartupConfig startupConfig) {
         log.info("updating " + startupConfig.getName());
 
-        Optional<EStartupConfig> maybeConfig = repository.findByName(startupConfig.getName());
-        maybeConfig.orElseThrow(NoSuchElementException::new);
-        EStartupConfig configEnt = maybeConfig.get();
+        EStartupConfig configEnt = repository.findByName(startupConfig.getName()).orElseThrow(NoSuchElementException::new);
 
 
         configEnt.setConfigJson(startupConfig.getConfigJson());

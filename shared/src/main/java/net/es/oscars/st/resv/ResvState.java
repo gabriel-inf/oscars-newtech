@@ -3,6 +3,7 @@ package net.es.oscars.st.resv;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public enum ResvState {
     IDLE_WAIT("IDLE_WAIT"),
@@ -37,8 +38,13 @@ public enum ResvState {
         }
     }
 
-    public static ResvState get(String code) {
-        return lookup.get(code);
+    public static Optional<ResvState> get(String code) {
+        Optional<ResvState> result;
+        if (lookup.containsKey(code)) {
+            return Optional.of(lookup.get(code));
+        } else {
+            return Optional.empty();
+        }
     }
 }
 

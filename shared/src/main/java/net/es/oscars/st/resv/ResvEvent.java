@@ -3,6 +3,7 @@ package net.es.oscars.st.resv;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public enum ResvEvent {
 
@@ -43,7 +44,12 @@ public enum ResvEvent {
         }
     }
 
-    public static ResvEvent get(String code) {
-        return lookup.get(code);
+    public static Optional<ResvEvent> get(String code) {
+        Optional<ResvEvent> result;
+        if (lookup.containsKey(code)) {
+            return Optional.of(lookup.get(code));
+        } else {
+            return Optional.empty();
+        }
     }
 }
