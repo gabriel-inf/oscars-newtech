@@ -7,16 +7,16 @@ import java.util.Set;
 
 @Data
 public class TopoEdge {
-    private String a;
+    private TopoVertex a;
 
-    private String z;
+    private TopoVertex z;
 
-    private Set<Metric> metrics = new HashSet<>();
+    private Long metric;
 
     public TopoEdge() {
-        
+
     }
-    public TopoEdge(String a, String z) {
+    public TopoEdge(TopoVertex a, TopoVertex z) {
         this.a = a;
         this.z = z;
 

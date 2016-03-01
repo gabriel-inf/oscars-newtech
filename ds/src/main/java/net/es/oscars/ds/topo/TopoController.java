@@ -5,11 +5,10 @@ import net.es.oscars.common.topo.Layer;
 import net.es.oscars.ds.topo.dao.TopologyRepository;
 import net.es.oscars.ds.topo.dao.DeviceRepository;
 import net.es.oscars.ds.topo.ent.EDevice;
-import net.es.oscars.ds.topo.ent.EIfce;
 import net.es.oscars.ds.topo.ent.ETopology;
 import net.es.oscars.ds.topo.ent.EUrnAdjcy;
 import net.es.oscars.dto.topo.Metric;
-import net.es.oscars.dto.topo.TopoEdge;
+import net.es.oscars.dto.topo.UrnEdge;
 import net.es.oscars.dto.topo.TopoVertex;
 import net.es.oscars.dto.topo.Topology;
 import org.modelmapper.ModelMapper;
@@ -84,7 +83,7 @@ public class TopoController {
                                 TopoVertex ifce = new TopoVertex(i.getUrn());
                                 topo.getVertices().add(ifce);
 
-                                TopoEdge edge = new TopoEdge(d.getUrn(), i.getUrn());
+                                UrnEdge edge = new UrnEdge(d.getUrn(), i.getUrn());
                                 Metric m = new Metric();
                                 m.setLayer(eLayer);
                                 m.setValue(1L);
@@ -105,7 +104,7 @@ public class TopoController {
                         metrics.add(m);
                     });
             if (!metrics.isEmpty()) {
-                TopoEdge edge = new TopoEdge(adj.getA(), adj.getZ());
+                UrnEdge edge = new UrnEdge(adj.getA(), adj.getZ());
                 edge.setMetrics(metrics);
                 topo.getEdges().add(edge);
             }
