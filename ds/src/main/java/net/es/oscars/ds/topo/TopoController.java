@@ -54,6 +54,7 @@ public class TopoController {
         TopoEdge ab = new TopoEdge(a, b);
         topo.getVertices().add(a);
         topo.getVertices().add(b);
+        topo.getEdges().add(ab);
 
         return topo;
     }
