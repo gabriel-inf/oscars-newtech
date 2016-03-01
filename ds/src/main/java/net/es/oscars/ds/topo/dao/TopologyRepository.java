@@ -12,6 +12,7 @@ import java.util.Optional;
 public interface TopologyRepository extends RevisionRepository<ETopology, Long, Integer>, CrudRepository<ETopology, Long> {
 
     List<ETopology> findAll();
+    Optional<ETopology> findByName(String name);
 
 
 }

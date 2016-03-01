@@ -5,6 +5,10 @@ import net.es.oscars.common.topo.Layer;
 import net.es.oscars.ds.topo.dao.TopologyRepository;
 import net.es.oscars.ds.topo.dao.DeviceRepository;
 import net.es.oscars.ds.topo.ent.EDevice;
+import net.es.oscars.ds.topo.ent.EIfce;
+import net.es.oscars.ds.topo.ent.ETopology;
+import net.es.oscars.ds.topo.ent.EUrnAdjcy;
+import net.es.oscars.dto.topo.Metric;
 import net.es.oscars.dto.topo.TopoEdge;
 import net.es.oscars.dto.topo.TopoVertex;
 import net.es.oscars.dto.topo.Topology;
@@ -15,7 +19,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashSet;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 @Slf4j
 @Controller
@@ -44,8 +50,6 @@ public class TopoController {
     }
 
 
-
-
     @RequestMapping(value = "/device/{urn}", method = RequestMethod.GET)
     @ResponseBody
     public EDevice device(@PathVariable("urn") String urn) {
@@ -55,23 +59,58 @@ public class TopoController {
     }
 
 
-
-
-    @RequestMapping(value = "/topo/layer/{layer}", method = RequestMethod.GET)
+    @RequestMapping(value = "/topo/{name}/layer/{layer}", method = RequestMethod.GET)
     @ResponseBody
-    public Topology layer(@PathVariable("layer") String layer) {
+    public Topology layer(@PathVariable("name") String name, @PathVariable("layer") String layer) {
 
-        log.info("topology for layer " + layer);
-        Layer l_enum = Layer.get(layer).orElseThrow(NoSuchElementException::new);
+        log.info("topology " + name + " layer " + layer);
+        Layer eLayer = Layer.get(layer).orElseThrow(NoSuchElementException::new);
+        ETopology etopo = topoRepo.findByName(name).orElseThrow(NoSuchElementException::new);
+
 
         Topology topo = new Topology();
-        topo.setLayer(l_enum);
-        TopoVertex a = new TopoVertex("alpha");
-        TopoVertex b = new TopoVertex("beta");
-        TopoEdge ab = new TopoEdge(a, b);
-        topo.getVertices().add(a);
-        topo.getVertices().add(b);
-        topo.getEdges().add(ab);
+        topo.setLayer(eLayer);
+
+        etopo.getDevices().stream()
+                .filter(d -> d.getCapabilities().contains(eLayer))
+                .forEach(d -> {
+
+                    TopoVertex dev = new TopoVertex(d.getUrn());
+                    topo.getVertices().add(dev);
+
+                    d.getIfces().stream()
+                            .filter(i -> i.getCapabilities().contains(eLayer))
+                            .forEach(i -> {
+                                TopoVertex ifce = new TopoVertex(i.getUrn());
+                                topo.getVertices().add(ifce);
+
+                                TopoEdge edge = new TopoEdge(d.getUrn(), i.getUrn());
+                                Metric m = new Metric();
+                                m.setLayer(eLayer);
+                                m.setValue(1L);
+                                edge.getMetrics().add(m);
+                                topo.getEdges().add(edge);
+                            });
+                });
+
+        for (EUrnAdjcy adj : etopo.getAdjcies()) {
+            Set<Metric> metrics = new HashSet<>();
+
+            adj.getMetrics().stream()
+                    .filter(em -> em.getLayer().equals(eLayer))
+                    .forEach(em -> {
+                        Metric m = new Metric();
+                        m.setLayer(eLayer);
+                        m.setValue(em.getValue());
+                        metrics.add(m);
+                    });
+            if (!metrics.isEmpty()) {
+                TopoEdge edge = new TopoEdge(adj.getA(), adj.getZ());
+                edge.setMetrics(metrics);
+                topo.getEdges().add(edge);
+            }
+        }
+
 
         return topo;
     }
