@@ -1,6 +1,7 @@
 package net.es.oscars.dto.topo;
 
 import lombok.Data;
+import net.es.oscars.common.topo.Layer;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -12,6 +13,8 @@ public class TopoEdge {
     private TopoVertex z;
 
     private Long metric;
+
+    private Layer layer;
 
     public TopoEdge() {
 

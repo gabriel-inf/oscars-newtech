@@ -1,9 +1,10 @@
 package net.es.oscars.dto.topo;
 
 import lombok.Data;
+import net.es.oscars.common.topo.Layer;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 @Data
 public class UrnEdge {
@@ -11,7 +12,7 @@ public class UrnEdge {
 
     private String z;
 
-    private Set<Metric> metrics = new HashSet<>();
+    private Map<Layer, Long> metrics = new HashMap<>();
 
     public UrnEdge() {
         

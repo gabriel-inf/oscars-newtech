@@ -2,11 +2,14 @@ package net.es.oscars.ds.topo.ent;
 
 import lombok.Data;
 import lombok.NonNull;
+import net.es.oscars.common.topo.Layer;
 import org.hibernate.annotations.*;
 
 import javax.persistence.*;
 import javax.persistence.Entity;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 
@@ -23,9 +26,8 @@ public class EUrnAdjcy {
     @NonNull
     private String z;
 
-    @OneToMany
-    @Cascade(org.hibernate.annotations.CascadeType.ALL)
-    private Set<EMetric> metrics = new HashSet<>();
+    @ElementCollection
+    private Map<Layer, Long> metrics = new HashMap<>();
 
     public EUrnAdjcy() {
 

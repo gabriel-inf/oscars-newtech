@@ -8,16 +8,19 @@ top_dir=`pwd`
 
 cd "$top_dir/ds"
 
+# set a trap on SIGINT to kill the first background task (the DS process) then exit
 trap 'kill %1; echo -e "\nExiting.."; exit' SIGINT
 echo "Starting data store.."
 java -jar target/ds-0.7.0.jar &
 
-curl -k -s https://oscars:oscars-shared@localhost:8000/configs/get/webui
+# keep polling the DS until curl exits OK, then it's safe to start the other processes
+curl -k -s https://oscars:oscars-shared@localhost:8000/configs/get/webui > /dev/null
 while [ $? -ne 0 ]; do
   sleep 1
-  curl -k -s https://oscars:oscars-shared@localhost:8000/configs/get/webui
+  curl -k -s https://oscars:oscars-shared@localhost:8000/configs/get/webui > /dev/null
 done
 
+# overwrite the trap to make it kill the first two bg tasks (the DS and webui processes) then exit
 trap 'kill %1; kill %2; echo -e "\nExiting..\n\n\n"; exit' SIGINT
 
 echo "Starting web UI.."
@@ -29,5 +32,5 @@ echo "Starting core.."
 cd "$top_dir/core"
 SPRING_APPLICATION_JSON=$(curl -k -s https://oscars:oscars-shared@localhost:8000/configs/get/core) java -jar target/core-0.7.0.jar
 
-cd $orig_dir
+cd ${orig_dir}
 

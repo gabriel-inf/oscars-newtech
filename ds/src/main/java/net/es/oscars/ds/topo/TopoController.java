@@ -6,8 +6,6 @@ import net.es.oscars.ds.topo.dao.TopologyRepository;
 import net.es.oscars.ds.topo.dao.DeviceRepository;
 import net.es.oscars.ds.topo.ent.EDevice;
 import net.es.oscars.ds.topo.ent.ETopology;
-import net.es.oscars.ds.topo.ent.EUrnAdjcy;
-import net.es.oscars.dto.topo.Metric;
 import net.es.oscars.dto.topo.UrnEdge;
 import net.es.oscars.dto.topo.TopoVertex;
 import net.es.oscars.dto.topo.Topology;
@@ -18,9 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashSet;
 import java.util.NoSuchElementException;
-import java.util.Set;
 
 @Slf4j
 @Controller
@@ -84,31 +80,19 @@ public class TopoController {
                                 topo.getVertices().add(ifce);
 
                                 UrnEdge edge = new UrnEdge(d.getUrn(), i.getUrn());
-                                Metric m = new Metric();
-                                m.setLayer(eLayer);
-                                m.setValue(1L);
-                                edge.getMetrics().add(m);
+                                edge.getMetrics().put(eLayer, 1L);
                                 topo.getEdges().add(edge);
                             });
                 });
 
-        for (EUrnAdjcy adj : etopo.getAdjcies()) {
-            Set<Metric> metrics = new HashSet<>();
-
-            adj.getMetrics().stream()
-                    .filter(em -> em.getLayer().equals(eLayer))
-                    .forEach(em -> {
-                        Metric m = new Metric();
-                        m.setLayer(eLayer);
-                        m.setValue(em.getValue());
-                        metrics.add(m);
-                    });
-            if (!metrics.isEmpty()) {
-                UrnEdge edge = new UrnEdge(adj.getA(), adj.getZ());
-                edge.setMetrics(metrics);
-                topo.getEdges().add(edge);
-            }
-        }
+        etopo.getAdjcies().stream()
+                .filter(adj -> adj.getMetrics().containsKey(eLayer))
+                .forEach(adj -> {
+                    Long metric = adj.getMetrics().get(eLayer);
+                    UrnEdge edge = new UrnEdge(adj.getA(), adj.getZ());
+                    edge.getMetrics().put(eLayer, metric);
+                    topo.getEdges().add(edge);
+                });
 
 
         return topo;
