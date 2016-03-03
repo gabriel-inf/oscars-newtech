@@ -32,5 +32,7 @@ echo "Starting core.."
 cd "$top_dir/core"
 SPRING_APPLICATION_JSON=$(curl -k -s https://oscars:oscars-shared@localhost:8000/configs/get/core) java -jar target/core-0.7.0.jar
 
+kill %1; kill %2
+
 cd ${orig_dir}
 
