@@ -1,16 +1,17 @@
 package net.es.oscars.core.pss.ftl;
 
+import lombok.Builder;
 import lombok.Data;
 import lombok.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Data
+@Builder
 public class AluVpls {
-    public AluVpls() {
 
-    }
     @NonNull
     private Integer vcId;
 
@@ -23,19 +24,13 @@ public class AluVpls {
     @NonNull
     private String description;
 
-    @NonNull
-    private boolean endpoint;
+    private Optional<String> endpointName;
 
-    private String endpointName;
+    private Optional<AluSdp> sdp;
 
-    @NonNull
-    private boolean hasProtect;
+    private Optional<Integer> protectVcId;
 
-    private AluSdp sdp;
-
-    private Integer protectVcId;
-
-    private AluSdp protectSdp;
+    private Optional<AluSdp> protectSdp;
 
 
 

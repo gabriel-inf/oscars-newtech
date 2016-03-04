@@ -1,5 +1,6 @@
 package net.es.oscars.core.pss.ftl;
 
+import lombok.Builder;
 import lombok.Data;
 import lombok.NonNull;
 
@@ -8,10 +9,8 @@ import java.util.List;
 
 
 @Data
+@Builder
 public class MplsPath {
-    public MplsPath() {
-
-    }
 
     @NonNull
     private String name = "primary";

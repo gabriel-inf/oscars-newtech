@@ -1,25 +1,23 @@
 package net.es.oscars.core.pss.ftl;
 
+import lombok.Builder;
 import lombok.Data;
 import lombok.NonNull;
 
 
 @Data
+@Builder
 public class AluSdp {
-    public AluSdp() {
-
-    }
 
     @NonNull
-    private Integer sdpId = 1;
+    private Integer sdpId;
 
     @NonNull
-    private String lspName = "primary";
+    private String lspName;
 
     @NonNull
-    private String description = "primary";
-
+    private String description;
 
     @NonNull
-    private String farEnd = "loopback";
+    private String farEnd;
 }

@@ -1,21 +1,25 @@
 package net.es.oscars.core.pss.ftl;
 
+import lombok.Builder;
 import lombok.Data;
+import lombok.Singular;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
+@Builder
 public class AluGenerationParams {
-    public AluGenerationParams() {
 
-    }
+    private List<AluQos> qoses;
+
+    private List<Lsp> lsps;
+
+    private List<MplsPath> paths;
+
+    private List<AluSdp> sdps;
 
     private AluVpls aluVpls;
-    private List<AluQos> qosList = new ArrayList<>();
-    private List<Lsp> lsps = new ArrayList<>();
-    private List<MplsPath> paths = new ArrayList<>();
-    private List<AluSdp> sdps = new ArrayList<>();
     private String loopbackInterface;
     private String loopbackAddress;
     private Boolean applyQos;

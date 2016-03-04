@@ -1,5 +1,6 @@
 package net.es.oscars.core.pss.ftl;
 
+import lombok.Builder;
 import lombok.Data;
 import lombok.NonNull;
 
@@ -8,16 +9,14 @@ import java.util.List;
 
 
 @Data
+@Builder
 public class Lsp {
-    public Lsp() {
-
-    }
 
     @NonNull
-    private String name = "primary";
+    private String name;
 
     @NonNull
-    private String pathName = "primary";
+    private String pathName;
 
     @NonNull
     private Integer setupPriority;
@@ -29,5 +28,5 @@ public class Lsp {
     private Integer metric;
 
     @NonNull
-    private String to = "loopback";
+    private String to;
 }

@@ -4,80 +4,89 @@ import net.es.oscars.core.pss.ftl.*;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Optional;
+
 
 @Component
 public class AluParamsBuilder {
 
     public AluGenerationParams sampleParams() {
-        AluGenerationParams params = new AluGenerationParams();
+        AluGenerationParams params = AluGenerationParams.builder()
+                .applyQos(true)
+                .loopbackAddress("134.55.99.11")
+                .loopbackInterface("es.net-1234_loopback")
+                .lsps(new ArrayList<>())
+                .qoses(new ArrayList<>())
+                .paths(new ArrayList<>())
+                .sdps(new ArrayList<>())
+                .build();
 
-        params.setApplyQos(true);
-        params.setLoopbackAddress("134.55.99.11");
-        params.setLoopbackInterface("es.net-1234_loopback");
+        Lsp lsp = Lsp.builder()
+                .metric(65100)
+                .holdPriority(5)
+                .setupPriority(5)
+                .name("es.net-1234")
+                .pathName("es.net-1234_pri")
+                .to("134.55.200.1")
+                .build();
 
-        Lsp lsp = new Lsp();
-        lsp.setMetric(65100);
-        lsp.setHoldPriority(5);
-        lsp.setSetupPriority(5);
-        lsp.setName("es.net-1234");
-        lsp.setPathName("es.net-1234_pri");
-        lsp.setTo("134.55.200.1");
         params.getLsps().add(lsp);
 
 
-        AluQos qos = new AluQos();
-        qos.setType(AluQosType.SAP_INGRESS);
-        qos.setDescription("es.net-1234");
-        qos.setMbps(100);
-        qos.setPolicing(Policing.STRICT);
-        qos.setPolicyId(1);
-        qos.setPolicyName("es.net-1234");
-        params.getQosList().add(qos);
+        AluQos qos = AluQos.builder().
+                type(AluQosType.SAP_INGRESS)
+                .description("es.net-1234")
+                .mbps(100)
+                .policing(Policing.STRICT)
+                .policyId(6511)
+                .policyName("es.net-1234").build();
 
+        params.getQoses().add(qos);
 
-        MplsPath mplsPath = new MplsPath();
-        mplsPath.setName("es.net-1234_pri");
-        MplsHop hop_a = new MplsHop();
-        hop_a.setAddress("134.55.11.1");
-        hop_a.setOrder(1);
-        MplsHop hop_b = new MplsHop();
-        hop_b.setAddress("134.55.22.2");
-        hop_b.setOrder(2);
+        MplsPath mplsPath = MplsPath.builder()
+                .name("es.net-1234_pri").hops(new ArrayList<>()).build();
+
+        MplsHop hop_a = MplsHop.builder()
+                .address("134.55.11.1").order(1).build();
+        MplsHop hop_b = MplsHop.builder()
+                .address("134.55.22.2").order(2).build();
+
+        mplsPath.getHops().add(hop_a);
         mplsPath.getHops().add(hop_b);
 
         params.getPaths().add(mplsPath);
 
 
+        AluSdp sdp = AluSdp.builder()
+                .description("es.net-1234_sdp")
+                .farEnd("134.55.200.99")
+                .lspName("es.net-1234")
+                .sdpId(6511)
+                .build();
 
-        AluSdp sdp = new AluSdp();
-        sdp.setDescription("es.net-1234_sdp");
-        sdp.setFarEnd("134.55.200.99");
-        sdp.setLspName("es.net-1234");
-        sdp.setSdpId(6011);
         params.getSdps().add(sdp);
 
 
+        AluVpls vpls = AluVpls.builder()
+                .serviceName("es.net-1234")
+                .description("es.net-1234, to someplace")
+                .endpointName(Optional.of("es.net-1234_endpoint"))
+                .sdp(Optional.of(sdp))
+                .vcId(6011)
+                .protectSdp(Optional.empty())
+                .protectVcId(Optional.empty())
+                .saps(new ArrayList<>())
+                .build();
 
-        AluVpls vpls = new AluVpls();
-        vpls.setServiceName("es.net-1234");
-        vpls.setHasProtect(false);
-        vpls.setDescription("es.net-1234, to someplace");
-        vpls.setEndpoint(true);
-        vpls.setEndpointName("es.net-1234_endpoint");
-        vpls.setProtectSdp(null);
-        vpls.setProtectVcId(null);
-        vpls.setSdp(sdp);
-        vpls.setVcId(6011);
-        vpls.setProtectVcId(null);
-        vpls.setProtectSdp(null);
 
-        AluSap mySap = new AluSap();
-        mySap.setDescription("foobar");
-        mySap.setIngressQosId(6011);
-        mySap.setEgressQosId(6011);
-        mySap.setPort("1/1/1");
-        mySap.setVlan(333);
+
+        AluSap mySap = AluSap.builder()
+                .description("sap description")
+                .ingressQosId(6011)
+                .egressQosId(6011)
+                .port("1/1/1")
+                .vlan(333)
+                .build();
 
         vpls.getSaps().add(mySap);
 

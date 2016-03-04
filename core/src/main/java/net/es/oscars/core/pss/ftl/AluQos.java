@@ -1,27 +1,30 @@
 package net.es.oscars.core.pss.ftl;
 
+import lombok.Builder;
 import lombok.Data;
 import lombok.NonNull;
 
 
 @Data
+@Builder
 public class AluQos {
-    public AluQos() {
-
-    }
 
     @NonNull
-    private AluQosType type = AluQosType.SAP_INGRESS;
+    private AluQosType type;
 
     @NonNull
-    private Policing policing = Policing.STRICT;
+    private Policing policing;
+
     @NonNull
-    private Integer mbps  = 1;
+    private Integer mbps;
+
     @NonNull
-    private Integer policyId = 0;
+    private Integer policyId;
+
     @NonNull
-    private String policyName = "default name";
+    private String policyName;
+
     @NonNull
-    private String description = "default description";
+    private String description;
 
 }
