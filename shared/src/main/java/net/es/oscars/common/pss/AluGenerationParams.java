@@ -1,10 +1,8 @@
-package net.es.oscars.core.pss.ftl;
+package net.es.oscars.common.pss;
 
 import lombok.Builder;
 import lombok.Data;
-import lombok.Singular;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Data

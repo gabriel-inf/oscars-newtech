@@ -3,8 +3,8 @@ package net.es.oscars.core.pss.alu;
 import freemarker.template.TemplateException;
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.core.pss.PSSOperation;
-import net.es.oscars.core.pss.ftl.AluQos;
-import net.es.oscars.core.pss.ftl.util.Stringifier;
+import net.es.oscars.common.pss.AluQos;
+import net.es.oscars.core.pss.util.Stringifier;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

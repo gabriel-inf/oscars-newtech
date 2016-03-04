@@ -1,4 +1,4 @@
-package net.es.oscars.core.pss.ftl.util;
+package net.es.oscars.core.pss.util;
 
 import freemarker.template.TemplateException;
 import lombok.extern.slf4j.Slf4j;

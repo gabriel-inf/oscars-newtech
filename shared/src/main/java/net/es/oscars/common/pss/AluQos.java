@@ -1,4 +1,4 @@
-package net.es.oscars.core.pss.ftl;
+package net.es.oscars.common.pss;
 
 import lombok.Builder;
 import lombok.Data;

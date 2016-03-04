@@ -1,5 +1,5 @@
 <#-- @ftlvariable name="qosList" type="java.util.List" -->
-<#-- @ftlvariable name="qos" type="net.es.oscars.core.pss.ftl.AluQos" -->
+<#-- @ftlvariable name="qos" type="net.es.oscars.common.pss.AluQos" -->
 
 <#list qosList as qos>
 <#assign qosId = qos.policyId >

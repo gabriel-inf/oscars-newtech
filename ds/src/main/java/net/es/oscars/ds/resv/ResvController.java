@@ -1,7 +1,9 @@
 package net.es.oscars.ds.resv;
 
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.ds.resv.dao.UrnReservedRepository;
 import net.es.oscars.ds.resv.ent.EReservation;
+import net.es.oscars.ds.resv.ent.EUrnReserved;
 import net.es.oscars.ds.resv.svc.ResvService;
 import net.es.oscars.dto.resv.Reservation;
 import org.modelmapper.ModelMapper;
@@ -23,6 +25,9 @@ public class ResvController {
 
     @Autowired
     private ResvService service;
+
+    @Autowired
+    private UrnReservedRepository urnRepo;
 
     @ExceptionHandler(NoSuchElementException.class)
     @ResponseStatus(value = HttpStatus.NOT_FOUND)
@@ -77,6 +82,25 @@ public class ResvController {
         return dtoItems;
 
     }
+
+
+    @RequestMapping(value = "/resvs/urn/", method = RequestMethod.GET)
+    @ResponseBody
+    public List<EUrnReserved> urnReserved() {
+
+        log.info("returning all reserved items on all urns");
+        //TODO : fix
+        List<EUrnReserved> dtoItems = urnRepo.findAll();
+        if (dtoItems.isEmpty()) {
+            log.info("empty list!");
+        }
+        for (EUrnReserved urnReserved : dtoItems) {
+            log.info(urnReserved.toString());
+        }
+        return dtoItems;
+
+    }
+
 
     private EReservation convertToEnt(Reservation dtoResv) {
         return modelMapper.map(dtoResv, EReservation.class);

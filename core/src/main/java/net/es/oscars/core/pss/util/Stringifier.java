@@ -1,4 +1,4 @@
-package net.es.oscars.core.pss.ftl.util;
+package net.es.oscars.core.pss.util;
 
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;

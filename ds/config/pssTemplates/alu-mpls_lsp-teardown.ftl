@@ -1,5 +1,5 @@
 <#-- @ftlvariable name="lsps" type="java.util.List" -->
-<#-- @ftlvariable name="lsp" type="net.es.oscars.core.pss.ftl.Lsp" -->
+<#-- @ftlvariable name="lsp" type="net.es.oscars.common.pss.Lsp" -->
 
 <#list lsps as lsp>
 /configure router mpls lsp "${lsp.name}" shutdown

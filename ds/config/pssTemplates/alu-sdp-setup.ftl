@@ -1,5 +1,5 @@
 <#-- @ftlvariable name="sdps" type="java.util.List" -->
-<#-- @ftlvariable name="sdp" type="net.es.oscars.core.pss.ftl.AluSdp" -->
+<#-- @ftlvariable name="sdp" type="net.es.oscars.common.pss.AluSdp" -->
 <#-- @ftlvariable name="protect" type="java.lang.Boolean" -->
 
 <#list sdps as sdp>

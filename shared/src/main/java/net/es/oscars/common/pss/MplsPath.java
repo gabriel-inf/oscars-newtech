@@ -1,4 +1,4 @@
-package net.es.oscars.core.pss.ftl;
+package net.es.oscars.common.pss;
 
 import lombok.Builder;
 import lombok.Data;
@@ -13,8 +13,8 @@ import java.util.List;
 public class MplsPath {
 
     @NonNull
-    private String name = "primary";
+    private String name;
 
     @NonNull
-    private List<MplsHop> hops = new ArrayList<>();
+    private List<MplsHop> hops;
 }

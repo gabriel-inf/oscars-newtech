@@ -1,4 +1,4 @@
-<#-- @ftlvariable name="qos" type="net.es.oscars.core.pss.ftl.AluQos" -->
+<#-- @ftlvariable name="qos" type="net.es.oscars.common.pss.AluQos" -->
 <#-- @ftlvariable name="qosList" type="java.util.List" -->
 <#list qosList as qos>
 

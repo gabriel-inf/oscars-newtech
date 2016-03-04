@@ -1,4 +1,4 @@
-package net.es.oscars.core.pss.ftl;
+package net.es.oscars.common.pss;
 
 import lombok.Builder;
 import lombok.Data;
@@ -16,7 +16,7 @@ public class AluVpls {
     private Integer vcId;
 
     @NonNull
-    private List<AluSap> saps = new ArrayList<>();
+    private List<AluSap> saps;
 
     @NonNull
     private String serviceName;
