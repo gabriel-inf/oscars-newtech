@@ -46,7 +46,7 @@ public class ConfigController {
 
     @PostConstruct
     public void initDefaults() throws JsonProcessingException {
-        StartupConfigEntry defaultCfg = startup.getDefaults();
+        StartupConfigEntry defaultCfg = startup.getStartupDefaults();
 
         for (StartupConfigEntry cfg : startup.getStartupConfigs()) {
 

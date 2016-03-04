@@ -17,13 +17,13 @@ public class Mender {
     @Autowired
     private Stringifier stringifier;
 
-    public String mend(List<String> fragments, String templateDir, String templateFilename)
+    public String mend(List<String> fragments, String templateFilename)
             throws IOException, TemplateException {
 
         Map<String, Object> root = new HashMap<>();
         root.put("fragments", fragments);
 
-        return stringifier.stringify(root, templateDir, templateFilename);
+        return stringifier.stringify(root, templateFilename);
 
     }
 }

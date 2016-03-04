@@ -19,12 +19,11 @@ public class AluQosGen {
     @Autowired
     private Stringifier stringifier;
 
-    private String setupTpl = "alu-qos-setup.ftl";
-    private String teardownTpl = "alu-qos-teardown.ftl";
-    private String modifyTpl = "alu-qos-modify.ftl";
+    private String setupTpl = "alu-qos-setup";
+    private String teardownTpl = "alu-qos-teardown";
+    private String modifyTpl = "alu-qos-modify";
 
-
-    public String generate(List<AluQos> qosList, boolean protect, boolean applyQos, String templateDir, PSSOperation op)
+    public String generate(List<AluQos> qosList, boolean protect, boolean applyQos, PSSOperation op)
             throws IOException, TemplateException {
 
         String templateFile = setupTpl;
@@ -43,7 +42,7 @@ public class AluQosGen {
         root.put("qosList", qosList);
         root.put("protect", protect);
         root.put("apply", applyQos);
-        return stringifier.stringify(root, templateDir, templateFile);
+        return stringifier.stringify(root, templateFile);
 
     }
 }

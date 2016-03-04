@@ -31,14 +31,14 @@ public class AluGen {
     public String genSetup() throws IOException, TemplateException {
 
         // TODO: externalize those / integrate with template param objects
-        String templateDir = "./config/templates";
-        String qosTpl = "alu-qos-setup.ftl";
-        String lspTpl = "alu-mpls_lsp-setup.ftl";
+        String qosTpl = "alu-qos-setup";
+        String lspTpl = "alu-mpls_lsp-setup";
 
-        String pathTpl= "alu-mpls_path-setup.ftl";
-        String sdpTpl = "alu-sdp-setup.ftl";
-        String vplsLoopbackTpl = "alu-vpls_loopback-setup.ftl";
-        String vplsServiceTpl = "alu-vpls_service-setup.ftl";
+        String pathTpl= "alu-mpls_path-setup";
+        String sdpTpl = "alu-sdp-setup";
+        String vplsLoopbackTpl = "alu-vpls_loopback-setup";
+        String vplsServiceTpl = "alu-vpls_service-setup";
+        String menderTemplate = "alu-top";
 
 
         List<String> fragments = new ArrayList<>();
@@ -49,42 +49,41 @@ public class AluGen {
         root.put("qosList", params.getQoses());
         root.put("protect", params.getAluVpls().getProtectVcId().isPresent());
         root.put("apply", params.getApplyQos());
-        String qosConfig = stringifier.stringify(root, templateDir, qosTpl);
+        String qosConfig = stringifier.stringify(root, qosTpl);
         fragments.add(qosConfig);
 
 
         root = new HashMap<>();
         root.put("lsps", params.getLsps());
-        String lspConfig = stringifier.stringify(root, templateDir, lspTpl);
+        String lspConfig = stringifier.stringify(root, lspTpl);
         fragments.add(lspConfig);
 
         root = new HashMap<>();
         root.put("paths", params.getPaths());
-        String pathConfig = stringifier.stringify(root, templateDir, pathTpl);
+        String pathConfig = stringifier.stringify(root,pathTpl);
         fragments.add(pathConfig);
 
         root = new HashMap<>();
         root.put("sdps", params.getSdps());
-        String sdpConfig = stringifier.stringify(root, templateDir, sdpTpl);
+        String sdpConfig = stringifier.stringify(root, sdpTpl);
         fragments.add(sdpConfig);
 
 
         root = new HashMap<>();
         root.put("loopback_ifce_name", params.getLoopbackInterface());
         root.put("loopback_address", params.getLoopbackAddress());
-        String loopbackConfig = stringifier.stringify(root, templateDir, vplsLoopbackTpl);
+        String loopbackConfig = stringifier.stringify(root, vplsLoopbackTpl);
         fragments.add(loopbackConfig);
 
         root = new HashMap<>();
         root.put("vpls", params.getAluVpls());
-        String vplsServiceConfig = stringifier.stringify(root, templateDir, vplsServiceTpl);
+        String vplsServiceConfig = stringifier.stringify(root, vplsServiceTpl);
         fragments.add(vplsServiceConfig);
 
 
 
 
-        String menderTemplate = "alu-top.ftl";
-        String mended = mender.mend(fragments, templateDir, menderTemplate);
+        String mended = mender.mend(fragments, menderTemplate);
 
         log.info(mended);
         return mended;

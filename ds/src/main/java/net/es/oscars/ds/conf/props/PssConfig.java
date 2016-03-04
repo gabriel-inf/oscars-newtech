@@ -7,17 +7,15 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@ConfigurationProperties
+@ConfigurationProperties(prefix = "pss")
 @Data
 @Component
-public class StartupConfigContainer {
-    public StartupConfigContainer() {
+public class PssConfig {
+    public PssConfig() {
 
     }
-    @NestedConfigurationProperty
-    StartupConfigEntry startupDefaults;
 
-    List<StartupConfigEntry> startupConfigs;
+    String defaultTemplateDir;
 
 
 }
