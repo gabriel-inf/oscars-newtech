@@ -1,6 +1,6 @@
 package net.es.oscars.common.resv;
 
-public interface IReservableIds extends IReservable {
+public interface IReservableIdentifier extends IReservable {
     void accept(IReservableVisitor visitor);
 
 }

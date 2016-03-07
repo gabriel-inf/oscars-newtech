@@ -19,8 +19,8 @@
         <tbody>
         <tr th:each="resv : ${resvs}">
             <td>
-                <a th:href="@{|/resvs/resv)view/${resv.gri}|}"
-                   th:text="|${resv.gri}|"/>
+                <a th:href="@{|/resvs/resv)view/${resv.connectionId}|}"
+                   th:text="|${resv.connectionId}|"/>
             </td>
             <td th:text="${resv.description}"/>
             <td th:text="${resv.username}"/>

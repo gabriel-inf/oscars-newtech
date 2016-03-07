@@ -1,11 +1,11 @@
 package net.es.oscars.ds.resv;
 
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.ds.resv.dao.UrnReservedRepository;
-import net.es.oscars.ds.resv.ent.EReservation;
-import net.es.oscars.ds.resv.ent.EUrnReserved;
+import net.es.oscars.ds.resv.dao.ReservedStrRepository;
+import net.es.oscars.ds.resv.ent.EConnection;
+import net.es.oscars.ds.resv.ent.EReservedString;
 import net.es.oscars.ds.resv.svc.ResvService;
-import net.es.oscars.dto.resv.Reservation;
+import net.es.oscars.dto.resv.Connection;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -27,7 +27,7 @@ public class ResvController {
     private ResvService service;
 
     @Autowired
-    private UrnReservedRepository urnRepo;
+    private ReservedStrRepository strRepo;
 
     @ExceptionHandler(NoSuchElementException.class)
     @ResponseStatus(value = HttpStatus.NOT_FOUND)
@@ -45,7 +45,7 @@ public class ResvController {
 
     @RequestMapping(value = "/resvs/gri/{gri}", method = RequestMethod.GET)
     @ResponseBody
-    public Reservation getResv(@PathVariable("gri") String gri) {
+    public Connection getResv(@PathVariable("gri") String gri) {
         log.info("retrieving " + gri);
 
         return convertToDto(service.findByGri(gri).orElseThrow(NoSuchElementException::new));
@@ -54,13 +54,13 @@ public class ResvController {
 
     @RequestMapping(value = "/resvs", method = RequestMethod.GET)
     @ResponseBody
-    public List<Reservation> listResvs() {
+    public List<Connection> listResvs() {
 
         log.info("listing all resvs");
-        List<Reservation> dtoItems = new ArrayList<>();
+        List<Connection> dtoItems = new ArrayList<>();
 
-        for (EReservation eItem : service.findAll()) {
-            Reservation dtoItem = convertToDto(eItem);
+        for (EConnection eItem : service.findAll()) {
+            Connection dtoItem = convertToDto(eItem);
             dtoItems.add(dtoItem);
         }
         return dtoItems;
@@ -68,33 +68,19 @@ public class ResvController {
     }
 
 
-    @RequestMapping(value = "/resvs/r_state/{r_state}", method = RequestMethod.GET)
-    @ResponseBody
-    public List<Reservation> r_stateResvs(@PathVariable("r_state") String r_state) {
-
-        log.info("listing resvs with r_state " + r_state);
-        List<Reservation> dtoItems = new ArrayList<>();
-
-        for (EReservation eItem : service.byResvState(r_state)) {
-            Reservation dtoItem = convertToDto(eItem);
-            dtoItems.add(dtoItem);
-        }
-        return dtoItems;
-
-    }
 
 
     @RequestMapping(value = "/resvs/urn/", method = RequestMethod.GET)
     @ResponseBody
-    public List<EUrnReserved> urnReserved() {
+    public List<EReservedString> urnReserved() {
 
         log.info("returning all reserved items on all urns");
         //TODO : fix
-        List<EUrnReserved> dtoItems = urnRepo.findAll();
+        List<EReservedString> dtoItems = strRepo.findAll();
         if (dtoItems.isEmpty()) {
             log.info("empty list!");
         }
-        for (EUrnReserved urnReserved : dtoItems) {
+        for (EReservedString urnReserved : dtoItems) {
             log.info(urnReserved.toString());
         }
         return dtoItems;
@@ -102,12 +88,12 @@ public class ResvController {
     }
 
 
-    private EReservation convertToEnt(Reservation dtoResv) {
-        return modelMapper.map(dtoResv, EReservation.class);
+    private EConnection convertToEnt(Connection dtoResv) {
+        return modelMapper.map(dtoResv, EConnection.class);
     }
 
-    private Reservation convertToDto(EReservation eResv) {
-        return modelMapper.map(eResv, Reservation.class);
+    private Connection convertToDto(EConnection eResv) {
+        return modelMapper.map(eResv, Connection.class);
     }
 
 }

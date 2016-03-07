@@ -1,14 +1,14 @@
 package net.es.oscars.dto.rsrc;
 
 import lombok.Data;
-import net.es.oscars.common.resv.IReservableIds;
+import net.es.oscars.common.resv.IReservableIdentifier;
 import net.es.oscars.common.resv.IReservableVisitor;
 import org.apache.commons.lang3.Range;
 
 import java.util.List;
 
 @Data
-public class ReservableVlans implements IReservableIds {
+public class ReservableVlans implements IReservableIdentifier {
     protected List<Range<Integer>> vlans;
 
     public ReservableVlans() {

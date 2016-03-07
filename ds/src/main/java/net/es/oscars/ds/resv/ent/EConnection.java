@@ -7,7 +7,7 @@ import javax.persistence.*;
 
 @Data
 @Entity
-public class EReservation {
+public class EConnection {
 
     @Id
     @GeneratedValue
@@ -15,16 +15,16 @@ public class EReservation {
 
     @NonNull
     @Column(unique = true)
-    private String gri;
+    private String connectionId;
     
     @Embedded
     private EStates states;
 
-    public EReservation(String gri) {
-        this.gri = gri;
+    public EConnection(String connectionId) {
+        this.connectionId = connectionId;
     }
 
-    public EReservation() {
+    public EConnection() {
 
     }
 }

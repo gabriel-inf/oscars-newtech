@@ -1,7 +1,7 @@
 package net.es.oscars.ds.resv.svc;
 
-import net.es.oscars.ds.resv.dao.ResvRepository;
-import net.es.oscars.ds.resv.ent.EReservation;
+import net.es.oscars.ds.resv.dao.ConnectionRepository;
+import net.es.oscars.ds.resv.ent.EConnection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,25 +14,22 @@ import java.util.Optional;
 public class ResvService {
 
     @Autowired
-    private ResvRepository resvRepo;
+    private ConnectionRepository resvRepo;
 
-    public void delete(EReservation resv) {
+    public void delete(EConnection resv) {
         resvRepo.delete(resv);
     }
 
-    public List<EReservation> findAll() {
+    public List<EConnection> findAll() {
         return resvRepo.findAll();
     }
 
-    public Optional<EReservation> findByGri(String gri) {
-        return resvRepo.findByGri(gri);
+    public Optional<EConnection> findByGri(String connectionId) {
+        return resvRepo.findByConnectionId(connectionId);
     }
 
-    public List<EReservation> byResvState(String resvState) {
-        return resvRepo.findByStatesResv(resvState);
-    }
 
-    public EReservation save(EReservation resv) {
+    public EConnection save(EConnection resv) {
         return resvRepo.save(resv);
     }
 

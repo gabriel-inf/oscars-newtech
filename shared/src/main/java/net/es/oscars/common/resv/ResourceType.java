@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public enum IdentifierType {
+public enum ResourceType {
     VC_ID("VC_ID"),
     ALU_INGRESS_POLICY_ID("ALU_INGRESS_POLICY_ID"),
     ALU_EGRESS_POLICY_ID("ALU_EGRESS_POLICY_ID"),
@@ -19,7 +19,7 @@ public enum IdentifierType {
 
     private String code;
 
-    IdentifierType(String code) {
+    ResourceType(String code) {
         this.code = code;
     }
 
@@ -28,16 +28,16 @@ public enum IdentifierType {
     }
 
 
-    private static final Map<String, IdentifierType> lookup = new HashMap<String, IdentifierType>();
+    private static final Map<String, ResourceType> lookup = new HashMap<String, ResourceType>();
 
     static {
-        for (IdentifierType pc : EnumSet.allOf(IdentifierType.class)) {
+        for (ResourceType pc : EnumSet.allOf(ResourceType.class)) {
             lookup.put(pc.getCode(), pc);
         }
     }
 
-    public static Optional<IdentifierType> get(String code) {
-        Optional<IdentifierType> result;
+    public static Optional<ResourceType> get(String code) {
+        Optional<ResourceType> result;
         if (lookup.containsKey(code)) {
             return Optional.of(lookup.get(code));
         } else {
