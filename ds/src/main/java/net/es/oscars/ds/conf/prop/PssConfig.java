@@ -1,12 +1,9 @@
-package net.es.oscars.ds.conf.props;
+package net.es.oscars.ds.conf.prop;
 
 import lombok.Data;
 import lombok.NonNull;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @ConfigurationProperties(prefix = "pss")
 @Data

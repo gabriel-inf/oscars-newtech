@@ -1,23 +1,23 @@
-package net.es.oscars.ds.conf.props;
+package net.es.oscars.ds.conf.prop;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
 
-@ConfigurationProperties
 @Data
-@Component
+@Configuration
+@ConfigurationProperties(prefix = "startup")
 public class StartupConfigContainer {
     public StartupConfigContainer() {
 
     }
     @NestedConfigurationProperty
-    StartupConfigEntry startupDefaults;
+    StartupConfigEntry defaults;
 
-    List<StartupConfigEntry> startupConfigs;
+    List<StartupConfigEntry> modules;
 
 
 }

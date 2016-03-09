@@ -1,4 +1,4 @@
-package net.es.oscars.ds.conf.props;
+package net.es.oscars.ds.conf.prop;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Data;

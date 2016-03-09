@@ -1,14 +1,12 @@
 package net.es.oscars.ds.pss.pop;
 
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.ds.conf.props.PssConfig;
+import net.es.oscars.ds.conf.prop.PssConfig;
 import net.es.oscars.ds.pss.dao.TemplateRepository;
 import net.es.oscars.ds.pss.ent.ETemplate;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOExceptionWithCause;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.method.P;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -18,7 +16,7 @@ import java.util.List;
 
 @Slf4j
 @Component
-public class TemplatePopulator {
+public class TemplateImporter {
 
     @Autowired
     private PssConfig pssConfig;
@@ -27,16 +25,16 @@ public class TemplatePopulator {
     private TemplateRepository repository;
 
     @PostConstruct
-    public void fill() throws IOException {
+    public void importFromDir() throws IOException {
 
         List<ETemplate> templates = repository.findAll();
 
         if (templates.isEmpty()) {
             if (pssConfig == null) {
-                log.error("No PSS config!");
+                log.error("No PSS config, skipping template import to DB..");
                 return;
             } else if (pssConfig.getDefaultTemplateDir() == null) {
-                log.error("Null default template dur!");
+                log.error("Null default template directory, skipping template import to DB..");
                 return;
 
             }
@@ -62,7 +60,7 @@ public class TemplatePopulator {
                 }
             }
         } else {
-            log.info("db not empty");
+            log.info("db not empty, skipping import.");
         }
     }
 }

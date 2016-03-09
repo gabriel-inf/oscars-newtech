@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import net.es.oscars.ds.conf.props.StartupConfigEntry;
+import net.es.oscars.ds.conf.prop.StartupConfigEntry;
 
 import java.io.IOException;
 

@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.ds.authnz.dao.UserRepository;
 import net.es.oscars.ds.authnz.ent.EPermissions;
 import net.es.oscars.ds.authnz.ent.EUser;
+import net.es.oscars.ds.authnz.prop.AuthnzProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -18,21 +19,27 @@ public class AuthnzPopulator {
     @Autowired
     private UserRepository userRepo;
 
+    @Autowired
+    private AuthnzProperties properties;
+
     @PostConstruct
-    public void populate() {
+    public void initializeUserDb() {
 
         List<EUser> users = userRepo.findAll();
         if (users.isEmpty()) {
-            String encoded = new BCryptPasswordEncoder().encode("oscars");
+            log.info("No users set; adding an admin user from application properties.");
+            String username = properties.getUsername();
+            String password = properties.getPassword();
+
+            String encoded = new BCryptPasswordEncoder().encode(password);
             EUser admin = EUser.builder()
-                    .username("admin")
+                    .username(username)
                     .password(encoded)
                     .permissions(new EPermissions())
                     .build();
             admin.getPermissions().setAdminAllowed(true);
             userRepo.save(admin);
 
-            log.info("added default admin");
         } else {
             log.info("user db not empty");
 
