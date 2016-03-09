@@ -7,7 +7,6 @@ import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
 
 import javax.persistence.*;
-import java.net.InetAddress;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -29,6 +28,7 @@ public class EDevice {
 
     private String model;
     private String vendor;
+    private DeviceType type;
 
 
     @OneToMany

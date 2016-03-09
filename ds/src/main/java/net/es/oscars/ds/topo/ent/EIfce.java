@@ -22,6 +22,7 @@ public class EIfce {
     private String urn;
 
     private Integer reservableBw;
+    private IfceType type = IfceType.PORT;
 
     @ElementCollection
     @CollectionTable

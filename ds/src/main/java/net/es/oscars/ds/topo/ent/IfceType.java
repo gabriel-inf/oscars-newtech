@@ -1,4 +1,4 @@
-package net.es.oscars.common.topo;
+package net.es.oscars.ds.topo.ent;
 
 
 import java.util.EnumSet;
@@ -6,13 +6,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public enum Layer {
-    ETHERNET("ETHERNET"),
-    MPLS("MPLS");
+public enum IfceType {
+    PORT("PORT");
 
     private String code;
 
-    Layer(String code) {
+    IfceType(String code) {
         this.code = code;
     }
 
@@ -21,21 +20,21 @@ public enum Layer {
     }
 
 
-    private static final Map<String, Layer> lookup = new HashMap<String, Layer>();
+    private static final Map<String, IfceType> lookup = new HashMap<String, IfceType>();
 
     static {
-        for (Layer pc : EnumSet.allOf(Layer.class)) {
+        for (IfceType pc : EnumSet.allOf(IfceType.class)) {
             lookup.put(pc.getCode(), pc);
         }
     }
 
-    public static Optional<Layer> get(String code) {
-        Optional<Layer> result;
+    public static Optional<IfceType> get(String code) {
         if (lookup.containsKey(code)) {
             return Optional.of(lookup.get(code));
         } else {
             return Optional.empty();
         }
     }
+
 
 }

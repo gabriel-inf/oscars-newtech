@@ -1,4 +1,4 @@
-package net.es.oscars.common.topo;
+package net.es.oscars.ds.topo.ent;
 
 
 import java.util.EnumSet;
@@ -6,13 +6,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public enum Layer {
-    ETHERNET("ETHERNET"),
-    MPLS("MPLS");
+public enum DeviceType {
+    ROUTER("ROUTER"),
+    SWITCH("SWITCH");
 
     private String code;
 
-    Layer(String code) {
+    DeviceType(String code) {
         this.code = code;
     }
 
@@ -21,21 +21,21 @@ public enum Layer {
     }
 
 
-    private static final Map<String, Layer> lookup = new HashMap<String, Layer>();
+    private static final Map<String, DeviceType> lookup = new HashMap<String, DeviceType>();
 
     static {
-        for (Layer pc : EnumSet.allOf(Layer.class)) {
+        for (DeviceType pc : EnumSet.allOf(DeviceType.class)) {
             lookup.put(pc.getCode(), pc);
         }
     }
 
-    public static Optional<Layer> get(String code) {
-        Optional<Layer> result;
+    public static Optional<DeviceType> get(String code) {
         if (lookup.containsKey(code)) {
             return Optional.of(lookup.get(code));
         } else {
             return Optional.empty();
         }
     }
+
 
 }
