@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public enum VertexType {
-    GENERIC("GENERIC"),
+    NETWORK("NETWORK"),
     PORT("PORT"),
     ROUTER("ROUTER"),
     SWITCH("SWITCH");

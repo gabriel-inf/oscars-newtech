@@ -47,6 +47,10 @@ public class ConfigController {
     @PostConstruct
     public void initDefaults() throws JsonProcessingException {
         StartupConfigEntry defaultCfg = startup.getStartupDefaults();
+        if (startup.getStartupConfigs() == null) {
+            log.error("Could not get startuo configs!");
+            return;
+        }
 
         for (StartupConfigEntry cfg : startup.getStartupConfigs()) {
 

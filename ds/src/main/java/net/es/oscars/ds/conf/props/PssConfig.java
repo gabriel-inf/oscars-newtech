@@ -1,6 +1,7 @@
 package net.es.oscars.ds.conf.props;
 
 import lombok.Data;
+import lombok.NonNull;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.stereotype.Component;
@@ -15,7 +16,8 @@ public class PssConfig {
 
     }
 
-    String defaultTemplateDir;
+    @NonNull
+    private String defaultTemplateDir;
 
 
 }

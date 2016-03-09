@@ -32,6 +32,15 @@ public class TemplatePopulator {
         List<ETemplate> templates = repository.findAll();
 
         if (templates.isEmpty()) {
+            if (pssConfig == null) {
+                log.error("No PSS config!");
+                return;
+            } else if (pssConfig.getDefaultTemplateDir() == null) {
+                log.error("Null default template dur!");
+                return;
+
+            }
+
             File folder = new File(pssConfig.getDefaultTemplateDir());
             File[] listOfFiles = folder.listFiles();
             if (listOfFiles == null) {

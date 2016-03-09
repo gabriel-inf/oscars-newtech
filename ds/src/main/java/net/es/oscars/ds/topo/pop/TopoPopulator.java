@@ -29,14 +29,18 @@ public class TopoPopulator {
     private DeviceRepository devRepo;
 
     @PostConstruct
-    public void fill() throws IOException {
+    public void fill() {
 
         List<ETopology> groups = grpRepo.findAll();
 
         if (groups.isEmpty()) {
-            ObjectMapper mapper = new ObjectMapper();
-            ETopology group = mapper.readValue(new File("./config/topo.json"), ETopology.class);
-            service.save(group);
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                ETopology group = mapper.readValue(new File("./config/topo.json"), ETopology.class);
+                service.save(group);
+            } catch (IOException ex) {
+                log.error("Error opening file!", ex);
+            }
 
         } else {
             log.info("db not empty");
