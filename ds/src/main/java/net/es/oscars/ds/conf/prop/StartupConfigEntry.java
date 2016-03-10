@@ -27,4 +27,8 @@ public class StartupConfigEntry implements Serializable {
     String sec_user_name;
     String sec_user_password;
 
+    String rest_username;
+    String rest_password;
+    String rest_truststore;
+
 }

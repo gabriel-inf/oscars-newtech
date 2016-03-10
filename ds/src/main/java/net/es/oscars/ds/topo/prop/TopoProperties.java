@@ -12,5 +12,7 @@ import org.springframework.context.annotation.Configuration;
 @NoArgsConstructor
 public class TopoProperties {
     @NonNull
-    private String importFrom;
+    private String devicesFilename;
+    @NonNull
+    private String adjciesFilename;
 }

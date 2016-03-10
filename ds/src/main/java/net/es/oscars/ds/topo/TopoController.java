@@ -2,10 +2,10 @@ package net.es.oscars.ds.topo;
 
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.common.topo.Layer;
-import net.es.oscars.ds.topo.dao.TopologyRepository;
 import net.es.oscars.ds.topo.dao.DeviceRepository;
+import net.es.oscars.ds.topo.dao.UrnAdjcyRepository;
 import net.es.oscars.ds.topo.ent.EDevice;
-import net.es.oscars.ds.topo.ent.ETopology;
+import net.es.oscars.ds.topo.ent.EUrnAdjcy;
 import net.es.oscars.dto.topo.UrnEdge;
 import net.es.oscars.dto.topo.TopoVertex;
 import net.es.oscars.dto.topo.Topology;
@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
 @Slf4j
@@ -23,13 +24,10 @@ import java.util.NoSuchElementException;
 public class TopoController {
 
     @Autowired
-    private TopologyRepository topoRepo;
+    private UrnAdjcyRepository adjcyRepo;
 
     @Autowired
     private DeviceRepository devRepo;
-
-    @Autowired
-    private ModelMapper modelMapper;
 
 
     @ExceptionHandler(NoSuchElementException.class)
@@ -53,20 +51,18 @@ public class TopoController {
         return eDevice;
     }
 
-
-    @RequestMapping(value = "/topo/{name}/layer/{layer}", method = RequestMethod.GET)
+    @RequestMapping(value = "/topo/layer/{layer}", method = RequestMethod.GET)
     @ResponseBody
-    public Topology layer(@PathVariable("name") String name, @PathVariable("layer") String layer) {
+    public Topology layer(@PathVariable("layer") String layer) {
 
-        log.info("topology " + name + " layer " + layer);
+        log.info("topology for layer " + layer);
         Layer eLayer = Layer.get(layer).orElseThrow(NoSuchElementException::new);
-        ETopology etopo = topoRepo.findByName(name).orElseThrow(NoSuchElementException::new);
-
-
         Topology topo = new Topology();
         topo.setLayer(eLayer);
+        List<EDevice> devices = devRepo.findAll();
+        List<EUrnAdjcy> adjcies = adjcyRepo.findAll();
 
-        etopo.getDevices().stream()
+        devices.stream()
                 .filter(d -> d.getCapabilities().contains(eLayer))
                 .forEach(d -> {
 
@@ -85,7 +81,7 @@ public class TopoController {
                             });
                 });
 
-        etopo.getAdjcies().stream()
+        adjcies.stream()
                 .filter(adj -> adj.getMetrics().containsKey(eLayer))
                 .forEach(adj -> {
                     Long metric = adj.getMetrics().get(eLayer);

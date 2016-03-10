@@ -25,7 +25,7 @@ import java.util.List;
 public class RestAuthProvider implements AuthenticationProvider {
 
     @Autowired
-    RestTemplate restTemplate;
+    private RestTemplate restTemplate;
 
     @Bean
     public PasswordEncoder passwordEncoder() {

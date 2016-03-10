@@ -42,6 +42,12 @@ public class StartupCfgSerializer extends JsonSerializer<StartupConfigEntry> {
 
         jgen.writeEndObject(); //security
 
+        jgen.writeObjectFieldStart("rest");
+        jgen.writeObjectField("internal-username", value.getRest_username());
+        jgen.writeObjectField("internal-password", value.getRest_password());
+        jgen.writeObjectField("internal-truststore-path", value.getRest_truststore());
+        jgen.writeEndObject(); //rest
+
         jgen.writeEndObject(); //top
     }
 }

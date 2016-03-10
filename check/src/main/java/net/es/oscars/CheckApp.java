@@ -1,4 +1,4 @@
-package net.es.oscars.check;
+package net.es.oscars;
 
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 

@@ -1,6 +1,7 @@
-package net.es.oscars.ds.conf.prop;
+package net.es.oscars.ds.pss.prop;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
@@ -8,13 +9,13 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "pss")
 @Data
 @Component
+@NoArgsConstructor
 public class PssConfig {
-    public PssConfig() {
-
-    }
 
     @NonNull
     private String defaultTemplateDir;
 
+    @NonNull
+    private String templateExtension;
 
 }

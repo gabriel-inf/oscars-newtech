@@ -26,9 +26,12 @@ public class ConfigPopulator {
 
     @PostConstruct
     public void initDefaults() throws JsonProcessingException {
+        log.info("Initializing startup configs for OSCARS modules.");
+
         StartupConfigEntry defaultCfg = startup.getDefaults();
+        log.info(defaultCfg.toString());
         if (startup.getModules() == null) {
-            log.error("Could not retrieve module configurations from application properties!");
+            log.error("Could not retrieve OSCARS module configurations from application properties!");
             return;
         }
 
@@ -44,13 +47,12 @@ public class ConfigPopulator {
             Optional<EStartupConfig> maybeConfig = repository.findByName(name);
 
             if (maybeConfig.isPresent()) {
-                log.info("config for " + name + " already in db, skipping");
+                log.debug("Startup config for OSCARS module " + name + " already in db.");
 
             } else {
-                log.info("saving a new default JSON config for service " + name);
+                log.info("Startup config for OSCARS module " + name+ " missing from DB; saving a new one from defaults.");
                 ObjectMapper mapper = new ObjectMapper();
                 String jsonString = mapper.writeValueAsString(cfg);
-                log.info("json string: " + jsonString);
 
                 EStartupConfig configEnt = new EStartupConfig();
                 configEnt.setName(name);

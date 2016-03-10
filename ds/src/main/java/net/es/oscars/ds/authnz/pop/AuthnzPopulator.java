@@ -26,10 +26,24 @@ public class AuthnzPopulator {
     public void initializeUserDb() {
 
         List<EUser> users = userRepo.findAll();
+
         if (users.isEmpty()) {
-            log.info("No users set; adding an admin user from application properties.");
+            log.info("No users in database; adding an admin user from authnz.username / .password properties.");
+            if (properties == null) {
+                log.info("No authnz application property set!");
+                return;
+            }
+
             String username = properties.getUsername();
             String password = properties.getPassword();
+            if (username == null) {
+                log.info("Null authnz.username application property!");
+                return;
+            }
+            if (password == null) {
+                log.info("Null authnz.password application property!");
+                return;
+            }
 
             String encoded = new BCryptPasswordEncoder().encode(password);
             EUser admin = EUser.builder()
@@ -41,7 +55,7 @@ public class AuthnzPopulator {
             userRepo.save(admin);
 
         } else {
-            log.info("user db not empty");
+            log.debug("User db not empty; no action needed");
 
         }
     }
