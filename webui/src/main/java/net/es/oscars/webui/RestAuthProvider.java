@@ -46,7 +46,7 @@ public class RestAuthProvider implements AuthenticationProvider {
 
         User userDto;
 
-        // no users have been set up; allow login with any username / password
+        // no users exist; allow login with any username / password
         if (users.length == 0) {
             List<GrantedAuthority> grantedAuths = new ArrayList<>();
             grantedAuths.add(new SimpleGrantedAuthority("USER"));
