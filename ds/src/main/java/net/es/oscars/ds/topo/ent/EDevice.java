@@ -2,12 +2,14 @@ package net.es.oscars.ds.topo.ent;
 
 import lombok.Data;
 import lombok.NonNull;
+import net.es.oscars.common.IntRange;
 import net.es.oscars.common.topo.Layer;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
 
 import javax.persistence.*;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -29,6 +31,10 @@ public class EDevice {
     private String model;
     private String vendor;
     private DeviceType type;
+
+    @ElementCollection
+    @CollectionTable
+    private List<EIntRange> reservableVlans;
 
 
     @OneToMany

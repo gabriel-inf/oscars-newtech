@@ -32,7 +32,14 @@
         "capabilities": [
           "MPLS"
         ],
-        "reservableBw": 1000
+        "reservableBw": 100
+      },
+      {
+        "urn": "nersc-tb1:2/1/1:to_star-tb1",
+        "capabilities": [
+          "MPLS"
+        ],
+        "reservableBw": 5000
       }
     ]
   },
@@ -47,7 +54,7 @@
     ],
     "ifces": [
       {
-        "urn": "star-tb1:1/1/1",
+        "urn": "star-tb1:3/1/1",
         "capabilities": [
           "ETHERNET",
           "MPLS"
@@ -61,11 +68,18 @@
         ]
       },
       {
+        "urn": "star-tb1:1/1/1:to_nersc-tb1",
+        "capabilities": [
+          "MPLS"
+        ],
+        "reservableBw": 100
+      },
+      {
         "urn": "star-tb1:2/1/1:to_nersc-tb1",
         "capabilities": [
           "MPLS"
         ],
-        "reservableBw": 1000
+        "reservableBw": 5000
       }
     ]
   },

@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class TopoVertex {
     private String urn;
-    private VertexType vertexType;
+    // private VertexType vertexType;
 
     public TopoVertex() {
         

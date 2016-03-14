@@ -77,32 +77,26 @@
     "capabilities": [
       "ETHERNET"
     ],
+    "reservableVlans": [
+      {
+        "floor": 2,
+        "ceiling": 3000
+      }
+    ],
     "ifces": [
       {
         "urn": "nersc-asw1:xe-1/1/0",
         "capabilities": [
           "ETHERNET"
         ],
-        "reservableBw": 1000,
-        "reservableVlans": [
-          {
-            "floor": 2,
-            "ceiling": 3000
-          }
-        ]
+        "reservableBw": 1000
       },
       {
         "urn": "nersc-asw1:xe-1/2/0",
         "capabilities": [
           "ETHERNET"
         ],
-        "reservableBw": 1000,
-        "reservableVlans": [
-          {
-            "floor": 2,
-            "ceiling": 3000
-          }
-        ]
+        "reservableBw": 1000
       }
     ]
   }

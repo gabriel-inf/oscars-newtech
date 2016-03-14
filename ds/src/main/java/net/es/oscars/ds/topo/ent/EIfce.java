@@ -26,7 +26,7 @@ public class EIfce {
 
     @ElementCollection
     @CollectionTable
-    private List<IntRange> reservableVlans;
+    private List<EIntRange> reservableVlans;
 
 
     @ElementCollection

@@ -15,6 +15,7 @@ public enum ResourceType {
     ALU_MPLS_PATH_NAME("ALU_MPLS_PATH_NAME"),
     IPV4_ADDRESS("IPV4_ADDRESS"),
     INTERFACE_NAME("INTERFACE_NAME"),
+    BANDWIDTH("BANDWIDTH"),
     VLAN("VLAN");
 
     private String code;

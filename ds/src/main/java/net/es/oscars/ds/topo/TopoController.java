@@ -1,23 +1,26 @@
 package net.es.oscars.ds.topo;
 
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.common.IntRange;
+import net.es.oscars.common.resv.ResourceType;
 import net.es.oscars.common.topo.Layer;
 import net.es.oscars.ds.topo.dao.DeviceRepository;
 import net.es.oscars.ds.topo.dao.UrnAdjcyRepository;
-import net.es.oscars.ds.topo.ent.EDevice;
-import net.es.oscars.ds.topo.ent.EUrnAdjcy;
+import net.es.oscars.ds.topo.ent.*;
+import net.es.oscars.dto.rsrc.ReservableQty;
+import net.es.oscars.dto.rsrc.ReservableRanges;
+import net.es.oscars.dto.rsrc.TopoResource;
 import net.es.oscars.dto.topo.UrnEdge;
 import net.es.oscars.dto.topo.TopoVertex;
 import net.es.oscars.dto.topo.Topology;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Controller
@@ -92,6 +95,84 @@ public class TopoController {
 
 
         return topo;
+    }
+
+    @RequestMapping(value = "/constraining/", method = RequestMethod.POST)
+    @ResponseBody
+    public List<TopoResource> constraining(@RequestBody List<String> urns) {
+        log.info("starting constraining");
+        List<TopoResource> resources = new ArrayList<>();
+        List<EDevice> devices = devRepo.findAll();
+        devices.stream()
+                .forEach(d -> {
+                    // vlans for switches: global to the device; one vlan resource w urns for device, all ifces
+                    // no bandwidth resource for switches
+                    if (d.getType().equals(DeviceType.SWITCH) && urns.contains(d.getUrn())) {
+                        ReservableRanges dtoVlans = ReservableRanges.builder()
+                                .type(ResourceType.VLAN)
+                                .ranges(d.getReservableVlans().stream().map(this::toDtoIntRange).collect(Collectors.toList()))
+                                .build();
+
+                        TopoResource dtoVlanResource = TopoResource.builder()
+                                .reservableQties(new HashSet<>())
+                                .reservableRanges(new HashSet<>())
+                                .topoVertexUrns(new ArrayList<>())
+                                .build();
+
+                        dtoVlanResource.getReservableRanges().add(dtoVlans);
+
+                        dtoVlanResource.getTopoVertexUrns().add(d.getUrn());
+                        for (EIfce switchIfce : d.getIfces()) {
+                            dtoVlanResource.getTopoVertexUrns().add(switchIfce.getUrn());
+                        }
+                        resources.add(dtoVlanResource);
+                        log.info("added switch vlan resource: " + dtoVlanResource.toString());
+
+                    }
+                    // now handle bandwidth for everything matched, and vlans for routers
+                    d.getIfces().stream()
+                            .filter(i -> urns.contains(i.getUrn()))
+                            .forEach(i -> {
+                                List<String> ifceUrns = new ArrayList<>();
+                                ifceUrns.add(i.getUrn());
+
+                                IntRange bwRange = IntRange.builder().floor(0).ceiling(i.getReservableBw()).build();
+                                ReservableQty dtoBw = ReservableQty.builder()
+                                        .type(ResourceType.BANDWIDTH)
+                                        .range(bwRange)
+                                        .build();
+
+                                TopoResource dtoResource = TopoResource.builder()
+                                        .reservableQties(new HashSet<>())
+                                        .reservableRanges(new HashSet<>())
+                                        .topoVertexUrns(ifceUrns)
+                                        .build();
+
+                                dtoResource.getReservableQties().add(dtoBw);
+                                resources.add(dtoResource);
+
+                                if (d.getType().equals(DeviceType.ROUTER)) {
+                                    ReservableRanges dtoVlans = ReservableRanges.builder()
+                                            .type(ResourceType.VLAN)
+                                            .ranges(i.getReservableVlans().stream().map(this::toDtoIntRange).collect(Collectors.toList()))
+                                            .build();
+                                    dtoResource.getReservableRanges().add(dtoVlans);
+
+                                }
+                                log.info("added router ifce resource: " + dtoResource.toString());
+                            });
+                });
+
+
+        return resources;
+    }
+
+    private IntRange toDtoIntRange(EIntRange eIntRange) {
+        return IntRange.builder()
+                .ceiling(eIntRange.getCeiling())
+                .floor(eIntRange.getFloor())
+                .build();
+
     }
 
 
