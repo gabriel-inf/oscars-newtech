@@ -1,4 +1,4 @@
-package net.es.oscars.ds.resv.ent;
+package net.es.oscars.ds.helpers;
 
 
 import javax.persistence.AttributeConverter;

@@ -28,7 +28,7 @@ public class PssController {
     @ResponseStatus(value = HttpStatus.NOT_FOUND)
     public void handleResourceNotFoundException(NoSuchElementException ex)
     {
-        // LOG.warn("user requested a resource which didn't exist", ex);
+        // LOG.warn("user requested a strResource which didn't exist", ex);
     }
 
     @RequestMapping(value = "/pss/templates/", method = RequestMethod.GET)

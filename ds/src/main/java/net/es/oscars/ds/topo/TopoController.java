@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.common.IntRange;
 import net.es.oscars.common.resv.ResourceType;
 import net.es.oscars.common.topo.Layer;
+import net.es.oscars.ds.helpers.EIntRange;
 import net.es.oscars.ds.topo.dao.DeviceRepository;
 import net.es.oscars.ds.topo.dao.UrnAdjcyRepository;
 import net.es.oscars.ds.topo.ent.*;
@@ -97,20 +98,21 @@ public class TopoController {
         return topo;
     }
 
-    @RequestMapping(value = "/constraining/", method = RequestMethod.POST)
+    @RequestMapping(value = "/constraining", method = RequestMethod.GET)
     @ResponseBody
-    public List<TopoResource> constraining(@RequestBody List<String> urns) {
+    public List<TopoResource> constraining() {
         log.info("starting constraining");
         List<TopoResource> resources = new ArrayList<>();
         List<EDevice> devices = devRepo.findAll();
+
         devices.stream()
                 .forEach(d -> {
-                    // vlans for switches: global to the device; one vlan resource w urns for device, all ifces
-                    // no bandwidth resource for switches
-                    if (d.getType().equals(DeviceType.SWITCH) && urns.contains(d.getUrn())) {
+                    // vlans for switches: global to the device; one vlan strResource w urns for device, all ifces
+                    // no bandwidth strResource for switches
+                    if (d.getType().equals(DeviceType.SWITCH)) {
                         ReservableRanges dtoVlans = ReservableRanges.builder()
                                 .type(ResourceType.VLAN)
-                                .ranges(d.getReservableVlans().stream().map(this::toDtoIntRange).collect(Collectors.toList()))
+                                .ranges(d.getReservableVlans().stream().map(EIntRange::toDtoIntRange).collect(Collectors.toList()))
                                 .build();
 
                         TopoResource dtoVlanResource = TopoResource.builder()
@@ -126,12 +128,11 @@ public class TopoController {
                             dtoVlanResource.getTopoVertexUrns().add(switchIfce.getUrn());
                         }
                         resources.add(dtoVlanResource);
-                        log.info("added switch vlan resource: " + dtoVlanResource.toString());
+                        log.info("added switch vlan strResource: " + dtoVlanResource.toString());
 
                     }
                     // now handle bandwidth for everything matched, and vlans for routers
                     d.getIfces().stream()
-                            .filter(i -> urns.contains(i.getUrn()))
                             .forEach(i -> {
                                 List<String> ifceUrns = new ArrayList<>();
                                 ifceUrns.add(i.getUrn());
@@ -154,12 +155,12 @@ public class TopoController {
                                 if (d.getType().equals(DeviceType.ROUTER)) {
                                     ReservableRanges dtoVlans = ReservableRanges.builder()
                                             .type(ResourceType.VLAN)
-                                            .ranges(i.getReservableVlans().stream().map(this::toDtoIntRange).collect(Collectors.toList()))
+                                            .ranges(i.getReservableVlans().stream().map(EIntRange::toDtoIntRange).collect(Collectors.toList()))
                                             .build();
                                     dtoResource.getReservableRanges().add(dtoVlans);
 
                                 }
-                                log.info("added router ifce resource: " + dtoResource.toString());
+                                log.info("added router ifce strResource: " + dtoResource.toString());
                             });
                 });
 
@@ -167,13 +168,6 @@ public class TopoController {
         return resources;
     }
 
-    private IntRange toDtoIntRange(EIntRange eIntRange) {
-        return IntRange.builder()
-                .ceiling(eIntRange.getCeiling())
-                .floor(eIntRange.getFloor())
-                .build();
-
-    }
 
 
 }

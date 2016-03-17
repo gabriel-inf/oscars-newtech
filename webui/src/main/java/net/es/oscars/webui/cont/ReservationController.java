@@ -9,7 +9,7 @@ import org.springframework.web.client.RestTemplate;
 
 @Slf4j
 @Controller
-public class ResvController {
+public class ReservationController {
 
     @Autowired
     private RestTemplate restTemplate;

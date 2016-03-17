@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.NonNull;
 import net.es.oscars.common.IntRange;
 import net.es.oscars.common.topo.Layer;
+import net.es.oscars.ds.helpers.EIntRange;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
 

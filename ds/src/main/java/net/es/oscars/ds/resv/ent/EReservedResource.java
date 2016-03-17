@@ -1,35 +1,37 @@
 package net.es.oscars.ds.resv.ent;
 
 import lombok.*;
-import net.es.oscars.common.resv.IReserved;
 import net.es.oscars.common.resv.ResourceType;
 
 import javax.persistence.*;
 import java.time.Instant;
+import java.util.List;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class EReservedInteger implements IReserved<Integer> {
+public class EReservedResource {
 
     @Id
     @GeneratedValue
     private Long id;
 
     @NonNull
-    private String urn;
+    @ElementCollection
+    private List<String> urns;
 
     @NonNull
     private ResourceType resourceType;
 
-    @NonNull
-    private Integer resource;
+    private String strResource;
 
-    private Instant validFrom;
+    private Integer intResource;
 
-    private Instant validUntil;
+    private Instant beginning;
+
+    private Instant ending;
 
 
 }

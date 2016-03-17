@@ -3,6 +3,7 @@ package net.es.oscars.ds.topo.ent;
 import lombok.Data;
 import lombok.NonNull;
 import net.es.oscars.common.topo.Layer;
+import net.es.oscars.ds.helpers.EIntRange;
 
 import javax.persistence.*;
 import java.util.HashSet;

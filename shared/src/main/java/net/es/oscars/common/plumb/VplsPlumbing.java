@@ -3,7 +3,7 @@ package net.es.oscars.common.plumb;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NonNull;
-import net.es.oscars.dto.resv.ReservedComponent;
+import net.es.oscars.dto.resv.ReservedResource;
 
 import java.util.Set;
 
@@ -14,9 +14,9 @@ public class VplsPlumbing {
     @NonNull
     private String deviceUrn;
 
-    @NonNull
-    private Set<ReservedComponent> reserved;
 
+    @NonNull
+    private Set<ReservedResource> reservedResources;
 
 
 
