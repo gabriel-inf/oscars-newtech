@@ -20,7 +20,6 @@ import java.util.Map;
 
 @Slf4j
 @RunWith(SpringJUnit4ClassRunner.class)
-
 @SpringApplicationConfiguration(PssUnitTestConfiguration.class)
 public class AluGenTest {
     @Autowired

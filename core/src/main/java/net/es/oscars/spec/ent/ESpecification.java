@@ -2,11 +2,8 @@ package net.es.oscars.spec.ent;
 
 import lombok.*;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import java.time.Instant;
+import javax.persistence.*;
+import java.util.Date;
 
 @Data
 @Entity
@@ -19,19 +16,22 @@ public class ESpecification {
     @GeneratedValue
     private Long id;
 
+    private Integer version;
+
     @NonNull
     @Column(unique = true)
     private String specificationId;
 
-    private Instant submitted;
-    private Instant reserveBegin;
-    private Instant reserveEnd;
+    private Date submitted;
+    private Date notBefore;
+    private Date notAfter;
 
-    private Integer mbps;
-    private Integer vlanId;
-    private String aUrn;
-    private String zUrn;
+    private Long durationMinutes;
 
     private String username;
+
+    @OneToOne
+    private EBlueprint blueprint;
+
 
 }
