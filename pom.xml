@@ -26,7 +26,6 @@
 
     <modules>
         <module>core</module>
-        <module>ds</module>
         <module>shared</module>
         <module>webui</module>
         <module>check</module>
@@ -50,10 +49,6 @@
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
-        </repository>
-        <repository>
-            <id>projectlombok.org</id>
-            <url>http://projectlombok.org/mavenrepo</url>
         </repository>
     </repositories>
 

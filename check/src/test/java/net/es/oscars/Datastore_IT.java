@@ -2,19 +2,16 @@ package net.es.oscars;
 
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.common.resv.ResourceType;
-import net.es.oscars.core.pce.Gatherer;
-import net.es.oscars.ds.DatastoreConfig;
-import net.es.oscars.ds.resv.dao.ReservedResourceRepository;
-import net.es.oscars.ds.resv.ent.EReservedResource;
-import net.es.oscars.ds.topo.pop.TopoImporter;
+import net.es.oscars.pce.Gatherer;
 import net.es.oscars.dto.resv.Interval;
+import net.es.oscars.resv.dao.ReservedResourceRepository;
+import net.es.oscars.resv.ent.EReservedResource;
+import net.es.oscars.topo.pop.TopoImporter;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationContextLoader;
 import org.springframework.boot.test.WebIntegrationTest;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.client.RestTemplate;
 
@@ -25,7 +22,6 @@ import java.util.*;
 @Slf4j
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = DatastoreConfig.class, loader = SpringApplicationContextLoader.class)
 @WebIntegrationTest
 public class Datastore_IT {
 
