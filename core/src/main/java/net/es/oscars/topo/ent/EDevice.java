@@ -3,6 +3,7 @@ package net.es.oscars.topo.ent;
 import lombok.Data;
 import lombok.NonNull;
 import net.es.oscars.common.topo.Layer;
+import net.es.oscars.topo.enums.DeviceModel;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
 
@@ -27,8 +28,7 @@ public class EDevice {
     @CollectionTable
     private Set<Layer> capabilities = new HashSet<>();
 
-    private String model;
-    private String vendor;
+    private DeviceModel model;
     private DeviceType type;
 
     @ElementCollection

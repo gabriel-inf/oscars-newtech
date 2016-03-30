@@ -2,9 +2,11 @@ package net.es.oscars.pss.ent;
 
 import lombok.*;
 import net.es.oscars.pss.enums.EthPipeType;
+import net.es.oscars.resv.ent.EReservedResource;
 
 import javax.persistence.*;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @Entity
@@ -17,11 +19,9 @@ public class EEthPipe {
     @GeneratedValue
     private Long id;
 
-    @OneToOne
-    private EEthJunction a;
+    private String aJunctionId;
 
-    @OneToOne
-    private EEthJunction z;
+    private String zJunctionId;
 
     @OneToOne
     private EEthValve azValve;
@@ -33,5 +33,7 @@ public class EEthPipe {
     @ElementCollection
     private List<String> azPath;
 
+    @ElementCollection
+    private Set<String> resourceIds;
 
 }

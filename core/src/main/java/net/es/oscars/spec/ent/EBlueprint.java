@@ -17,6 +17,7 @@ public class EBlueprint {
     private Long id;
 
     @OneToMany
+    @NonNull
     private Set<EFlow> flows;
 
 }

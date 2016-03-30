@@ -1,10 +1,149 @@
 package net.es.oscars.pce;
 
-/**
- * Created by haniotak on 3/17/16.
- */
+import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.pss.ent.ESchematic;
+import net.es.oscars.spec.ent.*;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
+@Slf4j
 public class EthPCE {
+    public ESchematic makeSchematic(EBlueprint blueprint) throws PCEException {
+        verifyBlueprint(blueprint);
+        ESchematic schematic = ESchematic.builder().flows(new HashSet<>()).build();
+        /*
+        for (EFlow flow : blueprint.getFlows()) {
+            for (EPipe pipe : flow.getPipes()) {
+
+            }
+
+        }
+        */
+        return schematic;
+
+    }
+
+
+    private void verifyBlueprint(EBlueprint blueprint) throws PCEException {
+        log.info("starting verification");
+        if (blueprint == null) {
+            throw new PCEException("Null blueprint");
+        } else if (blueprint.getFlows() == null || blueprint.getFlows().isEmpty()) {
+            throw new PCEException("No flows");
+        } else if (blueprint.getFlows().size() != 1) {
+            throw new PCEException("Exactly one flow supported right now");
+        }
+
+        EFlow flow = blueprint.getFlows().iterator().next();
+
+        log.info("verifying valves");
+        HashMap<String, Set<String>> deviceValveIds = new HashMap<>();
+        Set<EValve> valves = flow.getValves();
+        if (valves.isEmpty()) {
+            throw new PCEException("No valves");
+        }
+
+        for (EValve valve : valves) {
+            String deviceUrn = valve.getDeviceUrn();
+            if (!deviceValveIds.containsKey(deviceUrn)) {
+                deviceValveIds.put(deviceUrn, new HashSet<>());
+            }
+            deviceValveIds.get(valve.getDeviceUrn()).add(valve.getValveId());
+        }
+
+
+        log.info("verifying junctions");
+        Set<EJunction> junctions = flow.getJunctions();
+        if (junctions.isEmpty()) {
+            throw new PCEException("No junctions");
+        }
+
+        HashMap<String, Set<String>> deviceJunctionIds = new HashMap<>();
+
+        for (EJunction junction : junctions) {
+            String deviceUrn = junction.getDeviceUrn();
+            if (!deviceJunctionIds.containsKey(deviceUrn)) {
+                deviceJunctionIds.put(deviceUrn, new HashSet<>());
+            }
+            deviceJunctionIds.get(deviceUrn).add(junction.getJunctionId());
+
+
+            Set<EFixture> fixtures = junction.getFixtures();
+            if (fixtures.isEmpty()) {
+                throw new PCEException("Junction with no fixtures");
+            }
+
+            for (EFixture fixture : fixtures) {
+                String inValveId = fixture.getInValveId();
+                String outValveId = fixture.getOutValveId();
+
+                if (!deviceValveIds.containsKey(deviceUrn)) {
+                    throw new PCEException("Fixture has a valve with a bad deviceUrn");
+                } else if (!deviceValveIds.get(deviceUrn).contains(inValveId)) {
+                    throw new PCEException("Fixture has a bad inValveId: " + inValveId);
+
+                } else if (!deviceValveIds.get(deviceUrn).contains(outValveId)) {
+                    throw new PCEException("Fixture has a bad outValveId: " + outValveId);
+                }
+            }
+
+        }
+        log.info("verifying pipes");
+
+        Set<EPipe> pipes = flow.getPipes();
+        for (EPipe pipe : pipes) {
+            boolean foundA = false;
+            boolean foundZ = false;
+            String[] junctionIds = {pipe.getAJunctionId(), pipe.getZJunctionId()};
+
+            for (String junctionId : junctionIds) {
+                log.info("checking junction id "+ junctionId);
+
+                for (String deviceUrn : deviceJunctionIds.keySet()) {
+
+                    log.info("checking if valid on " + deviceUrn);
+                    if (deviceJunctionIds.containsKey(deviceUrn)) {
+                        if (deviceJunctionIds.get(deviceUrn).contains(junctionId)) {
+                            if (junctionId.equals(pipe.getAJunctionId())) {
+                                foundA = true;
+                                log.info("found a");
+
+                                String azValveId = pipe.getAzValveId();
+                                if (!deviceValveIds.get(deviceUrn).contains(azValveId)) {
+                                    throw new PCEException("Pipe has a bad azValveId");
+                                }
+                                log.info("found azvalve");
+
+                            } else {
+                                foundZ = true;
+                                log.info("found z");
+                            }
+                        }
+
+                    }
+
+
+                }
+            }
+            if (!foundA) {
+                throw new PCEException("Could not find A junction");
+            } else if (!foundZ) {
+                throw new PCEException("Could not find Z junction");
+
+            }
+        }
+    }
+
+
+
     public void keepit() {
+
+
+
+
 /*
         Integer bandwidth = 1000;
 

@@ -19,7 +19,11 @@ public class EJunction {
     @NonNull
     private String deviceUrn;
 
+    @NonNull
+    private String junctionId;
+
     @OneToMany
+    @NonNull
     private Set<EFixture> fixtures;
 
 }

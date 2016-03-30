@@ -17,10 +17,15 @@ public class EFlow {
     private Long id;
 
     @OneToMany
+    @NonNull
     private Set<EJunction> junctions;
 
     @OneToMany
+    @NonNull
     private Set<EPipe> pipes;
 
+    @OneToMany
+    @NonNull
+    private Set<EValve> valves;
 
 }

@@ -2,11 +2,10 @@ package net.es.oscars.pss.ent;
 
 import lombok.*;
 import net.es.oscars.pss.enums.EthFixtureType;
+import net.es.oscars.resv.ent.EReservedResource;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.OneToOne;
+import javax.persistence.*;
+import java.util.Set;
 
 @Data
 @Entity
@@ -32,5 +31,8 @@ public class EEthFixture {
 
     @OneToOne
     private EEthValve outValve;
+
+    @ElementCollection
+    private Set<String> resourceIds;
 
 }

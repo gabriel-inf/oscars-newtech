@@ -1,6 +1,8 @@
 package net.es.oscars.spec;
 
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.pce.EthPCE;
+import net.es.oscars.pce.PCEException;
 import net.es.oscars.spec.dao.SpecificationRepository;
 import net.es.oscars.spec.ent.*;
 import org.junit.Test;
@@ -24,7 +26,7 @@ public class SpecPopTest {
     private SpecificationRepository specRepo;
 
     @Test
-    public void testSave() {
+    public void testSave() throws PCEException {
 
         if (specRepo.findAll().isEmpty()) {
             Date now = new Date();
@@ -37,9 +39,11 @@ public class SpecPopTest {
                     .notBefore(notBefore)
                     .notAfter(notAfter)
                     .durationMinutes(30L)
+                    .version(1)
                     .username("some user")
                     .specificationId("UANS8A")
                     .build();
+
             EBlueprint bp = EBlueprint.builder()
                     .flows(new HashSet<>())
                     .build();
@@ -47,22 +51,31 @@ public class SpecPopTest {
             EFlow flow = EFlow.builder()
                     .junctions(new HashSet<>())
                     .pipes(new HashSet<>())
+                    .valves(new HashSet<>())
                     .build();
+
+            EValve sValve = EValve.builder().valveId("1G-star").deviceUrn("star-tb1").mbps(1000).build();
+            EValve nValve = EValve.builder().valveId("1G-nersc").deviceUrn("nersc-tb1").mbps(1000).build();
+            flow.getValves().add(sValve);
+            flow.getValves().add(nValve);
+
 
             EJunction aj = EJunction.builder()
                     .deviceUrn("star-tb1")
+                    .junctionId("star-junction")
                     .fixtures(new HashSet<>())
                     .build();
 
             EJunction zj = EJunction.builder()
                     .deviceUrn("nersc-tb1")
+                    .junctionId("nersc-junction")
                     .fixtures(new HashSet<>())
                     .build();
 
             EFixture af = EFixture.builder()
                     .portUrn("star-tb1:1/1/1")
-                    .inValve(EValve.builder().mbps(1000).build())
-                    .outValve(EValve.builder().mbps(1000).build())
+                    .inValveId("1G-star")
+                    .outValveId("1G-star")
                     .vlanId(100)
                     .build();
 
@@ -70,8 +83,8 @@ public class SpecPopTest {
 
             EFixture zf = EFixture.builder()
                     .portUrn("nersc-tb1:1/1/1")
-                    .inValve(EValve.builder().mbps(1000).build())
-                    .outValve(EValve.builder().mbps(1000).build())
+                    .inValveId("1G-nersc")
+                    .outValveId("1G-nersc")
                     .vlanId(1001)
                     .build();
 
@@ -79,16 +92,16 @@ public class SpecPopTest {
 
             EPipe az_p = EPipe.builder()
                     .azPath(new ArrayList<>())
-                    .a(aj)
-                    .z(zj)
-                    .azValve(EValve.builder().mbps(1000).build())
+                    .aJunctionId("star-junction")
+                    .zJunctionId("nersc-junction")
+                    .azValveId("1G-star")
                     .build();
 
             EPipe za_p = EPipe.builder()
                     .azPath(new ArrayList<>())
-                    .a(zj)
-                    .z(aj)
-                    .azValve(EValve.builder().mbps(1000).build())
+                    .aJunctionId("nersc-junction")
+                    .zJunctionId("star-junction")
+                    .azValveId("1G-nersc")
                     .build();
 
             flow.getJunctions().add(aj);
@@ -97,6 +110,10 @@ public class SpecPopTest {
             flow.getPipes().add(za_p);
 
             bp.getFlows().add(flow);
+
+            EthPCE pce = new EthPCE();
+            pce.makeSchematic(bp);
+            log.info("got schematic");
 
 
 

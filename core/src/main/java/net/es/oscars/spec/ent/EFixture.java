@@ -21,10 +21,10 @@ public class EFixture {
     @NonNull
     private Integer vlanId;
 
-    @OneToOne
-    private EValve inValve;
+    @NonNull
+    private String inValveId;
 
-    @OneToOne
-    private EValve outValve;
+    @NonNull
+    private String outValveId;
 
 }

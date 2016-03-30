@@ -16,14 +16,14 @@ public class EPipe {
     @GeneratedValue
     private Long id;
 
-    @OneToOne
-    private EJunction a;
+    @NonNull
+    private String aJunctionId;
 
-    @OneToOne
-    private EJunction z;
+    @NonNull
+    private String zJunctionId;
 
-    @OneToOne
-    private EValve azValve;
+    @NonNull
+    private String azValveId;
 
     @NonNull
     @ElementCollection

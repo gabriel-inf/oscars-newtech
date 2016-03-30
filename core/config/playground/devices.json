@@ -1,8 +1,7 @@
 [
   {
     "urn": "nersc-tb1",
-    "model": "SR7750",
-    "vendor": "Alcatel",
+    "deviceModel": "Alcatel SR-7750",
     "type": "ROUTER",
     "capabilities": [
       "ETHERNET",
@@ -38,8 +37,7 @@
   },
   {
     "urn": "star-tb1",
-    "model": "SR7750",
-    "vendor": "Alcatel",
+    "deviceModel": "Alcatel SR-7750",
     "type": "ROUTER",
     "capabilities": [
       "ETHERNET",
@@ -71,8 +69,7 @@
   },
   {
     "urn": "nersc-asw1",
-    "model": "ASW",
-    "vendor": "Juniper",
+    "deviceModel": "Juniper EX",
     "type": "SWITCH",
     "capabilities": [
       "ETHERNET"

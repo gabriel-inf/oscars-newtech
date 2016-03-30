@@ -16,18 +16,26 @@ public class ESpecification {
     @GeneratedValue
     private Long id;
 
+    @NonNull
     private Integer version;
 
     @NonNull
     @Column(unique = true)
     private String specificationId;
 
+    @NonNull
     private Date submitted;
+
+    @NonNull
     private Date notBefore;
+
+    @NonNull
     private Date notAfter;
 
+    @NonNull
     private Long durationMinutes;
 
+    @NonNull
     private String username;
 
     @OneToOne

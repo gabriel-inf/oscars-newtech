@@ -16,6 +16,12 @@ public class EValve {
     private Long id;
 
     @NonNull
+    private String valveId;
+
+    @NonNull
+    private String deviceUrn;
+
+    @NonNull
     private Integer mbps;
 
 }

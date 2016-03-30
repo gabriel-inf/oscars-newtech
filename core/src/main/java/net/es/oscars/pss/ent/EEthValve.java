@@ -2,10 +2,10 @@ package net.es.oscars.pss.ent;
 
 import lombok.*;
 import net.es.oscars.pss.enums.EthValveType;
+import net.es.oscars.resv.ent.EReservedResource;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
+import java.util.Set;
 
 @Data
 @Entity
@@ -26,5 +26,7 @@ public class EEthValve {
 
     private Boolean limited;
 
+    @ElementCollection
+    private Set<String> resourceIds;
 
 }

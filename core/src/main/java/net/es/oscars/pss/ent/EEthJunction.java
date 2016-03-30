@@ -2,11 +2,9 @@ package net.es.oscars.pss.ent;
 
 import lombok.*;
 import net.es.oscars.pss.enums.EthJunctionType;
+import net.es.oscars.resv.ent.EReservedResource;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 import java.util.Set;
 
 @Data
@@ -20,6 +18,8 @@ public class EEthJunction {
     @GeneratedValue
     private Long id;
 
+    private String junctionId;
+
     @NonNull
     private String deviceUrn;
 
@@ -28,5 +28,8 @@ public class EEthJunction {
 
     @OneToMany
     private Set<EEthFixture> fixtures;
+
+    @ElementCollection
+    private Set<String> resourceIds;
 
 }

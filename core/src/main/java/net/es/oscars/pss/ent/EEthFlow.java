@@ -28,5 +28,8 @@ public class EEthFlow {
     @OneToMany
     private Set<EEthPipe> pipes;
 
+    @OneToMany
+    private Set<EEthValve> valves;
+
 
 }
