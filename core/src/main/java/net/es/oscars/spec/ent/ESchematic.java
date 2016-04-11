@@ -1,14 +1,11 @@
-package net.es.oscars.pss.ent;
+package net.es.oscars.spec.ent;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 import java.util.Set;
 
 @Data
@@ -22,7 +19,7 @@ public class ESchematic {
     @GeneratedValue
     private Long id;
 
-    @OneToMany
-    private Set<EEthFlow> flows;
+    @OneToMany(cascade = CascadeType.ALL)
+    private Set<EFlow> flows;
 
 }

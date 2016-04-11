@@ -4,8 +4,7 @@ import lombok.Data;
 import lombok.NonNull;
 import net.es.oscars.common.topo.Layer;
 import net.es.oscars.topo.enums.DeviceModel;
-import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.CascadeType;
+
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -36,9 +35,8 @@ public class EDevice {
     private List<EIntRange> reservableVlans;
 
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     @NonNull
-    @Cascade(CascadeType.ALL)
     private Set<EIfce> ifces = new HashSet<>();
 
     public EDevice() {

@@ -16,7 +16,7 @@ public class EBlueprint {
     @GeneratedValue
     private Long id;
 
-    @OneToMany
+    @OneToMany (cascade = CascadeType.ALL)
     @NonNull
     private Set<EFlow> flows;
 

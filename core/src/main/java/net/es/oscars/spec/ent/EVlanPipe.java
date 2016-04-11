@@ -1,8 +1,7 @@
-package net.es.oscars.pss.ent;
+package net.es.oscars.spec.ent;
 
 import lombok.*;
 import net.es.oscars.pss.enums.EthPipeType;
-import net.es.oscars.resv.ent.EReservedResource;
 
 import javax.persistence.*;
 import java.util.List;
@@ -13,25 +12,29 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class EEthPipe {
+public class EVlanPipe {
 
     @Id
     @GeneratedValue
     private Long id;
 
-    private String aJunctionId;
-
-    private String zJunctionId;
+    @OneToOne
+    private EVlanJunction aJunction;
 
     @OneToOne
-    private EEthValve azValve;
+    private EVlanJunction zJunction;
+
+    @NonNull
+    private Integer azMbps;
+
+
+    @NonNull
+    @ElementCollection
+    private List<String> azERO;
 
     @NonNull
     private EthPipeType pipeType;
 
-    @NonNull
-    @ElementCollection
-    private List<String> azPath;
 
     @ElementCollection
     private Set<String> resourceIds;

@@ -3,6 +3,12 @@ package net.es.oscars.spec;
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.pce.EthPCE;
 import net.es.oscars.pce.PCEException;
+import net.es.oscars.pss.enums.EthJunctionType;
+import net.es.oscars.pss.enums.EthPipeType;
+import net.es.oscars.spec.ent.EFlow;
+import net.es.oscars.spec.ent.EVlanFixture;
+import net.es.oscars.spec.ent.EVlanJunction;
+import net.es.oscars.spec.ent.EVlanPipe;
 import net.es.oscars.spec.dao.SpecificationRepository;
 import net.es.oscars.spec.ent.*;
 import org.junit.Test;
@@ -29,92 +35,66 @@ public class SpecPopTest {
     public void testSave() throws PCEException {
 
         if (specRepo.findAll().isEmpty()) {
-            Date now = new Date();
-            Instant nowInstant = Instant.now();
-            Date notBefore = new Date(nowInstant.plus(15L, ChronoUnit.MINUTES).getEpochSecond());
-            Date notAfter = new Date(nowInstant.plus(1L, ChronoUnit.DAYS).getEpochSecond());
+            ESpecification spec = this.getBasicSpec();
 
-            ESpecification spec = ESpecification.builder()
-                    .submitted(now)
-                    .notBefore(notBefore)
-                    .notAfter(notAfter)
-                    .durationMinutes(30L)
-                    .version(1)
-                    .username("some user")
-                    .specificationId("UANS8A")
-                    .build();
-
-            EBlueprint bp = EBlueprint.builder()
-                    .flows(new HashSet<>())
-                    .build();
-
-            EFlow flow = EFlow.builder()
-                    .junctions(new HashSet<>())
-                    .pipes(new HashSet<>())
-                    .valves(new HashSet<>())
-                    .build();
-
-            EValve sValve = EValve.builder().valveId("1G-star").deviceUrn("star-tb1").mbps(1000).build();
-            EValve nValve = EValve.builder().valveId("1G-nersc").deviceUrn("nersc-tb1").mbps(1000).build();
-            flow.getValves().add(sValve);
-            flow.getValves().add(nValve);
+            EFlow flow = spec.getBlueprint().getFlows().iterator().next();
 
 
-            EJunction aj = EJunction.builder()
+            EVlanJunction aj = EVlanJunction.builder()
+                    .junctionType(EthJunctionType.REQUESTED)
                     .deviceUrn("star-tb1")
-                    .junctionId("star-junction")
                     .fixtures(new HashSet<>())
+                    .resourceIds(new HashSet<>())
                     .build();
 
-            EJunction zj = EJunction.builder()
+            EVlanJunction zj = EVlanJunction.builder()
+                    .junctionType(EthJunctionType.REQUESTED)
                     .deviceUrn("nersc-tb1")
-                    .junctionId("nersc-junction")
                     .fixtures(new HashSet<>())
+                    .resourceIds(new HashSet<>())
                     .build();
 
-            EFixture af = EFixture.builder()
+            EVlanFixture af = EVlanFixture.builder()
                     .portUrn("star-tb1:1/1/1")
-                    .inValveId("1G-star")
-                    .outValveId("1G-star")
-                    .vlanId(100)
+                    .vlanExpression("2-100")
+                    .inMbps(100)
+                    .egMbps(100)
                     .build();
 
             aj.getFixtures().add(af);
 
-            EFixture zf = EFixture.builder()
+            EVlanFixture zf = EVlanFixture.builder()
                     .portUrn("nersc-tb1:1/1/1")
-                    .inValveId("1G-nersc")
-                    .outValveId("1G-nersc")
-                    .vlanId(1001)
+                    .vlanExpression("2-100")
+                    .inMbps(100)
+                    .egMbps(100)
                     .build();
 
             zj.getFixtures().add(zf);
 
-            EPipe az_p = EPipe.builder()
-                    .azPath(new ArrayList<>())
-                    .aJunctionId("star-junction")
-                    .zJunctionId("nersc-junction")
-                    .azValveId("1G-star")
+            EVlanPipe az_p = EVlanPipe.builder()
+                    .azERO(new ArrayList<>())
+                    .aJunction(aj)
+                    .zJunction(zj)
+                    .azMbps(1000)
+                    .pipeType(EthPipeType.REQUESTED)
                     .build();
 
-            EPipe za_p = EPipe.builder()
-                    .azPath(new ArrayList<>())
-                    .aJunctionId("nersc-junction")
-                    .zJunctionId("star-junction")
-                    .azValveId("1G-nersc")
+            EVlanPipe za_p = EVlanPipe.builder()
+                    .azERO(new ArrayList<>())
+                    .aJunction(zj)
+                    .zJunction(aj)
+                    .azMbps(1000)
+                    .pipeType(EthPipeType.REQUESTED)
                     .build();
 
-            flow.getJunctions().add(aj);
-            flow.getJunctions().add(zj);
             flow.getPipes().add(az_p);
             flow.getPipes().add(za_p);
 
-            bp.getFlows().add(flow);
 
             EthPCE pce = new EthPCE();
-            pce.makeSchematic(bp);
+            pce.makeSchematic(spec.getBlueprint());
             log.info("got schematic");
-
 
 
             specRepo.save(spec);
@@ -122,6 +102,55 @@ public class SpecPopTest {
         } else {
             log.info("db not empty");
         }
+    }
+
+    @Test(expected = PCEException.class)
+    public void testNoFixtures() throws PCEException {
+        ESpecification spec = this.getBasicSpec();
+
+        EFlow flow = spec.getBlueprint().getFlows().iterator().next();
+
+        EVlanJunction somejunction = EVlanJunction.builder()
+                .junctionType(EthJunctionType.REQUESTED)
+                .deviceUrn("star-tb1")
+                .fixtures(new HashSet<>())
+                .resourceIds(new HashSet<>())
+                .build();
+
+        flow.getJunctions().add(somejunction);
+        EthPCE pce = new EthPCE();
+        pce.verifyBlueprint(spec.getBlueprint());
 
     }
+
+    private ESpecification getBasicSpec() {
+        Date now = new Date();
+        Instant nowInstant = Instant.now();
+        Date notBefore = new Date(nowInstant.plus(15L, ChronoUnit.MINUTES).getEpochSecond());
+        Date notAfter = new Date(nowInstant.plus(1L, ChronoUnit.DAYS).getEpochSecond());
+
+        ESpecification spec = ESpecification.builder()
+                .submitted(now)
+                .notBefore(notBefore)
+                .notAfter(notAfter)
+                .durationMinutes(30L)
+                .version(1)
+                .username("some user")
+                .specificationId("UANS8A")
+                .build();
+
+        EBlueprint bp = EBlueprint.builder()
+                .flows(new HashSet<>())
+                .build();
+
+        EFlow flow = EFlow.builder()
+                .junctions(new HashSet<>())
+                .pipes(new HashSet<>())
+                .build();
+
+        spec.setBlueprint(bp);
+        bp.getFlows().add(flow);
+        return spec;
+    }
+
 }

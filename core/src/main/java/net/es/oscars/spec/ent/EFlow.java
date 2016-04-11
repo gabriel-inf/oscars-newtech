@@ -1,6 +1,9 @@
 package net.es.oscars.spec.ent;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.Set;
@@ -16,16 +19,11 @@ public class EFlow {
     @GeneratedValue
     private Long id;
 
-    @OneToMany
-    @NonNull
-    private Set<EJunction> junctions;
+    @OneToMany (cascade = CascadeType.ALL)
+    private Set<EVlanJunction> junctions;
 
-    @OneToMany
-    @NonNull
-    private Set<EPipe> pipes;
+    @OneToMany (cascade = CascadeType.ALL)
+    private Set<EVlanPipe> pipes;
 
-    @OneToMany
-    @NonNull
-    private Set<EValve> valves;
 
 }

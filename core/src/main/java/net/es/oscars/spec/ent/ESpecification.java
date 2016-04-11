@@ -38,7 +38,7 @@ public class ESpecification {
     @NonNull
     private String username;
 
-    @OneToOne
+    @OneToOne (cascade = CascadeType.ALL)
     private EBlueprint blueprint;
 
 

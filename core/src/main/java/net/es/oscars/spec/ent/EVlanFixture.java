@@ -9,7 +9,7 @@ import javax.persistence.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class EFixture {
+public class EVlanFixture {
 
     @Id
     @GeneratedValue
@@ -18,13 +18,14 @@ public class EFixture {
     @NonNull
     private String portUrn;
 
-    @NonNull
     private Integer vlanId;
 
-    @NonNull
-    private String inValveId;
+    private String vlanExpression;
 
     @NonNull
-    private String outValveId;
+    private Integer inMbps;
+
+    @NonNull
+    private Integer egMbps;
 
 }

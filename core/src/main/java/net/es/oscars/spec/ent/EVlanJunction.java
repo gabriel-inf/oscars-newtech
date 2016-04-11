@@ -1,8 +1,7 @@
-package net.es.oscars.pss.ent;
+package net.es.oscars.spec.ent;
 
 import lombok.*;
-import net.es.oscars.pss.enums.EthValveType;
-import net.es.oscars.resv.ent.EReservedResource;
+import net.es.oscars.pss.enums.EthJunctionType;
 
 import javax.persistence.*;
 import java.util.Set;
@@ -12,19 +11,20 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class EEthValve {
+public class EVlanJunction {
 
     @Id
     @GeneratedValue
     private Long id;
 
     @NonNull
-    private Integer mbps;
+    private String deviceUrn;
 
     @NonNull
-    private EthValveType valveType;
+    private EthJunctionType junctionType;
 
-    private Boolean limited;
+    @OneToMany(cascade = CascadeType.ALL)
+    private Set<EVlanFixture> fixtures;
 
     @ElementCollection
     private Set<String> resourceIds;
