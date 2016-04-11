@@ -4,6 +4,7 @@ public enum EthJunctionType {
     REQUESTED,
     ALU_SDP,
     JUNOS_VPLS,
-    JUNOS_SWITCH
+    JUNOS_SWITCH,
+    UNKNOWN
     
 }

@@ -1,21 +1,51 @@
 package net.es.oscars.pce;
 
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.pss.PCEAssistant;
+import net.es.oscars.pss.PSSException;
+import net.es.oscars.pss.enums.EthJunctionType;
 import net.es.oscars.spec.ent.*;
+import net.es.oscars.topo.ent.EDevice;
+import net.es.oscars.topo.svc.TopoService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
+@Component
 public class EthPCE {
-    public ESchematic makeSchematic(EBlueprint blueprint) throws PCEException {
+
+    @Autowired
+    private PCEAssistant assistant;
+
+    @Autowired
+    private TopoService topoService;
+
+    public ESchematic makeSchematic(EBlueprint blueprint) throws PCEException, PSSException {
+
         verifyBlueprint(blueprint);
+
         ESchematic schematic = ESchematic.builder().flows(new HashSet<>()).build();
+
+
         for (EFlow flow : blueprint.getFlows()) {
+            // make a flow entry
+            EFlow schematicFlow = EFlow.builder().junctions(new HashSet<>()).pipes(new HashSet<>()).build();
+            schematic.getFlows().add(schematicFlow);
+
+            // plain junctions (not in pipes): decide type
+            for (EVlanJunction bpJunction : flow.getJunctions()) {
+                EVlanJunction schJunction = this.makeSchematicJunction(bpJunction);
+                schematicFlow.getJunctions().add(schJunction);
+
+            }
 
             for (EVlanPipe pipe : flow.getPipes()) {
-
+//
 
             }
 
@@ -23,6 +53,43 @@ public class EthPCE {
         return schematic;
 
     }
+
+    private EVlanJunction makeSchematicJunction(EVlanJunction bpJunction) throws PSSException {
+        String deviceUrn = bpJunction.getDeviceUrn();
+        EDevice device = topoService.device(deviceUrn);
+
+        EVlanJunction schJunction = EVlanJunction.builder()
+                .deviceUrn(deviceUrn)
+                .fixtures(new HashSet<>())
+                .resourceIds(new HashSet<>())
+                .junctionType(assistant.decideJunctionType(device))
+                .build();
+
+        bpJunction.getFixtures().stream().forEach(t -> {
+            try {
+                EVlanFixture bpFixture = this.makeSchematicFixture(t, device);
+                schJunction.getFixtures().add(bpFixture);
+            } catch (PSSException e) {
+                // oh, java 8
+                e.printStackTrace();
+            }
+        });
+
+
+        return schJunction;
+    }
+
+    private EVlanFixture makeSchematicFixture(EVlanFixture bpFixture, EDevice device) throws PSSException {
+        return EVlanFixture.builder()
+                .egMbps(bpFixture.getEgMbps())
+                .inMbps(bpFixture.getInMbps())
+                .portUrn(bpFixture.getPortUrn())
+                .vlanExpression(bpFixture.getVlanExpression())
+                .fixtureType(assistant.decideFixtureType(device))
+                .build();
+
+    }
+
 
 
     public void verifyBlueprint(EBlueprint blueprint) throws PCEException {
@@ -47,6 +114,10 @@ public class EthPCE {
             allJunctions.add(t.getAJunction());
             allJunctions.add(t.getZJunction());
         });
+
+        for (EVlanJunction junction: allJunctions) {
+            EDevice device = topoService.device(junction.getDeviceUrn());
+        }
 
         Set<String> junctionsWithNoFixtures = allJunctions.stream().
                 filter(t -> t.getFixtures().isEmpty()).

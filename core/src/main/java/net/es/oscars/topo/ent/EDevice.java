@@ -1,7 +1,6 @@
 package net.es.oscars.topo.ent;
 
-import lombok.Data;
-import lombok.NonNull;
+import lombok.*;
 import net.es.oscars.common.topo.Layer;
 import net.es.oscars.topo.enums.DeviceModel;
 
@@ -13,6 +12,9 @@ import java.util.Set;
 
 @Data
 @Entity
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class EDevice {
 
     @Id
@@ -38,11 +40,6 @@ public class EDevice {
     @OneToMany(cascade = CascadeType.ALL)
     @NonNull
     private Set<EIfce> ifces = new HashSet<>();
-
-    public EDevice() {
-
-    }
-
 
     public EDevice(String urn) {
         this.urn = urn;

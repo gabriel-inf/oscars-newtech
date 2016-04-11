@@ -3,6 +3,8 @@ package net.es.oscars.spec;
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.pce.EthPCE;
 import net.es.oscars.pce.PCEException;
+import net.es.oscars.pss.PSSException;
+import net.es.oscars.pss.enums.EthFixtureType;
 import net.es.oscars.pss.enums.EthJunctionType;
 import net.es.oscars.pss.enums.EthPipeType;
 import net.es.oscars.spec.ent.EFlow;
@@ -31,71 +33,13 @@ public class SpecPopTest {
     @Autowired
     private SpecificationRepository specRepo;
 
+
     @Test
-    public void testSave() throws PCEException {
+    public void testSave() throws PCEException, PSSException {
 
         if (specRepo.findAll().isEmpty()) {
-            ESpecification spec = this.getBasicSpec();
-
-            EFlow flow = spec.getBlueprint().getFlows().iterator().next();
-
-
-            EVlanJunction aj = EVlanJunction.builder()
-                    .junctionType(EthJunctionType.REQUESTED)
-                    .deviceUrn("star-tb1")
-                    .fixtures(new HashSet<>())
-                    .resourceIds(new HashSet<>())
-                    .build();
-
-            EVlanJunction zj = EVlanJunction.builder()
-                    .junctionType(EthJunctionType.REQUESTED)
-                    .deviceUrn("nersc-tb1")
-                    .fixtures(new HashSet<>())
-                    .resourceIds(new HashSet<>())
-                    .build();
-
-            EVlanFixture af = EVlanFixture.builder()
-                    .portUrn("star-tb1:1/1/1")
-                    .vlanExpression("2-100")
-                    .inMbps(100)
-                    .egMbps(100)
-                    .build();
-
-            aj.getFixtures().add(af);
-
-            EVlanFixture zf = EVlanFixture.builder()
-                    .portUrn("nersc-tb1:1/1/1")
-                    .vlanExpression("2-100")
-                    .inMbps(100)
-                    .egMbps(100)
-                    .build();
-
-            zj.getFixtures().add(zf);
-
-            EVlanPipe az_p = EVlanPipe.builder()
-                    .azERO(new ArrayList<>())
-                    .aJunction(aj)
-                    .zJunction(zj)
-                    .azMbps(1000)
-                    .pipeType(EthPipeType.REQUESTED)
-                    .build();
-
-            EVlanPipe za_p = EVlanPipe.builder()
-                    .azERO(new ArrayList<>())
-                    .aJunction(zj)
-                    .zJunction(aj)
-                    .azMbps(1000)
-                    .pipeType(EthPipeType.REQUESTED)
-                    .build();
-
-            flow.getPipes().add(az_p);
-            flow.getPipes().add(za_p);
-
-
-            EthPCE pce = new EthPCE();
-            pce.makeSchematic(spec.getBlueprint());
-            log.info("got schematic");
-
+            ESpecification spec = getBasicSpec();
+            addEndpoints(spec);
 
             specRepo.save(spec);
 
@@ -104,26 +48,70 @@ public class SpecPopTest {
         }
     }
 
-    @Test(expected = PCEException.class)
-    public void testNoFixtures() throws PCEException {
-        ESpecification spec = this.getBasicSpec();
+
+
+    public static ESpecification addEndpoints(ESpecification spec) {
 
         EFlow flow = spec.getBlueprint().getFlows().iterator().next();
 
-        EVlanJunction somejunction = EVlanJunction.builder()
+
+        EVlanJunction aj = EVlanJunction.builder()
                 .junctionType(EthJunctionType.REQUESTED)
                 .deviceUrn("star-tb1")
                 .fixtures(new HashSet<>())
                 .resourceIds(new HashSet<>())
                 .build();
 
-        flow.getJunctions().add(somejunction);
-        EthPCE pce = new EthPCE();
-        pce.verifyBlueprint(spec.getBlueprint());
+        EVlanJunction zj = EVlanJunction.builder()
+                .junctionType(EthJunctionType.REQUESTED)
+                .deviceUrn("nersc-tb1")
+                .fixtures(new HashSet<>())
+                .resourceIds(new HashSet<>())
+                .build();
 
+        EVlanFixture af = EVlanFixture.builder()
+                .portUrn("star-tb1:1/1/1")
+                .vlanExpression("2-100")
+                .inMbps(100)
+                .egMbps(100)
+                .fixtureType(EthFixtureType.REQUESTED)
+                .build();
+
+        aj.getFixtures().add(af);
+
+        EVlanFixture zf = EVlanFixture.builder()
+                .portUrn("nersc-tb1:1/1/1")
+                .vlanExpression("2-100")
+                .inMbps(100)
+                .egMbps(100)
+                .fixtureType(EthFixtureType.REQUESTED)
+                .build();
+
+        zj.getFixtures().add(zf);
+
+        EVlanPipe az_p = EVlanPipe.builder()
+                .azERO(new ArrayList<>())
+                .aJunction(aj)
+                .zJunction(zj)
+                .azMbps(1000)
+                .pipeType(EthPipeType.REQUESTED)
+                .build();
+
+        EVlanPipe za_p = EVlanPipe.builder()
+                .azERO(new ArrayList<>())
+                .aJunction(zj)
+                .zJunction(aj)
+                .azMbps(1000)
+                .pipeType(EthPipeType.REQUESTED)
+                .build();
+
+        flow.getPipes().add(az_p);
+        flow.getPipes().add(za_p);
+        return spec;
     }
 
-    private ESpecification getBasicSpec() {
+
+    public static ESpecification getBasicSpec() {
         Date now = new Date();
         Instant nowInstant = Instant.now();
         Date notBefore = new Date(nowInstant.plus(15L, ChronoUnit.MINUTES).getEpochSecond());

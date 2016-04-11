@@ -34,11 +34,11 @@ public class TopoService {
     @Autowired
     private DeviceRepository devRepo;
 
-    public EDevice device(String urn) {
+    public EDevice device(String urn) throws NoSuchElementException {
         return devRepo.findByUrn(urn).orElseThrow(NoSuchElementException::new);
     }
 
-    public Topology layer(String layer) {
+    public Topology layer(String layer) throws NoSuchElementException {
 
         log.info("topology for layer " + layer);
         Layer eLayer = Layer.get(layer).orElseThrow(NoSuchElementException::new);

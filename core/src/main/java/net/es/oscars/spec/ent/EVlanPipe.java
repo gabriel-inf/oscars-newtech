@@ -18,10 +18,10 @@ public class EVlanPipe {
     @GeneratedValue
     private Long id;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     private EVlanJunction aJunction;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     private EVlanJunction zJunction;
 
     @NonNull

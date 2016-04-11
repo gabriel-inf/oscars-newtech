@@ -9,7 +9,7 @@ import org.springframework.web.client.RestTemplate;
 
 @Slf4j
 @Component
-public class EthPCE {
+public class SampleTask {
 
 
     @Scheduled(fixedDelay = 10000)

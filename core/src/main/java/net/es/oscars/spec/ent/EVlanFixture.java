@@ -1,6 +1,7 @@
 package net.es.oscars.spec.ent;
 
 import lombok.*;
+import net.es.oscars.pss.enums.EthFixtureType;
 
 import javax.persistence.*;
 
@@ -21,6 +22,9 @@ public class EVlanFixture {
     private Integer vlanId;
 
     private String vlanExpression;
+
+    @NonNull
+    private EthFixtureType fixtureType;
 
     @NonNull
     private Integer inMbps;
