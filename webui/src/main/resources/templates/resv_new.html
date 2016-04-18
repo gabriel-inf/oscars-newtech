@@ -1,0 +1,107 @@
+<!DOCTYPE HTML>
+<html xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head th:include="shared :: headerFragment (pageTitle='New specification')"/>
+
+<body>
+<div th:include="shared :: navbar"></div>
+
+
+<form class="form-horizontal" id="resv_new"
+      action="#" th:action="@{/resv/resv_new_submit}" th:object="${specification}" method="post">
+    <fieldset>
+        <legend>New reservation specification</legend>
+        <div class="form-group">
+            <label class="col-md-4 control-label" for="description">Description</label>
+            <div class="col-md-4">
+                <input id="description" placeholder="Description"
+                       th:field="*{description}" class="form-control input-md" />
+                <span class="help-block">The reservation description</span>
+            </div>
+        </div>
+
+
+<!-- fix this -->
+        <div class="form-group">
+            <label class="col-md-4 control-label" for="vlanEdge">Edge URN</label>
+            <div class="col-md-4">
+                <input id="vlanEdge" placeholder="Edge URN"
+                       th:field="*{username}" class="form-control input-md vlanEdge" />
+                <span class="help-block">An edge URN</span>
+            </div>
+        </div>
+
+
+        <!-- Button (Double) -->
+        <div class="form-group">
+            <label class="col-md-4 control-label" for="submit_btn">Controls</label>
+            <div class="col-md-8">
+                <button id="submit_btn" type="submit" class="btn btn-success">Submit</button>
+                <button type="reset" class="btn btn-inverse">Reset</button>
+            </div>
+        </div>
+
+
+    </fieldset>
+</form>
+
+<script>
+    var vlanEdge_bh = new Bloodhound({
+        datumTokenizer: Bloodhound.tokenizers.obj.whitespace('urn'),
+        queryTokenizer: Bloodhound.tokenizers.whitespace,
+        limit: 10,
+
+        prefetch: {
+            cache: false,
+
+            url: '/info/vlanEdges',
+
+            filter: function (list) {
+                return $.map(list, function (urn) {
+                    return {urn: urn};
+                });
+            }
+        }
+
+    });
+
+    vlanEdge_bh.initialize();
+
+    function vlanEdgesWithDefault(q, sync) {
+        if (q === '') {
+            sync(vlanEdge_bh.index.all());
+        }
+        else {
+            vlanEdge_bh.search(q, sync);
+        }
+    }
+
+    var th_opts = {
+        hint: false,
+        highlight: true,
+        minLength: 0
+    };
+
+
+    // otherwise typeahead doesn't work
+    $(document).ready(function () {
+
+
+        $('#resv_new .vlanEdge').typeahead(th_opts, {
+            name: 'vlanEdges',
+            displayKey: 'urn',
+            source: vlanEdgesWithDefault,
+            templates: {
+                suggestion: function(data) { // data is an object as returned by suggestion engine
+                    return '<div class="tt-suggest-page">' + data.urn + '</div>';
+                }
+            }
+        });
+    });
+
+
+</script>
+</body>
+</html>

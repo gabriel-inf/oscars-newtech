@@ -1,6 +1,8 @@
 package net.es.oscars.webui.cont;
 
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.dto.spec.Blueprint;
+import net.es.oscars.dto.spec.Specification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -11,6 +13,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 @Slf4j
@@ -43,5 +46,19 @@ public class MainController {
         institutions.addAll(Arrays.asList(all_insts));
         return institutions;
     }
+
+
+    @RequestMapping(value = "/info/vlanEdges", method = RequestMethod.GET)
+    @ResponseBody
+    public List<String> vlanEdge_suggestions() {
+        log.info("giving vlanEdge suggestions");
+        String restPath = "https://localhost:8000/topo/vlanEdges";
+
+        String[] all_vlan_edges = restTemplate.getForObject(restPath, String[].class);
+        List<String> vlan_edges = new ArrayList<>();
+        vlan_edges.addAll(Arrays.asList(all_vlan_edges));
+        return vlan_edges;
+    }
+
 
 }

@@ -79,6 +79,7 @@ public class AdminUserController {
 
         String restPath = "https://localhost:8000/users/add";
         restTemplate.postForObject(restPath, addedUser, User.class);
+        log.info("added " + username);
 
         return "redirect:/admin/user_edit/" + username;
     }

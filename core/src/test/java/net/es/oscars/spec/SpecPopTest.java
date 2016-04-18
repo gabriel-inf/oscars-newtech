@@ -122,6 +122,7 @@ public class SpecPopTest {
                 .notAfter(notAfter)
                 .durationMinutes(30L)
                 .version(1)
+                .description("a description")
                 .username("some user")
                 .specificationId("UANS8A")
                 .build();

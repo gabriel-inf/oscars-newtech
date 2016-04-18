@@ -42,12 +42,15 @@ public class UserController {
     @RequestMapping(value = "/users/add", method = RequestMethod.POST)
     @ResponseBody
     public User add(@RequestBody User dtoUser) {
-        if (repository.findByUsername(dtoUser.getUsername()).isPresent()) {
+        String username = dtoUser.getUsername();
+        log.info("adding "+ username);
+        if (repository.findByUsername(username).isPresent()) {
             throw new DataIntegrityViolationException("User already exists.");
         }
 
         EUser eUser = convertToEnt(dtoUser);
         repository.save(eUser);
+        log.info("added "+ username);
         return dtoUser;
     }
 

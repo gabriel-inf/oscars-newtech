@@ -147,4 +147,27 @@ public class TopoService {
         return resources;
     }
 
+    public List<String> edges(Layer layer) {
+        log.info("finding edges for "+layer);
+
+        List<String> edges = new ArrayList<>();
+        List<EDevice> devices = devRepo.findAll();
+        devices.stream().forEach(d -> {log.info(d.toString());});
+
+        devices.stream()
+                .filter(d -> d.getCapabilities().contains(layer))
+                .forEach(d -> {
+                    log.info("found device "+d.getUrn()+" for "+layer);
+                    d.getIfces().stream()
+                            .filter(i -> i.getCapabilities().contains(layer))
+                            .forEach(i -> {
+                                log.info("found ifce "+i.getUrn()+" for "+layer);
+
+                                edges.add(i.getUrn());
+                            });
+                });
+        return edges;
+    }
+
+
 }

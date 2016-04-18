@@ -1,26 +1,19 @@
-package net.es.oscars.spec.ent;
+package net.es.oscars.dto.spec;
 
 import lombok.*;
 
-import javax.persistence.*;
 import java.util.Date;
 
 @Data
-@Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SpecificationE {
-
-    @Id
-    @GeneratedValue
-    private Long id;
+public class Specification {
 
     @NonNull
     private Integer version;
 
     @NonNull
-    @Column(unique = true)
     private String specificationId;
 
     @NonNull
@@ -36,17 +29,15 @@ public class SpecificationE {
     private Long durationMinutes;
 
     @NonNull
+    private String description;
+
+    @NonNull
     private String username;
 
     @NonNull
-    private String description;
+    private Blueprint requested;
 
-
-    @OneToOne (cascade = CascadeType.ALL)
-    private BlueprintE requested;
-
-    @OneToOne (cascade = CascadeType.ALL)
-    private BlueprintE reserved;
-
+    @NonNull
+    private Blueprint reserved;
 
 }
