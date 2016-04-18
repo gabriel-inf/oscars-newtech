@@ -9,6 +9,7 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Specification {
+    private Long id;
 
     @NonNull
     private Integer version;

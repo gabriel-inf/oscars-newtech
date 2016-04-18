@@ -8,13 +8,13 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Blueprint {
+public class Layer3Flow {
 
     private Long id;
 
-    @NonNull
-    private Set<VlanFlow> vlanFlows;
+    private Set<Layer3Junction> junctions;
 
-    @NonNull
-    private Set<Layer3Flow> layer3Flows;
+    private Set<Layer3Pipe> pipes;
+
+
 }

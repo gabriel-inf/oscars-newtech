@@ -11,6 +11,7 @@ import java.util.Optional;
 public interface SpecificationRepository extends CrudRepository<SpecificationE, Long> {
 
     List<SpecificationE> findAll();
+    Optional<SpecificationE> findById(Long id);
     Optional<SpecificationE> findBySpecificationId(String specificationId);
 
 
