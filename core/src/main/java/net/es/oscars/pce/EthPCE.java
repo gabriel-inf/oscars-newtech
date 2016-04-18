@@ -3,7 +3,6 @@ package net.es.oscars.pce;
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.pss.PCEAssistant;
 import net.es.oscars.pss.PSSException;
-import net.es.oscars.pss.enums.EthJunctionType;
 import net.es.oscars.spec.ent.*;
 import net.es.oscars.topo.ent.EDevice;
 import net.es.oscars.topo.svc.TopoService;
@@ -11,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
-import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -25,40 +23,46 @@ public class EthPCE {
     @Autowired
     private TopoService topoService;
 
-    public ESchematic makeSchematic(EBlueprint blueprint) throws PCEException, PSSException {
+    public BlueprintE makeReserved(BlueprintE requested) throws PCEException, PSSException {
 
-        verifyBlueprint(blueprint);
+        verifyBlueprint(requested);
 
-        ESchematic schematic = ESchematic.builder().flows(new HashSet<>()).build();
+        BlueprintE reserved = BlueprintE.builder()
+                .layer3Flows(new HashSet<>())
+                .vlanFlows(new HashSet<>())
+                .build();
 
 
-        for (EFlow flow : blueprint.getFlows()) {
+        for (VlanFlowE flow : requested.getVlanFlows()) {
             // make a flow entry
-            EFlow schematicFlow = EFlow.builder().junctions(new HashSet<>()).pipes(new HashSet<>()).build();
-            schematic.getFlows().add(schematicFlow);
+            VlanFlowE reservedFlow = VlanFlowE.builder()
+                    .junctions(new HashSet<>())
+                    .pipes(new HashSet<>())
+                    .build();
+
+            reserved.getVlanFlows().add(reservedFlow);
 
             // plain junctions (not in pipes): decide type
-            for (EVlanJunction bpJunction : flow.getJunctions()) {
-                EVlanJunction schJunction = this.makeSchematicJunction(bpJunction);
-                schematicFlow.getJunctions().add(schJunction);
-
+            for (VlanJunctionE bpJunction : flow.getJunctions()) {
+                VlanJunctionE schJunction = this.makeReservedJunction(bpJunction);
+                reservedFlow.getJunctions().add(schJunction);
             }
 
-            for (EVlanPipe pipe : flow.getPipes()) {
+            for (VlanPipeE pipe : flow.getPipes()) {
 //
 
             }
 
         }
-        return schematic;
+        return reserved;
 
     }
 
-    private EVlanJunction makeSchematicJunction(EVlanJunction bpJunction) throws PSSException {
+    private VlanJunctionE makeReservedJunction(VlanJunctionE bpJunction) throws PSSException {
         String deviceUrn = bpJunction.getDeviceUrn();
         EDevice device = topoService.device(deviceUrn);
 
-        EVlanJunction schJunction = EVlanJunction.builder()
+        VlanJunctionE rsvJunction = VlanJunctionE.builder()
                 .deviceUrn(deviceUrn)
                 .fixtures(new HashSet<>())
                 .resourceIds(new HashSet<>())
@@ -67,20 +71,19 @@ public class EthPCE {
 
         bpJunction.getFixtures().stream().forEach(t -> {
             try {
-                EVlanFixture bpFixture = this.makeSchematicFixture(t, device);
-                schJunction.getFixtures().add(bpFixture);
+                VlanFixtureE bpFixture = this.makeReservedFixture(t, device);
+                rsvJunction.getFixtures().add(bpFixture);
             } catch (PSSException e) {
                 // oh, java 8
                 e.printStackTrace();
             }
         });
 
-
-        return schJunction;
+        return rsvJunction;
     }
 
-    private EVlanFixture makeSchematicFixture(EVlanFixture bpFixture, EDevice device) throws PSSException {
-        return EVlanFixture.builder()
+    private VlanFixtureE makeReservedFixture(VlanFixtureE bpFixture, EDevice device) throws PSSException {
+        return VlanFixtureE.builder()
                 .egMbps(bpFixture.getEgMbps())
                 .inMbps(bpFixture.getInMbps())
                 .portUrn(bpFixture.getPortUrn())
@@ -92,36 +95,36 @@ public class EthPCE {
 
 
 
-    public void verifyBlueprint(EBlueprint blueprint) throws PCEException {
+    public void verifyBlueprint(BlueprintE blueprint) throws PCEException {
         log.info("starting verification");
         if (blueprint == null) {
-            throw new PCEException("Null blueprint");
-        } else if (blueprint.getFlows() == null || blueprint.getFlows().isEmpty()) {
-            throw new PCEException("No flows");
-        } else if (blueprint.getFlows().size() != 1) {
+            throw new PCEException("Null blueprint!");
+        } else if (blueprint.getVlanFlows() == null || blueprint.getVlanFlows().isEmpty()) {
+            throw new PCEException("No VLAN flows");
+        } else if (blueprint.getVlanFlows().size() != 1) {
             throw new PCEException("Exactly one flow supported right now");
         }
 
-        EFlow flow = blueprint.getFlows().iterator().next();
+        VlanFlowE flow = blueprint.getVlanFlows().iterator().next();
 
         log.info("verifying junctions & pipes");
         if (flow.getJunctions().isEmpty() && flow.getPipes().isEmpty()) {
             throw new PCEException("Junctions or pipes both empty.");
         }
 
-        Set<EVlanJunction> allJunctions = flow.getJunctions();
+        Set<VlanJunctionE> allJunctions = flow.getJunctions();
         flow.getPipes().stream().forEach(t -> {
             allJunctions.add(t.getAJunction());
             allJunctions.add(t.getZJunction());
         });
 
-        for (EVlanJunction junction: allJunctions) {
+        for (VlanJunctionE junction: allJunctions) {
             EDevice device = topoService.device(junction.getDeviceUrn());
         }
 
         Set<String> junctionsWithNoFixtures = allJunctions.stream().
                 filter(t -> t.getFixtures().isEmpty()).
-                map(EVlanJunction::getDeviceUrn).collect(Collectors.toSet());
+                map(VlanJunctionE::getDeviceUrn).collect(Collectors.toSet());
 
         if (!junctionsWithNoFixtures.isEmpty()) {
             throw new PCEException("Junctions with no fixtures found: " + String.join(" ", junctionsWithNoFixtures));

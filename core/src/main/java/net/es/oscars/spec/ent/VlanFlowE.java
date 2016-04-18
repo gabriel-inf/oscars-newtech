@@ -13,17 +13,17 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class EFlow {
+public class VlanFlowE {
 
     @Id
     @GeneratedValue
     private Long id;
 
     @OneToMany (cascade = CascadeType.ALL)
-    private Set<EVlanJunction> junctions;
+    private Set<VlanJunctionE> junctions;
 
     @OneToMany (cascade = CascadeType.ALL)
-    private Set<EVlanPipe> pipes;
+    private Set<VlanPipeE> pipes;
 
 
 }

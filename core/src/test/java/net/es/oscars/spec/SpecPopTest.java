@@ -1,16 +1,15 @@
 package net.es.oscars.spec;
 
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.pce.EthPCE;
 import net.es.oscars.pce.PCEException;
 import net.es.oscars.pss.PSSException;
-import net.es.oscars.pss.enums.EthFixtureType;
-import net.es.oscars.pss.enums.EthJunctionType;
-import net.es.oscars.pss.enums.EthPipeType;
-import net.es.oscars.spec.ent.EFlow;
-import net.es.oscars.spec.ent.EVlanFixture;
-import net.es.oscars.spec.ent.EVlanJunction;
-import net.es.oscars.spec.ent.EVlanPipe;
+import net.es.oscars.dto.pss.EthFixtureType;
+import net.es.oscars.dto.pss.EthJunctionType;
+import net.es.oscars.dto.pss.EthPipeType;
+import net.es.oscars.spec.ent.VlanFlowE;
+import net.es.oscars.spec.ent.VlanFixtureE;
+import net.es.oscars.spec.ent.VlanJunctionE;
+import net.es.oscars.spec.ent.VlanPipeE;
 import net.es.oscars.spec.dao.SpecificationRepository;
 import net.es.oscars.spec.ent.*;
 import org.junit.Test;
@@ -38,7 +37,7 @@ public class SpecPopTest {
     public void testSave() throws PCEException, PSSException {
 
         if (specRepo.findAll().isEmpty()) {
-            ESpecification spec = getBasicSpec();
+            SpecificationE spec = getBasicSpec();
             addEndpoints(spec);
 
             specRepo.save(spec);
@@ -50,26 +49,26 @@ public class SpecPopTest {
 
 
 
-    public static ESpecification addEndpoints(ESpecification spec) {
+    public static SpecificationE addEndpoints(SpecificationE spec) {
 
-        EFlow flow = spec.getBlueprint().getFlows().iterator().next();
+        VlanFlowE flow = spec.getRequested().getVlanFlows().iterator().next();
 
 
-        EVlanJunction aj = EVlanJunction.builder()
+        VlanJunctionE aj = VlanJunctionE.builder()
                 .junctionType(EthJunctionType.REQUESTED)
                 .deviceUrn("star-tb1")
                 .fixtures(new HashSet<>())
                 .resourceIds(new HashSet<>())
                 .build();
 
-        EVlanJunction zj = EVlanJunction.builder()
+        VlanJunctionE zj = VlanJunctionE.builder()
                 .junctionType(EthJunctionType.REQUESTED)
                 .deviceUrn("nersc-tb1")
                 .fixtures(new HashSet<>())
                 .resourceIds(new HashSet<>())
                 .build();
 
-        EVlanFixture af = EVlanFixture.builder()
+        VlanFixtureE af = VlanFixtureE.builder()
                 .portUrn("star-tb1:1/1/1")
                 .vlanExpression("2-100")
                 .inMbps(100)
@@ -79,7 +78,7 @@ public class SpecPopTest {
 
         aj.getFixtures().add(af);
 
-        EVlanFixture zf = EVlanFixture.builder()
+        VlanFixtureE zf = VlanFixtureE.builder()
                 .portUrn("nersc-tb1:1/1/1")
                 .vlanExpression("2-100")
                 .inMbps(100)
@@ -89,7 +88,7 @@ public class SpecPopTest {
 
         zj.getFixtures().add(zf);
 
-        EVlanPipe az_p = EVlanPipe.builder()
+        VlanPipeE az_p = VlanPipeE.builder()
                 .azERO(new ArrayList<>())
                 .aJunction(aj)
                 .zJunction(zj)
@@ -97,7 +96,7 @@ public class SpecPopTest {
                 .pipeType(EthPipeType.REQUESTED)
                 .build();
 
-        EVlanPipe za_p = EVlanPipe.builder()
+        VlanPipeE za_p = VlanPipeE.builder()
                 .azERO(new ArrayList<>())
                 .aJunction(zj)
                 .zJunction(aj)
@@ -111,13 +110,13 @@ public class SpecPopTest {
     }
 
 
-    public static ESpecification getBasicSpec() {
+    public static SpecificationE getBasicSpec() {
         Date now = new Date();
         Instant nowInstant = Instant.now();
         Date notBefore = new Date(nowInstant.plus(15L, ChronoUnit.MINUTES).getEpochSecond());
         Date notAfter = new Date(nowInstant.plus(1L, ChronoUnit.DAYS).getEpochSecond());
 
-        ESpecification spec = ESpecification.builder()
+        SpecificationE spec = SpecificationE.builder()
                 .submitted(now)
                 .notBefore(notBefore)
                 .notAfter(notAfter)
@@ -127,17 +126,18 @@ public class SpecPopTest {
                 .specificationId("UANS8A")
                 .build();
 
-        EBlueprint bp = EBlueprint.builder()
-                .flows(new HashSet<>())
+        BlueprintE bp = BlueprintE.builder()
+                .vlanFlows(new HashSet<>())
+                .layer3Flows(new HashSet<>())
                 .build();
 
-        EFlow flow = EFlow.builder()
+        VlanFlowE flow = VlanFlowE.builder()
                 .junctions(new HashSet<>())
                 .pipes(new HashSet<>())
                 .build();
 
-        spec.setBlueprint(bp);
-        bp.getFlows().add(flow);
+        spec.setRequested(bp);
+        bp.getVlanFlows().add(flow);
         return spec;
     }
 

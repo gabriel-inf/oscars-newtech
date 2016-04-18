@@ -1,7 +1,7 @@
 package net.es.oscars.pss;
 
-import net.es.oscars.pss.enums.EthFixtureType;
-import net.es.oscars.pss.enums.EthJunctionType;
+import net.es.oscars.dto.pss.EthFixtureType;
+import net.es.oscars.dto.pss.EthJunctionType;
 import net.es.oscars.topo.ent.EDevice;
 import net.es.oscars.topo.enums.DeviceModel;
 import org.springframework.stereotype.Component;

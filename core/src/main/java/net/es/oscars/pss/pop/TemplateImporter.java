@@ -2,7 +2,7 @@ package net.es.oscars.pss.pop;
 
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.pss.dao.TemplateRepository;
-import net.es.oscars.pss.ent.ETemplate;
+import net.es.oscars.pss.ent.TemplateE;
 import net.es.oscars.pss.prop.PssConfig;
 import net.es.oscars.pss.tpl.Stringifier;
 import org.apache.commons.io.FileUtils;
@@ -57,7 +57,7 @@ public class TemplateImporter {
             return;
         }
 
-        List<ETemplate> newTemplates = new ArrayList<>();
+        List<TemplateE> newTemplates = new ArrayList<>();
         File[] listOfFiles = folder.listFiles();
         if (listOfFiles == null) {
             log.error("Null folder contents for " + templateDir + ". Skipping template import.");
@@ -74,7 +74,7 @@ public class TemplateImporter {
                         try {
                             log.debug("Reading file: "+filename);
                             String contents = FileUtils.readFileToString(file);
-                            ETemplate tpl = ETemplate.builder().name(base).contents(contents).build();
+                            TemplateE tpl = TemplateE.builder().name(base).contents(contents).build();
                             log.debug("Successfully read template named: " + base );
                             newTemplates.add(tpl);
                         } catch (IOException ex) {
@@ -90,7 +90,7 @@ public class TemplateImporter {
             repository.deleteAll();
         }
 
-        List<ETemplate> templates = repository.findAll();
+        List<TemplateE> templates = repository.findAll();
 
         if (templates.isEmpty()) {
             log.info("PSS template DB is empty. Importing new ones.");

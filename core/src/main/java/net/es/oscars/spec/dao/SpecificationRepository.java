@@ -1,5 +1,5 @@
 package net.es.oscars.spec.dao;
-import net.es.oscars.spec.ent.ESpecification;
+import net.es.oscars.spec.ent.SpecificationE;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
@@ -8,10 +8,10 @@ import java.util.Optional;
 
 
 @Repository
-public interface SpecificationRepository extends CrudRepository<ESpecification, Long> {
+public interface SpecificationRepository extends CrudRepository<SpecificationE, Long> {
 
-    List<ESpecification> findAll();
-    Optional<ESpecification> findBySpecificationId(String specificationId);
+    List<SpecificationE> findAll();
+    Optional<SpecificationE> findBySpecificationId(String specificationId);
 
 
 }

@@ -1,6 +1,6 @@
 package net.es.oscars.pss.dao;
 
-import net.es.oscars.pss.ent.ETemplate;
+import net.es.oscars.pss.ent.TemplateE;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
@@ -9,10 +9,10 @@ import java.util.Optional;
 
 
 @Repository
-public interface TemplateRepository extends CrudRepository<ETemplate, Long> {
+public interface TemplateRepository extends CrudRepository<TemplateE, Long> {
 
-    List<ETemplate> findAll();
-    Optional<ETemplate> findByName(String name);
+    List<TemplateE> findAll();
+    Optional<TemplateE> findByName(String name);
 
 
 }

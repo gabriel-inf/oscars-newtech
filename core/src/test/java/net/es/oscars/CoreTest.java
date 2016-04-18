@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.pce.EthPCE;
 import net.es.oscars.pce.PCEException;
 import net.es.oscars.pss.PSSException;
-import net.es.oscars.pss.enums.EthJunctionType;
+import net.es.oscars.dto.pss.EthJunctionType;
 import net.es.oscars.spec.SpecPopTest;
 import net.es.oscars.spec.dao.SpecificationRepository;
 import net.es.oscars.spec.ent.*;
@@ -39,14 +39,14 @@ public class CoreTest {
     public void testSpecification() throws PCEException, PSSException {
 
         if (specRepo.findAll().isEmpty()) {
-            ESpecification spec = SpecPopTest.getBasicSpec();
+            SpecificationE spec = SpecPopTest.getBasicSpec();
 
             SpecPopTest.addEndpoints(spec);
 
             this.populateTopo(spec);
 
 
-            ethPCE.makeSchematic(spec.getBlueprint());
+            ethPCE.makeReserved(spec.getRequested());
             log.info("got schematic");
 
 
@@ -57,11 +57,11 @@ public class CoreTest {
 
     @Test(expected = PCEException.class)
     public void testNoFixtures() throws PCEException {
-        ESpecification spec = SpecPopTest.getBasicSpec();
+        SpecificationE spec = SpecPopTest.getBasicSpec();
 
-        EFlow flow = spec.getBlueprint().getFlows().iterator().next();
+        VlanFlowE flow = spec.getRequested().getVlanFlows().iterator().next();
 
-        EVlanJunction somejunction = EVlanJunction.builder()
+        VlanJunctionE somejunction = VlanJunctionE.builder()
                 .junctionType(EthJunctionType.REQUESTED)
                 .deviceUrn("star-tb1")
                 .fixtures(new HashSet<>())
@@ -70,14 +70,14 @@ public class CoreTest {
 
         flow.getJunctions().add(somejunction);
 
-        ethPCE.verifyBlueprint(spec.getBlueprint());
+        ethPCE.verifyBlueprint(spec.getRequested());
 
     }
 
 
-    private void populateTopo(ESpecification spec) {
-        spec.getBlueprint().getFlows().stream().forEach(t-> {
-            t.getJunctions().forEach(j -> makeDevice(j));
+    private void populateTopo(SpecificationE spec) {
+        spec.getRequested().getVlanFlows().stream().forEach(t-> {
+            t.getJunctions().forEach(this::makeDevice);
             t.getPipes().forEach( p -> {
                 makeDevice(p.getAJunction());
                 makeDevice(p.getZJunction());
@@ -86,7 +86,7 @@ public class CoreTest {
         });
     }
 
-    private void makeDevice(EVlanJunction junction) {
+    private void makeDevice(VlanJunctionE junction) {
         String urn = junction.getDeviceUrn();
         if (!devRepo.findByUrn(urn).isPresent()) {
            devRepo.save(EDevice.builder()

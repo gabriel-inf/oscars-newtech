@@ -10,7 +10,7 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class EBlueprint {
+public class BlueprintE {
 
     @Id
     @GeneratedValue
@@ -18,6 +18,11 @@ public class EBlueprint {
 
     @OneToMany (cascade = CascadeType.ALL)
     @NonNull
-    private Set<EFlow> flows;
+    private Set<VlanFlowE> vlanFlows;
+
+    @OneToMany (cascade = CascadeType.ALL)
+    @NonNull
+    private Set<Layer3FlowE> layer3Flows;
+
 
 }

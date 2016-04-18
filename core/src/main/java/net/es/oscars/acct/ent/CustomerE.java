@@ -10,7 +10,7 @@ import java.util.HashSet;
 
 @Data
 @Entity
-public class ECustomer {
+public class CustomerE {
 
 
     @Id
@@ -23,15 +23,15 @@ public class ECustomer {
 
     @ElementCollection
     private Collection<String> projects = new HashSet<>();
-    public ECustomer() {
+    public CustomerE() {
 
     }
 
-    public ECustomer(String name) {
+    public CustomerE(String name) {
         this.name = name;
     }
 
-    public ECustomer(String name, Collection<String> projects) {
+    public CustomerE(String name, Collection<String> projects) {
         this.name = name;
         this.projects = projects;
     }

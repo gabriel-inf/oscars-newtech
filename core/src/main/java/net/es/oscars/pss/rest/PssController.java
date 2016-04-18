@@ -2,7 +2,7 @@ package net.es.oscars.pss.rest;
 
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.pss.dao.TemplateRepository;
-import net.es.oscars.pss.ent.ETemplate;
+import net.es.oscars.pss.ent.TemplateE;
 import net.es.oscars.dto.pss.RouterConfigTemplate;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,8 +33,8 @@ public class PssController {
     @RequestMapping(value = "/pss/templates/", method = RequestMethod.GET)
     @ResponseBody
     public List<String> getAll() {
-        List<ETemplate> eTemplates = repository.findAll();
-        return eTemplates.stream().map(ETemplate::getName).collect(Collectors.toList());
+        List<TemplateE> templateEs = repository.findAll();
+        return templateEs.stream().map(TemplateE::getName).collect(Collectors.toList());
     }
 
     @RequestMapping(value = "/pss/templates/{name}", method = RequestMethod.GET)
@@ -43,8 +43,8 @@ public class PssController {
         return convertToDto(repository.findByName(name).orElseThrow(NoSuchElementException::new));
     }
 
-    private RouterConfigTemplate convertToDto(ETemplate eTemplate) {
-        return  modelMapper.map(eTemplate, RouterConfigTemplate.class);
+    private RouterConfigTemplate convertToDto(TemplateE templateE) {
+        return  modelMapper.map(templateE, RouterConfigTemplate.class);
     }
 
 

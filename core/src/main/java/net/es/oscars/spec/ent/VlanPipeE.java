@@ -1,7 +1,7 @@
 package net.es.oscars.spec.ent;
 
 import lombok.*;
-import net.es.oscars.pss.enums.EthPipeType;
+import net.es.oscars.dto.pss.EthPipeType;
 
 import javax.persistence.*;
 import java.util.List;
@@ -12,17 +12,17 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class EVlanPipe {
+public class VlanPipeE {
 
     @Id
     @GeneratedValue
     private Long id;
 
     @OneToOne(cascade = CascadeType.ALL)
-    private EVlanJunction aJunction;
+    private VlanJunctionE aJunction;
 
     @OneToOne(cascade = CascadeType.ALL)
-    private EVlanJunction zJunction;
+    private VlanJunctionE zJunction;
 
     @NonNull
     private Integer azMbps;

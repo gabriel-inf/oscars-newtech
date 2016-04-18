@@ -13,13 +13,17 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ESchematic {
+public class Layer3FlowE {
 
     @Id
     @GeneratedValue
     private Long id;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    private Set<EFlow> flows;
+    @OneToMany (cascade = CascadeType.ALL)
+    private Set<Layer3JunctionE> junctions;
+
+    @OneToMany (cascade = CascadeType.ALL)
+    private Set<Layer3PipeE> pipes;
+
 
 }

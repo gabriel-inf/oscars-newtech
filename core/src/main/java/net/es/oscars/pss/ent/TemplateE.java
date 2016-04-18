@@ -9,7 +9,7 @@ import javax.persistence.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ETemplate {
+public class TemplateE {
 
     @Id
     @GeneratedValue

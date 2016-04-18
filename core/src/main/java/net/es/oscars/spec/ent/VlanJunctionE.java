@@ -1,7 +1,7 @@
 package net.es.oscars.spec.ent;
 
 import lombok.*;
-import net.es.oscars.pss.enums.EthJunctionType;
+import net.es.oscars.dto.pss.EthJunctionType;
 
 import javax.persistence.*;
 import java.util.Set;
@@ -11,7 +11,7 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class EVlanJunction {
+public class VlanJunctionE {
 
     @Id
     @GeneratedValue
@@ -24,7 +24,7 @@ public class EVlanJunction {
     private EthJunctionType junctionType;
 
     @OneToMany(cascade = CascadeType.ALL)
-    private Set<EVlanFixture> fixtures;
+    private Set<VlanFixtureE> fixtures;
 
     @ElementCollection
     private Set<String> resourceIds;

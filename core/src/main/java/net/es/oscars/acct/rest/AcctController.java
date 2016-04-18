@@ -1,7 +1,7 @@
 package net.es.oscars.acct.rest;
 
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.acct.ent.ECustomer;
+import net.es.oscars.acct.ent.CustomerE;
 import net.es.oscars.acct.svc.CustService;
 import net.es.oscars.dto.acct.Customer;
 import org.modelmapper.ModelMapper;
@@ -42,8 +42,8 @@ public class AcctController {
         log.info("listing all customers");
         List<Customer> customers = new ArrayList<>();
 
-        for (ECustomer eCustomer : custService.findAll()) {
-            Customer customer = convertToDto(eCustomer);
+        for (CustomerE customerE : custService.findAll()) {
+            Customer customer = convertToDto(customerE);
             customers.add(customer);
         }
         return customers;
@@ -60,17 +60,17 @@ public class AcctController {
     @RequestMapping(value = "/acct/customers/update", method = RequestMethod.POST)
     @ResponseBody
     public Customer update(@RequestBody Customer dtoCustomer) {
-        ECustomer eCustomer = custService.findByName(dtoCustomer.getName()).orElseThrow(NoSuchElementException::new);
+        CustomerE customerE = custService.findByName(dtoCustomer.getName()).orElseThrow(NoSuchElementException::new);
 
-        Long id = eCustomer.getId();
-        eCustomer = convertToEnt(dtoCustomer);
-        eCustomer.setId(id);
+        Long id = customerE.getId();
+        customerE = convertToEnt(dtoCustomer);
+        customerE.setId(id);
 
-        custService.save(eCustomer);
+        custService.save(customerE);
         return dtoCustomer;
     }
 
-    @RequestMapping(value = "/acct/customers/delete/{username}", method = RequestMethod.GET)
+    @RequestMapping(value = "/acct/customers/delete/{name}", method = RequestMethod.GET)
     @ResponseBody
     public String delete(@PathVariable("name") String name) {
 
@@ -78,12 +78,12 @@ public class AcctController {
         return "User deleted.";
     }
 
-    private ECustomer convertToEnt(Customer dtoCustomer) {
-        return modelMapper.map(dtoCustomer, ECustomer.class);
+    private CustomerE convertToEnt(Customer dtoCustomer) {
+        return modelMapper.map(dtoCustomer, CustomerE.class);
     }
 
-    private Customer convertToDto(ECustomer eCustomer) {
-        return modelMapper.map(eCustomer, Customer.class);
+    private Customer convertToDto(CustomerE customerE) {
+        return modelMapper.map(customerE, Customer.class);
     }
 
 }

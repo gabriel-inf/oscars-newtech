@@ -10,7 +10,7 @@ import java.util.Date;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ESpecification {
+public class SpecificationE {
 
     @Id
     @GeneratedValue
@@ -39,7 +39,10 @@ public class ESpecification {
     private String username;
 
     @OneToOne (cascade = CascadeType.ALL)
-    private EBlueprint blueprint;
+    private BlueprintE requested;
+
+    @OneToOne (cascade = CascadeType.ALL)
+    private BlueprintE reserved;
 
 
 }
