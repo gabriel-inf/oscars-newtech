@@ -1,7 +1,7 @@
 package net.es.oscars.topo.rest;
 
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.common.topo.Layer;
+import net.es.oscars.dto.topo.Layer;
 import net.es.oscars.dto.rsrc.TopoResource;
 import net.es.oscars.dto.topo.Topology;
 import net.es.oscars.topo.ent.*;
@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Controller

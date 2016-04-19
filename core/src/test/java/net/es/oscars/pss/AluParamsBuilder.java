@@ -1,6 +1,6 @@
 package net.es.oscars.pss;
 
-import net.es.oscars.common.pss.*;
+import net.es.oscars.pss.cmd.*;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;

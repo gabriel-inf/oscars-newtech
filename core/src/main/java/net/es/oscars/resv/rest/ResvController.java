@@ -168,6 +168,7 @@ public class ResvController {
                 .portUrn(bvf.getAUrn())
                 .inMbps(bvf.getAzMbps())
                 .egMbps(bvf.getZaMbps())
+                .vlanExpression(bvf.getAVlanExpression())
                 .build();
 
         VlanFixture vfz = VlanFixture.builder()
@@ -175,6 +176,7 @@ public class ResvController {
                 .portUrn(bvf.getZUrn())
                 .inMbps(bvf.getZaMbps())
                 .egMbps(bvf.getAzMbps())
+                .vlanExpression(bvf.getZVlanExpression())
                 .build();
 
         VlanJunction vja = VlanJunction.builder()

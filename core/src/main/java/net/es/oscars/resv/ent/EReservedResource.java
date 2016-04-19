@@ -1,7 +1,7 @@
 package net.es.oscars.resv.ent;
 
 import lombok.*;
-import net.es.oscars.common.resv.ResourceType;
+import net.es.oscars.dto.resv.ResourceType;
 
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;

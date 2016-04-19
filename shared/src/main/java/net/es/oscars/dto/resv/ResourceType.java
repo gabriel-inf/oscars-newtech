@@ -1,4 +1,4 @@
-package net.es.oscars.common.resv;
+package net.es.oscars.dto.resv;
 
 
 import java.util.EnumSet;

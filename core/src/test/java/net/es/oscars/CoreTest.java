@@ -1,8 +1,8 @@
 package net.es.oscars;
 
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.pce.EthPCE;
 import net.es.oscars.pce.PCEException;
+import net.es.oscars.pce.TopPCE;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.dto.pss.EthJunctionType;
 import net.es.oscars.spec.SpecPopTest;
@@ -33,7 +33,7 @@ public class CoreTest {
     private DeviceRepository devRepo;
 
     @Autowired
-    private EthPCE ethPCE;
+    private TopPCE topPCE;
 
     @Test
     public void testSpecification() throws PCEException, PSSException {
@@ -46,7 +46,7 @@ public class CoreTest {
             this.populateTopo(spec);
 
 
-            ethPCE.makeReserved(spec.getRequested());
+            topPCE.makeReserved(spec.getRequested());
             log.info("got schematic");
 
 
@@ -70,7 +70,7 @@ public class CoreTest {
 
         flow.getJunctions().add(somejunction);
 
-        ethPCE.verifyBlueprint(spec.getRequested());
+        topPCE.verifyRequested(spec.getRequested());
 
     }
 

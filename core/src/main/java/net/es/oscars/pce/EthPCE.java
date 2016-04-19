@@ -1,6 +1,10 @@
 package net.es.oscars.pce;
 
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.dto.pss.EthPipeType;
+import net.es.oscars.dto.spec.VlanFixture;
+import net.es.oscars.dto.spec.VlanJunction;
+import net.es.oscars.dto.spec.VlanPipe;
 import net.es.oscars.pss.PCEAssistant;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.spec.ent.*;
@@ -9,6 +13,7 @@ import net.es.oscars.topo.svc.TopoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -23,66 +28,76 @@ public class EthPCE {
     @Autowired
     private TopoService topoService;
 
-    public BlueprintE makeReserved(BlueprintE requested) throws PCEException, PSSException {
 
-        verifyBlueprint(requested);
+    public VlanFlowE makeReserved(VlanFlowE req_f) throws PSSException {
 
-        BlueprintE reserved = BlueprintE.builder()
-                .layer3Flows(new HashSet<>())
-                .vlanFlows(new HashSet<>())
+        // make a flow entry
+        VlanFlowE res_f = VlanFlowE.builder()
+                .junctions(new HashSet<>())
+                .pipes(new HashSet<>())
                 .build();
 
 
-        for (VlanFlowE flow : requested.getVlanFlows()) {
-            // make a flow entry
-            VlanFlowE reservedFlow = VlanFlowE.builder()
-                    .junctions(new HashSet<>())
-                    .pipes(new HashSet<>())
-                    .build();
+        // plain junctions (not in pipes): decide type
+        for (VlanJunctionE bpJunction : req_f.getJunctions()) {
+            VlanJunctionE schJunction = this.makeJunction(bpJunction);
+            res_f.getJunctions().add(schJunction);
+        }
 
-            reserved.getVlanFlows().add(reservedFlow);
 
-            // plain junctions (not in pipes): decide type
-            for (VlanJunctionE bpJunction : flow.getJunctions()) {
-                VlanJunctionE schJunction = this.makeReservedJunction(bpJunction);
-                reservedFlow.getJunctions().add(schJunction);
-            }
-
-            for (VlanPipeE pipe : flow.getPipes()) {
-//
-
-            }
+        for (VlanPipeE req_p : req_f.getPipes()) {
+            VlanPipeE res_p = this.makePipe(req_p);
+            res_f.getPipes().add(res_p);
 
         }
-        return reserved;
-
+        return res_f;
     }
 
-    private VlanJunctionE makeReservedJunction(VlanJunctionE bpJunction) throws PSSException {
-        String deviceUrn = bpJunction.getDeviceUrn();
+    private VlanPipeE makePipe(VlanPipeE req_p) throws PSSException {
+        VlanJunctionE aj = makeJunction(req_p.getAJunction());
+        VlanJunctionE zj = makeJunction(req_p.getZJunction());
+        EDevice aDevice = topoService.device(req_p.getAJunction().getDeviceUrn());
+        EDevice zDevice = topoService.device(req_p.getZJunction().getDeviceUrn());
+
+        EthPipeType pipeType = assistant.decidePipeType(aDevice, zDevice);
+
+        // TODO: EROs, resource IDs, decompose hybrid pipes
+        VlanPipeE res_p = VlanPipeE.builder()
+                .azMbps(req_p.getAzMbps())
+                .zaMbps(req_p.getZaMbps())
+                .aJunction(aj)
+                .zJunction(zj)
+                .pipeType(pipeType)
+                .azERO(new ArrayList<>())
+                .zaERO(new ArrayList<>())
+                .resourceIds(new HashSet<>())
+                .build();
+        return res_p;
+    }
+
+
+
+
+    private VlanJunctionE makeJunction(VlanJunctionE req_j) throws PSSException {
+        String deviceUrn = req_j.getDeviceUrn();
         EDevice device = topoService.device(deviceUrn);
 
-        VlanJunctionE rsvJunction = VlanJunctionE.builder()
+        VlanJunctionE rsv_j = VlanJunctionE.builder()
                 .deviceUrn(deviceUrn)
                 .fixtures(new HashSet<>())
                 .resourceIds(new HashSet<>())
                 .junctionType(assistant.decideJunctionType(device))
                 .build();
 
-        bpJunction.getFixtures().stream().forEach(t -> {
-            try {
-                VlanFixtureE bpFixture = this.makeReservedFixture(t, device);
-                rsvJunction.getFixtures().add(bpFixture);
-            } catch (PSSException e) {
-                // oh, java 8
-                e.printStackTrace();
-            }
-        });
+        for (VlanFixtureE req_f : req_j.getFixtures()) {
+            VlanFixtureE res_f = this.makeFixture(req_f, device);
+            rsv_j.getFixtures().add(res_f);
+        }
 
-        return rsvJunction;
+        return rsv_j;
     }
 
-    private VlanFixtureE makeReservedFixture(VlanFixtureE bpFixture, EDevice device) throws PSSException {
+    private VlanFixtureE makeFixture(VlanFixtureE bpFixture, EDevice device) throws PSSException {
         return VlanFixtureE.builder()
                 .egMbps(bpFixture.getEgMbps())
                 .inMbps(bpFixture.getInMbps())
@@ -90,47 +105,10 @@ public class EthPCE {
                 .vlanExpression(bpFixture.getVlanExpression())
                 .fixtureType(assistant.decideFixtureType(device))
                 .build();
-
     }
 
 
 
-    public void verifyBlueprint(BlueprintE blueprint) throws PCEException {
-        log.info("starting verification");
-        if (blueprint == null) {
-            throw new PCEException("Null blueprint!");
-        } else if (blueprint.getVlanFlows() == null || blueprint.getVlanFlows().isEmpty()) {
-            throw new PCEException("No VLAN flows");
-        } else if (blueprint.getVlanFlows().size() != 1) {
-            throw new PCEException("Exactly one flow supported right now");
-        }
-
-        VlanFlowE flow = blueprint.getVlanFlows().iterator().next();
-
-        log.info("verifying junctions & pipes");
-        if (flow.getJunctions().isEmpty() && flow.getPipes().isEmpty()) {
-            throw new PCEException("Junctions or pipes both empty.");
-        }
-
-        Set<VlanJunctionE> allJunctions = flow.getJunctions();
-        flow.getPipes().stream().forEach(t -> {
-            allJunctions.add(t.getAJunction());
-            allJunctions.add(t.getZJunction());
-        });
-
-        for (VlanJunctionE junction: allJunctions) {
-            EDevice device = topoService.device(junction.getDeviceUrn());
-        }
-
-        Set<String> junctionsWithNoFixtures = allJunctions.stream().
-                filter(t -> t.getFixtures().isEmpty()).
-                map(VlanJunctionE::getDeviceUrn).collect(Collectors.toSet());
-
-        if (!junctionsWithNoFixtures.isEmpty()) {
-            throw new PCEException("Junctions with no fixtures found: " + String.join(" ", junctionsWithNoFixtures));
-        }
-
-    }
 
 
     public void keepit() {

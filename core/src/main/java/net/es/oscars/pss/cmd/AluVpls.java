@@ -1,10 +1,9 @@
-package net.es.oscars.common.pss;
+package net.es.oscars.pss.cmd;
 
 import lombok.Builder;
 import lombok.Data;
 import lombok.NonNull;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 

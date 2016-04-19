@@ -1,5 +1,5 @@
-<#-- @ftlvariable name="vpls" type="net.es.oscars.common.pss.AluVpls" -->
-<#-- @ftlvariable name="sap" type="net.es.oscars.common.pss.AluSap" -->
+<#-- @ftlvariable name="vpls" type="net.es.oscars.pss.cmd.AluVpls" -->
+<#-- @ftlvariable name="sap" type="net.es.oscars.pss.cmd.AluSap" -->
 <#-- @ftlvariable name="sdp" type="java.util.Optional" -->
 
 <#assign endpointSnippet = "">

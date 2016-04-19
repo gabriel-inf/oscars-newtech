@@ -2,7 +2,7 @@ package net.es.oscars.topo.ent;
 
 import lombok.Data;
 import lombok.NonNull;
-import net.es.oscars.common.topo.Layer;
+import net.es.oscars.dto.topo.Layer;
 
 import javax.persistence.*;
 import java.util.HashSet;

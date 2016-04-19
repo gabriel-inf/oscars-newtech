@@ -1,9 +1,9 @@
 package net.es.oscars.topo.svc;
 
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.common.IntRange;
-import net.es.oscars.common.resv.ResourceType;
-import net.es.oscars.common.topo.Layer;
+import net.es.oscars.dto.IntRange;
+import net.es.oscars.dto.resv.ResourceType;
+import net.es.oscars.dto.topo.Layer;
 import net.es.oscars.dto.rsrc.ReservableQty;
 import net.es.oscars.dto.rsrc.ReservableRanges;
 import net.es.oscars.dto.rsrc.TopoResource;

@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import net.es.oscars.common.IntRange;
+import net.es.oscars.dto.IntRange;
 
 import javax.persistence.Embeddable;
 

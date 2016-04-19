@@ -1,5 +1,5 @@
 <#-- @ftlvariable name="qosList" type="java.util.List" -->
-<#-- @ftlvariable name="qos" type="net.es.oscars.common.pss.AluQos" -->
+<#-- @ftlvariable name="qos" type="net.es.oscars.pss.cmd.AluQos" -->
 <#-- @ftlvariable name="protect" type="java.lang.Boolean" -->
 <#-- @ftlvariable name="apply" type="java.lang.Boolean" -->
 

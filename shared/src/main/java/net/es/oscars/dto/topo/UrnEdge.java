@@ -1,7 +1,6 @@
 package net.es.oscars.dto.topo;
 
 import lombok.Data;
-import net.es.oscars.common.topo.Layer;
 
 import java.util.HashMap;
 import java.util.Map;

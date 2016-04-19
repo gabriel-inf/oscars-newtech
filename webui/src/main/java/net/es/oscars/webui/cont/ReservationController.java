@@ -1,5 +1,7 @@
 package net.es.oscars.webui.cont;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.resv.Connection;
 import net.es.oscars.dto.spec.*;
@@ -79,8 +81,17 @@ public class ReservationController {
         String restPath = "https://localhost:8000/resv/get/" + connectionId;
 
         Connection conn = restTemplate.getForObject(restPath, Connection.class);
+        ObjectMapper mapper = new ObjectMapper();
 
-        model.addAttribute("connection", conn.toString());
+        String pretty = null;
+        try {
+            pretty = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(conn);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+
+
+        model.addAttribute("connection", pretty);
         return "resv_view";
 
 

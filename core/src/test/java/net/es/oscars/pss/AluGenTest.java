@@ -2,7 +2,7 @@ package net.es.oscars.pss;
 
 import freemarker.template.TemplateException;
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.common.pss.AluGenerationParams;
+import net.es.oscars.pss.cmd.AluGenerationParams;
 import net.es.oscars.pss.dao.TemplateRepository;
 import net.es.oscars.pss.tpl.Assembler;
 import net.es.oscars.pss.tpl.Stringifier;

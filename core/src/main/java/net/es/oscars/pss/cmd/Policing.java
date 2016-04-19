@@ -1,4 +1,4 @@
-package net.es.oscars.common.pss;
+package net.es.oscars.pss.cmd;
 
 public enum Policing {
     STRICT,

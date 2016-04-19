@@ -4,12 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import net.es.oscars.common.IntRange;
-import net.es.oscars.common.resv.IReservable;
-import net.es.oscars.common.resv.IReservableIdentifier;
-import net.es.oscars.common.resv.IReservableVisitor;
-import net.es.oscars.common.resv.ResourceType;
-import org.apache.commons.lang3.Range;
+import net.es.oscars.dto.IntRange;
+import net.es.oscars.dto.resv.ResourceType;
 
 import java.util.List;
 

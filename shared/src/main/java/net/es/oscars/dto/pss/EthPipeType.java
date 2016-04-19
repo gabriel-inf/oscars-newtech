@@ -6,5 +6,6 @@ public enum EthPipeType {
     ALU_TO_JUNOS_VPLS,
     JUNOS_TO_ALU_VPLS,
     JUNOS_TO_JUNOS_VPLS,
+    HYBRID,
     ETHERNET_TRUNK
 }
