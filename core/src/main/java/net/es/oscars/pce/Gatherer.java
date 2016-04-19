@@ -2,7 +2,7 @@ package net.es.oscars.pce;
 
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.common.resv.ResourceType;
-import net.es.oscars.dto.resv.Interval;
+import net.es.oscars.common.resv.Interval;
 import net.es.oscars.dto.resv.ReservedResource;
 import net.es.oscars.dto.resv.ReservedResponse;
 import net.es.oscars.dto.rsrc.ReservableQty;

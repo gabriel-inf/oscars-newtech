@@ -8,15 +8,9 @@ import java.util.Date;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Specification {
+public class BasicVlanSpecification {
 
-    private Long id;
-
-    @NonNull
-    private Integer version;
-
-    @NonNull
-    private String description;
+    private Long specificationId;
 
     @NonNull
     private String connectionId;
@@ -25,10 +19,14 @@ public class Specification {
     private String username;
 
     @NonNull
+    private String description;
+
+    @NonNull
     private ScheduleSpecification scheduleSpec;
 
     @NonNull
-    private Blueprint requested;
+    private BasicVlanFlow basicVlanFlow;
+
 
 
 }

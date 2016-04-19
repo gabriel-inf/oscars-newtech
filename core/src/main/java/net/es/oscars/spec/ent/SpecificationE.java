@@ -20,33 +20,20 @@ public class SpecificationE {
     private Integer version;
 
     @NonNull
-    @Column(unique = true)
-    private String specificationId;
-
-    @NonNull
-    private Date submitted;
-
-    @NonNull
-    private Date notBefore;
-
-    @NonNull
-    private Date notAfter;
-
-    @NonNull
-    private Long durationMinutes;
-
-    @NonNull
     private String username;
 
     @NonNull
     private String description;
 
+    @NonNull
+    private String connectionId;
+
+    @Embedded
+    private ScheduleSpecificationE scheduleSpec;
 
     @OneToOne (cascade = CascadeType.ALL)
     private BlueprintE requested;
 
-    @OneToOne (cascade = CascadeType.ALL)
-    private BlueprintE reserved;
 
 
 }

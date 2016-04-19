@@ -61,4 +61,16 @@ public class MainController {
     }
 
 
+    @RequestMapping(value = "/info/devices", method = RequestMethod.GET)
+    @ResponseBody
+    public List<String> device_suggestions() {
+        log.info("giving device suggestions");
+        String restPath = "https://localhost:8000/topo/devices";
+
+        String[] all_devices = restTemplate.getForObject(restPath, String[].class);
+        List<String> devices = new ArrayList<>();
+        devices.addAll(Arrays.asList(all_devices));
+        return devices;
+    }
+
 }

@@ -3,7 +3,7 @@ package net.es.oscars;
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.common.resv.ResourceType;
 import net.es.oscars.pce.Gatherer;
-import net.es.oscars.dto.resv.Interval;
+import net.es.oscars.common.resv.Interval;
 import net.es.oscars.resv.dao.ReservedResourceRepository;
 import net.es.oscars.resv.ent.EReservedResource;
 import net.es.oscars.topo.pop.TopoImporter;

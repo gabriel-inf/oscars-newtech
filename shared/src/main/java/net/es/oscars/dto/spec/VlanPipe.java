@@ -14,16 +14,23 @@ public class VlanPipe {
 
     private Long id;
 
+    @NonNull
     private VlanJunction aJunction;
 
+    @NonNull
     private VlanJunction zJunction;
 
     @NonNull
     private Integer azMbps;
 
+    @NonNull
+    private Integer zaMbps;
 
     @NonNull
     private List<String> azERO;
+
+    @NonNull
+    private List<String> zaERO;
 
     @NonNull
     private EthPipeType pipeType;

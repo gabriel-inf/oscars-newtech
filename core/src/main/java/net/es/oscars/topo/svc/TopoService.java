@@ -152,7 +152,6 @@ public class TopoService {
 
         List<String> edges = new ArrayList<>();
         List<EDevice> devices = devRepo.findAll();
-        devices.stream().forEach(d -> {log.info(d.toString());});
 
         devices.stream()
                 .filter(d -> d.getCapabilities().contains(layer))
@@ -168,6 +167,14 @@ public class TopoService {
                 });
         return edges;
     }
+
+    public List<String> devices() {
+        log.info("retrieving all devices");
+
+        return devRepo.findAll().stream().map(EDevice::getUrn).collect(Collectors.toList());
+
+    }
+
 
 
 }

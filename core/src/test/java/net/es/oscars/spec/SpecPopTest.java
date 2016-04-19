@@ -1,6 +1,7 @@
 package net.es.oscars.spec;
 
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.dto.spec.ScheduleSpecification;
 import net.es.oscars.pce.PCEException;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.dto.pss.EthFixtureType;
@@ -90,41 +91,36 @@ public class SpecPopTest {
 
         VlanPipeE az_p = VlanPipeE.builder()
                 .azERO(new ArrayList<>())
+                .zaERO(new ArrayList<>())
                 .aJunction(aj)
                 .zJunction(zj)
                 .azMbps(1000)
-                .pipeType(EthPipeType.REQUESTED)
-                .build();
-
-        VlanPipeE za_p = VlanPipeE.builder()
-                .azERO(new ArrayList<>())
-                .aJunction(zj)
-                .zJunction(aj)
-                .azMbps(1000)
+                .zaMbps(1000)
                 .pipeType(EthPipeType.REQUESTED)
                 .build();
 
         flow.getPipes().add(az_p);
-        flow.getPipes().add(za_p);
         return spec;
     }
 
 
     public static SpecificationE getBasicSpec() {
-        Date now = new Date();
         Instant nowInstant = Instant.now();
         Date notBefore = new Date(nowInstant.plus(15L, ChronoUnit.MINUTES).getEpochSecond());
         Date notAfter = new Date(nowInstant.plus(1L, ChronoUnit.DAYS).getEpochSecond());
 
-        SpecificationE spec = SpecificationE.builder()
-                .submitted(now)
+        ScheduleSpecificationE sse = ScheduleSpecificationE.builder()
                 .notBefore(notBefore)
                 .notAfter(notAfter)
                 .durationMinutes(30L)
+                .build();
+
+        SpecificationE spec = SpecificationE.builder()
+                .scheduleSpec(sse)
                 .version(1)
+                .connectionId("UFAWE")
                 .description("a description")
                 .username("some user")
-                .specificationId("UANS8A")
                 .build();
 
         BlueprintE bp = BlueprintE.builder()

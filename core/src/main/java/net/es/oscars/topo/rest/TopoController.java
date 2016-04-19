@@ -61,5 +61,12 @@ public class TopoController {
         return svc.edges(Layer.ETHERNET);
     }
 
+    @RequestMapping(value = "/topo/devices", method = RequestMethod.GET)
+    @ResponseBody
+    public List<String> devices() {
+        log.info("getting devices");
+        return svc.devices();
+    }
+
 
 }

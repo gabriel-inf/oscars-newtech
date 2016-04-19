@@ -1,4 +1,4 @@
-package net.es.oscars.dto.resv;
+package net.es.oscars.common.resv;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

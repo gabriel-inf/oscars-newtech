@@ -1,10 +1,8 @@
 package net.es.oscars.webui.cont;
 
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.dto.auth.User;
-import net.es.oscars.dto.spec.Blueprint;
-import net.es.oscars.dto.spec.Specification;
-import net.es.oscars.webui.RestAuthProvider;
+import net.es.oscars.dto.resv.Connection;
+import net.es.oscars.dto.spec.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Date;
-import java.util.HashSet;
 
 @Slf4j
 @Controller
@@ -30,52 +27,61 @@ public class ReservationController {
         return "resv_list";
     }
 
-    @RequestMapping("/resv_new")
-    public String resv_new(Model model) {
-        Blueprint requested = Blueprint.builder().layer3Flows(new HashSet<>()).vlanFlows(new HashSet<>()).build();
-        Blueprint reserved = Blueprint.builder().layer3Flows(new HashSet<>()).vlanFlows(new HashSet<>()).build();
+    @RequestMapping("/resv_basic_new")
+    public String resv_basic_new(Model model) {
 
-        Specification specification = Specification.builder()
-                .durationMinutes(0L)
-                .notAfter(new Date())
-                .notBefore(new Date())
-                .requested(requested)
-                .reserved(reserved)
-                .specificationId("")
-                .description("")
-                .version(0)
-                .username("")
-                .submitted(new Date())
+        BasicVlanFlow flow = BasicVlanFlow.builder()
+                .aDeviceUrn("")
+                .aUrn("")
+                .aVlanExpression("")
+                .azMbps(0)
+                .zDeviceUrn("")
+                .zUrn("")
+                .zVlanExpression("")
+                .zaMbps(0)
                 .build();
 
-        model.addAttribute("specification", specification);
+        ScheduleSpecification ss = ScheduleSpecification.builder()
+                .durationMinutes(0L)
+                .notBefore(new Date())
+                .notAfter(new Date())
+                .build();
 
+        BasicVlanSpecification basicSpec = BasicVlanSpecification.builder()
+                .connectionId("")
+                .basicVlanFlow(flow)
+                .scheduleSpec(ss)
+                .specificationId(0L)
+                .description("")
+                .username("")
+                .build();
 
-        return "resv_new";
+        model.addAttribute("basicSpec", basicSpec);
+
+        return "resv_basic_new";
     }
 
 
-    @RequestMapping(value="/resv_new_submit", method = RequestMethod.POST)
-    public String resv_new_submit(@ModelAttribute Specification addedSpecification) {
-        log.info("adding a spec ");
+    @RequestMapping(value="/resv_basic_new_submit", method = RequestMethod.POST)
+    public String resv_basic_new_submit(@ModelAttribute BasicVlanSpecification addedSpecification) {
+        log.info("adding a basic vlan spec ");
 
-        String restPath = "https://localhost:8000/spec/add";
-        Specification spec = restTemplate.postForObject(restPath, addedSpecification, Specification.class);
+        String restPath = "https://localhost:8000/resv/basic_vlan/add";
+        Connection conn = restTemplate.postForObject(restPath, addedSpecification, Connection.class);
 
-        log.info("added spec, id set to "+spec.getId());
 
-        return "redirect:/resv_view/" + spec.getId();
+        return "redirect:/resv_view/" + conn.getConnectionId();
 
     }
 
-    @RequestMapping("/resv_view/{id}")
-    public String resv_view(@PathVariable Long id, Model model) {
-        String restPath = "https://localhost:8000/spec/get/" + id;
+    @RequestMapping("/resv_view/{connectionId}")
+    public String resv_view(@PathVariable String connectionId, Model model) {
+        String restPath = "https://localhost:8000/resv/get/" + connectionId;
 
-        Specification spec = restTemplate.getForObject(restPath, Specification.class);
+        Connection conn = restTemplate.getForObject(restPath, Connection.class);
 
-        model.addAttribute("specification", spec.toString());
-        return "admin_user_edit";
+        model.addAttribute("connection", conn.toString());
+        return "resv_view";
 
 
     }

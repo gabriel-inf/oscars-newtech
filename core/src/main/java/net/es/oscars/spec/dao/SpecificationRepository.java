@@ -12,7 +12,6 @@ public interface SpecificationRepository extends CrudRepository<SpecificationE, 
 
     List<SpecificationE> findAll();
     Optional<SpecificationE> findById(Long id);
-    Optional<SpecificationE> findBySpecificationId(String specificationId);
 
 
 }

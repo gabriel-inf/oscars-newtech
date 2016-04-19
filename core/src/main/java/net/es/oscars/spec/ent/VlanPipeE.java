@@ -27,10 +27,16 @@ public class VlanPipeE {
     @NonNull
     private Integer azMbps;
 
+    @NonNull
+    private Integer zaMbps;
 
     @NonNull
     @ElementCollection
     private List<String> azERO;
+
+    @NonNull
+    @ElementCollection
+    private List<String> zaERO;
 
     @NonNull
     private EthPipeType pipeType;

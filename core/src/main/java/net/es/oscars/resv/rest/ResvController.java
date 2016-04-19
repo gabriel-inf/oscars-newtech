@@ -1,15 +1,22 @@
 package net.es.oscars.resv.rest;
 
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.dto.pss.EthFixtureType;
+import net.es.oscars.dto.pss.EthJunctionType;
+import net.es.oscars.dto.pss.EthPipeType;
+import net.es.oscars.dto.resv.*;
+import net.es.oscars.dto.spec.*;
+import net.es.oscars.resv.dao.ConnectionRepository;
 import net.es.oscars.resv.dao.ReservedResourceRepository;
-import net.es.oscars.resv.ent.EConnection;
+import net.es.oscars.resv.ent.ConnectionE;
 import net.es.oscars.resv.ent.EReservedResource;
 import net.es.oscars.resv.svc.ResvService;
+import net.es.oscars.spec.ent.SpecificationE;
+import net.es.oscars.st.oper.OperState;
+import net.es.oscars.st.prov.ProvState;
+import net.es.oscars.st.resv.ResvState;
 import net.es.oscars.topo.dao.DeviceRepository;
 import net.es.oscars.topo.ent.EDevice;
-import net.es.oscars.dto.resv.Connection;
-import net.es.oscars.dto.resv.ReservedResource;
-import net.es.oscars.dto.resv.ReservedResponse;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -18,9 +25,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -34,8 +39,9 @@ public class ResvController {
     @Autowired
     private ReservedResourceRepository resRepo;
 
+
     @Autowired
-    private DeviceRepository devRepo;
+    private ConnectionRepository connRepo;
 
 
     @ExceptionHandler(NoSuchElementException.class)
@@ -50,25 +56,25 @@ public class ResvController {
         // LOG.warn("user requested a strResource which didn't exist", ex);
     }
 
-    // TODO: make better
-    @RequestMapping(value = "/resvs/gri/{gri}", method = RequestMethod.GET)
-    @ResponseBody
-    public Connection getResv(@PathVariable("gri") String gri) {
-        log.info("retrieving " + gri);
 
-        return convertConnToDto(service.findByGri(gri).orElseThrow(NoSuchElementException::new));
+    @RequestMapping(value = "/resv/get/{connectionId}", method = RequestMethod.GET)
+    @ResponseBody
+    public Connection getResv(@PathVariable("connectionId") String connectionId) {
+        log.info("retrieving " + connectionId);
+
+        return convertConnToDto(service.findByConnectionId(connectionId).orElseThrow(NoSuchElementException::new));
 
     }
 
     // TODO: make better
-    @RequestMapping(value = "/resvs", method = RequestMethod.GET)
+    @RequestMapping(value = "/resv", method = RequestMethod.GET)
     @ResponseBody
     public List<Connection> listResvs() {
 
         log.info("listing all resvs");
         List<Connection> dtoItems = new ArrayList<>();
 
-        for (EConnection eItem : service.findAll()) {
+        for (ConnectionE eItem : service.findAll()) {
             Connection dtoItem = convertConnToDto(eItem);
             dtoItems.add(dtoItem);
         }
@@ -92,29 +98,165 @@ public class ResvController {
         return ReservedResponse.builder().reservedResources(rsrcs).build();
     }
 
-
-    public List<String> findAllUrns() {
-        List<String> urns = new ArrayList<>();
-        List<EDevice> devices = devRepo.findAll();
-
-        devices.stream()
-                .forEach(d -> {
-                    urns.add(d.getUrn());
-                    d.getIfces().stream()
-                            .forEach(i -> urns.add(i.getUrn()));
-                });
+    @RequestMapping(value = "/resv/basic_vlan/add", method = RequestMethod.POST)
+    @ResponseBody
+    public Connection basic_vlan_add(@RequestBody BasicVlanSpecification dtoSpec) {
+        log.info("saving a new basic spec");
+        log.info(dtoSpec.toString());
 
 
-        return urns;
+        return makeConnectionFromBasic(dtoSpec);
     }
+
+
+    private Connection makeConnectionFromBasic(BasicVlanSpecification dtoSpec) {
+        log.info("making a new connection with id "+dtoSpec.getConnectionId());
+
+        Specification spec = basicVlanToFull(dtoSpec);
+        SpecificationE specE = convertToEnt(spec);
+
+        States states = States.builder()
+                .oper(OperState.ADMIN_DOWN_OPER_DOWN)
+                .prov(ProvState.INITIAL)
+                .resv(ResvState.SUBMITTED)
+                .build();
+
+        Schedule sch = Schedule.builder()
+                .setup(new Date())
+                .submitted(new Date())
+                .teardown(new Date())
+                .build();
+
+        Blueprint reserved = Blueprint.builder()
+                .layer3Flows(new HashSet<>())
+                .vlanFlows(new HashSet<>())
+                .build();
+
+        Connection conn = Connection.builder()
+                .specification(spec)
+                .schedule(sch)
+                .states(states)
+                .reserved(reserved)
+                .connectionId(spec.getConnectionId())
+                .build();
+
+        ConnectionE connE = modelMapper.map(conn, ConnectionE.class);
+        connE.setSpecification(specE);
+        connE = connRepo.save(connE);
+        log.info("saved connection, connectionId "+specE.getConnectionId());
+        log.info(connE.toString());
+
+
+        conn = modelMapper.map(connE, Connection.class);
+        log.info(conn.toString());
+
+
+        return conn;
+
+    }
+
+    private Specification basicVlanToFull(BasicVlanSpecification bvs) {
+        VlanFlow vf = VlanFlow.builder()
+                .junctions(new HashSet<>())
+                .pipes(new HashSet<>())
+                .build();
+
+        BasicVlanFlow bvf = bvs.getBasicVlanFlow();
+
+        VlanFixture vfa = VlanFixture.builder()
+                .fixtureType(EthFixtureType.REQUESTED)
+                .portUrn(bvf.getAUrn())
+                .inMbps(bvf.getAzMbps())
+                .egMbps(bvf.getZaMbps())
+                .build();
+
+        VlanFixture vfz = VlanFixture.builder()
+                .fixtureType(EthFixtureType.REQUESTED)
+                .portUrn(bvf.getZUrn())
+                .inMbps(bvf.getZaMbps())
+                .egMbps(bvf.getAzMbps())
+                .build();
+
+        VlanJunction vja = VlanJunction.builder()
+                .deviceUrn(bvf.getADeviceUrn())
+                .fixtures(new HashSet<>())
+                .resourceIds(new HashSet<>())
+                .junctionType(EthJunctionType.REQUESTED)
+                .build();
+
+        VlanJunction vjz = VlanJunction.builder()
+                .deviceUrn(bvf.getZDeviceUrn())
+                .fixtures(new HashSet<>())
+                .resourceIds(new HashSet<>())
+                .junctionType(EthJunctionType.REQUESTED)
+                .build();
+
+        if (bvf.getADeviceUrn().equals(bvf.getZDeviceUrn())) {
+            vja.getFixtures().add(vfa);
+            vja.getFixtures().add(vfz);
+            vf.getJunctions().add(vja);
+
+        } else {
+            vja.getFixtures().add(vfa);
+            vjz.getFixtures().add(vfz);
+
+            VlanPipe vpaz = VlanPipe.builder()
+                    .aJunction(vja)
+                    .zJunction(vjz)
+                    .azERO(new ArrayList<>())
+                    .zaERO(new ArrayList<>())
+                    .azMbps(bvf.getAzMbps())
+                    .zaMbps(bvf.getZaMbps())
+                    .pipeType(EthPipeType.REQUESTED)
+                    .build();
+
+            vf.getPipes().add(vpaz);
+        }
+
+
+        Blueprint requested = Blueprint.builder()
+                .layer3Flows(new HashSet<>())
+                .vlanFlows(new HashSet<>())
+                .build();
+
+
+        requested.getVlanFlows().add(vf);
+
+
+        return Specification.builder()
+                .connectionId(bvs.getConnectionId())
+                .username(bvs.getUsername())
+                .description(bvs.getDescription())
+                .scheduleSpec(bvs.getScheduleSpec())
+                .requested(requested)
+                .version(0)
+                .build();
+
+    }
+
+
+
+    private SpecificationE convertToEnt(Specification dtoSpec) {
+        SpecificationE specE = modelMapper.map(dtoSpec, SpecificationE.class);
+        return specE;
+    }
+
+    private Specification convertToDto(SpecificationE specE) {
+        Specification dtoSpec = modelMapper.map(specE, Specification.class);
+        return dtoSpec;
+    }
+
+
+
+
 
     private ReservedResource convertRStoDTO(EReservedResource eRs) {
         return modelMapper.map(eRs, ReservedResource.class);
     }
 
 
-    private Connection convertConnToDto(EConnection eResv) {
-        return modelMapper.map(eResv, Connection.class);
+    private Connection convertConnToDto(ConnectionE connectionE) {
+        return modelMapper.map(connectionE, Connection.class);
     }
 
 }
