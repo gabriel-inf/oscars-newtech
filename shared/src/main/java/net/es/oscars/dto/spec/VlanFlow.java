@@ -14,7 +14,7 @@ public class VlanFlow {
 
     private Set<VlanJunction> junctions;
 
-    private Set<VlanPipeB> pipes;
+    private Set<VlanPipe> pipes;
 
 
 }

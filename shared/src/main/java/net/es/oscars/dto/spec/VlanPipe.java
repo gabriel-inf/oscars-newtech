@@ -10,7 +10,7 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class VlanPipeB {
+public class VlanPipe {
 
     private Long id;
 
