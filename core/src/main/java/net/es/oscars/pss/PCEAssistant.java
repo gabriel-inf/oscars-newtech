@@ -3,6 +3,7 @@ package net.es.oscars.pss;
 import net.es.oscars.dto.pss.EthFixtureType;
 import net.es.oscars.dto.pss.EthJunctionType;
 import net.es.oscars.dto.pss.EthPipeType;
+import net.es.oscars.spec.ent.VlanJunctionE;
 import net.es.oscars.topo.ent.EDevice;
 import net.es.oscars.topo.enums.DeviceModel;
 import org.springframework.stereotype.Component;
@@ -10,11 +11,28 @@ import org.springframework.stereotype.Component;
 @Component
 public class PCEAssistant {
 
+    public void reserveJunctionResources(VlanJunctionE vj) throws PSSException {
+        switch (vj.getJunctionType()) {
+            case ALU_VPLS:
+                // name
+                // vc-id
+
+                return;
+            case JUNOS_SWITCH:
+                // TODO: what?
+                return;
+            case JUNOS_VPLS:
+                // TODO: what to reserve?
+                return;
+        }
+        throw new PSSException("Could not reserve junction resources");
+    }
+
     public EthJunctionType decideJunctionType(EDevice device) throws PSSException {
         DeviceModel model = device.getModel();
         switch (model) {
             case ALCATEL_SR7750:
-                return EthJunctionType.ALU_SDP;
+                return EthJunctionType.ALU_VPLS;
             case JUNIPER_EX:
                 return EthJunctionType.JUNOS_SWITCH;
             case JUNIPER_MX:

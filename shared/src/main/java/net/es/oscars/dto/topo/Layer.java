@@ -8,6 +8,7 @@ import java.util.Optional;
 
 public enum Layer {
     ETHERNET("ETHERNET"),
+    INTERNAL("INTERNAL"),
     MPLS("MPLS");
 
     private String code;

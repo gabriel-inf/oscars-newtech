@@ -41,17 +41,6 @@ public class TopoController {
         return svc.device(urn);
     }
 
-    @RequestMapping(value = "/topo/layer/{layer}", method = RequestMethod.GET)
-    @ResponseBody
-    public Topology layer(@PathVariable("layer") String layer) {
-        return svc.layer(layer);
-    }
-
-    @RequestMapping(value = "/constraining", method = RequestMethod.GET)
-    @ResponseBody
-    public List<TopoResource> constraining() {
-        return svc.constraining();
-    }
 
     @RequestMapping(value = "/topo/vlanEdges", method = RequestMethod.GET)
     @ResponseBody

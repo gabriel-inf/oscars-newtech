@@ -1,5 +1,7 @@
 package net.es.oscars.topo.svc;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.IntRange;
 import net.es.oscars.dto.resv.ResourceType;
@@ -38,43 +40,52 @@ public class TopoService {
         return devRepo.findByUrn(urn).orElseThrow(NoSuchElementException::new);
     }
 
-    public Topology layer(String layer) throws NoSuchElementException {
+    public Topology layer(Layer layer) throws NoSuchElementException {
 
         log.info("topology for layer " + layer);
-        Layer eLayer = Layer.get(layer).orElseThrow(NoSuchElementException::new);
         Topology topo = new Topology();
-        topo.setLayer(eLayer);
+        topo.setLayer(layer);
         List<EDevice> devices = devRepo.findAll();
         List<EUrnAdjcy> adjcies = adjcyRepo.findAll();
 
         devices.stream()
-                .filter(d -> d.getCapabilities().contains(eLayer))
+                .filter(d -> d.getCapabilities().contains(layer))
                 .forEach(d -> {
+                    log.info("added device "+d.getUrn()+" to topo for "+layer);
 
                     TopoVertex dev = new TopoVertex(d.getUrn());
                     topo.getVertices().add(dev);
 
                     d.getIfces().stream()
-                            .filter(i -> i.getCapabilities().contains(eLayer))
+                            .filter(i -> i.getCapabilities().contains(layer))
                             .forEach(i -> {
                                 TopoVertex ifce = new TopoVertex(i.getUrn());
                                 topo.getVertices().add(ifce);
 
                                 UrnEdge edge = new UrnEdge(d.getUrn(), i.getUrn());
-                                edge.getMetrics().put(eLayer, 1L);
+                                edge.getMetrics().put(Layer.INTERNAL, 1L);
                                 topo.getEdges().add(edge);
                             });
                 });
 
         adjcies.stream()
-                .filter(adj -> adj.getMetrics().containsKey(eLayer))
+                .filter(adj -> adj.getMetrics().containsKey(layer))
                 .forEach(adj -> {
-                    Long metric = adj.getMetrics().get(eLayer);
+                    Long metric = adj.getMetrics().get(layer);
                     UrnEdge edge = new UrnEdge(adj.getA(), adj.getZ());
-                    edge.getMetrics().put(eLayer, metric);
+                    edge.getMetrics().put(layer, metric);
                     topo.getEdges().add(edge);
                 });
 
+        String pretty = null;
+        try {
+            pretty = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(topo);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+
+
+        log.info(pretty);
 
         return topo;
     }

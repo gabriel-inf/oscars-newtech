@@ -6,7 +6,7 @@
     <!-- magic line: ties to spring logging.file property -->
     <property name="LOG_FILE" value="${LOG_FILE:-${LOG_PATH:-${LOG_TEMP:-${java.io.tmpdir:-/tmp}}/}spring.log}"/>
 
-    <logger name="net.es.oscars" level="INFO"/>
+    <logger name="net.es.oscars" level="DEBUG"/>
 
     <root level="INFO">
         <appender-ref ref="FILE"/>

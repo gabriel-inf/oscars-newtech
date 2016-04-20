@@ -58,31 +58,4 @@ public class Gatherer {
 
     }
 
-
-    private Set<TopoResource> applyingTo(String urn, Collection<TopoResource> allResources) {
-        return allResources.stream().filter(t -> t.getTopoVertexUrns().contains(urn)).collect(Collectors.toSet());
-    }
-
-    private Boolean bandwidthFits(Integer bandwidth, String urn, Collection<TopoResource> allResources) {
-        Set<TopoResource> applyingTo = this.applyingTo(urn, allResources);
-        if (applyingTo.isEmpty()) {
-            return true;
-        } else {
-            boolean fits = true;
-            for (TopoResource tr : applyingTo) {
-                List<ReservableQty> bwQties = tr.getReservableQties().stream()
-                        .filter(t -> t.getType().equals(ResourceType.BANDWIDTH)).collect(Collectors.toList());
-
-                boolean fitsOnThis = bwQties.isEmpty() || bwQties.stream().filter(q -> q.getRange().contains(bandwidth)).findAny().isPresent();
-
-                if (!fitsOnThis) {
-                    fits = false;
-                }
-            }
-            return fits;
-
-
-        }
-
-    }
 }

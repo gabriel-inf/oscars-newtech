@@ -9,14 +9,11 @@ import net.es.oscars.dto.spec.*;
 import net.es.oscars.resv.dao.ConnectionRepository;
 import net.es.oscars.resv.dao.ReservedResourceRepository;
 import net.es.oscars.resv.ent.ConnectionE;
-import net.es.oscars.resv.ent.EReservedResource;
 import net.es.oscars.resv.svc.ResvService;
 import net.es.oscars.spec.ent.SpecificationE;
 import net.es.oscars.st.oper.OperState;
 import net.es.oscars.st.prov.ProvState;
 import net.es.oscars.st.resv.ResvState;
-import net.es.oscars.topo.dao.DeviceRepository;
-import net.es.oscars.topo.ent.EDevice;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -24,9 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.Instant;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Controller
@@ -83,21 +78,6 @@ public class ResvController {
     }
 
 
-    @RequestMapping(
-            value = "/queryReserved", method = RequestMethod.GET,
-            params = { "beginning", "ending" }
-    )
-    @ResponseBody
-    public ReservedResponse reservedResources(@RequestParam Instant beginning, @RequestParam Instant ending) {
-        log.info("reserved resources start");
-
-        List<EReservedResource> eReservedResources = resRepo.findOverlappingInterval(beginning, ending).orElse(new ArrayList<>());
-
-        List<ReservedResource> rsrcs = eReservedResources.stream().map(this::convertRStoDTO).collect(Collectors.toList());
-
-        return ReservedResponse.builder().reservedResources(rsrcs).build();
-    }
-
     @RequestMapping(value = "/resv/basic_vlan/add", method = RequestMethod.POST)
     @ResponseBody
     public Connection basic_vlan_add(@RequestBody BasicVlanSpecification dtoSpec) {
@@ -113,7 +93,7 @@ public class ResvController {
         log.info("making a new connection with id "+dtoSpec.getConnectionId());
 
         Specification spec = basicVlanToFull(dtoSpec);
-        SpecificationE specE = convertToEnt(spec);
+        SpecificationE specE = convertSpecToEnt(spec);
 
         States states = States.builder()
                 .oper(OperState.ADMIN_DOWN_OPER_DOWN)
@@ -238,24 +218,9 @@ public class ResvController {
 
 
 
-    private SpecificationE convertToEnt(Specification dtoSpec) {
-        SpecificationE specE = modelMapper.map(dtoSpec, SpecificationE.class);
-        return specE;
+    private SpecificationE convertSpecToEnt(Specification dtoSpec) {
+        return modelMapper.map(dtoSpec, SpecificationE.class);
     }
-
-    private Specification convertToDto(SpecificationE specE) {
-        Specification dtoSpec = modelMapper.map(specE, Specification.class);
-        return dtoSpec;
-    }
-
-
-
-
-
-    private ReservedResource convertRStoDTO(EReservedResource eRs) {
-        return modelMapper.map(eRs, ReservedResource.class);
-    }
-
 
     private Connection convertConnToDto(ConnectionE connectionE) {
         return modelMapper.map(connectionE, Connection.class);
