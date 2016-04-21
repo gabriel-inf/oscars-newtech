@@ -1,6 +1,6 @@
 package net.es.oscars.resv.dao;
 
-import net.es.oscars.resv.ent.EReservedResource;
+import net.es.oscars.resv.ent.ReservedResourceE;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
@@ -11,12 +11,12 @@ import java.util.Optional;
 
 
 @Repository
-public interface ReservedResourceRepository extends CrudRepository<EReservedResource, Long> {
+public interface ReservedResourceRepository extends CrudRepository<ReservedResourceE, Long> {
 
-    List<EReservedResource> findAll();
+    List<ReservedResourceE> findAll();
 
-    @Query(value = "SELECT rs FROM EReservedResource rs WHERE (rs.ending >= ?1 AND rs.beginning <= ?2)")
-    Optional<List<EReservedResource>> findOverlappingInterval(Instant period_start, Instant period_end);
+    @Query(value = "SELECT rs FROM ReservedResourceE rs WHERE (rs.ending >= ?1 AND rs.beginning <= ?2)")
+    Optional<List<ReservedResourceE>> findOverlappingInterval(Instant period_start, Instant period_end);
 
 
 }

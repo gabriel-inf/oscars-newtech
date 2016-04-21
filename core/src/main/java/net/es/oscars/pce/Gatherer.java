@@ -1,61 +1,36 @@
 package net.es.oscars.pce;
 
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.dto.resv.ResourceType;
 import net.es.oscars.dto.Interval;
-import net.es.oscars.dto.resv.ReservedResource;
-import net.es.oscars.dto.resv.ReservedResponse;
-import net.es.oscars.dto.rsrc.ReservableQty;
 import net.es.oscars.dto.rsrc.TopoResource;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
+import net.es.oscars.resv.dao.ReservedResourceRepository;
+import net.es.oscars.resv.ent.ReservedResourceE;
+import net.es.oscars.topo.svc.TopoService;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import java.net.URI;
-import java.time.Instant;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 public class Gatherer {
+    @Autowired
+    private TopoService topoService;
 
-    public List<ReservedResource> gatherReserved(Interval interval, RestTemplate restTemplate) {
+    @Autowired
+    private ReservedResourceRepository rrRepo;
 
+    public List<TopoResource> availableThroughoutInterval(Interval interval) {
 
-        log.info("getting reserved");
-        // gather reserved resources
-        String reservedRestPath = "https://localhost:8000/queryReserved";
+        // these are the base resources that are available on the topology
+        // and defined as path-constraining
+        List<TopoResource> resources = topoService.constraining();
 
-        Instant beginning = interval.getBeginning();
-        Instant ending = interval.getEnding();
+        // these are the reserved resources over that interval
+        List<ReservedResourceE> reservedOverInterval = rrRepo
+                .findOverlappingInterval(interval.getBeginning(), interval.getEnding())
+                .orElse(new ArrayList<>());
 
-        URI targetUrl = UriComponentsBuilder.fromUriString(reservedRestPath)
-                .queryParam("beginning", beginning)
-                .queryParam("ending", ending)
-                .build()
-                .toUri();
-
-        log.info("target url:  \"" + targetUrl + "\"");
-
-        ReservedResponse rr = restTemplate.getForObject(targetUrl, ReservedResponse.class);
-        rr.getReservedResources().stream().forEach(t -> {
-            log.info(t.toString());
-        });
-
-        return rr.getReservedResources();
+        return TopoAssistant.baseMinusReserved(resources, reservedOverInterval);
     }
 
-    public List<TopoResource> gatherConstraining(RestTemplate restTemplate) {
-
-        // gather constraining resources
-        String constrainingRestPath = "https://localhost:8000/constraining";
-        List<TopoResource> topoResources = Arrays.asList(restTemplate.getForObject(constrainingRestPath, TopoResource[].class));
-
-        topoResources.stream().forEach(t -> {
-            log.info(t.toString());
-        });
-
-        return topoResources;
-
-    }
 
 }

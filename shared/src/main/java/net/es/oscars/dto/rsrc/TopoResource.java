@@ -5,8 +5,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import net.es.oscars.dto.IntRange;
+import net.es.oscars.dto.resv.ResourceType;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @Data
@@ -15,7 +18,7 @@ import java.util.Set;
 @Builder
 public class TopoResource {
     private List<String> topoVertexUrns;
-    private Set<ReservableQty> reservableQties;
-    private Set<ReservableRanges> reservableRanges;
+    private Map<ResourceType, IntRange> reservableQties;
+    private Map<ResourceType, Set<IntRange>> reservableRanges;
 
 }

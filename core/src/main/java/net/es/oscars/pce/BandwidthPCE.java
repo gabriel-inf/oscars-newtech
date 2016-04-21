@@ -7,21 +7,13 @@ import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.UndirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.util.EdgeType;
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.dto.pss.EthPipeType;
+import net.es.oscars.dto.IntRange;
 import net.es.oscars.dto.resv.ResourceType;
-import net.es.oscars.dto.rsrc.ReservableQty;
 import net.es.oscars.dto.rsrc.TopoResource;
 import net.es.oscars.dto.topo.Layer;
 import net.es.oscars.dto.topo.TopoEdge;
 import net.es.oscars.dto.topo.TopoVertex;
 import net.es.oscars.dto.topo.Topology;
-import net.es.oscars.pss.PCEAssistant;
-import net.es.oscars.pss.PSSException;
-import net.es.oscars.spec.ent.VlanFixtureE;
-import net.es.oscars.spec.ent.VlanFlowE;
-import net.es.oscars.spec.ent.VlanJunctionE;
-import net.es.oscars.spec.ent.VlanPipeE;
-import net.es.oscars.topo.ent.EDevice;
 import net.es.oscars.topo.svc.TopoService;
 import org.apache.commons.collections15.Transformer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -122,12 +114,8 @@ public class BandwidthPCE {
         } else {
             boolean fits = true;
             for (TopoResource tr : applyingTo) {
-                List<ReservableQty> bwQties = tr.getReservableQties().stream()
-                        .filter(t -> t.getType().equals(ResourceType.BANDWIDTH)).collect(Collectors.toList());
-
-                boolean fitsOnThis = bwQties.isEmpty() || bwQties.stream().filter(q -> q.getRange().contains(bandwidth)).findAny().isPresent();
-
-                if (!fitsOnThis) {
+                IntRange bwQty = tr.getReservableQties().get(ResourceType.BANDWIDTH);
+                if (!bwQty.contains(bandwidth)) {
                     fits = false;
                 }
             }

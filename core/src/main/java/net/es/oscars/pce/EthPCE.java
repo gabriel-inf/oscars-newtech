@@ -30,6 +30,12 @@ public class EthPCE {
 
     public VlanFlowE makeReserved(VlanFlowE req_f) throws PSSException {
 
+        Set<Layer> layers = new HashSet<>();
+        layers.add(Layer.ETHERNET);
+        layers.add(Layer.MPLS);
+
+//        Graph<TopoVertex, TopoEdge> g = bwPCE.bwConstrainedGraph(layers, startInstant, endInstant);
+
         // make a flow entry
         VlanFlowE res_f = VlanFlowE.builder()
                 .junctions(new HashSet<>())
@@ -38,38 +44,38 @@ public class EthPCE {
 
         // plain junctions (not in pipes)
         for (VlanJunctionE bpJunction : req_f.getJunctions()) {
-            VlanJunctionE schJunction = this.makeSimpleJunction(bpJunction);
+            VlanJunctionE schJunction = this.reserveSimpleJunction(bpJunction);
             res_f.getJunctions().add(schJunction);
         }
 
 
         // handle pipes
         for (VlanPipeE req_p : req_f.getPipes()) {
-            VlanPipeE res_p = this.makePipe(req_p);
-            res_f.getPipes().add(res_p);
-
+            Set<VlanPipeE> res_ps = this.makePipes(req_p);
+            res_f.getPipes().addAll(res_ps);
         }
         return res_f;
     }
 
 
-    private VlanPipeE makePipe(VlanPipeE req_p) throws PSSException {
+    private Set<VlanPipeE> makePipes(VlanPipeE req_p) throws PSSException {
         EDevice aDevice = topoService.device(req_p.getAJunction().getDeviceUrn());
         EDevice zDevice = topoService.device(req_p.getZJunction().getDeviceUrn());
 
         EthPipeType pipeType = assistant.decidePipeType(aDevice, zDevice);
 
         // TODO: actually different for pipes than simple
-        VlanJunctionE aj = makeSimpleJunction(req_p.getAJunction());
-        VlanJunctionE zj = makeSimpleJunction(req_p.getZJunction());
+        VlanJunctionE aj = reserveSimpleJunction(req_p.getAJunction());
+        VlanJunctionE zj = reserveSimpleJunction(req_p.getZJunction());
 
-        Set<Layer> layers = new HashSet<>();
-        layers.add(Layer.ETHERNET);
-        layers.add(Layer.MPLS);
+
+
+
+
 
         // TODO: finish this
         // A-Z ERO
-        List<TopoEdge> azEro = bwPCE.bwConstrainedShortestPath(aj.getDeviceUrn(), zj.getDeviceUrn(), req_p.getAzMbps(), layers);
+        // List<TopoEdge> azEro = bwPCE.bwConstrainedShortestPath(aj.getDeviceUrn(), zj.getDeviceUrn(), req_p.getAzMbps(), layers);
 
 
         // TODO: EROs, resource IDs, decompose hybrid pipes
@@ -84,12 +90,13 @@ public class EthPCE {
                 .resourceIds(new HashSet<>())
                 .build();
 
-
-        return res_p;
+        Set<VlanPipeE> res_ps = new HashSet<>();
+        res_ps.add(res_p);
+        return res_ps;
     }
 
 
-    private VlanJunctionE makeSimpleJunction(VlanJunctionE req_j) throws PSSException {
+    private VlanJunctionE reserveSimpleJunction(VlanJunctionE req_j) throws PSSException {
         String deviceUrn = req_j.getDeviceUrn();
         EDevice device = topoService.device(deviceUrn);
 

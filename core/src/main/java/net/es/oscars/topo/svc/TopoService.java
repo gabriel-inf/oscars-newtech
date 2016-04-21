@@ -6,8 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.IntRange;
 import net.es.oscars.dto.resv.ResourceType;
 import net.es.oscars.dto.topo.Layer;
-import net.es.oscars.dto.rsrc.ReservableQty;
-import net.es.oscars.dto.rsrc.ReservableRanges;
 import net.es.oscars.dto.rsrc.TopoResource;
 import net.es.oscars.dto.topo.TopoVertex;
 import net.es.oscars.dto.topo.Topology;
@@ -19,10 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -62,7 +57,7 @@ public class TopoService {
                                 TopoVertex ifce = new TopoVertex(i.getUrn());
                                 topo.getVertices().add(ifce);
 
-                                UrnEdge edge = new UrnEdge(d.getUrn(), i.getUrn());
+                                UrnEdge edge = UrnEdge.builder().a(d.getUrn()).z(i.getUrn()).metrics(new HashMap<>()).build();
                                 edge.getMetrics().put(Layer.INTERNAL, 1L);
                                 topo.getEdges().add(edge);
                             });
@@ -72,7 +67,7 @@ public class TopoService {
                 .filter(adj -> adj.getMetrics().containsKey(layer))
                 .forEach(adj -> {
                     Long metric = adj.getMetrics().get(layer);
-                    UrnEdge edge = new UrnEdge(adj.getA(), adj.getZ());
+                    UrnEdge edge = UrnEdge.builder().a(adj.getA()).z(adj.getZ()).metrics(new HashMap<>()).build();
                     edge.getMetrics().put(layer, metric);
                     topo.getEdges().add(edge);
                 });
@@ -100,18 +95,16 @@ public class TopoService {
                     // vlans for switches: global to the device; one vlan strResource w urns for device, all ifces
                     // no bandwidth strResource for switches
                     if (d.getType().equals(DeviceType.SWITCH)) {
-                        ReservableRanges dtoVlans = ReservableRanges.builder()
-                                .type(ResourceType.VLAN)
-                                .ranges(d.getReservableVlans().stream().map(EIntRange::toDtoIntRange).collect(Collectors.toList()))
-                                .build();
+                        Set<IntRange> dtoVlans = d.getReservableVlans().stream().map(EIntRange::toDtoIntRange).collect(Collectors.toSet());
 
                         TopoResource dtoVlanResource = TopoResource.builder()
-                                .reservableQties(new HashSet<>())
-                                .reservableRanges(new HashSet<>())
+                                .reservableQties(new HashMap<>())
+                                .reservableRanges(new HashMap<>())
                                 .topoVertexUrns(new ArrayList<>())
                                 .build();
 
-                        dtoVlanResource.getReservableRanges().add(dtoVlans);
+
+                        dtoVlanResource.getReservableRanges().put(ResourceType.VLAN, dtoVlans);
 
                         dtoVlanResource.getTopoVertexUrns().add(d.getUrn());
                         for (EIfce switchIfce : d.getIfces()) {
@@ -128,26 +121,20 @@ public class TopoService {
                                 ifceUrns.add(i.getUrn());
 
                                 IntRange bwRange = IntRange.builder().floor(0).ceiling(i.getReservableBw()).build();
-                                ReservableQty dtoBw = ReservableQty.builder()
-                                        .type(ResourceType.BANDWIDTH)
-                                        .range(bwRange)
-                                        .build();
 
                                 TopoResource dtoResource = TopoResource.builder()
-                                        .reservableQties(new HashSet<>())
-                                        .reservableRanges(new HashSet<>())
+                                        .reservableQties(new HashMap<>())
+                                        .reservableRanges(new HashMap<>())
                                         .topoVertexUrns(ifceUrns)
                                         .build();
 
-                                dtoResource.getReservableQties().add(dtoBw);
+                                dtoResource.getReservableQties().put(ResourceType.BANDWIDTH, bwRange);
                                 resources.add(dtoResource);
 
                                 if (d.getType().equals(DeviceType.ROUTER)) {
-                                    ReservableRanges dtoVlans = ReservableRanges.builder()
-                                            .type(ResourceType.VLAN)
-                                            .ranges(i.getReservableVlans().stream().map(EIntRange::toDtoIntRange).collect(Collectors.toList()))
-                                            .build();
-                                    dtoResource.getReservableRanges().add(dtoVlans);
+                                    Set<IntRange> dtoVlans = i.getReservableVlans().stream().map(EIntRange::toDtoIntRange).collect(Collectors.toSet());
+
+                                    dtoResource.getReservableRanges().put(ResourceType.VLAN, dtoVlans);
 
                                 }
                                 log.info("added router ifce strResource: " + dtoResource.toString());

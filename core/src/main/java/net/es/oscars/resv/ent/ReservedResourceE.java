@@ -15,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class EReservedResource {
+public class ReservedResourceE {
 
     @Id
     @GeneratedValue
