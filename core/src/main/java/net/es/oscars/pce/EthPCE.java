@@ -2,12 +2,14 @@ package net.es.oscars.pce;
 
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.pss.EthPipeType;
+import net.es.oscars.dto.spec.VlanPipe;
 import net.es.oscars.dto.topo.Layer;
 import net.es.oscars.dto.topo.TopoEdge;
 import net.es.oscars.pss.PCEAssistant;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.spec.ent.*;
 import net.es.oscars.topo.ent.EDevice;
+import net.es.oscars.topo.enums.DeviceModel;
 import net.es.oscars.topo.svc.TopoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -28,7 +30,7 @@ public class EthPCE {
     private BandwidthPCE bwPCE;
 
 
-    public VlanFlowE makeReserved(VlanFlowE req_f) throws PSSException {
+    public VlanFlowE makeReserved(VlanFlowE req_f) throws PSSException, PCEException{
 
         Set<Layer> layers = new HashSet<>();
         layers.add(Layer.ETHERNET);
@@ -58,11 +60,32 @@ public class EthPCE {
     }
 
 
-    private Set<VlanPipeE> makePipes(VlanPipeE req_p) throws PSSException {
+    private Set<VlanPipeE> makePipes(VlanPipeE req_p) throws PSSException, PCEException {
+        Set<Layer> layers = new HashSet<>();
+        layers.add(Layer.ETHERNET);
+        layers.add(Layer.MPLS);
+
+
+        String aDeviceUrn = req_p.getAJunction().getDeviceUrn();
+        String zDeviceUrn = req_p.getZJunction().getDeviceUrn();
+        // TODO: we are CURRENTLY only doing symmetrical paths
+        // need to
+        List<TopoEdge> symmetricalERO = bwPCE
+                .bwConstrainedShortestPath(aDeviceUrn, zDeviceUrn, req_p.getAzMbps(), layers);
+
+        if (symmetricalERO.isEmpty()) {
+            throw new PCEException("Empty path from BW PCE");
+        }
+
+        Map<String, DeviceModel> deviceModels = topoService.deviceModels();
+
+        // ok now decompose the path
+        Set<VlanPipeE> pipes = assistant.decompose(req_p, symmetricalERO, deviceModels);
+
+        // TODO: not actually correct from now on..
+
         EDevice aDevice = topoService.device(req_p.getAJunction().getDeviceUrn());
         EDevice zDevice = topoService.device(req_p.getZJunction().getDeviceUrn());
-
-        EthPipeType pipeType = assistant.decidePipeType(aDevice, zDevice);
 
         // TODO: actually different for pipes than simple
         VlanJunctionE aj = reserveSimpleJunction(req_p.getAJunction());
@@ -70,12 +93,12 @@ public class EthPCE {
 
 
 
+        EthPipeType pipeType = assistant.decidePipeType(aDevice, zDevice);
 
 
 
-        // TODO: finish this
-        // A-Z ERO
-        // List<TopoEdge> azEro = bwPCE.bwConstrainedShortestPath(aj.getDeviceUrn(), zj.getDeviceUrn(), req_p.getAzMbps(), layers);
+        List<String> azEro = TopoAssistant.makeEro(symmetricalERO, false);
+        List<String> zaEro = TopoAssistant.makeEro(symmetricalERO, true);
 
 
         // TODO: EROs, resource IDs, decompose hybrid pipes
@@ -85,8 +108,8 @@ public class EthPCE {
                 .aJunction(aj)
                 .zJunction(zj)
                 .pipeType(pipeType)
-                .azERO(new ArrayList<>())
-                .zaERO(new ArrayList<>())
+                .azERO(azEro)
+                .zaERO(zaEro)
                 .resourceIds(new HashSet<>())
                 .build();
 

@@ -4,12 +4,15 @@ import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.IntRange;
 import net.es.oscars.dto.resv.ResourceType;
 import net.es.oscars.dto.rsrc.TopoResource;
+import net.es.oscars.dto.topo.TopoEdge;
 import net.es.oscars.resv.ent.ReservedResourceE;
+import net.es.oscars.spec.ent.VlanPipeE;
 
 import java.util.*;
 
 @Slf4j
 public class TopoAssistant {
+
 
 
     public static List<TopoResource> baseMinusReserved(List<TopoResource> resources, List<ReservedResourceE> reserved) {
@@ -50,6 +53,27 @@ public class TopoAssistant {
 
         return availableResources;
     }
+
+    public static List<String> makeEro(List<TopoEdge> topoEdges, boolean reverse) {
+
+        List<String> ero = new ArrayList<>();
+
+        if (!reverse) {
+            ero.add(topoEdges.get(0).getA().getUrn());
+            topoEdges.stream().forEach(t -> ero.add(t.getZ().getUrn()));
+
+        } else {
+            List<TopoEdge> reversedEdges = topoEdges.subList(0, topoEdges.size());
+            Collections.reverse(reversedEdges);
+
+            ero.add(reversedEdges.get(0).getZ().getUrn());
+            topoEdges.stream().forEach(t -> ero.add(t.getA().getUrn()));
+        }
+
+        log.debug("ERO: "+ero.toString());
+        return ero;
+    }
+
 
     public static TopoResource subtractBandwidth(TopoResource tr, ReservedResourceE rr) {
 

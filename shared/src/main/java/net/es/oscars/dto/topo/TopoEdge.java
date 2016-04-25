@@ -1,8 +1,14 @@
 package net.es.oscars.dto.topo;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class TopoEdge {
     private TopoVertex a;
 
@@ -12,13 +18,5 @@ public class TopoEdge {
 
     private Layer layer;
 
-    public TopoEdge() {
-
-    }
-    public TopoEdge(TopoVertex a, TopoVertex z) {
-        this.a = a;
-        this.z = z;
-
-    }
 
 }

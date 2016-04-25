@@ -13,6 +13,7 @@ import net.es.oscars.dto.topo.UrnEdge;
 import net.es.oscars.topo.dao.DeviceRepository;
 import net.es.oscars.topo.dao.UrnAdjcyRepository;
 import net.es.oscars.topo.ent.*;
+import net.es.oscars.topo.enums.DeviceModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
@@ -60,6 +61,12 @@ public class TopoService {
                                 UrnEdge edge = UrnEdge.builder().a(d.getUrn()).z(i.getUrn()).metrics(new HashMap<>()).build();
                                 edge.getMetrics().put(Layer.INTERNAL, 1L);
                                 topo.getEdges().add(edge);
+
+                                UrnEdge reverseEdge = UrnEdge.builder().z(d.getUrn()).a(i.getUrn()).metrics(new HashMap<>()).build();
+                                reverseEdge.getMetrics().put(Layer.INTERNAL, 1L);
+                                topo.getEdges().add(reverseEdge);
+
+
                             });
                 });
 
@@ -143,6 +150,15 @@ public class TopoService {
 
 
         return resources;
+    }
+
+    public Map<String, DeviceModel> deviceModels() {
+        Map<String, DeviceModel> result = new HashMap<>();
+        devRepo.findAll().stream().forEach(t -> {
+            result.put(t.getUrn(), t.getModel());
+        });
+        return result;
+
     }
 
     public List<String> edges(Layer layer) {

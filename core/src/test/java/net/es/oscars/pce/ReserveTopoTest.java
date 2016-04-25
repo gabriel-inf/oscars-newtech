@@ -4,8 +4,13 @@ import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.IntRange;
 import net.es.oscars.dto.resv.ResourceType;
 import net.es.oscars.dto.rsrc.TopoResource;
+import net.es.oscars.dto.topo.Layer;
+import net.es.oscars.dto.topo.TopoEdge;
+import net.es.oscars.dto.topo.TopoVertex;
 import net.es.oscars.helpers.IntRangeParsing;
+import net.es.oscars.pss.PCEAssistant;
 import net.es.oscars.resv.ent.ReservedResourceE;
+import net.es.oscars.topo.enums.DeviceModel;
 import org.junit.Test;
 
 import java.time.Instant;
@@ -13,6 +18,40 @@ import java.util.*;
 
 @Slf4j
 public class ReserveTopoTest {
+
+    @Test
+    public void testDecompose() {
+        List<TopoEdge> edges = this.buildDecomposablePath();
+        Map<String, DeviceModel> deviceModels = new HashMap<>();
+        deviceModels.put("alpha", DeviceModel.JUNIPER_EX);
+        deviceModels.put("bravo", DeviceModel.JUNIPER_MX);
+        deviceModels.put("charlie", DeviceModel.JUNIPER_MX);
+        deviceModels.put("delta", DeviceModel.JUNIPER_MX);
+        PCEAssistant.decompose(null, edges, deviceModels);
+
+
+    }
+
+
+    @Test
+    public void testEroFromTopoEdge() {
+        List<TopoEdge> edges = this.buildAbcEro();
+
+
+        List<String> ero = TopoAssistant.makeEro(edges, false);
+        assert ero.size() == 3;
+        assert ero.get(0).equals("alpha");
+        assert ero.get(1).equals("bravo");
+        assert ero.get(2).equals("charlie");
+
+        ero = TopoAssistant.makeEro(edges, true);
+        assert ero.size() == 3;
+        assert ero.get(0).equals("charlie");
+        assert ero.get(1).equals("bravo");
+        assert ero.get(2).equals("alpha");
+
+
+    }
 
     @Test
     public void testSubtract() {
@@ -152,6 +191,108 @@ public class ReserveTopoTest {
 
     }
 
+    public List<TopoEdge> buildAbcEro() {
+        TopoEdge ab = TopoEdge.builder()
+                .a(TopoVertex.builder().urn("alpha").build())
+                .z(TopoVertex.builder().urn("bravo").build())
+                .layer(Layer.ETHERNET)
+                .metric(100L)
+                .build();
 
+        TopoEdge bc = TopoEdge.builder()
+                .a(TopoVertex.builder().urn("bravo").build())
+                .z(TopoVertex.builder().urn("charlie").build())
+                .layer(Layer.ETHERNET)
+                .metric(100L)
+                .build();
+
+        List<TopoEdge> edges = new ArrayList<>();
+        edges.add(ab);
+        edges.add(bc);
+
+        return edges;
+    }
+
+
+    public List<TopoEdge> buildDecomposablePath() {
+        TopoEdge a_to_a_one = TopoEdge.builder()
+                .a(TopoVertex.builder().urn("alpha").build())
+                .z(TopoVertex.builder().urn("alpha:1/1/1").build())
+                .layer(Layer.INTERNAL)
+                .metric(1L)
+                .build();
+
+        TopoEdge a_one_to_b_one = TopoEdge.builder()
+                .a(TopoVertex.builder().urn("alpha:1/1/1").build())
+                .z(TopoVertex.builder().urn("bravo:1/1/1").build())
+                .layer(Layer.ETHERNET)
+                .metric(100L)
+                .build();
+
+        TopoEdge b_one_to_b = TopoEdge.builder()
+                .a(TopoVertex.builder().urn("bravo:1/1/1").build())
+                .z(TopoVertex.builder().urn("bravo").build())
+                .layer(Layer.INTERNAL)
+                .metric(100L)
+                .build();
+
+        TopoEdge b_to_b_two = TopoEdge.builder()
+                .a(TopoVertex.builder().urn("bravo").build())
+                .z(TopoVertex.builder().urn("bravo:2/1/1").build())
+                .layer(Layer.INTERNAL)
+                .metric(100L)
+                .build();
+
+        TopoEdge b_two_to_c_two = TopoEdge.builder()
+                .a(TopoVertex.builder().urn("bravo:2/1/1").build())
+                .z(TopoVertex.builder().urn("charlie:2/1/1").build())
+                .layer(Layer.MPLS)
+                .metric(100L)
+                .build();
+
+        TopoEdge c_two_to_c = TopoEdge.builder()
+                .a(TopoVertex.builder().urn("charlie:2/1/1").build())
+                .z(TopoVertex.builder().urn("charlie").build())
+                .layer(Layer.INTERNAL)
+                .metric(100L)
+                .build();
+
+        TopoEdge c_to_c_one = TopoEdge.builder()
+                .a(TopoVertex.builder().urn("charlie").build())
+                .z(TopoVertex.builder().urn("charlie:1/1/1").build())
+                .layer(Layer.INTERNAL)
+                .metric(100L)
+                .build();
+
+        TopoEdge c_one_to_d_one = TopoEdge.builder()
+                .a(TopoVertex.builder().urn("charlie:1/1/1").build())
+                .z(TopoVertex.builder().urn("delta:1/1/1").build())
+                .layer(Layer.MPLS)
+                .metric(100L)
+                .build();
+
+        TopoEdge d_one_to_d = TopoEdge.builder()
+                .a(TopoVertex.builder().urn("delta:1/1/1").build())
+                .z(TopoVertex.builder().urn("delta").build())
+                .layer(Layer.INTERNAL)
+                .metric(100L)
+                .build();
+
+
+
+
+        List<TopoEdge> edges = new ArrayList<>();
+        edges.add(a_to_a_one);
+        edges.add(a_one_to_b_one);
+        edges.add(b_one_to_b);
+        edges.add(b_to_b_two);
+        edges.add(b_two_to_c_two);
+        edges.add(c_two_to_c);
+        edges.add(c_to_c_one);
+        edges.add(c_one_to_d_one);
+        edges.add(d_one_to_d);
+
+        return edges;
+    }
 
 }

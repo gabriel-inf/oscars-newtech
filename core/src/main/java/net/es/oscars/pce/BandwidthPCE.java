@@ -3,6 +3,7 @@ package net.es.oscars.pce;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.uci.ics.jung.algorithms.shortestpath.DijkstraShortestPath;
+import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.UndirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.util.EdgeType;
@@ -34,7 +35,7 @@ public class BandwidthPCE {
         log.info("finding bandwidth constrained path between " + aUrn + " -- " + zUrn + " for " + bandwidth + " mbps");
         List<TopoResource> constraining = topoService.constraining();
 
-        Graph<TopoVertex, TopoEdge> g = new UndirectedSparseMultigraph<>();
+        Graph<TopoVertex, TopoEdge> g = new DirectedSparseMultigraph<>();
 
         Transformer<TopoEdge, Double> wtTransformer = edge -> edge.getMetric().doubleValue();
 
@@ -57,7 +58,10 @@ public class BandwidthPCE {
         TopoVertex dst = new TopoVertex(zUrn);
         List<TopoEdge> path = alg.getPath(src, dst);
 
-        log.info("finished with path!");
+        log.info("calculated path ");
+        if (path.isEmpty()) {
+            log.error("no path found");
+        }
 
         path.stream().forEach(h -> {
             log.info(h.getA().getUrn() + " -- " + h.getLayer() + " -- " + h.getZ().getUrn());
@@ -80,7 +84,7 @@ public class BandwidthPCE {
 
                 TopoVertex a = new TopoVertex(e.getA());
                 TopoVertex z = new TopoVertex(e.getZ());
-                TopoEdge az = new TopoEdge(a, z);
+                TopoEdge az = TopoEdge.builder().a(a).z(z).build();
 
                 if (e.getMetrics().containsKey(Layer.INTERNAL)) {
                     az.setLayer(Layer.INTERNAL);
@@ -92,7 +96,7 @@ public class BandwidthPCE {
                     log.info("adding edge " + e.getA() + " -- " + layer + " -- " + e.getZ());
                 }
 
-                g.addEdge(az, a, z, EdgeType.UNDIRECTED);
+                g.addEdge(az, a, z, EdgeType.DIRECTED);
             } else {
                 log.info("not enough BW on edge " + e.getA() + " -- " + layer + " -- " + e.getZ());
 
@@ -114,12 +118,15 @@ public class BandwidthPCE {
         } else {
             boolean fits = true;
             for (TopoResource tr : applyingTo) {
-                IntRange bwQty = tr.getReservableQties().get(ResourceType.BANDWIDTH);
-                if (!bwQty.contains(bandwidth)) {
-                    fits = false;
+                if (tr.getReservableQties().containsKey(ResourceType.BANDWIDTH)) {
+                    IntRange bwQty = tr.getReservableQties().get(ResourceType.BANDWIDTH);
+                    if (!bwQty.contains(bandwidth)) {
+                        fits = false;
+                    }
                 }
             }
-            log.info("bandwidth fits? " + fits);
+            log.info("urn: "+ urn +" , bw fits: " + fits);
+
             return fits;
 
 

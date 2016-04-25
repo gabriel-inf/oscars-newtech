@@ -136,6 +136,9 @@ public class ResvController {
     }
 
     private Specification basicVlanToFull(BasicVlanSpecification bvs) {
+
+
+
         VlanFlow vf = VlanFlow.builder()
                 .junctions(new HashSet<>())
                 .pipes(new HashSet<>())
@@ -182,13 +185,17 @@ public class ResvController {
             vja.getFixtures().add(vfa);
             vjz.getFixtures().add(vfz);
 
+            // TODO: this makes symmetrical circuits based on the max of az / za bandwidth
+
+            Integer bw = Math.max(bvf.getAzMbps(), bvf.getZaMbps());
+
             VlanPipe vpaz = VlanPipe.builder()
                     .aJunction(vja)
                     .zJunction(vjz)
                     .azERO(new ArrayList<>())
                     .zaERO(new ArrayList<>())
-                    .azMbps(bvf.getAzMbps())
-                    .zaMbps(bvf.getZaMbps())
+                    .azMbps(bw)
+                    .zaMbps(bw)
                     .pipeType(EthPipeType.REQUESTED)
                     .build();
 
