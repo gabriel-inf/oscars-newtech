@@ -50,17 +50,14 @@ public class EthPCE {
             res_f.getJunctions().add(schJunction);
         }
 
-
         // handle pipes
         for (VlanPipeE req_p : req_f.getPipes()) {
-            Set<VlanPipeE> res_ps = this.makePipes(req_p);
-            res_f.getPipes().addAll(res_ps);
+            this.handlePipes(req_p, res_f);
         }
         return res_f;
     }
 
-
-    private Set<VlanPipeE> makePipes(VlanPipeE req_p) throws PSSException, PCEException {
+    private void handlePipes(VlanPipeE req_p, VlanFlowE res_f) throws PSSException, PCEException {
         Set<Layer> layers = new HashSet<>();
         layers.add(Layer.ETHERNET);
         layers.add(Layer.MPLS);
@@ -68,10 +65,13 @@ public class EthPCE {
 
         String aDeviceUrn = req_p.getAJunction().getDeviceUrn();
         String zDeviceUrn = req_p.getZJunction().getDeviceUrn();
+
         // TODO: we are CURRENTLY only doing symmetrical paths
-        // need to
         List<TopoEdge> symmetricalERO = bwPCE
                 .bwConstrainedShortestPath(aDeviceUrn, zDeviceUrn, req_p.getAzMbps(), layers);
+
+        // TODO: constrain this further by VLANs
+
 
         if (symmetricalERO.isEmpty()) {
             throw new PCEException("Empty path from BW PCE");
@@ -79,43 +79,60 @@ public class EthPCE {
 
         Map<String, DeviceModel> deviceModels = topoService.deviceModels();
 
-        // ok now decompose the path
-        Set<VlanPipeE> pipes = assistant.decompose(req_p, symmetricalERO, deviceModels);
+        // now, decompose the path
+        List<Map<Layer, List<TopoEdge>>>  segments = assistant.decompose(symmetricalERO, deviceModels);
 
-        // TODO: not actually correct from now on..
+        // for each segment:
+        // if it is an Ethernet segment, make junctions, one per device
+        // if it is an MPLS segment, make a pipe
+        // all the while, make sure to merge in the current first and last junctions as needed
 
-        EDevice aDevice = topoService.device(req_p.getAJunction().getDeviceUrn());
-        EDevice zDevice = topoService.device(req_p.getZJunction().getDeviceUrn());
+        for (int i = 0; i < segments.size(); i++) {
+            Map<Layer, List<TopoEdge>> segment = segments.get(i);
+            Optional<VlanJunctionE> mergeA = Optional.empty();
+            Optional<VlanJunctionE> mergeZ = Optional.empty();
+            if (i == 0) {
+                mergeA = Optional.of(req_p.getAJunction());
+            }
+            if (i == segments.size() - 1) {
+                mergeZ = Optional.of(req_p.getZJunction());
+            }
 
-        // TODO: actually different for pipes than simple
-        VlanJunctionE aj = reserveSimpleJunction(req_p.getAJunction());
-        VlanJunctionE zj = reserveSimpleJunction(req_p.getZJunction());
+            List<TopoEdge> edges;
+
+            if (segment.size() != 1) {
+               throw new PCEException("invalid segmentation");
+            }
+            if (segment.containsKey(Layer.ETHERNET)) {
+                if (segment.get(Layer.ETHERNET).size() != 3) {
+                    throw new PCEException("invalid segmentation");
+                }
+
+                edges = segment.get(Layer.ETHERNET);
+
+                // an ethernet segment: a list of junctions, one per device
+
+                // TODO: do something with these junctions
+                List<VlanJunctionE> vjs = assistant.makeEthernetJunctions(edges,
+                        req_p.getAzMbps(), req_p.getZaMbps(),
+                        mergeA, mergeZ, deviceModels);
 
 
+            } else if (segment.containsKey(Layer.MPLS)) {
+                edges = segment.get(Layer.MPLS);
+                // TODO: do something with this pipe
+                VlanPipeE pipe = assistant.makeVplsPipe(edges, req_p.getAzMbps(), req_p.getZaMbps(),
+                        mergeA, mergeZ, deviceModels);
 
-        EthPipeType pipeType = assistant.decidePipeType(aDevice, zDevice);
+            } else {
+                throw new PCEException("invalid segmentation");
+            }
+        }
+
+        // TODO: decide VLANs and reserve them
+        // TODO: ask the PSS assistant to do its own resource reservations
 
 
-
-        List<String> azEro = TopoAssistant.makeEro(symmetricalERO, false);
-        List<String> zaEro = TopoAssistant.makeEro(symmetricalERO, true);
-
-
-        // TODO: EROs, resource IDs, decompose hybrid pipes
-        VlanPipeE res_p = VlanPipeE.builder()
-                .azMbps(req_p.getAzMbps())
-                .zaMbps(req_p.getZaMbps())
-                .aJunction(aj)
-                .zJunction(zj)
-                .pipeType(pipeType)
-                .azERO(azEro)
-                .zaERO(zaEro)
-                .resourceIds(new HashSet<>())
-                .build();
-
-        Set<VlanPipeE> res_ps = new HashSet<>();
-        res_ps.add(res_p);
-        return res_ps;
     }
 
 
@@ -127,7 +144,7 @@ public class EthPCE {
                 .deviceUrn(deviceUrn)
                 .fixtures(new HashSet<>())
                 .resourceIds(new HashSet<>())
-                .junctionType(assistant.decideJunctionType(device))
+                .junctionType(assistant.decideJunctionType(device.getModel()))
                 .build();
 
         assistant.reserveJunctionResources(rsv_j);
@@ -147,7 +164,7 @@ public class EthPCE {
                 .inMbps(bpFixture.getInMbps())
                 .portUrn(bpFixture.getPortUrn())
                 .vlanExpression(bpFixture.getVlanExpression())
-                .fixtureType(assistant.decideFixtureType(device))
+                .fixtureType(assistant.decideFixtureType(device.getModel()))
                 .build();
     }
 

@@ -2,14 +2,24 @@ package net.es.oscars.pce;
 
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.IntRange;
+import net.es.oscars.dto.pss.EthFixtureType;
+import net.es.oscars.dto.pss.EthJunctionType;
+import net.es.oscars.dto.pss.EthPipeType;
 import net.es.oscars.dto.resv.ResourceType;
 import net.es.oscars.dto.rsrc.TopoResource;
+import net.es.oscars.dto.spec.VlanFixture;
+import net.es.oscars.dto.spec.VlanJunction;
 import net.es.oscars.dto.topo.Layer;
 import net.es.oscars.dto.topo.TopoEdge;
 import net.es.oscars.dto.topo.TopoVertex;
 import net.es.oscars.helpers.IntRangeParsing;
 import net.es.oscars.pss.PCEAssistant;
+import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.ent.ReservedResourceE;
+import net.es.oscars.spec.ent.VlanFixtureE;
+import net.es.oscars.spec.ent.VlanJunctionE;
+import net.es.oscars.spec.ent.VlanPipeE;
+import net.es.oscars.topo.ent.EDevice;
 import net.es.oscars.topo.enums.DeviceModel;
 import org.junit.Test;
 
@@ -20,15 +30,138 @@ import java.util.*;
 public class ReserveTopoTest {
 
     @Test
-    public void testDecompose() {
+    public void testDecompose() throws PSSException {
         List<TopoEdge> edges = this.buildDecomposablePath();
         Map<String, DeviceModel> deviceModels = new HashMap<>();
         deviceModels.put("alpha", DeviceModel.JUNIPER_EX);
         deviceModels.put("bravo", DeviceModel.JUNIPER_MX);
         deviceModels.put("charlie", DeviceModel.JUNIPER_MX);
         deviceModels.put("delta", DeviceModel.JUNIPER_MX);
-        PCEAssistant.decompose(null, edges, deviceModels);
+        List<Map<Layer, List<TopoEdge>>>  segments = PCEAssistant.decompose(edges, deviceModels);
+        log.info(segments.toString());
 
+        assert segments.size() == 2;
+        assert segments.get(0).size() == 1;
+        assert segments.get(0).containsKey(Layer.ETHERNET);
+        assert segments.get(0).get(Layer.ETHERNET).size() == 2;
+        assert segments.get(0).get(Layer.ETHERNET).get(0).getA().getUrn().equals("alpha");
+        assert segments.get(0).get(Layer.ETHERNET).get(0).getZ().getUrn().equals("alpha:1/1/1");
+
+        assert segments.get(0).get(Layer.ETHERNET).get(1).getA().getUrn().equals("alpha:1/1/1");
+        assert segments.get(0).get(Layer.ETHERNET).get(1).getZ().getUrn().equals("bravo:1/1/1");
+
+
+        assert segments.get(1).size() == 1;
+        assert segments.get(1).containsKey(Layer.MPLS);
+        assert segments.get(1).get(Layer.MPLS).size() == 7;
+
+        assert segments.get(1).get(Layer.MPLS).get(0).getA().getUrn().equals("bravo:1/1/1");
+        assert segments.get(1).get(Layer.MPLS).get(0).getZ().getUrn().equals("bravo");
+
+        assert segments.get(1).get(Layer.MPLS).get(1).getA().getUrn().equals("bravo");
+        assert segments.get(1).get(Layer.MPLS).get(1).getZ().getUrn().equals("bravo:2/1/1");
+
+        assert segments.get(1).get(Layer.MPLS).get(2).getA().getUrn().equals("bravo:2/1/1");
+        assert segments.get(1).get(Layer.MPLS).get(2).getZ().getUrn().equals("charlie:2/1/1");
+
+        assert segments.get(1).get(Layer.MPLS).get(3).getA().getUrn().equals("charlie:2/1/1");
+        assert segments.get(1).get(Layer.MPLS).get(3).getZ().getUrn().equals("charlie");
+
+        assert segments.get(1).get(Layer.MPLS).get(4).getA().getUrn().equals("charlie");
+        assert segments.get(1).get(Layer.MPLS).get(4).getZ().getUrn().equals("charlie:1/1/1");
+
+        assert segments.get(1).get(Layer.MPLS).get(5).getA().getUrn().equals("charlie:1/1/1");
+        assert segments.get(1).get(Layer.MPLS).get(5).getZ().getUrn().equals("delta:1/1/1");
+
+        assert segments.get(1).get(Layer.MPLS).get(6).getA().getUrn().equals("delta:1/1/1");
+        assert segments.get(1).get(Layer.MPLS).get(6).getZ().getUrn().equals("delta");
+
+
+        List<TopoEdge> ethSegment = segments.get(0).get(Layer.ETHERNET);
+        VlanJunctionE aJunction = VlanJunctionE.builder()
+                .junctionType(EthJunctionType.REQUESTED)
+                .deviceUrn("alpha")
+                .fixtures(new HashSet<>())
+                .resourceIds(new HashSet<>())
+                .build();
+
+        VlanFixtureE aFixture = VlanFixtureE.builder()
+                .inMbps(10)
+                .egMbps(10)
+                .fixtureType(EthFixtureType.REQUESTED)
+                .portUrn("alpha:0/1/0")
+                .vlanExpression("")
+                .vlanId(null)
+                .build();
+        aJunction.getFixtures().add(aFixture);
+
+        PCEAssistant asst = new PCEAssistant();
+        List<VlanJunctionE> ethJunctions = asst.makeEthernetJunctions(ethSegment, 10, 10,
+                Optional.of(aJunction), Optional.empty(),deviceModels );
+
+        assert ethJunctions.size() == 1;
+
+        VlanJunctionE vj = ethJunctions.get(0);
+        assert vj.getDeviceUrn().equals("alpha");
+        assert vj.getJunctionType().equals(EthJunctionType.JUNOS_SWITCH);
+        Set<VlanFixtureE> fixtures = vj.getFixtures();
+        assert fixtures.size() == 2;
+
+        for (VlanFixtureE fx : fixtures) {
+            assert fx.getPortUrn().equals("alpha:1/1/1") || fx.getPortUrn().equals("alpha:0/1/0");
+            assert fx.getFixtureType().equals(EthFixtureType.JUNOS_IFCE);
+        }
+
+        List<TopoEdge> mplsSegment = segments.get(1).get(Layer.MPLS);
+
+
+
+        VlanJunctionE zJunction = VlanJunctionE.builder()
+                .junctionType(EthJunctionType.REQUESTED)
+                .deviceUrn("delta")
+                .fixtures(new HashSet<>())
+                .resourceIds(new HashSet<>())
+                .build();
+
+        VlanFixtureE zFixture = VlanFixtureE.builder()
+                .inMbps(10)
+                .egMbps(10)
+                .fixtureType(EthFixtureType.REQUESTED)
+                .portUrn("delta:0/1/0")
+                .vlanExpression("")
+                .vlanId(null)
+                .build();
+        zJunction.getFixtures().add(zFixture);
+
+        VlanPipeE vp = asst.makeVplsPipe(mplsSegment, 10, 10, Optional.empty(), Optional.of(zJunction), deviceModels);
+        List<String> azEro = vp.getAzERO();
+        List<String> zaEro = vp.getZaERO();
+        log.info(azEro.toString());
+        log.info(zaEro.toString());
+
+        assert azEro.size() == 7;
+        assert azEro.get(0).equals("bravo");
+        assert azEro.get(6).equals("delta");
+        assert zaEro.size() == 7;
+        assert zaEro.get(0).equals("delta");
+        assert zaEro.get(6).equals("bravo");
+
+
+
+        assert vp.getPipeType().equals(EthPipeType.JUNOS_TO_JUNOS_VPLS);
+
+        assert vp.getAJunction().getDeviceUrn().equals("bravo");
+
+        assert vp.getAJunction().getFixtures().size() == 1;
+        VlanFixtureE fx = vp.getAJunction().getFixtures().iterator().next();
+        assert fx.getPortUrn().equals("bravo:1/1/1");
+        assert fx.getFixtureType().equals(EthFixtureType.JUNOS_IFCE);
+
+
+        assert vp.getZJunction().getFixtures().size() == 1;
+        fx = vp.getZJunction().getFixtures().iterator().next();
+        assert fx.getPortUrn().equals("delta:0/1/0");
+        assert fx.getFixtureType().equals(EthFixtureType.JUNOS_IFCE);
 
     }
 

@@ -57,17 +57,12 @@ public class TopoAssistant {
     public static List<String> makeEro(List<TopoEdge> topoEdges, boolean reverse) {
 
         List<String> ero = new ArrayList<>();
+        // all the As plus the last Z
+        topoEdges.stream().forEach(t -> ero.add(t.getA().getUrn()));
+        ero.add(topoEdges.get(topoEdges.size()-1).getZ().getUrn());
 
-        if (!reverse) {
-            ero.add(topoEdges.get(0).getA().getUrn());
-            topoEdges.stream().forEach(t -> ero.add(t.getZ().getUrn()));
-
-        } else {
-            List<TopoEdge> reversedEdges = topoEdges.subList(0, topoEdges.size());
-            Collections.reverse(reversedEdges);
-
-            ero.add(reversedEdges.get(0).getZ().getUrn());
-            topoEdges.stream().forEach(t -> ero.add(t.getA().getUrn()));
+        if (reverse) {
+            Collections.reverse(ero);
         }
 
         log.debug("ERO: "+ero.toString());
