@@ -4,6 +4,5 @@ public enum EthPipeType {
     REQUESTED,
     ALU_TO_ALU_VPLS,
     ALU_TO_JUNOS_VPLS,
-    JUNOS_TO_JUNOS_VPLS,
-    ETHERNET_TRUNK
+    JUNOS_TO_JUNOS_VPLS
 }

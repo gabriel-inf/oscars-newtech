@@ -4,16 +4,13 @@ import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.pss.EthFixtureType;
 import net.es.oscars.dto.pss.EthJunctionType;
 import net.es.oscars.dto.pss.EthPipeType;
-import net.es.oscars.dto.spec.VlanFixture;
-import net.es.oscars.dto.spec.VlanJunction;
-import net.es.oscars.dto.spec.VlanPipe;
+import net.es.oscars.dto.resv.ResourceType;
 import net.es.oscars.dto.topo.Layer;
 import net.es.oscars.dto.topo.TopoEdge;
 import net.es.oscars.pce.TopoAssistant;
 import net.es.oscars.spec.ent.VlanFixtureE;
 import net.es.oscars.spec.ent.VlanJunctionE;
 import net.es.oscars.spec.ent.VlanPipeE;
-import net.es.oscars.topo.ent.EDevice;
 import net.es.oscars.topo.enums.DeviceModel;
 import org.springframework.stereotype.Component;
 
@@ -21,9 +18,7 @@ import java.util.*;
 
 @Component
 @Slf4j
-public class
-PCEAssistant {
-
+public class PCEAssistant {
 
     public static List<Map<Layer, List<TopoEdge>>> decompose(List<TopoEdge> edges, Map<String, DeviceModel> deviceModels) {
         List<Map<Layer, List<TopoEdge>>> result = new ArrayList<>();
@@ -393,16 +388,16 @@ PCEAssistant {
         return result;
     }
 
-    public void reservePipeResources(VlanPipeE vp) throws PSSException {
+    // TODO: fix this
+    public Map<String, ResourceType> neededPipeResources(VlanPipeE vp) throws PSSException {
+        Map<String, ResourceType> result = new HashMap<>();
         switch (vp.getPipeType()) {
             case ALU_TO_ALU_VPLS:
-                return;
+                return result;
             case ALU_TO_JUNOS_VPLS:
-                return;
+                return result;
             case JUNOS_TO_JUNOS_VPLS:
-                return;
-            case ETHERNET_TRUNK:
-                return;
+                return result;
             case REQUESTED:
                 throw new PSSException("Invalid pipe type (REQUESTED)!");
         }
@@ -410,19 +405,22 @@ PCEAssistant {
 
     }
 
-    public void reserveJunctionResources(VlanJunctionE vj) throws PSSException {
+    // TODO: fix this
+    public Map<String, ResourceType> neededJunctionResources(VlanJunctionE vj) throws PSSException {
+        Map<String, ResourceType> result = new HashMap<>();
         switch (vj.getJunctionType()) {
             case ALU_VPLS:
-                // name
-                // vc-id
+                result.put(vj.getDeviceUrn(), ResourceType.ALU_INGRESS_POLICY_ID);
+                result.put(vj.getDeviceUrn(), ResourceType.ALU_EGRESS_POLICY_ID);
+                result.put(ResourceType.GLOBAL, ResourceType.VC_ID);
 
-                return;
+                return result;
             case JUNOS_SWITCH:
-                // TODO: what?
-                return;
+                result.put(vj.getDeviceUrn(), ResourceType.VLAN);
+                return result;
             case JUNOS_VPLS:
-                // TODO: what to reserve?
-                return;
+                result.put(vj.getDeviceUrn(), ResourceType.VC_ID);
+                return result;
         }
         throw new PSSException("Could not reserve junction resources");
     }
@@ -460,8 +458,6 @@ PCEAssistant {
                 switch (zModel) {
                     case ALCATEL_SR7750:
                         return EthPipeType.ALU_TO_ALU_VPLS;
-                    case JUNIPER_EX:
-                        return EthPipeType.ETHERNET_TRUNK;
                     case JUNIPER_MX:
                         return EthPipeType.ALU_TO_JUNOS_VPLS;
                 }
@@ -471,19 +467,8 @@ PCEAssistant {
                 switch (zModel) {
                     case ALCATEL_SR7750:
                         return EthPipeType.ALU_TO_JUNOS_VPLS;
-                    case JUNIPER_EX:
-                        return EthPipeType.ETHERNET_TRUNK;
                     case JUNIPER_MX:
                         return EthPipeType.JUNOS_TO_JUNOS_VPLS;
-                }
-            case JUNIPER_EX:
-                switch (zModel) {
-                    case ALCATEL_SR7750:
-                        return EthPipeType.ETHERNET_TRUNK;
-                    case JUNIPER_MX:
-                        return EthPipeType.ETHERNET_TRUNK;
-                    case JUNIPER_EX:
-                        return EthPipeType.ETHERNET_TRUNK;
                 }
 
         }

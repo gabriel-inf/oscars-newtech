@@ -6,7 +6,6 @@ import net.es.oscars.dto.resv.ResourceType;
 import net.es.oscars.dto.rsrc.TopoResource;
 import net.es.oscars.dto.topo.TopoEdge;
 import net.es.oscars.resv.ent.ReservedResourceE;
-import net.es.oscars.spec.ent.VlanPipeE;
 
 import java.util.*;
 

@@ -1,8 +1,7 @@
 package net.es.oscars.pce;
 
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.dto.pss.EthPipeType;
-import net.es.oscars.dto.spec.VlanPipe;
+import net.es.oscars.dto.resv.ResourceType;
 import net.es.oscars.dto.topo.Layer;
 import net.es.oscars.dto.topo.TopoEdge;
 import net.es.oscars.pss.PCEAssistant;
@@ -112,7 +111,7 @@ public class EthPCE {
 
                 // an ethernet segment: a list of junctions, one per device
 
-                // TODO: do something with these junctions
+                // TODO: do something with these junctions!
                 List<VlanJunctionE> vjs = assistant.makeEthernetJunctions(edges,
                         req_p.getAzMbps(), req_p.getZaMbps(),
                         mergeA, mergeZ, deviceModels);
@@ -120,7 +119,7 @@ public class EthPCE {
 
             } else if (segment.containsKey(Layer.MPLS)) {
                 edges = segment.get(Layer.MPLS);
-                // TODO: do something with this pipe
+                // TODO: do something with this pipe!
                 VlanPipeE pipe = assistant.makeVplsPipe(edges, req_p.getAzMbps(), req_p.getZaMbps(),
                         mergeA, mergeZ, deviceModels);
 
@@ -130,7 +129,7 @@ public class EthPCE {
         }
 
         // TODO: decide VLANs and reserve them
-        // TODO: ask the PSS assistant to do its own resource reservations
+        // TODO: collect needed resources from assistant
 
 
     }
@@ -147,7 +146,8 @@ public class EthPCE {
                 .junctionType(assistant.decideJunctionType(device.getModel()))
                 .build();
 
-        assistant.reserveJunctionResources(rsv_j);
+        // TODO: go from needed to reserving them
+        Map<String, ResourceType> neededResources = assistant.neededJunctionResources(rsv_j);
 
 
         for (VlanFixtureE req_f : req_j.getFixtures()) {
