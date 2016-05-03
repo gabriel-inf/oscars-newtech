@@ -152,6 +152,57 @@ public class TopoService {
         return resources;
     }
 
+
+    public List<TopoResource> reservable() {
+        log.info("starting reservable");
+        List<TopoResource> reservable = constraining();
+        // this gives us bandwidth and VLAN already
+        // now for the rest:
+
+        devRepo.findAll().stream().forEach(d -> {
+            if (d.getType().equals(DeviceType.ROUTER) && d.getModel().equals(DeviceModel.ALCATEL_SR7750)) {
+                TopoResource tr = TopoResource.builder()
+                        .reservableQties(new HashMap<>())
+                        .reservableRanges(new HashMap<>())
+                        .topoVertexUrns(new ArrayList<>())
+                        .build();
+
+                tr.getTopoVertexUrns().add(d.getUrn());
+
+                Set<IntRange> inPolicyIds = new HashSet<>();
+                Set<IntRange> egPolicyIds = new HashSet<>();
+                Set<IntRange> sdpIds = new HashSet<>();
+
+                // TODO: change from hardcoded to configurable
+                inPolicyIds.add(IntRange.builder().floor(6000).ceiling(6999).build());
+                egPolicyIds.add(IntRange.builder().floor(6000).ceiling(6999).build());
+                sdpIds.add(IntRange.builder().floor(6000).ceiling(6999).build());
+
+
+                tr.getReservableRanges().put(ResourceType.ALU_EGRESS_POLICY_ID, egPolicyIds);
+                tr.getReservableRanges().put(ResourceType.ALU_INGRESS_POLICY_ID, inPolicyIds);
+                tr.getReservableRanges().put(ResourceType.ALU_SDP_ID, sdpIds);
+                reservable.add(tr);
+            }
+
+        });
+
+        // TODO: change from hardcoded to configurable
+        TopoResource tr = TopoResource.builder()
+                .reservableQties(new HashMap<>())
+                .reservableRanges(new HashMap<>())
+                .topoVertexUrns(new ArrayList<>())
+                .build();
+
+        Set<IntRange> vcIds = new HashSet<>();
+        vcIds.add(IntRange.builder().floor(6000).ceiling(6999).build());
+        tr.getReservableRanges().put(ResourceType.VC_ID, vcIds);
+        tr.getTopoVertexUrns().add(ResourceType.GLOBAL);
+        reservable.add(tr);
+
+        return reservable;
+    }
+
     public Map<String, DeviceModel> deviceModels() {
         Map<String, DeviceModel> result = new HashMap<>();
         devRepo.findAll().stream().forEach(t -> {

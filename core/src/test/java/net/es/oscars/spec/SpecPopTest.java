@@ -80,7 +80,7 @@ public class SpecPopTest {
         aj.getFixtures().add(af);
 
         VlanFixtureE zf = VlanFixtureE.builder()
-                .portUrn("nersc-tb1:1/1/1")
+                .portUrn("nersc-tb1:3/1/1")
                 .vlanExpression("2-100")
                 .inMbps(100)
                 .egMbps(100)

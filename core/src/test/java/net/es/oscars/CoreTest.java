@@ -48,7 +48,7 @@ public class CoreTest {
             this.populateTopo(spec);
 
 
-            topPCE.makeReserved(spec.getRequested());
+            topPCE.makeReserved(spec.getRequested(), spec.getScheduleSpec());
             log.info("got schematic");
 
 

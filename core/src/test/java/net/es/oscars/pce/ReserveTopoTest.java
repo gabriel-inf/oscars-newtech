@@ -30,6 +30,44 @@ import java.util.*;
 public class ReserveTopoTest {
 
     @Test
+    public void decideVCIDTest() throws PCEException {
+
+        List<String> urns = new ArrayList<>();
+        urns.add("alpha");
+        urns.add("bravo");
+
+        List<String> badUrns = new ArrayList<>();
+        badUrns.add("charlie");
+
+        List<ReservedResourceE> rrs = new ArrayList<>();
+
+
+        rrs.add(ReservedResourceE.builder()
+                .resource(100)
+                .beginning(Instant.MIN)
+                .ending(Instant.MAX)
+                .resourceType(ResourceType.VC_ID)
+                .urns(urns)
+                .build());
+
+        rrs.add(ReservedResourceE.builder()
+                .resource(101)
+                .beginning(Instant.MIN)
+                .ending(Instant.MAX)
+                .resourceType(ResourceType.VC_ID)
+                .urns(urns)
+                .build());
+
+
+        Set<ReservedResourceE> allUrnsResv = TopoAssistant.reservedOfAllUrnsPlusType(urns, ResourceType.VC_ID, rrs);
+        assert allUrnsResv.size() == 2;
+
+
+
+    }
+
+
+    @Test
     public void testDecompose() throws PSSException {
         List<TopoEdge> edges = this.buildDecomposablePath();
         Map<String, DeviceModel> deviceModels = new HashMap<>();
@@ -215,14 +253,14 @@ public class ReserveTopoTest {
                 .urns(reservedUrns)
                 .beginning(Instant.MIN)
                 .ending(Instant.MAX)
-                .intResource(100)
+                .resource(100)
                 .resourceType(ResourceType.VLAN)
                 .build();
 
         reserved.add(rr);
 
         // first, remove 100 fom 99-100
-        TopoResource avail = TopoAssistant.subtractVlan(tr, rr);
+        TopoResource avail = TopoAssistant.subtractReserved(tr, rr,ResourceType.VLAN);
         assert avail.getReservableRanges().get(ResourceType.VLAN).size() == 1;
         assert avail.getReservableRanges().get(ResourceType.VLAN).iterator().next().contains(99);
     }

@@ -24,7 +24,7 @@ public class TopPCE {
     @Autowired
     private Layer3PCE layer3PCE;
 
-    public BlueprintE makeReserved(BlueprintE requested) throws PCEException, PSSException {
+    public BlueprintE makeReserved(BlueprintE requested, ScheduleSpecificationE schedSpec) throws PCEException, PSSException {
 
         verifyRequested(requested);
 
@@ -34,14 +34,14 @@ public class TopPCE {
                 .build();
 
         for (Layer3FlowE req_f : requested.getLayer3Flows()) {
-            Layer3FlowE res_f = layer3PCE.makeReserved(req_f);
+            Layer3FlowE res_f = layer3PCE.makeReserved(req_f, schedSpec);
             reserved.getLayer3Flows().add(res_f);
         }
 
 
 
         for (VlanFlowE req_f : requested.getVlanFlows()) {
-            VlanFlowE res_f = ethPCE.makeReserved(req_f);
+            VlanFlowE res_f = ethPCE.makeReserved(req_f, schedSpec);
             reserved.getVlanFlows().add(res_f);
 
         }

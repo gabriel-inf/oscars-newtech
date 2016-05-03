@@ -28,9 +28,7 @@ public class ReservedResourceE {
     @NonNull
     private ResourceType resourceType;
 
-    private String strResource;
-
-    private Integer intResource;
+    private Integer resource;
 
     private Instant beginning;
 

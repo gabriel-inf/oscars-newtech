@@ -49,7 +49,7 @@ public class ResvStartGrabber {
                     BlueprintE req = c.getSpecification().getRequested();
 
                     try {
-                        BlueprintE res = topPCE.makeReserved(req);
+                        BlueprintE res = topPCE.makeReserved(req, c.getSpecification().getScheduleSpec());
                         c.setReserved(res);
                         c.getStates().setResv(ResvState.HELD);
                         c = connRepo.save(c);

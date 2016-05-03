@@ -16,7 +16,7 @@ import java.util.HashSet;
 public class Layer3PCE {
 
 
-    public Layer3FlowE makeReserved(Layer3FlowE req_f) throws PCEException {
+    public Layer3FlowE makeReserved(Layer3FlowE req_f, ScheduleSpecificationE scheduleSpec) throws PCEException {
         throw new PCEException("Layer 3 flows not supported yet");
     }
 

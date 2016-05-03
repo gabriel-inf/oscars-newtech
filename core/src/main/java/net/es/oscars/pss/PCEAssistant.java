@@ -405,24 +405,38 @@ public class PCEAssistant {
 
     }
 
-    // TODO: fix this
-    public Map<String, ResourceType> neededJunctionResources(VlanJunctionE vj) throws PSSException {
-        Map<String, ResourceType> result = new HashMap<>();
+    public Map<ResourceType, List<String>> neededJunctionResources(VlanJunctionE vj) throws PSSException {
+        Map<ResourceType, List<String>> result = new HashMap<>();
+
+        List<String> deviceScope = new ArrayList<>();
+        deviceScope.add(vj.getDeviceUrn());
+        List<String> global = new ArrayList<>();
+        global.add(ResourceType.GLOBAL);
+
+        List<String> ports = new ArrayList<>();
+        vj.getFixtures().stream().forEach(t -> {
+            ports.add(t.getPortUrn());
+        });
+
+
         switch (vj.getJunctionType()) {
             case ALU_VPLS:
-                result.put(vj.getDeviceUrn(), ResourceType.ALU_INGRESS_POLICY_ID);
-                result.put(vj.getDeviceUrn(), ResourceType.ALU_EGRESS_POLICY_ID);
-                result.put(ResourceType.GLOBAL, ResourceType.VC_ID);
+
+                result.put(ResourceType.ALU_INGRESS_POLICY_ID, deviceScope);
+                result.put(ResourceType.ALU_EGRESS_POLICY_ID, deviceScope);
+                result.put(ResourceType.VC_ID, global);
+                result.put(ResourceType.VLAN, ports);
 
                 return result;
             case JUNOS_SWITCH:
-                result.put(vj.getDeviceUrn(), ResourceType.VLAN);
+                result.put(ResourceType.VLAN, deviceScope);
                 return result;
             case JUNOS_VPLS:
-                result.put(vj.getDeviceUrn(), ResourceType.VC_ID);
+                result.put(ResourceType.VC_ID, global);
+                result.put(ResourceType.VLAN, ports);
                 return result;
         }
-        throw new PSSException("Could not reserve junction resources");
+        throw new PSSException("Could not decide needed junction resources");
     }
 
     public EthJunctionType decideJunctionType(DeviceModel model) throws PSSException {
