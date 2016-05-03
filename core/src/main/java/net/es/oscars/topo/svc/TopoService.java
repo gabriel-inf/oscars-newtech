@@ -97,10 +97,14 @@ public class TopoService {
         List<TopoResource> resources = new ArrayList<>();
         List<EDevice> devices = devRepo.findAll();
 
+        // vlans for switches: one resource, per device;
+        // vlans for routers: one resource per ifce for device
+        // bandwidth for switches or routers: one resource per ifce
+
         devices.stream()
                 .forEach(d -> {
-                    // vlans for switches: global to the device; one vlan strResource w urns for device, all ifces
-                    // no bandwidth strResource for switches
+
+
                     if (d.getType().equals(DeviceType.SWITCH)) {
                         Set<IntRange> dtoVlans = d.getReservableVlans().stream().map(EIntRange::toDtoIntRange).collect(Collectors.toSet());
 
@@ -118,7 +122,7 @@ public class TopoService {
                             dtoVlanResource.getTopoVertexUrns().add(switchIfce.getUrn());
                         }
                         resources.add(dtoVlanResource);
-                        log.info("added switch vlan strResource: " + dtoVlanResource.toString());
+                        log.info("added switch vlan resource: " + dtoVlanResource.toString());
 
                     }
                     // now handle bandwidth for everything matched, and vlans for routers

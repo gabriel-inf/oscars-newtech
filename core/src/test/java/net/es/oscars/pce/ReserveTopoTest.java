@@ -29,14 +29,16 @@ import java.util.*;
 @Slf4j
 public class ReserveTopoTest {
 
-    @Test
+    @Test(expected = AssertionError.class)
     public void decideVCIDTest() throws PCEException {
+        log.info("resource decision");
 
         List<String> urns = new ArrayList<>();
         urns.add("alpha");
         urns.add("bravo");
 
         List<String> badUrns = new ArrayList<>();
+        badUrns.add("alpha");
         badUrns.add("charlie");
 
         List<ReservedResourceE> rrs = new ArrayList<>();
@@ -62,8 +64,21 @@ public class ReserveTopoTest {
         Set<ReservedResourceE> allUrnsResv = TopoAssistant.reservedOfAllUrnsPlusType(urns, ResourceType.VC_ID, rrs);
         assert allUrnsResv.size() == 2;
 
+        log.info("bad urn test");
+
+        // this should throw an assertion
+        TopoAssistant.reservedOfAllUrnsPlusType(badUrns, ResourceType.VC_ID, rrs);
 
 
+    }
+
+    @Test(expected = AssertionError.class)
+    public void nullTest() throws PCEException {
+        TopoAssistant.reservedOfAllUrnsPlusType(null, ResourceType.VC_ID, null);
+    }
+    @Test(expected = AssertionError.class)
+    public void emptyTest() throws PCEException {
+        TopoAssistant.reservedOfAllUrnsPlusType(new ArrayList<>(), ResourceType.VC_ID, new ArrayList<>());
     }
 
 

@@ -66,7 +66,8 @@ public class TopPCE {
             throw new PCEException("Junctions or pipes both empty.");
         }
 
-        Set<VlanJunctionE> allJunctions = flow.getJunctions();
+        Set<VlanJunctionE> allJunctions = new HashSet<>();
+        allJunctions.addAll(flow.getJunctions());
         flow.getPipes().stream().forEach(t -> {
             allJunctions.add(t.getAJunction());
             allJunctions.add(t.getZJunction());
@@ -84,6 +85,7 @@ public class TopPCE {
         if (!junctionsWithNoFixtures.isEmpty()) {
             throw new PCEException("Junctions with no fixtures found: " + String.join(" ", junctionsWithNoFixtures));
         }
+        log.info("all junctions & pipes are ok");
 
     }
 }

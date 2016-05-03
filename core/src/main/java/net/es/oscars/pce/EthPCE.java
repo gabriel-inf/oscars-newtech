@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.IntRange;
 import net.es.oscars.dto.resv.ResourceType;
 import net.es.oscars.dto.rsrc.TopoResource;
+import net.es.oscars.dto.spec.VlanFixture;
+import net.es.oscars.dto.spec.VlanJunction;
 import net.es.oscars.dto.topo.Layer;
 import net.es.oscars.dto.topo.TopoEdge;
 import net.es.oscars.pss.PCEAssistant;
@@ -38,6 +40,7 @@ public class EthPCE {
 
 
     public VlanFlowE makeReserved(VlanFlowE req_f, ScheduleSpecificationE schedSpec) throws PSSException, PCEException {
+        log.info("making reserved for flow: "+req_f.toString());
 
         Set<Layer> layers = new HashSet<>();
         layers.add(Layer.ETHERNET);
@@ -49,14 +52,16 @@ public class EthPCE {
                 .pipes(new HashSet<>())
                 .build();
 
-        // part 1: plain junctions (not in pipes): same device stuff
+        // part 1: plain junctions (not in pipes): same device
         for (VlanJunctionE bpJunction : req_f.getJunctions()) {
+            log.info("making a simple junction: "+bpJunction);
             VlanJunctionE schJunction = this.reserveSimpleJunction(bpJunction, schedSpec);
             res_f.getJunctions().add(schJunction);
         }
 
         // part 2: pipes - i.e. not in same device
         for (VlanPipeE req_p : req_f.getPipes()) {
+            log.info("handling a pipe: " + req_p.toString());
             this.handlePipes(req_p, res_f);
         }
         return res_f;
@@ -164,25 +169,27 @@ public class EthPCE {
         for (VlanFixtureE req_f : req_j.getFixtures()) {
             VlanFixtureE res_f = this.makeFixture(req_f, device);
             rsv_j.getFixtures().add(res_f);
+
             saveFixtureResources(res_f, scheduleSpec);
         }
 
 
-        Map<ResourceType, List<String>> neededResources = pceAssistant.neededJunctionResources(rsv_j);
-        log.info("needed junction resources: " +neededResources.toString());
 
-        this.decideAndSaveReserved(neededResources, scheduleSpec);
+        this.decideAndSaveReserved(rsv_j, scheduleSpec);
 
-        // TODO: set VLAN from reserved on fixtures here
 
 
         return rsv_j;
     }
 
-    public void decideAndSaveReserved(Map<ResourceType, List<String>> neededResources,
-                                      ScheduleSpecificationE scheduleSpec) throws PCEException {
+    public void decideAndSaveReserved(VlanJunctionE rsv_j,
+                                      ScheduleSpecificationE scheduleSpec) throws PSSException, PCEException {
 
-        // TODO: time windows
+
+        Map<ResourceType, List<String>> neededResources = pceAssistant.neededJunctionResources(rsv_j);
+        log.info("needed junction resources: " +neededResources.toString());
+
+        // TODO: time windows?
         Instant beginning = scheduleSpec.getNotBefore().toInstant();
         Instant ending = scheduleSpec.getNotAfter().toInstant();
 
@@ -202,8 +209,10 @@ public class EthPCE {
         for (ResourceType rt : neededResources.keySet()) {
             List<String> urns = neededResources.get(rt);
             Integer resource;
+            // constraining resources are not decided here
             if (rt.equals(ResourceType.BANDWIDTH)) {
                 // skip this
+
             } else {
                 // decide what the newly reserved resource will be
                 resource = decideRangeResource(reserved, reservable, urns, rt);

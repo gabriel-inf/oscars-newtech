@@ -45,6 +45,8 @@ public class CoreTest {
 
             SpecPopTest.addEndpoints(spec);
 
+            log.info("spec: "+spec.toString());
+
             this.populateTopo(spec);
 
 

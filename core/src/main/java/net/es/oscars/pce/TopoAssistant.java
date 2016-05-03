@@ -13,6 +13,9 @@ import java.util.*;
 public class TopoAssistant {
 
     public static Set<ReservedResourceE> reservedOfAllUrnsPlusType(List<String> urns, ResourceType rt, List<ReservedResourceE> reserved) {
+        assert urns != null;
+        assert rt != null;
+        assert reserved != null;
 
         assert (!urns.isEmpty());
 
@@ -31,6 +34,7 @@ public class TopoAssistant {
                 result.add(rr);
             }
         }
+        assert !result.isEmpty();
 
 
         return result;
