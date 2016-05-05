@@ -9,7 +9,8 @@ import edu.uci.ics.jung.graph.util.EdgeType;
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.IntRange;
 import net.es.oscars.dto.resv.ResourceType;
-import net.es.oscars.dto.rsrc.TopoResource;
+import net.es.oscars.dto.rsrc.ReservableBandwidth;
+import net.es.oscars.dto.rsrc.ReservablePssResource;
 import net.es.oscars.dto.topo.Layer;
 import net.es.oscars.dto.topo.TopoEdge;
 import net.es.oscars.dto.topo.TopoVertex;
@@ -32,14 +33,16 @@ public class BandwidthPCE {
 
     public List<TopoEdge> bwConstrainedShortestPath(String aUrn, String zUrn, Integer bandwidth, Set<Layer> layers) {
         log.info("finding bandwidth constrained path between " + aUrn + " -- " + zUrn + " for " + bandwidth + " mbps");
-        List<TopoResource> constraining = topoService.constraining();
+
+        List<ReservableBandwidth> bandwidths = topoService.reservableBandwidth();
+        // TODO: subtract already reserved bandwidths
 
         Graph<TopoVertex, TopoEdge> g = new DirectedSparseMultigraph<>();
 
         Transformer<TopoEdge, Double> wtTransformer = edge -> edge.getMetric().doubleValue();
 
         layers.stream().forEach(l -> {
-            this.addToGraph(topoService.layer(l), l, g, bandwidth, constraining);
+            this.addToGraph(topoService.layer(l), l, g, bandwidth, bandwidths);
         });
 
         String pretty = null;
@@ -68,7 +71,7 @@ public class BandwidthPCE {
         return path;
     }
 
-    private void addToGraph(Topology topo, Layer layer, Graph<TopoVertex, TopoEdge> g, Integer bandwidth, List<TopoResource> constraining) {
+    private void addToGraph(Topology topo, Layer layer, Graph<TopoVertex, TopoEdge> g, Integer bandwidth, List<ReservableBandwidth> bandwidths) {
 
         topo.getVertices().stream().forEach(v -> {
             log.info("adding vertex to " + layer + " topo " + v.getUrn());
@@ -76,8 +79,8 @@ public class BandwidthPCE {
         });
 
         topo.getEdges().stream().forEach(e -> {
-            boolean bwFitsOnA = this.bandwidthFits(bandwidth, e.getA(), constraining);
-            boolean bwFitsOnZ = this.bandwidthFits(bandwidth, e.getZ(), constraining);
+            boolean bwFitsOnA = this.bandwidthFits(bandwidth, e.getA(), bandwidths);
+            boolean bwFitsOnZ = this.bandwidthFits(bandwidth, e.getZ(), bandwidths);
 
             if (bwFitsOnA && bwFitsOnZ) {
 
@@ -104,30 +107,18 @@ public class BandwidthPCE {
 
     }
 
-    private Set<TopoResource> applyingTo(String urn, Collection<TopoResource> allResources) {
-        return allResources.stream().filter(t -> t.getTopoVertexUrns().contains(urn)).collect(Collectors.toSet());
-    }
+    private Boolean bandwidthFits(Integer bandwidth, String urn, List<ReservableBandwidth> bandwidths) {
 
-    private Boolean bandwidthFits(Integer bandwidth, String urn, Collection<TopoResource> allResources) {
         log.debug("checking if " + urn + " has enough bandwidth " + bandwidth);
-        Set<TopoResource> applyingTo = this.applyingTo(urn, allResources);
-        if (applyingTo.isEmpty()) {
-            log.info("bandwidth does not apply");
+        List<ReservableBandwidth> matching = bandwidths.stream().filter(bw -> bw.getTopoVertexUrn().equals(urn)).collect(Collectors.toList());
+
+        assert matching.size() <= 1;
+        if (matching.isEmpty()) {
+            log.info("bandwidth does not apply to " + urn);
             return true;
         } else {
-            boolean fits = true;
-            for (TopoResource tr : applyingTo) {
-                if (tr.getReservableQties().containsKey(ResourceType.BANDWIDTH)) {
-                    IntRange bwQty = tr.getReservableQties().get(ResourceType.BANDWIDTH);
-                    if (!bwQty.contains(bandwidth)) {
-                        fits = false;
-                    }
-                }
-            }
-            log.info("urn: "+ urn +" , bw fits: " + fits);
-
-            return fits;
-
+            log.info("bandwidth fits on urn: " + urn);
+            return matching.get(0).getBandwidth() >= bandwidth;
 
         }
 

@@ -6,20 +6,17 @@ import net.es.oscars.dto.pss.EthFixtureType;
 import net.es.oscars.dto.pss.EthJunctionType;
 import net.es.oscars.dto.pss.EthPipeType;
 import net.es.oscars.dto.resv.ResourceType;
-import net.es.oscars.dto.rsrc.TopoResource;
-import net.es.oscars.dto.spec.VlanFixture;
-import net.es.oscars.dto.spec.VlanJunction;
+import net.es.oscars.dto.rsrc.ReservablePssResource;
 import net.es.oscars.dto.topo.Layer;
 import net.es.oscars.dto.topo.TopoEdge;
 import net.es.oscars.dto.topo.TopoVertex;
 import net.es.oscars.helpers.IntRangeParsing;
 import net.es.oscars.pss.PCEAssistant;
 import net.es.oscars.pss.PSSException;
-import net.es.oscars.resv.ent.ReservedResourceE;
+import net.es.oscars.resv.ent.ReservedPssResourceE;
 import net.es.oscars.spec.ent.VlanFixtureE;
 import net.es.oscars.spec.ent.VlanJunctionE;
 import net.es.oscars.spec.ent.VlanPipeE;
-import net.es.oscars.topo.ent.EDevice;
 import net.es.oscars.topo.enums.DeviceModel;
 import org.junit.Test;
 
@@ -29,56 +26,32 @@ import java.util.*;
 @Slf4j
 public class ReserveTopoTest {
 
-    @Test(expected = AssertionError.class)
+    @Test
     public void decideVCIDTest() throws PCEException {
         log.info("resource decision");
 
-        List<String> urns = new ArrayList<>();
-        urns.add("alpha");
-        urns.add("bravo");
 
-        List<String> badUrns = new ArrayList<>();
-        badUrns.add("alpha");
-        badUrns.add("charlie");
-
-        List<ReservedResourceE> rrs = new ArrayList<>();
+        List<ReservedPssResourceE> rrs = new ArrayList<>();
 
 
-        rrs.add(ReservedResourceE.builder()
+        rrs.add(ReservedPssResourceE.builder()
                 .resource(100)
                 .beginning(Instant.MIN)
                 .ending(Instant.MAX)
                 .resourceType(ResourceType.VC_ID)
-                .urns(urns)
+                .urn("alpha")
                 .build());
 
-        rrs.add(ReservedResourceE.builder()
+        rrs.add(ReservedPssResourceE.builder()
                 .resource(101)
                 .beginning(Instant.MIN)
                 .ending(Instant.MAX)
                 .resourceType(ResourceType.VC_ID)
-                .urns(urns)
+                .urn("bravo")
                 .build());
 
+        // TODO: complete this
 
-        Set<ReservedResourceE> allUrnsResv = TopoAssistant.reservedOfAllUrnsPlusType(urns, ResourceType.VC_ID, rrs);
-        assert allUrnsResv.size() == 2;
-
-        log.info("bad urn test");
-
-        // this should throw an assertion
-        TopoAssistant.reservedOfAllUrnsPlusType(badUrns, ResourceType.VC_ID, rrs);
-
-
-    }
-
-    @Test(expected = AssertionError.class)
-    public void nullTest() throws PCEException {
-        TopoAssistant.reservedOfAllUrnsPlusType(null, ResourceType.VC_ID, null);
-    }
-    @Test(expected = AssertionError.class)
-    public void emptyTest() throws PCEException {
-        TopoAssistant.reservedOfAllUrnsPlusType(new ArrayList<>(), ResourceType.VC_ID, new ArrayList<>());
     }
 
 
@@ -239,46 +212,7 @@ public class ReserveTopoTest {
 
     }
 
-    @Test
-    public void testSubtract() {
 
-        List<String> resourceUrns = new ArrayList<>();
-        resourceUrns.add("alpha:1");
-        resourceUrns.add("alpha:2");
-
-        TopoResource tr = TopoResource.builder()
-                .reservableQties(new HashMap<>())
-                .reservableRanges(new HashMap<>())
-                .topoVertexUrns(resourceUrns)
-                .build();
-
-        Set<IntRange> vlanRanges = new HashSet<>();
-        vlanRanges.add(IntRange.builder().floor(99).ceiling(100).build());
-        tr.getReservableRanges().put(ResourceType.VLAN, vlanRanges);
-
-
-        List<String> reservedUrns = new ArrayList<>();
-        resourceUrns.add("alpha:1");
-        resourceUrns.add("beta:1");
-
-        Set<ReservedResourceE> reserved = new HashSet<>();
-
-
-        ReservedResourceE rr = ReservedResourceE.builder()
-                .urns(reservedUrns)
-                .beginning(Instant.MIN)
-                .ending(Instant.MAX)
-                .resource(100)
-                .resourceType(ResourceType.VLAN)
-                .build();
-
-        reserved.add(rr);
-
-        // first, remove 100 fom 99-100
-        TopoResource avail = TopoAssistant.subtractReserved(tr, rr,ResourceType.VLAN);
-        assert avail.getReservableRanges().get(ResourceType.VLAN).size() == 1;
-        assert avail.getReservableRanges().get(ResourceType.VLAN).iterator().next().contains(99);
-    }
 
     @Test
     public void testIntRangeParsing() {

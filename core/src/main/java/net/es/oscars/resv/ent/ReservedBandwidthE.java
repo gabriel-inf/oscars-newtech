@@ -1,7 +1,6 @@
 package net.es.oscars.resv.ent;
 
 import lombok.*;
-import net.es.oscars.dto.resv.ResourceType;
 
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
@@ -15,20 +14,16 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class ReservedResourceE {
+public class ReservedBandwidthE {
 
     @Id
     @GeneratedValue
     private Long id;
 
     @NonNull
-    @ElementCollection
-    private List<String> urns;
+    private String urn;
 
-    @NonNull
-    private ResourceType resourceType;
-
-    private Integer resource;
+    private Integer bandwidth;
 
     private Instant beginning;
 

@@ -7,7 +7,7 @@ import net.es.oscars.dto.pss.EthPipeType;
 import net.es.oscars.dto.resv.*;
 import net.es.oscars.dto.spec.*;
 import net.es.oscars.resv.dao.ConnectionRepository;
-import net.es.oscars.resv.dao.ReservedResourceRepository;
+import net.es.oscars.resv.dao.ReservedPssResourceRepository;
 import net.es.oscars.resv.ent.ConnectionE;
 import net.es.oscars.resv.svc.ResvService;
 import net.es.oscars.spec.ent.SpecificationE;
@@ -32,7 +32,7 @@ public class ResvController {
     private ResvService service;
 
     @Autowired
-    private ReservedResourceRepository resRepo;
+    private ReservedPssResourceRepository resRepo;
 
 
     @Autowired

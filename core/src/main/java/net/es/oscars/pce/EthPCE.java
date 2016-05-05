@@ -1,17 +1,14 @@
 package net.es.oscars.pce;
 
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.dto.IntRange;
-import net.es.oscars.dto.resv.ResourceType;
-import net.es.oscars.dto.rsrc.TopoResource;
-import net.es.oscars.dto.spec.VlanFixture;
-import net.es.oscars.dto.spec.VlanJunction;
 import net.es.oscars.dto.topo.Layer;
 import net.es.oscars.dto.topo.TopoEdge;
 import net.es.oscars.pss.PCEAssistant;
 import net.es.oscars.pss.PSSException;
-import net.es.oscars.resv.dao.ReservedResourceRepository;
-import net.es.oscars.resv.ent.ReservedResourceE;
+import net.es.oscars.resv.dao.ReservedBandwidthRepository;
+import net.es.oscars.resv.dao.ReservedPssResourceRepository;
+import net.es.oscars.resv.dao.ReservedVlanRepository;
+import net.es.oscars.resv.ent.ReservedBandwidthE;
 import net.es.oscars.spec.ent.*;
 import net.es.oscars.topo.ent.EDevice;
 import net.es.oscars.topo.enums.DeviceModel;
@@ -36,7 +33,13 @@ public class EthPCE {
     private BandwidthPCE bwPCE;
 
     @Autowired
-    private ReservedResourceRepository resourceRepo;
+    private ReservedBandwidthRepository bwRepo;
+
+    @Autowired
+    private ReservedVlanRepository vlanRepo;
+
+    @Autowired
+    private ReservedPssResourceRepository pssResourceRepo;
 
 
     public VlanFlowE makeReserved(VlanFlowE req_f, ScheduleSpecificationE schedSpec) throws PSSException, PCEException {
@@ -175,108 +178,7 @@ public class EthPCE {
 
 
 
-        this.decideAndSaveReserved(rsv_j, scheduleSpec);
-
-
-
         return rsv_j;
-    }
-
-    public void decideAndSaveReserved(VlanJunctionE rsv_j,
-                                      ScheduleSpecificationE scheduleSpec) throws PSSException, PCEException {
-
-
-        Map<ResourceType, List<String>> neededResources = pceAssistant.neededJunctionResources(rsv_j);
-        log.info("needed junction resources: " +neededResources.toString());
-
-        // TODO: time windows?
-        Instant beginning = scheduleSpec.getNotBefore().toInstant();
-        Instant ending = scheduleSpec.getNotAfter().toInstant();
-
-
-        // collect reservable resources
-        List<TopoResource> reservable = topoService.reservable();
-
-        // collect reserved resources
-        List<ReservedResourceE> reserved = new ArrayList<>();
-
-        Optional<List<ReservedResourceE>> reservedOpt = resourceRepo.findOverlappingInterval(beginning, ending);
-        if (reservedOpt.isPresent()) {
-            reserved = reservedOpt.get();
-        }
-
-
-        for (ResourceType rt : neededResources.keySet()) {
-            List<String> urns = neededResources.get(rt);
-            Integer resource;
-            // constraining resources are not decided here
-            if (rt.equals(ResourceType.BANDWIDTH)) {
-                // skip this
-
-            } else {
-                // decide what the newly reserved resource will be
-                resource = decideRangeResource(reserved, reservable, urns, rt);
-                ReservedResourceE re = ReservedResourceE.builder()
-                        .beginning(beginning)
-                        .ending(ending)
-                        .resourceType(rt)
-                        .urns(urns)
-                        .resource(resource)
-                        .build();
-
-                // build and save it
-                resourceRepo.save(re);
-            }
-
-
-        }
-
-    }
-
-    public Integer decideRangeResource(List<ReservedResourceE> reserved,
-                                       List<TopoResource> reservable,
-                                       List<String> urns, ResourceType rt) throws PCEException {
-
-        log.info("trying to decide "+rt+" for urns: "+urns.toString());
-        /*
-
-        the logic is:
-        our topology defines a resource as a resourcetype + a set of intRanges + a set of URNs
-
-        our reserved resource is a resourcetype + a specific integer + a set of URNs
-
-        we need to match the set of URNs + the type
-
-        we will have exactly ONE resource
-        and 0 .. N reserved
-
-
-        */
-
-
-        // for each of our urns
-
-        // find what is reserved & what is reservable for that specific urn
-
-
-        TopoResource tr = TopoAssistant.resourcefAllUrnsPlusType(urns, rt, reservable).orElseThrow(PCEException::new);
-        Set<ReservedResourceE> rrs = TopoAssistant.reservedOfAllUrnsPlusType(urns, rt, reserved);
-
-        for (ReservedResourceE rr : rrs) {
-            tr = TopoAssistant.subtractReserved(tr, rr, rt);
-        }
-
-
-        Set<IntRange> availRanges = tr.getReservableRanges().get(rt);
-        log.info("available: "+ availRanges.toString());
-        if (availRanges.isEmpty()) {
-            throw new PCEException("no resource available!");
-        }
-        Integer resource = availRanges.iterator().next().getFloor();
-        log.info("decided "+ resource);
-
-        return resource;
-
     }
 
 
@@ -287,25 +189,20 @@ public class EthPCE {
         // TODO: time windows
         Instant beginning = scheduleSpec.getNotBefore().toInstant();
         Instant ending = scheduleSpec.getNotAfter().toInstant();
-        List<String> urns = new ArrayList<>();
-        urns.add(fixture.getPortUrn());
 
         // bandwidth
-
-        // TODO: asymmetrical bandwidth reservations
-        Integer resource  = fixture.getInMbps();
-        ResourceType rt = ResourceType.BANDWIDTH;
-
-        ReservedResourceE re = ReservedResourceE.builder()
+        ReservedBandwidthE reserved_bw = ReservedBandwidthE.builder()
                 .beginning(beginning)
                 .ending(ending)
-                .resourceType(rt)
-                .urns(urns)
-                .resource(resource)
+                .urn(fixture.getPortUrn())
+                .bandwidth(fixture.getInMbps())
                 .build();
 
+
         // build and save it
-        resourceRepo.save(re);
+        bwRepo.save(reserved_bw);
+
+        // TODO: VLAN
 
     }
 

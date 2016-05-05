@@ -16,9 +16,8 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class TopoResource {
-    private List<String> topoVertexUrns;
-    private Map<ResourceType, IntRange> reservableQties;
+public class ReservablePssResource {
+    private String topoVertexUrn;
     private Map<ResourceType, Set<IntRange>> reservableRanges;
 
 }

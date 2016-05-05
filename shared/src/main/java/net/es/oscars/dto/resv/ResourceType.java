@@ -10,10 +10,7 @@ public enum ResourceType {
     VC_ID("VC_ID"),
     ALU_INGRESS_POLICY_ID("ALU_INGRESS_POLICY_ID"),
     ALU_EGRESS_POLICY_ID("ALU_EGRESS_POLICY_ID"),
-    ALU_SDP_ID("ALU_SDP_ID"),
-    IPV4_ADDRESS("IPV4_ADDRESS"),
-    BANDWIDTH("BANDWIDTH"),
-    VLAN("VLAN");
+    ALU_SDP_ID("ALU_SDP_ID");
 
     private String code;
 
