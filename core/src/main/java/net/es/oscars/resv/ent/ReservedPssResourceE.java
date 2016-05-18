@@ -20,7 +20,7 @@ public class ReservedPssResourceE {
     private Long id;
 
     @NonNull
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     private UrnE urn;
 
     @NonNull

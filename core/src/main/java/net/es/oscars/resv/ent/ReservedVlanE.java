@@ -20,7 +20,7 @@ public class ReservedVlanE {
     private Long id;
 
     @NonNull
-    @ManyToOne
+    @OneToOne(cascade = CascadeType.ALL)
     private UrnE urn;
 
     private Integer vlan;

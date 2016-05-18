@@ -6,9 +6,10 @@ import net.es.oscars.pce.PCEException;
 import net.es.oscars.pce.TopPCE;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.dto.pss.EthJunctionType;
-import net.es.oscars.spec.SpecPopTest;
-import net.es.oscars.spec.dao.SpecificationRepository;
-import net.es.oscars.spec.ent.*;
+import net.es.oscars.resv.ent.RequestedVlanFlowE;
+import net.es.oscars.resv.ent.RequestedVlanJunctionE;
+import net.es.oscars.resv.ent.SpecificationE;
+import net.es.oscars.resv.dao.SpecificationRepository;
 import net.es.oscars.topo.dao.UrnRepository;
 import net.es.oscars.topo.ent.UrnE;
 import net.es.oscars.topo.enums.DeviceType;
@@ -63,14 +64,22 @@ public class CoreTest {
     @Test(expected = PCEException.class)
     public void testNoFixtures() throws PCEException {
         SpecificationE spec = SpecPopTest.getBasicSpec();
+        UrnE urnE = UrnE.builder()
+                .deviceModel(DeviceModel.JUNIPER_EX)
+                .capabilities(new HashSet<>())
+                .deviceType(DeviceType.SWITCH)
+                .urnType(UrnType.DEVICE)
+                .urn("star-tb1")
+                .valid(true)
+                .build();
 
-        VlanFlowE flow = spec.getRequested().getVlanFlows().iterator().next();
 
-        VlanJunctionE somejunction = VlanJunctionE.builder()
+        RequestedVlanFlowE flow = spec.getRequested().getVlanFlows().iterator().next();
+
+        RequestedVlanJunctionE somejunction = RequestedVlanJunctionE.builder()
                 .junctionType(EthJunctionType.REQUESTED)
-                .deviceUrn("star-tb1")
+                .deviceUrn(urnE)
                 .fixtures(new HashSet<>())
-                .resourceIds(new HashSet<>())
                 .build();
 
         flow.getJunctions().add(somejunction);
@@ -91,8 +100,8 @@ public class CoreTest {
         });
     }
 
-    private void makeDeviceUrn(VlanJunctionE junction) {
-        String urn = junction.getDeviceUrn();
+    private void makeDeviceUrn(RequestedVlanJunctionE junction) {
+        String urn = junction.getDeviceUrn().getUrn();
         if (!urnRepo.findByUrn(urn).isPresent()) {
             UrnE urnE = UrnE.builder()
                     .deviceModel(DeviceModel.JUNIPER_EX)

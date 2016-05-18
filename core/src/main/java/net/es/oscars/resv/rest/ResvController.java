@@ -10,7 +10,7 @@ import net.es.oscars.resv.dao.ConnectionRepository;
 import net.es.oscars.resv.dao.ReservedPssResourceRepository;
 import net.es.oscars.resv.ent.ConnectionE;
 import net.es.oscars.resv.svc.ResvService;
-import net.es.oscars.spec.ent.SpecificationE;
+import net.es.oscars.resv.ent.SpecificationE;
 import net.es.oscars.st.oper.OperState;
 import net.es.oscars.st.prov.ProvState;
 import net.es.oscars.st.resv.ResvState;

@@ -1,7 +1,8 @@
 package net.es.oscars.pce;
 
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.spec.ent.*;
+import net.es.oscars.resv.ent.Layer3FlowE;
+import net.es.oscars.resv.ent.ScheduleSpecificationE;
 import org.springframework.stereotype.Component;
 
 @Slf4j

@@ -1,4 +1,4 @@
-package net.es.oscars.spec.ent;
+package net.es.oscars.resv.ent;
 
 import lombok.*;
 

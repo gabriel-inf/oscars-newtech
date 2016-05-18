@@ -1,4 +1,4 @@
-package net.es.oscars.spec.ent;
+package net.es.oscars.resv.ent;
 
 import lombok.*;
 import net.es.oscars.dto.pss.EthPipeType;
@@ -12,23 +12,23 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class VlanPipeE {
 
+public class ReservedEthPipeE {
     @Id
     @GeneratedValue
     private Long id;
 
     @OneToOne(cascade = CascadeType.ALL)
-    private VlanJunctionE aJunction;
+    private ReservedVlanJunctionE aJunction;
 
     @OneToOne(cascade = CascadeType.ALL)
-    private VlanJunctionE zJunction;
+    private ReservedVlanJunctionE zJunction;
 
-    @NonNull
-    private Integer azMbps;
+    @OneToOne(cascade = CascadeType.ALL)
+    private ReservedBandwidthE reservedBandwidth;
 
-    @NonNull
-    private Integer zaMbps;
+    @OneToMany(cascade = CascadeType.ALL)
+    private Set<ReservedPssResourceE> reservedPssResources;
 
     @NonNull
     @ElementCollection
@@ -41,8 +41,5 @@ public class VlanPipeE {
     @NonNull
     private EthPipeType pipeType;
 
-
-    @ElementCollection
-    private Set<String> resourceIds;
 
 }

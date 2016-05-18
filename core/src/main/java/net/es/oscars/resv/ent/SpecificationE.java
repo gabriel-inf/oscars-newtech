@@ -1,9 +1,8 @@
-package net.es.oscars.spec.ent;
+package net.es.oscars.resv.ent;
 
 import lombok.*;
 
 import javax.persistence.*;
-import java.util.Date;
 
 @Data
 @Entity
@@ -32,7 +31,7 @@ public class SpecificationE {
     private ScheduleSpecificationE scheduleSpec;
 
     @OneToOne (cascade = CascadeType.ALL)
-    private BlueprintE requested;
+    private RequestedBlueprintE requested;
 
 
 

@@ -1,7 +1,6 @@
-package net.es.oscars.spec.ent;
+package net.es.oscars.resv.ent;
 
 import lombok.*;
-import net.es.oscars.dto.pss.EthJunctionType;
 import net.es.oscars.dto.pss.Layer3JunctionType;
 
 import javax.persistence.*;

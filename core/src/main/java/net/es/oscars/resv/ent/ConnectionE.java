@@ -1,8 +1,6 @@
 package net.es.oscars.resv.ent;
 
 import lombok.*;
-import net.es.oscars.spec.ent.BlueprintE;
-import net.es.oscars.spec.ent.SpecificationE;
 
 import javax.persistence.*;
 
@@ -32,6 +30,6 @@ public class ConnectionE {
 
 
     @OneToOne (cascade = CascadeType.ALL)
-    private BlueprintE reserved;
+    private ReservedBlueprintE reserved;
 
 }

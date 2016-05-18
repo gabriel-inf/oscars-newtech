@@ -19,10 +19,15 @@ public class ReservedBandwidthE {
     private Long id;
 
     @NonNull
-    @ManyToOne
+    @OneToOne(cascade = CascadeType.ALL)
     private UrnE urn;
 
     private Integer bandwidth;
+
+    private Integer inBandwidth;
+
+    private Integer egBandwidth;
+
 
     private Instant beginning;
 

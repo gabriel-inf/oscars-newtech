@@ -7,7 +7,8 @@ import net.es.oscars.pce.PCEException;
 import net.es.oscars.pce.TopPCE;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.dao.ConnectionRepository;
-import net.es.oscars.spec.ent.BlueprintE;
+import net.es.oscars.resv.ent.ReservedBlueprintE;
+import net.es.oscars.resv.ent.RequestedBlueprintE;
 import net.es.oscars.st.resv.ResvState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -46,10 +47,10 @@ public class ResvStartGrabber {
                 .filter(c -> c.getStates().getResv().equals(ResvState.SUBMITTED))
                 .forEach(c -> {
                     log.info("detected submitted connection " + c.getConnectionId());
-                    BlueprintE req = c.getSpecification().getRequested();
+                    RequestedBlueprintE req = c.getSpecification().getRequested();
 
                     try {
-                        BlueprintE res = topPCE.makeReserved(req, c.getSpecification().getScheduleSpec());
+                        ReservedBlueprintE res = topPCE.makeReserved(req, c.getSpecification().getScheduleSpec());
                         c.setReserved(res);
                         c.getStates().setResv(ResvState.HELD);
                         c = connRepo.save(c);

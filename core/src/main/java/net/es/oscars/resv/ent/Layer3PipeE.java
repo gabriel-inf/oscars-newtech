@@ -1,7 +1,6 @@
-package net.es.oscars.spec.ent;
+package net.es.oscars.resv.ent;
 
 import lombok.*;
-import net.es.oscars.dto.pss.EthPipeType;
 import net.es.oscars.dto.pss.Layer3PipeType;
 
 import javax.persistence.*;

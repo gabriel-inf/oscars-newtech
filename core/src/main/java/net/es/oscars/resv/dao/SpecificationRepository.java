@@ -1,5 +1,5 @@
-package net.es.oscars.spec.dao;
-import net.es.oscars.spec.ent.SpecificationE;
+package net.es.oscars.resv.dao;
+import net.es.oscars.resv.ent.SpecificationE;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 

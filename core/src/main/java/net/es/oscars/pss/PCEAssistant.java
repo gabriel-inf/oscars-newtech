@@ -8,9 +8,10 @@ import net.es.oscars.dto.resv.ResourceType;
 import net.es.oscars.dto.topo.Layer;
 import net.es.oscars.dto.topo.TopoEdge;
 import net.es.oscars.pce.TopoAssistant;
-import net.es.oscars.spec.ent.VlanFixtureE;
-import net.es.oscars.spec.ent.VlanJunctionE;
-import net.es.oscars.spec.ent.VlanPipeE;
+import net.es.oscars.resv.ent.RequestedVlanFixtureE;
+import net.es.oscars.resv.ent.RequestedVlanJunctionE;
+import net.es.oscars.resv.ent.RequestedVlanPipeE;
+import net.es.oscars.topo.ent.UrnE;
 import net.es.oscars.topo.enums.DeviceModel;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +20,7 @@ import java.util.*;
 @Component
 @Slf4j
 public class PCEAssistant {
+
 
     public static List<Map<Layer, List<TopoEdge>>> decompose(List<TopoEdge> edges, Map<String, DeviceModel> deviceModels) {
         List<Map<Layer, List<TopoEdge>>> result = new ArrayList<>();
@@ -117,24 +119,25 @@ public class PCEAssistant {
 
     }
 
-    public List<VlanJunctionE> makeEthernetJunctions(List<TopoEdge> edges,
-                                                     Integer azMbps, Integer zaMbps,
-                                                     Optional<VlanJunctionE> mergeA,
-                                                     Optional<VlanJunctionE> mergeZ,
-                                                     Map<String, DeviceModel> deviceModels)
+    public List<RequestedVlanJunctionE> makeEthernetJunctions(List<TopoEdge> edges,
+                                                              Integer azMbps, Integer zaMbps,
+                                                              Optional<RequestedVlanJunctionE> mergeA,
+                                                              Optional<RequestedVlanJunctionE> mergeZ,
+                                                              Map<String, UrnE> urnMap,
+                                                              Map<String, DeviceModel> deviceModels)
             throws PSSException {
-        List<VlanJunctionE> result = new ArrayList<>();
+        List<RequestedVlanJunctionE> result = new ArrayList<>();
         if (mergeA.isPresent()) {
             // we will find the device URN at the A of the first edge
             String aaUrn = edges.get(0).getA().getUrn();
-            String deviceUrn = mergeA.get().getDeviceUrn();
-            assert aaUrn.equals(deviceUrn);
+            UrnE deviceUrn = mergeA.get().getDeviceUrn();
+            assert aaUrn.equals(deviceUrn.getUrn());
         }
         if (mergeZ.isPresent()) {
             // we will find the device URN at Z of the last edge
             String zzUrn = edges.get(edges.size() - 1).getZ().getUrn();
-            String deviceUrn = mergeZ.get().getDeviceUrn();
-            assert zzUrn.equals(deviceUrn);
+            UrnE deviceUrn = mergeZ.get().getDeviceUrn();
+            assert zzUrn.equals(deviceUrn.getUrn());
         }
 
         /*
@@ -163,23 +166,29 @@ public class PCEAssistant {
         if (mergeA.isPresent()) {
             startAt = 1;
 
-            VlanJunctionE mergeThis = mergeA.get();
-            DeviceModel model = deviceModels.get(mergeThis.getDeviceUrn());
+            RequestedVlanJunctionE mergeThis = mergeA.get();
+            DeviceModel model = deviceModels.get(mergeThis.getDeviceUrn().getUrn());
             EthFixtureType fixtureType = decideFixtureType(model);
 
-            VlanFixtureE fx = VlanFixtureE.builder()
+            String zUrn = edges.get(0).getZ().getUrn();
+            log.info("making fixture for z urn: "+zUrn);
+
+            UrnE urn = urnMap.get(zUrn);
+
+            assert urn != null;
+
+            RequestedVlanFixtureE fx = RequestedVlanFixtureE.builder()
                     .inMbps(azMbps)
                     .egMbps(zaMbps)
                     .fixtureType(EthFixtureType.REQUESTED)
-                    .portUrn(edges.get(0).getZ().getUrn())
+                    .portUrn(urn)
                     .vlanExpression("")
-                    .vlanId(null)
                     .build();
 
-            VlanJunctionE copy = VlanJunctionE.copyFrom(mergeThis);
+            RequestedVlanJunctionE copy = RequestedVlanJunctionE.copyFrom(mergeThis);
             copy.setJunctionType(decideJunctionType(model));
             copy.getFixtures().add(fx);
-            for (VlanFixtureE f : copy.getFixtures()) {
+            for (RequestedVlanFixtureE f : copy.getFixtures()) {
                 f.setFixtureType(fixtureType);
             }
 
@@ -196,29 +205,31 @@ public class PCEAssistant {
             TopoEdge edgeOne = edges.get(i);
             TopoEdge edgeTwo = edges.get(i + 1);
 
+            // TODO: verify urns exist
+
+            UrnE urnA = urnMap.get(edges.get(0).getA().getUrn());
+            UrnE urnZ = urnMap.get(edges.get(0).getZ().getUrn());
+
 
             DeviceModel model = deviceModels.get(edgeOne.getZ().getUrn());
 
-            VlanJunctionE newJunction = VlanJunctionE.builder()
+            RequestedVlanJunctionE newJunction = RequestedVlanJunctionE.builder()
                     .junctionType(decideJunctionType(model))
-                    .resourceIds(new HashSet<>())
                     .fixtures(new HashSet<>())
                     .build();
-            VlanFixtureE fOne = VlanFixtureE.builder()
+            RequestedVlanFixtureE fOne = RequestedVlanFixtureE.builder()
                     .inMbps(azMbps)
                     .egMbps(zaMbps)
                     .fixtureType(decideFixtureType(model))
-                    .portUrn(edgeOne.getA().getUrn())
+                    .portUrn(urnA)
                     .vlanExpression("")
-                    .vlanId(null)
                     .build();
-            VlanFixtureE fTwo = VlanFixtureE.builder()
+            RequestedVlanFixtureE fTwo = RequestedVlanFixtureE.builder()
                     .inMbps(azMbps)
                     .egMbps(zaMbps)
                     .fixtureType(decideFixtureType(model))
-                    .portUrn(edgeTwo.getZ().getUrn())
+                    .portUrn(urnZ)
                     .vlanExpression("")
-                    .vlanId(null)
                     .build();
 
             newJunction.getFixtures().add(fOne);
@@ -230,23 +241,25 @@ public class PCEAssistant {
         }
 
         if (mergeZ.isPresent()) {
-            VlanJunctionE mergeThis = mergeZ.get();
-            DeviceModel model = deviceModels.get(mergeThis.getDeviceUrn());
+            RequestedVlanJunctionE mergeThis = mergeZ.get();
+            DeviceModel model = deviceModels.get(mergeThis.getDeviceUrn().getUrn());
             EthFixtureType fixtureType = decideFixtureType(model);
 
-            VlanFixtureE fx = VlanFixtureE.builder()
+            // TODO: verify urns exist
+            UrnE urnZ = urnMap.get(edges.get(edges.size() - 1).getZ().getUrn());
+
+            RequestedVlanFixtureE fx = RequestedVlanFixtureE.builder()
                     .inMbps(azMbps)
                     .egMbps(zaMbps)
                     .fixtureType(EthFixtureType.REQUESTED)
-                    .portUrn(edges.get(edges.size() - 1).getZ().getUrn())
+                    .portUrn(urnZ)
                     .vlanExpression("")
-                    .vlanId(null)
                     .build();
 
-            VlanJunctionE copy = VlanJunctionE.copyFrom(mergeThis);
+            RequestedVlanJunctionE copy = RequestedVlanJunctionE.copyFrom(mergeThis);
             copy.setJunctionType(decideJunctionType(model));
             copy.getFixtures().add(fx);
-            for (VlanFixtureE f : copy.getFixtures()) {
+            for (RequestedVlanFixtureE f : copy.getFixtures()) {
                 f.setFixtureType(fixtureType);
             }
             result.add(copy);
@@ -256,11 +269,12 @@ public class PCEAssistant {
     }
 
     // TODO: support asymmetrical case; need to change method signature
-    public VlanPipeE makeVplsPipe(List<TopoEdge> edges,
-                                  Integer azMbps, Integer zaMbps,
-                                  Optional<VlanJunctionE> mergeA,
-                                  Optional<VlanJunctionE> mergeZ,
-                                  Map<String, DeviceModel> deviceModels)
+    public RequestedVlanPipeE makeVplsPipe(List<TopoEdge> edges,
+                                           Integer azMbps, Integer zaMbps,
+                                           Optional<RequestedVlanJunctionE> mergeA,
+                                           Optional<RequestedVlanJunctionE> mergeZ,
+                                           Map<String, UrnE> urnMap,
+                                           Map<String, DeviceModel> deviceModels)
             throws PSSException {
         /*
         a few different cases to handle:
@@ -273,31 +287,34 @@ public class PCEAssistant {
         in either case, we will need to create a new junction for our pipe and add that single port as a fixture
 
         */
-        VlanJunctionE aJunction;
-        VlanJunctionE zJunction;
+        RequestedVlanJunctionE aJunction;
+        RequestedVlanJunctionE zJunction;
 
         if (mergeA.isPresent()) {
-            DeviceModel model = deviceModels.get(mergeA.get().getDeviceUrn());
+            DeviceModel model = deviceModels.get(mergeA.get().getDeviceUrn().getUrn());
             aJunction = mergeJunction(mergeA.get(), model);
 
 
         } else {
             TopoEdge aEdge = edges.get(0);
-            String deviceUrn = aEdge.getZ().getUrn();
-            String portUrn = aEdge.getA().getUrn();
-            DeviceModel model = deviceModels.get(deviceUrn);
+            UrnE deviceUrn = urnMap.get(aEdge.getZ().getUrn());
+            UrnE portUrn = urnMap.get(aEdge.getA().getUrn());
+            DeviceModel model = deviceUrn.getDeviceModel();
+
             aJunction = makeEdgeJunction(deviceUrn, portUrn, model, azMbps, zaMbps);
 
         }
         if (mergeZ.isPresent()) {
-            DeviceModel model = deviceModels.get(mergeZ.get().getDeviceUrn());
+            DeviceModel model = deviceModels.get(mergeZ.get().getDeviceUrn().getUrn());
             zJunction = mergeJunction(mergeZ.get(), model);
 
         } else {
             TopoEdge zEdge = edges.get(edges.size() - 1);
-            String deviceUrn = zEdge.getA().getUrn();
-            String portUrn = zEdge.getZ().getUrn();
-            DeviceModel model = deviceModels.get(deviceUrn);
+
+            UrnE deviceUrn = urnMap.get(zEdge.getZ().getUrn());
+            UrnE portUrn = urnMap.get(zEdge.getA().getUrn());
+            DeviceModel model = deviceUrn.getDeviceModel();
+
             zJunction = makeEdgeJunction(deviceUrn, portUrn, model, azMbps, zaMbps);
 
         }
@@ -340,15 +357,14 @@ public class PCEAssistant {
         List<String> zaEro = TopoAssistant.makeEro(subList, true);
 
 
-        DeviceModel aModel = deviceModels.get(aJunction.getDeviceUrn());
-        DeviceModel zModel = deviceModels.get(zJunction.getDeviceUrn());
-        return VlanPipeE.builder()
+        DeviceModel aModel = deviceModels.get(aJunction.getDeviceUrn().getUrn());
+        DeviceModel zModel = deviceModels.get(zJunction.getDeviceUrn().getUrn());
+        return RequestedVlanPipeE.builder()
                 .pipeType(decidePipeType(aModel, zModel))
                 .aJunction(aJunction)
                 .zJunction(zJunction)
                 .azMbps(azMbps)
                 .zaMbps(zaMbps)
-                .resourceIds(new HashSet<>())
                 .azERO(azEro)
                 .zaERO(zaEro)
                 .build();
@@ -356,40 +372,41 @@ public class PCEAssistant {
     }
 
 
-    private VlanJunctionE mergeJunction(VlanJunctionE junction, DeviceModel model) throws PSSException {
-        VlanJunctionE result = VlanJunctionE.copyFrom(junction);
+    private RequestedVlanJunctionE mergeJunction(RequestedVlanJunctionE junction, DeviceModel model) throws PSSException {
+        RequestedVlanJunctionE result = RequestedVlanJunctionE.copyFrom(junction);
 
         result.setJunctionType(decideJunctionType(model));
         EthFixtureType fixtureType = decideFixtureType(model);
 
-        for (VlanFixtureE f : result.getFixtures()) {
+        for (RequestedVlanFixtureE f : result.getFixtures()) {
             f.setFixtureType(fixtureType);
         }
         return result;
     }
 
-    private VlanJunctionE makeEdgeJunction(String deviceUrn, String portUrn, DeviceModel model, Integer azMbps, Integer zaMbps) throws PSSException {
+    private RequestedVlanJunctionE makeEdgeJunction(UrnE deviceUrn, UrnE portUrn, DeviceModel model, Integer azMbps, Integer zaMbps) throws PSSException {
+        // TODO: verify urns exist / pass them in method
 
-        VlanJunctionE result = VlanJunctionE.builder()
-                .resourceIds(new HashSet<>())
+
+
+        RequestedVlanJunctionE result = RequestedVlanJunctionE.builder()
                 .deviceUrn(deviceUrn)
                 .fixtures(new HashSet<>())
                 .junctionType(decideJunctionType(model))
                 .build();
-        VlanFixtureE fx = VlanFixtureE.builder()
+        RequestedVlanFixtureE fx = RequestedVlanFixtureE.builder()
                 .inMbps(azMbps)
                 .egMbps(zaMbps)
                 .fixtureType(decideFixtureType(model))
                 .portUrn(portUrn)
                 .vlanExpression("")
-                .vlanId(null)
                 .build();
         result.getFixtures().add(fx);
         return result;
     }
 
     // TODO: fix this
-    public Map<String, ResourceType> neededPipeResources(VlanPipeE vp) throws PSSException {
+    public Map<String, ResourceType> neededPipeResources(RequestedVlanPipeE vp) throws PSSException {
         Map<String, ResourceType> result = new HashMap<>();
         switch (vp.getPipeType()) {
             case ALU_TO_ALU_VPLS:
@@ -405,17 +422,17 @@ public class PCEAssistant {
 
     }
 
-    public Map<ResourceType, List<String>> neededJunctionResources(VlanJunctionE vj) throws PSSException {
+    public Map<ResourceType, List<String>> neededJunctionResources(RequestedVlanJunctionE vj) throws PSSException {
         Map<ResourceType, List<String>> result = new HashMap<>();
 
         List<String> deviceScope = new ArrayList<>();
-        deviceScope.add(vj.getDeviceUrn());
+        deviceScope.add(vj.getDeviceUrn().getUrn());
         List<String> global = new ArrayList<>();
         global.add(ResourceType.GLOBAL);
 
         List<String> ports = new ArrayList<>();
         vj.getFixtures().stream().forEach(t -> {
-            ports.add(t.getPortUrn());
+            ports.add(t.getPortUrn().getUrn());
         });
 
 

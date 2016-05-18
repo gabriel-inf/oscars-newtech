@@ -1,4 +1,4 @@
-package net.es.oscars.spec;
+package net.es.oscars.resv;
 
 
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;

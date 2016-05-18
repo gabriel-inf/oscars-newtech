@@ -1,4 +1,4 @@
-package net.es.oscars.spec.ent;
+package net.es.oscars.resv.ent;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,17 +13,17 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Layer3FlowE {
+public class RequestedVlanFlowE {
 
     @Id
     @GeneratedValue
     private Long id;
 
     @OneToMany (cascade = CascadeType.ALL)
-    private Set<Layer3JunctionE> junctions;
+    private Set<RequestedVlanJunctionE> junctions;
 
     @OneToMany (cascade = CascadeType.ALL)
-    private Set<Layer3PipeE> pipes;
+    private Set<RequestedVlanPipeE> pipes;
 
 
 }

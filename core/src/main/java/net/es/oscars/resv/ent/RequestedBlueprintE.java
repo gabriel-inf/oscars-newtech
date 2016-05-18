@@ -1,4 +1,4 @@
-package net.es.oscars.spec.ent;
+package net.es.oscars.resv.ent;
 
 import lombok.*;
 
@@ -10,7 +10,7 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class BlueprintE {
+public class RequestedBlueprintE {
 
     @Id
     @GeneratedValue
@@ -18,7 +18,7 @@ public class BlueprintE {
 
     @OneToMany (cascade = CascadeType.ALL)
     @NonNull
-    private Set<VlanFlowE> vlanFlows;
+    private Set<RequestedVlanFlowE> vlanFlows;
 
     @OneToMany (cascade = CascadeType.ALL)
     @NonNull

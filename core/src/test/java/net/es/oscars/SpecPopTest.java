@@ -1,18 +1,19 @@
-package net.es.oscars.spec;
+package net.es.oscars;
 
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.dto.spec.ScheduleSpecification;
+import net.es.oscars.dto.topo.Layer;
 import net.es.oscars.pce.PCEException;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.dto.pss.EthFixtureType;
 import net.es.oscars.dto.pss.EthJunctionType;
 import net.es.oscars.dto.pss.EthPipeType;
-import net.es.oscars.spec.ent.VlanFlowE;
-import net.es.oscars.spec.ent.VlanFixtureE;
-import net.es.oscars.spec.ent.VlanJunctionE;
-import net.es.oscars.spec.ent.VlanPipeE;
-import net.es.oscars.spec.dao.SpecificationRepository;
-import net.es.oscars.spec.ent.*;
+import net.es.oscars.resv.SpecUnitTestConfiguration;
+import net.es.oscars.resv.ent.*;
+import net.es.oscars.resv.dao.SpecificationRepository;
+import net.es.oscars.topo.ent.UrnE;
+import net.es.oscars.topo.enums.DeviceModel;
+import net.es.oscars.topo.enums.DeviceType;
+import net.es.oscars.topo.enums.UrnType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +28,7 @@ import java.util.HashSet;
 
 @Slf4j
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(SpecUnitTestConfiguration.class)
+@SpringApplicationConfiguration(CoreUnitTestConfiguration.class)
 public class SpecPopTest {
 
     @Autowired
@@ -52,25 +53,63 @@ public class SpecPopTest {
 
     public static SpecificationE addEndpoints(SpecificationE spec) {
 
-        VlanFlowE flow = spec.getRequested().getVlanFlows().iterator().next();
+        RequestedVlanFlowE flow = spec.getRequested().getVlanFlows().iterator().next();
 
 
-        VlanJunctionE aj = VlanJunctionE.builder()
+        UrnE startb1 = UrnE.builder()
+                .deviceModel(DeviceModel.JUNIPER_EX)
+                .capabilities(new HashSet<>())
+                .deviceType(DeviceType.SWITCH)
+                .urnType(UrnType.DEVICE)
+                .urn("star-tb1")
+                .valid(true)
+                .build();
+        startb1.getCapabilities().add(Layer.ETHERNET);
+
+        UrnE nersctb1 = UrnE.builder()
+                .deviceModel(DeviceModel.JUNIPER_EX)
+                .capabilities(new HashSet<>())
+                .deviceType(DeviceType.SWITCH)
+                .urnType(UrnType.DEVICE)
+                .urn("nersc-tb1")
+                .valid(true)
+                .build();
+        nersctb1.getCapabilities().add(Layer.ETHERNET);
+
+
+
+        UrnE nersctb1_3_1_1 = UrnE.builder()
+                .capabilities(new HashSet<>())
+                .urnType(UrnType.IFCE)
+                .urn("nersc-tb1:3/1/1")
+                .valid(true)
+                .build();
+        nersctb1_3_1_1.getCapabilities().add(Layer.ETHERNET);
+
+        UrnE startb1_1_1_1 = UrnE.builder()
+                .capabilities(new HashSet<>())
+                .urnType(UrnType.IFCE)
+                .urn("star-tb1:1/1/1")
+                .valid(true)
+                .build();
+        startb1_1_1_1.getCapabilities().add(Layer.ETHERNET);
+
+
+
+        RequestedVlanJunctionE aj = RequestedVlanJunctionE.builder()
                 .junctionType(EthJunctionType.REQUESTED)
-                .deviceUrn("star-tb1")
+                .deviceUrn(startb1)
                 .fixtures(new HashSet<>())
-                .resourceIds(new HashSet<>())
                 .build();
 
-        VlanJunctionE zj = VlanJunctionE.builder()
+        RequestedVlanJunctionE zj = RequestedVlanJunctionE.builder()
                 .junctionType(EthJunctionType.REQUESTED)
-                .deviceUrn("nersc-tb1")
+                .deviceUrn(nersctb1)
                 .fixtures(new HashSet<>())
-                .resourceIds(new HashSet<>())
                 .build();
 
-        VlanFixtureE af = VlanFixtureE.builder()
-                .portUrn("star-tb1:1/1/1")
+        RequestedVlanFixtureE af = RequestedVlanFixtureE.builder()
+                .portUrn(startb1_1_1_1)
                 .vlanExpression("2-100")
                 .inMbps(100)
                 .egMbps(100)
@@ -79,8 +118,8 @@ public class SpecPopTest {
 
         aj.getFixtures().add(af);
 
-        VlanFixtureE zf = VlanFixtureE.builder()
-                .portUrn("nersc-tb1:3/1/1")
+        RequestedVlanFixtureE zf = RequestedVlanFixtureE.builder()
+                .portUrn(nersctb1_3_1_1)
                 .vlanExpression("2-100")
                 .inMbps(100)
                 .egMbps(100)
@@ -89,7 +128,7 @@ public class SpecPopTest {
 
         zj.getFixtures().add(zf);
 
-        VlanPipeE az_p = VlanPipeE.builder()
+        RequestedVlanPipeE az_p = RequestedVlanPipeE.builder()
                 .azERO(new ArrayList<>())
                 .zaERO(new ArrayList<>())
                 .aJunction(aj)
@@ -123,12 +162,12 @@ public class SpecPopTest {
                 .username("some user")
                 .build();
 
-        BlueprintE bp = BlueprintE.builder()
+        RequestedBlueprintE bp = RequestedBlueprintE.builder()
                 .vlanFlows(new HashSet<>())
                 .layer3Flows(new HashSet<>())
                 .build();
 
-        VlanFlowE flow = VlanFlowE.builder()
+        RequestedVlanFlowE flow = RequestedVlanFlowE.builder()
                 .junctions(new HashSet<>())
                 .pipes(new HashSet<>())
                 .build();
