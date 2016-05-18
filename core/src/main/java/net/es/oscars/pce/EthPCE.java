@@ -10,7 +10,8 @@ import net.es.oscars.resv.dao.ReservedPssResourceRepository;
 import net.es.oscars.resv.dao.ReservedVlanRepository;
 import net.es.oscars.resv.ent.ReservedBandwidthE;
 import net.es.oscars.spec.ent.*;
-import net.es.oscars.topo.ent.EDevice;
+import net.es.oscars.topo.dao.UrnRepository;
+import net.es.oscars.topo.ent.UrnE;
 import net.es.oscars.topo.enums.DeviceModel;
 import net.es.oscars.topo.svc.TopoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +41,9 @@ public class EthPCE {
 
     @Autowired
     private ReservedPssResourceRepository pssResourceRepo;
+
+    @Autowired
+    private UrnRepository urnRepository;
 
 
     public VlanFlowE makeReserved(VlanFlowE req_f, ScheduleSpecificationE schedSpec) throws PSSException, PCEException {
@@ -99,6 +103,7 @@ public class EthPCE {
 
         Map<String, DeviceModel> deviceModels = topoService.deviceModels();
 
+
         // now, decompose the path
         List<Map<Layer, List<TopoEdge>>> segments = pceAssistant.decompose(symmetricalERO, deviceModels);
 
@@ -141,8 +146,7 @@ public class EthPCE {
             } else if (segment.containsKey(Layer.MPLS)) {
                 edges = segment.get(Layer.MPLS);
                 // TODO: do something with this pipe!
-                VlanPipeE pipe = pceAssistant.makeVplsPipe(edges, req_p.getAzMbps(), req_p.getZaMbps(),
-                        mergeA, mergeZ, deviceModels);
+                VlanPipeE pipe = pceAssistant.makeVplsPipe(edges, req_p.getAzMbps(), req_p.getZaMbps(), mergeA, mergeZ, deviceModels);
 
             } else {
                 throw new PCEException("invalid segmentation");
@@ -159,18 +163,19 @@ public class EthPCE {
 
     private VlanJunctionE reserveSimpleJunction(VlanJunctionE req_j, ScheduleSpecificationE scheduleSpec) throws PCEException, PSSException {
         String deviceUrn = req_j.getDeviceUrn();
-        EDevice device = topoService.device(deviceUrn);
+        // TODO: check if present
+        UrnE urn = urnRepository.findByUrn(deviceUrn).get();
 
         VlanJunctionE rsv_j = VlanJunctionE.builder()
                 .deviceUrn(deviceUrn)
                 .fixtures(new HashSet<>())
                 .resourceIds(new HashSet<>())
-                .junctionType(pceAssistant.decideJunctionType(device.getModel()))
+                .junctionType(pceAssistant.decideJunctionType(urn.getDeviceModel()))
                 .build();
 
 
         for (VlanFixtureE req_f : req_j.getFixtures()) {
-            VlanFixtureE res_f = this.makeFixture(req_f, device);
+            VlanFixtureE res_f = this.makeFixture(req_f, urn);
             rsv_j.getFixtures().add(res_f);
 
             saveFixtureResources(res_f, scheduleSpec);
@@ -190,11 +195,14 @@ public class EthPCE {
         Instant beginning = scheduleSpec.getNotBefore().toInstant();
         Instant ending = scheduleSpec.getNotAfter().toInstant();
 
+        // TODO: check if present
+        UrnE urn = urnRepository.findByUrn(fixture.getPortUrn()).get();
+
         // bandwidth
         ReservedBandwidthE reserved_bw = ReservedBandwidthE.builder()
                 .beginning(beginning)
                 .ending(ending)
-                .urn(fixture.getPortUrn())
+                .urn(urn)
                 .bandwidth(fixture.getInMbps())
                 .build();
 
@@ -208,14 +216,14 @@ public class EthPCE {
 
 
 
-    private VlanFixtureE makeFixture(VlanFixtureE bpFixture, EDevice device) throws PSSException {
+    private VlanFixtureE makeFixture(VlanFixtureE bpFixture, UrnE urn) throws PSSException {
 
         return VlanFixtureE.builder()
                 .egMbps(bpFixture.getEgMbps())
                 .inMbps(bpFixture.getInMbps())
                 .portUrn(bpFixture.getPortUrn())
                 .vlanExpression(bpFixture.getVlanExpression())
-                .fixtureType(pceAssistant.decideFixtureType(device.getModel()))
+                .fixtureType(pceAssistant.decideFixtureType(urn.getDeviceModel()))
                 .build();
     }
 

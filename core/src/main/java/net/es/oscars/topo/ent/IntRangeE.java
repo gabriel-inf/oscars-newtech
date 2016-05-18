@@ -14,7 +14,7 @@ import javax.persistence.Embeddable;
 @AllArgsConstructor
 @Builder
 @Embeddable
-public class EIntRange {
+public class IntRangeE {
     private Integer floor;
     private Integer ceiling;
 

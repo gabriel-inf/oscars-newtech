@@ -2,11 +2,9 @@ package net.es.oscars.resv.ent;
 
 import lombok.*;
 import net.es.oscars.dto.resv.ResourceType;
+import net.es.oscars.topo.ent.UrnE;
 
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.time.Instant;
 import java.util.List;
 
@@ -22,7 +20,8 @@ public class ReservedPssResourceE {
     private Long id;
 
     @NonNull
-    private String urn;
+    @ManyToOne
+    private UrnE urn;
 
     @NonNull
     private ResourceType resourceType;

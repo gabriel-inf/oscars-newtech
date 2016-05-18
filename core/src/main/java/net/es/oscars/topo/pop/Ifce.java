@@ -1,18 +1,20 @@
-package net.es.oscars.topo.ent;
+package net.es.oscars.topo.pop;
 
-import lombok.Data;
-import lombok.NonNull;
+import lombok.*;
 import net.es.oscars.dto.topo.Layer;
+import net.es.oscars.topo.ent.IntRangeE;
+import net.es.oscars.topo.enums.IfceType;
 
 import javax.persistence.*;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 
 @Data
-@Entity
-public class EIfce {
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class Ifce {
     @Id
     @GeneratedValue
     private Long id;
@@ -26,19 +28,12 @@ public class EIfce {
 
     @ElementCollection
     @CollectionTable
-    private List<EIntRange> reservableVlans;
+    private Set<IntRangeE> reservableVlans;
 
 
     @ElementCollection
     @CollectionTable
     private Set<Layer> capabilities = new HashSet<>();
 
-    public EIfce() {
-
-    }
-
-    public EIfce(String urn) {
-        this.urn = urn;
-    }
 
 }

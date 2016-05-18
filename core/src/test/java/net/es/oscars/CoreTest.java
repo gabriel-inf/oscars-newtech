@@ -1,6 +1,7 @@
 package net.es.oscars;
 
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.dto.topo.Layer;
 import net.es.oscars.pce.PCEException;
 import net.es.oscars.pce.TopPCE;
 import net.es.oscars.pss.PSSException;
@@ -8,10 +9,11 @@ import net.es.oscars.dto.pss.EthJunctionType;
 import net.es.oscars.spec.SpecPopTest;
 import net.es.oscars.spec.dao.SpecificationRepository;
 import net.es.oscars.spec.ent.*;
-import net.es.oscars.topo.dao.DeviceRepository;
-import net.es.oscars.topo.ent.DeviceType;
-import net.es.oscars.topo.ent.EDevice;
+import net.es.oscars.topo.dao.UrnRepository;
+import net.es.oscars.topo.ent.UrnE;
+import net.es.oscars.topo.enums.DeviceType;
 import net.es.oscars.topo.enums.DeviceModel;
+import net.es.oscars.topo.enums.UrnType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +21,6 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 
 @Slf4j
@@ -32,12 +33,12 @@ public class CoreTest {
     private SpecificationRepository specRepo;
 
     @Autowired
-    private DeviceRepository devRepo;
+    private UrnRepository urnRepo;
 
     @Autowired
     private TopPCE topPCE;
 
-    @Test
+    @Test(expected = PCEException.class)
     public void testSpecification() throws PCEException, PSSException {
 
         if (specRepo.findAll().isEmpty()) {
@@ -45,7 +46,7 @@ public class CoreTest {
 
             SpecPopTest.addEndpoints(spec);
 
-            log.info("spec: "+spec.toString());
+            log.info("spec: " + spec.toString());
 
             this.populateTopo(spec);
 
@@ -80,27 +81,29 @@ public class CoreTest {
 
 
     private void populateTopo(SpecificationE spec) {
-        spec.getRequested().getVlanFlows().stream().forEach(t-> {
-            t.getJunctions().forEach(this::makeDevice);
-            t.getPipes().forEach( p -> {
-                makeDevice(p.getAJunction());
-                makeDevice(p.getZJunction());
+        spec.getRequested().getVlanFlows().stream().forEach(t -> {
+            t.getJunctions().forEach(this::makeDeviceUrn);
+            t.getPipes().forEach(p -> {
+                makeDeviceUrn(p.getAJunction());
+                makeDeviceUrn(p.getZJunction());
             });
 
         });
     }
 
-    private void makeDevice(VlanJunctionE junction) {
+    private void makeDeviceUrn(VlanJunctionE junction) {
         String urn = junction.getDeviceUrn();
-        if (!devRepo.findByUrn(urn).isPresent()) {
-           devRepo.save(EDevice.builder()
-                    .model(DeviceModel.JUNIPER_EX)
+        if (!urnRepo.findByUrn(urn).isPresent()) {
+            UrnE urnE = UrnE.builder()
+                    .deviceModel(DeviceModel.JUNIPER_EX)
                     .capabilities(new HashSet<>())
-                    .ifces(new HashSet<>())
-                    .reservableVlans(new ArrayList<>())
-                    .type(DeviceType.SWITCH)
+                    .deviceType(DeviceType.SWITCH)
+                    .urnType(UrnType.DEVICE)
                     .urn(urn)
-                    .build());
+                    .valid(true)
+                    .build();
+            urnE.getCapabilities().add(Layer.ETHERNET);
+            urnRepo.save(urnE);
 
         }
 

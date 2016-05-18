@@ -7,14 +7,11 @@ import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.util.EdgeType;
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.dto.IntRange;
-import net.es.oscars.dto.resv.ResourceType;
-import net.es.oscars.dto.rsrc.ReservableBandwidth;
-import net.es.oscars.dto.rsrc.ReservablePssResource;
 import net.es.oscars.dto.topo.Layer;
 import net.es.oscars.dto.topo.TopoEdge;
 import net.es.oscars.dto.topo.TopoVertex;
 import net.es.oscars.dto.topo.Topology;
+import net.es.oscars.topo.ent.ReservableBandwidthE;
 import net.es.oscars.topo.svc.TopoService;
 import org.apache.commons.collections15.Transformer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +31,7 @@ public class BandwidthPCE {
     public List<TopoEdge> bwConstrainedShortestPath(String aUrn, String zUrn, Integer bandwidth, Set<Layer> layers) {
         log.info("finding bandwidth constrained path between " + aUrn + " -- " + zUrn + " for " + bandwidth + " mbps");
 
-        List<ReservableBandwidth> bandwidths = topoService.reservableBandwidth();
+        List<ReservableBandwidthE> bandwidths = topoService.reservableBandwidths();
         // TODO: subtract already reserved bandwidths
 
         Graph<TopoVertex, TopoEdge> g = new DirectedSparseMultigraph<>();
@@ -71,7 +68,7 @@ public class BandwidthPCE {
         return path;
     }
 
-    private void addToGraph(Topology topo, Layer layer, Graph<TopoVertex, TopoEdge> g, Integer bandwidth, List<ReservableBandwidth> bandwidths) {
+    private void addToGraph(Topology topo, Layer layer, Graph<TopoVertex, TopoEdge> g, Integer bandwidth, List<ReservableBandwidthE> bandwidths) {
 
         topo.getVertices().stream().forEach(v -> {
             log.info("adding vertex to " + layer + " topo " + v.getUrn());
@@ -107,10 +104,10 @@ public class BandwidthPCE {
 
     }
 
-    private Boolean bandwidthFits(Integer bandwidth, String urn, List<ReservableBandwidth> bandwidths) {
+    private Boolean bandwidthFits(Integer bandwidth, String urn, List<ReservableBandwidthE> bandwidths) {
 
         log.debug("checking if " + urn + " has enough bandwidth " + bandwidth);
-        List<ReservableBandwidth> matching = bandwidths.stream().filter(bw -> bw.getTopoVertexUrn().equals(urn)).collect(Collectors.toList());
+        List<ReservableBandwidthE> matching = bandwidths.stream().filter(bw -> bw.getUrn().getUrn().equals(urn)).collect(Collectors.toList());
 
         assert matching.size() <= 1;
         if (matching.isEmpty()) {

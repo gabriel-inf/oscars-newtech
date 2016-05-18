@@ -1,20 +1,18 @@
-package net.es.oscars.resv.ent;
+package net.es.oscars.topo.ent;
+
 
 import lombok.*;
 import net.es.oscars.dto.resv.ResourceType;
-import net.es.oscars.topo.ent.UrnE;
 
 import javax.persistence.*;
-import java.time.Instant;
-import java.util.List;
+import java.util.Set;
 
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Entity
-public class ReservedVlanE {
-
+public class ReservablePssResourceE {
     @Id
     @GeneratedValue
     private Long id;
@@ -23,11 +21,11 @@ public class ReservedVlanE {
     @ManyToOne
     private UrnE urn;
 
-    private Integer vlan;
+    @NonNull
+    private ResourceType type;
 
-    private Instant beginning;
-
-    private Instant ending;
-
+    @ElementCollection
+    @CollectionTable
+    private Set<IntRangeE> reservableRanges;
 
 }

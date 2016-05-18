@@ -1,32 +1,31 @@
-package net.es.oscars.resv.ent;
+package net.es.oscars.topo.ent;
+
 
 import lombok.*;
 import net.es.oscars.topo.ent.UrnE;
 
 import javax.persistence.*;
-import java.time.Instant;
-import java.util.List;
 
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Entity
-public class ReservedBandwidthE {
 
+public class ReservableBandwidthE {
     @Id
     @GeneratedValue
     private Long id;
 
     @NonNull
-    @ManyToOne
+    @OneToOne
     private UrnE urn;
+
 
     private Integer bandwidth;
 
-    private Instant beginning;
+    private Integer ingressBw;
 
-    private Instant ending;
-
+    private Integer egressBw;
 
 }

@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -75,7 +76,11 @@ public class TopPCE {
 
         for (VlanJunctionE junction: allJunctions) {
             // throws exception if device not found in topology
-            topoService.device(junction.getDeviceUrn());
+            try {
+                topoService.device(junction.getDeviceUrn());
+            } catch (NoSuchElementException ex) {
+                throw new PCEException("device not found in topology");
+            }
         }
 
         Set<String> junctionsWithNoFixtures = allJunctions.stream().

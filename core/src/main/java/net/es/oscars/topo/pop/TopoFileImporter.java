@@ -2,10 +2,15 @@ package net.es.oscars.topo.pop;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.topo.dao.DeviceRepository;
+import net.es.oscars.dto.topo.Layer;
 import net.es.oscars.topo.dao.UrnAdjcyRepository;
-import net.es.oscars.topo.ent.EDevice;
-import net.es.oscars.topo.ent.EUrnAdjcy;
+import net.es.oscars.topo.dao.UrnRepository;
+import net.es.oscars.topo.ent.ReservableBandwidthE;
+import net.es.oscars.topo.ent.ReservableVlanE;
+import net.es.oscars.topo.ent.UrnAdjcyE;
+import net.es.oscars.topo.ent.UrnE;
+import net.es.oscars.topo.enums.IfceType;
+import net.es.oscars.topo.enums.UrnType;
 import net.es.oscars.topo.prop.TopoProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,8 +18,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 
 @Slf4j
@@ -22,7 +26,7 @@ import java.util.List;
 public class TopoFileImporter implements TopoImporter {
 
     @Autowired
-    private DeviceRepository deviceRepo;
+    private UrnRepository urnRepo;
 
     @Autowired
     private UrnAdjcyRepository adjcyRepo;
@@ -57,48 +61,144 @@ public class TopoFileImporter implements TopoImporter {
     }
 
     public void importFromFile(boolean overwrite, String devicesFilename, String adjciesFilename) throws IOException {
-        List<EDevice> newDevices = importDevicesFromFile(devicesFilename);
-        newDevices.stream().forEach(t -> log.info(t.toString()));
 
-        List<EUrnAdjcy> newAdjcies = importAdjciesFromFile(adjciesFilename);
+
+        List<Device> devices = importDevicesFromFile(devicesFilename);
+        devices.stream().forEach(t -> log.info(t.toString()));
+
+        List<UrnAdjcyE> newAdjcies = importAdjciesFromFile(adjciesFilename);
         newAdjcies.stream().forEach(t -> log.info(t.toString()));
+
+        List<UrnAdjcyE> deviceAdjcies = adjciesFromDevices(devices);
+        deviceAdjcies.stream().forEach(t -> log.info(t.toString()));
 
         if (overwrite) {
             log.info("Overwrite set; deleting topology DB entries.");
-            deviceRepo.deleteAll();
+            urnRepo.deleteAll();
             adjcyRepo.deleteAll();
         }
 
-        List<EDevice> devices = deviceRepo.findAll();
+        List<UrnE> urns = urnRepo.findAll();
 
-        if (devices.isEmpty()) {
-            log.info("Devices DB empty. Will replace with input from devices file "+devicesFilename);
-            deviceRepo.save(newDevices);
+        if (urns.isEmpty()) {
+            log.info("URN DB empty. Will replace with input from devices file "+devicesFilename);
+            List<UrnE> newUrns = this.urnsFromDevices(devices);
+
+            urnRepo.save(newUrns);
         } else {
             log.info("Devices DB is not empty; skipping import");
         }
 
-
-        List<EUrnAdjcy> adjcies = adjcyRepo.findAll();
+        List<UrnAdjcyE> adjcies = adjcyRepo.findAll();
         if (adjcies.isEmpty()) {
             log.info("Adjacencies DB empty. Will replace with input from adjacencies file "+adjciesFilename);
             adjcyRepo.save(newAdjcies);
+            adjcyRepo.save(deviceAdjcies);
         } else {
             log.info("Adjacencies DB is not empty; skipping import");
         }
 
     }
 
-    private List<EDevice> importDevicesFromFile(String filename) throws IOException {
-        File jsonFile = new File(filename);
-        ObjectMapper mapper = new ObjectMapper();
-        return Arrays.asList(mapper.readValue(jsonFile, EDevice[].class));
+
+    private List<UrnAdjcyE> adjciesFromDevices(List<Device> devices) {
+        List<UrnAdjcyE> adjcies = new ArrayList<>();
+        devices.stream().forEach(d -> {
+            UrnE deviceUrn = urnRepo.findByUrn(d.getUrn()).get();
+            d.getIfces().stream().forEach(i -> {
+                UrnE ifceUrn = urnRepo.findByUrn(i.getUrn()).get();
+                UrnAdjcyE azAdjcy = UrnAdjcyE.builder()
+                        .a(deviceUrn)
+                        .z(ifceUrn)
+                        .metrics(new HashMap<>())
+                        .build();
+
+                UrnAdjcyE zaAdjcy = UrnAdjcyE.builder()
+                        .a(deviceUrn)
+                        .z(ifceUrn)
+                        .metrics(new HashMap<>())
+                        .build();
+
+                azAdjcy.getMetrics().put(Layer.INTERNAL, 1L);
+                zaAdjcy.getMetrics().put(Layer.INTERNAL, 1L);
+                adjcies.add(azAdjcy);
+                adjcies.add(zaAdjcy);
+            });
+
+        });
+
+        return adjcies;
     }
 
-    private List<EUrnAdjcy> importAdjciesFromFile(String filename) throws IOException {
+    private List<UrnE> urnsFromDevices(List<Device> devices) {
+        List<UrnE> urns = new ArrayList<>();
+
+        devices.stream().forEach(d -> {
+            UrnE deviceUrn = UrnE.builder()
+                    .valid(true)
+                    .urn(d.getUrn())
+                    .deviceModel(d.getModel())
+                    .deviceType(d.getType())
+                    .urnType(UrnType.DEVICE)
+                    .capabilities(d.getCapabilities())
+                    .build();
+
+            if (null != d.getReservableVlans() && !d.getReservableVlans().isEmpty()) {
+
+                ReservableVlanE resvVlan = ReservableVlanE.builder()
+                        .vlanRanges(d.getReservableVlans())
+                        .urn(deviceUrn)
+                        .build();
+                deviceUrn.setReservableVlans(resvVlan);
+            }
+            urns.add(deviceUrn);
+
+
+            d.getIfces().stream().forEach(i -> {
+                UrnE ifceUrn = UrnE.builder()
+                        .valid(true)
+                        .urn(i.getUrn())
+                        .urnType(UrnType.IFCE)
+                        .capabilities(i.getCapabilities())
+                        .ifceType(IfceType.PORT)
+                        .build();
+
+                if (null != i.getReservableBw()) {
+                    ReservableBandwidthE rbw = ReservableBandwidthE.builder()
+                            .bandwidth(i.getReservableBw())
+                            .ingressBw(i.getReservableBw())
+                            .egressBw(i.getReservableBw())
+                            .urn(ifceUrn)
+                            .build();
+                    ifceUrn.setReservableBandwidth(rbw);
+                }
+
+                if (null != i.getReservableVlans() && !i.getReservableVlans().isEmpty()) {
+                    ReservableVlanE resvVlan = ReservableVlanE.builder()
+                            .vlanRanges(i.getReservableVlans())
+                            .urn(ifceUrn)
+                            .build();
+                    ifceUrn.setReservableVlans(resvVlan);
+                }
+                urns.add(ifceUrn);
+            });
+        });
+
+        return urns;
+
+    }
+
+
+    private List<Device> importDevicesFromFile(String filename) throws IOException {
         File jsonFile = new File(filename);
         ObjectMapper mapper = new ObjectMapper();
-        return Arrays.asList(mapper.readValue(jsonFile, EUrnAdjcy[].class));
+        return Arrays.asList(mapper.readValue(jsonFile, Device[].class));
+    }
+
+    private List<UrnAdjcyE> importAdjciesFromFile(String filename) throws IOException {
+        File jsonFile = new File(filename);
+        ObjectMapper mapper = new ObjectMapper();
+        return Arrays.asList(mapper.readValue(jsonFile, UrnAdjcyE[].class));
     }
 
 }

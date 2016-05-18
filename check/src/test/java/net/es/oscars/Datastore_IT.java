@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.resv.ResourceType;
 import net.es.oscars.resv.dao.ReservedPssResourceRepository;
 import net.es.oscars.resv.ent.ReservedPssResourceE;
+import net.es.oscars.topo.ent.UrnE;
 import net.es.oscars.topo.pop.TopoImporter;
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -32,12 +33,13 @@ public class Datastore_IT {
     @Before
     public void prepare() throws IOException {
         importer.importFromFile(true, "config/topo-basic/devices.json", "config/topo-basic/adjcies.json");
+        UrnE urn = UrnE.builder().urn("star-tb1").build();
 
         ReservedPssResourceE rr = ReservedPssResourceE.builder()
                 .beginning(Instant.ofEpochSecond(0))
                 .ending(Instant.ofEpochSecond(5000))
                 .resource(10)
-                .urn("star-tb1")
+                .urn(urn)
                 .resourceType(ResourceType.VC_ID)
                 .build();
 

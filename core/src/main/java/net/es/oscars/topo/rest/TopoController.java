@@ -33,12 +33,6 @@ public class TopoController {
     }
 
 
-    @RequestMapping(value = "/device/{urn}", method = RequestMethod.GET)
-    @ResponseBody
-    public EDevice device(@PathVariable("urn") String urn) {
-        return svc.device(urn);
-    }
-
 
     @RequestMapping(value = "/topo/vlanEdges", method = RequestMethod.GET)
     @ResponseBody
