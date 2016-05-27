@@ -1,1 +1,67 @@
 # oscars-newtech
+## Synopsis
+Short for "On-demand Secure Circuits and Advance Reservation System," OSCARS is a freely available open-source product. As developed by the Department of Energy’s high-performance science network ESnet, OSCARS was designed by network engineers who specialize in supporting the U.S. national laboratory system and its data-intensive collaborations. This project is a complete redesign of the original OSCARS to improve performance and maintainability. 
+
+
+## Building OSCARS
+
+### Preparing Your Environment
+
+Make sure the following are installed on your system:
+
+* [Java](https://www.java.com) 1.8
+* The latest version of [Maven](http://maven.apache.org) 
+
+
+### Building using maven
+
+Run the following commands from the main project directory:
+
+```bash
+mvn -DskipTests install
+```
+
+## Testing OSCARS
+You can run the unit tests with the command:
+
+```bash
+mvn test
+```
+
+You may also install only if the tests pass by running:
+
+```bash
+mvn install
+```
+## Running OSCARS
+
+### Starting OSCARS
+
+You may start all OSCARS services (core and webui) with the following command:
+
+```bash
+$./bin/startServers.sh
+```
+
+## Project Structure
+The new OSCARS is a [Springboot](http://projects.spring.io/spring-boot/) application, made up of two major components: The main application ("core"), and the web interface ("webui"). 
+The main project directory is structured as follows:
+### bin
+Contains script(s) for running OSCARS.
+### check
+Integration tests.
+### core
+The main application. Handles reservation requests, determines which path (if any) is available to satisfy the request, and reserves the network resources. Key modules include:
+* **acct** - Maintains list of customers and handles storing, editing, and retrieving account information.
+* **authnz** - Tracks permissions/authorization associated with user accounts. 
+* **conf** - Retrives configurations, specified in "oscars-newtech/core/config", for each OSCARS module on startup.
+* **helpers** - Functions useful for dealing with Instants and VLAN expression parsing.
+* **pce** - The Path Computation Engine. It takes a requested reservation's parameters, evaluates the current topology, determines the (shortest) path, if any, and decides which network resources must be reserved.
+* **pss** - Sets up, tears down, modifies and verifies network paths. Handles templates for network devices.
+* **resv** - Tracks reservations, and receives user parameters for reservation requests.
+* **tasks** - Services which run in the background and perform tasks at certain intervals (e.g. Select a submitted request to begin the reservation process).
+* **topo** - Maintain topology information.
+### shared 
+A collection of shared classes used by the different modules. 
+### webui 
+The web interface through which users can view their current and past reservations, and submit reservation requests. The WebUI is built useing the [Thymeleaf](http://www.thymeleaf.org/) template engine. 
