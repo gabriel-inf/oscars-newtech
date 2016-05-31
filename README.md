@@ -54,7 +54,7 @@ Integration tests.
 The main application. Handles reservation requests, determines which path (if any) is available to satisfy the request, and reserves the network resources. Key modules include:
 * **acct** - Maintains list of customers and handles storing, editing, and retrieving account information.
 * **authnz** - Tracks permissions/authorization associated with user accounts. 
-* **conf** - Retrives configurations, specified in "oscars-newtech/core/config", for each OSCARS module on startup.
+* **conf** - Retrieves configurations, specified in "oscars-newtech/core/config", for each OSCARS module on startup.
 * **helpers** - Functions useful for dealing with Instants and VLAN expression parsing.
 * **pce** - The Path Computation Engine. It takes a requested reservation's parameters, evaluates the current topology, determines the (shortest) path, if any, and decides which network resources must be reserved.
 * **pss** - Sets up, tears down, modifies and verifies network paths. Handles templates for network devices.
@@ -66,4 +66,4 @@ The main application. Handles reservation requests, determines which path (if an
 A collection of shared classes used by the different modules. 
 
 ### webui 
-The web interface through which users can view their current and past reservations, and submit reservation requests. The WebUI is built useing the [Thymeleaf](http://www.thymeleaf.org/) template engine. 
+The web interface through which users can view their current and past reservations, and submit reservation requests. The WebUI is built using the [Thymeleaf](http://www.thymeleaf.org/) template engine. 
