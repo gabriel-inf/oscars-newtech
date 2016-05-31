@@ -61,7 +61,9 @@ The main application. Handles reservation requests, determines which path (if an
 * **resv** - Tracks reservations, and receives user parameters for reservation requests.
 * **tasks** - Services which run in the background and perform tasks at certain intervals (e.g. Select a submitted request to begin the reservation process).
 * **topo** - Maintain topology information.
+
 ### shared 
 A collection of shared classes used by the different modules. 
+
 ### webui 
 The web interface through which users can view their current and past reservations, and submit reservation requests. The WebUI is built useing the [Thymeleaf](http://www.thymeleaf.org/) template engine. 
