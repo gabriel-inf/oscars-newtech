@@ -15,7 +15,7 @@ Make sure the following are installed on your system:
 
 ### Building using maven
 
-Run the following commands from the main project directory:
+Run the following commands from the main project directory (oscars-newtech):
 
 ```bash
 mvn -DskipTests install
@@ -42,6 +42,9 @@ You may start all OSCARS services (core and webui) with the following command:
 ```bash
 $./bin/start.sh
 ```
+### Accessing the Web User Interface (webui)
+
+OSCARS should now be running on your local machine. The webui can be accessed at: https://localhost:8001. You will be presented with a login screen. The admin username is **admin** and the default password is **oscars**. 
 
 ## Project Structure
 The new OSCARS is a [Springboot](http://projects.spring.io/spring-boot/) application, made up of two major components: The main application ("core"), and the web interface ("webui"). 
