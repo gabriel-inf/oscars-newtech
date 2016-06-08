@@ -40,7 +40,7 @@ mvn install
 You may start all OSCARS services (core and webui) with the following command:
 
 ```bash
-$./bin/startServers.sh
+$./bin/start.sh
 ```
 
 ## Project Structure
