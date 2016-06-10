@@ -1,7 +1,7 @@
 package net.es.oscars.topo.ent;
 
 import lombok.*;
-import net.es.oscars.dto.topo.Layer;
+import net.es.oscars.topo.enums.Layer;
 
 import javax.persistence.*;
 import java.util.HashMap;

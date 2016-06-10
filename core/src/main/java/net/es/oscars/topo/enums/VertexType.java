@@ -1,4 +1,4 @@
-package net.es.oscars.dto.topo;
+package net.es.oscars.topo.enums;
 
 
 import java.util.EnumSet;
@@ -6,14 +6,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public enum Layer {
-    ETHERNET("ETHERNET"),
-    INTERNAL("INTERNAL"),
-    MPLS("MPLS");
+public enum VertexType {
+    NETWORK("NETWORK"),
+    PORT("PORT"),
+    ROUTER("ROUTER"),
+    SWITCH("SWITCH");
+
 
     private String code;
 
-    Layer(String code) {
+    VertexType(String code) {
         this.code = code;
     }
 
@@ -21,22 +23,21 @@ public enum Layer {
         return this.code;
     }
 
-
-    private static final Map<String, Layer> lookup = new HashMap<String, Layer>();
+    private static final Map<String, VertexType> lookup = new HashMap<String, VertexType>();
 
     static {
-        for (Layer pc : EnumSet.allOf(Layer.class)) {
+        for (VertexType pc : EnumSet.allOf(VertexType.class)) {
             lookup.put(pc.getCode(), pc);
         }
     }
 
-    public static Optional<Layer> get(String code) {
-        Optional<Layer> result;
+    public static Optional<VertexType> get(String code) {
         if (lookup.containsKey(code)) {
             return Optional.of(lookup.get(code));
         } else {
             return Optional.empty();
         }
     }
+
 
 }

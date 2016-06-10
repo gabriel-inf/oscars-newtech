@@ -2,7 +2,7 @@ package net.es.oscars.topo.pop;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.dto.topo.Layer;
+import net.es.oscars.topo.enums.Layer;
 import net.es.oscars.topo.dao.UrnAdjcyRepository;
 import net.es.oscars.topo.dao.UrnRepository;
 import net.es.oscars.topo.ent.ReservableBandwidthE;

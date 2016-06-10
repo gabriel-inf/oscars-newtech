@@ -3,7 +3,7 @@ package net.es.oscars.pce;
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.IntRange;
 import net.es.oscars.dto.rsrc.ReservableVlan;
-import net.es.oscars.dto.topo.TopoEdge;
+import net.es.oscars.topo.beans.TopoEdge;
 import net.es.oscars.resv.ent.ReservedVlanE;
 
 import java.util.*;

@@ -1,13 +1,12 @@
 package net.es.oscars;
 
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.dto.topo.Layer;
+import net.es.oscars.topo.enums.Layer;
 import net.es.oscars.pce.PCEException;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.dto.pss.EthFixtureType;
 import net.es.oscars.dto.pss.EthJunctionType;
 import net.es.oscars.dto.pss.EthPipeType;
-import net.es.oscars.resv.SpecUnitTestConfiguration;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.resv.dao.SpecificationRepository;
 import net.es.oscars.topo.ent.UrnE;

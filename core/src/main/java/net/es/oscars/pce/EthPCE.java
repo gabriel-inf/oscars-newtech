@@ -1,8 +1,8 @@
 package net.es.oscars.pce;
 
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.dto.topo.Layer;
-import net.es.oscars.dto.topo.TopoEdge;
+import net.es.oscars.topo.enums.Layer;
+import net.es.oscars.topo.beans.TopoEdge;
 import net.es.oscars.pss.PCEAssistant;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.dao.ReservedBandwidthRepository;
