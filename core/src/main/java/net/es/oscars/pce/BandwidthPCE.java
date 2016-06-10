@@ -24,8 +24,6 @@ import java.util.stream.Collectors;
 @Component
 public class BandwidthPCE {
 
-    //Jeremy: Testing Git push
-
     @Autowired
     private TopoService topoService;
 
