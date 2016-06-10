@@ -11,4 +11,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class TopoVertex {
     private String urn;
+    private VertexType type;
 }
