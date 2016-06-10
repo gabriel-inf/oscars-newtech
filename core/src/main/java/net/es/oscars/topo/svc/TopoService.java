@@ -7,7 +7,6 @@ import net.es.oscars.topo.beans.TopoEdge;
 import net.es.oscars.topo.enums.*;
 import net.es.oscars.topo.beans.TopoVertex;
 import net.es.oscars.topo.beans.Topology;
-import net.es.oscars.topo.beans.UrnEdge;
 import net.es.oscars.topo.dao.ReservableBandwidthRepository;
 import net.es.oscars.topo.dao.ReservableVlanRepository;
 import net.es.oscars.topo.dao.UrnAdjcyRepository;
