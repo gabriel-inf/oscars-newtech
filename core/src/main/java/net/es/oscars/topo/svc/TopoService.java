@@ -117,11 +117,7 @@ public class TopoService {
     }
 
     public List<ReservableVlanE> reservableVlans() {
-
-
-        List<ReservableVlanE> vlans = vlanRepo.findAll();
-        return vlans;
-
+        return vlanRepo.findAll();
 
     }
 
