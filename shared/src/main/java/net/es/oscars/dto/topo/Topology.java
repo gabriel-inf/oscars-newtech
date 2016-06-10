@@ -8,7 +8,7 @@ import java.util.Set;
 @Data
 public class Topology {
     public Layer layer;
-    private Set<UrnEdge> edges = new HashSet<>();
+    private Set<TopoEdge> edges = new HashSet<>();
     private Set<TopoVertex> vertices = new HashSet<>();
 
     public Topology() {
