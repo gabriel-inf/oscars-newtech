@@ -4,20 +4,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import net.es.oscars.dto.topo.*;
-import net.es.oscars.topo.dao.UrnAdjcyRepository;
-import net.es.oscars.topo.dao.UrnRepository;
-import net.es.oscars.topo.ent.UrnAdjcyE;
-import net.es.oscars.topo.ent.UrnE;
-import net.es.oscars.topo.enums.DeviceType;
-import net.es.oscars.topo.enums.IfceType;
-import net.es.oscars.topo.enums.UrnType;
+import net.es.oscars.topo.beans.TopoEdge;
+import net.es.oscars.topo.beans.TopoVertex;
+import net.es.oscars.topo.beans.Topology;
+import net.es.oscars.topo.enums.*;
 import net.es.oscars.topo.svc.TopoService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.persistence.Entity;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -30,15 +24,15 @@ public class ServiceLayerTopology
 {
     Set<TopoVertex> serviceLayerDevices;
     Set<TopoVertex> serviceLayerPorts;
-    List<TopoEdge> serviceLayerLinks;
+    Set<TopoEdge> serviceLayerLinks;
 
     Set<TopoVertex> mplsLayerDevices;
     Set<TopoVertex> mplsLayerPorts;
-    List<TopoEdge> mplsLayerLinks;
+    Set<TopoEdge> mplsLayerLinks;
 
-    List<TopoVertex> logicalSrcDst;
-    List<TopoVertex> logicalSrcdstPort;
-    List<TopoEdge> logicalLinks;
+    Set<TopoVertex> logicalSrcDst;
+    Set<TopoVertex> logicalSrcdstPort;
+    Set<TopoEdge> logicalLinks;
 
     @Autowired
     TopoService topoService;
@@ -68,19 +62,19 @@ public class ServiceLayerTopology
         // Parse the Devices
         Set<TopoVertex> allEthernetDevices = ethernetVertices.stream()
                 .filter(d -> d.getVertexType().equals(VertexType.SWITCH))
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
 
 
         // Parse the Ports
         Set<TopoVertex> allEthernetPorts = ethernetVertices.stream()
                 .filter(p -> p.getVertexType().equals(VertexType.PORT))
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
 
 
         // Parse the INTERNAL Edges
         Set<TopoEdge> allInternalEthernetEdges = allInternalEdges.stream()
                 .filter(e -> !e.getA().getVertexType().equals(VertexType.ROUTER) && !e.getZ().getVertexType().equals(VertexType.ROUTER))
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
 
 
         // Compose Service-Layer
@@ -107,19 +101,19 @@ public class ServiceLayerTopology
         // Parse the Devices
         Set<TopoVertex> allMplsDevices = mplsVertices.stream()
                 .filter(d -> d.getVertexType().equals(VertexType.ROUTER))
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
 
 
         // Parse the Ports
         Set<TopoVertex> allMplsPorts = mplsVertices.stream()
                 .filter(p -> p.getVertexType().equals(VertexType.PORT))
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
 
 
         // Parse the INTERNAL Edges
         Set<TopoEdge> allInternalMPLSEdges = allInternalEdges.stream()
                 .filter(e -> !e.getA().getVertexType().equals(VertexType.SWITCH) && !e.getZ().getVertexType().equals(VertexType.SWITCH))
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
 
 
         //Compose MPLS Mesh Layer

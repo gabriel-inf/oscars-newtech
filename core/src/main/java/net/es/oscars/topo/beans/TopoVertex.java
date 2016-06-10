@@ -12,5 +12,5 @@ import net.es.oscars.topo.enums.VertexType;
 @AllArgsConstructor
 public class TopoVertex {
     private String urn;
-    private VertexType type;
+    private VertexType vertexType;
 }
