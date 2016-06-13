@@ -11,12 +11,10 @@ import net.es.oscars.topo.enums.*;
 import net.es.oscars.topo.svc.TopoService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.persistence.Entity;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Data
-@Entity
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
