@@ -12,6 +12,7 @@ import net.es.oscars.topo.beans.TopoEdge;
 import net.es.oscars.topo.beans.TopoVertex;
 import net.es.oscars.topo.beans.Topology;
 import net.es.oscars.topo.ent.ReservableBandwidthE;
+import net.es.oscars.topo.enums.VertexType;
 import net.es.oscars.topo.svc.TopoService;
 import org.apache.commons.collections15.Transformer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,8 +54,8 @@ public class BandwidthPCE {
 
         DijkstraShortestPath<TopoVertex, TopoEdge> alg = new DijkstraShortestPath<>(g, wtTransformer);
 
-        TopoVertex src = new TopoVertex(aUrn);
-        TopoVertex dst = new TopoVertex(zUrn);
+        TopoVertex src = new TopoVertex(aUrn, VertexType.PORT);
+        TopoVertex dst = new TopoVertex(zUrn, VertexType.PORT);
         List<TopoEdge> path = alg.getPath(src, dst);
 
         log.info("calculated path ");
@@ -76,22 +77,22 @@ public class BandwidthPCE {
         });
 
         topo.getEdges().stream().forEach(e -> {
-            boolean bwFitsOnA = this.bandwidthFits(bandwidth, e.getA(), bandwidths);
-            boolean bwFitsOnZ = this.bandwidthFits(bandwidth, e.getZ(), bandwidths);
+            boolean bwFitsOnA = this.bandwidthFits(bandwidth, e.getA().getUrn(), bandwidths);
+            boolean bwFitsOnZ = this.bandwidthFits(bandwidth, e.getZ().getUrn(), bandwidths);
 
             if (bwFitsOnA && bwFitsOnZ) {
 
-                TopoVertex a = new TopoVertex(e.getA());
-                TopoVertex z = new TopoVertex(e.getZ());
+                TopoVertex a = new TopoVertex(e.getA().getUrn(), e.getA().getVertexType());
+                TopoVertex z = new TopoVertex(e.getZ().getUrn(), e.getA().getVertexType());
                 TopoEdge az = TopoEdge.builder().a(a).z(z).build();
 
-                if (e.getMetrics().containsKey(Layer.INTERNAL)) {
+                if (e.getLayer().equals(Layer.INTERNAL)) {
                     az.setLayer(Layer.INTERNAL);
-                    az.setMetric(e.getMetrics().get(Layer.INTERNAL));
+                    az.setMetric(e.getMetric());;
                     log.info("adding edge " + e.getA() + " -- INTERNAL -- " + e.getZ());
                 } else {
                     az.setLayer(layer);
-                    az.setMetric(e.getMetrics().get(layer));
+                    az.setMetric(e.getMetric());
                     log.info("adding edge " + e.getA() + " -- " + layer + " -- " + e.getZ());
                 }
 

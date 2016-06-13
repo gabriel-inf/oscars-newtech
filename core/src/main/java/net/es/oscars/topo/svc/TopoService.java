@@ -148,6 +148,4 @@ public class TopoService {
                 .map(UrnE::getUrn)
                 .collect(Collectors.toList());
     }
-
-
 }

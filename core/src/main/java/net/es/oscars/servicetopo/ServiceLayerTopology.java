@@ -21,15 +21,15 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 public class ServiceLayerTopology
 {
-    Set<TopoVertex> serviceLayerDevices;
-    Set<TopoVertex> serviceLayerPorts;
-    Set<TopoEdge> serviceLayerLinks;
+    Set<TopoVertex> serviceLayerDevices = new HashSet<>();
+    Set<TopoVertex> serviceLayerPorts = new HashSet<>();
+    Set<TopoEdge> serviceLayerLinks = new HashSet<>();
 
     Set<TopoVertex> nonAdjacentPorts;
 
-    Set<TopoVertex> mplsLayerDevices;
-    Set<TopoVertex> mplsLayerPorts;
-    Set<TopoEdge> mplsLayerLinks;
+    Set<TopoVertex> mplsLayerDevices = new HashSet<>();
+    Set<TopoVertex> mplsLayerPorts = new HashSet<>();
+    Set<TopoEdge> mplsLayerLinks = new HashSet<>();
 
     Set<TopoVertex> logicalSrcNodes = null;
     Set<TopoVertex> logicalDstNodes = null;
@@ -38,6 +38,12 @@ public class ServiceLayerTopology
 
     @Autowired
     TopoService topoService;
+
+
+    // these objects are for easily getting/setting topologies for testing only!
+    Topology ethernetTopology;
+    Topology mplsTopology;
+    Topology internalTopology;
 
     public void createMultilayerTopology()
     {
@@ -49,8 +55,13 @@ public class ServiceLayerTopology
 
     private void buildServiceLayerTopo()
     {
-        Topology ethernetTopo = topoService.layer(Layer.ETHERNET);
-        Topology internalTopo = topoService.layer(Layer.INTERNAL);
+        /* UNCOMMENT THESE LINES AFTER TESTING */
+        //Topology ethernetTopo = topoService.layer(Layer.ETHERNET);
+        //Topology internalTopo = topoService.layer(Layer.INTERNAL);
+
+        /* DELETE THESE LINES AFTER TESTING */
+        Topology ethernetTopo = ethernetTopology;
+        Topology internalTopo = internalTopology;
 
         Set<TopoVertex> ethernetVertices = ethernetTopo.getVertices();
         Set<TopoVertex> internalVertices = internalTopo.getVertices();
@@ -89,8 +100,14 @@ public class ServiceLayerTopology
 
     private void buildMplsLayerTopo()
     {
-        Topology mplsTopo = topoService.layer(Layer.MPLS);
-        Topology internalTopo = topoService.layer(Layer.INTERNAL);
+        /* UNCOMMENT THESE LINES AFTER TESTING */
+        //Topology mplsTopo = topoService.layer(Layer.MPLS);
+        //Topology internalTopo = topoService.layer(Layer.INTERNAL);
+
+        /* DELETE THESE LINES AFTER TESTING */
+        Topology mplsTopo = mplsTopology;
+        Topology internalTopo = internalTopology;
+
 
         Set<TopoVertex> mplsVertices = mplsTopo.getVertices();
         Set<TopoVertex> internalVertices = internalTopo.getVertices();
@@ -142,6 +159,12 @@ public class ServiceLayerTopology
         {
             TopoVertex portA = serviceLink.getA();
             TopoVertex portZ = serviceLink.getZ();
+
+            // Skip INTERNAL edges
+            if(serviceLink.getLayer().equals(Layer.INTERNAL))
+            {
+                continue;
+            }
 
             // ETHERNET -> MPLS edge
             if(serviceLayerPorts.contains(portA) && !serviceLayerPorts.contains(portZ))
@@ -228,5 +251,30 @@ public class ServiceLayerTopology
         nonAdjacentPorts.add(virtualDstPort);
 
         buildLogicalLayerLinks();               // Should filter out duplicates -- TEST THAT!
+    }
+
+
+    // Here for testing only!
+    public Topology getTopology(Layer layer)
+    {
+        if(layer.equals(Layer.ETHERNET))
+            return ethernetTopology;
+        else if(layer.equals(Layer.MPLS))
+            return mplsTopology;
+        else
+            return internalTopology;
+    }
+
+    // Here for testing only!
+    public void setTopology(Topology topology)
+    {
+        Layer layer = topology.getLayer();
+
+        if(layer.equals(Layer.ETHERNET))
+            ethernetTopology = topology;
+        else if(layer.equals(Layer.MPLS))
+            mplsTopology = topology;
+        else
+            internalTopology = topology;
     }
 }
