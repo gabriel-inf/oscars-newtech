@@ -11,6 +11,7 @@ import net.es.oscars.topo.enums.*;
 import net.es.oscars.topo.svc.TopoService;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -24,12 +25,15 @@ public class ServiceLayerTopology
     Set<TopoVertex> serviceLayerPorts;
     Set<TopoEdge> serviceLayerLinks;
 
+    Set<TopoVertex> nonAdjacentPorts;
+
     Set<TopoVertex> mplsLayerDevices;
     Set<TopoVertex> mplsLayerPorts;
     Set<TopoEdge> mplsLayerLinks;
 
-    Set<TopoVertex> logicalSrcDst;
-    Set<TopoVertex> logicalSrcdstPort;
+    Set<TopoVertex> logicalSrcNodes = null;
+    Set<TopoVertex> logicalDstNodes = null;
+
     Set<TopoEdge> logicalLinks;
 
     @Autowired
@@ -122,8 +126,107 @@ public class ServiceLayerTopology
     }
 
 
-    public void buildLogicalLayerTopo()
+    private void buildLogicalLayerTopo()
     {
-        ;
+        identifyNonAdjacentSLPorts();
+        buildLogicalLayerLinks();
+    }
+
+
+    //Identify switch ports which have links connected to router ports. All of these srvice-layer ports will have logical edges to each other.
+    private void identifyNonAdjacentSLPorts()
+    {
+        nonAdjacentPorts = new HashSet<>();
+
+        for(TopoEdge serviceLink : serviceLayerLinks)
+        {
+            TopoVertex portA = serviceLink.getA();
+            TopoVertex portZ = serviceLink.getZ();
+
+            // ETHERNET -> MPLS edge
+            if(serviceLayerPorts.contains(portA) && !serviceLayerPorts.contains(portZ))
+            {
+                nonAdjacentPorts.add(portA);
+            }
+
+            // MPLS -> Ethernet edge
+            if(!serviceLayerPorts.contains(portA) && serviceLayerPorts.contains(portZ))
+            {
+                nonAdjacentPorts.add(portZ);
+            }
+        }
+    }
+
+
+    //Establish a logical edge between non-adjacent service-layer ports. Weights will be assigned later.
+    private void buildLogicalLayerLinks()
+    {
+        logicalLinks = new HashSet<>();
+
+        for(TopoVertex nonAdjacentA : nonAdjacentPorts)
+        {
+            for(TopoVertex nonAdjacentZ : nonAdjacentPorts)
+            {
+                if(nonAdjacentA.equals(nonAdjacentZ))
+                {
+                    continue;
+                }
+
+                TopoEdge azLogicalEdge = new TopoEdge(nonAdjacentA,nonAdjacentZ, 0L, Layer.LOGICAL);
+                TopoEdge zaLogicalEdge = new TopoEdge(nonAdjacentZ,nonAdjacentA, 0L, Layer.LOGICAL);
+
+                logicalLinks.add(azLogicalEdge);
+                logicalLinks.add(zaLogicalEdge);
+            }
+        }
+    }
+
+
+    // Should only be called if Source Device is MPLS
+    public void buildLogicalLayerSrcNodes(TopoVertex srcDevice, TopoVertex srcInPort)
+    {
+        TopoVertex virtualSrcDevice = srcDevice;
+        TopoVertex virtualSrcPort = new TopoVertex(srcInPort.getUrn() + "dummy", VertexType.VIRTUAL);
+
+        virtualSrcDevice.setVertexType(VertexType.VIRTUAL);
+
+        TopoEdge portToDevice = new TopoEdge(virtualSrcPort, virtualSrcDevice, 0L, Layer.ETHERNET);
+        TopoEdge devicetoPort = new TopoEdge(virtualSrcDevice, virtualSrcPort, 0L, Layer.ETHERNET);
+
+        TopoEdge vPortToPort = new TopoEdge(virtualSrcPort, srcInPort, 0L, Layer.ETHERNET);
+        TopoEdge portToVPort = new TopoEdge(srcInPort, virtualSrcPort, 0L, Layer.ETHERNET);
+
+        serviceLayerLinks.add(portToDevice);
+        serviceLayerLinks.add(devicetoPort);
+        serviceLayerLinks.add(vPortToPort);
+        serviceLayerLinks.add(portToVPort);
+
+        nonAdjacentPorts.add(virtualSrcPort);
+
+        buildLogicalLayerLinks();               // Should filter out duplicates -- TEST THAT!
+    }
+
+    // Should only be called if Source Device is MPLS
+    public void buildLogicalLayerDstNodes(TopoVertex dstDevice, TopoVertex dstOutPort)
+    {
+        TopoVertex virtualDstDevice = dstDevice;
+        TopoVertex virtualDstPort = new TopoVertex(dstOutPort.getUrn() + "dummy", VertexType.VIRTUAL);
+
+        virtualDstDevice.setVertexType(VertexType.VIRTUAL);
+
+        TopoEdge portToDevice = new TopoEdge(virtualDstPort, virtualDstDevice, 0L, Layer.ETHERNET);
+        TopoEdge devicetoPort = new TopoEdge(virtualDstDevice, virtualDstPort, 0L, Layer.ETHERNET);
+
+        TopoEdge vPortToPort = new TopoEdge(virtualDstPort, dstOutPort, 0L, Layer.ETHERNET);
+        TopoEdge portToVPort = new TopoEdge(dstOutPort, virtualDstPort, 0L, Layer.ETHERNET);
+
+        serviceLayerLinks.add(portToDevice);
+        serviceLayerLinks.add(devicetoPort);
+        serviceLayerLinks.add(vPortToPort);
+        serviceLayerLinks.add(portToVPort);
+
+        nonAdjacentPorts.add(virtualDstPort);
+
+        buildLogicalLayerLinks();               // Should filter out duplicates -- TEST THAT!
     }
 }

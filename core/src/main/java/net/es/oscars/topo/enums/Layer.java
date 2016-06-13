@@ -9,7 +9,8 @@ import java.util.Optional;
 public enum Layer {
     ETHERNET("ETHERNET"),
     INTERNAL("INTERNAL"),
-    MPLS("MPLS");
+    MPLS("MPLS"),
+    LOGICAL("LOGICAL");     // Added by Jeremy for Service-Layer Topology construction - Can be moved if necessary
 
     private String code;
 
