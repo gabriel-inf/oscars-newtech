@@ -7,6 +7,7 @@ import net.es.oscars.resv.ent.RequestedVlanJunctionE;
 import net.es.oscars.resv.ent.RequestedVlanPipeE;
 import net.es.oscars.topo.beans.TopoEdge;
 import net.es.oscars.topo.beans.Topology;
+import net.es.oscars.topo.dao.UrnRepository;
 import net.es.oscars.topo.ent.IntRangeE;
 import net.es.oscars.topo.ent.ReservableBandwidthE;
 import net.es.oscars.topo.ent.ReservableVlanE;
@@ -27,6 +28,13 @@ import java.util.stream.Stream;
 @Component
 public class PruningService {
 
+    @Autowired
+    private UrnRepository urnRepo;
+
+    public Topology pruneForPipe(Topology topo, RequestedVlanPipeE pipe){
+
+        return pruneForPipe(topo, pipe, urnRepo.findAll());
+    }
 
     public Topology pruneForPipe(Topology topo, RequestedVlanPipeE pipe, List<UrnE> urns){
         Integer azBw = pipe.getAzMbps();
