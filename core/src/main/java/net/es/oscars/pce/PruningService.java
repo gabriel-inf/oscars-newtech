@@ -1,7 +1,8 @@
 package net.es.oscars.pce;
 
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.resv.ent.RequestedVlanFlowE;
+import net.es.oscars.dto.IntRange;
+import net.es.oscars.resv.ent.RequestedVlanFixtureE;
 import net.es.oscars.resv.ent.RequestedVlanJunctionE;
 import net.es.oscars.resv.ent.RequestedVlanPipeE;
 import net.es.oscars.topo.beans.TopoEdge;
@@ -18,6 +19,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -30,17 +32,19 @@ public class PruningService {
     public Topology pruneForPipe(Topology topo, RequestedVlanPipeE pipe){
         Integer azBw = pipe.getAzMbps();
         Integer zaBw = pipe.getZaMbps();
-        Set<String> vlans = new HashSet<>();
-        vlans.addAll(getVlansFromJunction(pipe.getAJunction()));
-        vlans.addAll(getVlansFromJunction(pipe.getZJunction()));
+        Set<Integer> vlans = new HashSet<>();
+        vlans.addAll(getVlansFromJunction(pipe.getAJunction()).stream()
+                .map(Integer::parseInt).collect(Collectors.toSet()));
+        vlans.addAll(getVlansFromJunction(pipe.getZJunction()).stream()
+                .map(Integer::parseInt).collect(Collectors.toSet()));
         return pruneTopology(topo, azBw, zaBw, vlans);
     }
 
     private Set<String> getVlansFromJunction(RequestedVlanJunctionE junction){
-        return junction.getFixtures().stream().map(j -> j.getVlanExpression()).collect(Collectors.toSet());
+        return junction.getFixtures().stream().map(RequestedVlanFixtureE::getVlanExpression).collect(Collectors.toSet());
     }
 
-    public Topology pruneTopology(Topology topo, Integer azBw, Integer zaBw, Set<String> vlans){
+    private Topology pruneTopology(Topology topo, Integer azBw, Integer zaBw, Set<Integer> vlans){
         Topology pruned = new Topology();
         pruned.setLayer(topo.getLayer());
         pruned.setVertices(topo.getVertices());
@@ -54,7 +58,7 @@ public class PruningService {
         return pruned;
     }
 
-    private boolean availableVlans(TopoEdge edge, Set<String> vlans, List<ReservableVlanE> resvVlans) {
+    private boolean availableVlans(TopoEdge edge, Set<Integer> vlans, List<ReservableVlanE> resvVlans) {
         String aUrn = edge.getA().getUrn();
         String zUrn = edge.getZ().getUrn();
         List<ReservableVlanE> aMatching = resvVlans.stream().filter(v -> v.getUrn().getUrn().equals(aUrn))
@@ -66,12 +70,11 @@ public class PruningService {
         if(aMatching.isEmpty() || zMatching.isEmpty()){
             return true;
         } else{
-            for(String vlanString : vlans){
-                Integer vlanInt = Integer.parseInt(vlanString);
-                boolean aContainsVlan = aMatching.get(0).getVlanRanges().stream().map(IntRangeE::toDtoIntRange)
-                        .anyMatch(vr -> vr.contains(vlanInt));
-                boolean zContainsVlan = zMatching.get(0).getVlanRanges().stream().map(IntRangeE::toDtoIntRange)
-                        .anyMatch(vr -> vr.contains(vlanInt));
+            Stream<IntRange> aVlanRangeStream = aMatching.get(0).getVlanRanges().stream().map(IntRangeE::toDtoIntRange);
+            Stream<IntRange> zVlanRangeStream = zMatching.get(0).getVlanRanges().stream().map(IntRangeE::toDtoIntRange);
+            for(Integer requestedVlan : vlans){
+                boolean aContainsVlan = aVlanRangeStream.anyMatch(vr -> vr.contains(requestedVlan));
+                boolean zContainsVlan = zVlanRangeStream.anyMatch(vr -> vr.contains(requestedVlan));
                 if(!aContainsVlan || !zContainsVlan){
                     return false;
                 }
@@ -79,6 +82,7 @@ public class PruningService {
             return true;
         }
     }
+
 
     private boolean availableBW(TopoEdge edge, Integer azBw, Integer zaBw, List<ReservableBandwidthE> bandwidths){
         String aUrn = edge.getA().getUrn();
