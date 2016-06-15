@@ -4,12 +4,15 @@ import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.topo.beans.Topology;
+import net.es.oscars.topo.ent.ReservableBandwidthE;
+import net.es.oscars.topo.ent.ReservableVlanE;
 import net.es.oscars.topo.enums.Layer;
 import net.es.oscars.topo.svc.TopoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -50,9 +53,13 @@ public class TopPCE {
         for (RequestedVlanFlowE req_f : requested.getVlanFlows()) {
             for(RequestedVlanPipeE pipe : req_f.getPipes()){
                 //Prune MPLS and Ethernet Topologies (Bandwidth, VLANs)
-                Topology prunedEthernet = pruningService.pruneForPipe(topoService.layer(Layer.ETHERNET), pipe);
-                Topology prunedMPLS = pruningService.pruneForPipe(topoService.layer(Layer.MPLS), pipe);
 
+                List<ReservableBandwidthE> rBandwidths = topoService.reservableBandwidths();
+                List<ReservableVlanE> rVlans = topoService.reservableVlans();
+                Topology prunedEthernet = pruningService.pruneForPipe(topoService.layer(Layer.ETHERNET), pipe,
+                        rBandwidths, rVlans);
+                Topology prunedMpls = pruningService.pruneForPipe(topoService.layer(Layer.MPLS), pipe,
+                        rBandwidths, rVlans);
                 //Build specialized service layer topology for this pipe
                 //Run Symmetric Dijkstra on this Topology
                 //Translate the Shortest Path into EROs, then EROs to Junction/Pipes/Fixtures

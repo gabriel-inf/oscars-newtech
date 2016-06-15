@@ -26,10 +26,9 @@ import java.util.stream.Stream;
 @Component
 public class PruningService {
 
-    @Autowired
-    private TopoService topoService;
 
-    public Topology pruneForPipe(Topology topo, RequestedVlanPipeE pipe){
+    public Topology pruneForPipe(Topology topo, RequestedVlanPipeE pipe, List<ReservableBandwidthE> bandwidths,
+                                 List<ReservableVlanE> rVlans){
         Integer azBw = pipe.getAzMbps();
         Integer zaBw = pipe.getZaMbps();
         Set<Integer> vlans = new HashSet<>();
@@ -37,33 +36,32 @@ public class PruningService {
                 .map(Integer::parseInt).collect(Collectors.toSet()));
         vlans.addAll(getVlansFromJunction(pipe.getZJunction()).stream()
                 .map(Integer::parseInt).collect(Collectors.toSet()));
-        return pruneTopology(topo, azBw, zaBw, vlans);
+        return pruneTopology(topo, azBw, zaBw, vlans, bandwidths, rVlans);
     }
 
     private Set<String> getVlansFromJunction(RequestedVlanJunctionE junction){
         return junction.getFixtures().stream().map(RequestedVlanFixtureE::getVlanExpression).collect(Collectors.toSet());
     }
 
-    private Topology pruneTopology(Topology topo, Integer azBw, Integer zaBw, Set<Integer> vlans){
+    private Topology pruneTopology(Topology topo, Integer azBw, Integer zaBw, Set<Integer> vlans,
+                                   List<ReservableBandwidthE> bandwidths, List<ReservableVlanE> rVlans){
         Topology pruned = new Topology();
         pruned.setLayer(topo.getLayer());
         pruned.setVertices(topo.getVertices());
-        List<ReservableBandwidthE> bandwidths = topoService.reservableBandwidths();
-        List<ReservableVlanE> resvVlans = topoService.reservableVlans();
         Set<TopoEdge> availableEdges = topo.getEdges().stream()
                 .filter(e -> availableBW(e, azBw, zaBw, bandwidths))
-                .filter(e -> availableVlans(e, vlans, resvVlans))
+                .filter(e -> availableVlans(e, vlans, rVlans))
                 .collect(Collectors.toSet());
         pruned.setEdges(availableEdges);
         return pruned;
     }
 
-    private boolean availableVlans(TopoEdge edge, Set<Integer> vlans, List<ReservableVlanE> resvVlans) {
+    private boolean availableVlans(TopoEdge edge, Set<Integer> vlans, List<ReservableVlanE> rVlans) {
         String aUrn = edge.getA().getUrn();
         String zUrn = edge.getZ().getUrn();
-        List<ReservableVlanE> aMatching = resvVlans.stream().filter(v -> v.getUrn().getUrn().equals(aUrn))
+        List<ReservableVlanE> aMatching = rVlans.stream().filter(v -> v.getUrn().getUrn().equals(aUrn))
                 .collect(Collectors.toList());
-        List<ReservableVlanE> zMatching = resvVlans.stream().filter(v -> v.getUrn().getUrn().equals(zUrn))
+        List<ReservableVlanE> zMatching = rVlans.stream().filter(v -> v.getUrn().getUrn().equals(zUrn))
                 .collect(Collectors.toList());
 
         assert aMatching.size() <= 1 && zMatching.size() <= 1;
