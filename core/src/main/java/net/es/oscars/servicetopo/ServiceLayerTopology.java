@@ -4,17 +4,26 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.pce.DijkstraPCE;
+import net.es.oscars.pce.PruningService;
+import net.es.oscars.resv.ent.RequestedVlanJunctionE;
+import net.es.oscars.resv.ent.RequestedVlanPipeE;
 import net.es.oscars.topo.beans.TopoEdge;
 import net.es.oscars.topo.beans.TopoVertex;
 import net.es.oscars.topo.beans.Topology;
+import net.es.oscars.topo.ent.UrnE;
 import net.es.oscars.topo.enums.*;
 import net.es.oscars.topo.svc.TopoService;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Data
 @Builder
 @AllArgsConstructor
@@ -23,6 +32,12 @@ public class ServiceLayerTopology
 {
     @Autowired
     TopoService topoService;
+
+    @Autowired
+    PruningService pruningService;
+
+    @Autowired
+    DijkstraPCE dijkstraPCE;
 
     Set<TopoVertex> serviceLayerDevices = new HashSet<>();
     Set<TopoVertex> serviceLayerPorts = new HashSet<>();
@@ -37,7 +52,10 @@ public class ServiceLayerTopology
     Set<TopoVertex> logicalSrcNodes = null;
     Set<TopoVertex> logicalDstNodes = null;
 
-    Set<TopoEdge> logicalLinks;
+    Set<LogicalEdge> logicalLinks;
+
+    Topology serviceLayerTopo;
+    Topology mplsLayerTopo;
 
 
     // these objects are for easily getting/setting topologies for testing only!
@@ -48,9 +66,13 @@ public class ServiceLayerTopology
     // This method should be called whenever the physical topology is updated
     public void createMultilayerTopology()
     {
+        log.info("decomposing topology into Service-Layer and MPLS-Layer.");
         buildServiceLayerTopo();
         buildMplsLayerTopo();
+
+        log.info("building logical edges for Service-Layer topology.");
         buildLogicalLayerTopo();
+
     }
 
 
@@ -96,6 +118,11 @@ public class ServiceLayerTopology
         serviceLayerPorts.addAll(allEthernetPorts);
         serviceLayerLinks.addAll(allEthernetEdges);
         serviceLayerLinks.addAll(allInternalEthernetEdges);
+
+        serviceLayerTopo = new Topology();
+        serviceLayerTopo.setVertices(serviceLayerDevices);
+        serviceLayerTopo.setVertices(serviceLayerPorts);
+        serviceLayerTopo.setEdges(serviceLayerLinks);
     }
 
 
@@ -141,6 +168,11 @@ public class ServiceLayerTopology
         mplsLayerPorts.addAll(allMplsPorts);
         mplsLayerLinks.addAll(allMplsEdges);
         mplsLayerLinks.addAll(allInternalMPLSEdges);
+
+        mplsLayerTopo = new Topology();
+        mplsLayerTopo.setVertices(mplsLayerDevices);
+        mplsLayerTopo.setVertices(mplsLayerPorts);
+        mplsLayerTopo.setEdges(mplsLayerLinks);
     }
 
 
@@ -196,8 +228,8 @@ public class ServiceLayerTopology
                     continue;
                 }
 
-                TopoEdge azLogicalEdge = new TopoEdge(nonAdjacentA,nonAdjacentZ, 0L, Layer.LOGICAL);
-                TopoEdge zaLogicalEdge = new TopoEdge(nonAdjacentZ,nonAdjacentA, 0L, Layer.LOGICAL);
+                LogicalEdge azLogicalEdge = new LogicalEdge(nonAdjacentA,nonAdjacentZ, 0L, Layer.LOGICAL, new ArrayList<TopoEdge>());
+                LogicalEdge zaLogicalEdge = new LogicalEdge(nonAdjacentZ,nonAdjacentA, 0L, Layer.LOGICAL, new ArrayList<TopoEdge>());
 
                 logicalLinks.add(azLogicalEdge);
                 logicalLinks.add(zaLogicalEdge);
@@ -205,7 +237,90 @@ public class ServiceLayerTopology
         }
     }
 
+    //Calls Pruner and Dijkstra to compute shortest MPLS-layer paths, calculates weights of those paths, and maps them to the appropriate logical links
+    public void calculateLogicalLinkWeights(RequestedVlanPipeE requestedVlanPipe)
+    {
+        log.info("pruning MPLS-Layer topology.");
+        Topology prunedMPLSTopo = pruningService.pruneForPipe(mplsLayerTopo, requestedVlanPipe);
 
+        for(LogicalEdge oneLogicalLink : logicalLinks)
+        {
+            TopoVertex srcEthPort = oneLogicalLink.getA();
+            TopoVertex dstEthPort = oneLogicalLink.getZ();
+
+            TopoEdge physEdgeAtoMpls = null;
+            TopoEdge physEdgeZtoMpls = null;
+            TopoEdge physEdgeMplstoA = null;
+            TopoEdge physEdgeMplstoZ = null;
+
+            long weightMetric = 0;
+
+            for(TopoEdge oneSLLink : serviceLayerLinks)
+            {
+                if(oneSLLink.getA().equals(srcEthPort))
+                {
+                    if(oneSLLink.getZ().getVertexType().equals(VertexType.PORT))
+                    {
+                        physEdgeAtoMpls = oneSLLink;
+                    }
+                }
+                else if(oneSLLink.getZ().equals(srcEthPort))
+                {
+                    if(oneSLLink.getA().getVertexType().equals(VertexType.PORT))
+                    {
+                        physEdgeMplstoA = oneSLLink;
+                    }
+                }
+
+                if(oneSLLink.getZ().equals(dstEthPort))
+                {
+                    if (oneSLLink.getA().getVertexType().equals(VertexType.PORT)) {
+                        physEdgeMplstoZ = oneSLLink;
+                    }
+                }
+                else if(oneSLLink.getA().equals(dstEthPort))
+                {
+                    if(oneSLLink.getZ().getVertexType().equals(VertexType.PORT))
+                    {
+                        physEdgeZtoMpls = oneSLLink;
+                    }
+                }
+
+                if(physEdgeAtoMpls != null && physEdgeZtoMpls != null && physEdgeMplstoA != null && physEdgeMplstoZ != null)
+                {
+                    break;
+                }
+            }
+
+            // Must perform routing ONLY on MPLS layer because ETHERNET layer has bi-directionality requirements. Pruning needs to be done separately.
+            assert(physEdgeAtoMpls != null);
+            assert(physEdgeZtoMpls != null);
+            assert(physEdgeMplstoA != null);
+            assert(physEdgeMplstoZ != null);
+
+            TopoVertex mplsSrc = physEdgeAtoMpls.getZ();
+            TopoVertex mplsDst = physEdgeMplstoZ.getA();
+            List<TopoEdge> path = dijkstraPCE.computeShortestPathEdges(prunedMPLSTopo, mplsSrc, mplsDst);
+
+            for(TopoEdge pathEdge : path)
+            {
+                weightMetric += pathEdge.getMetric();
+            }
+
+            // Add bi-directional cost sum of ETHERNET links to Logical Link weight
+            weightMetric += physEdgeAtoMpls.getMetric();
+            weightMetric += physEdgeZtoMpls.getMetric();
+            weightMetric += physEdgeMplstoA.getMetric();
+            weightMetric += physEdgeMplstoZ.getMetric();
+
+            oneLogicalLink.setMetric(weightMetric);
+
+            path.add(physEdgeAtoMpls);
+            path.add(physEdgeMplstoZ);
+
+            oneLogicalLink.setCorrespondingTopoEdges(path);
+        }
+    }
 
 
     // Should only be called if Source Device is MPLS
@@ -213,6 +328,8 @@ public class ServiceLayerTopology
     {
         if(srcDevice.getVertexType().equals(VertexType.SWITCH))
             return;
+
+        log.info("representing MPLS source on Service-Layer topology as VIRTUAL node.");
 
         TopoVertex virtualSrcDevice = srcDevice;
         TopoVertex virtualSrcPort = new TopoVertex(srcInPort.getUrn() + "dummy", VertexType.VIRTUAL);
@@ -240,6 +357,8 @@ public class ServiceLayerTopology
     {
         if(dstDevice.getVertexType().equals(VertexType.SWITCH))
             return;
+
+        log.info("representing MPLS destination on Service-Layer topology as VIRTUAL node.");
 
         TopoVertex virtualDstDevice = dstDevice;
         TopoVertex virtualDstPort = new TopoVertex(dstOutPort.getUrn() + "dummy", VertexType.VIRTUAL);
