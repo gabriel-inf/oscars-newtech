@@ -2,6 +2,7 @@ package net.es.oscars.slTopo;
 
 
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.servicetopo.LogicalEdge;
 import net.es.oscars.servicetopo.ServiceLayerTopology;
 import net.es.oscars.topo.beans.Topology;
 import net.es.oscars.topo.enums.*;
@@ -738,7 +739,7 @@ public class ServiceLayerTopoConstructionTest {
 
         int ASrcNum = 0, BSrcNum = 0, CSrcNum = 0, DSrcNum = 0, wrongSrcNum = 0;
 
-        for(TopoEdge ll : serviceLayerTopo.getLogicalLinks())
+        for(LogicalEdge ll : serviceLayerTopo.getLogicalLinks())
         {
             String aURN = ll.getA().getUrn();
 
@@ -782,7 +783,7 @@ public class ServiceLayerTopoConstructionTest {
 
         int A3SrcNum = 0, B3SrcNum = 0, B4SrcNum = 0, C1SrcNum = 0, D3SrcNum = 0, wrongSrcNum = 0;
 
-        for(TopoEdge ll : serviceLayerTopo.getLogicalLinks())
+        for(LogicalEdge ll : serviceLayerTopo.getLogicalLinks())
         {
             String aURN = ll.getA().getUrn();
             String zURN = ll.getZ().getUrn();
