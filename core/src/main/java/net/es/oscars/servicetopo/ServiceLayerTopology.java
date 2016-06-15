@@ -21,6 +21,9 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 public class ServiceLayerTopology
 {
+    @Autowired
+    TopoService topoService;
+
     Set<TopoVertex> serviceLayerDevices = new HashSet<>();
     Set<TopoVertex> serviceLayerPorts = new HashSet<>();
     Set<TopoEdge> serviceLayerLinks = new HashSet<>();
@@ -36,15 +39,13 @@ public class ServiceLayerTopology
 
     Set<TopoEdge> logicalLinks;
 
-    @Autowired
-    TopoService topoService;
-
 
     // these objects are for easily getting/setting topologies for testing only!
     Topology ethernetTopology;
     Topology mplsTopology;
     Topology internalTopology;
 
+    // This method should be called whenever the physical topology is updated
     public void createMultilayerTopology()
     {
         buildServiceLayerTopo();
@@ -205,9 +206,14 @@ public class ServiceLayerTopology
     }
 
 
+
+
     // Should only be called if Source Device is MPLS
     public void buildLogicalLayerSrcNodes(TopoVertex srcDevice, TopoVertex srcInPort)
     {
+        if(srcDevice.getVertexType().equals(VertexType.SWITCH))
+            return;
+
         TopoVertex virtualSrcDevice = srcDevice;
         TopoVertex virtualSrcPort = new TopoVertex(srcInPort.getUrn() + "dummy", VertexType.VIRTUAL);
 
@@ -232,6 +238,9 @@ public class ServiceLayerTopology
     // Should only be called if Source Device is MPLS
     public void buildLogicalLayerDstNodes(TopoVertex dstDevice, TopoVertex dstOutPort)
     {
+        if(dstDevice.getVertexType().equals(VertexType.SWITCH))
+            return;
+
         TopoVertex virtualDstDevice = dstDevice;
         TopoVertex virtualDstPort = new TopoVertex(dstOutPort.getUrn() + "dummy", VertexType.VIRTUAL);
 
