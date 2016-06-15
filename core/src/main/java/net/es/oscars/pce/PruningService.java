@@ -32,15 +32,14 @@ public class PruningService {
         Integer azBw = pipe.getAzMbps();
         Integer zaBw = pipe.getZaMbps();
         Set<Integer> vlans = new HashSet<>();
-        vlans.addAll(getVlansFromJunction(pipe.getAJunction()).stream()
-                .map(Integer::parseInt).collect(Collectors.toSet()));
-        vlans.addAll(getVlansFromJunction(pipe.getZJunction()).stream()
-                .map(Integer::parseInt).collect(Collectors.toSet()));
+        vlans.addAll(getVlansFromJunction(pipe.getAJunction()));
+        vlans.addAll(getVlansFromJunction(pipe.getZJunction()));
         return pruneTopology(topo, azBw, zaBw, vlans, bandwidths, rVlans);
     }
 
-    private Set<String> getVlansFromJunction(RequestedVlanJunctionE junction){
-        return junction.getFixtures().stream().map(RequestedVlanFixtureE::getVlanExpression).collect(Collectors.toSet());
+    private Set<Integer> getVlansFromJunction(RequestedVlanJunctionE junction){
+        return junction.getFixtures().stream().map(RequestedVlanFixtureE::getVlanExpression)
+                .map(Integer::parseInt).collect(Collectors.toSet());
     }
 
     private Topology pruneTopology(Topology topo, Integer azBw, Integer zaBw, Set<Integer> vlans,
