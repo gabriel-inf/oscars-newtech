@@ -18,7 +18,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class LogicalEdge
+public class LogicalEdge extends TopoEdge
 {
     private TopoVertex a;
 

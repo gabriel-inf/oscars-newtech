@@ -34,11 +34,11 @@ public class DijkstraPCE
 
 
     /**
-     * Computes Dijkstra's shortest path directed from aURN to zURN. Input topology is assumed to be pre-pruned based on bandwidth and vlan availability.
+     * Computes Dijkstra's shortest path directed from srcVertex to dstVertex. Input topology is assumed to be pre-pruned based on bandwidth and vlan availability.
      * @param topology - pruned topology
      * @param srcVertex  - source URN
      * @param dstVertex  - destination URN
-     * @return
+     * @return path as List of TopoEdge objects
      */
     public List<TopoEdge> computeShortestPathEdges(Topology topology, TopoVertex srcVertex, TopoVertex dstVertex)
     {
@@ -74,6 +74,14 @@ public class DijkstraPCE
         return path;
     }
 
+
+    /**
+     * Computes Dijkstra's shortest path directed from srcVertex to dstVertex. Input topology is assumed to be pre-pruned based on bandwidth and vlan availability.
+     * @param topology - pruned topology
+     * @param srcVertex  - source URN
+     * @param dstVertex  - destination URN
+     * @return path as list of TopoVertex objects
+     */
     public List<TopoVertex> computeShortestPathVertices(Topology topology, TopoVertex srcVertex, TopoVertex dstVertex)
     {
         log.info("finding shortest path between " + srcVertex.getUrn() + " -- " + dstVertex.getUrn());
