@@ -12,6 +12,7 @@ import net.es.oscars.topo.ent.IntRangeE;
 import net.es.oscars.topo.ent.ReservableBandwidthE;
 import net.es.oscars.topo.ent.ReservableVlanE;
 import net.es.oscars.topo.ent.UrnE;
+import net.es.oscars.topo.enums.Layer;
 import net.es.oscars.topo.svc.TopoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -31,8 +32,40 @@ public class PruningService {
     @Autowired
     private UrnRepository urnRepo;
 
-    public Topology pruneForPipe(Topology topo, RequestedVlanPipeE pipe){
 
+    public Topology pruneWithBwVlans(Topology topo, Integer Bw, Set<Integer> vlans, List<UrnE> urns){
+        return pruneTopology(topo, Bw, Bw, vlans, urns);
+    }
+
+    public Topology pruneWithBwVlans(Topology topo, Integer Bw, Set<Integer> vlans){
+        return pruneTopology(topo, Bw, Bw, vlans, urnRepo.findAll());
+    }
+
+    public Topology pruneWithAZBwVlans(Topology topo, Integer azBw, Integer zaBw, Set<Integer> vlans, List<UrnE> urns){
+        return pruneTopology(topo, azBw, zaBw, vlans, urns);
+    }
+
+    public Topology pruneWithAZBwVlans(Topology topo, Integer azBw, Integer zaBw, Set<Integer> vlans){
+        return pruneTopology(topo, azBw, zaBw, vlans, urnRepo.findAll());
+    }
+
+    public Topology pruneWithBw(Topology topo, Integer Bw, List<UrnE> urns){
+        return pruneTopology(topo, Bw, Bw, null, urns);
+    }
+
+    public Topology pruneWithBw(Topology topo, Integer Bw){
+        return pruneTopology(topo, Bw, Bw, null, urnRepo.findAll());
+    }
+
+    public Topology pruneWithAZBw(Topology topo, Integer azBw, Integer zaBw, List<UrnE> urns){
+        return pruneTopology(topo, azBw, zaBw, null, urns);
+    }
+
+    public Topology pruneWithAZBw(Topology topo, Integer azBw, Integer zaBw){
+        return pruneTopology(topo, azBw, zaBw, null, urnRepo.findAll());
+    }
+
+    public Topology pruneForPipe(Topology topo, RequestedVlanPipeE pipe){
         return pruneForPipe(topo, pipe, urnRepo.findAll());
     }
 
@@ -43,6 +76,13 @@ public class PruningService {
         vlans.addAll(getVlansFromJunction(pipe.getAJunction()));
         vlans.addAll(getVlansFromJunction(pipe.getZJunction()));
         return pruneTopology(topo, azBw, zaBw, vlans, urns);
+    }
+
+    private Set<Integer> findOpenVlans(Set<TopoEdge> edges){
+        //TODO: Figure out best way to find a VLAN that will work across all edges
+        // Note: MPLS edges can use any available VLAN
+
+        return new HashSet<Integer>();
     }
 
     private Set<Integer> getVlansFromJunction(RequestedVlanJunctionE junction){
@@ -56,8 +96,10 @@ public class PruningService {
         pruned.setVertices(topo.getVertices());
         Set<TopoEdge> availableEdges = topo.getEdges().stream()
                 .filter(e -> availableBW(e, azBw, zaBw, urns))
-                .filter(e -> availableVlans(e, vlans, urns))
                 .collect(Collectors.toSet());
+        if(vlans == null){
+            Set<Integer> openVlans = findOpenVlans(availableEdges);
+        }
         pruned.setEdges(availableEdges);
         return pruned;
     }
@@ -84,6 +126,21 @@ public class PruningService {
                     .getVlanRanges()
                     .stream()
                     .map(IntRangeE::toDtoIntRange);
+
+            //Edge is in MPLS
+            //This implies that any one VLAN tag (available on both ends of the edge) can work
+            if(edge.getLayer().equals(Layer.MPLS)){
+                Set<IntRange> aRanges = aVlanRangeStream.collect(Collectors.toSet());
+                Set<IntRange> zRanges = zVlanRangeStream.collect(Collectors.toSet());
+                for(IntRange aRange : aRanges){
+                    for(IntRange zRange: zRanges){
+                        if(checkVlanRangeOverlap(aRange, zRange)){
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
             for(Integer requestedVlan : vlans){
                 boolean aContainsVlan = aVlanRangeStream.anyMatch(vr -> vr.contains(requestedVlan));
                 boolean zContainsVlan = zVlanRangeStream.anyMatch(vr -> vr.contains(requestedVlan));
@@ -93,6 +150,10 @@ public class PruningService {
             }
             return true;
         }
+    }
+
+    private boolean checkVlanRangeOverlap(IntRange aRange, IntRange zRange) {
+        return aRange.getFloor() <= zRange.getCeiling() && zRange.getFloor() <= aRange.getCeiling();
     }
 
 
