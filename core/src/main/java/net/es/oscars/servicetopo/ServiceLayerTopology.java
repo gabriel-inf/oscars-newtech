@@ -13,7 +13,6 @@ import net.es.oscars.topo.beans.TopoVertex;
 import net.es.oscars.topo.beans.Topology;
 import net.es.oscars.topo.enums.*;
 import net.es.oscars.topo.svc.TopoService;
-import org.apache.commons.collections15.Transformer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -44,22 +43,16 @@ public class ServiceLayerTopology
     Set<TopoVertex> serviceLayerPorts = new HashSet<>();
     Set<TopoEdge> serviceLayerLinks = new HashSet<>();
 
-    Set<TopoVertex> nonAdjacentPorts;
-
     Set<TopoVertex> mplsLayerDevices = new HashSet<>();
     Set<TopoVertex> mplsLayerPorts = new HashSet<>();
     Set<TopoEdge> mplsLayerLinks = new HashSet<>();
 
+    Set<TopoVertex> nonAdjacentPorts;
+    Set<LogicalEdge> logicalLinks;
+
     Set<TopoVertex> logicalSrcNodes = null;
     Set<TopoVertex> logicalDstNodes = null;
 
-    Set<LogicalEdge> logicalLinks;
-
-    Topology serviceLayerTopo;
-    Topology mplsLayerTopo;
-
-
-    // these objects are for easily getting/setting topologies for testing only!
     Topology ethernetTopology;
     Topology mplsTopology;
     Topology internalTopology;
@@ -78,20 +71,11 @@ public class ServiceLayerTopology
 
     private void buildServiceLayerTopo()
     {
-        /* UNCOMMENT THESE LINES AFTER TESTING */
-        //Topology ethernetTopo = topoService.layer(Layer.ETHERNET);
-        //Topology internalTopo = topoService.layer(Layer.INTERNAL);
+        Set<TopoVertex> ethernetVertices = ethernetTopology.getVertices();
+        Set<TopoVertex> internalVertices = internalTopology.getVertices();
 
-        /* DELETE THESE LINES AFTER TESTING */
-        Topology ethernetTopo = ethernetTopology;
-        Topology internalTopo = internalTopology;
-
-        Set<TopoVertex> ethernetVertices = ethernetTopo.getVertices();
-        Set<TopoVertex> internalVertices = internalTopo.getVertices();
-
-
-        Set<TopoEdge> allEthernetEdges = ethernetTopo.getEdges();
-        Set<TopoEdge> allInternalEdges = internalTopo.getEdges();
+        Set<TopoEdge> allEthernetEdges = ethernetTopology.getEdges();
+        Set<TopoEdge> allInternalEdges = internalTopology.getEdges();
 
         assert(internalVertices.isEmpty());     // Only edges should be INTERNAL
 
@@ -118,30 +102,16 @@ public class ServiceLayerTopology
         serviceLayerPorts.addAll(allEthernetPorts);
         serviceLayerLinks.addAll(allEthernetEdges);
         serviceLayerLinks.addAll(allInternalEthernetEdges);
-
-        serviceLayerTopo = new Topology();
-        serviceLayerTopo.getVertices().addAll(serviceLayerDevices);
-        serviceLayerTopo.getVertices().addAll(serviceLayerPorts);
-        serviceLayerTopo.getEdges().addAll(serviceLayerLinks);
     }
 
 
     private void buildMplsLayerTopo()
     {
-        /* UNCOMMENT THESE LINES AFTER TESTING */
-        //Topology mplsTopo = topoService.layer(Layer.MPLS);
-        //Topology internalTopo = topoService.layer(Layer.INTERNAL);
+        Set<TopoVertex> mplsVertices = mplsTopology.getVertices();
+        Set<TopoVertex> internalVertices = internalTopology.getVertices();
 
-        /* DELETE THESE LINES AFTER TESTING */
-        Topology mplsTopo = mplsTopology;
-        Topology internalTopo = internalTopology;
-
-
-        Set<TopoVertex> mplsVertices = mplsTopo.getVertices();
-        Set<TopoVertex> internalVertices = internalTopo.getVertices();
-
-        Set<TopoEdge> allMplsEdges = mplsTopo.getEdges();
-        Set<TopoEdge> allInternalEdges = internalTopo.getEdges();
+        Set<TopoEdge> allMplsEdges = mplsTopology.getEdges();
+        Set<TopoEdge> allInternalEdges = internalTopology.getEdges();
 
         assert(internalVertices.isEmpty());     // Only edges should be INTERNAL
 
@@ -168,11 +138,6 @@ public class ServiceLayerTopology
         mplsLayerPorts.addAll(allMplsPorts);
         mplsLayerLinks.addAll(allMplsEdges);
         mplsLayerLinks.addAll(allInternalMPLSEdges);
-
-        mplsLayerTopo = new Topology();
-        mplsLayerTopo.getVertices().addAll(mplsLayerDevices);
-        mplsLayerTopo.getVertices().addAll(mplsLayerPorts);
-        mplsLayerTopo.getEdges().addAll(mplsLayerLinks);
     }
 
 
@@ -244,6 +209,11 @@ public class ServiceLayerTopology
     {
         log.info("Performing routing on MPLS-Layer topology to assign weights to Service-Layer logical links.");
         Set<LogicalEdge> logicalLinksToRemoveFromServiceLayer = new HashSet<>();
+
+        Topology mplsLayerTopo = new Topology();
+        mplsLayerTopo.getVertices().addAll(mplsLayerDevices);
+        mplsLayerTopo.getVertices().addAll(mplsLayerPorts);
+        mplsLayerTopo.getEdges().addAll(mplsLayerLinks);
 
         // Step 1: Prune MPLS-Layer topology once before considering any logical links.
         log.info("step 1: pruning MPLS-layer by bandwidth and vlan availability.");
@@ -378,6 +348,16 @@ public class ServiceLayerTopology
         logicalLinks.removeAll(logicalLinksToRemoveFromServiceLayer);
     }
 
+    // Doesn't destroy logical links, but resets cost metrics to 0, and clears the correspondingTopoEdges lists. This needs to be done, for example, prior to every call to calculateLogicalLinkWeights().
+    public void resetLogicalLinks()
+    {
+        logicalLinks.stream()
+            .forEach(ll -> {
+                ll.setMetric(0L);
+                ll.getCorrespondingTopoEdges().clear();
+            });
+    }
+
 
     // Should only be called if Source Device is MPLS
     public void buildLogicalLayerSrcNodes(TopoVertex srcDevice, TopoVertex srcInPort)
@@ -448,27 +428,23 @@ public class ServiceLayerTopology
     }
 
 
-    // Here for testing only!
-    public Topology getTopology(Layer layer)
-    {
-        if(layer.equals(Layer.ETHERNET))
-            return ethernetTopology;
-        else if(layer.equals(Layer.MPLS))
-            return mplsTopology;
-        else
-            return internalTopology;
-    }
 
-    // Here for testing only!
     public void setTopology(Topology topology)
     {
+        assert(topology != null);
+
         Layer layer = topology.getLayer();
 
         if(layer.equals(Layer.ETHERNET))
             ethernetTopology = topology;
         else if(layer.equals(Layer.MPLS))
             mplsTopology = topology;
-        else
+        else if(layer.equals(Layer.INTERNAL))
             internalTopology = topology;
+        else
+        {
+            log.error("Topology passed to ServiceLayerTopology class with invalid Layer.");
+            assert(false);
+        }
     }
 }
