@@ -16,7 +16,7 @@ import java.util.Set;
 
 @Slf4j
 public class ServiceLayerTopoConstructionTest {
-    private ServiceLayerTopology serviceLayerTopo = new ServiceLayerTopology();
+    private ServiceLayerTopology serviceLayerTopology = new ServiceLayerTopology();
 
     private Set<TopoVertex> ethernetTopoVertices = new HashSet<>();
     private Set<TopoVertex> mplsTopoVertices = new HashSet<>();
@@ -97,18 +97,18 @@ public class ServiceLayerTopoConstructionTest {
         ethernetTopoEdges.add(edgeEth_Bin_Aout);
         ethernetTopoEdges.add(edgeEth_Cin_Bout);
 
-        constructLayeredTopology();
+        this.constructLayeredTopology();
 
-        assert (serviceLayerTopo.getServiceLayerDevices().size() == 3);
-        assert (serviceLayerTopo.getServiceLayerPorts().size() == 6);
-        assert (serviceLayerTopo.getServiceLayerLinks().size() == 16);
+        assert (serviceLayerTopology.getServiceLayerDevices().size() == 3);
+        assert (serviceLayerTopology.getServiceLayerPorts().size() == 6);
+        assert (serviceLayerTopology.getServiceLayerLinks().size() == 16);
 
-        assert (serviceLayerTopo.getMplsLayerDevices().size() == 0);
-        assert (serviceLayerTopo.getMplsLayerPorts().size() == 0);
-        assert (serviceLayerTopo.getMplsLayerLinks().size() == 0);
+        assert (serviceLayerTopology.getMplsLayerDevices().size() == 0);
+        assert (serviceLayerTopology.getMplsLayerPorts().size() == 0);
+        assert (serviceLayerTopology.getMplsLayerLinks().size() == 0);
 
-        assert (serviceLayerTopo.getNonAdjacentPorts().size() == 0);
-        assert (serviceLayerTopo.getLogicalLinks().size() == 0);
+        assert (serviceLayerTopology.getNonAdjacentPorts().size() == 0);
+        assert (serviceLayerTopology.getLogicalLinks().size() == 0);
 
         log.info("test complete.");
     }
@@ -184,18 +184,18 @@ public class ServiceLayerTopoConstructionTest {
         mplsTopoEdges.add(edgeMpls_Bin_Aout);
         mplsTopoEdges.add(edgeMpls_Cin_Bout);
 
-        constructLayeredTopology();
+        this.constructLayeredTopology();
 
-        assert (serviceLayerTopo.getServiceLayerDevices().size() == 0);
-        assert (serviceLayerTopo.getServiceLayerPorts().size() == 0);
-        assert (serviceLayerTopo.getServiceLayerLinks().size() == 0);
+        assert (serviceLayerTopology.getServiceLayerDevices().size() == 0);
+        assert (serviceLayerTopology.getServiceLayerPorts().size() == 0);
+        assert (serviceLayerTopology.getServiceLayerLinks().size() == 0);
 
-        assert (serviceLayerTopo.getMplsLayerDevices().size() == 3);
-        assert (serviceLayerTopo.getMplsLayerPorts().size() == 6);
-        assert (serviceLayerTopo.getMplsLayerLinks().size() == 16);
+        assert (serviceLayerTopology.getMplsLayerDevices().size() == 3);
+        assert (serviceLayerTopology.getMplsLayerPorts().size() == 6);
+        assert (serviceLayerTopology.getMplsLayerLinks().size() == 16);
 
-        assert (serviceLayerTopo.getNonAdjacentPorts().size() == 0);
-        assert (serviceLayerTopo.getLogicalLinks().size() == 0);
+        assert (serviceLayerTopology.getNonAdjacentPorts().size() == 0);
+        assert (serviceLayerTopology.getLogicalLinks().size() == 0);
 
         log.info("test complete.");
     }
@@ -273,18 +273,18 @@ public class ServiceLayerTopoConstructionTest {
         ethernetTopoEdges.add(edgeEth_Bin_Aout);
         ethernetTopoEdges.add(edgeEth_Cin_Bout);
 
-        constructLayeredTopology();
+        this.constructLayeredTopology();
 
-        assert (serviceLayerTopo.getServiceLayerDevices().size() == 1);
-        assert (serviceLayerTopo.getServiceLayerPorts().size() == 2);
-        assert (serviceLayerTopo.getServiceLayerLinks().size() == 8);
+        assert (serviceLayerTopology.getServiceLayerDevices().size() == 1);
+        assert (serviceLayerTopology.getServiceLayerPorts().size() == 2);
+        assert (serviceLayerTopology.getServiceLayerLinks().size() == 8);
 
-        assert (serviceLayerTopo.getMplsLayerDevices().size() == 2);
-        assert (serviceLayerTopo.getMplsLayerPorts().size() == 4);
-        assert (serviceLayerTopo.getMplsLayerLinks().size() == 8);
+        assert (serviceLayerTopology.getMplsLayerDevices().size() == 2);
+        assert (serviceLayerTopology.getMplsLayerPorts().size() == 4);
+        assert (serviceLayerTopology.getMplsLayerLinks().size() == 8);
 
-        assert (serviceLayerTopo.getNonAdjacentPorts().size() == 2);
-        assert (serviceLayerTopo.getLogicalLinks().size() == 2);
+        assert (serviceLayerTopology.getNonAdjacentPorts().size() == 2);
+        assert (serviceLayerTopology.getLogicalLinks().size() == 2);
 
         log.info("test complete.");
     }
@@ -362,19 +362,19 @@ public class ServiceLayerTopoConstructionTest {
         ethernetTopoEdges.add(edgeEth_Bin_Aout);
         ethernetTopoEdges.add(edgeEth_Cin_Bout);
 
-        constructLayeredTopology();
+        this.constructLayeredTopology();
 
-        assert (serviceLayerTopo.getServiceLayerDevices().size() == 2);
-        assert (serviceLayerTopo.getServiceLayerPorts().size() == 4);
-        assert (serviceLayerTopo.getServiceLayerLinks().size() == 12);
+        assert (serviceLayerTopology.getServiceLayerDevices().size() == 2);
+        assert (serviceLayerTopology.getServiceLayerPorts().size() == 4);
+        assert (serviceLayerTopology.getServiceLayerLinks().size() == 12);
 
-        assert (serviceLayerTopo.getMplsLayerDevices().size() == 1);
-        assert (serviceLayerTopo.getMplsLayerPorts().size() == 2);
-        assert (serviceLayerTopo.getMplsLayerLinks().size() == 4);
+        assert (serviceLayerTopology.getMplsLayerDevices().size() == 1);
+        assert (serviceLayerTopology.getMplsLayerPorts().size() == 2);
+        assert (serviceLayerTopology.getMplsLayerLinks().size() == 4);
 
-        assert (serviceLayerTopo.getNonAdjacentPorts().size() == 2);
+        assert (serviceLayerTopology.getNonAdjacentPorts().size() == 2);
 
-        assert (serviceLayerTopo.getLogicalLinks().size() == 2);
+        assert (serviceLayerTopology.getLogicalLinks().size() == 2);
 
         log.info("test complete.");
     }
@@ -383,7 +383,7 @@ public class ServiceLayerTopoConstructionTest {
     public void testFourSwitchOneRouter()
     {
         log.info("testing simple Service-Layer topology: 5-nodes, S-S-R-S-S.");
-        Topology networkTopology = buildFiveNodeTopo();
+        Topology networkTopology = this.buildFiveNodeTopo();
         Set<TopoVertex> topoNodes = networkTopology.getVertices();
         Set<TopoEdge> topoEdges = networkTopology.getEdges();
 
@@ -424,21 +424,21 @@ public class ServiceLayerTopoConstructionTest {
         }
 
 
-        constructLayeredTopology();
+        this.constructLayeredTopology();
 
-        assert (serviceLayerTopo.getServiceLayerDevices().size() == 4);
-        assert (serviceLayerTopo.getServiceLayerPorts().size() == 8);
-        assert (serviceLayerTopo.getServiceLayerLinks().size() == 24);
+        assert (serviceLayerTopology.getServiceLayerDevices().size() == 4);
+        assert (serviceLayerTopology.getServiceLayerPorts().size() == 8);
+        assert (serviceLayerTopology.getServiceLayerLinks().size() == 24);
 
-        assert (serviceLayerTopo.getMplsLayerDevices().size() == 1);
-        assert (serviceLayerTopo.getMplsLayerPorts().size() == 2);
-        assert (serviceLayerTopo.getMplsLayerLinks().size() == 4);
+        assert (serviceLayerTopology.getMplsLayerDevices().size() == 1);
+        assert (serviceLayerTopology.getMplsLayerPorts().size() == 2);
+        assert (serviceLayerTopology.getMplsLayerLinks().size() == 4);
 
-        assert (serviceLayerTopo.getNonAdjacentPorts().size() == 2);
+        assert (serviceLayerTopology.getNonAdjacentPorts().size() == 2);
 
-        assert (serviceLayerTopo.getLogicalLinks().size() == 2);
+        assert (serviceLayerTopology.getLogicalLinks().size() == 2);
 
-        serviceLayerTopo.getLogicalLinks().stream()
+        serviceLayerTopology.getLogicalLinks().stream()
                 .forEach(ll -> {
                     String aURN = ll.getA().getUrn();
                     String zURN = ll.getZ().getUrn();
@@ -459,7 +459,7 @@ public class ServiceLayerTopoConstructionTest {
     {
         log.info("testing simple Service-Layer topology: 5-nodes, R-R-S-R-R.");
 
-        Topology networkTopology = buildFiveNodeTopo();
+        Topology networkTopology = this.buildFiveNodeTopo();
         Set<TopoVertex> topoNodes = networkTopology.getVertices();
         Set<TopoEdge> topoEdges = networkTopology.getEdges();
 
@@ -511,21 +511,21 @@ public class ServiceLayerTopoConstructionTest {
         }
 
 
-        constructLayeredTopology();
+        this.constructLayeredTopology();
 
-        assert (serviceLayerTopo.getServiceLayerDevices().size() == 1);
-        assert (serviceLayerTopo.getServiceLayerPorts().size() == 2);
-        assert (serviceLayerTopo.getServiceLayerLinks().size() == 8);
+        assert (serviceLayerTopology.getServiceLayerDevices().size() == 1);
+        assert (serviceLayerTopology.getServiceLayerPorts().size() == 2);
+        assert (serviceLayerTopology.getServiceLayerLinks().size() == 8);
 
-        assert (serviceLayerTopo.getMplsLayerDevices().size() == 4);
-        assert (serviceLayerTopo.getMplsLayerPorts().size() == 8);
-        assert (serviceLayerTopo.getMplsLayerLinks().size() == 20);
+        assert (serviceLayerTopology.getMplsLayerDevices().size() == 4);
+        assert (serviceLayerTopology.getMplsLayerPorts().size() == 8);
+        assert (serviceLayerTopology.getMplsLayerLinks().size() == 20);
 
-        assert (serviceLayerTopo.getNonAdjacentPorts().size() == 2);
+        assert (serviceLayerTopology.getNonAdjacentPorts().size() == 2);
 
-        assert (serviceLayerTopo.getLogicalLinks().size() == 2);
+        assert (serviceLayerTopology.getLogicalLinks().size() == 2);
 
-        serviceLayerTopo.getLogicalLinks().stream()
+        serviceLayerTopology.getLogicalLinks().stream()
                 .forEach(ll -> {
                     String aURN = ll.getA().getUrn();
                     String zURN = ll.getZ().getUrn();
@@ -545,7 +545,7 @@ public class ServiceLayerTopoConstructionTest {
     {
         log.info("testing simple Service-Layer topology: 5-nodes, S-R-R-S-S.");
 
-        Topology networkTopology = buildFiveNodeTopo();
+        Topology networkTopology = this.buildFiveNodeTopo();
         Set<TopoVertex> topoNodes = networkTopology.getVertices();
         Set<TopoEdge> topoEdges = networkTopology.getEdges();
 
@@ -597,21 +597,21 @@ public class ServiceLayerTopoConstructionTest {
         }
 
 
-        constructLayeredTopology();
+        this.constructLayeredTopology();
 
-        assert (serviceLayerTopo.getServiceLayerDevices().size() == 3);
-        assert (serviceLayerTopo.getServiceLayerPorts().size() == 6);
-        assert (serviceLayerTopo.getServiceLayerLinks().size() == 18);
+        assert (serviceLayerTopology.getServiceLayerDevices().size() == 3);
+        assert (serviceLayerTopology.getServiceLayerPorts().size() == 6);
+        assert (serviceLayerTopology.getServiceLayerLinks().size() == 18);
 
-        assert (serviceLayerTopo.getMplsLayerDevices().size() == 2);
-        assert (serviceLayerTopo.getMplsLayerPorts().size() == 4);
-        assert (serviceLayerTopo.getMplsLayerLinks().size() == 10);
+        assert (serviceLayerTopology.getMplsLayerDevices().size() == 2);
+        assert (serviceLayerTopology.getMplsLayerPorts().size() == 4);
+        assert (serviceLayerTopology.getMplsLayerLinks().size() == 10);
 
-        assert (serviceLayerTopo.getNonAdjacentPorts().size() == 2);
+        assert (serviceLayerTopology.getNonAdjacentPorts().size() == 2);
 
-        assert (serviceLayerTopo.getLogicalLinks().size() == 2);
+        assert (serviceLayerTopology.getLogicalLinks().size() == 2);
 
-        serviceLayerTopo.getLogicalLinks().stream()
+        serviceLayerTopology.getLogicalLinks().stream()
                 .forEach(ll -> {
                     String aURN = ll.getA().getUrn();
                     String zURN = ll.getZ().getUrn();
@@ -631,7 +631,7 @@ public class ServiceLayerTopoConstructionTest {
     {
         log.info("testing more complex Service-Layer topology: 5-nodes, S==R-R-S-S.");
 
-        Topology networkTopology = buildFiveNodeTopo();
+        Topology networkTopology = this.buildFiveNodeTopo();
         Set<TopoVertex> topoNodes = networkTopology.getVertices();
         Set<TopoEdge> topoEdges = networkTopology.getEdges();
 
@@ -717,21 +717,21 @@ public class ServiceLayerTopoConstructionTest {
                 mplsTopoEdges.add(oneEdge);
         }
 
-        constructLayeredTopology();
+        this.constructLayeredTopology();
 
-        assert (serviceLayerTopo.getServiceLayerDevices().size() == 3);
-        assert (serviceLayerTopo.getServiceLayerPorts().size() == 7);
-        assert (serviceLayerTopo.getServiceLayerLinks().size() == 22);
+        assert (serviceLayerTopology.getServiceLayerDevices().size() == 3);
+        assert (serviceLayerTopology.getServiceLayerPorts().size() == 7);
+        assert (serviceLayerTopology.getServiceLayerLinks().size() == 22);
 
-        assert (serviceLayerTopo.getMplsLayerDevices().size() == 2);
-        assert (serviceLayerTopo.getMplsLayerPorts().size() == 5);
-        assert (serviceLayerTopo.getMplsLayerLinks().size() == 12);
+        assert (serviceLayerTopology.getMplsLayerDevices().size() == 2);
+        assert (serviceLayerTopology.getMplsLayerPorts().size() == 5);
+        assert (serviceLayerTopology.getMplsLayerLinks().size() == 12);
 
-        assert (serviceLayerTopo.getNonAdjacentPorts().size() == 3);
+        assert (serviceLayerTopology.getNonAdjacentPorts().size() == 3);
 
-        assert (serviceLayerTopo.getLogicalLinks().size() == 6);
+        assert (serviceLayerTopology.getLogicalLinks().size() == 6);
 
-        serviceLayerTopo.getLogicalLinks().stream()
+        serviceLayerTopology.getLogicalLinks().stream()
                 .forEach(ll -> {
                     String aURN = ll.getA().getUrn();
                     String zURN = ll.getZ().getUrn();
@@ -754,25 +754,25 @@ public class ServiceLayerTopoConstructionTest {
     {
         log.info("testing star-shaped Service-Layer topology: 5-nodes, 4 switches, connected to same router.");
 
-        buildStarTopo();
+        this.buildStarTopo();
 
-        constructLayeredTopology();
+        this.constructLayeredTopology();
 
-        assert (serviceLayerTopo.getServiceLayerDevices().size() == 4);
-        assert (serviceLayerTopo.getServiceLayerPorts().size() == 8);
-        assert (serviceLayerTopo.getServiceLayerLinks().size() == 24);
+        assert (serviceLayerTopology.getServiceLayerDevices().size() == 4);
+        assert (serviceLayerTopology.getServiceLayerPorts().size() == 8);
+        assert (serviceLayerTopology.getServiceLayerLinks().size() == 24);
 
-        assert (serviceLayerTopo.getMplsLayerDevices().size() == 1);
-        assert (serviceLayerTopo.getMplsLayerPorts().size() == 4);
-        assert (serviceLayerTopo.getMplsLayerLinks().size() == 8);
+        assert (serviceLayerTopology.getMplsLayerDevices().size() == 1);
+        assert (serviceLayerTopology.getMplsLayerPorts().size() == 4);
+        assert (serviceLayerTopology.getMplsLayerLinks().size() == 8);
 
-        assert (serviceLayerTopo.getNonAdjacentPorts().size() == 4);
+        assert (serviceLayerTopology.getNonAdjacentPorts().size() == 4);
 
-        assert (serviceLayerTopo.getLogicalLinks().size() == 12);
+        assert (serviceLayerTopology.getLogicalLinks().size() == 12);
 
         int ASrcNum = 0, BSrcNum = 0, CSrcNum = 0, DSrcNum = 0, wrongSrcNum = 0;
 
-        for(LogicalEdge ll : serviceLayerTopo.getLogicalLinks())
+        for(LogicalEdge ll : serviceLayerTopology.getLogicalLinks())
         {
             String aURN = ll.getA().getUrn();
 
@@ -806,21 +806,21 @@ public class ServiceLayerTopoConstructionTest {
 
         constructLayeredTopology();
 
-        assert (serviceLayerTopo.getServiceLayerDevices().size() == 4);
-        assert (serviceLayerTopo.getServiceLayerPorts().size() == 12);
-        assert (serviceLayerTopo.getServiceLayerLinks().size() == 38);
+        assert (serviceLayerTopology.getServiceLayerDevices().size() == 4);
+        assert (serviceLayerTopology.getServiceLayerPorts().size() == 12);
+        assert (serviceLayerTopology.getServiceLayerLinks().size() == 38);
 
-        assert (serviceLayerTopo.getMplsLayerDevices().size() == 6);
-        assert (serviceLayerTopo.getMplsLayerPorts().size() == 15);
-        assert (serviceLayerTopo.getMplsLayerLinks().size() == 38);
+        assert (serviceLayerTopology.getMplsLayerDevices().size() == 6);
+        assert (serviceLayerTopology.getMplsLayerPorts().size() == 15);
+        assert (serviceLayerTopology.getMplsLayerLinks().size() == 38);
 
-        assert (serviceLayerTopo.getNonAdjacentPorts().size() == 5);
+        assert (serviceLayerTopology.getNonAdjacentPorts().size() == 5);
 
-        assert (serviceLayerTopo.getLogicalLinks().size() == 20);
+        assert (serviceLayerTopology.getLogicalLinks().size() == 20);
 
         int A3SrcNum = 0, B3SrcNum = 0, B4SrcNum = 0, C1SrcNum = 0, D3SrcNum = 0, wrongSrcNum = 0;
 
-        for(LogicalEdge ll : serviceLayerTopo.getLogicalLinks())
+        for(LogicalEdge ll : serviceLayerTopology.getLogicalLinks())
         {
             String aURN = ll.getA().getUrn();
             String zURN = ll.getZ().getUrn();
@@ -882,11 +882,11 @@ public class ServiceLayerTopoConstructionTest {
         dummyMPLSTopo.setVertices(mplsTopoVertices);
         dummyMPLSTopo.setEdges(mplsTopoEdges);
 
-        serviceLayerTopo.setTopology(dummyEthernetTopo);
-        serviceLayerTopo.setTopology(dummyInternalTopo);
-        serviceLayerTopo.setTopology(dummyMPLSTopo);
+        serviceLayerTopology.setTopology(dummyEthernetTopo);
+        serviceLayerTopology.setTopology(dummyInternalTopo);
+        serviceLayerTopology.setTopology(dummyMPLSTopo);
 
-        serviceLayerTopo.createMultilayerTopology();
+        serviceLayerTopology.createMultilayerTopology();
     }
 
     private Topology buildFiveNodeTopo()

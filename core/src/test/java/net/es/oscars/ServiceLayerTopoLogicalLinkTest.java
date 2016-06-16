@@ -26,6 +26,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -39,7 +40,6 @@ public class ServiceLayerTopoLogicalLinkTest
 {
     @Autowired
     private ServiceLayerTopology serviceLayerTopo;
-    //private ServiceLayerTopology serviceLayerTopo = new ServiceLayerTopology();
 
     private Set<TopoVertex> ethernetTopoVertices = new HashSet<>();
     private Set<TopoVertex> mplsTopoVertices = new HashSet<>();
@@ -49,15 +49,18 @@ public class ServiceLayerTopoLogicalLinkTest
     private Set<TopoEdge> mplsTopoEdges = new HashSet<>();
     private Set<TopoEdge> internalTopoEdges = new HashSet<>();
 
+    private RequestedVlanPipeE requestedPipe = new RequestedVlanPipeE();
+
     @Test
     public void verifyLogicalLinkWeights()
     {
         buildLinearTopo();
         constructLayeredTopology();
+        buildLinearRequestPipe();
 
-        Set<LogicalEdge> logicalEdges = serviceLayerTopo.getLogicalLinks();
+        Set<LogicalEdge> logicalLinks = serviceLayerTopo.getLogicalLinks();
 
-        assert(logicalEdges.size() == 2);
+        assert(logicalLinks.size() == 2);
 
         serviceLayerTopo.getLogicalLinks().stream()
                 .forEach(ll -> {
@@ -79,75 +82,58 @@ public class ServiceLayerTopoLogicalLinkTest
                 srcDevice = v;
             else if(v.getUrn().equals("switchE"))
                 dstDevice = v;
-            else if(v.getUrn().equals("switchA:1"))
+            else if(v.getUrn().equals("switchA:2"))
                 srcPort = v;
-            else if(v.getUrn().equals("switchE:2"))
+            else if(v.getUrn().equals("switchE:1"))
                 dstPort = v;
         }
 
-        log.info("HERE IN TEST 1");
-        RequestedVlanPipeE bwPipe = new RequestedVlanPipeE();
-        RequestedVlanJunctionE aJunc = new RequestedVlanJunctionE();
-        RequestedVlanJunctionE zJunc = new RequestedVlanJunctionE();
-        RequestedVlanFixtureE aFix = new RequestedVlanFixtureE();
-        RequestedVlanFixtureE zFix = new RequestedVlanFixtureE();
-        UrnE aFixURN = new UrnE();
-        UrnE zFixURN = new UrnE();
-        UrnE aJuncURN = new UrnE();
-        UrnE zJuncURN = new UrnE();
-
-        log.info("HERE IN TEST 2");
-        
-        aFixURN.setUrn("switchA:1");
-        aFixURN.setUrnType(UrnType.IFCE);
-
-        zFixURN.setUrn("switchE:1");
-        zFixURN.setUrnType(UrnType.IFCE);
-
-        aJuncURN.setUrn("switchA");
-        aJuncURN.setUrnType(UrnType.DEVICE);
-
-        zJuncURN.setUrn("switchE:1");
-        zJuncURN.setUrnType(UrnType.DEVICE);
-        
-        
-        aFix.setPortUrn(aFixURN);
-        aFix.setVlanExpression("1234");
-        aFix.setFixtureType(EthFixtureType.JUNOS_IFCE);
-        aFix.setInMbps(100);
-        aFix.setEgMbps(100);
-
-        zFix.setPortUrn(zFixURN);
-        zFix.setVlanExpression("1234");
-        zFix.setFixtureType(EthFixtureType.JUNOS_IFCE);
-        zFix.setInMbps(100);
-        zFix.setEgMbps(100);
-
-        Set<RequestedVlanFixtureE> aFixes = new HashSet<>();
-        Set<RequestedVlanFixtureE> zFixes = new HashSet<>();
-
-        aFixes.add(aFix);
-        zFixes.add(zFix);
-
-        aJunc.setDeviceUrn(aJuncURN);
-        aJunc.setJunctionType(EthJunctionType.JUNOS_SWITCH);
-        aJunc.setFixtures(aFixes);
-
-        zJunc.setDeviceUrn(zJuncURN);
-        zJunc.setJunctionType(EthJunctionType.JUNOS_SWITCH);
-        zJunc.setFixtures(zFixes);
-
-
-        bwPipe.setAzMbps(20);
-        bwPipe.setZaMbps(20);
-        bwPipe.setAJunction(aJunc);
-        bwPipe.setZJunction(zJunc);
-        bwPipe.setPipeType(EthPipeType.REQUESTED);
-
-
         serviceLayerTopo.buildLogicalLayerSrcNodes(srcDevice, srcPort);
         serviceLayerTopo.buildLogicalLayerDstNodes(dstDevice, dstPort);
-        serviceLayerTopo.calculateLogicalLinkWeights(bwPipe);
+        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe);
+
+        logicalLinks = serviceLayerTopo.getLogicalLinks();
+
+        assert(logicalLinks.size() == 2);
+
+        for(LogicalEdge ll : logicalLinks)
+        {
+            List<TopoEdge> physicalEdges = ll.getCorrespondingTopoEdges();
+
+            assert(ll.getA().equals(srcPort) || ll.getZ().equals(srcPort));
+            assert(ll.getA().equals(dstPort) || ll.getZ().equals(dstPort));
+            assert(ll.getMetric() == 400);
+            assert(physicalEdges.size() == 10);
+
+            String physicalURNs = "";
+            String correctURNs;
+
+            if(ll.getA().equals(srcPort))
+            {
+                assert(physicalEdges.get(0).getA().equals(srcPort));
+                assert(physicalEdges.get(physicalEdges.size()-1).getZ().equals(dstPort));
+
+                correctURNs = "switchA:2]-->[routerB:1-routerB:1]-->[routerB-routerB]-->[routerB:2-routerB:2]-->[routerC:1-routerC:1]-->[routerC-routerC]-->[routerC:2-routerC:2]-->[routerD:1-routerD:1]-->[routerD-routerD]-->[routerD:2-routerD:2]-->[switchE:1-";
+            }
+            else
+            {
+                assert(physicalEdges.get(0).getA().equals(dstPort));
+                assert(physicalEdges.get(physicalEdges.size()-1).getZ().equals(srcPort));
+
+                correctURNs = "switchE:1]-->[routerD:2-routerD:2]-->[routerD-routerD]-->[routerD:1-routerD:1]-->[routerC:2-routerC:2]-->[routerC-routerC]-->[routerC:1-routerC:1]-->[routerB:2-routerB:2]-->[routerB-routerB]-->[routerB:1-routerB:1]-->[switchA:2-";
+            }
+
+            for(TopoEdge physEdge : physicalEdges)
+            {
+                physicalURNs = physicalURNs + physEdge.getA().getUrn();
+                physicalURNs = physicalURNs + "]-->[";
+                physicalURNs = physicalURNs + physEdge.getZ().getUrn();
+                physicalURNs = physicalURNs + "-";
+            }
+
+            assert(physicalURNs.equals(correctURNs));
+        }
+
     }
 
     private void constructLayeredTopology()
@@ -277,5 +263,66 @@ public class ServiceLayerTopoLogicalLinkTest
         mplsTopoEdges.add(edgeMpls_C1_B2);
         mplsTopoEdges.add(edgeMpls_C2_D1);
         mplsTopoEdges.add(edgeMpls_D1_C2);
+    }
+
+    private void buildLinearRequestPipe()
+    {
+        RequestedVlanPipeE bwPipe = new RequestedVlanPipeE();
+        RequestedVlanJunctionE aJunc = new RequestedVlanJunctionE();
+        RequestedVlanJunctionE zJunc = new RequestedVlanJunctionE();
+        RequestedVlanFixtureE aFix = new RequestedVlanFixtureE();
+        RequestedVlanFixtureE zFix = new RequestedVlanFixtureE();
+        UrnE aFixURN = new UrnE();
+        UrnE zFixURN = new UrnE();
+        UrnE aJuncURN = new UrnE();
+        UrnE zJuncURN = new UrnE();
+
+        aFixURN.setUrn("switchA:1");
+        aFixURN.setUrnType(UrnType.IFCE);
+
+        zFixURN.setUrn("switchE:1");
+        zFixURN.setUrnType(UrnType.IFCE);
+
+        aJuncURN.setUrn("switchA");
+        aJuncURN.setUrnType(UrnType.DEVICE);
+
+        zJuncURN.setUrn("switchE:1");
+        zJuncURN.setUrnType(UrnType.DEVICE);
+
+
+        aFix.setPortUrn(aFixURN);
+        aFix.setVlanExpression("1234");
+        aFix.setFixtureType(EthFixtureType.JUNOS_IFCE);
+        aFix.setInMbps(100);
+        aFix.setEgMbps(100);
+
+        zFix.setPortUrn(zFixURN);
+        zFix.setVlanExpression("1234");
+        zFix.setFixtureType(EthFixtureType.JUNOS_IFCE);
+        zFix.setInMbps(100);
+        zFix.setEgMbps(100);
+
+        Set<RequestedVlanFixtureE> aFixes = new HashSet<>();
+        Set<RequestedVlanFixtureE> zFixes = new HashSet<>();
+
+        aFixes.add(aFix);
+        zFixes.add(zFix);
+
+        aJunc.setDeviceUrn(aJuncURN);
+        aJunc.setJunctionType(EthJunctionType.JUNOS_SWITCH);
+        aJunc.setFixtures(aFixes);
+
+        zJunc.setDeviceUrn(zJuncURN);
+        zJunc.setJunctionType(EthJunctionType.JUNOS_SWITCH);
+        zJunc.setFixtures(zFixes);
+
+
+        bwPipe.setAzMbps(20);
+        bwPipe.setZaMbps(20);
+        bwPipe.setAJunction(aJunc);
+        bwPipe.setZJunction(zJunc);
+        bwPipe.setPipeType(EthPipeType.REQUESTED);
+
+        requestedPipe = bwPipe;
     }
 }

@@ -83,7 +83,7 @@ public class BandwidthPCE {
             if (bwFitsOnA && bwFitsOnZ) {
 
                 TopoVertex a = new TopoVertex(e.getA().getUrn(), e.getA().getVertexType());
-                TopoVertex z = new TopoVertex(e.getZ().getUrn(), e.getA().getVertexType());
+                TopoVertex z = new TopoVertex(e.getZ().getUrn(), e.getZ().getVertexType());
                 TopoEdge az = TopoEdge.builder().a(a).z(z).build();
 
                 if (e.getLayer().equals(Layer.INTERNAL)) {

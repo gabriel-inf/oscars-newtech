@@ -58,11 +58,12 @@ public class DijkstraPCE
         catch (JsonProcessingException e) { e.printStackTrace(); }
         //log.info(pretty);
 
+
         DijkstraShortestPath<TopoVertex, TopoEdge> alg = new DijkstraShortestPath<>(graph, wtTransformer);
 
         List<TopoEdge> path = alg.getPath(srcVertex, dstVertex);
 
-        log.info("calculated path ");
+        log.info("calculated path: ");
         if (path.isEmpty())
         {
             log.error("no path found");
@@ -105,7 +106,7 @@ public class DijkstraPCE
         List<TopoEdge> path = alg.getPath(srcVertex, dstVertex);
         List<TopoVertex> verticesInPath = new ArrayList<>();
 
-        log.info("calculated path ");
+        log.info("calculated path: ");
         if (path.isEmpty())
         {
             log.error("no path found");
@@ -136,7 +137,7 @@ public class DijkstraPCE
         topo.getEdges().stream()
             .forEach(e -> {
                 TopoVertex nodeA = new TopoVertex(e.getA().getUrn(), e.getA().getVertexType());
-                TopoVertex nodeZ = new TopoVertex(e.getZ().getUrn(), e.getA().getVertexType());
+                TopoVertex nodeZ = new TopoVertex(e.getZ().getUrn(), e.getZ().getVertexType());
                 TopoEdge az = TopoEdge.builder().a(nodeA).z(nodeZ).build();
 
                 az.setMetric(e.getMetric());;

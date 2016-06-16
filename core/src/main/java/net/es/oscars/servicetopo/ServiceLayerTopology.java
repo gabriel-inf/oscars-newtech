@@ -13,6 +13,7 @@ import net.es.oscars.topo.beans.TopoVertex;
 import net.es.oscars.topo.beans.Topology;
 import net.es.oscars.topo.enums.*;
 import net.es.oscars.topo.svc.TopoService;
+import org.apache.commons.collections15.Transformer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -119,9 +120,9 @@ public class ServiceLayerTopology
         serviceLayerLinks.addAll(allInternalEthernetEdges);
 
         serviceLayerTopo = new Topology();
-        serviceLayerTopo.setVertices(serviceLayerDevices);
-        serviceLayerTopo.setVertices(serviceLayerPorts);
-        serviceLayerTopo.setEdges(serviceLayerLinks);
+        serviceLayerTopo.getVertices().addAll(serviceLayerDevices);
+        serviceLayerTopo.getVertices().addAll(serviceLayerPorts);
+        serviceLayerTopo.getEdges().addAll(serviceLayerLinks);
     }
 
 
@@ -169,9 +170,9 @@ public class ServiceLayerTopology
         mplsLayerLinks.addAll(allInternalMPLSEdges);
 
         mplsLayerTopo = new Topology();
-        mplsLayerTopo.setVertices(mplsLayerDevices);
-        mplsLayerTopo.setVertices(mplsLayerPorts);
-        mplsLayerTopo.setEdges(mplsLayerLinks);
+        mplsLayerTopo.getVertices().addAll(mplsLayerDevices);
+        mplsLayerTopo.getVertices().addAll(mplsLayerPorts);
+        mplsLayerTopo.getEdges().addAll(mplsLayerLinks);
     }
 
 
@@ -359,18 +360,17 @@ public class ServiceLayerTopology
                 weightMetric += pathEdge.getMetric();
             }
 
-            // Add *bi-directional* cost sum of adaptation links to Logical Link weight since these are ETHERNET links and must be used in BOTH directions!
+            // Add *uni-directional* cost of adaptation links to Logical Link weight since these are ETHERNET links, but will implicitly be used in BOTH directions across two logical links
             weightMetric += physEdgeAtoMpls.getMetric();
-            weightMetric += physEdgeZtoMpls.getMetric();
-            weightMetric += physEdgeMplstoA.getMetric();
             weightMetric += physEdgeMplstoZ.getMetric();
 
             oneLogicalLink.setMetric(weightMetric);
 
-            path.add(physEdgeAtoMpls);
-            path.add(physEdgeMplstoZ);
+            log.info("step 4 COMPLETE.");
 
             // Step 5: Store the physical route corresponding to this logical link
+            path.add(0, physEdgeAtoMpls);
+            path.add(physEdgeMplstoZ);
             oneLogicalLink.setCorrespondingTopoEdges(path);
         }
 
