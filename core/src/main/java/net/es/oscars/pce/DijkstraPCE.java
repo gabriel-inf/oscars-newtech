@@ -56,7 +56,7 @@ public class DijkstraPCE
             pretty = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(graph);
         }
         catch (JsonProcessingException e) { e.printStackTrace(); }
-        log.info(pretty);
+        //log.info(pretty);
 
         DijkstraShortestPath<TopoVertex, TopoEdge> alg = new DijkstraShortestPath<>(graph, wtTransformer);
 
@@ -98,7 +98,7 @@ public class DijkstraPCE
             pretty = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(graph);
         }
         catch (JsonProcessingException e) { e.printStackTrace(); }
-        log.info(pretty);
+        //log.info(pretty);
 
         DijkstraShortestPath<TopoVertex, TopoEdge> alg = new DijkstraShortestPath<>(graph, wtTransformer);
 

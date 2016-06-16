@@ -27,7 +27,10 @@ public class ServiceLayerTopoConstructionTest {
     private Set<TopoEdge> internalTopoEdges = new HashSet<>();
 
     @Test
-    public void testAllEthernet() {
+    public void testAllEthernet()
+    {
+        log.info("testing simple Service-Layer topology: 3-nodes, all switches.");
+
         TopoVertex switchA = new TopoVertex("swA", VertexType.SWITCH);
         TopoVertex switchB = new TopoVertex("swB", VertexType.SWITCH);
         TopoVertex switchC = new TopoVertex("swC", VertexType.SWITCH);
@@ -106,10 +109,15 @@ public class ServiceLayerTopoConstructionTest {
 
         assert (serviceLayerTopo.getNonAdjacentPorts().size() == 0);
         assert (serviceLayerTopo.getLogicalLinks().size() == 0);
+
+        log.info("test complete.");
     }
 
     @Test
-    public void testAllMPLS() {
+    public void testAllMPLS()
+    {
+        log.info("testing simple Service-Layer topology: 3-nodes, all routers.");
+
         TopoVertex routerA = new TopoVertex("roA", VertexType.ROUTER);
         TopoVertex routerB = new TopoVertex("roB", VertexType.ROUTER);
         TopoVertex routerC = new TopoVertex("roC", VertexType.ROUTER);
@@ -188,10 +196,15 @@ public class ServiceLayerTopoConstructionTest {
 
         assert (serviceLayerTopo.getNonAdjacentPorts().size() == 0);
         assert (serviceLayerTopo.getLogicalLinks().size() == 0);
+
+        log.info("test complete.");
     }
 
     @Test
-    public void testSingleSwitch() {
+    public void testSingleSwitch()
+    {
+        log.info("testing simple Service-Layer topology: 3-nodes, router-switch-router.");
+
         TopoVertex routerA = new TopoVertex("roA", VertexType.ROUTER);
         TopoVertex switchB = new TopoVertex("swB", VertexType.SWITCH);
         TopoVertex routerC = new TopoVertex("roC", VertexType.ROUTER);
@@ -272,10 +285,15 @@ public class ServiceLayerTopoConstructionTest {
 
         assert (serviceLayerTopo.getNonAdjacentPorts().size() == 2);
         assert (serviceLayerTopo.getLogicalLinks().size() == 2);
+
+        log.info("test complete.");
     }
 
     @Test
-    public void testSingleRouter() {
+    public void testSingleRouter()
+    {
+        log.info("testing simple Service-Layer topology: 3-nodes, switch-router-switch.");
+
         TopoVertex switchA = new TopoVertex("swA", VertexType.SWITCH);
         TopoVertex routerB = new TopoVertex("roB", VertexType.ROUTER);
         TopoVertex switchC = new TopoVertex("swC", VertexType.SWITCH);
@@ -357,11 +375,14 @@ public class ServiceLayerTopoConstructionTest {
         assert (serviceLayerTopo.getNonAdjacentPorts().size() == 2);
 
         assert (serviceLayerTopo.getLogicalLinks().size() == 2);
+
+        log.info("test complete.");
     }
 
     @Test
     public void testFourSwitchOneRouter()
     {
+        log.info("testing simple Service-Layer topology: 5-nodes, S-S-R-S-S.");
         Topology networkTopology = buildFiveNodeTopo();
         Set<TopoVertex> topoNodes = networkTopology.getVertices();
         Set<TopoEdge> topoEdges = networkTopology.getEdges();
@@ -429,12 +450,15 @@ public class ServiceLayerTopoConstructionTest {
                         assert(false);
                 });
 
+        log.info("test complete.");
     }
 
 
     @Test
     public void testFourRoutersOneSwitch()
     {
+        log.info("testing simple Service-Layer topology: 5-nodes, R-R-S-R-R.");
+
         Topology networkTopology = buildFiveNodeTopo();
         Set<TopoVertex> topoNodes = networkTopology.getVertices();
         Set<TopoEdge> topoEdges = networkTopology.getEdges();
@@ -513,11 +537,14 @@ public class ServiceLayerTopoConstructionTest {
                         assert(false);
                 });
 
+        log.info("test complete.");
     }
 
     @Test
     public void testTwoRoutersThreeSwitches()
     {
+        log.info("testing simple Service-Layer topology: 5-nodes, S-R-R-S-S.");
+
         Topology networkTopology = buildFiveNodeTopo();
         Set<TopoVertex> topoNodes = networkTopology.getVertices();
         Set<TopoEdge> topoEdges = networkTopology.getEdges();
@@ -596,11 +623,14 @@ public class ServiceLayerTopoConstructionTest {
                         assert(false);
                 });
 
+        log.info("test complete.");
     }
 
     @Test
     public void testTwoRoutersThreeSwitchesAdditionalLogicalLinks()
     {
+        log.info("testing more complex Service-Layer topology: 5-nodes, S==R-R-S-S.");
+
         Topology networkTopology = buildFiveNodeTopo();
         Set<TopoVertex> topoNodes = networkTopology.getVertices();
         Set<TopoEdge> topoEdges = networkTopology.getEdges();
@@ -715,12 +745,15 @@ public class ServiceLayerTopoConstructionTest {
                         assert(false);
                 });
 
+        log.info("test complete.");
     }
 
 
     @Test
     public void testRouterHubStar()
     {
+        log.info("testing star-shaped Service-Layer topology: 5-nodes, 4 switches, connected to same router.");
+
         buildStarTopo();
 
         constructLayeredTopology();
@@ -760,11 +793,15 @@ public class ServiceLayerTopoConstructionTest {
         assert(CSrcNum == 3);
         assert(DSrcNum == 3);
         assert(wrongSrcNum == 0);
+
+        log.info("test complete.");
     }
 
     @Test
     public void testComplexTopo()
     {
+        log.info("testing complex Service-Layer topology: you'll have to see the picture for description.");
+
         buildComplexTopo();
 
         constructLayeredTopology();
@@ -823,6 +860,8 @@ public class ServiceLayerTopoConstructionTest {
         assert(C1SrcNum == 4);
         assert(D3SrcNum == 4);
         assert(wrongSrcNum == 0);
+
+        log.info("test complete.");
     }
 
     private void constructLayeredTopology()
