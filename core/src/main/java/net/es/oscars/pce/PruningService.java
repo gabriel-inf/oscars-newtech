@@ -142,13 +142,18 @@ public class PruningService {
         Set<IntRange> aRanges = getVlanRangesFromUrn(urns, edge.getA().getUrn());
         Set<IntRange> zRanges = getVlanRangesFromUrn(urns, edge.getZ().getUrn());
 
-        assert aRanges.size() <= 1 && zRanges.size() <= 1;
         if(aRanges.isEmpty() && zRanges.isEmpty()){
             return true;
         } else{
             for(Integer requestedVlan : vlans){
-                boolean aContainsVlan = aRanges.stream().anyMatch(vr -> vr.contains(requestedVlan));
-                boolean zContainsVlan = zRanges.stream().anyMatch(vr -> vr.contains(requestedVlan));
+                boolean aContainsVlan = true;
+                if(!aRanges.isEmpty()) {
+                    aContainsVlan = aRanges.stream().anyMatch(vr -> vr.contains(requestedVlan));
+                }
+                boolean zContainsVlan = true;
+                if(!zRanges.isEmpty()) {
+                    zContainsVlan = zRanges.stream().anyMatch(vr -> vr.contains(requestedVlan));
+                }
                 if(!aContainsVlan || !zContainsVlan){
                     return false;
                 }
