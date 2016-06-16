@@ -87,7 +87,7 @@ public class PruningService {
         Set<TopoEdge> availableEdges = topo.getEdges().stream()
                 .filter(e -> bwAvailable(e, azBw, zaBw, urns))
                 .collect(Collectors.toSet());
-        if(pruned.getLayer() == Layer.MPLS){
+        if(pruned.getLayer() == Layer.MPLS || availableEdges.isEmpty()){
             pruned.setEdges(availableEdges);
         }else {
             pruned.setEdges(findEdgesWithAvailableVlans(availableEdges, urns, vlans));
@@ -182,11 +182,17 @@ public class PruningService {
     }
 
     private Set<Integer> findOpenVlans(Set<TopoEdge> edges, List<UrnE> urns){
+        Set<Integer> overlap = new HashSet<>();
         Iterator<TopoEdge> iter = edges.iterator();
+        if(!iter.hasNext()){
+            return overlap;
+        }
         TopoEdge e = iter.next();
+
         Set<IntRange> aRanges = getVlanRangesFromUrn(urns, e.getA().getUrn());
         Set<IntRange> zRanges = getVlanRangesFromUrn(urns, e.getZ().getUrn());
-        Set<Integer> overlap = new HashSet<>();
+
+
         overlap = addToOverlap(overlap, aRanges);
         overlap = addToOverlap(overlap, zRanges);
 
