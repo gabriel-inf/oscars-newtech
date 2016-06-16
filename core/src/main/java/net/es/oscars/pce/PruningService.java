@@ -18,10 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -83,17 +80,59 @@ public class PruningService {
         return pruneTopology(topo, azBw, zaBw, vlans, urns);
     }
 
-    private Set<Integer> findOpenVlans(Set<TopoEdge> edges, List<UrnE> urns){
-        //TODO: Figure out best way to find a VLAN that will work across all edges
-        // Note: MPLS edges can use any available VLAN
+    private Topology pruneTopology(Topology topo, Integer azBw, Integer zaBw, Set<Integer> vlans, List<UrnE> urns){
+        Topology pruned = new Topology();
+        pruned.setLayer(topo.getLayer());
+        pruned.setVertices(topo.getVertices());
+        Set<TopoEdge> availableEdges = topo.getEdges().stream()
+                .filter(e -> availableBW(e, azBw, zaBw, urns))
+                .collect(Collectors.toSet());
+        if(vlans == null){
+            Set<Integer> open = findOpenVlans(availableEdges, urns);
+            if(open.isEmpty()){
+                pruned.setEdges(new HashSet<>());
+                return pruned;
+            }
+            availableEdges = availableEdges.stream().filter(e -> availableVlans(e, open, urns))
+                    .collect(Collectors.toSet());
+        }
+        else{
+            availableEdges = availableEdges.stream().filter(e -> availableVlans(e, vlans, urns))
+                    .collect(Collectors.toSet());
+        }
+        pruned.setEdges(availableEdges);
+        return pruned;
+    }
 
-        TopoEdge e = edges.iterator().next();
+    private Set<Integer> findOpenVlans(Set<TopoEdge> edges, List<UrnE> urns){
+        Iterator<TopoEdge> iter = edges.iterator();
+        TopoEdge e = iter.next();
         Set<IntRange> aRanges = getVlanRangesFromUrn(urns, e.getA().getUrn());
         Set<IntRange> zRanges = getVlanRangesFromUrn(urns, e.getZ().getUrn());
         Set<Integer> overlap = new HashSet<>();
         overlap = addToOverlap(overlap, aRanges);
         overlap = addToOverlap(overlap, zRanges);
-        return new HashSet<Integer>();
+
+        //Now, we have a set of all integers(VLAN tags) that are available on both node A and node Z of an edge
+        //Next, we have to go through the other edges in the network, and for each one, find the vlans available
+        //On both the A and Z ends of the edge. Remove VLAN tags from our overlap set if they are not contained
+        //Within the available VLAN ranges on each edge.
+        while(iter.hasNext()){
+            TopoEdge edge = iter.next();
+            aRanges = getVlanRangesFromUrn(urns, edge.getA().getUrn());
+            zRanges = getVlanRangesFromUrn(urns, edge.getZ().getUrn());
+
+            overlap = removeIfNotInRange(overlap, aRanges);
+            overlap = removeIfNotInRange(overlap, zRanges);
+        }
+        return overlap;
+    }
+
+    private Set<Integer> removeIfNotInRange(Set<Integer> overlap, Set<IntRange> ranges){
+        for(IntRange range : ranges){
+            overlap = overlap.stream().filter(range::contains).collect(Collectors.toSet());
+        }
+        return overlap;
     }
 
     private Set<Integer> addToOverlap(Set<Integer> overlap, Set<IntRange> ranges){
@@ -119,20 +158,6 @@ public class PruningService {
     private Set<Integer> getVlansFromJunction(RequestedVlanJunctionE junction){
         return junction.getFixtures().stream().map(RequestedVlanFixtureE::getVlanExpression)
                 .map(Integer::parseInt).collect(Collectors.toSet());
-    }
-
-    private Topology pruneTopology(Topology topo, Integer azBw, Integer zaBw, Set<Integer> vlans, List<UrnE> urns){
-        Topology pruned = new Topology();
-        pruned.setLayer(topo.getLayer());
-        pruned.setVertices(topo.getVertices());
-        Set<TopoEdge> availableEdges = topo.getEdges().stream()
-                .filter(e -> availableBW(e, azBw, zaBw, urns))
-                .collect(Collectors.toSet());
-        if(vlans == null){
-            Set<Integer> openVlans = findOpenVlans(availableEdges, urns);
-        }
-        pruned.setEdges(availableEdges);
-        return pruned;
     }
 
     private Set<IntRange> getVlanRangesFromUrn(List<UrnE> urns, String matchingUrn){
