@@ -2,6 +2,11 @@ package net.es.oscars;
 
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.CoreUnitTestConfiguration;
+import net.es.oscars.dto.pss.EthFixtureType;
+import net.es.oscars.dto.pss.EthJunctionType;
+import net.es.oscars.dto.pss.EthPipeType;
+import net.es.oscars.resv.ent.RequestedVlanFixtureE;
+import net.es.oscars.resv.ent.RequestedVlanJunctionE;
 import net.es.oscars.resv.ent.RequestedVlanPipeE;
 import net.es.oscars.servicetopo.LogicalEdge;
 import net.es.oscars.servicetopo.ServiceLayerTopology;
@@ -9,7 +14,9 @@ import net.es.oscars.topo.beans.TopoEdge;
 import net.es.oscars.topo.beans.TopoVertex;
 import net.es.oscars.topo.beans.Topology;
 import net.es.oscars.topo.dao.UrnRepository;
+import net.es.oscars.topo.ent.UrnE;
 import net.es.oscars.topo.enums.Layer;
+import net.es.oscars.topo.enums.UrnType;
 import net.es.oscars.topo.enums.VertexType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,7 +37,9 @@ import java.util.Set;
 @SpringApplicationConfiguration(CoreUnitTestConfiguration.class)
 public class ServiceLayerTopoLogicalLinkTest
 {
-    private ServiceLayerTopology serviceLayerTopo = new ServiceLayerTopology();
+    @Autowired
+    private ServiceLayerTopology serviceLayerTopo;
+    //private ServiceLayerTopology serviceLayerTopo = new ServiceLayerTopology();
 
     private Set<TopoVertex> ethernetTopoVertices = new HashSet<>();
     private Set<TopoVertex> mplsTopoVertices = new HashSet<>();
@@ -62,10 +71,8 @@ public class ServiceLayerTopoLogicalLinkTest
                         assert(false);
                 });
 
-        log.info("HERE 1");
-        RequestedVlanPipeE bwPipe = new RequestedVlanPipeE();
         TopoVertex srcDevice = null, dstDevice = null, srcPort = null, dstPort = null;
-        log.info("HERE 2");
+
         for(TopoVertex v : ethernetTopoVertices)
         {
             if(v.getUrn().equals("switchA"))
@@ -77,7 +84,66 @@ public class ServiceLayerTopoLogicalLinkTest
             else if(v.getUrn().equals("switchE:2"))
                 dstPort = v;
         }
+
+        log.info("HERE IN TEST 1");
+        RequestedVlanPipeE bwPipe = new RequestedVlanPipeE();
+        RequestedVlanJunctionE aJunc = new RequestedVlanJunctionE();
+        RequestedVlanJunctionE zJunc = new RequestedVlanJunctionE();
+        RequestedVlanFixtureE aFix = new RequestedVlanFixtureE();
+        RequestedVlanFixtureE zFix = new RequestedVlanFixtureE();
+        UrnE aFixURN = new UrnE();
+        UrnE zFixURN = new UrnE();
+        UrnE aJuncURN = new UrnE();
+        UrnE zJuncURN = new UrnE();
+
+        log.info("HERE IN TEST 2");
+        
+        aFixURN.setUrn("switchA:1");
+        aFixURN.setUrnType(UrnType.IFCE);
+
+        zFixURN.setUrn("switchE:1");
+        zFixURN.setUrnType(UrnType.IFCE);
+
+        aJuncURN.setUrn("switchA");
+        aJuncURN.setUrnType(UrnType.DEVICE);
+
+        zJuncURN.setUrn("switchE:1");
+        zJuncURN.setUrnType(UrnType.DEVICE);
+        
+        
+        aFix.setPortUrn(aFixURN);
+        aFix.setVlanExpression("1234");
+        aFix.setFixtureType(EthFixtureType.JUNOS_IFCE);
+        aFix.setInMbps(100);
+        aFix.setEgMbps(100);
+
+        zFix.setPortUrn(zFixURN);
+        zFix.setVlanExpression("1234");
+        zFix.setFixtureType(EthFixtureType.JUNOS_IFCE);
+        zFix.setInMbps(100);
+        zFix.setEgMbps(100);
+
+        Set<RequestedVlanFixtureE> aFixes = new HashSet<>();
+        Set<RequestedVlanFixtureE> zFixes = new HashSet<>();
+
+        aFixes.add(aFix);
+        zFixes.add(zFix);
+
+        aJunc.setDeviceUrn(aJuncURN);
+        aJunc.setJunctionType(EthJunctionType.JUNOS_SWITCH);
+        aJunc.setFixtures(aFixes);
+
+        zJunc.setDeviceUrn(zJuncURN);
+        zJunc.setJunctionType(EthJunctionType.JUNOS_SWITCH);
+        zJunc.setFixtures(zFixes);
+
+
         bwPipe.setAzMbps(20);
+        bwPipe.setZaMbps(20);
+        bwPipe.setAJunction(aJunc);
+        bwPipe.setZJunction(zJunc);
+        bwPipe.setPipeType(EthPipeType.REQUESTED);
+
 
         serviceLayerTopo.buildLogicalLayerSrcNodes(srcDevice, srcPort);
         serviceLayerTopo.buildLogicalLayerDstNodes(dstDevice, dstPort);

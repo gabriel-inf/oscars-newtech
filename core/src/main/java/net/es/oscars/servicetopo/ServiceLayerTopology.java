@@ -14,6 +14,7 @@ import net.es.oscars.topo.beans.Topology;
 import net.es.oscars.topo.enums.*;
 import net.es.oscars.topo.svc.TopoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Data
 @Builder
+@Component
 @AllArgsConstructor
 @NoArgsConstructor
 public class ServiceLayerTopology
@@ -31,7 +33,8 @@ public class ServiceLayerTopology
     @Autowired
     TopoService topoService;
 
-    PruningService pruningService = new PruningService();
+    @Autowired
+    PruningService pruningService;
 
     @Autowired
     DijkstraPCE dijkstraPCE;
@@ -69,7 +72,6 @@ public class ServiceLayerTopology
 
         log.info("building logical edges for Service-Layer topology.");
         buildLogicalLayerTopo();
-
     }
 
 
@@ -232,20 +234,21 @@ public class ServiceLayerTopology
                 logicalLinks.add(zaLogicalEdge);
             }
         }
+
+        log.info("logical edges added to Service-Layer Topology.");
     }
 
     //Calls Pruner and Dijkstra to compute shortest MPLS-layer paths, calculates weights of those paths, and maps them to the appropriate logical links
     public void calculateLogicalLinkWeights(RequestedVlanPipeE requestedVlanPipe)
     {
-        log.info("HERE LL-1");
-        assert(pruningService != null);
-        log.info("HERE LL-2");
+        log.info("Performing routing on MPLS-Layer topology to assign weights to Service-Layer logical links.");
         Set<LogicalEdge> logicalLinksToRemoveFromServiceLayer = new HashSet<>();
 
         // Step 1: Prune MPLS-Layer topology once before considering any logical links.
+        log.info("step 1: pruning MPLS-layer by bandwidth and vlan availability.");
         Topology prunedMPLSTopo = pruningService.pruneForPipe(mplsLayerTopo, requestedVlanPipe);
+        log.info("step 1 COMPLETE.");
 
-        log.info("HERE LL-3");
         for(LogicalEdge oneLogicalLink : logicalLinks)
         {
             TopoVertex srcEthPort = oneLogicalLink.getA();      //Ethernet-source of logical link
@@ -304,6 +307,7 @@ public class ServiceLayerTopology
             }
 
             // Step 2: Prune the adaptation (Ethernet-MPLS) edges and ports to ensure this logical link is worth building.
+            log.info("step 2: pruning adaptation (Ethernet-MPLS) edges and ports to ensure logical link is worth building.");
             mplsSrc = physEdgeAtoMpls.getZ();
             mplsDst = physEdgeMplstoZ.getA();
 
@@ -323,24 +327,33 @@ public class ServiceLayerTopology
 
             if(!prunedAdaptationTopo.equals(adaptationTopo))
             {
-                log.info("cannot assign weight to logical edge: adaptation ports/links do not support demand");
+                log.info("cannot assign weight to logical edge: adaptation ports/links do not support demand.");
+                log.info("step 2 FAILED.");
+                log.info("removing logical link from Service-Layer topology.");
+
                 logicalLinksToRemoveFromServiceLayer.add(oneLogicalLink);
                 continue;
             }
+            log.info("step 2 COMPLETE.");
 
             // Step 3: Perform routing on MPLS layer to construct physical routes corresponding to the logical link.
-            log.info("logical edge is valid: performing MPLS-Layer routing.");
+            log.info("step 3: performing MPLS-Layer routing.");
 
             List<TopoEdge> path = dijkstraPCE.computeShortestPathEdges(prunedMPLSTopo, mplsSrc, mplsDst);
 
             if(path.isEmpty())
             {
-                log.error("no path found for logical link");
+                log.error("no path found for logical link.");
+                log.info("step 3 FAILED.");
+                log.info("removing logical link from Service-Layer topology.");
                 logicalLinksToRemoveFromServiceLayer.add(oneLogicalLink);
                 continue;
             }
 
+            log.info("step 3 COMPLETE.");
+
             // Step 4: Calculate total cost-metric for logical link.
+            log.info("step 4: compute logical link-weights.");
             for(TopoEdge pathEdge : path)
             {
                 weightMetric += pathEdge.getMetric();
@@ -369,8 +382,12 @@ public class ServiceLayerTopology
     // Should only be called if Source Device is MPLS
     public void buildLogicalLayerSrcNodes(TopoVertex srcDevice, TopoVertex srcInPort)
     {
+        log.info("determining if source is already represented on Service-Layer topology.");
         if(srcDevice.getVertexType().equals(VertexType.SWITCH))
+        {
+            log.info("it is.");
             return;
+        }
 
         log.info("representing MPLS source on Service-Layer topology as VIRTUAL node.");
 
@@ -399,8 +416,12 @@ public class ServiceLayerTopology
     // Should only be called if Source Device is MPLS
     public void buildLogicalLayerDstNodes(TopoVertex dstDevice, TopoVertex dstOutPort)
     {
+        log.info("determining if destination is already represented on Service-Layer topology.");
         if(dstDevice.getVertexType().equals(VertexType.SWITCH))
+        {
+            log.info("it is.");
             return;
+        }
 
         log.info("representing MPLS destination on Service-Layer topology as VIRTUAL node.");
 
