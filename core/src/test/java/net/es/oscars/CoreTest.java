@@ -39,7 +39,7 @@ public class CoreTest {
     @Autowired
     private TopPCE topPCE;
 
-    @Test(expected = PCEException.class)
+    @Test
     public void testSpecification() throws PCEException, PSSException {
 
         if (specRepo.findAll().isEmpty()) {
