@@ -143,22 +143,9 @@ public class PruningService {
         Set<IntRange> zRanges = getVlanRangesFromUrn(urns, edge.getZ().getUrn());
 
         assert aRanges.size() <= 1 && zRanges.size() <= 1;
-        if(aRanges.isEmpty() || zRanges.isEmpty()){
+        if(aRanges.isEmpty() && zRanges.isEmpty()){
             return true;
         } else{
-
-            //Edge is in MPLS
-            //Any one VLAN tag (available on both ends of the edge) can work
-            if(edge.getLayer().equals(Layer.MPLS)){
-                for(IntRange aRange : aRanges){
-                    for(IntRange zRange: zRanges){
-                        if(checkVlanRangeOverlap(aRange, zRange)){
-                            return true;
-                        }
-                    }
-                }
-                return false;
-            }
             for(Integer requestedVlan : vlans){
                 boolean aContainsVlan = aRanges.stream().anyMatch(vr -> vr.contains(requestedVlan));
                 boolean zContainsVlan = zRanges.stream().anyMatch(vr -> vr.contains(requestedVlan));
