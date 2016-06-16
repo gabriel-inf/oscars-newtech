@@ -85,23 +85,100 @@ public class PruningService {
         pruned.setLayer(topo.getLayer());
         pruned.setVertices(topo.getVertices());
         Set<TopoEdge> availableEdges = topo.getEdges().stream()
-                .filter(e -> availableBW(e, azBw, zaBw, urns))
+                .filter(e -> bwAvailable(e, azBw, zaBw, urns))
                 .collect(Collectors.toSet());
+        if(pruned.getLayer() == Layer.MPLS){
+            pruned.setEdges(availableEdges);
+        }else {
+            pruned.setEdges(findEdgesWithAvailableVlans(availableEdges, urns, vlans));
+        }
+        return pruned;
+    }
+
+    private boolean bwAvailable(TopoEdge edge, Integer azBw, Integer zaBw, List<UrnE> urns){
+        List<ReservableBandwidthE> aMatching = urns.stream()
+                .filter(u -> u.getUrn().equals(edge.getA().getUrn()))
+                .filter(u -> u.getReservableBandwidth() != null)
+                .map(UrnE::getReservableBandwidth)
+                .collect(Collectors.toList());
+        List<ReservableBandwidthE> zMatching = urns.stream()
+                .filter(u -> u.getUrn().equals(edge.getZ().getUrn()))
+                .filter(u -> u.getReservableBandwidth() != null)
+                .map(UrnE::getReservableBandwidth)
+                .collect(Collectors.toList());
+
+        assert aMatching.size() <= 1 && zMatching.size() <=1;
+        if (aMatching.isEmpty() && zMatching.isEmpty()) {
+            return true;
+        } else {
+            boolean aPasses = true;
+            boolean zPasses = true;
+            if(!aMatching.isEmpty()){
+                aPasses = aMatching.get(0).getEgressBw() >= azBw && aMatching.get(0).getIngressBw() >= zaBw;
+            }
+            if(!zMatching.isEmpty()){
+                zPasses = zMatching.get(0).getIngressBw() >= azBw && zMatching.get(0).getEgressBw() >= zaBw;
+            }
+
+            return aPasses && zPasses;
+
+        }
+    }
+
+    private Set<TopoEdge> findEdgesWithAvailableVlans(Set<TopoEdge> availableEdges, List<UrnE> urns, Set<Integer> vlans) {
         if(vlans == null){
             Set<Integer> open = findOpenVlans(availableEdges, urns);
             if(open.isEmpty()){
-                pruned.setEdges(new HashSet<>());
-                return pruned;
+                return new HashSet<>();
             }
-            availableEdges = availableEdges.stream().filter(e -> availableVlans(e, open, urns))
+            return availableEdges.stream().filter(e -> vlansAvailable(e, open, urns))
                     .collect(Collectors.toSet());
         }
-        else{
-            availableEdges = availableEdges.stream().filter(e -> availableVlans(e, vlans, urns))
+        return availableEdges.stream().filter(e -> vlansAvailable(e, vlans, urns))
                     .collect(Collectors.toSet());
+    }
+
+    private boolean vlansAvailable(TopoEdge edge, Set<Integer> vlans, List<UrnE> urns) {
+        Set<IntRange> aRanges = getVlanRangesFromUrn(urns, edge.getA().getUrn());
+        Set<IntRange> zRanges = getVlanRangesFromUrn(urns, edge.getZ().getUrn());
+
+        assert aRanges.size() <= 1 && zRanges.size() <= 1;
+        if(aRanges.isEmpty() || zRanges.isEmpty()){
+            return true;
+        } else{
+
+            //Edge is in MPLS
+            //Any one VLAN tag (available on both ends of the edge) can work
+            if(edge.getLayer().equals(Layer.MPLS)){
+                for(IntRange aRange : aRanges){
+                    for(IntRange zRange: zRanges){
+                        if(checkVlanRangeOverlap(aRange, zRange)){
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+            for(Integer requestedVlan : vlans){
+                boolean aContainsVlan = aRanges.stream().anyMatch(vr -> vr.contains(requestedVlan));
+                boolean zContainsVlan = zRanges.stream().anyMatch(vr -> vr.contains(requestedVlan));
+                if(!aContainsVlan || !zContainsVlan){
+                    return false;
+                }
+            }
+            return true;
         }
-        pruned.setEdges(availableEdges);
-        return pruned;
+    }
+
+    private Set<IntRange> getVlanRangesFromUrn(List<UrnE> urns, String matchingUrn){
+        return urns.stream()
+                .filter(u -> u.getUrn().equals(matchingUrn))
+                .filter(u -> u.getReservableVlans() != null)
+                .map(UrnE::getReservableVlans)
+                .map(ReservableVlanE::getVlanRanges)
+                .flatMap(Collection::stream)
+                .map(IntRangeE::toDtoIntRange)
+                .collect(Collectors.toSet());
     }
 
     private Set<Integer> findOpenVlans(Set<TopoEdge> edges, List<UrnE> urns){
@@ -160,76 +237,8 @@ public class PruningService {
                 .map(Integer::parseInt).collect(Collectors.toSet());
     }
 
-    private Set<IntRange> getVlanRangesFromUrn(List<UrnE> urns, String matchingUrn){
-        return urns.stream()
-                .filter(u -> u.getUrn().equals(matchingUrn))
-                .map(UrnE::getReservableVlans)
-                .map(ReservableVlanE::getVlanRanges)
-                .flatMap(Collection::stream)
-                .map(IntRangeE::toDtoIntRange)
-                .collect(Collectors.toSet());
-    }
-
-
-    private boolean availableVlans(TopoEdge edge, Set<Integer> vlans, List<UrnE> urns) {
-        Set<IntRange> aRanges = getVlanRangesFromUrn(urns, edge.getA().getUrn());
-        Set<IntRange> zRanges = getVlanRangesFromUrn(urns, edge.getZ().getUrn());
-
-        assert aRanges.size() <= 1 && zRanges.size() <= 1;
-        if(aRanges.isEmpty() || zRanges.isEmpty()){
-            return true;
-        } else{
-
-            //Edge is in MPLS
-            //Any one VLAN tag (available on both ends of the edge) can work
-            if(edge.getLayer().equals(Layer.MPLS)){
-                for(IntRange aRange : aRanges){
-                    for(IntRange zRange: zRanges){
-                        if(checkVlanRangeOverlap(aRange, zRange)){
-                            return true;
-                        }
-                    }
-                }
-                return false;
-            }
-            for(Integer requestedVlan : vlans){
-                boolean aContainsVlan = aRanges.stream().anyMatch(vr -> vr.contains(requestedVlan));
-                boolean zContainsVlan = zRanges.stream().anyMatch(vr -> vr.contains(requestedVlan));
-                if(!aContainsVlan || !zContainsVlan){
-                    return false;
-                }
-            }
-            return true;
-        }
-    }
-
     private boolean checkVlanRangeOverlap(IntRange aRange, IntRange zRange) {
         return aRange.getFloor() <= zRange.getCeiling() && zRange.getFloor() <= aRange.getCeiling();
-    }
-
-
-    private boolean availableBW(TopoEdge edge, Integer azBw, Integer zaBw, List<UrnE> urns){
-        String aUrn = edge.getA().getUrn();
-        String zUrn = edge.getZ().getUrn();
-        log.debug("checking if " + aUrn + " and " + zUrn + " have enough bandwidth ");
-        List<ReservableBandwidthE> aMatching = urns.stream()
-                .filter(u -> u.getUrn().equals(edge.getA().getUrn()))
-                .map(UrnE::getReservableBandwidth)
-                .collect(Collectors.toList());
-        List<ReservableBandwidthE> zMatching = urns.stream()
-                .filter(u -> u.getUrn().equals(edge.getZ().getUrn()))
-                .map(UrnE::getReservableBandwidth)
-                .collect(Collectors.toList());
-
-        assert aMatching.size() <= 1 && zMatching.size() <=1;
-        if (aMatching.isEmpty() || zMatching.isEmpty()) {
-            log.info("bandwidth does not apply to " + aUrn + " or " + zUrn);
-            return true;
-        } else {
-            return aMatching.get(0).getEgressBw() >= azBw && aMatching.get(0).getIngressBw() >= zaBw
-                    && zMatching.get(0).getIngressBw() >= azBw && zMatching.get(0).getEgressBw() >= zaBw;
-
-        }
     }
 
 }
