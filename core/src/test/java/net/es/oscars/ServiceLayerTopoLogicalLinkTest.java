@@ -1,7 +1,6 @@
 package net.es.oscars;
 
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.CoreUnitTestConfiguration;
 import net.es.oscars.dto.pss.EthFixtureType;
 import net.es.oscars.dto.pss.EthJunctionType;
 import net.es.oscars.dto.pss.EthPipeType;
@@ -9,11 +8,11 @@ import net.es.oscars.resv.ent.RequestedVlanFixtureE;
 import net.es.oscars.resv.ent.RequestedVlanJunctionE;
 import net.es.oscars.resv.ent.RequestedVlanPipeE;
 import net.es.oscars.servicetopo.LogicalEdge;
+import net.es.oscars.servicetopo.SLTopoUnitTestConfiguration;
 import net.es.oscars.servicetopo.ServiceLayerTopology;
 import net.es.oscars.topo.beans.TopoEdge;
 import net.es.oscars.topo.beans.TopoVertex;
 import net.es.oscars.topo.beans.Topology;
-import net.es.oscars.topo.dao.UrnRepository;
 import net.es.oscars.topo.ent.UrnE;
 import net.es.oscars.topo.enums.Layer;
 import net.es.oscars.topo.enums.UrnType;
@@ -22,7 +21,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.HashSet;
@@ -52,15 +50,17 @@ public class ServiceLayerTopoLogicalLinkTest
     private RequestedVlanPipeE requestedPipe = new RequestedVlanPipeE();
 
     @Test
-    public void verifyLogicalLinkWeights()
+    public void verifyLogicalLinkWeightsLinear()
     {
         buildLinearTopo();
         constructLayeredTopology();
         buildLinearRequestPipe();
 
         Set<LogicalEdge> logicalLinks = serviceLayerTopo.getLogicalLinks();
+        Set<LogicalEdge> llBackup = serviceLayerTopo.getLlBackup();
 
         assert(logicalLinks.size() == 2);
+        assert(llBackup.size() == 2);
 
         serviceLayerTopo.getLogicalLinks().stream()
                 .forEach(ll -> {
@@ -82,9 +82,9 @@ public class ServiceLayerTopoLogicalLinkTest
                 srcDevice = v;
             else if(v.getUrn().equals("switchE"))
                 dstDevice = v;
-            else if(v.getUrn().equals("switchA:2"))
+            else if(v.getUrn().equals("switchA:1"))
                 srcPort = v;
-            else if(v.getUrn().equals("switchE:1"))
+            else if(v.getUrn().equals("switchE:2"))
                 dstPort = v;
         }
 
@@ -92,33 +92,49 @@ public class ServiceLayerTopoLogicalLinkTest
         serviceLayerTopo.buildLogicalLayerDstNodes(dstDevice, dstPort);
         serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe);
 
-        logicalLinks = serviceLayerTopo.getLogicalLinks();
+        log.info("Beginning test: 'verifyLogicalLinkWeightsLinear'.");
 
-        assert(logicalLinks.size() == 2);
+        logicalLinks = serviceLayerTopo.getLogicalLinks();
+        llBackup = serviceLayerTopo.getLlBackup();
+
+        assert(serviceLayerTopo.getNonAdjacentPorts().size() == 2);
+        assert(logicalLinks.size() == 2);   // No change after assigning weights
+        assert(llBackup.size() == 2);
+
+        TopoVertex portA2 = null;
+        TopoVertex portE1 = null;
+
+        for(TopoVertex vert : ethernetTopoVertices)
+        {
+            if(vert.getUrn().equals("switchA:2"))
+                portA2 = vert;
+            else if(vert.getUrn().equals("switchE:1"))
+                portE1 = vert;
+        }
 
         for(LogicalEdge ll : logicalLinks)
         {
             List<TopoEdge> physicalEdges = ll.getCorrespondingTopoEdges();
 
-            assert(ll.getA().equals(srcPort) || ll.getZ().equals(srcPort));
-            assert(ll.getA().equals(dstPort) || ll.getZ().equals(dstPort));
+            assert(ll.getA().equals(portA2) || ll.getZ().equals(portA2));
+            assert(ll.getA().equals(portE1) || ll.getZ().equals(portE1));
             assert(ll.getMetric() == 400);
             assert(physicalEdges.size() == 10);
 
             String physicalURNs = "";
-            String correctURNs;
+            String correctURNs = "";
 
-            if(ll.getA().equals(srcPort))
+            if(ll.getA().equals(portA2))
             {
-                assert(physicalEdges.get(0).getA().equals(srcPort));
-                assert(physicalEdges.get(physicalEdges.size()-1).getZ().equals(dstPort));
+                assert(physicalEdges.get(0).getA().equals(portA2));
+                assert(physicalEdges.get(physicalEdges.size()-1).getZ().equals(portE1));
 
                 correctURNs = "switchA:2]-->[routerB:1-routerB:1]-->[routerB-routerB]-->[routerB:2-routerB:2]-->[routerC:1-routerC:1]-->[routerC-routerC]-->[routerC:2-routerC:2]-->[routerD:1-routerD:1]-->[routerD-routerD]-->[routerD:2-routerD:2]-->[switchE:1-";
             }
             else
             {
-                assert(physicalEdges.get(0).getA().equals(dstPort));
-                assert(physicalEdges.get(physicalEdges.size()-1).getZ().equals(srcPort));
+                assert(physicalEdges.get(0).getA().equals(portE1));
+                assert(physicalEdges.get(physicalEdges.size()-1).getZ().equals(portA2));
 
                 correctURNs = "switchE:1]-->[routerD:2-routerD:2]-->[routerD-routerD]-->[routerD:1-routerD:1]-->[routerC:2-routerC:2]-->[routerC-routerC]-->[routerC:1-routerC:1]-->[routerB:2-routerB:2]-->[routerB-routerB]-->[routerB:1-routerB:1]-->[switchA:2-";
             }
@@ -134,6 +150,150 @@ public class ServiceLayerTopoLogicalLinkTest
             assert(physicalURNs.equals(correctURNs));
         }
 
+        log.info("test 'verifyLogicalLinkWeightsLinear' passed.");
+    }
+
+    @Test
+    public void verifyLogicalLinkWeightsTwoPath()
+    {
+        buildTwoMPlsPathTopo();
+        constructLayeredTopology();
+        buildLinearRequestPipe();
+
+        Set<LogicalEdge> logicalLinks = serviceLayerTopo.getLogicalLinks();
+        Set<LogicalEdge> llBackup = serviceLayerTopo.getLlBackup();
+
+        assert(logicalLinks.size() == 12);
+        assert(llBackup.size() == 12);
+
+        serviceLayerTopo.getLogicalLinks().stream()
+                .forEach(ll -> {
+                    String aURN = ll.getA().getUrn();
+                    String zURN = ll.getZ().getUrn();
+                    if(aURN.equals("switchA:2"))
+                        assert(zURN.equals("switchE:1") || zURN.equals("switchA:3") || zURN.equals("switchE:3"));
+                    else if(aURN.equals("switchE:1"))
+                        assert(zURN.equals("switchA:2") || zURN.equals("switchA:3") || zURN.equals("switchE:3"));
+                    else if(aURN.equals("switchA:3"))
+                        assert(zURN.equals("switchA:2") || zURN.equals("switchE:1") || zURN.equals("switchE:3"));
+                    else if(aURN.equals("switchE:3"))
+                        assert(zURN.equals("switchA:2") || zURN.equals("switchA:3") || zURN.equals("switchE:1"));
+                    else
+                        assert(false);
+                });
+
+        TopoVertex srcDevice = null, dstDevice = null, srcPort = null, dstPort = null;
+
+        for(TopoVertex v : ethernetTopoVertices)
+        {
+            if(v.getUrn().equals("switchA"))
+                srcDevice = v;
+            else if(v.getUrn().equals("switchE"))
+                dstDevice = v;
+            else if(v.getUrn().equals("switchA:1"))
+                srcPort = v;
+            else if(v.getUrn().equals("switchE:2"))
+                dstPort = v;
+        }
+
+        serviceLayerTopo.buildLogicalLayerSrcNodes(srcDevice, srcPort);
+        serviceLayerTopo.buildLogicalLayerDstNodes(dstDevice, dstPort);
+        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe);
+
+        log.info("Beginning test: 'verifyLogicalLinkWeightsTwoPath'.");
+
+        logicalLinks = serviceLayerTopo.getLogicalLinks();
+        llBackup = serviceLayerTopo.getLlBackup();
+
+        assert(serviceLayerTopo.getNonAdjacentPorts().size() == 4);
+        assert(logicalLinks.size() == 4);   // No logical link between (switchA:2 <--> switchA:3) or (switchE:1 <--> switchE:3) or (switchA:2 <--> switchE:3) or (switchA:3 <--> switchE:1)
+        assert(llBackup.size() == 12);
+
+        TopoVertex portA2 = null;
+        TopoVertex portA3 = null;
+        TopoVertex portE1 = null;
+        TopoVertex portE3 = null;
+
+        for(TopoVertex vert : ethernetTopoVertices)
+        {
+            if(vert.getUrn().equals("switchA:2"))
+                portA2 = vert;
+            else if(vert.getUrn().equals("switchA:3"))
+                portA3 = vert;
+            else if(vert.getUrn().equals("switchE:1"))
+                portE1 = vert;
+            else if(vert.getUrn().equals("switchE:3"))
+                portE3 = vert;
+        }
+
+        for(LogicalEdge ll : logicalLinks)
+        {
+            List<TopoEdge> physicalEdges = ll.getCorrespondingTopoEdges();
+
+            assert(ll.getA().equals(portA2) || ll.getA().equals(portA3) || ll.getA().equals(portE1) || ll.getA().equals(portE3));
+            assert(ll.getZ().equals(portA2) || ll.getZ().equals(portA3) || ll.getZ().equals(portE1) || ll.getZ().equals(portE3));
+
+            if(ll.getA().equals(portA2) || ll.getA().equals(portE1))
+            {
+                assert (ll.getZ().equals(portE1) || ll.getZ().equals(portA2));
+                assert(ll.getMetric() == 400);
+                assert(physicalEdges.size() == 10);
+            }
+            else if(ll.getA().equals(portA3) || ll.getA().equals(portE3))
+            {
+                assert (ll.getZ().equals(portE3) || ll.getZ().equals(portA3));
+                assert(ll.getMetric() == 300);
+                assert(physicalEdges.size() == 7);
+            }
+            else
+            {
+                assert(false);
+            }
+
+            String physicalURNs = "";
+            String correctURNs = "";
+
+            if(ll.getA().equals(portA2))
+            {
+                assert(physicalEdges.get(0).getA().equals(portA2));
+                assert(physicalEdges.get(physicalEdges.size()-1).getZ().equals(portE1));
+
+                correctURNs = "switchA:2]-->[routerB:1-routerB:1]-->[routerB-routerB]-->[routerB:2-routerB:2]-->[routerC:1-routerC:1]-->[routerC-routerC]-->[routerC:2-routerC:2]-->[routerD:1-routerD:1]-->[routerD-routerD]-->[routerD:2-routerD:2]-->[switchE:1-";
+            }
+            else if(ll.getA().equals(portA3))
+            {
+                assert(physicalEdges.get(0).getA().equals(portA3));
+                assert(physicalEdges.get(physicalEdges.size()-1).getZ().equals(portE3));
+
+                correctURNs = "switchA:3]-->[routerF:1-routerF:1]-->[routerF-routerF]-->[routerF:2-routerF:2]-->[routerG:1-routerG:1]-->[routerG-routerG]-->[routerG:2-routerG:2]-->[switchE:3-";
+            }
+            else if(ll.getA().equals(portE1))
+            {
+                assert(physicalEdges.get(0).getA().equals(portE1));
+                assert(physicalEdges.get(physicalEdges.size()-1).getZ().equals(portA2));
+
+                correctURNs = "switchE:1]-->[routerD:2-routerD:2]-->[routerD-routerD]-->[routerD:1-routerD:1]-->[routerC:2-routerC:2]-->[routerC-routerC]-->[routerC:1-routerC:1]-->[routerB:2-routerB:2]-->[routerB-routerB]-->[routerB:1-routerB:1]-->[switchA:2-";
+            }
+            else if(ll.getA().equals(portE3))
+            {
+                assert(physicalEdges.get(0).getA().equals(portE3));
+                assert(physicalEdges.get(physicalEdges.size()-1).getZ().equals(portA3));
+
+                correctURNs = "switchE:3]-->[routerG:2-routerG:2]-->[routerG-routerG]-->[routerG:1-routerG:1]-->[routerF:2-routerF:2]-->[routerF-routerF]-->[routerF:1-routerF:1]-->[switchA:3-";
+            }
+
+            for(TopoEdge physEdge : physicalEdges)
+            {
+                physicalURNs = physicalURNs + physEdge.getA().getUrn();
+                physicalURNs = physicalURNs + "]-->[";
+                physicalURNs = physicalURNs + physEdge.getZ().getUrn();
+                physicalURNs = physicalURNs + "-";
+            }
+
+            assert(physicalURNs.equals(correctURNs));
+        }
+
+        log.info("test 'verifyLogicalLinkWeightsTwoPath' passed.");
     }
 
     private void constructLayeredTopology()
@@ -264,6 +424,91 @@ public class ServiceLayerTopoLogicalLinkTest
         mplsTopoEdges.add(edgeMpls_C2_D1);
         mplsTopoEdges.add(edgeMpls_D1_C2);
     }
+
+    private void buildTwoMPlsPathTopo()
+    {
+        buildLinearTopo();
+
+        TopoVertex nodeA = null;
+        TopoVertex nodeE = null;
+
+        for(TopoVertex n : ethernetTopoVertices)
+        {
+            if(n.getUrn().equals("switchA"))
+                nodeA = n;
+            else if(n.getUrn().equals("switchE"))
+                nodeE = n;
+        }
+
+
+        //Additional Devices
+        TopoVertex nodeF = new TopoVertex("routerF", VertexType.ROUTER);
+        TopoVertex nodeG = new TopoVertex("routerG", VertexType.ROUTER);
+
+        //Additional Ports
+        TopoVertex portA3 = new TopoVertex("switchA:3", VertexType.PORT);
+        TopoVertex portE3 = new TopoVertex("switchE:3", VertexType.PORT);
+        TopoVertex portF1 = new TopoVertex("routerF:1", VertexType.PORT);
+        TopoVertex portF2 = new TopoVertex("routerF:2", VertexType.PORT);
+        TopoVertex portG1 = new TopoVertex("routerG:1", VertexType.PORT);
+        TopoVertex portG2 = new TopoVertex("routerG:2", VertexType.PORT);
+
+        //Additional Internal Links
+        TopoEdge edgeInt_A3_A = new TopoEdge(portA3, nodeA, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_E3_E = new TopoEdge(portE3, nodeE, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_F1_F = new TopoEdge(portF1, nodeF, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_F2_F = new TopoEdge(portF2, nodeF, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_G1_G = new TopoEdge(portG1, nodeG, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_G2_G = new TopoEdge(portG2, nodeG, 0L, Layer.INTERNAL);
+
+        //Additional Internal Reverse Links
+        TopoEdge edgeInt_A_A3 = new TopoEdge(nodeA, portA3, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_E_E3 = new TopoEdge(nodeE, portE3, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_F_F1 = new TopoEdge(nodeF, portF1, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_F_F2 = new TopoEdge(nodeF, portF2, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_G_G1 = new TopoEdge(nodeG, portG1, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_G_G2 = new TopoEdge(nodeG, portG2, 0L, Layer.INTERNAL);
+
+        //Additional Network Links
+        TopoEdge edgeEth_A3_F1 = new TopoEdge(portA3, portF1, 100L, Layer.ETHERNET);
+        TopoEdge edgeEth_E3_G2 = new TopoEdge(portE3, portG2, 100L, Layer.ETHERNET);
+        TopoEdge edgeEth_F1_A3 = new TopoEdge(portF1, portA3, 100L, Layer.ETHERNET);
+        TopoEdge edgeMpls_F2_G1 = new TopoEdge(portF2, portG1, 100L, Layer.MPLS);
+        TopoEdge edgeMpls_G1_F2 = new TopoEdge(portG1, portF2, 100L, Layer.MPLS);
+        TopoEdge edgeEth_G2_E3 = new TopoEdge(portG2, portE3, 100L, Layer.ETHERNET);
+
+        ethernetTopoVertices.add(portA3);
+        ethernetTopoVertices.add(portE3);
+
+        mplsTopoVertices.add(nodeF);
+        mplsTopoVertices.add(nodeG);
+        mplsTopoVertices.add(portF1);
+        mplsTopoVertices.add(portF2);
+        mplsTopoVertices.add(portG1);
+        mplsTopoVertices.add(portG2);
+
+        internalTopoEdges.add(edgeInt_A3_A);
+        internalTopoEdges.add(edgeInt_E3_E);
+        internalTopoEdges.add(edgeInt_F1_F);
+        internalTopoEdges.add(edgeInt_F2_F);
+        internalTopoEdges.add(edgeInt_G1_G);
+        internalTopoEdges.add(edgeInt_G2_G);
+        internalTopoEdges.add(edgeInt_A_A3);
+        internalTopoEdges.add(edgeInt_E_E3);
+        internalTopoEdges.add(edgeInt_F_F1);
+        internalTopoEdges.add(edgeInt_F_F2);
+        internalTopoEdges.add(edgeInt_G_G1);
+        internalTopoEdges.add(edgeInt_G_G2);
+
+        ethernetTopoEdges.add(edgeEth_A3_F1);
+        ethernetTopoEdges.add(edgeEth_E3_G2);
+        ethernetTopoEdges.add(edgeEth_F1_A3);
+        ethernetTopoEdges.add(edgeEth_G2_E3);
+
+        mplsTopoEdges.add(edgeMpls_F2_G1);
+        mplsTopoEdges.add(edgeMpls_G1_F2);
+    }
+
 
     private void buildLinearRequestPipe()
     {

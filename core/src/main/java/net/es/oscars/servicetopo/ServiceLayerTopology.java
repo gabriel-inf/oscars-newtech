@@ -49,6 +49,7 @@ public class ServiceLayerTopology
 
     Set<TopoVertex> nonAdjacentPorts;
     Set<LogicalEdge> logicalLinks;
+    Set<LogicalEdge> llBackup;
 
     Set<TopoVertex> logicalSrcNodes = null;
     Set<TopoVertex> logicalDstNodes = null;
@@ -202,6 +203,13 @@ public class ServiceLayerTopology
         }
 
         log.info("logical edges added to Service-Layer Topology.");
+
+        // Create a backup of all topology-based Logical Links (excludes links created for a specific request).
+        llBackup = new HashSet<>();
+        logicalLinks.stream()
+                .filter(ll -> !ll.getA().getVertexType().equals(VertexType.VIRTUAL))
+                .filter(ll -> !ll.getZ().getVertexType().equals(VertexType.VIRTUAL))
+                .forEach(llBackup::add);
     }
 
     //Calls Pruner and Dijkstra to compute shortest MPLS-layer paths, calculates weights of those paths, and maps them to the appropriate logical links
@@ -344,18 +352,21 @@ public class ServiceLayerTopology
             oneLogicalLink.setCorrespondingTopoEdges(path);
         }
 
-        // Step 6: If any logical links cannot be built, remove them from the Service-Layer Topology.
+        // Step 6: If any logical links cannot be built, remove them from the Service-Layer Topology for this request.
         logicalLinks.removeAll(logicalLinksToRemoveFromServiceLayer);
     }
 
     // Doesn't destroy logical links, but resets cost metrics to 0, and clears the correspondingTopoEdges lists. This needs to be done, for example, prior to every call to calculateLogicalLinkWeights().
     public void resetLogicalLinks()
     {
-        logicalLinks.stream()
-            .forEach(ll -> {
-                ll.setMetric(0L);
-                ll.getCorrespondingTopoEdges().clear();
-            });
+        llBackup.stream()
+                .forEach(ll -> {
+                    ll.getCorrespondingTopoEdges().clear();
+                    ll.setMetric(0L);
+                });
+
+        logicalLinks.clear();
+        logicalLinks.addAll(llBackup);
     }
 
 

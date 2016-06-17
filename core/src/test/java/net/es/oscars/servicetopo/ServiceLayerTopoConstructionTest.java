@@ -1,8 +1,10 @@
-package net.es.oscars.slTopo;
+package net.es.oscars.servicetopo;
 
 
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.CoreUnitTestConfiguration;
 import net.es.oscars.servicetopo.LogicalEdge;
+import net.es.oscars.servicetopo.SLTopoUnitTestConfiguration;
 import net.es.oscars.servicetopo.ServiceLayerTopology;
 import net.es.oscars.topo.beans.Topology;
 import net.es.oscars.topo.enums.*;
@@ -10,12 +12,19 @@ import net.es.oscars.topo.beans.TopoEdge;
 import net.es.oscars.topo.beans.TopoVertex;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.HashSet;
 import java.util.Set;
 
 @Slf4j
 public class ServiceLayerTopoConstructionTest {
+
+    //@Autowired
+    //private ServiceLayerTopology serviceLayerTopology;
     private ServiceLayerTopology serviceLayerTopology = new ServiceLayerTopology();
 
     private Set<TopoVertex> ethernetTopoVertices = new HashSet<>();
