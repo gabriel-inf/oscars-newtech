@@ -3,6 +3,7 @@ package net.es.oscars.pce;
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.CoreUnitTestConfiguration;
 import net.es.oscars.topo.beans.Topology;
+import net.es.oscars.topo.dao.UrnRepository;
 import net.es.oscars.topo.ent.IntRangeE;
 import net.es.oscars.topo.ent.ReservableBandwidthE;
 import net.es.oscars.topo.ent.ReservableVlanE;
@@ -10,6 +11,7 @@ import net.es.oscars.topo.enums.*;
 import net.es.oscars.topo.beans.TopoEdge;
 import net.es.oscars.topo.beans.TopoVertex;
 import net.es.oscars.topo.ent.UrnE;
+import net.es.oscars.topo.svc.TopoService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,10 @@ public class PruningServiceTest {
 
     @Autowired
     private PruningService pruningService;
+
+    @Autowired
+    private TopoService topoService;
+
 
     @Test
     public void testBwPrune(){
@@ -46,6 +52,29 @@ public class PruningServiceTest {
 
         log.info("Pruning - Remove only some edges");
         pruned = pruningService.pruneWithBw(topo, 150, urns);
+        assert(pruned.getEdges().size() < topo.getEdges().size() && !pruned.getEdges().isEmpty());
+    }
+
+    @Test
+    public void testAZBwPrune(){
+        log.info("Pruning using AZ & ZA Bandwidth");
+        Topology topo = buildTopology();
+        log.info("Built Topology");
+        log.info(topo.toString());
+        List<UrnE> urns = buildUrnList();
+        log.info("Built list of URNs");
+        log.info(urns.toString());
+
+        log.info("Pruning - Remove no edges");
+        Topology pruned = pruningService.pruneWithAZBw(topo, 100, 125, urns);
+        assert(pruned.getEdges().size() == topo.getEdges().size());
+
+        log.info("Pruning - Remove every edge");
+        pruned = pruningService.pruneWithAZBw(topo, 175, 100, urns);
+        assert(pruned.getEdges().isEmpty());
+
+        log.info("Pruning - Remove only some edges");
+        pruned = pruningService.pruneWithAZBw(topo, 150, 125, urns);
         assert(pruned.getEdges().size() < topo.getEdges().size() && !pruned.getEdges().isEmpty());
     }
 
@@ -72,6 +101,72 @@ public class PruningServiceTest {
         log.info("Pruning - Remove only some edges");
         vlans = new HashSet<>(Arrays.asList(5, 40));
         pruned = pruningService.pruneWithBwVlans(topo, 125, vlans, urns);
+        assert(pruned.getEdges().size() < topo.getEdges().size() && !pruned.getEdges().isEmpty());
+    }
+
+    @Test
+    public void testAZBwVlanPrune(){
+        log.info("Pruning using AZ & ZA Bandwidth and VLANs");
+        Topology topo = buildTopology();
+        log.info("Built Topology");
+        log.info(topo.toString());
+        List<UrnE> urns = buildUrnList();
+        log.info("Built list of URNs");
+        log.info(urns.toString());
+
+        log.info("Pruning - Remove no edges");
+        Set<Integer> vlans = new HashSet<>(Arrays.asList(3, 4, 10));
+        Topology pruned = pruningService.pruneWithAZBwVlans(topo, 100, 125, vlans, urns);
+        assert(pruned.getEdges().size() == topo.getEdges().size());
+
+        log.info("Pruning - Remove every edge");
+        vlans = new HashSet<>(Arrays.asList(1, 90));
+        pruned = pruningService.pruneWithAZBwVlans(topo, 175, 100, vlans, urns);
+        assert(pruned.getEdges().isEmpty());
+
+        log.info("Pruning - Remove only some edges");
+        vlans = new HashSet<>(Arrays.asList(5, 40));
+        pruned = pruningService.pruneWithAZBwVlans(topo, 150, 125, vlans, urns);
+        assert(pruned.getEdges().size() < topo.getEdges().size() && !pruned.getEdges().isEmpty());
+    }
+
+    @Test
+    public void testBwPruneEthernet(){
+        log.info("Pruning using only Bandwidth");
+        Topology topo = topoService.layer(Layer.ETHERNET);
+        log.info("Retrieved Topology");
+        log.info(topo.toString());
+
+        log.info("Pruning - Remove no edges");
+        Topology pruned = pruningService.pruneWithBw(topo, 100);
+        assert(pruned.getEdges().size() == topo.getEdges().size());
+
+        log.info("Pruning - Remove every edge");
+        pruned = pruningService.pruneWithBw(topo, 175);
+        assert(pruned.getEdges().isEmpty());
+
+        log.info("Pruning - Remove only some edges");
+        pruned = pruningService.pruneWithBw(topo, 150);
+        assert(pruned.getEdges().size() < topo.getEdges().size() && !pruned.getEdges().isEmpty());
+    }
+
+    //@Test
+    public void testBwPruneMPLS(){
+        log.info("Pruning using only Bandwidth");
+        Topology topo = topoService.layer(Layer.MPLS);
+        log.info("Retrieved Topology");
+        log.info(topo.toString());
+
+        log.info("Pruning - Remove no edges");
+        Topology pruned = pruningService.pruneWithBw(topo, 100);
+        assert(pruned.getEdges().size() == topo.getEdges().size());
+
+        log.info("Pruning - Remove every edge");
+        pruned = pruningService.pruneWithBw(topo, 175);
+        assert(pruned.getEdges().isEmpty());
+
+        log.info("Pruning - Remove only some edges");
+        pruned = pruningService.pruneWithBw(topo, 150);
         assert(pruned.getEdges().size() < topo.getEdges().size() && !pruned.getEdges().isEmpty());
     }
 
