@@ -50,8 +50,8 @@ public class TopPCE {
         for (RequestedVlanFlowE req_f : requested.getVlanFlows()) {
             for(RequestedVlanPipeE pipe : req_f.getPipes()){
                 //Prune MPLS and Ethernet Topologies (Bandwidth, VLANs)
-                Topology prunedEthernet = pruningService.pruneForPipe(topoService.layer(Layer.ETHERNET), pipe);
-                Topology prunedMPLS = pruningService.pruneForPipe(topoService.layer(Layer.MPLS), pipe);
+                Topology prunedEthernet = pruningService.pruneWithPipe(topoService.layer(Layer.ETHERNET), pipe);
+                Topology prunedMPLS = pruningService.pruneWithPipe(topoService.layer(Layer.MPLS), pipe);
 
                 //Build specialized service layer topology for this pipe
                 //Run Symmetric Dijkstra on this Topology

@@ -217,7 +217,7 @@ public class ServiceLayerTopology
 
         // Step 1: Prune MPLS-Layer topology once before considering any logical links.
         log.info("step 1: pruning MPLS-layer by bandwidth and vlan availability.");
-        Topology prunedMPLSTopo = pruningService.pruneForPipe(mplsLayerTopo, requestedVlanPipe);
+        Topology prunedMPLSTopo = pruningService.pruneWithPipe(mplsLayerTopo, requestedVlanPipe);
         log.info("step 1 COMPLETE.");
 
         for(LogicalEdge oneLogicalLink : logicalLinks)
@@ -294,7 +294,7 @@ public class ServiceLayerTopology
 
             adaptationTopo.setVertices(adaptationPorts);
             adaptationTopo.setEdges(adaptationEdges);
-            Topology prunedAdaptationTopo = pruningService.pruneForPipe(adaptationTopo, requestedVlanPipe);
+            Topology prunedAdaptationTopo = pruningService.pruneWithPipe(adaptationTopo, requestedVlanPipe);
 
             if(!prunedAdaptationTopo.equals(adaptationTopo))
             {

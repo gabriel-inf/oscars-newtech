@@ -13,15 +13,19 @@ import net.es.oscars.topo.ent.ReservableBandwidthE;
 import net.es.oscars.topo.ent.ReservableVlanE;
 import net.es.oscars.topo.ent.UrnE;
 import net.es.oscars.topo.enums.Layer;
-import net.es.oscars.topo.svc.TopoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
+/***
+ * Pruning Service. This class can take in a variety of inputs (Bidrectional bandwidth, a pair of unidirectional
+ * bandwidths (AZ/ZA), specified set of desired VLAN tags, or a logical pipe (containing those other elements)).
+ * With any/all of those inputs, edges are removed from the passed in topology that do not meet the specified
+ * bandwidth/VLAN requirements.
+ */
 @Slf4j
 @Service
 @Component
@@ -31,47 +35,118 @@ public class PruningService {
     private UrnRepository urnRepo;
 
 
+    /**
+     * Prune the topology using a specified bidirectional bandwidth, set of VLANs, and a list of URNs to
+     * match to the topology.
+     * @param topo - The topology to be pruned.
+     * @param Bw - The minimum required bidirectional Bandwidth.
+     * @param vlans - The set of required VLANs.
+     * @param urns - The URNs that will be used to match available resources with elements of the topology.
+     * @return The topology with ineligible edges removed.
+     */
     public Topology pruneWithBwVlans(Topology topo, Integer Bw, Set<Integer> vlans, List<UrnE> urns){
         return pruneTopology(topo, Bw, Bw, vlans, urns);
     }
 
+    /**
+     * Prune the topology using a specified bidirectional bandwidth, and set of VLANs. The URNs are pulled
+     * from the URN repository.
+     * @param topo - The topology to be pruned.
+     * @param Bw - The minimum required bidirectional Bandwidth.
+     * @param vlans - The set of required VLANs.
+     * @return The topology with ineligible edges removed.
+     */
     public Topology pruneWithBwVlans(Topology topo, Integer Bw, Set<Integer> vlans){
         return pruneTopology(topo, Bw, Bw, vlans, urnRepo.findAll());
     }
 
+    /**
+     * Prune the topology using a pair of specified unidirectional bandwidths, set of VLANs, and a list of URNs to
+     * match to the topology.
+     * @param topo - The topology to be pruned.
+     * @param azBw - The minimum required undirectional bandwidth in one direction.
+     * @param zaBw - The minimum required undirectional bandwidth in the other direction.
+     * @param vlans - The set of required VLANs.
+     * @return The topology with ineligible edges removed.
+     */
     public Topology pruneWithAZBwVlans(Topology topo, Integer azBw, Integer zaBw, Set<Integer> vlans, List<UrnE> urns){
         return pruneTopology(topo, azBw, zaBw, vlans, urns);
     }
 
+    /**
+     * Prune the topology using a pair of specified unidirectional bandwidths, and set of VLANs. The URNs are pulled
+     * from the URN repository.
+     * @param topo - The topology to be pruned.
+     * @param azBw - The minimum required undirectional bandwidth in one direction.
+     * @param zaBw - The minimum required undirectional bandwidth in the other direction.
+     * @param vlans - The set of required VLANs.
+     * @return The topology with ineligible edges removed.
+     */
     public Topology pruneWithAZBwVlans(Topology topo, Integer azBw, Integer zaBw, Set<Integer> vlans){
         return pruneTopology(topo, azBw, zaBw, vlans, urnRepo.findAll());
     }
 
+    /**
+     * Prune the topology using a specified bidirectional bandwidth, set of VLANs, and a list of URNs to
+     * match to the topology.
+     * @param topo - The topology to be pruned.
+     * @param Bw - The minimum required bidirectional Bandwidth.
+     * @param urns - The URNs that will be used to match available resources with elements of the topology.
+     * @return The topology with ineligible edges removed.
+     */
     public Topology pruneWithBw(Topology topo, Integer Bw, List<UrnE> urns){
         return pruneTopology(topo, Bw, Bw, null, urns);
     }
 
+    /**
+     * Prune the topology using a specified bidirectional bandwidth. With no VLAN specified, the
+     * pruning service will search for at least one VLAN (if not several) that is available across the topology,
+     * and prune using that set of VLANs. The URNs are pulled from the URN repository.
+     * @param topo - The topology to be pruned.
+     * @param Bw - The minimum required bidirectional Bandwidth.
+     * @return The topology with ineligible edges removed.
+     */
     public Topology pruneWithBw(Topology topo, Integer Bw){
         return pruneTopology(topo, Bw, Bw, null, urnRepo.findAll());
     }
 
+    /**
+     * Prune the topology using a pair of specified unidirectional bandwidths, and a list of URNs.
+     * With no VLAN specified, the pruning service will search for at least one VLAN (if not several) that is
+     * available across the topology, and prune using that set of VLANs.
+     * @param topo - The topology to be pruned.
+     * @param azBw - The minimum required undirectional bandwidth in one direction.
+     * @param zaBw - The minimum required undirectional bandwidth in the other direction.
+     * @param urns - The URNs that will be used to match available resources with elements of the topology.
+     * @return The topology with ineligible edges removed.
+     */
     public Topology pruneWithAZBw(Topology topo, Integer azBw, Integer zaBw, List<UrnE> urns){
         return pruneTopology(topo, azBw, zaBw, null, urns);
     }
 
+    /**
+     * Prune the topology using a pair of specified unidirectional bandwidths. With no VLAN specified, the
+     * pruning service will search for at least one VLAN (if not several) that is available across the topology,
+     * and prune using that set of VLANs. The URNs are pulled from the URN repository.
+     * @param topo - The topology to be pruned.
+     * @param azBw - The minimum required undirectional bandwidth in one direction.
+     * @param zaBw - The minimum required undirectional bandwidth in the other direction.
+     * @return The topology with ineligible edges removed.
+     */
     public Topology pruneWithAZBw(Topology topo, Integer azBw, Integer zaBw){
         return pruneTopology(topo, azBw, zaBw, null, urnRepo.findAll());
     }
 
-    public Topology pruneForPipe(Topology topo, RequestedVlanPipeE pipe){
+
+    public Topology pruneWithPipe(Topology topo, RequestedVlanPipeE pipe){
         assert(pipe != null);
         assert(topo != null);
         assert(urnRepo != null);
         assert(urnRepo.findAll() != null);
-        return pruneForPipe(topo, pipe, urnRepo.findAll());
+        return pruneWithPipe(topo, pipe, urnRepo.findAll());
     }
 
-    public Topology pruneForPipe(Topology topo, RequestedVlanPipeE pipe, List<UrnE> urns){
+    public Topology pruneWithPipe(Topology topo, RequestedVlanPipeE pipe, List<UrnE> urns){
         Integer azBw = pipe.getAzMbps();
         Integer zaBw = pipe.getZaMbps();
         Set<Integer> vlans = new HashSet<>();
