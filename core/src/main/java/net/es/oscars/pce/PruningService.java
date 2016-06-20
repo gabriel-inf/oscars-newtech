@@ -10,7 +10,6 @@ import net.es.oscars.topo.beans.Topology;
 import net.es.oscars.topo.dao.UrnRepository;
 import net.es.oscars.topo.ent.IntRangeE;
 import net.es.oscars.topo.ent.ReservableBandwidthE;
-import net.es.oscars.topo.ent.ReservableVlanE;
 import net.es.oscars.topo.ent.UrnE;
 import net.es.oscars.topo.enums.Layer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +17,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /***
@@ -182,22 +182,36 @@ public class PruningService {
      * @return The topology with ineligible edges removed.
      */
     private Topology pruneTopology(Topology topo, Integer azBw, Integer zaBw, Set<Integer> vlans, List<UrnE> urns){
+        //Build map of URN name to UrnE
+        Map<String, UrnE> urnMap = buildUrnMap(urns);
         // Copy the original topology's layer and set of vertices.
         Topology pruned = new Topology();
         pruned.setLayer(topo.getLayer());
         pruned.setVertices(topo.getVertices());
         // Filter out edges from the topology that do not have sufficient bandwidth available on both terminating nodes.
+        // Also filters out all edges where either terminating node is not present in the URN map.
         Set<TopoEdge> availableEdges = topo.getEdges().stream()
-                .filter(e -> bwAvailable(e, azBw, zaBw, urns))
+                .filter(e -> urnMap.get(e.getA().getUrn()) != null)
+                .filter(e -> urnMap.get(e.getZ().getUrn()) != null)
+                .filter(e -> bwAvailable(e, azBw, zaBw, urnMap))
                 .collect(Collectors.toSet());
         // If this is an MPLS topology, or there are no edges left, just take the bandwidth-pruned set of edges.
         // Otherwise, find all the remaining edges that can support the requested VLAN(s).
         if(pruned.getLayer() == Layer.MPLS || availableEdges.isEmpty()){
             pruned.setEdges(availableEdges);
         }else {
-            pruned.setEdges(findEdgesWithAvailableVlans(availableEdges, urns, vlans));
+            pruned.setEdges(findEdgesWithAvailableVlans(availableEdges, urnMap, vlans));
         }
         return pruned;
+    }
+
+    /***
+     * Build a mapping of URN names to UrnE objects.
+     * @param urns - A list of URNs, used to create the name -> UrnE map.
+     * @return A map of URN names to UrnE objects.
+     */
+    private Map<String,UrnE> buildUrnMap(List<UrnE> urns) {
+        return urns.stream().collect(Collectors.toMap(UrnE::getUrn, urn -> urn));
     }
 
     /**
@@ -208,30 +222,17 @@ public class PruningService {
      * @param edge - The edge to be evaluated.
      * @param azBw - The requested bandwidth in one direction.
      * @param zaBw - The requested bandwidth in the other direction.
-     * @param urns - The list of URNs to match to the nodes on either end of the edge.
+     * @param urnMap - Map of URN name to UrnE object.
      * @return True if there is sufficient reservable bandwidth, False otherwise.
      */
-    private boolean bwAvailable(TopoEdge edge, Integer azBw, Integer zaBw, List<UrnE> urns){
+    private boolean bwAvailable(TopoEdge edge, Integer azBw, Integer zaBw, Map<String, UrnE> urnMap){
         // Get the reservable bandwidth for the URN matching the node on the "a" side of the edge.
-        // This list should only have one or zero elements in it
-        List<ReservableBandwidthE> aMatching = urns.stream()
-                .filter(u -> u.getUrn().equals(edge.getA().getUrn()))
-                .filter(u -> u.getReservableBandwidth() != null)
-                .map(UrnE::getReservableBandwidth)
-                .collect(Collectors.toList());
+        ReservableBandwidthE aBandwidth = urnMap.get(edge.getA().getUrn()).getReservableBandwidth();
         // Get the reservable bandwidth for the URN matching the node on the "z" side of the edge.
-        // This list should only have one or zero elements in it
-        List<ReservableBandwidthE> zMatching = urns.stream()
-                .filter(u -> u.getUrn().equals(edge.getZ().getUrn()))
-                .filter(u -> u.getReservableBandwidth() != null)
-                .map(UrnE::getReservableBandwidth)
-                .collect(Collectors.toList());
+        ReservableBandwidthE zBandwidth = urnMap.get(edge.getZ().getUrn()).getReservableBandwidth();
 
-        // Verify that there is no more than one reservable bandwidth that matched the a/z URNs.
-        // This would imply that there are duplicate elements in the list of URNs
-        assert aMatching.size() <= 1 && zMatching.size() <=1;
         // If both are empty, then neither node has a reservable bandwidth field, so there is no need to remove the edge
-        if (aMatching.isEmpty() && zMatching.isEmpty()) {
+        if (aBandwidth == null && zBandwidth == null) {
             return true;
         } else {
             // At least one of the two has reservable bandwidth, so check the valid nodes to determine
@@ -239,11 +240,11 @@ public class PruningService {
             // If it is a (port, port) edge, then both must be checked.
             boolean aPasses = true;
             boolean zPasses = true;
-            if(!aMatching.isEmpty()){
-                aPasses = aMatching.get(0).getEgressBw() >= azBw && aMatching.get(0).getIngressBw() >= zaBw;
+            if(aBandwidth != null){
+                aPasses = aBandwidth.getEgressBw() >= azBw && aBandwidth.getIngressBw() >= zaBw;
             }
-            if(!zMatching.isEmpty()){
-                zPasses = zMatching.get(0).getIngressBw() >= azBw && zMatching.get(0).getEgressBw() >= zaBw;
+            if(zBandwidth != null){
+                zPasses = zBandwidth.getIngressBw() >= azBw && zBandwidth.getEgressBw() >= zaBw;
             }
 
             return aPasses && zPasses;
@@ -257,15 +258,15 @@ public class PruningService {
      * requested (set is empty), find all open VLAN tags available across all input edges, then filter out the edges
      * using that set.
      * @param availableEdges - The set of currently available edges, which will be pruned further using VLAN tags.
-     * @param urns - The list of URNs which will be mapped to the nodes in the topology.
+     * @param urnMap - Map of URN name to UrnE object.
      * @param vlans - The desired set of VLANs (empty if any VLANs can work).
      * @return The input edges, pruned using the input set of VLAN tags.
      */
-    private Set<TopoEdge> findEdgesWithAvailableVlans(Set<TopoEdge> availableEdges, List<UrnE> urns, Set<Integer> vlans) {
+    private Set<TopoEdge> findEdgesWithAvailableVlans(Set<TopoEdge> availableEdges, Map<String, UrnE> urnMap, Set<Integer> vlans) {
         // If no VLAN tags are specified
         if(vlans.isEmpty()){
             // Find all VLAN tags that are available across the input edges
-            Set<Integer> open = findOpenVlans(availableEdges, urns);
+            Set<Integer> open = findOpenVlans(availableEdges, urnMap);
             // If none were found, then no edges are viable.
             if(open.isEmpty()){
                 return new HashSet<>();
@@ -275,8 +276,8 @@ public class PruningService {
             return availableEdges;
         }
         // If there are specified VLANs, filter out the currently available edges using the specified VLAN tags..
-        return availableEdges.stream().filter(e -> vlansAvailable(e, vlans, urns))
-                    .collect(Collectors.toSet());
+        return availableEdges.stream().filter(e -> vlansAvailable(e, vlans, urnMap))
+                .collect(Collectors.toSet());
     }
 
     /**
@@ -286,14 +287,14 @@ public class PruningService {
      * ranges (the tag(s) are not currently reservable).
      * @param edge - The edge to be evaluated.
      * @param vlans - The set of VLAN tags requested.
-     * @param urns - The list of URNs, used to find the matching UrnE objects for the terminating nodes.
+     * @param urnMap - Map of URN name to UrnE object.
      * @return True, if the edge can support the desired VLAN tags. False, otherwise.
      */
-    private boolean vlansAvailable(TopoEdge edge, Set<Integer> vlans, List<UrnE> urns) {
+    private boolean vlansAvailable(TopoEdge edge, Set<Integer> vlans, Map<String, UrnE> urnMap) {
         // Get the set of IntRanges supported at node A
-        Set<IntRange> aRanges = getVlanRangesFromUrn(urns, edge.getA().getUrn());
+        Set<IntRange> aRanges = getVlanRangesFromUrn(urnMap, edge.getA().getUrn());
         // Get the set of IntRanges supported at node Z
-        Set<IntRange> zRanges = getVlanRangesFromUrn(urns, edge.getZ().getUrn());
+        Set<IntRange> zRanges = getVlanRangesFromUrn(urnMap, edge.getZ().getUrn());
 
         // If neither node supports IntRanges, the edge does not need to be removed.
         if(aRanges.isEmpty() && zRanges.isEmpty()){
@@ -326,17 +327,17 @@ public class PruningService {
     /**
      * Using the list of URNs and the URN string, find the matching UrnE object and retrieve all of its
      * IntRanges.
-     * @param urns - The list of possible URNs.
+     * @param urnMap - Map of URN name to UrnE object.
      * @param matchingUrn - String representation of the desired URN.
      * @return - All IntRanges supported at the URN.
      */
-    private Set<IntRange> getVlanRangesFromUrn(List<UrnE> urns, String matchingUrn){
-        return urns.stream()
-                .filter(u -> u.getUrn().equals(matchingUrn))
-                .filter(u -> u.getReservableVlans() != null)
-                .map(UrnE::getReservableVlans)
-                .map(ReservableVlanE::getVlanRanges)
-                .flatMap(Collection::stream)
+    private Set<IntRange> getVlanRangesFromUrn(Map<String, UrnE> urnMap, String matchingUrn){
+        if(urnMap.get(matchingUrn) == null || urnMap.get(matchingUrn).getReservableVlans() == null)
+            return new HashSet<>();
+        return urnMap.get(matchingUrn)
+                .getReservableVlans()
+                .getVlanRanges()
+                .stream()
                 .map(IntRangeE::toDtoIntRange)
                 .collect(Collectors.toSet());
     }
@@ -344,10 +345,10 @@ public class PruningService {
     /**
      * Traverse the set of edges, and find all VLAN tags that are available across every edge in the set.
      * @param edges - The set of edges.
-     * @param urns - The list of URNs that are used to retrieve the available VLANs at each node.
+     * @param urnMap - Map of URN name to UrnE object.
      * @return A (possibly empty) set of VLAN tags that are available across every edge.
      */
-    private Set<Integer> findOpenVlans(Set<TopoEdge> edges, List<UrnE> urns){
+    private Set<Integer> findOpenVlans(Set<TopoEdge> edges, Map<String, UrnE> urnMap){
         // Overlap is used to track all VLAN tags that are available across every edge.
         Set<Integer> overlap = new HashSet<>();
         Iterator<TopoEdge> iter = edges.iterator();
@@ -359,8 +360,8 @@ public class PruningService {
         TopoEdge e = iter.next();
 
         // Get the VLAN ranges available the a and z ends of the edge
-        Set<IntRange> aRanges = getVlanRangesFromUrn(urns, e.getA().getUrn());
-        Set<IntRange> zRanges = getVlanRangesFromUrn(urns, e.getZ().getUrn());
+        Set<IntRange> aRanges = getVlanRangesFromUrn(urnMap, e.getA().getUrn());
+        Set<IntRange> zRanges = getVlanRangesFromUrn(urnMap, e.getZ().getUrn());
 
 
         // Find the intersection of those two set of VLAN ranges
@@ -373,8 +374,8 @@ public class PruningService {
         //Within the available VLAN ranges on each edge.
         while(iter.hasNext()){
             TopoEdge edge = iter.next();
-            aRanges = getVlanRangesFromUrn(urns, edge.getA().getUrn());
-            zRanges = getVlanRangesFromUrn(urns, edge.getZ().getUrn());
+            aRanges = getVlanRangesFromUrn(urnMap, edge.getA().getUrn());
+            zRanges = getVlanRangesFromUrn(urnMap, edge.getZ().getUrn());
 
             overlap = removeIfNotInRange(overlap, aRanges);
             overlap = removeIfNotInRange(overlap, zRanges);
