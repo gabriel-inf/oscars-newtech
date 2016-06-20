@@ -1,4 +1,4 @@
-package net.es.oscars.dto.topo;
+package net.es.oscars.topo.enums;
 
 
 import java.util.EnumSet;
@@ -10,7 +10,8 @@ public enum VertexType {
     NETWORK("NETWORK"),
     PORT("PORT"),
     ROUTER("ROUTER"),
-    SWITCH("SWITCH");
+    SWITCH("SWITCH"),
+    VIRTUAL("VIRTUAL");     // Added by Jeremy for Service-Layer Topology construction - Can be moved if necessary
 
 
     private String code;

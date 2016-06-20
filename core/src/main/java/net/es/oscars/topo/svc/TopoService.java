@@ -3,17 +3,15 @@ package net.es.oscars.topo.svc;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.dto.topo.Layer;
-import net.es.oscars.dto.topo.TopoVertex;
-import net.es.oscars.dto.topo.Topology;
-import net.es.oscars.dto.topo.UrnEdge;
+import net.es.oscars.topo.beans.TopoEdge;
+import net.es.oscars.topo.enums.*;
+import net.es.oscars.topo.beans.TopoVertex;
+import net.es.oscars.topo.beans.Topology;
 import net.es.oscars.topo.dao.ReservableBandwidthRepository;
 import net.es.oscars.topo.dao.ReservableVlanRepository;
 import net.es.oscars.topo.dao.UrnAdjcyRepository;
 import net.es.oscars.topo.dao.UrnRepository;
 import net.es.oscars.topo.ent.*;
-import net.es.oscars.topo.enums.DeviceModel;
-import net.es.oscars.topo.enums.UrnType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
@@ -50,8 +48,21 @@ public class TopoService {
                 .filter(u -> u.getCapabilities().contains(layer))
                 .forEach(u -> {
                     log.info("added urn " + u.getUrn() + " to topo for " + layer);
-
-                    TopoVertex dev = new TopoVertex(u.getUrn());
+                    VertexType type = null;
+                    if(u.getDeviceType() == null && u.getIfceType() != null){
+                        type = VertexType.PORT;
+                    }
+                    else{
+                        switch(u.getDeviceType()){
+                            case ROUTER:
+                                type = VertexType.ROUTER;
+                                break;
+                            case SWITCH:
+                                type = VertexType.SWITCH;
+                                break;
+                        }
+                    }
+                    TopoVertex dev = new TopoVertex(u.getUrn(), type);
                     topo.getVertices().add(dev);
                 });
 
@@ -59,12 +70,17 @@ public class TopoService {
                 .filter(adj -> adj.getMetrics().containsKey(layer))
                 .forEach(adj -> {
                     Long metric = adj.getMetrics().get(layer);
-                    UrnEdge edge = UrnEdge.builder()
-                            .a(adj.getA().getUrn())
-                            .z(adj.getZ().getUrn())
-                            .metrics(new HashMap<>()).build();
-                    edge.getMetrics().put(layer, metric);
-                    topo.getEdges().add(edge);
+                    Optional<TopoVertex> a = topo.getVertexByUrn(adj.getA().getUrn());
+                    Optional<TopoVertex> z = topo.getVertexByUrn(adj.getZ().getUrn());
+                    if(a.isPresent() && z.isPresent()){
+                        TopoEdge edge = TopoEdge.builder()
+                                .a(a.get())
+                                .z(z.get())
+                                .metric(metric)
+                                .layer(layer)
+                                .build();
+                        topo.getEdges().add(edge);
+                    }
                 });
 
         String pretty = null;
@@ -101,11 +117,7 @@ public class TopoService {
     }
 
     public List<ReservableVlanE> reservableVlans() {
-
-
-        List<ReservableVlanE> vlans = vlanRepo.findAll();
-        return vlans;
-
+        return vlanRepo.findAll();
 
     }
 
@@ -136,6 +148,4 @@ public class TopoService {
                 .map(UrnE::getUrn)
                 .collect(Collectors.toList());
     }
-
-
 }

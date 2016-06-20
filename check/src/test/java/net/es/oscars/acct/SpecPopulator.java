@@ -1,7 +1,7 @@
 package net.es.oscars.acct;
 
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.dto.topo.Layer;
+import net.es.oscars.topo.enums.Layer;
 import net.es.oscars.resv.ent.RequestedVlanFlowE;
 import net.es.oscars.resv.ent.RequestedVlanFixtureE;
 import net.es.oscars.resv.ent.RequestedVlanJunctionE;

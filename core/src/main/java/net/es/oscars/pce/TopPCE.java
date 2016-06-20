@@ -3,6 +3,8 @@ package net.es.oscars.pce;
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.ent.*;
+import net.es.oscars.topo.beans.Topology;
+import net.es.oscars.topo.enums.Layer;
 import net.es.oscars.topo.svc.TopoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -18,6 +20,9 @@ public class TopPCE {
 
     @Autowired
     private TopoService topoService;
+
+    @Autowired
+    private PruningService pruningService;
 
     @Autowired
     private EthPCE ethPCE;
@@ -43,6 +48,15 @@ public class TopPCE {
 
 
         for (RequestedVlanFlowE req_f : requested.getVlanFlows()) {
+            for(RequestedVlanPipeE pipe : req_f.getPipes()){
+                //Prune MPLS and Ethernet Topologies (Bandwidth, VLANs)
+                Topology prunedEthernet = pruningService.pruneWithPipe(topoService.layer(Layer.ETHERNET), pipe);
+                Topology prunedMPLS = pruningService.pruneWithPipe(topoService.layer(Layer.MPLS), pipe);
+
+                //Build specialized service layer topology for this pipe
+                //Run Symmetric Dijkstra on this Topology
+                //Translate the Shortest Path into EROs, then EROs to Junction/Pipes/Fixtures
+            }
             ReservedVlanFlowE res_f = ethPCE.makeReserved(req_f, schedSpec);
             reserved.getVlanFlows().add(res_f);
 
