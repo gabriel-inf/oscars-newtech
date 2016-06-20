@@ -39,13 +39,13 @@ public class ServiceLayerTopology
     @Autowired
     DijkstraPCE dijkstraPCE;
 
-    Set<TopoVertex> serviceLayerDevices = new HashSet<>();
-    Set<TopoVertex> serviceLayerPorts = new HashSet<>();
-    Set<TopoEdge> serviceLayerLinks = new HashSet<>();
+    Set<TopoVertex> serviceLayerDevices;
+    Set<TopoVertex> serviceLayerPorts;
+    Set<TopoEdge> serviceLayerLinks;
 
-    Set<TopoVertex> mplsLayerDevices = new HashSet<>();
-    Set<TopoVertex> mplsLayerPorts = new HashSet<>();
-    Set<TopoEdge> mplsLayerLinks = new HashSet<>();
+    Set<TopoVertex> mplsLayerDevices;
+    Set<TopoVertex> mplsLayerPorts;
+    Set<TopoEdge> mplsLayerLinks;
 
     Set<TopoVertex> nonAdjacentPorts;
     Set<LogicalEdge> logicalLinks;
@@ -61,6 +61,14 @@ public class ServiceLayerTopology
     // This method should be called whenever the physical topology is updated
     public void createMultilayerTopology()
     {
+        serviceLayerDevices = new HashSet<>();
+        serviceLayerPorts = new HashSet<>();
+        serviceLayerLinks = new HashSet<>();
+
+        mplsLayerDevices = new HashSet<>();
+        mplsLayerPorts = new HashSet<>();
+        mplsLayerLinks = new HashSet<>();
+
         log.info("decomposing topology into Service-Layer and MPLS-Layer.");
         buildServiceLayerTopo();
         buildMplsLayerTopo();
@@ -225,7 +233,11 @@ public class ServiceLayerTopology
 
         // Step 1: Prune MPLS-Layer topology once before considering any logical links.
         log.info("step 1: pruning MPLS-layer by bandwidth and vlan availability.");
-        Topology prunedMPLSTopo = pruningService.pruneWithPipe(mplsLayerTopo, requestedVlanPipe);
+        //Topology prunedMPLSTopo = pruningService.pruneWithPipe(mplsLayerTopo, requestedVlanPipe);  //PUT ME BACK IN!!!!!!!!!!!!!!!
+        Topology prunedMPLSTopo = new Topology();
+        prunedMPLSTopo.getEdges().addAll(mplsLayerTopo.getEdges());                                  // DELETE ME!!!!!!
+        prunedMPLSTopo.getVertices().addAll(mplsLayerTopo.getVertices());                            // DELETE ME!!!!!!
+        prunedMPLSTopo.setLayer(mplsLayerTopo.getLayer());                                           // DELETE ME!!!!!!
         log.info("step 1 COMPLETE.");
 
         for(LogicalEdge oneLogicalLink : logicalLinks)
@@ -302,7 +314,11 @@ public class ServiceLayerTopology
 
             adaptationTopo.setVertices(adaptationPorts);
             adaptationTopo.setEdges(adaptationEdges);
-            Topology prunedAdaptationTopo = pruningService.pruneWithPipe(adaptationTopo, requestedVlanPipe);
+            //Topology prunedAdaptationTopo = pruningService.pruneWithPipe(adaptationTopo, requestedVlanPipe);  //PUT ME BACK IN!!!!!!!!!!!!!!!
+            Topology prunedAdaptationTopo = new Topology();
+            prunedAdaptationTopo.getEdges().addAll(adaptationTopo.getEdges());                                  // DELETE ME!!!!!!
+            prunedAdaptationTopo.getVertices().addAll(adaptationTopo.getVertices());                            // DELETE ME!!!!!!
+            prunedAdaptationTopo.setLayer(adaptationTopo.getLayer());                                           // DELETE ME!!!!!!
 
             if(!prunedAdaptationTopo.equals(adaptationTopo))
             {
