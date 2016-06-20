@@ -2,6 +2,7 @@ package net.es.oscars.pce;
 
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.IntRange;
+import net.es.oscars.helpers.IntRangeParsing;
 import net.es.oscars.resv.ent.RequestedVlanFixtureE;
 import net.es.oscars.resv.ent.RequestedVlanJunctionE;
 import net.es.oscars.resv.ent.RequestedVlanPipeE;
@@ -40,12 +41,12 @@ public class PruningService {
      * match to the topology.
      * @param topo - The topology to be pruned.
      * @param Bw - The minimum required bidirectional Bandwidth.
-     * @param vlans - The set of required VLANs.
+     * @param vlans - Requested VLAN ranges. Any VLAN ID within those ranges can be accepted.
      * @param urns - The URNs that will be used to match available resources with elements of the topology.
      * @return The topology with ineligible edges removed.
      */
-    public Topology pruneWithBwVlans(Topology topo, Integer Bw, Set<Integer> vlans, List<UrnE> urns){
-        return pruneTopology(topo, Bw, Bw, vlans, urns);
+    public Topology pruneWithBwVlans(Topology topo, Integer Bw, String vlans, List<UrnE> urns){
+        return pruneTopology(topo, Bw, Bw, getIntRangesFromString(vlans), urns);
     }
 
     /**
@@ -53,11 +54,11 @@ public class PruningService {
      * from the URN repository.
      * @param topo - The topology to be pruned.
      * @param Bw - The minimum required bidirectional Bandwidth.
-     * @param vlans - The set of required VLANs.
+     * @param vlans - Requested VLAN ranges. Any VLAN ID within those ranges can be accepted.
      * @return The topology with ineligible edges removed.
      */
-    public Topology pruneWithBwVlans(Topology topo, Integer Bw, Set<Integer> vlans){
-        return pruneTopology(topo, Bw, Bw, vlans, urnRepo.findAll());
+    public Topology pruneWithBwVlans(Topology topo, Integer Bw, String vlans){
+        return pruneTopology(topo, Bw, Bw, getIntRangesFromString(vlans), urnRepo.findAll());
     }
 
     /**
@@ -66,11 +67,11 @@ public class PruningService {
      * @param topo - The topology to be pruned.
      * @param azBw - The minimum required undirectional bandwidth in one direction.
      * @param zaBw - The minimum required undirectional bandwidth in the other direction.
-     * @param vlans - The set of required VLANs.
+     * @param vlans - Requested VLAN ranges. Any VLAN ID within those ranges can be accepted.
      * @return The topology with ineligible edges removed.
      */
-    public Topology pruneWithAZBwVlans(Topology topo, Integer azBw, Integer zaBw, Set<Integer> vlans, List<UrnE> urns){
-        return pruneTopology(topo, azBw, zaBw, vlans, urns);
+    public Topology pruneWithAZBwVlans(Topology topo, Integer azBw, Integer zaBw, String vlans, List<UrnE> urns){
+        return pruneTopology(topo, azBw, zaBw, getIntRangesFromString(vlans), urns);
     }
 
     /**
@@ -79,11 +80,11 @@ public class PruningService {
      * @param topo - The topology to be pruned.
      * @param azBw - The minimum required undirectional bandwidth in one direction.
      * @param zaBw - The minimum required undirectional bandwidth in the other direction.
-     * @param vlans - The set of required VLANs.
+     * @param vlans - Requested VLAN ranges. Any VLAN ID within those ranges can be accepted.
      * @return The topology with ineligible edges removed.
      */
-    public Topology pruneWithAZBwVlans(Topology topo, Integer azBw, Integer zaBw, Set<Integer> vlans){
-        return pruneTopology(topo, azBw, zaBw, vlans, urnRepo.findAll());
+    public Topology pruneWithAZBwVlans(Topology topo, Integer azBw, Integer zaBw, String vlans){
+        return pruneTopology(topo, azBw, zaBw, getIntRangesFromString(vlans), urnRepo.findAll());
     }
 
     /**
@@ -95,7 +96,7 @@ public class PruningService {
      * @return The topology with ineligible edges removed.
      */
     public Topology pruneWithBw(Topology topo, Integer Bw, List<UrnE> urns){
-        return pruneTopology(topo, Bw, Bw, new HashSet<>(), urns);
+        return pruneTopology(topo, Bw, Bw, new ArrayList<>(), urns);
     }
 
     /**
@@ -107,7 +108,7 @@ public class PruningService {
      * @return The topology with ineligible edges removed.
      */
     public Topology pruneWithBw(Topology topo, Integer Bw){
-        return pruneTopology(topo, Bw, Bw, new HashSet<>(), urnRepo.findAll());
+        return pruneTopology(topo, Bw, Bw, new ArrayList<>(), urnRepo.findAll());
     }
 
     /**
@@ -121,7 +122,7 @@ public class PruningService {
      * @return The topology with ineligible edges removed.
      */
     public Topology pruneWithAZBw(Topology topo, Integer azBw, Integer zaBw, List<UrnE> urns){
-        return pruneTopology(topo, azBw, zaBw, new HashSet<>(), urns);
+        return pruneTopology(topo, azBw, zaBw, new ArrayList<>(), urns);
     }
 
     /**
@@ -134,7 +135,7 @@ public class PruningService {
      * @return The topology with ineligible edges removed.
      */
     public Topology pruneWithAZBw(Topology topo, Integer azBw, Integer zaBw){
-        return pruneTopology(topo, azBw, zaBw, new HashSet<>(), urnRepo.findAll());
+        return pruneTopology(topo, azBw, zaBw, new ArrayList<>(), urnRepo.findAll());
     }
 
 
@@ -165,7 +166,7 @@ public class PruningService {
     public Topology pruneWithPipe(Topology topo, RequestedVlanPipeE pipe, List<UrnE> urns){
         Integer azBw = pipe.getAzMbps();
         Integer zaBw = pipe.getZaMbps();
-        Set<Integer> vlans = new HashSet<>();
+        List<IntRange> vlans = new ArrayList<>();
         vlans.addAll(getVlansFromJunction(pipe.getAJunction()));
         vlans.addAll(getVlansFromJunction(pipe.getZJunction()));
         return pruneTopology(topo, azBw, zaBw, vlans, urns);
@@ -177,11 +178,11 @@ public class PruningService {
      * @param topo - The topology to be pruned.
      * @param azBw - The required bandwidth that must be supported in one direction on each edge.
      * @param zaBw - The required bandwidth that must be supported in the other direction on each edge.
-     * @param vlans - The required VLANs (can be a set of one) that must be supported by the nodes terminating each edge.
+     * @param vlans - Requested VLAN ranges. Any VLAN ID within those ranges can be accepted.
      * @param urns - The URNs that will be matched to elements in the topology.
      * @return The topology with ineligible edges removed.
      */
-    private Topology pruneTopology(Topology topo, Integer azBw, Integer zaBw, Set<Integer> vlans, List<UrnE> urns){
+    private Topology pruneTopology(Topology topo, Integer azBw, Integer zaBw, List<IntRange> vlans, List<UrnE> urns){
         //Build map of URN name to UrnE
         Map<String, UrnE> urnMap = buildUrnMap(urns);
         // Copy the original topology's layer and set of vertices.
@@ -259,69 +260,43 @@ public class PruningService {
      * using that set.
      * @param availableEdges - The set of currently available edges, which will be pruned further using VLAN tags.
      * @param urnMap - Map of URN name to UrnE object.
-     * @param vlans - The desired set of VLANs (empty if any VLANs can work).
+     * @param vlans - Requested VLAN ranges. Any VLAN ID within those ranges can be accepted.
      * @return The input edges, pruned using the input set of VLAN tags.
      */
-    private Set<TopoEdge> findEdgesWithAvailableVlans(Set<TopoEdge> availableEdges, Map<String, UrnE> urnMap, Set<Integer> vlans) {
-        // If no VLAN tags are specified
-        if(vlans.isEmpty()){
-            // Find all VLAN tags that are available across the input edges
-            Set<Integer> open = findOpenVlans(availableEdges, urnMap);
-            // If none were found, then no edges are viable.
-            if(open.isEmpty()){
-                return new HashSet<>();
-            }
-            // Otherwise, there is at least one VLAN tag available across all input edges, so all of these
-            // edges are viable.
-            return availableEdges;
+    private Set<TopoEdge> findEdgesWithAvailableVlans(Set<TopoEdge> availableEdges, Map<String, UrnE> urnMap, List<IntRange> vlans) {
+        // Find all VLAN tags that are available across the input edges
+        Set<Integer> open = findOpenVlans(availableEdges, urnMap);
+        // No VLAN tag available across all edges
+        if(open.isEmpty()){
+            return new HashSet<>();
         }
-        // If there are specified VLANs, filter out the currently available edges using the specified VLAN tags..
-        return availableEdges.stream().filter(e -> vlansAvailable(e, vlans, urnMap))
-                .collect(Collectors.toSet());
+        else{
+            // At least one VLAN tag available across all edges
+            // Return the available edges if no specific one is requested
+            // OR if at least one of the requested VLAN tags is open across the topology
+            if(vlans.isEmpty() || anyRequestedVlanOpen(vlans, open)){
+                return availableEdges;
+            }
+            // Specific VLANs were requested, but none were available across the topology
+            return new HashSet<>();
+        }
     }
 
     /**
-     * Determine if the specified VLAN tags are supported on the two nodes terminating this edge. An edge only
-     * fails the test if: (1) One or both of the URNs matching the terminating nodes have valid sets of reservable
-     * VLAN rangs, and (2) Of those that do have valid ranges, the specified VLAN tags are not contained in those
-     * ranges (the tag(s) are not currently reservable).
-     * @param edge - The edge to be evaluated.
-     * @param vlans - The set of VLAN tags requested.
-     * @param urnMap - Map of URN name to UrnE object.
-     * @return True, if the edge can support the desired VLAN tags. False, otherwise.
+     * Using the set of all VLAN IDs which are available on each edge in the topology, find if any of the
+     * requested VLAN ranges include an ID within the set of open IDs.
+     * @param vlans - Requested VLAN ranges. Any VLAN ID within those ranges can be accepted.
+     * @param openIds - The set of IDs available everywhere in the topology.
+     * @return True: If any requested VLAN range contains an open ID number; False: Otherwise.
      */
-    private boolean vlansAvailable(TopoEdge edge, Set<Integer> vlans, Map<String, UrnE> urnMap) {
-        // Get the set of IntRanges supported at node A
-        Set<IntRange> aRanges = getVlanRangesFromUrn(urnMap, edge.getA().getUrn());
-        // Get the set of IntRanges supported at node Z
-        Set<IntRange> zRanges = getVlanRangesFromUrn(urnMap, edge.getZ().getUrn());
-
-        // If neither node supports IntRanges, the edge does not need to be removed.
-        if(aRanges.isEmpty() && zRanges.isEmpty()){
-            return true;
-        } else{
-            // Otherwise, go through all requested VLAN tags
-            for(Integer requestedVlan : vlans){
-
-                // Check if any of the ranges supported at A contain the requested tag
-                boolean aContainsVlan = true;
-                if(!aRanges.isEmpty()) {
-                    aContainsVlan = aRanges.stream().anyMatch(vr -> vr.contains(requestedVlan));
-                }
-                // Check if any of the ranges supported at Z contain the requested tag
-                boolean zContainsVlan = true;
-                if(!zRanges.isEmpty()) {
-                    zContainsVlan = zRanges.stream().anyMatch(vr -> vr.contains(requestedVlan));
-                }
-                // If neither contain the requested tag, remove the edge
-                if(!aContainsVlan || !zContainsVlan){
-                    return false;
-                }
-            }
-            // If all requested tags are available at both nodes if (port, port), or just at the port if (device, port),
-            // then this edge is valid.
-            return true;
-        }
+    private boolean anyRequestedVlanOpen(List<IntRange> vlans, Set<Integer> openIds){
+        Set<Integer> vlanIds = vlans
+                .stream()
+                .map(this::getSetOfNumbersInRange)
+                .flatMap(Collection::stream)
+                .filter(openIds::contains)
+                .collect(Collectors.toSet());
+        return !vlanIds.isEmpty();
     }
 
     /**
@@ -440,10 +415,25 @@ public class PruningService {
      * @param junction - The requested VLAN junction.
      * @return The set of VLAN tags (Integers) requested for fixtures at that junction.
      */
-    private Set<Integer> getVlansFromJunction(RequestedVlanJunctionE junction){
+    private List<IntRange> getVlansFromJunction(RequestedVlanJunctionE junction){
         // Stream through the junction's fixtures, map the requested VLAN expression to a set of Integers
-        return junction.getFixtures().stream().map(RequestedVlanFixtureE::getVlanExpression)
-                .map(Integer::parseInt).collect(Collectors.toSet());
+        return junction.getFixtures().stream()
+                .map(RequestedVlanFixtureE::getVlanExpression)
+                .map(this::getIntRangesFromString)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Given a list of strings, convert all valid strings into IntRanges.
+     * @param vlans - Requested VLAN ranges. Any VLAN ID within those ranges can be accepted.
+     * @return A list of IntRanges, each representing a range of VLAN ID values parsed from a string.
+     */
+    private List<IntRange> getIntRangesFromString(String vlans){
+        if(IntRangeParsing.isValidIntRangeInput(vlans)){
+            return IntRangeParsing.retrieveIntRanges(vlans);
+        }
+        return new ArrayList<>();
     }
 
 }

@@ -89,19 +89,17 @@ public class PruningServiceTest {
         log.info(urns.toString());
 
         log.info("Pruning - Remove no edges");
-        Set<Integer> vlans = new HashSet<>(Arrays.asList(3, 4, 10));
-        Topology pruned = pruningService.pruneWithBwVlans(topo, 100, vlans, urns);
+        Topology pruned = pruningService.pruneWithBwVlans(topo, 100, "2:5", urns);
         assert(pruned.getEdges().size() == topo.getEdges().size());
 
         log.info("Pruning - Remove every edge");
-        vlans = new HashSet<>(Arrays.asList(1, 90));
-        pruned = pruningService.pruneWithBwVlans(topo, 150, vlans, urns);
+        pruned = pruningService.pruneWithBwVlans(topo, 150, "90:120", urns);
         assert(pruned.getEdges().isEmpty());
 
         log.info("Pruning - Remove only some edges");
-        vlans = new HashSet<>(Arrays.asList(5, 40));
-        pruned = pruningService.pruneWithBwVlans(topo, 125, vlans, urns);
-        assert(pruned.getEdges().size() < topo.getEdges().size() && !pruned.getEdges().isEmpty());
+        pruned = pruningService.pruneWithBwVlans(topo, 130, "1:20,21:27,29", urns);
+        assert(pruned.getEdges().size() < topo.getEdges().size());
+        assert(!pruned.getEdges().isEmpty());
     }
 
     @Test
@@ -115,19 +113,19 @@ public class PruningServiceTest {
         log.info(urns.toString());
 
         log.info("Pruning - Remove no edges");
-        Set<Integer> vlans = new HashSet<>(Arrays.asList(3, 4, 10));
-        Topology pruned = pruningService.pruneWithAZBwVlans(topo, 100, 125, vlans, urns);
+        String vlans = "3,4,10";
+        Topology pruned = pruningService.pruneWithAZBwVlans(topo, 100, 125, "3,4,10", urns);
         assert(pruned.getEdges().size() == topo.getEdges().size());
 
         log.info("Pruning - Remove every edge");
-        vlans = new HashSet<>(Arrays.asList(1, 90));
-        pruned = pruningService.pruneWithAZBwVlans(topo, 175, 100, vlans, urns);
+        vlans = "80-90";
+        pruned = pruningService.pruneWithAZBwVlans(topo, 175, 100, "80:90", urns);
         assert(pruned.getEdges().isEmpty());
 
         log.info("Pruning - Remove only some edges");
-        vlans = new HashSet<>(Arrays.asList(5, 40));
-        pruned = pruningService.pruneWithAZBwVlans(topo, 150, 125, vlans, urns);
-        assert(pruned.getEdges().size() < topo.getEdges().size() && !pruned.getEdges().isEmpty());
+        pruned = pruningService.pruneWithAZBwVlans(topo, 150, 125, "40:45,50", urns);
+        assert(pruned.getEdges().size() < topo.getEdges().size());
+        assert(!pruned.getEdges().isEmpty());
     }
 
     //@Test
@@ -147,7 +145,8 @@ public class PruningServiceTest {
 
         log.info("Pruning - Remove only some edges");
         pruned = pruningService.pruneWithBw(topo, 150);
-        assert(pruned.getEdges().size() < topo.getEdges().size() && !pruned.getEdges().isEmpty());
+        assert(pruned.getEdges().size() < topo.getEdges().size());
+        assert(!pruned.getEdges().isEmpty());
     }
 
     //@Test
@@ -167,7 +166,8 @@ public class PruningServiceTest {
 
         log.info("Pruning - Remove only some edges");
         pruned = pruningService.pruneWithBw(topo, 150);
-        assert(pruned.getEdges().size() < topo.getEdges().size() && !pruned.getEdges().isEmpty());
+        assert(pruned.getEdges().size() < topo.getEdges().size());
+        assert(!pruned.getEdges().isEmpty());
     }
 
     private Topology buildTopology() {
