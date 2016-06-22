@@ -254,49 +254,44 @@ public class PruningService {
     }
 
     /**
-     * Return a modified set of edges where the nodes on either end of the edge support the specified VLANs.
-     * A list of URNs are used to retrive the reservable VLAN sets from nodes (where applicable). If no VLANs are
-     * requested (set is empty), find all open VLAN tags available across all input edges, then filter out the edges
-     * using that set.
+     * Return a pruned set of edges where the nodes on either end of the edge support at least one of the specified VLANs.
+     * A map of URNs are used to retrive the reservable VLAN sets from nodes (where applicable). Builds a mapping from
+     * each available VLAN id to the set of edges that support that ID. Using this mapping, the largest set of edges
+     * that supports a requested VLAN id (or any VLAN id if none are specified) is returned.
      * @param availableEdges - The set of currently available edges, which will be pruned further using VLAN tags.
      * @param urnMap - Map of URN name to UrnE object.
      * @param vlans - Requested VLAN ranges. Any VLAN ID within those ranges can be accepted.
      * @return The input edges, pruned using the input set of VLAN tags.
      */
     private Set<TopoEdge> findEdgesWithAvailableVlans(Set<TopoEdge> availableEdges, Map<String, UrnE> urnMap, List<IntRange> vlans) {
-        // Find all VLAN tags that are available across the input edges
-        Set<Integer> open = findOpenVlans(availableEdges, urnMap);
-        // No VLAN tag available across all edges
-        if(open.isEmpty()){
-            return new HashSet<>();
-        }
-        else{
-            // At least one VLAN tag available across all edges
-            // Return the available edges if no specific one is requested
-            // OR if at least one of the requested VLAN tags is open across the topology
-            if(vlans.isEmpty() || anyRequestedVlanOpen(vlans, open)){
-                return availableEdges;
+        // Find a set of matching edges for each available VLAN id
+        Map<Integer, Set<TopoEdge>> edgesPerId = findEdgesPerVlanId(availableEdges, urnMap);
+        // Get a set of the requested VLAN ids
+        Set<Integer> idsInRanges = getIntegersFromRanges(vlans);
+        // Find the largest set of TopoEdges that meet the request
+        Set<TopoEdge> bestSet = new HashSet<>();
+        for(Integer id : edgesPerId.keySet()){
+            // If the currently considered ID matches the request (or there are no VLANs requested)
+            // and the set of edges supporting this ID are larger than the current best
+            // choose this set of edges
+            if((idsInRanges.contains(id) || idsInRanges.isEmpty()) && edgesPerId.get(id).size() > bestSet.size()){
+                bestSet = edgesPerId.get(id);
             }
-            // Specific VLANs were requested, but none were available across the topology
-            return new HashSet<>();
         }
+        return bestSet;
     }
 
     /**
-     * Using the set of all VLAN IDs which are available on each edge in the topology, find if any of the
-     * requested VLAN ranges include an ID within the set of open IDs.
+     * Return all of the VLAN ids contained within the list of VLAN ranges.
      * @param vlans - Requested VLAN ranges. Any VLAN ID within those ranges can be accepted.
-     * @param openIds - The set of IDs available everywhere in the topology.
-     * @return True: If any requested VLAN range contains an open ID number; False: Otherwise.
+     * @return The set of VLAN ids making up the input ranges.
      */
-    private boolean anyRequestedVlanOpen(List<IntRange> vlans, Set<Integer> openIds){
-        Set<Integer> vlanIds = vlans
+    private Set<Integer> getIntegersFromRanges(List<IntRange> vlans){
+        return vlans
                 .stream()
                 .map(this::getSetOfNumbersInRange)
                 .flatMap(Collection::stream)
-                .filter(openIds::contains)
                 .collect(Collectors.toSet());
-        return !vlanIds.isEmpty();
     }
 
     /**
@@ -318,60 +313,35 @@ public class PruningService {
     }
 
     /**
-     * Traverse the set of edges, and find all VLAN tags that are available across every edge in the set.
+     * Traverse the set of edges, and create a map of VLAN ID to the edges where that ID is available
      * @param edges - The set of edges.
      * @param urnMap - Map of URN name to UrnE object.
      * @return A (possibly empty) set of VLAN tags that are available across every edge.
      */
-    private Set<Integer> findOpenVlans(Set<TopoEdge> edges, Map<String, UrnE> urnMap){
+    private Map<Integer, Set<TopoEdge>> findEdgesPerVlanId(Set<TopoEdge> edges, Map<String, UrnE> urnMap){
         // Overlap is used to track all VLAN tags that are available across every edge.
-        Set<Integer> overlap = new HashSet<>();
-        Iterator<TopoEdge> iter = edges.iterator();
-        // If there are no edges, there is no overlapping set of VLAN tags.
-        if(!iter.hasNext()){
-            return overlap;
+        Map<Integer, Set<TopoEdge>> edgesPerId = new HashMap<>();
+        for(TopoEdge edge : edges){
+            // Overlap is used to track all VLAN tags that are available across both endpoints of an edge
+            Set<Integer> overlap = new HashSet<>();
+            // Get the VLAN ranges available the a and z ends of the edge
+            Set<IntRange> aRanges = getVlanRangesFromUrn(urnMap, edge.getA().getUrn());
+            Set<IntRange> zRanges = getVlanRangesFromUrn(urnMap, edge.getZ().getUrn());
+
+
+            // Find the intersection of those two set of VLAN ranges
+            overlap = addToOverlap(overlap, aRanges);
+            overlap = addToOverlap(overlap, zRanges);
+
+            // For overlapping IDs, put that edge into the map
+            for(Integer id: overlap){
+                if(!edgesPerId.containsKey(id)){
+                    edgesPerId.put(id, new HashSet<>());
+                }
+                edgesPerId.get(id).add(edge);
+            }
         }
-        // Pick a first edge
-        TopoEdge e = iter.next();
-
-        // Get the VLAN ranges available the a and z ends of the edge
-        Set<IntRange> aRanges = getVlanRangesFromUrn(urnMap, e.getA().getUrn());
-        Set<IntRange> zRanges = getVlanRangesFromUrn(urnMap, e.getZ().getUrn());
-
-
-        // Find the intersection of those two set of VLAN ranges
-        overlap = addToOverlap(overlap, aRanges);
-        overlap = addToOverlap(overlap, zRanges);
-
-        //Now, we have a set of all integers(VLAN tags) that are available on both node A and node Z of an edge
-        //Next, we have to go through the other edges in the network, and for each one, find the vlans available
-        //On both the A and Z ends of the edge. Remove VLAN tags from our overlap set if they are not contained
-        //Within the available VLAN ranges on each edge.
-        while(iter.hasNext()){
-            TopoEdge edge = iter.next();
-            aRanges = getVlanRangesFromUrn(urnMap, edge.getA().getUrn());
-            zRanges = getVlanRangesFromUrn(urnMap, edge.getZ().getUrn());
-
-            overlap = removeIfNotInRange(overlap, aRanges);
-            overlap = removeIfNotInRange(overlap, zRanges);
-        }
-        return overlap;
-    }
-
-    /**
-     * Iterate through a set of VLAN ranges, and remove elements from the overlap set if they are not contained
-     * in all of the ranges.
-     * @param overlap - The set of overlapping VLAN tags
-     * @param ranges - The set of available VLAN ranges
-     * @return The filtered set of overlapping VLAN tags
-     */
-    private Set<Integer> removeIfNotInRange(Set<Integer> overlap, Set<IntRange> ranges){
-        // Go through each IntRange, filter the overlap set to remove VLAN tags that
-        // are not contained within the IntRange.
-        for(IntRange range : ranges){
-            overlap = overlap.stream().filter(range::contains).collect(Collectors.toSet());
-        }
-        return overlap;
+        return edgesPerId;
     }
 
     /**
@@ -431,7 +401,11 @@ public class PruningService {
      */
     private List<IntRange> getIntRangesFromString(String vlans){
         if(IntRangeParsing.isValidIntRangeInput(vlans)){
-            return IntRangeParsing.retrieveIntRanges(vlans);
+            try {
+                return IntRangeParsing.retrieveIntRanges(vlans);
+            }catch(Exception e){
+                return new ArrayList<>();
+            }
         }
         return new ArrayList<>();
     }
