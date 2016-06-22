@@ -109,7 +109,7 @@ public class SpecPopTest {
 
         RequestedVlanFixtureE af = RequestedVlanFixtureE.builder()
                 .portUrn(startb1_1_1_1)
-                .vlanExpression("2")
+                .vlanExpression("2:100")
                 .inMbps(100)
                 .egMbps(100)
                 .fixtureType(EthFixtureType.REQUESTED)
@@ -119,7 +119,7 @@ public class SpecPopTest {
 
         RequestedVlanFixtureE zf = RequestedVlanFixtureE.builder()
                 .portUrn(nersctb1_3_1_1)
-                .vlanExpression("2")
+                .vlanExpression("2:100")
                 .inMbps(100)
                 .egMbps(100)
                 .fixtureType(EthFixtureType.REQUESTED)

@@ -129,7 +129,7 @@ public class DijkstraPCE
     {
         topo.getVertices().stream()
             .forEach(v -> {
-                log.info("adding vertex to Dijkstra graph: " + v.getUrn());
+                //log.info("adding vertex to Dijkstra graph: " + v.getUrn());
                 g.addVertex(v);
             }
         );
@@ -141,7 +141,7 @@ public class DijkstraPCE
                 TopoEdge az = TopoEdge.builder().a(nodeA).z(nodeZ).build();
 
                 az.setMetric(e.getMetric());;
-                log.info("adding edge to Dijkstra graph: (" + e.getA() + "," + e.getZ() + ")");
+                //log.info("adding edge to Dijkstra graph: (" + e.getA() + "," + e.getZ() + ")");
 
                 g.addEdge(az, nodeA, nodeZ, EdgeType.DIRECTED);
             }

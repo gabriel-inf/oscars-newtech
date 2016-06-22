@@ -417,7 +417,7 @@ public class ServiceLayerTopology
 
         nonAdjacentPorts.add(virtualSrcPort);
 
-        buildLogicalLayerLinks();               // Should filter out duplicates -- TEST THAT!
+        buildLogicalLayerLinks();               // Should filter out duplicates
     }
 
     // Should only be called if Source Device is MPLS
@@ -451,7 +451,7 @@ public class ServiceLayerTopology
 
         nonAdjacentPorts.add(virtualDstPort);
 
-        buildLogicalLayerLinks();               // Should filter out duplicates -- TEST THAT!
+        buildLogicalLayerLinks();               // Should filter out duplicates
     }
 
 

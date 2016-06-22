@@ -52,7 +52,16 @@ public class PruningServiceTest {
 
         log.info("Pruning - Remove only some edges");
         pruned = pruningService.pruneWithBw(topo, 150, urns);
-        assert(pruned.getEdges().size() < topo.getEdges().size() && !pruned.getEdges().isEmpty());
+        assert(pruned.getEdges().size() < topo.getEdges().size());
+        assert(!pruned.getEdges().isEmpty());
+        assert(!getEdgeByEndpoints(pruned, "swA", "swA:1").isPresent());
+        assert(getEdgeByEndpoints(pruned, "swA", "swA:2").isPresent());
+        assert(getEdgeByEndpoints(pruned, "swA:2", "swB:1").isPresent());
+        assert(getEdgeByEndpoints(pruned, "swB:1", "swB").isPresent());
+        assert(!getEdgeByEndpoints(pruned, "swB", "swB:2").isPresent());
+        assert(!getEdgeByEndpoints(pruned, "swB:2", "swC:1").isPresent());
+        assert(!getEdgeByEndpoints(pruned, "swC:1", "swC").isPresent());
+        assert(!getEdgeByEndpoints(pruned, "swC", "swC:2").isPresent());
     }
 
     @Test
@@ -75,7 +84,16 @@ public class PruningServiceTest {
 
         log.info("Pruning - Remove only some edges");
         pruned = pruningService.pruneWithAZBw(topo, 150, 125, urns);
-        assert(pruned.getEdges().size() < topo.getEdges().size() && !pruned.getEdges().isEmpty());
+        assert(pruned.getEdges().size() < topo.getEdges().size());
+        assert(!pruned.getEdges().isEmpty());
+        assert(getEdgeByEndpoints(pruned, "swA", "swA:1").isPresent());
+        assert(getEdgeByEndpoints(pruned, "swA", "swA:2").isPresent());
+        assert(getEdgeByEndpoints(pruned, "swA:2", "swB:1").isPresent());
+        assert(getEdgeByEndpoints(pruned, "swB:1", "swB").isPresent());
+        assert(!getEdgeByEndpoints(pruned, "swB", "swB:2").isPresent());
+        assert(!getEdgeByEndpoints(pruned, "swB:2", "swC:1").isPresent());
+        assert(!getEdgeByEndpoints(pruned, "swC:1", "swC").isPresent());
+        assert(getEdgeByEndpoints(pruned, "swC", "swC:2").isPresent());
     }
 
     @Test
@@ -89,19 +107,26 @@ public class PruningServiceTest {
         log.info(urns.toString());
 
         log.info("Pruning - Remove no edges");
-        Set<Integer> vlans = new HashSet<>(Arrays.asList(3, 4, 10));
-        Topology pruned = pruningService.pruneWithBwVlans(topo, 100, vlans, urns);
+        Topology pruned = pruningService.pruneWithBwVlans(topo, 100, "2:5", urns);
         assert(pruned.getEdges().size() == topo.getEdges().size());
 
         log.info("Pruning - Remove every edge");
-        vlans = new HashSet<>(Arrays.asList(1, 90));
-        pruned = pruningService.pruneWithBwVlans(topo, 150, vlans, urns);
+        pruned = pruningService.pruneWithBwVlans(topo, 150, "90:120", urns);
         assert(pruned.getEdges().isEmpty());
 
         log.info("Pruning - Remove only some edges");
-        vlans = new HashSet<>(Arrays.asList(5, 40));
-        pruned = pruningService.pruneWithBwVlans(topo, 125, vlans, urns);
-        assert(pruned.getEdges().size() < topo.getEdges().size() && !pruned.getEdges().isEmpty());
+        pruned = pruningService.pruneWithBwVlans(topo, 125, "11:20,21:27,29", urns);
+        log.info(pruned.getEdges().toString());
+        assert(pruned.getEdges().size() < topo.getEdges().size());
+        assert(!pruned.getEdges().isEmpty());
+        assert(!getEdgeByEndpoints(pruned, "swA", "swA:1").isPresent());
+        assert(!getEdgeByEndpoints(pruned, "swA", "swA:2").isPresent());
+        assert(!getEdgeByEndpoints(pruned, "swA:2", "swB:1").isPresent());
+        assert(getEdgeByEndpoints(pruned, "swB:1", "swB").isPresent());
+        assert(getEdgeByEndpoints(pruned, "swB", "swB:2").isPresent());
+        assert(getEdgeByEndpoints(pruned, "swB:2", "swC:1").isPresent());
+        assert(getEdgeByEndpoints(pruned, "swC:1", "swC").isPresent());
+        assert(getEdgeByEndpoints(pruned, "swC", "swC:2").isPresent());
     }
 
     @Test
@@ -115,19 +140,41 @@ public class PruningServiceTest {
         log.info(urns.toString());
 
         log.info("Pruning - Remove no edges");
-        Set<Integer> vlans = new HashSet<>(Arrays.asList(3, 4, 10));
-        Topology pruned = pruningService.pruneWithAZBwVlans(topo, 100, 125, vlans, urns);
+        Topology pruned = pruningService.pruneWithAZBwVlans(topo, 100, 125, "3,4,10", urns);
         assert(pruned.getEdges().size() == topo.getEdges().size());
 
         log.info("Pruning - Remove every edge");
-        vlans = new HashSet<>(Arrays.asList(1, 90));
-        pruned = pruningService.pruneWithAZBwVlans(topo, 175, 100, vlans, urns);
+        pruned = pruningService.pruneWithAZBwVlans(topo, 175, 100, "80:90", urns);
         assert(pruned.getEdges().isEmpty());
 
         log.info("Pruning - Remove only some edges");
-        vlans = new HashSet<>(Arrays.asList(5, 40));
-        pruned = pruningService.pruneWithAZBwVlans(topo, 150, 125, vlans, urns);
-        assert(pruned.getEdges().size() < topo.getEdges().size() && !pruned.getEdges().isEmpty());
+        pruned = pruningService.pruneWithAZBwVlans(topo, 100, 125, "40:45,50", urns);
+        assert(pruned.getEdges().size() < topo.getEdges().size());
+        assert(!pruned.getEdges().isEmpty());
+        assert(!getEdgeByEndpoints(pruned, "swA", "swA:1").isPresent());
+        assert(!getEdgeByEndpoints(pruned, "swA", "swA:2").isPresent());
+        assert(!getEdgeByEndpoints(pruned, "swA:2", "swB:1").isPresent());
+        assert(!getEdgeByEndpoints(pruned, "swB:1", "swB").isPresent());
+        assert(!getEdgeByEndpoints(pruned, "swB", "swB:2").isPresent());
+        assert(!getEdgeByEndpoints(pruned, "swB:2", "swC:1").isPresent());
+        assert(getEdgeByEndpoints(pruned, "swC:1", "swC").isPresent());
+        assert(getEdgeByEndpoints(pruned, "swC", "swC:2").isPresent());
+    }
+
+    @Test
+    public void testBadInput(){
+        log.info("Pruning using poorly formatted VLAN expressions");
+        Topology topo = buildTopology();
+        List<UrnE> urns = buildUrnList();
+        log.info("VLAN expression: 9-10");
+        Topology pruned = pruningService.pruneWithBwVlans(topo, 20, "9-10", urns);
+        assert(pruned.getEdges().size() == topo.getEdges().size());
+        log.info("VLAN expression: 20:3");
+        pruned = pruningService.pruneWithBwVlans(topo, 20, "20:3", urns);
+        assert(pruned.getEdges().size() == topo.getEdges().size());
+        log.info("VLAN expression: jiofashjfiasf");
+        pruned = pruningService.pruneWithBwVlans(topo, 20, "jiofashjfiasf", urns);
+        assert(pruned.getEdges().size() == topo.getEdges().size());
     }
 
     //@Test
@@ -147,7 +194,8 @@ public class PruningServiceTest {
 
         log.info("Pruning - Remove only some edges");
         pruned = pruningService.pruneWithBw(topo, 150);
-        assert(pruned.getEdges().size() < topo.getEdges().size() && !pruned.getEdges().isEmpty());
+        assert(pruned.getEdges().size() < topo.getEdges().size());
+        assert(!pruned.getEdges().isEmpty());
     }
 
     //@Test
@@ -167,8 +215,10 @@ public class PruningServiceTest {
 
         log.info("Pruning - Remove only some edges");
         pruned = pruningService.pruneWithBw(topo, 150);
-        assert(pruned.getEdges().size() < topo.getEdges().size() && !pruned.getEdges().isEmpty());
+        assert(pruned.getEdges().size() < topo.getEdges().size());
+        assert(!pruned.getEdges().isEmpty());
     }
+
 
     private Topology buildTopology() {
         Topology topo = new Topology();
@@ -266,7 +316,7 @@ public class PruningServiceTest {
                 .build();
         swAIn.getCapabilities().add(Layer.ETHERNET);
         swAIn.setReservableBandwidth(createReservableBandwidth(swAIn, 125, 150));
-        swAIn.setReservableVlans(createReservableVlans(swAIn, 1, 50));
+        swAIn.setReservableVlans(createReservableVlans(swAIn, 1, 10));
 
         UrnE swAOut = UrnE.builder()
                 .capabilities(new HashSet<>())
@@ -276,7 +326,7 @@ public class PruningServiceTest {
                 .build();
         swAOut.getCapabilities().add(Layer.ETHERNET);
         swAOut.setReservableBandwidth(createReservableBandwidth(swAOut, 150, 150));
-        swAOut.setReservableVlans(createReservableVlans(swAOut, 1, 50));
+        swAOut.setReservableVlans(createReservableVlans(swAOut, 1, 10));
 
         UrnE swBIn = UrnE.builder()
                 .capabilities(new HashSet<>())
@@ -286,7 +336,7 @@ public class PruningServiceTest {
                 .build();
         swBIn.getCapabilities().add(Layer.ETHERNET);
         swBIn.setReservableBandwidth(createReservableBandwidth(swBIn, 150, 150));
-        swBIn.setReservableVlans(createReservableVlans(swBIn, 1, 50));
+        swBIn.setReservableVlans(createReservableVlans(swBIn, 1, 20));
 
         UrnE swBOut = UrnE.builder()
                 .capabilities(new HashSet<>())
@@ -296,7 +346,7 @@ public class PruningServiceTest {
                 .build();
         swBOut.getCapabilities().add(Layer.ETHERNET);
         swBOut.setReservableBandwidth(createReservableBandwidth(swBOut, 125, 150));
-        swBOut.setReservableVlans(createReservableVlans(swBOut, 1, 30));
+        swBOut.setReservableVlans(createReservableVlans(swBOut, 1, 20));
 
         UrnE swCIn = UrnE.builder()
                 .capabilities(new HashSet<>())
@@ -306,7 +356,7 @@ public class PruningServiceTest {
                 .build();
         swCIn.getCapabilities().add(Layer.ETHERNET);
         swCIn.setReservableBandwidth(createReservableBandwidth(swCIn, 125, 125));
-        swCIn.setReservableVlans(createReservableVlans(swCIn, 1, 30));
+        swCIn.setReservableVlans(createReservableVlans(swCIn, 1, 50));
 
         UrnE swCOut = UrnE.builder()
                 .capabilities(new HashSet<>())
@@ -330,6 +380,12 @@ public class PruningServiceTest {
         return urns;
     }
 
+    private Optional<TopoEdge> getEdgeByEndpoints(Topology topo, String urnA, String urnZ){
+        return topo.getEdges().stream()
+                .filter(e -> e.getA().getUrn().equals(urnA) && e.getZ().getUrn().equals(urnZ)
+                        || e.getA().getUrn().equals(urnZ) && e.getZ().getUrn().equals(urnA))
+                .findAny();
+    }
 
     private ReservableVlanE createReservableVlans(UrnE urn, Integer floor, Integer ceiling){
         Set<IntRangeE> intRanges= new HashSet<>();
