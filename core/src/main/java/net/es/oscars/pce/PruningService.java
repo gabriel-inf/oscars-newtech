@@ -271,6 +271,11 @@ public class PruningService {
         // Find the largest set of TopoEdges that meet the request
         Set<TopoEdge> bestSet = new HashSet<>();
         for(Integer id : edgesPerId.keySet()){
+            // Ignore the set of edges where both terminating nodes do not have reservable VLAN fields
+            // Add them to the best set of edges after this loop
+            if(id == -1){
+                continue;
+            }
             // If the currently considered ID matches the request (or there are no VLANs requested)
             // and the set of edges supporting this ID are larger than the current best
             // choose this set of edges
@@ -278,6 +283,8 @@ public class PruningService {
                 bestSet = edgesPerId.get(id);
             }
         }
+        // Add all edges where neither terminating node has reservable VLAN attributes
+        bestSet.addAll(edgesPerId.get(-1));
         return bestSet;
     }
 
@@ -321,6 +328,7 @@ public class PruningService {
     private Map<Integer, Set<TopoEdge>> findEdgesPerVlanId(Set<TopoEdge> edges, Map<String, UrnE> urnMap){
         // Overlap is used to track all VLAN tags that are available across every edge.
         Map<Integer, Set<TopoEdge>> edgesPerId = new HashMap<>();
+        edgesPerId.put(-1, new HashSet<>());
         for(TopoEdge edge : edges){
             // Overlap is used to track all VLAN tags that are available across both endpoints of an edge
             Set<Integer> overlap = new HashSet<>();
@@ -329,17 +337,28 @@ public class PruningService {
             Set<IntRange> zRanges = getVlanRangesFromUrn(urnMap, edge.getZ().getUrn());
 
 
-            // Find the intersection of those two set of VLAN ranges
-            overlap = addToOverlap(overlap, aRanges);
-            overlap = addToOverlap(overlap, zRanges);
-
-            // For overlapping IDs, put that edge into the map
-            for(Integer id: overlap){
-                if(!edgesPerId.containsKey(id)){
-                    edgesPerId.put(id, new HashSet<>());
-                }
-                edgesPerId.get(id).add(edge);
+            // If neither edge has reservable VLAN fields, add the edge to the "-1" VLAN tag list.
+            // These edges do not need to be pruned, and will be added at the end to the best set of edges
+            if(aRanges.isEmpty() && zRanges.isEmpty()){
+                edgesPerId.get(-1).add(edge);
             }
+            // Otherwise, find the intersection between the VLAN ranges (if any), and add the edge to the list
+            // matching each overlapping VLAN ID.
+            else{
+                // Find the intersection of those two set of VLAN ranges
+                overlap = addToOverlap(overlap, aRanges);
+                overlap = addToOverlap(overlap, zRanges);
+
+
+                // For overlapping IDs, put that edge into the map
+                for(Integer id: overlap){
+                    if(!edgesPerId.containsKey(id)){
+                        edgesPerId.put(id, new HashSet<>());
+                    }
+                    edgesPerId.get(id).add(edge);
+                }
+            }
+
         }
         return edgesPerId;
     }
@@ -352,6 +371,10 @@ public class PruningService {
      * @return The (possibly reduced) set of overlapping VLAN tags.
      */
     private Set<Integer> addToOverlap(Set<Integer> overlap, Set<IntRange> ranges){
+        // If there are no ranges available, just return the current overlap set
+        if(ranges.isEmpty()){
+            return overlap;
+        }
         // Iterate through all passed in IntRanges
         for(IntRange range : ranges){
             // Get the set of VLAN tags within that range
