@@ -161,7 +161,9 @@ public class PruningService {
      * @param pipe - The logical pipe, from which the requested bandwidth and VLANs are retrieved.
      * @return The topology with ineligible edges removed.
      */
-    public Topology pruneWithPipe(Topology topo, RequestedVlanPipeE pipe, Date start, Date end){
+    public Topology pruneWithPipe(Topology topo, RequestedVlanPipeE pipe, ScheduleSpecificationE sched){
+        Date start = sched.getNotBefore();
+        Date end = sched.getNotAfter();
         return pruneWithPipe(topo, pipe, urnRepo.findAll(),
                 getReservedBandwidth(start, end), getReservedVlans(start, end));
     }
