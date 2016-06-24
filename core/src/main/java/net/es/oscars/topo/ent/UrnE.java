@@ -16,7 +16,6 @@ import java.util.Set;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(exclude={"reservableVlans", "reservableBandwidth", "reservablePssResources"})
 public class UrnE {
 
     public String toString() {
