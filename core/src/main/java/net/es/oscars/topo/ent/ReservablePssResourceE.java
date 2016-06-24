@@ -12,15 +12,10 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 @Entity
-@EqualsAndHashCode(exclude="urn")
 public class ReservablePssResourceE {
     @Id
     @GeneratedValue
     private Long id;
-
-    @NonNull
-    @ManyToOne
-    private UrnE urn;
 
     @NonNull
     private ResourceType type;

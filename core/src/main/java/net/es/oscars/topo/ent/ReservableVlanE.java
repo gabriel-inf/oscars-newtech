@@ -14,16 +14,10 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 @Entity
-@EqualsAndHashCode(exclude="urn")
 public class ReservableVlanE {
     @Id
     @GeneratedValue
     private Long id;
-
-
-    @NonNull
-    @OneToOne
-    private UrnE urn;
 
 
     @ElementCollection
