@@ -442,7 +442,6 @@ public class PruningService {
                 // Find what VLAN ids are actually available at A and Z
                 Set<Integer> aAvailableVlanIds = getAvailableVlanIds(urnMap, edge.getA().getUrn(), aRanges, resvVlanMap);
                 Set<Integer> zAvailableVlanIds = getAvailableVlanIds(urnMap, edge.getZ().getUrn(), zRanges, resvVlanMap);
-
                 // Find the intersection of those two set of VLAN ranges
                 overlap = addToOverlap(overlap, aAvailableVlanIds);
                 overlap = addToOverlap(overlap, zAvailableVlanIds);
@@ -491,7 +490,7 @@ public class PruningService {
                     .collect(Collectors.toSet());
         }
         else{
-            return new HashSet<>();
+            return reservableVlanIds;
         }
     }
 

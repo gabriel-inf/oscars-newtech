@@ -196,14 +196,33 @@ public class PruningServiceTest {
         List<UrnE> urns = buildUrnList();
         List<ReservedBandwidthE> rsvBwList = buildReservedBandwidthList(urns, 10);
         List<ReservedVlanE> rsvVlanList = buildReservedVlanList(urns, Arrays.asList(1,2,3));
+
         log.info("VLAN expression: 9-10");
         Topology pruned = pruningService.pruneWithBwVlans(topo, 20, "9-10", urns, rsvBwList, rsvVlanList);
         assert(pruned.getEdges().size() == topo.getEdges().size());
+
         log.info("VLAN expression: 20:3");
         pruned = pruningService.pruneWithBwVlans(topo, 20, "20:3", urns, rsvBwList, rsvVlanList);
         assert(pruned.getEdges().size() == topo.getEdges().size());
+
         log.info("VLAN expression: jiofashjfiasf");
         pruned = pruningService.pruneWithBwVlans(topo, 20, "jiofashjfiasf", urns, rsvBwList, rsvVlanList);
+        assert(pruned.getEdges().size() == topo.getEdges().size());
+
+        log.info("Pruning using empty Reserved Bandwidth List");
+        pruned = pruningService.pruneWithBwVlans(topo, 20, "1:10", urns, new ArrayList<ReservedBandwidthE>(), rsvVlanList);
+        assert(pruned.getEdges().size() == topo.getEdges().size());
+
+        log.info("Pruning using empty Reserved VLAN List");
+        pruned = pruningService.pruneWithBwVlans(topo, 20, "1", urns, rsvBwList, new ArrayList<ReservedVlanE>());
+        assert(pruned.getEdges().size() == topo.getEdges().size());
+
+        log.info("Pruning using empty Reserved VLAN and Bandwidth List");
+        pruned = pruningService.pruneWithBwVlans(topo, 20, "1", urns, new ArrayList<ReservedBandwidthE>(), new ArrayList<ReservedVlanE>());
+        assert(pruned.getEdges().size() == topo.getEdges().size());
+
+        log.info("Pruning using empty Reserved VLAN and Bandwidth List and incorrect expression");
+        pruned = pruningService.pruneWithBwVlans(topo, 20, "~~~", urns, new ArrayList<ReservedBandwidthE>(), new ArrayList<ReservedVlanE>());
         assert(pruned.getEdges().size() == topo.getEdges().size());
     }
 
@@ -398,7 +417,7 @@ public class PruningServiceTest {
         List<ReservedBandwidthE> reservedBandwidth = new ArrayList<>();
 
         for(UrnE urn : urns){
-            if(urn.getIfceType() != null){
+            if(urn.getUrnType() == UrnType.IFCE){
                 ReservedBandwidthE rsvBw = ReservedBandwidthE.builder()
                         .urn(urn)
                         .bandwidth(bandwidth)
@@ -418,7 +437,7 @@ public class PruningServiceTest {
 
         for(UrnE urn : urns){
             for(Integer vlanId : vlanIds){
-                if(urn.getIfceType() != null){
+                if(urn.getUrnType() == UrnType.IFCE){
                     ReservedVlanE rsvVlan = ReservedVlanE.builder()
                             .urn(urn)
                             .vlan(vlanId)
