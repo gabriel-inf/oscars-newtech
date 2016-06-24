@@ -3,15 +3,14 @@ package net.es.oscars.pce;
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.ent.*;
+import net.es.oscars.topo.beans.TopoEdge;
 import net.es.oscars.topo.beans.Topology;
 import net.es.oscars.topo.enums.Layer;
 import net.es.oscars.topo.svc.TopoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.HashSet;
-import java.util.NoSuchElementException;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -48,18 +47,47 @@ public class TopPCE {
 
 
         for (RequestedVlanFlowE req_f : requested.getVlanFlows()) {
-            for(RequestedVlanPipeE pipe : req_f.getPipes()){
-                //Prune MPLS and Ethernet Topologies (Bandwidth, VLANs)
-                //Build specialized service layer topology for this pipe
-                //Run Symmetric Dijkstra on this Topology
-                //Translate the Shortest Path into EROs, then EROs to Junction/Pipes/Fixtures
-            }
-            ReservedVlanFlowE res_f = ethPCE.makeReserved(req_f, schedSpec);
-            reserved.getVlanFlows().add(res_f);
+            ReservedVlanFlowE res_f = new ReservedVlanFlowE();
 
+            List<RequestedVlanPipeE> pipes = new ArrayList<>();
+            pipes.addAll(req_f.getPipes());
+
+            // Attempt to find the az / za pipes for the flow
+            List<Map<String, List<TopoEdge>>> eroMapsPerFlow = handlePipes(pipes);
+
+            // If the EROs are not valid for every pipe, try reversing the order pipes are attempted
+            if(eroMapsPerFlow.size() != pipes.size()){
+                Collections.reverse(pipes);
+                eroMapsPerFlow = handlePipes(pipes);
+            }
+            // If the EROs are still not valid for every pipe, return the blank Reserved Vlan Flow
+            if(eroMapsPerFlow.size() != pipes.size()){
+                reserved.getVlanFlows().add(res_f);
+            }
+            // All pipes were successfully found, translate the EROs into a ReservedVlanFlow
+            else{
+                //res_f = makeReservedFlow(eroMapsPerFlow);
+                reserved.getVlanFlows().add(res_f);
+            }
         }
         return reserved;
 
+    }
+
+    private List<Map<String, List<TopoEdge>>> handlePipes(List<RequestedVlanPipeE> pipes){
+        List<Map<String, List<TopoEdge>>> eroMapsPerFlow= new ArrayList<>();
+        for(RequestedVlanPipeE pipe : pipes){
+            // Find the shortest path
+            Map<String, List<TopoEdge>> eroMap= new HashMap<>();
+            if(validEros(eroMap)){
+                eroMapsPerFlow.add(eroMap);
+            }
+        }
+        return eroMapsPerFlow;
+    }
+
+    private boolean validEros(Map<String, List<TopoEdge>> eroMap){
+        return eroMap.values().stream().allMatch(l -> l.size() > 0);
     }
 
     public void verifyRequested(RequestedBlueprintE requested) throws PCEException {

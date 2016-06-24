@@ -402,8 +402,8 @@ public class PruningServiceTest {
                 .valid(true)
                 .build();
         swAIn.getCapabilities().add(Layer.ETHERNET);
-        swAIn.setReservableBandwidth(createReservableBandwidth(swAIn, 125, 150));
-        swAIn.setReservableVlans(createReservableVlans(swAIn, 1, 10));
+        swAIn.setReservableBandwidth(createReservableBandwidth(125, 150));
+        swAIn.setReservableVlans(createReservableVlans(1, 10));
 
         UrnE swAOut = UrnE.builder()
                 .capabilities(new HashSet<>())
@@ -412,8 +412,8 @@ public class PruningServiceTest {
                 .valid(true)
                 .build();
         swAOut.getCapabilities().add(Layer.ETHERNET);
-        swAOut.setReservableBandwidth(createReservableBandwidth(swAOut, 150, 150));
-        swAOut.setReservableVlans(createReservableVlans(swAOut, 1, 10));
+        swAOut.setReservableBandwidth(createReservableBandwidth(150, 150));
+        swAOut.setReservableVlans(createReservableVlans(1, 10));
 
         UrnE swBIn = UrnE.builder()
                 .capabilities(new HashSet<>())
@@ -422,8 +422,8 @@ public class PruningServiceTest {
                 .valid(true)
                 .build();
         swBIn.getCapabilities().add(Layer.ETHERNET);
-        swBIn.setReservableBandwidth(createReservableBandwidth(swBIn, 150, 150));
-        swBIn.setReservableVlans(createReservableVlans(swBIn, 1, 20));
+        swBIn.setReservableBandwidth(createReservableBandwidth(150, 150));
+        swBIn.setReservableVlans(createReservableVlans(1, 20));
 
         UrnE swBOut = UrnE.builder()
                 .capabilities(new HashSet<>())
@@ -432,8 +432,8 @@ public class PruningServiceTest {
                 .valid(true)
                 .build();
         swBOut.getCapabilities().add(Layer.ETHERNET);
-        swBOut.setReservableBandwidth(createReservableBandwidth(swBOut, 125, 150));
-        swBOut.setReservableVlans(createReservableVlans(swBOut, 1, 20));
+        swBOut.setReservableBandwidth(createReservableBandwidth(125, 150));
+        swBOut.setReservableVlans(createReservableVlans(1, 20));
 
         UrnE swCIn = UrnE.builder()
                 .capabilities(new HashSet<>())
@@ -442,8 +442,8 @@ public class PruningServiceTest {
                 .valid(true)
                 .build();
         swCIn.getCapabilities().add(Layer.ETHERNET);
-        swCIn.setReservableBandwidth(createReservableBandwidth(swCIn, 125, 125));
-        swCIn.setReservableVlans(createReservableVlans(swCIn, 1, 50));
+        swCIn.setReservableBandwidth(createReservableBandwidth(125, 125));
+        swCIn.setReservableVlans(createReservableVlans(1, 50));
 
         UrnE swCOut = UrnE.builder()
                 .capabilities(new HashSet<>())
@@ -452,8 +452,8 @@ public class PruningServiceTest {
                 .valid(true)
                 .build();
         swCOut.getCapabilities().add(Layer.ETHERNET);
-        swCOut.setReservableBandwidth(createReservableBandwidth(swCOut, 150, 125));
-        swCOut.setReservableVlans(createReservableVlans(swCOut, 1, 50));
+        swCOut.setReservableBandwidth(createReservableBandwidth(150, 125));
+        swCOut.setReservableVlans(createReservableVlans(1, 50));
 
         urns.add(swA);
         urns.add(swAIn);
@@ -474,22 +474,20 @@ public class PruningServiceTest {
                 .findAny();
     }
 
-    private ReservableVlanE createReservableVlans(UrnE urn, Integer floor, Integer ceiling){
+    private ReservableVlanE createReservableVlans(Integer floor, Integer ceiling){
         Set<IntRangeE> intRanges= new HashSet<>();
         intRanges.add(IntRangeE.builder().ceiling(ceiling).floor(floor).build());
         return ReservableVlanE.builder()
                 .vlanRanges(intRanges)
-                .urn(urn)
                 .build();
     }
 
-    private ReservableBandwidthE createReservableBandwidth(UrnE urn, Integer ingress, Integer egress){
+    private ReservableBandwidthE createReservableBandwidth(Integer ingress, Integer egress){
         Integer max = Math.max(ingress, egress);
         return ReservableBandwidthE.builder()
                 .bandwidth(max)
                 .ingressBw(ingress)
                 .egressBw(egress)
-                .urn(urn)
                 .build();
     }
 

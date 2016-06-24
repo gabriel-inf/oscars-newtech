@@ -108,7 +108,8 @@ public class BandwidthPCE {
     private Boolean bandwidthFits(Integer bandwidth, String urn, List<ReservableBandwidthE> bandwidths) {
 
         log.debug("checking if " + urn + " has enough bandwidth " + bandwidth);
-        List<ReservableBandwidthE> matching = bandwidths.stream().filter(bw -> bw.getUrn().getUrn().equals(urn)).collect(Collectors.toList());
+        List<ReservableBandwidthE> matching = new ArrayList<>();
+                //bandwidths.stream().filter(bw -> bw.getUrn().getUrn().equals(urn)).collect(Collectors.toList());
 
         assert matching.size() <= 1;
         if (matching.isEmpty()) {
