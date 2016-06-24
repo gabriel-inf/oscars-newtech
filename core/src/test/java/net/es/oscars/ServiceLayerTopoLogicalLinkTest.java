@@ -56,7 +56,7 @@ public class ServiceLayerTopoLogicalLinkTest
     private ScheduleSpecificationE requestedSched;
     private List<UrnE> urnList;
 
-    //@Test
+    @Test
     public void verifyLogicalLinksLinear()
     {
         buildLinearTopo();
@@ -162,7 +162,7 @@ public class ServiceLayerTopoLogicalLinkTest
         log.info("test 'verifyLogicalLinksLinear' passed.");
     }
 
-    //@Test
+    @Test
     public void verifyLogicalLinksMultipath()
     {
         buildLinearTopoWithMultipleMPLSBranch();
@@ -270,7 +270,7 @@ public class ServiceLayerTopoLogicalLinkTest
         log.info("test 'verifyLogicalLinksMultipath' passed.");
     }
 
-    //@Test
+    @Test
     public void verifyLogicalLinksLongerPath()
     {
         buildLinearTopoWithMultipleMPLSBranch();
@@ -391,7 +391,7 @@ public class ServiceLayerTopoLogicalLinkTest
     }
 
 
-    //@Test
+    @Test
     public void verifyLogicalLinksAsymmetric()
     {
         buildLinearTopoWithMultipleMPLSBranch();
@@ -516,7 +516,7 @@ public class ServiceLayerTopoLogicalLinkTest
     }
 
 
-    //@Test
+    @Test
     public void verifyLogicalLinksDisjointMpls()
     {
         buildTwoMPlsPathTopo();
@@ -783,7 +783,7 @@ public class ServiceLayerTopoLogicalLinkTest
 
 
     /* Expected behavior: Add one VIRTUAL nodes and to VIRTUAL ports to Service-Layer topology to represent source end-points. */
-    //@Test
+    @Test
     public void verifyLogicalLinksSrcMPLS()
     {
         this.buildLinearMPLSTopo();
@@ -970,7 +970,7 @@ public class ServiceLayerTopoLogicalLinkTest
     }
 
     /* Expected behavior: Add one VIRTUAL nodes and to VIRTUAL ports to Service-Layer topology to represent destination end-points. */
-    //@Test
+    @Test
     public void verifyLogicalLinksDstMPLS()
     {
         this.buildLinearMPLSTopo();
@@ -1297,7 +1297,7 @@ public class ServiceLayerTopoLogicalLinkTest
         mplsTopoEdges.add(edgeMpls_D1_C2);
     }
 
-    // same as buildLinearTopo(), except all devices/ports/links are on Ethernet layer
+    // same as buildLinearTopo(), except all devices/ports/links are on MPLS layer
     private void buildLinearMPLSTopo()
     {
         ethernetTopoVertices = new HashSet<>();

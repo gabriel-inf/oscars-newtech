@@ -62,6 +62,8 @@ public class AsymmetricPCE
         serviceLayerTopology.createMultilayerTopology();
         /* * */
 
+        serviceLayerTopology.resetLogicalLinks();
+
         UrnE srcDeviceURN = requestPipe.getAJunction().getDeviceUrn();
         UrnE dstDeviceURN = requestPipe.getZJunction().getDeviceUrn();
 

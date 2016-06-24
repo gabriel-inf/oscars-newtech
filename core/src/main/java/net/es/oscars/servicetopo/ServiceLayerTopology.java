@@ -236,12 +236,6 @@ public class ServiceLayerTopology
         log.info("step 1: pruning MPLS-layer by bandwidth and vlan availability.");
         Topology prunedMPLSTopo = pruningService.pruneWithPipe(mplsLayerTopo, requestedVlanPipe, urnList, requestedSchedule);
 
-        log.info("Edges Remaining after prune:");
-        for(TopoEdge edge : prunedMPLSTopo.getEdges())
-        {
-            log.info("Edge: (" + edge.getA() + "," + edge.getZ() + ")");
-        }
-
         log.info("step 1 COMPLETE.");
 
         for(LogicalEdge oneLogicalLink : logicalLinks)
@@ -494,7 +488,7 @@ public class ServiceLayerTopology
     {
         for(TopoVertex oneNode : serviceLayerDevices)
         {
-            if(oneNode.getVertexType().equals(VertexType.VIRTUAL));
+            if(oneNode.getVertexType().equals(VertexType.VIRTUAL))
             {
                 if(oneNode.getUrn().contains(realNode.getUrn()))
                 {
