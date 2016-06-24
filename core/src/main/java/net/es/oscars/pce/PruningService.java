@@ -242,7 +242,7 @@ public class PruningService {
                 .collect(Collectors.toSet());
         // If this is an MPLS topology, or there are no edges left, just take the bandwidth-pruned set of edges.
         // Otherwise, find all the remaining edges that can support the requested VLAN(s).
-        if(pruned.getLayer() == Layer.MPLS || availableEdges.isEmpty()){
+        if(pruned.getLayer() == Layer.MPLS || pruned.getLayer() == null || availableEdges.isEmpty()){
             pruned.setEdges(availableEdges);
         }else {
             pruned.setEdges(findEdgesWithAvailableVlans(availableEdges, urnMap, vlans, resvVlanMap));
