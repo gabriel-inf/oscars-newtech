@@ -290,19 +290,19 @@ public class PruningServiceTest {
         assert(pruned.getEdges().size() == topo.getEdges().size());
 
         log.info("Pruning using empty Reserved Bandwidth List");
-        pruned = pruningService.pruneWithBwVlans(topo, 20, "1:10", urns, new ArrayList<ReservedBandwidthE>(), rsvVlanList);
+        pruned = pruningService.pruneWithBwVlans(topo, 20, "1:10", urns, new ArrayList<>(), rsvVlanList);
         assert(pruned.getEdges().size() == topo.getEdges().size());
 
         log.info("Pruning using empty Reserved VLAN List");
-        pruned = pruningService.pruneWithBwVlans(topo, 20, "1", urns, rsvBwList, new ArrayList<ReservedVlanE>());
+        pruned = pruningService.pruneWithBwVlans(topo, 20, "1", urns, rsvBwList, new ArrayList<>());
         assert(pruned.getEdges().size() == topo.getEdges().size());
 
         log.info("Pruning using empty Reserved VLAN and Bandwidth List");
-        pruned = pruningService.pruneWithBwVlans(topo, 20, "1", urns, new ArrayList<ReservedBandwidthE>(), new ArrayList<ReservedVlanE>());
+        pruned = pruningService.pruneWithBwVlans(topo, 20, "1", urns, new ArrayList<>(), new ArrayList<>());
         assert(pruned.getEdges().size() == topo.getEdges().size());
 
         log.info("Pruning using empty Reserved VLAN and Bandwidth List and incorrect expression");
-        pruned = pruningService.pruneWithBwVlans(topo, 20, "~~~", urns, new ArrayList<ReservedBandwidthE>(), new ArrayList<ReservedVlanE>());
+        pruned = pruningService.pruneWithBwVlans(topo, 20, "~~~", urns, new ArrayList<>(), new ArrayList<>());
         assert(pruned.getEdges().size() == topo.getEdges().size());
     }
 
