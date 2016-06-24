@@ -188,6 +188,29 @@ public class PruningService {
     }
 
     /**
+     * Prune the topology using a logical pipe. The pipe contains the requested bandwidth and VLANs (through
+     * querying the attached junctions/fixtures). A list of URNs is passed into match devices/interfaces to
+     * topology elements.
+     * @param topo - The topology to be pruned.
+     * @param pipe - The logical pipe, from which the requested bandwidth and VLANs are retrieved.
+     * @param urns - The URNs that will be used to match available resources with elements of the topology.
+     * @return The topology with ineligible edges removed.
+     */
+    public Topology pruneWithPipe(Topology topo, RequestedVlanPipeE pipe, List<UrnE> urns, ScheduleSpecificationE sched){
+        Integer azBw = pipe.getAzMbps();
+        Integer zaBw = pipe.getZaMbps();
+        List<IntRange> vlans = new ArrayList<>();
+        vlans.addAll(getVlansFromJunction(pipe.getAJunction()));
+        vlans.addAll(getVlansFromJunction(pipe.getZJunction()));
+
+        Date start = sched.getNotBefore();
+        Date end = sched.getNotAfter();
+
+        return pruneTopology(topo, azBw, zaBw, vlans, urns,
+                getReservedBandwidth(start, end), getReservedVlans(start, end));
+    }
+
+    /**
      * Prune the topology. Called by all outward facing methods to actually perform the pruning. Given the parameters,
      * filter out the edges where the terminating nodes (a/z) do not meet the bandwidth/vlan requirements.
      * @param topo - The topology to be pruned.
@@ -215,8 +238,6 @@ public class PruningService {
         // Filter out edges from the topology that do not have sufficient bandwidth available on both terminating nodes.
         // Also filters out all edges where either terminating node is not present in the URN map.
         Set<TopoEdge> availableEdges = topo.getEdges().stream()
-                .filter(e -> urnMap.get(e.getA().getUrn()) != null)
-                .filter(e -> urnMap.get(e.getZ().getUrn()) != null)
                 .filter(e -> bwAvailable(e, azBw, zaBw, urnMap, resvBwMap))
                 .collect(Collectors.toSet());
         // If this is an MPLS topology, or there are no edges left, just take the bandwidth-pruned set of edges.
@@ -301,19 +322,23 @@ public class PruningService {
     /**
      * Evaluate an edge to determine if the nodes on either end of the edge support the requested
      * az and za bandwidths. An edge will only fail the test if one or both URNs (corresponding to the nodes):
-     * (1) have valid reservable bandwidth fields, and (2) the URN(s) do not have sufficient reservable bandwidth
+     * (1) have valid reservable bandwidth fields, and (2) the URN(s) do not have sufficient available bandwidth
      * available in both the az and za directions (egress and ingress).
      * @param edge - The edge to be evaluated.
      * @param azBw - The requested bandwidth in one direction.
      * @param zaBw - The requested bandwidth in the other direction.
      * @param urnMap - Map of URN name to UrnE object.
+     * @param resvBwMap - Map of UrnE objects to Lists of Reserved Bandwidth
      * @return True if there is sufficient reservable bandwidth, False otherwise.
      */
     private boolean bwAvailable(TopoEdge edge, Integer azBw, Integer zaBw, Map<String, UrnE> urnMap, Map<UrnE, List<ReservedBandwidthE>> resvBwMap){
+
         // Get the reservable bandwidth for the URN matching the node on the "a" side of the edge.
-        ReservableBandwidthE aBandwidth = urnMap.get(edge.getA().getUrn()).getReservableBandwidth();
+        ReservableBandwidthE aBandwidth = urnMap.get(edge.getA().getUrn()) != null ?
+                urnMap.get(edge.getA().getUrn()).getReservableBandwidth() : null;
         // Get the reservable bandwidth for the URN matching the node on the "z" side of the edge.
-        ReservableBandwidthE zBandwidth = urnMap.get(edge.getZ().getUrn()).getReservableBandwidth();
+        ReservableBandwidthE zBandwidth = urnMap.get(edge.getZ().getUrn()) != null ?
+                urnMap.get(edge.getZ().getUrn()).getReservableBandwidth() : null;
 
 
         // At least one of the two has reservable bandwidth, so check the valid nodes to determine
@@ -323,12 +348,12 @@ public class PruningService {
         boolean zPasses = true;
         if(aBandwidth != null){
             // Get a map of the available Ingress/Egress bandwidth for URN a
-            Map<String, Integer> aAvailBwMap = getBwAvailabilityForUrn(aBandwidth, resvBwMap);
+            Map<String, Integer> aAvailBwMap = getBwAvailabilityForUrn(urnMap.get(edge.getA().getUrn()), aBandwidth, resvBwMap);
             aPasses = aAvailBwMap.get("Egress") >= azBw && aAvailBwMap.get("Ingress") >= zaBw;
         }
         if(zBandwidth != null){
             // Get a map of the available Ingress/Egress bandwidth for URN z
-            Map<String, Integer> zAvailBwMap = getBwAvailabilityForUrn(zBandwidth, resvBwMap);
+            Map<String, Integer> zAvailBwMap = getBwAvailabilityForUrn(urnMap.get(edge.getZ().getUrn()), zBandwidth, resvBwMap);
             zPasses = zAvailBwMap.get("Ingress") >= azBw && zAvailBwMap.get("Egress") >= zaBw;
         }
 
@@ -345,12 +370,12 @@ public class PruningService {
      * @param resvBwMap - A Mapping from a URN to a list of Reserved Bandwidths at that URN.
      * @return A map containing the net available ingress/egress bandwidth at a URN
      */
-    private Map<String,Integer> getBwAvailabilityForUrn(ReservableBandwidthE bandwidth, Map<UrnE, List<ReservedBandwidthE>> resvBwMap) {
+    private Map<String,Integer> getBwAvailabilityForUrn(UrnE urn, ReservableBandwidthE bandwidth, Map<UrnE, List<ReservedBandwidthE>> resvBwMap) {
         Map<String, Integer> availBw = new HashMap<>();
         availBw.put("Ingress", bandwidth.getIngressBw());
         availBw.put("Egress", bandwidth.getEgressBw());
-        if(resvBwMap.containsKey(bandwidth.getUrn())){
-            List<ReservedBandwidthE> resvBwList = resvBwMap.get(bandwidth.getUrn());
+        if(resvBwMap.containsKey(urn)){
+            List<ReservedBandwidthE> resvBwList = resvBwMap.get(urn);
             Integer sumIngress = 0;
             Integer sumEgress = 0;
             for(ReservedBandwidthE resv : resvBwList){
