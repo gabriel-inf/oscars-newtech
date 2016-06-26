@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.topo.beans.TopoEdge;
+import net.es.oscars.topo.beans.TopoVertex;
 import net.es.oscars.topo.beans.Topology;
 import net.es.oscars.topo.enums.Layer;
 import net.es.oscars.topo.svc.TopoService;
@@ -29,6 +30,9 @@ public class TopPCE {
     @Autowired
     private Layer3PCE layer3PCE;
 
+    @Autowired
+    private TranslationPCE transPCE;
+
     public ReservedBlueprintE makeReserved(RequestedBlueprintE requested, ScheduleSpecificationE schedSpec) throws PCEException, PSSException {
 
         verifyRequested(requested);
@@ -52,21 +56,21 @@ public class TopPCE {
             List<RequestedVlanPipeE> pipes = new ArrayList<>();
             pipes.addAll(req_f.getPipes());
 
-            // Attempt to find the az / za pipes for the flow
-            List<Map<String, List<TopoEdge>>> eroMapsPerFlow = handlePipes(pipes);
+            // Attempt to find the az / za paths for the flow
+            Map<RequestedVlanPipeE, Map<String, List<TopoEdge>>> eroMapsForFlow = handleRequestedPipes(pipes, schedSpec);
 
             // If the EROs are not valid for every pipe, try reversing the order pipes are attempted
-            if(eroMapsPerFlow.size() != pipes.size()){
+            if(eroMapsForFlow.size() != pipes.size()){
                 Collections.reverse(pipes);
-                eroMapsPerFlow = handlePipes(pipes);
+                eroMapsForFlow = handleRequestedPipes(pipes, schedSpec);
             }
             // If the EROs are still not valid for every pipe, return the blank Reserved Vlan Flow
-            if(eroMapsPerFlow.size() != pipes.size()){
+            if(eroMapsForFlow.size() != pipes.size()){
                 reserved.getVlanFlows().add(res_f);
             }
             // All pipes were successfully found, translate the EROs into a ReservedVlanFlow
             else{
-                //res_f = makeReservedFlow(eroMapsPerFlow);
+                res_f = transPCE.makeReservedFlow(req_f, schedSpec, eroMapsForFlow);
                 reserved.getVlanFlows().add(res_f);
             }
         }
@@ -74,19 +78,20 @@ public class TopPCE {
 
     }
 
-    private List<Map<String, List<TopoEdge>>> handlePipes(List<RequestedVlanPipeE> pipes){
-        List<Map<String, List<TopoEdge>>> eroMapsPerFlow= new ArrayList<>();
+    private Map<RequestedVlanPipeE, Map<String, List<TopoEdge>>> handleRequestedPipes(List<RequestedVlanPipeE> pipes,
+                                                                   ScheduleSpecificationE sched){
+        Map<RequestedVlanPipeE,Map<String, List<TopoEdge>>> eroMapsPerFlow= new HashMap<>();
         for(RequestedVlanPipeE pipe : pipes){
             // Find the shortest path
-            Map<String, List<TopoEdge>> eroMap= new HashMap<>();
-            if(validEros(eroMap)){
-                eroMapsPerFlow.add(eroMap);
+            Map<String, List<TopoEdge>> eroMap = new HashMap<>();
+            if(verifyEros(eroMap)){
+                eroMapsPerFlow.put(pipe, eroMap);
             }
         }
         return eroMapsPerFlow;
     }
 
-    private boolean validEros(Map<String, List<TopoEdge>> eroMap){
+    private boolean verifyEros(Map<String, List<TopoEdge>> eroMap){
         return eroMap.values().stream().allMatch(l -> l.size() > 0);
     }
 
