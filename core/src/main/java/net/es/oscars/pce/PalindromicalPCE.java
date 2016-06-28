@@ -18,7 +18,7 @@ import java.util.*;
 /**
  * Created by jeremy on 6/22/16.
  */
-public class SymmetricPCE
+public class PalindromicalPCE
 {
     @Autowired
     private TopoService topoService;
@@ -41,7 +41,7 @@ public class SymmetricPCE
      * @throws PSSException
      * @throws PCEException
      */
-    public Map<String, List<TopoEdge>> computeSymmetricERO(RequestedVlanPipeE requestPipe, ScheduleSpecificationE requestSched) throws PSSException, PCEException
+    public Map<String, List<TopoEdge>> computePalindromicERO(RequestedVlanPipeE requestPipe, ScheduleSpecificationE requestSched) throws PCEException
     {
         Topology multiLayerTopo = new Topology();
         multiLayerTopo.getVertices().addAll(topoService.layer(Layer.ETHERNET).getVertices());
