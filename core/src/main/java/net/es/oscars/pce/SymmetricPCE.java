@@ -24,9 +24,6 @@ public class SymmetricPCE
     private TopoService topoService;
 
     @Autowired
-    private BandwidthPCE bwPCE;
-
-    @Autowired
     private PruningService pruningService;
 
     @Autowired
