@@ -5,6 +5,7 @@ import net.es.oscars.dto.pss.EthFixtureType;
 import net.es.oscars.dto.pss.EthJunctionType;
 import net.es.oscars.dto.pss.EthPipeType;
 import net.es.oscars.dto.resv.ResourceType;
+import net.es.oscars.pce.PCEException;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.topo.ent.ReservableBandwidthE;
 import net.es.oscars.topo.enums.Layer;
@@ -94,9 +95,7 @@ public class PCEAssistant {
             // this needs belong to a new segment IFF the layer of the NEXT port-to-port connection is different
             if (mod == 2) {
                 // at the very last one, there's no next port-to-port, so skip that
-                if (i + 1 == edges.size()) {
-
-                } else {
+                if (i + 1 != edges.size()) {
                     TopoEdge nextPortToPort = edges.get(i + 2);
                     if (!nextPortToPort.getLayer().equals(currentLayer)) {
                         log.info("switching layers to " + nextPortToPort.getLayer());
@@ -180,7 +179,7 @@ public class PCEAssistant {
             // Create new Reserved Bandwidth
             ReservedBandwidthE rsvBw = createReservedBandwidth(urn, azMbps, zaMbps, sched);
 
-            ReservedVlanE rsvVlan = createReservedVlan(urn, sched, vlanId);
+            ReservedVlanE rsvVlan = createReservedVlan(urn, vlanId, sched);
 
             ReservedVlanFixtureE fx = createReservedFixture(urn, new HashSet<>(), rsvVlan, rsvBw, fixtureType);
 
@@ -204,7 +203,6 @@ public class PCEAssistant {
             TopoEdge edgeOne = edges.get(i);
             TopoEdge edgeTwo = edges.get(i + 1);
 
-            // TODO: verify urns exist
             String urnAPortString = edgeOne.getA().getUrn();
             String urnDeviceString = edgeOne.getZ().getUrn();
             String urnZPortString = edgeTwo.getZ().getUrn();
@@ -226,10 +224,10 @@ public class PCEAssistant {
             ReservedBandwidthE rsvBwZ = createReservedBandwidth(urnPortZ, azMbps, zaMbps, sched);
 
             // Create new Reserved VLAN for Urn A
-            ReservedVlanE rsvVlanA = createReservedVlan(urnPortA, sched, vlanId);
+            ReservedVlanE rsvVlanA = createReservedVlan(urnPortA, vlanId, sched);
 
             // Create new Reserved VLAN for Urn Z
-            ReservedVlanE rsvVlanZ = createReservedVlan(urnPortZ, sched, vlanId);
+            ReservedVlanE rsvVlanZ = createReservedVlan(urnPortZ, vlanId, sched);
 
             // Create junction for device
             ReservedVlanJunctionE newJunction = createReservedJunction(urnDevice, new HashSet<>(), new HashSet<>(),
@@ -255,7 +253,6 @@ public class PCEAssistant {
             DeviceModel model = deviceModels.get(mergeThis.getDeviceUrn().getUrn());
             EthFixtureType fixtureType = decideFixtureType(model);
 
-            // TODO: verify urns exist
             String urnZString = edges.get(edges.size()-1).getZ().getUrn();
             if(!urnMap.containsKey(urnZString)){
                 throw new PSSException(("URN Map does not contain: " + urnZString));
@@ -265,7 +262,7 @@ public class PCEAssistant {
             ReservedBandwidthE rsvBw = createReservedBandwidth(urnZ, azMbps, zaMbps, sched);
 
             // Create new Reserved VLAN for Urn Z
-            ReservedVlanE rsvVlan = createReservedVlan(urnZ, sched, vlanId);
+            ReservedVlanE rsvVlan = createReservedVlan(urnZ, vlanId, sched);
 
             // Create fixture for UrnZ
             ReservedVlanFixtureE fx = createReservedFixture(urnZ, new HashSet<>(), rsvVlan, rsvBw, fixtureType);
@@ -282,8 +279,7 @@ public class PCEAssistant {
 
     }
 
-    // TODO: support asymmetrical case; need to change method signature
-    public ReservedEthPipeE makeVplsPipe(List<TopoEdge> edges, List<TopoEdge> zaEdges,
+    public ReservedEthPipeE makeVplsPipe(List<TopoEdge> azEdges, List<TopoEdge> zaEdges,
                                          Integer azMbps, Integer zaMbps,
                                          Integer vlanId,
                                          Optional<ReservedVlanJunctionE> mergeA,
@@ -311,7 +307,7 @@ public class PCEAssistant {
 
 
         } else {
-            TopoEdge aEdge = edges.get(0);
+            TopoEdge aEdge = azEdges.get(0);
             UrnE deviceUrn = urnMap.get(aEdge.getZ().getUrn());
             UrnE portUrn = urnMap.get(aEdge.getA().getUrn());
             DeviceModel model = deviceUrn.getDeviceModel();
@@ -324,7 +320,7 @@ public class PCEAssistant {
             zJunction = mergeJunction(mergeZ.get(), model);
 
         } else {
-            TopoEdge zEdge = edges.get(edges.size() - 1);
+            TopoEdge zEdge = azEdges.get(azEdges.size() - 1);
 
             UrnE deviceUrn = urnMap.get(zEdge.getZ().getUrn());
             UrnE portUrn = urnMap.get(zEdge.getA().getUrn());
@@ -360,7 +356,7 @@ public class PCEAssistant {
 
          */
         int firstIdx = 0;
-        int lastIdxExclusive = edges.size();
+        int lastIdxExclusive = azEdges.size();
         if (!mergeA.isPresent()) {
             firstIdx = 1;
         }
@@ -368,14 +364,16 @@ public class PCEAssistant {
             lastIdxExclusive = lastIdxExclusive - 1;
         }
 
-        //TODO: Update this to use asymmetrical paths
-        List<TopoEdge> subList = edges.subList(firstIdx, lastIdxExclusive);
-        List<String> azEro = TopoAssistant.makeEro(subList, false);
-        List<String> zaEro = TopoAssistant.makeEro(subList, true);
+        List<TopoEdge> azSubList = azEdges.subList(firstIdx, lastIdxExclusive);
+        List<TopoEdge> zaSubList = zaEdges.subList(firstIdx, lastIdxExclusive);
+        List<String> azEro = TopoAssistant.makeEro(azSubList, false);
+        List<String> zaEro = zaSubList.equals(azSubList) ?
+                TopoAssistant.makeEro(zaSubList, true) : TopoAssistant.makeEro(zaSubList, false);
 
 
         DeviceModel aModel = deviceModels.get(aJunction.getDeviceUrn().getUrn());
         DeviceModel zModel = deviceModels.get(zJunction.getDeviceUrn().getUrn());
+
         //TODO: Add Reserved Bandwidth?
         return ReservedEthPipeE.builder()
                 .pipeType(decidePipeType(aModel, zModel))
@@ -408,7 +406,7 @@ public class PCEAssistant {
         // Create new Reserved Bandwidth
         ReservedBandwidthE rsvBw = createReservedBandwidth(portUrn, azMbps, zaMbps, sched);
 
-        ReservedVlanE rsvVlan = createReservedVlan(portUrn, sched, vlanId);
+        ReservedVlanE rsvVlan = createReservedVlan(portUrn, vlanId, sched);
 
         ReservedVlanJunctionE result = createReservedJunction(deviceUrn, new HashSet<>(), new HashSet<>(),
                 decideJunctionType(model));
@@ -454,7 +452,7 @@ public class PCEAssistant {
                 .build();
     }
 
-    public ReservedVlanE createReservedVlan(UrnE urn, ScheduleSpecificationE sched, Integer vlanId){
+    public ReservedVlanE createReservedVlan(UrnE urn, Integer vlanId, ScheduleSpecificationE sched){
         return ReservedVlanE.builder()
                 .urn(urn)
                 .vlan(vlanId)

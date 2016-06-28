@@ -194,7 +194,7 @@ public class ReserveTopoTest {
 
 
         ReservedBandwidthE rsvBw = asst.createReservedBandwidth(alpha_0_1_0, 10, 10, sched);
-        ReservedVlanE rsvVlan = asst.createReservedVlan(alpha_0_1_0, sched, 10);
+        ReservedVlanE rsvVlan = asst.createReservedVlan(alpha_0_1_0, 10, sched);
 
 
         ReservedVlanFixtureE aFixture = asst.createReservedFixture(alpha_0_1_0, new HashSet<>(), rsvVlan, rsvBw,
@@ -278,12 +278,14 @@ public class ReserveTopoTest {
         ReservedVlanFixtureE fx = vp.getAJunction().getFixtures().iterator().next();
         assert fx.getIfceUrn().getUrn().equals("bravo:1/1/1");
         assert fx.getFixtureType().equals(EthFixtureType.JUNOS_IFCE);
+        assert fx.getReservedVlan().getVlan().equals(10);
 
 
         assert vp.getZJunction().getFixtures().size() == 1;
         fx = vp.getZJunction().getFixtures().iterator().next();
         assert fx.getIfceUrn().getUrn().equals("delta:0/1/0");
         assert fx.getFixtureType().equals(EthFixtureType.JUNOS_IFCE);
+        assert fx.getReservedVlan().getVlan().equals(10);
 
     }
 
