@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 /**
  * Created by jeremy on 6/22/16.
  */
-public class AsymmetricPCE
+public class LacimordnilapPCE
 {
     @Autowired
     private TopoService topoService;
@@ -48,7 +48,7 @@ public class AsymmetricPCE
      * @throws PSSException
      * @throws PCEException
      */
-    private Map<String, List<TopoEdge>> computeAsymmetricERO(RequestedVlanPipeE requestPipe, ScheduleSpecificationE requestSched) throws PSSException, PCEException
+    public Map<String, List<TopoEdge>> computeCimordnilapERO(RequestedVlanPipeE requestPipe, ScheduleSpecificationE requestSched) throws PCEException
     {
 
         /* These calls only need to be made once when topology is updated */
