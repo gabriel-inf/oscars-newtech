@@ -376,7 +376,7 @@ public class PCEAssistant {
 
         // Create Reserved Bandwidth
         // NOTE: Has null urn (for now)
-        ReservedBandwidthE rsvBw = createReservedBandwidth(null, azMbps, zaMbps, sched);
+        ReservedBandwidthE rsvBw = createReservedBandwidth(aJunction.getDeviceUrn(), azMbps, zaMbps, sched);
         return ReservedEthPipeE.builder()
                 .pipeType(decidePipeType(aModel, zModel))
                 .aJunction(aJunction)
