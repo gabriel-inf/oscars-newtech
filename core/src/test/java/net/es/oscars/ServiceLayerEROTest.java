@@ -1417,7 +1417,6 @@ public class ServiceLayerEROTest
         bwPipe.setZaMbps(20);
         bwPipe.setAJunction(aJunc);
         bwPipe.setZJunction(zJunc);
-        bwPipe.setEroPalindromic(false);
         bwPipe.setPipeType(EthPipeType.REQUESTED);
 
         requestedPipe = bwPipe;
@@ -1481,7 +1480,6 @@ public class ServiceLayerEROTest
         bwPipe.setZaMbps(20);
         bwPipe.setAJunction(aJunc);
         bwPipe.setZJunction(zJunc);
-        bwPipe.setEroPalindromic(false);
         bwPipe.setPipeType(EthPipeType.REQUESTED);
 
         requestedPipe = bwPipe;
@@ -1545,7 +1543,6 @@ public class ServiceLayerEROTest
         bwPipe.setZaMbps(20);
         bwPipe.setAJunction(aJunc);
         bwPipe.setZJunction(zJunc);
-        bwPipe.setEroPalindromic(false);
         bwPipe.setPipeType(EthPipeType.REQUESTED);
 
         requestedPipe = bwPipe;
@@ -1609,7 +1606,6 @@ public class ServiceLayerEROTest
         bwPipe.setZaMbps(20);
         bwPipe.setAJunction(aJunc);
         bwPipe.setZJunction(zJunc);
-        bwPipe.setEroPalindromic(false);
         bwPipe.setPipeType(EthPipeType.REQUESTED);
 
         requestedPipe = bwPipe;

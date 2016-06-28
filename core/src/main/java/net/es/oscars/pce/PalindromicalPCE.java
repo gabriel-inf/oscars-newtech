@@ -41,7 +41,7 @@ public class PalindromicalPCE
      * @throws PSSException
      * @throws PCEException
      */
-    public Map<String, List<TopoEdge>> computePalindromicERO(RequestedVlanPipeE requestPipe, ScheduleSpecificationE requestSched) throws PCEException
+    public Map<String, List<TopoEdge>> computePalindromicERO(RequestedVlanPipeE requestPipe, ScheduleSpecificationE requestSched) throws PSSException, PCEException
     {
         Topology multiLayerTopo = new Topology();
         multiLayerTopo.getVertices().addAll(topoService.layer(Layer.ETHERNET).getVertices());

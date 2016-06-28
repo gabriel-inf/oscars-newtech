@@ -40,7 +40,4 @@ public class RequestedVlanPipeE {
     @NonNull
     private EthPipeType pipeType;
 
-    @NonNull
-    private Boolean eroPalindromic;
-
 }

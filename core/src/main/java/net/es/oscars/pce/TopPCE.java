@@ -4,6 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.topo.beans.TopoEdge;
+import net.es.oscars.topo.beans.TopoVertex;
+import net.es.oscars.topo.beans.Topology;
+import net.es.oscars.topo.enums.Layer;
 import net.es.oscars.topo.svc.TopoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -27,13 +30,6 @@ public class TopPCE {
     @Autowired
     private TranslationPCE transPCE;
 
-    @Autowired
-    private PalindromicalPCE palindromicalPCE;
-
-    @Autowired
-    private LacimordnilapPCE lacimordnilapPCE;
-
-
     public ReservedBlueprintE makeReserved(RequestedBlueprintE requested, ScheduleSpecificationE schedSpec) throws PCEException, PSSException {
 
         verifyRequested(requested);
@@ -51,8 +47,7 @@ public class TopPCE {
 
 
 
-        for (RequestedVlanFlowE req_f : requested.getVlanFlows())
-        {
+        for (RequestedVlanFlowE req_f : requested.getVlanFlows()) {
             ReservedVlanFlowE res_f = new ReservedVlanFlowE();
 
             List<RequestedVlanPipeE> pipes = new ArrayList<>();
@@ -66,7 +61,6 @@ public class TopPCE {
                 Collections.reverse(pipes);
                 eroMapsForFlow = handleRequestedPipes(pipes, schedSpec);
             }
-
             // If the EROs are still not valid for every pipe, return the blank Reserved Vlan Flow
             if(eroMapsForFlow.size() != pipes.size()){
                 reserved.getVlanFlows().add(res_f);
@@ -81,56 +75,21 @@ public class TopPCE {
 
     }
 
-    private Map<RequestedVlanPipeE, Map<String, List<TopoEdge>>> handleRequestedPipes(List<RequestedVlanPipeE> pipes, ScheduleSpecificationE sched)
-    {
-        Map<RequestedVlanPipeE, Map<String, List<TopoEdge>>> eroMapsPerFlow = new HashMap<>();
-
-        for(RequestedVlanPipeE pipe : pipes)
-        {
-            // Perform Pathfinding
-            Map<String, List<TopoEdge>> eroMap = null;
-
-            if(pipe.getEroPalindromic())
-            {
-                try
-                {
-                    eroMap = palindromicalPCE.computePalindromicERO(pipe, sched);       // A->Z ERO is palindrome of Z->A ERO
-                }
-                catch(PCEException e)
-                {
-                    log.error("PCE Unsuccessful", e);
-                }
-            }
-            else
-            {
-                try
-                {
-                    eroMap = lacimordnilapPCE.computeCimordnilapERO(pipe, sched);       // A->Z ERO is NOT palindrome of Z->A ERO
-                }
-                catch(PCEException e)
-                {
-                    log.error("PCE Unsuccessful", e);
-                }
-            }
-
-            if(verifyEros(eroMap))
-            {
+    private Map<RequestedVlanPipeE, Map<String, List<TopoEdge>>> handleRequestedPipes(List<RequestedVlanPipeE> pipes,
+                                                                   ScheduleSpecificationE sched){
+        Map<RequestedVlanPipeE,Map<String, List<TopoEdge>>> eroMapsPerFlow= new HashMap<>();
+        for(RequestedVlanPipeE pipe : pipes){
+            // Find the shortest path
+            Map<String, List<TopoEdge>> eroMap = new HashMap<>();
+            if(verifyEros(eroMap)){
                 eroMapsPerFlow.put(pipe, eroMap);
             }
         }
         return eroMapsPerFlow;
     }
 
-    private boolean verifyEros(Map<String, List<TopoEdge>> eroMap)
-    {
-        if(eroMap != null)
-        {
-            if (eroMap.size() == 2)
-            {
-                return eroMap.values().stream().allMatch(l -> l.size() > 0);
-            }
-        }
-        return false;
+    private boolean verifyEros(Map<String, List<TopoEdge>> eroMap){
+        return eroMap.values().stream().allMatch(l -> l.size() > 0);
     }
 
     public void verifyRequested(RequestedBlueprintE requested) throws PCEException {

@@ -48,7 +48,7 @@ public class LacimordnilapPCE
      * @throws PSSException
      * @throws PCEException
      */
-    public Map<String, List<TopoEdge>> computeCimordnilapERO(RequestedVlanPipeE requestPipe, ScheduleSpecificationE requestSched) throws PCEException
+    private Map<String, List<TopoEdge>> computeCimordnilapERO(RequestedVlanPipeE requestPipe, ScheduleSpecificationE requestSched) throws PSSException, PCEException
     {
 
         /* These calls only need to be made once when topology is updated */

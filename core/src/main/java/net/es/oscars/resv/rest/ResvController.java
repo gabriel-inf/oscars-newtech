@@ -196,7 +196,6 @@ public class ResvController {
                     .zaERO(new ArrayList<>())
                     .azMbps(bw)
                     .zaMbps(bw)
-                    .eroPalindromic(bvf.getEroPalindromic())
                     .pipeType(EthPipeType.REQUESTED)
                     .build();
 
