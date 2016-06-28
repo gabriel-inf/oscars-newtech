@@ -2,8 +2,6 @@ package net.es.oscars.pce;
 
 
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.dto.IntRange;
-import net.es.oscars.dto.pss.EthJunctionType;
 import net.es.oscars.pss.PCEAssistant;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.dao.ReservedBandwidthRepository;
@@ -48,16 +46,9 @@ public class TranslationPCE {
     private PruningService pruningService;
 
     public ReservedVlanFlowE makeReservedFlow(RequestedVlanFlowE req_f, ScheduleSpecificationE schedSpec,
+                                              Set<ReservedVlanJunctionE> rsvJunctions,
                                               Map<RequestedVlanPipeE, Map<String, List<TopoEdge>>> eroMapsPerPipe)
             throws PSSException, PCEException {
-        // Handle Single junctions
-        Set<ReservedVlanJunctionE> rsv_junctions = new HashSet<>();
-        for (RequestedVlanJunctionE bpJunction : req_f.getJunctions()) {
-            log.info("making a simple junction: "+bpJunction);
-            ReservedVlanJunctionE schJunction = this.reserveSimpleJunction(bpJunction, schedSpec);
-            rsv_junctions.add(schJunction);
-        }
-
         // Handle Creating Reserved Pipes
         Set<ReservedEthPipeE> rsv_pipes = new HashSet<>();
         // For each Requested Pipe, there is a Map containing the az and za list of edges that will together
@@ -66,10 +57,10 @@ public class TranslationPCE {
             Map<String, List<TopoEdge>> eroMap = eroMapsPerPipe.get(pipe);
             List<TopoEdge> azEros = eroMap.get("az");
             List<TopoEdge> zaEros = eroMap.get("za");
-            rsv_pipes.addAll(makeReservedPipes(pipe, azEros, zaEros, rsv_junctions, schedSpec));
+            rsv_pipes.addAll(makeReservedPipes(pipe, azEros, zaEros, rsvJunctions, schedSpec));
         }
 
-        return ReservedVlanFlowE.builder().junctions(rsv_junctions).pipes(rsv_pipes).build();
+        return ReservedVlanFlowE.builder().junctions(rsvJunctions).pipes(rsv_pipes).build();
     }
 
     /**
@@ -220,7 +211,7 @@ public class TranslationPCE {
     }
 
 
-    private ReservedVlanJunctionE reserveSimpleJunction(RequestedVlanJunctionE req_j, ScheduleSpecificationE sched) throws PCEException, PSSException {
+    public ReservedVlanJunctionE reserveSimpleJunction(RequestedVlanJunctionE req_j, ScheduleSpecificationE sched) throws PCEException, PSSException {
         String deviceUrn = req_j.getDeviceUrn().getUrn();
         Optional<UrnE> optUrn = urnRepository.findByUrn(deviceUrn);
         UrnE urn;
@@ -228,7 +219,8 @@ public class TranslationPCE {
             urn = optUrn.get();
         }
         else{
-            throw new PCEException("URN " + deviceUrn + " not found in URN Repository");
+            log.error("URN " + deviceUrn + " not found in URN Repository");
+            return null;
         }
 
         List<ReservedVlanE> rsvVlans = pruningService.getReservedVlans(sched.getNotBefore(), sched.getNotAfter());
@@ -251,7 +243,8 @@ public class TranslationPCE {
 
         Set<Integer> overlap = pruningService.addToOverlap(reservedVlanIds, reqVlanIds);
         if(overlap.isEmpty()){
-            throw new PCEException("Requested VLAN IDs " + reqVlanIds + " not available at " + fixOne.getPortUrn().toString());
+            log.error("Requested VLAN IDs " + reqVlanIds + " not available at " + fixOne.getPortUrn().toString());
+            return null;
         }
 
         Integer vlanId = overlap.iterator().next();
@@ -264,9 +257,10 @@ public class TranslationPCE {
                 reservedBwMap);
 
         if(availBwMap.get("Ingress") < fixOne.getInMbps() || availBwMap.get("Egress") < fixOne.getEgMbps()){
-            throw new PCEException("Insufficient Bandwidth at " + fixOne.getPortUrn().toString() + ". Requested: " +
-            fixOne.getInMbps() + " In and " + fixOne.getEgMbps() + " Out. Available: " + availBwMap.get("Ingress") +
+            log.error("Insufficient Bandwidth at " + fixOne.getPortUrn().toString() + ". Requested: " +
+                    fixOne.getInMbps() + " In and " + fixOne.getEgMbps() + " Out. Available: " + availBwMap.get("Ingress") +
                     " In and " + availBwMap.get("Egress") + " Out.");
+            return null;
         }
 
 

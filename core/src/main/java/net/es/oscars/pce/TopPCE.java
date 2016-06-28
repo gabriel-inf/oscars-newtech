@@ -54,6 +54,24 @@ public class TopPCE {
         for (RequestedVlanFlowE req_f : requested.getVlanFlows()) {
             ReservedVlanFlowE res_f = new ReservedVlanFlowE();
 
+            // Attempt to reserve simple junctions
+            Set<ReservedVlanJunctionE> junctions = new HashSet<>();
+            for(RequestedVlanJunctionE reqJunction : req_f.getJunctions()){
+                ReservedVlanJunctionE junction = transPCE.reserveSimpleJunction(reqJunction, schedSpec);
+                if(junction != null){
+                    junctions.add(junction);
+                }
+            }
+
+            // If not all junctions were able to be reserved, return the blank Reserved Vlan FLow
+            if(junctions.size() != req_f.getJunctions().size()){
+                reserved.getVlanFlows().add(res_f);
+            }
+            // Otherwise, add the reserved junctions to the current flow
+            else{
+                res_f.setJunctions(junctions);
+            }
+
             List<RequestedVlanPipeE> pipes = new ArrayList<>();
             pipes.addAll(req_f.getPipes());
 
@@ -72,13 +90,14 @@ public class TopPCE {
             }
             // All pipes were successfully found, translate the EROs into a ReservedVlanFlow
             else{
-                res_f = transPCE.makeReservedFlow(req_f, schedSpec, eroMapsForFlow);
+                res_f = transPCE.makeReservedFlow(req_f, schedSpec, res_f.getJunctions(), eroMapsForFlow);
                 reserved.getVlanFlows().add(res_f);
             }
         }
         return reserved;
 
     }
+
 
     private Map<RequestedVlanPipeE, Map<String, List<TopoEdge>>> handleRequestedPipes(List<RequestedVlanPipeE> pipes, ScheduleSpecificationE sched)
     {
