@@ -25,9 +25,6 @@ public class TopPCE {
     private PruningService pruningService;
 
     @Autowired
-    private EthPCE ethPCE;
-
-    @Autowired
     private Layer3PCE layer3PCE;
 
     @Autowired

@@ -32,9 +32,6 @@ public class TranslationPCE {
     private TopoService topoService;
 
     @Autowired
-    private BandwidthPCE bwPCE;
-
-    @Autowired
     private ReservedBandwidthRepository bwRepo;
 
     @Autowired
