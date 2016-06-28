@@ -6,6 +6,7 @@ import net.es.oscars.dto.pss.EthJunctionType;
 import net.es.oscars.dto.pss.EthPipeType;
 import net.es.oscars.dto.resv.ResourceType;
 import net.es.oscars.resv.ent.*;
+import net.es.oscars.topo.ent.ReservableBandwidthE;
 import net.es.oscars.topo.enums.Layer;
 import net.es.oscars.topo.beans.TopoEdge;
 import net.es.oscars.pce.TopoAssistant;
@@ -118,9 +119,10 @@ public class PCEAssistant {
     }
 
     public List<ReservedVlanJunctionE> makeEthernetJunctions(List<TopoEdge> edges,
-                                                              Integer azMbps, Integer zaMbps,
+                                                              Integer azMbps, Integer zaMbps, Integer vlanId,
                                                               Optional<ReservedVlanJunctionE> mergeA,
                                                               Optional<ReservedVlanJunctionE> mergeZ,
+                                                              ScheduleSpecificationE sched,
                                                               Map<String, UrnE> urnMap,
                                                               Map<String, DeviceModel> deviceModels)
             throws PSSException {
@@ -175,13 +177,12 @@ public class PCEAssistant {
 
             assert urn != null;
 
-            ReservedVlanFixtureE fx = ReservedVlanFixtureE.builder()
-                    .inMbps(azMbps)
-                    .egMbps(zaMbps)
-                    .fixtureType(fixtureType)
-                    .portUrn(urn)
-                    .vlanExpression("")
-                    .build();
+            // Create new Reserved Bandwidth
+            ReservedBandwidthE rsvBw = createReservedBandwidth(urn, azMbps, zaMbps, sched);
+
+            ReservedVlanE rsvVlan = createReservedVlan(urn, sched, vlanId);
+
+            ReservedVlanFixtureE fx = createReservedFixture(urn, new HashSet<>(), rsvVlan, rsvBw, fixtureType);
 
             ReservedVlanJunctionE copy = ReservedVlanJunctionE.copyFrom(mergeThis);
             copy.setJunctionType(decideJunctionType(model));
@@ -204,31 +205,42 @@ public class PCEAssistant {
             TopoEdge edgeTwo = edges.get(i + 1);
 
             // TODO: verify urns exist
-
-            UrnE urnA = urnMap.get(edges.get(0).getA().getUrn());
-            UrnE urnZ = urnMap.get(edges.get(0).getZ().getUrn());
+            String urnAPortString = edgeOne.getA().getUrn();
+            String urnDeviceString = edgeOne.getZ().getUrn();
+            String urnZPortString = edgeTwo.getZ().getUrn();
+            if(!urnMap.containsKey(urnAPortString) || !urnMap.containsKey(urnZPortString) || !urnMap.containsKey(urnDeviceString)){
+                    throw new PSSException("URNs " + urnAPortString + " and/or " + urnZPortString + " Not found in URN map");
+            }
+            UrnE urnPortA = urnMap.get(urnAPortString);
+            UrnE urnDevice = urnMap.get(urnDeviceString);
+            UrnE urnPortZ = urnMap.get(urnZPortString);
 
 
             DeviceModel model = deviceModels.get(edgeOne.getZ().getUrn());
+            EthFixtureType fixtureType = decideFixtureType(model);
 
-            ReservedVlanJunctionE newJunction = ReservedVlanJunctionE.builder()
-                    .junctionType(decideJunctionType(model))
-                    .fixtures(new HashSet<>())
-                    .build();
-            ReservedVlanFixtureE fOne = ReservedVlanFixtureE.builder()
-                    .inMbps(azMbps)
-                    .egMbps(zaMbps)
-                    .fixtureType(decideFixtureType(model))
-                    .portUrn(urnA)
-                    .vlanExpression("")
-                    .build();
-            ReservedVlanFixtureE fTwo = ReservedVlanFixtureE.builder()
-                    .inMbps(azMbps)
-                    .egMbps(zaMbps)
-                    .fixtureType(decideFixtureType(model))
-                    .portUrn(urnZ)
-                    .vlanExpression("")
-                    .build();
+            // Create new Reserved Bandwidth for URN A
+            ReservedBandwidthE rsvBwA = createReservedBandwidth(urnPortA, azMbps, zaMbps, sched);
+
+            // Create new Reserved Bandwidth for URN Z
+            ReservedBandwidthE rsvBwZ = createReservedBandwidth(urnPortZ, azMbps, zaMbps, sched);
+
+            // Create new Reserved VLAN for Urn A
+            ReservedVlanE rsvVlanA = createReservedVlan(urnPortA, sched, vlanId);
+
+            // Create new Reserved VLAN for Urn Z
+            ReservedVlanE rsvVlanZ = createReservedVlan(urnPortZ, sched, vlanId);
+
+            // Create junction for device
+            ReservedVlanJunctionE newJunction = createReservedJunction(urnDevice, new HashSet<>(), new HashSet<>(),
+                    decideJunctionType(model));
+
+            // For URN Port A
+            ReservedVlanFixtureE fOne = createReservedFixture(urnPortA, new HashSet<>(), rsvVlanA, rsvBwA, fixtureType);
+
+
+            // For URN Port Z
+            ReservedVlanFixtureE fTwo = createReservedFixture(urnPortZ, new HashSet<>(), rsvVlanZ, rsvBwZ, fixtureType);
 
             newJunction.getFixtures().add(fOne);
             newJunction.getFixtures().add(fTwo);
@@ -244,15 +256,19 @@ public class PCEAssistant {
             EthFixtureType fixtureType = decideFixtureType(model);
 
             // TODO: verify urns exist
-            UrnE urnZ = urnMap.get(edges.get(edges.size() - 1).getZ().getUrn());
+            String urnZString = edges.get(edges.size()-1).getZ().getUrn();
+            if(!urnMap.containsKey(urnZString)){
+                throw new PSSException(("URN Map does not contain: " + urnZString));
+            }
+            UrnE urnZ = urnMap.get(urnZString);
+            // Create new Reserved Bandwidth for URN Z
+            ReservedBandwidthE rsvBw = createReservedBandwidth(urnZ, azMbps, zaMbps, sched);
 
-            ReservedVlanFixtureE fx = ReservedVlanFixtureE.builder()
-                    .inMbps(azMbps)
-                    .egMbps(zaMbps)
-                    .fixtureType(fixtureType)
-                    .portUrn(urnZ)
-                    .vlanExpression("")
-                    .build();
+            // Create new Reserved VLAN for Urn Z
+            ReservedVlanE rsvVlan = createReservedVlan(urnZ, sched, vlanId);
+
+            // Create fixture for UrnZ
+            ReservedVlanFixtureE fx = createReservedFixture(urnZ, new HashSet<>(), rsvVlan, rsvBw, fixtureType);
 
             ReservedVlanJunctionE copy = ReservedVlanJunctionE.copyFrom(mergeThis);
             copy.setJunctionType(decideJunctionType(model));
@@ -267,12 +283,14 @@ public class PCEAssistant {
     }
 
     // TODO: support asymmetrical case; need to change method signature
-    public ReservedEthPipeE makeVplsPipe(List<TopoEdge> edges,
-                                         ReservedEthPipeE reqPipe,
+    public ReservedEthPipeE makeVplsPipe(List<TopoEdge> edges, List<TopoEdge> zaEdges,
+                                         Integer azMbps, Integer zaMbps,
+                                         Integer vlanId,
                                          Optional<ReservedVlanJunctionE> mergeA,
                                          Optional<ReservedVlanJunctionE> mergeZ,
                                          Map<String, UrnE> urnMap,
-                                         Map<String, DeviceModel> deviceModels) throws PSSException {
+                                         Map<String, DeviceModel> deviceModels,
+                                         ScheduleSpecificationE sched) throws PSSException {
         /*
         a few different cases to handle:
         if we need to merge either A or Z junction from the originally Reserved pipe, we just copy the junction over
@@ -298,7 +316,7 @@ public class PCEAssistant {
             UrnE portUrn = urnMap.get(aEdge.getA().getUrn());
             DeviceModel model = deviceUrn.getDeviceModel();
 
-            aJunction = makeEdgeJunction(deviceUrn, portUrn, model, azMbps, zaMbps);
+            aJunction = makeEdgeJunction(deviceUrn, portUrn, model, azMbps, zaMbps, vlanId, sched);
 
         }
         if (mergeZ.isPresent()) {
@@ -312,7 +330,7 @@ public class PCEAssistant {
             UrnE portUrn = urnMap.get(zEdge.getA().getUrn());
             DeviceModel model = deviceUrn.getDeviceModel();
 
-            zJunction = makeEdgeJunction(deviceUrn, portUrn, model, azMbps, zaMbps);
+            zJunction = makeEdgeJunction(deviceUrn, portUrn, model, azMbps, zaMbps, vlanId, sched);
 
         }
 
@@ -349,6 +367,8 @@ public class PCEAssistant {
         if (!mergeZ.isPresent()) {
             lastIdxExclusive = lastIdxExclusive - 1;
         }
+
+        //TODO: Update this to use asymmetrical paths
         List<TopoEdge> subList = edges.subList(firstIdx, lastIdxExclusive);
         List<String> azEro = TopoAssistant.makeEro(subList, false);
         List<String> zaEro = TopoAssistant.makeEro(subList, true);
@@ -356,12 +376,12 @@ public class PCEAssistant {
 
         DeviceModel aModel = deviceModels.get(aJunction.getDeviceUrn().getUrn());
         DeviceModel zModel = deviceModels.get(zJunction.getDeviceUrn().getUrn());
+        //TODO: Add Reserved Bandwidth?
         return ReservedEthPipeE.builder()
                 .pipeType(decidePipeType(aModel, zModel))
                 .aJunction(aJunction)
                 .zJunction(zJunction)
-                .azMbps(azMbps)
-                .zaMbps(zaMbps)
+                .reservedPssResources(new HashSet<>())
                 .azERO(azEro)
                 .zaERO(zaEro)
                 .build();
@@ -381,25 +401,66 @@ public class PCEAssistant {
         return result;
     }
 
-    private ReservedVlanJunctionE makeEdgeJunction(UrnE deviceUrn, UrnE portUrn, DeviceModel model, Integer azMbps, Integer zaMbps) throws PSSException {
+    private ReservedVlanJunctionE makeEdgeJunction(UrnE deviceUrn, UrnE portUrn, DeviceModel model, Integer azMbps,
+                                                   Integer zaMbps, Integer vlanId, ScheduleSpecificationE sched) throws PSSException {
         // TODO: verify urns exist / pass them in method
 
+        // Create new Reserved Bandwidth
+        ReservedBandwidthE rsvBw = createReservedBandwidth(portUrn, azMbps, zaMbps, sched);
 
+        ReservedVlanE rsvVlan = createReservedVlan(portUrn, sched, vlanId);
 
-        ReservedVlanJunctionE result = ReservedVlanJunctionE.builder()
-                .deviceUrn(deviceUrn)
-                .fixtures(new HashSet<>())
-                .junctionType(decideJunctionType(model))
-                .build();
-        ReservedVlanFixtureE fx = ReservedVlanFixtureE.builder()
-                .inMbps(azMbps)
-                .egMbps(zaMbps)
-                .fixtureType(decideFixtureType(model))
-                .portUrn(portUrn)
-                .vlanExpression("")
-                .build();
+        ReservedVlanJunctionE result = createReservedJunction(deviceUrn, new HashSet<>(), new HashSet<>(),
+                decideJunctionType(model));
+
+        ReservedVlanFixtureE fx = createReservedFixture(portUrn, new HashSet<>(), rsvVlan, rsvBw,
+                decideFixtureType(model));
+
         result.getFixtures().add(fx);
         return result;
+    }
+
+    public ReservedVlanJunctionE createReservedJunction(UrnE urn, Set<ReservedPssResourceE> pssResources,
+                                                         Set<ReservedVlanFixtureE> fixtures, EthJunctionType junctionType){
+        return ReservedVlanJunctionE.builder()
+                .deviceUrn(urn)
+                .reservedPssResources(pssResources)
+                .fixtures(fixtures)
+                .junctionType(junctionType)
+                .build();
+    }
+
+    public ReservedVlanFixtureE createReservedFixture(UrnE urn, Set<ReservedPssResourceE> pssResources,
+                                                       ReservedVlanE rsvVlan, ReservedBandwidthE rsvBw,
+                                                       EthFixtureType fixtureType){
+        return ReservedVlanFixtureE.builder()
+                .ifceUrn(urn)
+                .reservedPssResources(pssResources)
+                .reservedVlan(rsvVlan)
+                .reservedBandwidth(rsvBw)
+                .fixtureType(fixtureType)
+                .build();
+    }
+
+
+    public ReservedBandwidthE createReservedBandwidth(UrnE urn, Integer azMbps, Integer zaMbps, ScheduleSpecificationE sched){
+        return ReservedBandwidthE.builder()
+                .urn(urn)
+                .bandwidth(Math.max(azMbps, zaMbps))
+                .egBandwidth(azMbps)
+                .inBandwidth(zaMbps)
+                .beginning(sched.getNotBefore().toInstant())
+                .ending(sched.getNotAfter().toInstant())
+                .build();
+    }
+
+    public ReservedVlanE createReservedVlan(UrnE urn, ScheduleSpecificationE sched, Integer vlanId){
+        return ReservedVlanE.builder()
+                .urn(urn)
+                .vlan(vlanId)
+                .beginning(sched.getNotBefore().toInstant())
+                .ending(sched.getNotAfter().toInstant())
+                .build();
     }
 
     // TODO: fix this

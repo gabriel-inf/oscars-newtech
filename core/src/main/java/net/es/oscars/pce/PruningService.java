@@ -277,7 +277,7 @@ public class PruningService {
      * @param end - The end of the time range
      * @return A list of reserved VLAN IDs
      */
-    private List<ReservedVlanE> getReservedVlans(Date start, Date end){
+    public List<ReservedVlanE> getReservedVlans(Date start, Date end){
         //Get all Reserved VLan between start and end
         Optional<List<ReservedVlanE>> optResvVlan = resvVlanRepo.findOverlappingInterval(start.toInstant(), end.toInstant());
         return optResvVlan.isPresent() ? optResvVlan.get() : new ArrayList<>();
@@ -305,7 +305,7 @@ public class PruningService {
      * @param rsvVlanList - A list of all reserved VLAN IDs
      * @return A map of UrnE to ReservedVlanE objects
      */
-    private Map<UrnE, List<ReservedVlanE>> buildReservedVlanMap(List<ReservedVlanE> rsvVlanList) {
+    public Map<UrnE, List<ReservedVlanE>> buildReservedVlanMap(List<ReservedVlanE> rsvVlanList) {
 
         Map<UrnE, List<ReservedVlanE>> map = new HashMap<>();
         for(ReservedVlanE resv : rsvVlanList){
@@ -430,7 +430,7 @@ public class PruningService {
      * @param vlans - Requested VLAN ranges. Any VLAN ID within those ranges can be accepted.
      * @return The set of VLAN ids making up the input ranges.
      */
-    private Set<Integer> getIntegersFromRanges(List<IntRange> vlans){
+    public Set<Integer> getIntegersFromRanges(List<IntRange> vlans){
         return vlans
                 .stream()
                 .map(this::getSetOfNumbersInRange)
@@ -444,7 +444,7 @@ public class PruningService {
      * @param urnMap - Map of URN name to UrnE object.
      * @return A (possibly empty) set of VLAN tags that are available across every edge.
      */
-    private Map<Integer, Set<TopoEdge>> findEdgesPerVlanId(Set<TopoEdge> edges, Map<String, UrnE> urnMap,
+    public Map<Integer, Set<TopoEdge>> findEdgesPerVlanId(Set<TopoEdge> edges, Map<String, UrnE> urnMap,
                                                            Map<UrnE, List<ReservedVlanE>> resvVlanMap){
         // Overlap is used to track all VLAN tags that are available across every edge.
         Map<Integer, Set<TopoEdge>> edgesPerId = new HashMap<>();
@@ -495,7 +495,7 @@ public class PruningService {
      * @param resvVlanMap - A mapping representing the Reserved VLANs at a URN
      * @return Set of VLAN IDs that are both supported and not reserved at a URN
      */
-    private Set<Integer> getAvailableVlanIds(Map<String, UrnE> urnMap, String urn, List<IntRange> ranges,
+    public Set<Integer> getAvailableVlanIds(Map<String, UrnE> urnMap, String urn, List<IntRange> ranges,
                                              Map<UrnE, List<ReservedVlanE>> resvVlanMap) {
         // Get the supported reservable VLAN IDs
         Set<Integer> reservableVlanIds = getIntegersFromRanges(ranges);
@@ -528,7 +528,7 @@ public class PruningService {
      * @param matchingUrn - String representation of the desired URN.
      * @return - All IntRanges supported at the URN.
      */
-    private List<IntRange> getVlanRangesFromUrn(Map<String, UrnE> urnMap, String matchingUrn){
+    public List<IntRange> getVlanRangesFromUrn(Map<String, UrnE> urnMap, String matchingUrn){
         if(urnMap.get(matchingUrn) == null || urnMap.get(matchingUrn).getReservableVlans() == null)
             return new ArrayList<>();
         return urnMap.get(matchingUrn)
@@ -547,7 +547,7 @@ public class PruningService {
      * @param other - Another set of VLAN tags, to be overlapped with the current overlapping set.
      * @return The (possibly reduced) set of overlapping VLAN tags.
      */
-    private Set<Integer> addToOverlap(Set<Integer> overlap, Set<Integer> other){
+    public Set<Integer> addToOverlap(Set<Integer> overlap, Set<Integer> other){
         // If there are no ranges available, just return the current overlap set
         if(other.isEmpty()){
             return overlap;
@@ -567,7 +567,7 @@ public class PruningService {
      * @param aRange - The specified IntRange
      * @return The set of Integers contained within the range.
      */
-    private Set<Integer> getSetOfNumbersInRange(IntRange aRange) {
+    public Set<Integer> getSetOfNumbersInRange(IntRange aRange) {
         Set<Integer> numbers = new HashSet<>();
         for(Integer num = aRange.getFloor(); num <= aRange.getCeiling(); num++){
             numbers.add(num);
@@ -580,7 +580,7 @@ public class PruningService {
      * @param junction - The requested VLAN junction.
      * @return The set of VLAN tags (Integers) requested for fixtures at that junction.
      */
-    private List<IntRange> getVlansFromJunction(RequestedVlanJunctionE junction){
+    public List<IntRange> getVlansFromJunction(RequestedVlanJunctionE junction){
         // Stream through the junction's fixtures, map the requested VLAN expression to a set of Integers
         return junction.getFixtures().stream()
                 .map(RequestedVlanFixtureE::getVlanExpression)
@@ -594,7 +594,7 @@ public class PruningService {
      * @param vlans - Requested VLAN ranges. Any VLAN ID within those ranges can be accepted.
      * @return A list of IntRanges, each representing a range of VLAN ID values parsed from a string.
      */
-    private List<IntRange> getIntRangesFromString(String vlans){
+    public List<IntRange> getIntRangesFromString(String vlans){
         if(IntRangeParsing.isValidIntRangeInput(vlans)){
             try {
                 return IntRangeParsing.retrieveIntRanges(vlans);

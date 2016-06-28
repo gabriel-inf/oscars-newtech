@@ -2,6 +2,8 @@ package net.es.oscars.pce;
 
 
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.dto.IntRange;
+import net.es.oscars.dto.pss.EthJunctionType;
 import net.es.oscars.pss.PCEAssistant;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.dao.ReservedBandwidthRepository;
@@ -18,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -42,6 +45,9 @@ public class TranslationPCE {
 
     @Autowired
     private UrnRepository urnRepository;
+
+    @Autowired
+    private PruningService pruningService;
 
     public ReservedVlanFlowE makeReservedFlow(RequestedVlanFlowE req_f, ScheduleSpecificationE schedSpec,
                                               Map<RequestedVlanPipeE, Map<String, List<TopoEdge>>> eroMapsForFlow) throws PSSException, PCEException {
@@ -83,7 +89,7 @@ public class TranslationPCE {
         // now, decompose the path
         List<Map<Layer, List<TopoEdge>>> azSegments = PCEAssistant.decompose(azERO, deviceModels);
         List<Map<Layer, List<TopoEdge>>> zaSegments = PCEAssistant.decompose(zaERO, deviceModels);
-
+        assert(azSegments.size() == zaSegments.size());
 
         Map<String , UrnE> urnMap = new HashMap<>();
 
@@ -92,59 +98,123 @@ public class TranslationPCE {
 
         });
 
+
+        List<Integer> vlanIdPerSegment = selectVlanIds(urnMap, reqPipe, sched, azSegments);
+
         // for each segment:
         // if it is an Ethernet segment, make junctions, one per device
         // if it is an MPLS segment, make a pipe
         // all the while, make sure to merge in the current first and last junctions as needed
 
-        for (int i = 0; i < segments.size(); i++) {
-            Map<Layer, List<TopoEdge>> segment = segments.get(i);
-            Optional<RequestedVlanJunctionE> mergeA = Optional.empty();
-            Optional<RequestedVlanJunctionE> mergeZ = Optional.empty();
+        for (int i = 0; i < azSegments.size(); i++) {
+            // Get az segment and za segment
+            Map<Layer, List<TopoEdge>> azSegment = azSegments.get(i);
+            Map<Layer, List<TopoEdge>> zaSegment = zaSegments.get(i);
+
+            // Get Chosen VLAN ID for segment
+            Integer vlanId = vlanIdPerSegment.get(0);
+
+            // Create mergeA and MergeZ for AZ segment
+            Optional<ReservedVlanJunctionE> mergeA = Optional.empty();
+            Optional<ReservedVlanJunctionE> mergeZ = Optional.empty();
             if (i == 0) {
-                mergeA = Optional.of(reqPipe.getAJunction());
+                UrnE urn = reqPipe.getAJunction().getDeviceUrn();
+
+                mergeA = Optional.of(pceAssistant.createReservedJunction(urn, new HashSet<>(), new HashSet<>()
+                        , EthJunctionType.UNKNOWN));
             }
-            if (i == segments.size() - 1) {
-                mergeZ = Optional.of(reqPipe.getZJunction());
+            if (i == azSegments.size() - 1) {
+                UrnE urn = reqPipe.getZJunction().getDeviceUrn();
+                mergeZ = Optional.of(pceAssistant.createReservedJunction(urn, new HashSet<>(), new HashSet<>()
+                        , EthJunctionType.UNKNOWN));
             }
 
-            List<TopoEdge> edges;
 
-            if (segment.size() != 1) {
+            List<TopoEdge> azEdges;
+            List<TopoEdge> zaEdges;
+
+            if (azSegment.size() != 1) {
                 throw new PCEException("invalid segmentation");
             }
-            if (segment.containsKey(Layer.ETHERNET)) {
-                if (segment.get(Layer.ETHERNET).size() != 3) {
+            if (azSegment.containsKey(Layer.ETHERNET)) {
+                if (azSegment.get(Layer.ETHERNET).size() != 3) {
                     throw new PCEException("invalid segmentation");
                 }
 
-                edges = segment.get(Layer.ETHERNET);
+                azEdges = azSegment.get(Layer.ETHERNET);
+                zaEdges = zaSegment.get(Layer.ETHERNET);
 
                 // an ethernet segment: a list of junctions, one per device
 
                 // TODO: do something with these junctions!
-                List<RequestedVlanJunctionE> vjs = pceAssistant.makeEthernetJunctions(edges,
-                        reqPipe.getAzMbps(), reqPipe.getZaMbps(),
+                List<ReservedVlanJunctionE> azVjs = pceAssistant.makeEthernetJunctions(azEdges,
+                        reqPipe.getAzMbps(), reqPipe.getZaMbps(), vlanId,
                         mergeA, mergeZ,
+                        sched,
+                        urnMap,
+                        deviceModels);
+                List<ReservedVlanJunctionE> zaVjs = pceAssistant.makeEthernetJunctions(zaEdges,
+                        reqPipe.getAzMbps(), reqPipe.getZaMbps(), vlanId,
+                        mergeA, mergeZ,
+                        sched,
                         urnMap,
                         deviceModels);
 
-
-            } else if (segment.containsKey(Layer.MPLS)) {
-                edges = segment.get(Layer.MPLS);
+            } else if (azSegment.containsKey(Layer.MPLS)) {
+                azEdges = azSegment.get(Layer.MPLS);
+                zaEdges = zaSegment.get(Layer.MPLS);
                 // TODO: do something with this pipe!
-                RequestedVlanPipeE pipe = pceAssistant.makeVplsPipe(edges, reqPipe.getAzMbps(), reqPipe.getZaMbps(), mergeA, mergeZ, urnMap, deviceModels);
+                ReservedEthPipeE pipe = pceAssistant.makeVplsPipe(azEdges, zaEdges, reqPipe.getAzMbps(),
+                        reqPipe.getZaMbps(), vlanId, mergeA, mergeZ, urnMap, deviceModels, sched);
                 pipes.add(pipe);
             } else {
                 throw new PCEException("invalid segmentation");
             }
         }
+        return pipes;
+    }
 
-        // TODO: decide VLANs and reserve them
-        // TODO: collect needed resources from pceAssistant
+    private List<Integer> selectVlanIds(Map<String, UrnE> urnMap,
+                                                   RequestedVlanPipeE reqPipe, ScheduleSpecificationE sched,
+                                                   List<Map<Layer, List<TopoEdge>>> segments) {
+        List<Integer> vlanIdPerSegment = new ArrayList<>();
 
+        List<ReservedVlanE> rsvVlans = pruningService.getReservedVlans(sched.getNotBefore(), sched.getNotAfter());
+        Map<UrnE, List<ReservedVlanE>> rsvVlanMap = pruningService.buildReservedVlanMap(rsvVlans);
 
+        String vlanExpression = reqPipe.getAJunction().getFixtures().iterator().next().getVlanExpression();
+        Set<Integer> requestedVlanIds = pruningService
+                .getIntegersFromRanges(pruningService.getIntRangesFromString(vlanExpression));
 
+        List<Set<Integer>> validIdsPerSegment = new ArrayList<>();
+        for(Map<Layer, List<TopoEdge>> segment: segments){
+            if(segment.containsKey(Layer.ETHERNET)){
+                List<TopoEdge> segmentEdges = segment.get(Layer.ETHERNET);
+                Map<Integer, Set<TopoEdge>> edgesPerVlanId = pruningService
+                        .findEdgesPerVlanId(new HashSet<>(segmentEdges), urnMap, rsvVlanMap);
+                validIdsPerSegment.add(new HashSet<>());
+                for(Integer id : edgesPerVlanId.keySet()){
+                    Set<TopoEdge> edgesForId = edgesPerVlanId.get(id);
+                    if(edgesForId.size() == segmentEdges.size()){
+                        if(requestedVlanIds.contains(id) || requestedVlanIds.isEmpty()){
+                            validIdsPerSegment.get(validIdsPerSegment.size()-1).add(id);
+                        }
+                    }
+                }
+            }
+        }
+
+        //TODO: VLAN Translation
+        //For now: Just use same VLAN ID on all segments
+        Set<Integer> overlappingVlanIds = new HashSet<>();
+        for(Set<Integer> validIds : validIdsPerSegment){
+            overlappingVlanIds = pruningService.addToOverlap(overlappingVlanIds, validIds);
+        }
+        assert(!overlappingVlanIds.isEmpty());
+        for(Integer i = 0; i < segments.size(); i++){
+            vlanIdPerSegment.add(overlappingVlanIds.iterator().next());
+        }
+        return vlanIdPerSegment;
     }
 
 
