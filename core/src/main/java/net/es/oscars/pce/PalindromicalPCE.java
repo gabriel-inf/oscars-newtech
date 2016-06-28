@@ -1,5 +1,6 @@
 package net.es.oscars.pce;
 
+import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.ent.RequestedVlanPipeE;
 import net.es.oscars.resv.ent.ScheduleSpecificationE;
@@ -12,12 +13,15 @@ import net.es.oscars.topo.enums.Layer;
 import net.es.oscars.topo.enums.VertexType;
 import net.es.oscars.topo.svc.TopoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
 
 /**
  * Created by jeremy on 6/22/16.
  */
+@Slf4j
+@Component
 public class PalindromicalPCE
 {
     @Autowired
@@ -29,16 +33,12 @@ public class PalindromicalPCE
     @Autowired
     private DijkstraPCE dijkstraPCE;
 
-    @Autowired
-    private UrnAdjcyRepository adjcyRepo;
-
     /**
      * Depends on DijkstraPCE to construct the Physical-Layer EROs for a request
      *
      * @param requestPipe Requested pipe with required reservation parameters
      * @param requestSched Requested schedule parameters
      * @return A two-element Map containing both the forward-direction (A->Z) ERO and the reverse-direction (Z->A) ERO
-     * @throws PSSException
      * @throws PCEException
      */
     public Map<String, List<TopoEdge>> computePalindromicERO(RequestedVlanPipeE requestPipe, ScheduleSpecificationE requestSched) throws PSSException, PCEException

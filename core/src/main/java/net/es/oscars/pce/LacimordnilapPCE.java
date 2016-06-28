@@ -1,5 +1,6 @@
 package net.es.oscars.pce;
 
+import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.ent.RequestedVlanPipeE;
 import net.es.oscars.resv.ent.ScheduleSpecificationE;
@@ -13,6 +14,7 @@ import net.es.oscars.topo.ent.UrnE;
 import net.es.oscars.topo.enums.*;
 import net.es.oscars.topo.svc.TopoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -20,6 +22,8 @@ import java.util.stream.Collectors;
 /**
  * Created by jeremy on 6/22/16.
  */
+@Slf4j
+@Component
 public class LacimordnilapPCE
 {
     @Autowired
@@ -33,8 +37,6 @@ public class LacimordnilapPCE
 
     @Autowired
     private UrnRepository urnRepo;
-    @Autowired
-    private UrnAdjcyRepository adjcyRepo;
 
     @Autowired
     private ServiceLayerTopology serviceLayerTopology;
@@ -45,7 +47,6 @@ public class LacimordnilapPCE
      * @param requestPipe Requested pipe with required reservation parameters
      * @param requestSched Requested schedule parameters
      * @return A two-element Map containing both the forward-direction (A->Z) ERO and the reverse-direction (Z->A) ERO
-     * @throws PSSException
      * @throws PCEException
      */
     private Map<String, List<TopoEdge>> computeCimordnilapERO(RequestedVlanPipeE requestPipe, ScheduleSpecificationE requestSched) throws PSSException, PCEException
