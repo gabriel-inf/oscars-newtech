@@ -154,6 +154,37 @@ public class ReserveTopoTest {
         urnMap.put("alpha:0/1/0", alpha_0_1_0);
         urnMap.put("alpha:1/1/1", alpha_1_1_1);
 
+        UrnE bravo = UrnE.builder()
+                .deviceModel(DeviceModel.JUNIPER_EX)
+                .capabilities(new HashSet<>())
+                .deviceType(DeviceType.SWITCH)
+                .urnType(UrnType.DEVICE)
+                .urn("bravo")
+                .valid(true)
+                .build();
+        alpha.getCapabilities().add(Layer.ETHERNET);
+
+
+        UrnE bravo_1_1_1 = UrnE.builder()
+                .capabilities(new HashSet<>())
+                .urnType(UrnType.IFCE)
+                .urn("bravo:1/1/1")
+                .valid(true)
+                .build();
+        alpha_0_1_0.getCapabilities().add(Layer.ETHERNET);
+
+        UrnE bravo_2_1_1 = UrnE.builder()
+                .capabilities(new HashSet<>())
+                .urnType(UrnType.IFCE)
+                .urn("bravo:2/1/1")
+                .valid(true)
+                .build();
+        alpha_1_1_1.getCapabilities().add(Layer.ETHERNET);
+
+        urnMap.put("bravo", bravo);
+        urnMap.put("bravo:1/1/1", bravo_1_1_1);
+        urnMap.put("bravo:2/1/1", bravo_2_1_1);
+
 
         PCEAssistant asst = new PCEAssistant();
 
@@ -178,10 +209,6 @@ public class ReserveTopoTest {
                         sched, urnMap, deviceModels);
 
         assert ethJunctions.size() == 1;
-
-        // TODO: need to continue populating the URN map and whatnot
-        // disabling the rest of the test for now
-        if (1 ==1) return;
 
         ReservedVlanJunctionE vj = ethJunctions.get(0);
         assert vj.getDeviceUrn().getUrn().equals("alpha");
