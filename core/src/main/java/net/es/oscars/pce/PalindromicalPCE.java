@@ -41,7 +41,7 @@ public class PalindromicalPCE
      * @return A two-element Map containing both the forward-direction (A->Z) ERO and the reverse-direction (Z->A) ERO
      * @throws PCEException
      */
-    public Map<String, List<TopoEdge>> computePalindromicERO(RequestedVlanPipeE requestPipe, ScheduleSpecificationE requestSched) throws PSSException, PCEException
+    public Map<String, List<TopoEdge>> computePalindromicERO(RequestedVlanPipeE requestPipe, ScheduleSpecificationE requestSched) throws PCEException
     {
         Topology multiLayerTopo = new Topology();
         multiLayerTopo.getVertices().addAll(topoService.layer(Layer.ETHERNET).getVertices());
