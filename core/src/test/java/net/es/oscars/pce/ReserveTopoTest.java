@@ -6,16 +6,13 @@ import net.es.oscars.dto.pss.EthFixtureType;
 import net.es.oscars.dto.pss.EthJunctionType;
 import net.es.oscars.dto.pss.EthPipeType;
 import net.es.oscars.dto.resv.ResourceType;
+import net.es.oscars.resv.ent.*;
 import net.es.oscars.topo.enums.Layer;
 import net.es.oscars.topo.beans.TopoEdge;
 import net.es.oscars.topo.beans.TopoVertex;
 import net.es.oscars.helpers.IntRangeParsing;
 import net.es.oscars.pss.PCEAssistant;
 import net.es.oscars.pss.PSSException;
-import net.es.oscars.resv.ent.ReservedPssResourceE;
-import net.es.oscars.resv.ent.RequestedVlanFixtureE;
-import net.es.oscars.resv.ent.RequestedVlanJunctionE;
-import net.es.oscars.resv.ent.RequestedVlanPipeE;
 import net.es.oscars.topo.ent.UrnE;
 import net.es.oscars.topo.enums.DeviceModel;
 import net.es.oscars.topo.enums.DeviceType;
@@ -75,6 +72,14 @@ public class ReserveTopoTest {
         deviceModels.put("bravo", DeviceModel.JUNIPER_MX);
         deviceModels.put("charlie", DeviceModel.JUNIPER_MX);
         deviceModels.put("delta", DeviceModel.JUNIPER_MX);
+
+        ScheduleSpecificationE sched = ScheduleSpecificationE.builder()
+                .notBefore(Date.from(Instant.now()))
+                .notAfter(Date.from(Instant.now().plusSeconds(300)))
+                .durationMinutes(5L)
+                .build();
+
+
         List<Map<Layer, List<TopoEdge>>> segments = PCEAssistant.decompose(edges, deviceModels);
         log.info(segments.toString());
 
@@ -150,30 +155,27 @@ public class ReserveTopoTest {
         urnMap.put("alpha:1/1/1", alpha_1_1_1);
 
 
-        List<TopoEdge> ethSegment = segments.get(0).get(Layer.ETHERNET);
-        RequestedVlanJunctionE aJunction = RequestedVlanJunctionE.builder()
-                .junctionType(EthJunctionType.REQUESTED)
-                .deviceUrn(alpha)
-                .fixtures(new HashSet<>())
-                .build();
-
-        RequestedVlanFixtureE aFixture = RequestedVlanFixtureE.builder()
-                .inMbps(10)
-                .egMbps(10)
-                .fixtureType(EthFixtureType.REQUESTED)
-                .portUrn(alpha_0_1_0)
-                .vlanExpression("")
-                .build();
-        aJunction.getFixtures().add(aFixture);
-
         PCEAssistant asst = new PCEAssistant();
 
-        List<RequestedVlanJunctionE> ethJunctions = asst
-                .makeEthernetJunctions(ethSegment, 10, 10,
+        List<TopoEdge> ethSegment = segments.get(0).get(Layer.ETHERNET);
+        ReservedVlanJunctionE aJunction = asst.createReservedJunction(alpha, new HashSet<>(), new HashSet<>(),
+                asst.decideJunctionType(deviceModels.get("alpha")));
+
+
+        ReservedBandwidthE rsvBw = asst.createReservedBandwidth(alpha_0_1_0, 10, 10, sched);
+        ReservedVlanE rsvVlan = asst.createReservedVlan(alpha_0_1_0, sched, 10);
+
+
+        ReservedVlanFixtureE aFixture = asst.createReservedFixture(alpha_0_1_0, new HashSet<>(), rsvVlan, rsvBw,
+                asst.decideFixtureType(deviceModels.get("alpha")));
+
+        aJunction.getFixtures().add(aFixture);
+
+
+        List<ReservedVlanJunctionE> ethJunctions = asst
+                .makeEthernetJunctions(ethSegment, 10, 10, 10,
                         Optional.of(aJunction), Optional.empty(),
-                        urnMap, deviceModels);
-
-
+                        sched, urnMap, deviceModels);
 
         assert ethJunctions.size() == 1;
 
@@ -181,14 +183,14 @@ public class ReserveTopoTest {
         // disabling the rest of the test for now
         if (1 ==1) return;
 
-        RequestedVlanJunctionE vj = ethJunctions.get(0);
+        ReservedVlanJunctionE vj = ethJunctions.get(0);
         assert vj.getDeviceUrn().getUrn().equals("alpha");
         assert vj.getJunctionType().equals(EthJunctionType.JUNOS_SWITCH);
-        Set<RequestedVlanFixtureE> fixtures = vj.getFixtures();
+        Set<ReservedVlanFixtureE> fixtures = vj.getFixtures();
         assert fixtures.size() == 2;
 
-        for (RequestedVlanFixtureE fx : fixtures) {
-            assert fx.getPortUrn().getUrn().equals("alpha:1/1/1") || fx.getPortUrn().getUrn().equals("alpha:0/1/0");
+        for (ReservedVlanFixtureE fx : fixtures) {
+            assert fx.getIfceUrn().getUrn().equals("alpha:1/1/1") || fx.getIfceUrn().getUrn().equals("alpha:0/1/0");
             assert fx.getFixtureType().equals(EthFixtureType.JUNOS_IFCE);
         }
 
@@ -218,22 +220,16 @@ public class ReserveTopoTest {
         urnMap.put("delta:0/1/0", delta_0_1_0);
 
 
-        RequestedVlanJunctionE zJunction = RequestedVlanJunctionE.builder()
-                .junctionType(EthJunctionType.REQUESTED)
-                .deviceUrn(delta)
-                .fixtures(new HashSet<>())
-                .build();
+        ReservedVlanJunctionE zJunction = asst.createReservedJunction(delta, new HashSet<>(), new HashSet<>(),
+                asst.decideJunctionType(deviceModels.get("delta")));
 
-        RequestedVlanFixtureE zFixture = RequestedVlanFixtureE.builder()
-                .inMbps(10)
-                .egMbps(10)
-                .fixtureType(EthFixtureType.REQUESTED)
-                .portUrn(delta_0_1_0)
-                .vlanExpression("")
-                .build();
+
+        ReservedVlanFixtureE zFixture = asst.createReservedFixture(delta_0_1_0, new HashSet<>(), rsvVlan, rsvBw,
+                asst.decideFixtureType(deviceModels.get("delta")));
         zJunction.getFixtures().add(zFixture);
 
-        RequestedVlanPipeE vp = asst.makeVplsPipe(mplsSegment, 10, 10, Optional.empty(), Optional.of(zJunction), urnMap, deviceModels);
+        ReservedEthPipeE vp = asst.makeVplsPipe(mplsSegment, mplsSegment, 10, 10, 10, Optional.empty(),
+                Optional.of(zJunction), urnMap, deviceModels, sched);
         List<String> azEro = vp.getAzERO();
         List<String> zaEro = vp.getZaERO();
         log.info(azEro.toString());
@@ -252,14 +248,14 @@ public class ReserveTopoTest {
         assert vp.getAJunction().getDeviceUrn().getUrn().equals("bravo");
 
         assert vp.getAJunction().getFixtures().size() == 1;
-        RequestedVlanFixtureE fx = vp.getAJunction().getFixtures().iterator().next();
-        assert fx.getPortUrn().getUrn().equals("bravo:1/1/1");
+        ReservedVlanFixtureE fx = vp.getAJunction().getFixtures().iterator().next();
+        assert fx.getIfceUrn().getUrn().equals("bravo:1/1/1");
         assert fx.getFixtureType().equals(EthFixtureType.JUNOS_IFCE);
 
 
         assert vp.getZJunction().getFixtures().size() == 1;
         fx = vp.getZJunction().getFixtures().iterator().next();
-        assert fx.getPortUrn().getUrn().equals("delta:0/1/0");
+        assert fx.getIfceUrn().getUrn().equals("delta:0/1/0");
         assert fx.getFixtureType().equals(EthFixtureType.JUNOS_IFCE);
 
     }
