@@ -265,7 +265,7 @@ public class PruningService {
      * @param end - The end of the time range
      * @return A list of reserved bandwidth
      */
-    private List<ReservedBandwidthE> getReservedBandwidth(Date start, Date end){
+    public List<ReservedBandwidthE> getReservedBandwidth(Date start, Date end){
         // Get all Reserved Bandwidth between start and end
         Optional<List<ReservedBandwidthE>> optResvBw = resvBwRepo.findOverlappingInterval(start.toInstant(), end.toInstant());
         return optResvBw.isPresent() ? optResvBw.get() : new ArrayList<>();
@@ -288,7 +288,7 @@ public class PruningService {
      * @param rsvBwList A list of all bandwidth reserved.
      * @return A map of UrnE to ReservedBandwidthE objects
      */
-    private Map<UrnE, List<ReservedBandwidthE>> buildReservedBandwidthMap(List<ReservedBandwidthE> rsvBwList) {
+    public Map<UrnE, List<ReservedBandwidthE>> buildReservedBandwidthMap(List<ReservedBandwidthE> rsvBwList) {
         Map<UrnE, List<ReservedBandwidthE>> map = new HashMap<>();
         for(ReservedBandwidthE resv : rsvBwList){
             UrnE resvUrn = resv.getUrn();
@@ -370,7 +370,7 @@ public class PruningService {
      * @param resvBwMap - A Mapping from a URN to a list of Reserved Bandwidths at that URN.
      * @return A map containing the net available ingress/egress bandwidth at a URN
      */
-    private Map<String,Integer> getBwAvailabilityForUrn(UrnE urn, ReservableBandwidthE bandwidth, Map<UrnE, List<ReservedBandwidthE>> resvBwMap) {
+    public Map<String,Integer> getBwAvailabilityForUrn(UrnE urn, ReservableBandwidthE bandwidth, Map<UrnE, List<ReservedBandwidthE>> resvBwMap) {
         Map<String, Integer> availBw = new HashMap<>();
         availBw.put("Ingress", bandwidth.getIngressBw());
         availBw.put("Egress", bandwidth.getEgressBw());

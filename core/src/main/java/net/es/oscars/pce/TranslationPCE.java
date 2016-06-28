@@ -12,6 +12,7 @@ import net.es.oscars.resv.dao.ReservedVlanRepository;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.topo.beans.TopoEdge;
 import net.es.oscars.topo.dao.UrnRepository;
+import net.es.oscars.topo.ent.ReservableBandwidthE;
 import net.es.oscars.topo.ent.UrnE;
 import net.es.oscars.topo.enums.DeviceModel;
 import net.es.oscars.topo.enums.Layer;
@@ -237,10 +238,9 @@ public class TranslationPCE {
                 pceAssistant.decideJunctionType(urn.getDeviceModel()));
 
 
-        // Create Reserved Fixtures
         Set<RequestedVlanFixtureE> reqFixtures = req_j.getFixtures();
 
-        // Select a VLAN for these fixtures
+        // Select a VLAN for the reserved fixtures
         String vlanExpression = reqFixtures.iterator().next().getVlanExpression();
         Set<Integer> reqVlanIds = pruningService.getIntegersFromRanges(
                 pruningService.getIntRangesFromString(vlanExpression));
@@ -256,11 +256,23 @@ public class TranslationPCE {
 
         Integer vlanId = overlap.iterator().next();
 
+        // Confirm that there is sufficient available bandwidth
+        ReservableBandwidthE reservableBw = fixOne.getPortUrn().getReservableBandwidth();
+        Map<UrnE, List<ReservedBandwidthE>> reservedBwMap = pruningService.buildReservedBandwidthMap(
+                pruningService.getReservedBandwidth(sched.getNotBefore(), sched.getNotAfter()));
+        Map<String, Integer> availBwMap = pruningService.getBwAvailabilityForUrn(fixOne.getPortUrn(), reservableBw,
+                reservedBwMap);
+
+        if(availBwMap.get("Ingress") < fixOne.getInMbps() || availBwMap.get("Egress") < fixOne.getEgMbps()){
+            throw new PCEException("Insufficient Bandwidth at " + fixOne.getPortUrn().toString() + ". Requested: " +
+            fixOne.getInMbps() + " In and " + fixOne.getEgMbps() + " Out. Available: " + availBwMap.get("Ingress") +
+                    " In and " + availBwMap.get("Egress") + " Out.");
+        }
+
+
         for(RequestedVlanFixtureE reqFix : reqFixtures){
             ReservedBandwidthE rsvBw = pceAssistant.createReservedBandwidth(reqFix.getPortUrn(), reqFix.getInMbps(),
                     reqFix.getEgMbps(), sched);
-
-
 
             ReservedVlanE rsvVlan = pceAssistant.createReservedVlan(reqFix.getPortUrn(), vlanId, sched);
 
