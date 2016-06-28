@@ -143,15 +143,8 @@ public class TranslationPCE {
                         sched,
                         urnMap,
                         deviceModels);
-                List<ReservedVlanJunctionE> zaVjs = pceAssistant.makeEthernetJunctions(zaEdges,
-                        reqPipe.getAzMbps(), reqPipe.getZaMbps(), vlanId,
-                        mergeA, mergeZ,
-                        sched,
-                        urnMap,
-                        deviceModels);
 
                 junctions.addAll(azVjs);
-                junctions.addAll(zaVjs);
 
             } else if (azSegment.containsKey(Layer.MPLS)) {
                 azEdges = azSegment.get(Layer.MPLS);

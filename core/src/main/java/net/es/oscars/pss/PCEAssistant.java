@@ -374,12 +374,15 @@ public class PCEAssistant {
         DeviceModel aModel = deviceModels.get(aJunction.getDeviceUrn().getUrn());
         DeviceModel zModel = deviceModels.get(zJunction.getDeviceUrn().getUrn());
 
-        //TODO: Add Reserved Bandwidth?
+        // Create Reserved Bandwidth
+        // NOTE: Has null urn (for now)
+        ReservedBandwidthE rsvBw = createReservedBandwidth(null, azMbps, zaMbps, sched);
         return ReservedEthPipeE.builder()
                 .pipeType(decidePipeType(aModel, zModel))
                 .aJunction(aJunction)
                 .zJunction(zJunction)
                 .reservedPssResources(new HashSet<>())
+                .reservedBandwidth(rsvBw)
                 .azERO(azEro)
                 .zaERO(zaEro)
                 .build();
