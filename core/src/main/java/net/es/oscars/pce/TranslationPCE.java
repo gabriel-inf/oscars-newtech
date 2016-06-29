@@ -204,7 +204,7 @@ public class TranslationPCE {
     }
 
 
-    public ReservedVlanJunctionE reserveSimpleJunction(RequestedVlanJunctionE req_j, ScheduleSpecificationE sched) throws PCEException, PSSException {
+    public ReservedVlanJunctionE reserveSimpleJunction(RequestedVlanJunctionE req_j, ScheduleSpecificationE sched, Set<ReservedVlanJunctionE> simpleJunctions) throws PCEException, PSSException {
         String deviceUrn = req_j.getDeviceUrn().getUrn();
         Optional<UrnE> optUrn = urnRepository.findByUrn(deviceUrn);
         UrnE urn;
@@ -273,4 +273,6 @@ public class TranslationPCE {
     }
 
 
+    public void reserveRequestedPipe(RequestedVlanPipeE pipe, ScheduleSpecificationE schedSpec, Set<ReservedVlanJunctionE> simpleJunctions, Set<ReservedEthPipeE> reservedPipes, Set<ReservedVlanJunctionE> reservedEthJunctions) {
+    }
 }

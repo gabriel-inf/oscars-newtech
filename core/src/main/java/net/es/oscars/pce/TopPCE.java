@@ -55,42 +55,51 @@ public class TopPCE {
             ReservedVlanFlowE res_f = new ReservedVlanFlowE();
 
             // Attempt to reserve simple junctions
-            Set<ReservedVlanJunctionE> junctions = new HashSet<>();
+            Set<ReservedVlanJunctionE> simpleJunctions = new HashSet<>();
             for(RequestedVlanJunctionE reqJunction : req_f.getJunctions()){
-                ReservedVlanJunctionE junction = transPCE.reserveSimpleJunction(reqJunction, schedSpec);
+                ReservedVlanJunctionE junction = transPCE.reserveSimpleJunction(reqJunction, schedSpec, simpleJunctions);
                 if(junction != null){
-                    junctions.add(junction);
+                    simpleJunctions.add(junction);
                 }
             }
 
             // If not all junctions were able to be reserved, return the blank Reserved Vlan FLow
-            if(junctions.size() != req_f.getJunctions().size()){
+            if(simpleJunctions.size() != req_f.getJunctions().size()){
                 reserved.getVlanFlows().add(res_f);
-            }
-            // Otherwise, add the reserved junctions to the current flow
-            else{
-                res_f.setJunctions(junctions);
             }
 
             List<RequestedVlanPipeE> pipes = new ArrayList<>();
             pipes.addAll(req_f.getPipes());
 
-            // Attempt to find the az / za paths for the flow
-            Map<RequestedVlanPipeE, Map<String, List<TopoEdge>>> eroMapsForFlow = handleRequestedPipes(pipes, schedSpec);
+            // Create temporary storage for reserved pipes and junctions
+            Set<ReservedEthPipeE> reservedPipes = new HashSet<>();
+            Set<ReservedVlanJunctionE> reservedEthJunctions = new HashSet<>();
 
-            // If the EROs are not valid for every pipe, try reversing the order pipes are attempted
-            if(eroMapsForFlow.size() != pipes.size()){
+            // Keep track of the number of successfully reserved pipes
+            Integer numReserved = 0;
+
+            // Attempt to reserve all requested pipes
+            handleRequestedPipes(pipes, schedSpec, simpleJunctions, reservedPipes, reservedEthJunctions, numReserved);
+
+            // If pipes were not able to be reserved in the original order, try reversing the order pipes are attempted
+            if(numReserved != pipes.size()){
                 Collections.reverse(pipes);
-                eroMapsForFlow = handleRequestedPipes(pipes, schedSpec);
+                numReserved = 0;
+                reservedPipes = new HashSet<>();
+                reservedEthJunctions = new HashSet<>();
+                handleRequestedPipes(pipes, schedSpec, simpleJunctions, reservedPipes, reservedEthJunctions, numReserved);
             }
 
-            // If the EROs are still not valid for every pipe, return the blank Reserved Vlan Flow
-            if(eroMapsForFlow.size() != pipes.size()){
+            // If the pipes still cannot be reserved, return the blank Reserved Vlan Flow
+            if(numReserved != pipes.size()){
                 reserved.getVlanFlows().add(res_f);
             }
-            // All pipes were successfully found, translate the EROs into a ReservedVlanFlow
+            // All pipes were successfully found, translate store the reserved resources
             else{
-                res_f = transPCE.makeReservedFlow(req_f, schedSpec, res_f.getJunctions(), eroMapsForFlow);
+                Set<ReservedVlanJunctionE> rsvJunctions = new HashSet<>(simpleJunctions);
+                rsvJunctions.addAll(reservedEthJunctions);
+                res_f.setJunctions(rsvJunctions);
+                res_f.setPipes(reservedPipes);
                 reserved.getVlanFlows().add(res_f);
             }
         }
@@ -98,47 +107,49 @@ public class TopPCE {
 
     }
 
+    private void handleRequestedPipes(List<RequestedVlanPipeE> pipes, ScheduleSpecificationE schedSpec,
+                                      Set<ReservedVlanJunctionE> simpleJunctions, Set<ReservedEthPipeE> reservedPipes,
+                                      Set<ReservedVlanJunctionE> reservedEthJunctions, Integer numReserved) {
 
-    private Map<RequestedVlanPipeE, Map<String, List<TopoEdge>>> handleRequestedPipes(List<RequestedVlanPipeE> pipes, ScheduleSpecificationE sched)
-    {
-        Map<RequestedVlanPipeE, Map<String, List<TopoEdge>>> eroMapsPerFlow = new HashMap<>();
-
-        for(RequestedVlanPipeE pipe : pipes)
-        {
-            // Perform Pathfinding
-            Map<String, List<TopoEdge>> eroMap = null;
-
-            if(pipe.getEroPalindromic())
-            {
-                try
-                {
-                    eroMap = palindromicalPCE.computePalindromicERO(pipe, sched);       // A->Z ERO is palindrome of Z->A ERO
-                }
-                catch(PCEException e)
-                {
-                    log.error("PCE Unsuccessful", e);
-                }
-            }
-            else
-            {
-                try
-                {
-                    eroMap = nonPalindromicPCE.computeCimordnilapERO(pipe, sched);       // A->Z ERO is NOT palindrome of Z->A ERO
-                }
-                catch(PCEException e)
-                {
-                    log.error("PCE Unsuccessful", e);
-                }
-            }
-
-            if(verifyEros(eroMap))
-            {
-                eroMapsPerFlow.put(pipe, eroMap);
+        for(RequestedVlanPipeE pipe: pipes){
+            Map<String, List<TopoEdge>> eroMapForPipe = findShortestConstrainedPath(pipe, schedSpec, simpleJunctions,
+                    reservedPipes, reservedEthJunctions);
+            if(verifyEros(eroMapForPipe)){
+                numReserved++;
+                transPCE.reserveRequestedPipe(pipe, schedSpec, simpleJunctions, reservedPipes, reservedEthJunctions);
             }
         }
-
-        return eroMapsPerFlow;
     }
+
+    private Map<String,List<TopoEdge>> findShortestConstrainedPath(RequestedVlanPipeE pipe,
+                                                                   ScheduleSpecificationE schedSpec,
+                                                                   Set<ReservedVlanJunctionE> simpleJunctions,
+                                                                   Set<ReservedEthPipeE> reservedPipes,
+                                                                   Set<ReservedVlanJunctionE> reservedEthJunctions) {
+        Map<String, List<TopoEdge>> eroMap = null;
+
+        Set<ReservedVlanJunctionE> reservedJunctions = new HashSet<>(simpleJunctions);
+        reservedJunctions.addAll(reservedEthJunctions);
+
+        if(pipe.getEroPalindromic()){
+            try{
+                eroMap = palindromicalPCE.computePalindromicERO(pipe, schedSpec, reservedJunctions, reservedPipes);       // A->Z ERO is palindrome of Z->A ERO
+            }
+            catch(PCEException e){
+                log.error("PCE Unsuccessful", e);
+            }
+        }
+        else{
+            try{
+                eroMap = nonPalindromicPCE.computeCimordnilapERO(pipe, schedSpec, reservedJunctions, reservedPipes);       // A->Z ERO is NOT palindrome of Z->A ERO
+            }
+            catch(PCEException e){
+                log.error("PCE Unsuccessful", e);
+            }
+        }
+        return eroMap;
+    }
+
 
     private boolean verifyEros(Map<String, List<TopoEdge>> eroMap)
     {
