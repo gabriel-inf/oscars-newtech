@@ -9,6 +9,7 @@ import net.es.oscars.resv.dao.ReservedPssResourceRepository;
 import net.es.oscars.resv.dao.ReservedVlanRepository;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.topo.beans.TopoEdge;
+import net.es.oscars.topo.beans.TopoVertex;
 import net.es.oscars.topo.dao.UrnRepository;
 import net.es.oscars.topo.ent.IntRangeE;
 import net.es.oscars.topo.ent.ReservableBandwidthE;
@@ -121,13 +122,14 @@ public class TranslationPCE {
         List<ReservedVlanE> rsvVlans = retrieveReservedVlans(reservedJunctions);
         rsvVlans.addAll(retrieveReservedVlansFromPipes(reservedPipes));
 
-        List<Integer> vlanIdPerSegment = selectVlanIds(urnMap, reqPipe, sched, azSegments, zaSegments, rsvVlans);
         boolean sufficientBw = checkForSufficientBw(urnMap, reqPipe, sched, azSegments, zaSegments, rsvBandwidths);
-
         if(!sufficientBw){
             throw new PCEException("Insufficient Bandwidth to meet requested pipe" +
                     reqPipe.toString() + " given previous pipes in flow");
         }
+
+
+        List<Integer> vlanIdPerSegment = selectVlanIds(urnMap, reqPipe, sched, azSegments, zaSegments, rsvVlans);
         if(vlanIdPerSegment.contains(-1)){
             throw new PCEException("Insufficient VLANs to meet requested pipe " +
                     reqPipe.toString() + " viven previous pipes in flow");
@@ -184,6 +186,7 @@ public class TranslationPCE {
                         urnMap,
                         deviceModels);
 
+                // Add these to the list of ongoing reserved junctions
                 reservedEthJunctions.addAll(azVjs);
 
             } else if (azSegment.containsKey(Layer.MPLS)) {
@@ -192,7 +195,10 @@ public class TranslationPCE {
 
                 ReservedEthPipeE pipe = pceAssistant.makeVplsPipe(azEdges, zaEdges, reqPipe.getAzMbps(),
                         reqPipe.getZaMbps(), vlanId, mergeA, mergeZ, urnMap, deviceModels, sched);
+
+                // Add this pipe to the list of ongoing reserved pipes
                 reservedPipes.add(pipe);
+
             } else {
                 throw new PCEException("invalid segmentation");
             }
@@ -203,6 +209,66 @@ public class TranslationPCE {
                                          ScheduleSpecificationE sched, List<Map<Layer, List<TopoEdge>>> azSegments,
                                          List<Map<Layer, List<TopoEdge>>> zaSegments, List<ReservedBandwidthE> rsvBandwidths) {
 
+        List<ReservedBandwidthE> allRsvBandwidths = new ArrayList<>(rsvBandwidths);
+        allRsvBandwidths.addAll(pruningService.getReservedBandwidth(sched.getNotBefore(), sched.getNotAfter()));
+
+        Map<UrnE, List<ReservedBandwidthE>> resvBwMap = pruningService.buildReservedBandwidthMap(allRsvBandwidths);
+
+        Integer azMbps = reqPipe.getAzMbps();
+        Integer zaMbps = reqPipe.getZaMbps();
+
+        for(Map<Layer, List<TopoEdge>> segment : azSegments){
+            if(!availableBandwidthForSegment(segment, urnMap, resvBwMap, azMbps, zaMbps)){
+                return false;
+            }
+        }
+
+        for(Map<Layer, List<TopoEdge>> segment : zaSegments){
+            if(!availableBandwidthForSegment(segment, urnMap, resvBwMap, azMbps, zaMbps)){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean availableBandwidthForSegment(Map<Layer, List<TopoEdge>> segment, Map<String, UrnE> urnMap,
+                                                 Map<UrnE, List<ReservedBandwidthE>> resvBwMap, Integer azMbps,
+                                                 Integer zaMbps){
+        for(List<TopoEdge> edges : segment.values()){
+            for(TopoEdge edge : edges){
+                String urnStringA = edge.getA().getUrn();
+                String urnStringZ = edge.getZ().getUrn();
+                if(!urnMap.containsKey(urnStringA) || !urnMap.containsKey(urnStringZ)){
+                    return false;
+                }
+                UrnE urnA = urnMap.get(urnStringA);
+                UrnE urnZ = urnMap.get(urnStringZ);
+
+                if(urnA.getReservableBandwidth() != null){
+                    if(!availableBandwidthAtUrn(urnA, urnA.getReservableBandwidth(), resvBwMap, azMbps, zaMbps)){
+                        return false;
+                    }
+                }
+
+                if(urnZ.getReservableBandwidth() != null){
+                    if(!availableBandwidthAtUrn(urnZ, urnZ.getReservableBandwidth(), resvBwMap, azMbps, zaMbps)){
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    private boolean availableBandwidthAtUrn(UrnE urn, ReservableBandwidthE reservableBw,
+                                              Map<UrnE, List<ReservedBandwidthE>> resvBwMap, Integer inMbps, Integer egMbps){
+        Map<String, Integer> bwAvail = pruningService.getBwAvailabilityForUrn(urn, reservableBw, resvBwMap);
+        if(bwAvail.get("Ingress") < inMbps || bwAvail.get("Egress") < egMbps){
+            log.error("Insufficient Bandwidth at " + urn.toString() + ". Requested: " +
+                    inMbps + " In and " + egMbps + " Out. Available: " + bwAvail.get("Ingress") +
+                    " In and " + bwAvail.get("Egress") + " Out.");
+            return false;
+        }
         return true;
     }
 
@@ -278,19 +344,13 @@ public class TranslationPCE {
         // Combine list with bandwidth retrieved from the passed in junctions
         reservedBandwidthList.addAll(retrieveReservedBandwidths(rsvJunctions));
 
-        Map<UrnE, List<ReservedBandwidthE>> reservedBwMap = pruningService.buildReservedBandwidthMap(reservedBandwidthList);
+        Map<UrnE, List<ReservedBandwidthE>> resvBwMap = pruningService.buildReservedBandwidthMap(reservedBandwidthList);
 
 
         for(RequestedVlanFixtureE reqFix: reqFixtures){
             ReservableBandwidthE reservableBw = reqFix.getPortUrn().getReservableBandwidth();
-
-            Map<String, Integer> availBwMap = pruningService.getBwAvailabilityForUrn(reqFix.getPortUrn(), reservableBw,
-                    reservedBwMap);
-
-            if(availBwMap.get("Ingress") < reqFix.getInMbps() || availBwMap.get("Egress") < reqFix.getEgMbps()){
-                log.error("Insufficient Bandwidth at " + reqFix.getPortUrn().toString() + ". Requested: " +
-                        reqFix.getInMbps() + " In and " + reqFix.getEgMbps() + " Out. Available: " + availBwMap.get("Ingress") +
-                        " In and " + availBwMap.get("Egress") + " Out.");
+            if(!availableBandwidthAtUrn(reqFix.getPortUrn(), reservableBw,
+                    resvBwMap, reqFix.getInMbps(), reqFix.getEgMbps())){
                 return false;
             }
         }
