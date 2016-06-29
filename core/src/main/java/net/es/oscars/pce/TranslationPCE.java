@@ -112,7 +112,26 @@ public class TranslationPCE {
         });
 
 
-        List<Integer> vlanIdPerSegment = selectVlanIds(urnMap, reqPipe, sched, azSegments);
+        Set<ReservedVlanJunctionE> reservedJunctions = new HashSet<>(simpleJunctions);
+        reservedJunctions.addAll(reservedEthJunctions);
+
+        List<ReservedBandwidthE> rsvBandwidths = retrieveReservedBandwidths(reservedJunctions);
+        rsvBandwidths.addAll(retrieveReservedBandwidthsFromPipes(reservedPipes));
+
+        List<ReservedVlanE> rsvVlans = retrieveReservedVlans(reservedJunctions);
+        rsvVlans.addAll(retrieveReservedVlansFromPipes(reservedPipes));
+
+        List<Integer> vlanIdPerSegment = selectVlanIds(urnMap, reqPipe, sched, azSegments, zaSegments, rsvVlans);
+        boolean sufficientBw = checkForSufficientBw(urnMap, reqPipe, sched, azSegments, zaSegments, rsvBandwidths);
+
+        if(!sufficientBw){
+            throw new PCEException("Insufficient Bandwidth to meet requested pipe" +
+                    reqPipe.toString() + " given previous pipes in flow");
+        }
+        if(vlanIdPerSegment.contains(-1)){
+            throw new PCEException("Insufficient VLANs to meet requested pipe " +
+                    reqPipe.toString() + " viven previous pipes in flow");
+        }
 
         // for each segment:
         // if it is an Ethernet segment, make junctions, one per device
@@ -180,47 +199,72 @@ public class TranslationPCE {
         }
     }
 
+    private boolean checkForSufficientBw(Map<String, UrnE> urnMap, RequestedVlanPipeE reqPipe,
+                                         ScheduleSpecificationE sched, List<Map<Layer, List<TopoEdge>>> azSegments,
+                                         List<Map<Layer, List<TopoEdge>>> zaSegments, List<ReservedBandwidthE> rsvBandwidths) {
+
+        return true;
+    }
+
     private List<Integer> selectVlanIds(Map<String, UrnE> urnMap,
-                                                   RequestedVlanPipeE reqPipe, ScheduleSpecificationE sched,
-                                                   List<Map<Layer, List<TopoEdge>>> segments) {
+                                        RequestedVlanPipeE reqPipe, ScheduleSpecificationE sched,
+                                        List<Map<Layer, List<TopoEdge>>> azSegments,
+                                        List<Map<Layer, List<TopoEdge>>> zaSegments, List<ReservedVlanE> rsvVlans) {
         List<Integer> vlanIdPerSegment = new ArrayList<>();
 
-        List<ReservedVlanE> rsvVlans = pruningService.getReservedVlans(sched.getNotBefore(), sched.getNotAfter());
-        Map<UrnE, List<ReservedVlanE>> rsvVlanMap = pruningService.buildReservedVlanMap(rsvVlans);
+
+        List<ReservedVlanE> allRsvVlans = new ArrayList<>(rsvVlans);
+        allRsvVlans.addAll(pruningService.getReservedVlans(sched.getNotBefore(), sched.getNotAfter()));
+
+        Map<UrnE, List<ReservedVlanE>> rsvVlanMap = pruningService.buildReservedVlanMap(allRsvVlans);
 
         String vlanExpression = reqPipe.getAJunction().getFixtures().iterator().next().getVlanExpression();
         Set<Integer> requestedVlanIds = pruningService
                 .getIntegersFromRanges(pruningService.getIntRangesFromString(vlanExpression));
 
-        List<Set<Integer>> validIdsPerSegment = new ArrayList<>();
-        for(Map<Layer, List<TopoEdge>> segment: segments){
-            if(segment.containsKey(Layer.ETHERNET)){
-                List<TopoEdge> segmentEdges = segment.get(Layer.ETHERNET);
-                Map<Integer, Set<TopoEdge>> edgesPerVlanId = pruningService
-                        .findEdgesPerVlanId(new HashSet<>(segmentEdges), urnMap, rsvVlanMap);
-                validIdsPerSegment.add(new HashSet<>());
-                for(Integer id : edgesPerVlanId.keySet()){
-                    Set<TopoEdge> edgesForId = edgesPerVlanId.get(id);
-                    if(edgesForId.size() == segmentEdges.size()){
-                        if(requestedVlanIds.contains(id) || requestedVlanIds.isEmpty()){
-                            validIdsPerSegment.get(validIdsPerSegment.size()-1).add(id);
-                        }
-                    }
-                }
-            }
+        List<Set<Integer>> azValidIdsPerSegment = new ArrayList<>();
+        for(Map<Layer, List<TopoEdge>> segment: azSegments){
+            azValidIdsPerSegment.add(getValidIdsForSegment(segment, requestedVlanIds, urnMap, rsvVlanMap));
+        }
+
+        List<Set<Integer>> zaValidIdsPerSegment = new ArrayList<>();
+        for(Map<Layer, List<TopoEdge>> segment: zaSegments){
+            zaValidIdsPerSegment.add(getValidIdsForSegment(segment, requestedVlanIds, urnMap, rsvVlanMap));
         }
 
         //TODO: VLAN Translation
         //For now: Just use same VLAN ID on all segments
         Set<Integer> overlappingVlanIds = new HashSet<>();
-        for(Set<Integer> validIds : validIdsPerSegment){
+        for(Set<Integer> validIds : azValidIdsPerSegment){
+            overlappingVlanIds = pruningService.addToOverlap(overlappingVlanIds, validIds);
+        }
+        for(Set<Integer> validIds : zaValidIdsPerSegment){
             overlappingVlanIds = pruningService.addToOverlap(overlappingVlanIds, validIds);
         }
         assert(!overlappingVlanIds.isEmpty());
-        for(Integer i = 0; i < segments.size(); i++){
+        for(Integer i = 0; i < azSegments.size(); i++){
             vlanIdPerSegment.add(overlappingVlanIds.iterator().next());
         }
         return vlanIdPerSegment;
+    }
+
+    private Set<Integer> getValidIdsForSegment(Map<Layer, List<TopoEdge>> segment, Set<Integer> requestedVlanIds,
+                                               Map<String, UrnE> urnMap, Map<UrnE, List<ReservedVlanE>> rsvVlanMap){
+        Set<Integer> validIds = new HashSet<>();
+        if(segment.containsKey(Layer.ETHERNET)) {
+            List<TopoEdge> segmentEdges = segment.get(Layer.ETHERNET);
+            Map<Integer, Set<TopoEdge>> edgesPerVlanId = pruningService
+                    .findEdgesPerVlanId(new HashSet<>(segmentEdges), urnMap, rsvVlanMap);
+            for (Integer id : edgesPerVlanId.keySet()) {
+                Set<TopoEdge> edgesForId = edgesPerVlanId.get(id);
+                if (edgesForId.size() == segmentEdges.size()) {
+                    if (requestedVlanIds.contains(id) || requestedVlanIds.isEmpty()) {
+                        validIds.add(id);
+                    }
+                }
+            }
+        }
+        return validIds;
     }
 
 
