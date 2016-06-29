@@ -4,15 +4,14 @@ import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.CoreUnitTestConfiguration;
 import net.es.oscars.resv.ent.ReservedBandwidthE;
 import net.es.oscars.resv.ent.ReservedVlanE;
+import net.es.oscars.topo.beans.TopoEdge;
+import net.es.oscars.topo.beans.TopoVertex;
 import net.es.oscars.topo.beans.Topology;
-import net.es.oscars.topo.dao.UrnRepository;
 import net.es.oscars.topo.ent.IntRangeE;
 import net.es.oscars.topo.ent.ReservableBandwidthE;
 import net.es.oscars.topo.ent.ReservableVlanE;
-import net.es.oscars.topo.enums.*;
-import net.es.oscars.topo.beans.TopoEdge;
-import net.es.oscars.topo.beans.TopoVertex;
 import net.es.oscars.topo.ent.UrnE;
+import net.es.oscars.topo.enums.*;
 import net.es.oscars.topo.svc.TopoService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -498,7 +497,6 @@ public class PruningServiceTest {
             if(urn.getUrnType() == UrnType.IFCE){
                 ReservedBandwidthE rsvBw = ReservedBandwidthE.builder()
                         .urn(urn)
-                        .bandwidth(bandwidth)
                         .inBandwidth(bandwidth)
                         .egBandwidth(bandwidth)
                         .beginning(Instant.MIN)

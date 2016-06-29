@@ -5,14 +5,12 @@ import net.es.oscars.dto.pss.EthFixtureType;
 import net.es.oscars.dto.pss.EthJunctionType;
 import net.es.oscars.dto.pss.EthPipeType;
 import net.es.oscars.dto.resv.ResourceType;
-import net.es.oscars.pce.PCEException;
-import net.es.oscars.resv.ent.*;
-import net.es.oscars.topo.ent.ReservableBandwidthE;
-import net.es.oscars.topo.enums.Layer;
-import net.es.oscars.topo.beans.TopoEdge;
 import net.es.oscars.pce.TopoAssistant;
+import net.es.oscars.resv.ent.*;
+import net.es.oscars.topo.beans.TopoEdge;
 import net.es.oscars.topo.ent.UrnE;
 import net.es.oscars.topo.enums.DeviceModel;
+import net.es.oscars.topo.enums.Layer;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -447,7 +445,6 @@ public class PCEAssistant {
     public ReservedBandwidthE createReservedBandwidth(UrnE urn, Integer azMbps, Integer zaMbps, ScheduleSpecificationE sched){
         return ReservedBandwidthE.builder()
                 .urn(urn)
-                .bandwidth(Math.max(azMbps, zaMbps))
                 .egBandwidth(azMbps)
                 .inBandwidth(zaMbps)
                 .beginning(sched.getNotBefore().toInstant())
