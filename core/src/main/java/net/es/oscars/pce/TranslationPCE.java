@@ -46,35 +46,56 @@ public class TranslationPCE {
     @Autowired
     private PruningService pruningService;
 
-    public ReservedVlanFlowE makeReservedFlow(RequestedVlanFlowE req_f, ScheduleSpecificationE schedSpec,
-                                              Set<ReservedVlanJunctionE> rsvJunctions,
-                                              Map<RequestedVlanPipeE, Map<String, List<TopoEdge>>> eroMapsPerPipe)
-            throws PSSException, PCEException {
-        // Handle Creating Reserved Pipes
-        Set<ReservedEthPipeE> rsv_pipes = new HashSet<>();
-        // For each Requested Pipe, there is a Map containing the az and za list of edges that will together
-        // make up the reserved pipe(s). There can be multiple reserved pipes per requested pipe.
-        for(RequestedVlanPipeE pipe : eroMapsPerPipe.keySet()){
-            Map<String, List<TopoEdge>> eroMap = eroMapsPerPipe.get(pipe);
-            List<TopoEdge> azEros = eroMap.get("az");
-            List<TopoEdge> zaEros = eroMap.get("za");
-            rsv_pipes.addAll(makeReservedPipes(pipe, azEros, zaEros, rsvJunctions, schedSpec));
+    public ReservedVlanJunctionE reserveSimpleJunction(RequestedVlanJunctionE req_j, ScheduleSpecificationE sched,
+                                                       Set<ReservedVlanJunctionE> simpleJunctions)
+            throws PCEException, PSSException {
+        String deviceUrn = req_j.getDeviceUrn().getUrn();
+        Optional<UrnE> optUrn = urnRepository.findByUrn(deviceUrn);
+        UrnE urn;
+        if(optUrn.isPresent()){
+            urn = optUrn.get();
+        }
+        else{
+            log.error("URN " + deviceUrn + " not found in URN Repository");
+            return null;
         }
 
-        return ReservedVlanFlowE.builder().junctions(rsvJunctions).pipes(rsv_pipes).build();
+        ReservedVlanJunctionE rsv_j = pceAssistant.createReservedJunction(urn, new HashSet<>(), new HashSet<>(),
+                pceAssistant.decideJunctionType(urn.getDeviceModel()));
+
+        // Select a VLAN ID for this junction
+        Integer vlanId = selectVLANForJunction(req_j, sched, simpleJunctions);
+        if(vlanId == -1){
+            return null;
+        }
+
+        // Confirm that there is sufficient available bandwidth
+        boolean sufficientBandwidth = confirmSufficientBandwidth(req_j, sched, simpleJunctions);
+        if(!sufficientBandwidth){
+            return null;
+        }
+
+        Set<RequestedVlanFixtureE> reqFixtures = req_j.getFixtures();
+        for(RequestedVlanFixtureE reqFix : reqFixtures){
+            ReservedBandwidthE rsvBw = pceAssistant.createReservedBandwidth(reqFix.getPortUrn(), reqFix.getInMbps(),
+                    reqFix.getEgMbps(), sched);
+
+            ReservedVlanE rsvVlan = pceAssistant.createReservedVlan(reqFix.getPortUrn(), vlanId, sched);
+
+            ReservedVlanFixtureE rsvFix = pceAssistant.createReservedFixture(reqFix.getPortUrn(), new HashSet<>(),
+                    rsvVlan, rsvBw, pceAssistant.decideFixtureType(reqFix.getPortUrn().getDeviceModel()));
+
+            rsv_j.getFixtures().add(rsvFix);
+        }
+
+        return rsv_j;
     }
 
-    /**
-     *
-     * @throws PSSException
-     * @throws PCEException
-     */
-    private List<ReservedEthPipeE> makeReservedPipes(RequestedVlanPipeE reqPipe, List<TopoEdge> azERO,
-                                                     List<TopoEdge> zaERO, Set<ReservedVlanJunctionE> junctions,
-                                                                  ScheduleSpecificationE sched)
-            throws PSSException, PCEException {
+    public void reserveRequestedPipe(RequestedVlanPipeE reqPipe, ScheduleSpecificationE sched, List<TopoEdge> azERO,
+                                     List<TopoEdge> zaERO, Set<ReservedVlanJunctionE> simpleJunctions,
+                                     Set<ReservedEthPipeE> reservedPipes, Set<ReservedVlanJunctionE> reservedEthJunctions)
+    throws PCEException, PSSException{
 
-        List<ReservedEthPipeE> pipes = new ArrayList<>();
         Map<String, DeviceModel> deviceModels = topoService.deviceModels();
 
 
@@ -134,7 +155,6 @@ public class TranslationPCE {
                 }
 
                 azEdges = azSegment.get(Layer.ETHERNET);
-                zaEdges = zaSegment.get(Layer.ETHERNET);
 
                 // an ethernet segment: a list of junctions, one per device
 
@@ -145,7 +165,7 @@ public class TranslationPCE {
                         urnMap,
                         deviceModels);
 
-                junctions.addAll(azVjs);
+                reservedEthJunctions.addAll(azVjs);
 
             } else if (azSegment.containsKey(Layer.MPLS)) {
                 azEdges = azSegment.get(Layer.MPLS);
@@ -153,12 +173,11 @@ public class TranslationPCE {
 
                 ReservedEthPipeE pipe = pceAssistant.makeVplsPipe(azEdges, zaEdges, reqPipe.getAzMbps(),
                         reqPipe.getZaMbps(), vlanId, mergeA, mergeZ, urnMap, deviceModels, sched);
-                pipes.add(pipe);
+                reservedPipes.add(pipe);
             } else {
                 throw new PCEException("invalid segmentation");
             }
         }
-        return pipes;
     }
 
     private List<Integer> selectVlanIds(Map<String, UrnE> urnMap,
@@ -205,50 +224,6 @@ public class TranslationPCE {
     }
 
 
-    public ReservedVlanJunctionE reserveSimpleJunction(RequestedVlanJunctionE req_j, ScheduleSpecificationE sched,
-                                                       Set<ReservedVlanJunctionE> simpleJunctions)
-            throws PCEException, PSSException {
-        String deviceUrn = req_j.getDeviceUrn().getUrn();
-        Optional<UrnE> optUrn = urnRepository.findByUrn(deviceUrn);
-        UrnE urn;
-        if(optUrn.isPresent()){
-            urn = optUrn.get();
-        }
-        else{
-            log.error("URN " + deviceUrn + " not found in URN Repository");
-            return null;
-        }
-
-        ReservedVlanJunctionE rsv_j = pceAssistant.createReservedJunction(urn, new HashSet<>(), new HashSet<>(),
-                pceAssistant.decideJunctionType(urn.getDeviceModel()));
-
-        // Select a VLAN ID for this junction
-        Integer vlanId = selectVLANForJunction(req_j, sched, simpleJunctions);
-        if(vlanId == -1){
-            return null;
-        }
-
-        // Confirm that there is sufficient available bandwidth
-        boolean sufficientBandwidth = confirmSufficientBandwidth(req_j, sched, simpleJunctions);
-        if(!sufficientBandwidth){
-            return null;
-        }
-
-        Set<RequestedVlanFixtureE> reqFixtures = req_j.getFixtures();
-        for(RequestedVlanFixtureE reqFix : reqFixtures){
-            ReservedBandwidthE rsvBw = pceAssistant.createReservedBandwidth(reqFix.getPortUrn(), reqFix.getInMbps(),
-                    reqFix.getEgMbps(), sched);
-
-            ReservedVlanE rsvVlan = pceAssistant.createReservedVlan(reqFix.getPortUrn(), vlanId, sched);
-
-            ReservedVlanFixtureE rsvFix = pceAssistant.createReservedFixture(reqFix.getPortUrn(), new HashSet<>(),
-                    rsvVlan, rsvBw, pceAssistant.decideFixtureType(reqFix.getPortUrn().getDeviceModel()));
-
-            rsv_j.getFixtures().add(rsvFix);
-        }
-
-        return rsv_j;
-    }
     public boolean confirmSufficientBandwidth(RequestedVlanJunctionE req_j, ScheduleSpecificationE sched,
                                               Set<ReservedVlanJunctionE> rsvJunctions){
 
@@ -284,14 +259,12 @@ public class TranslationPCE {
         List<ReservedVlanE> rsvVlans = pruningService.getReservedVlans(sched.getNotBefore(), sched.getNotAfter());
         // Add already reserved VLANs from passed in junctions
         rsvVlans.addAll(retrieveReservedVlans(rsvJunctions));
-        // Build map from URNs to Reserved VLAN lists
-        Map<UrnE, List<ReservedVlanE>> rsvVlanMap = pruningService.buildReservedVlanMap(rsvVlans);
 
         Set<RequestedVlanFixtureE> reqFixtures = req_j.getFixtures();
 
         Set<Integer> overlap = null;
         for(RequestedVlanFixtureE reqFix : reqFixtures){
-            Set<Integer> availableVlans = getAvailableVlanIds(reqFix, rsvVlanMap);
+            Set<Integer> availableVlans = getAvailableVlanIds(reqFix, rsvVlans);
             String vlanExpression = reqFix.getVlanExpression();
             Set<Integer> reqVlanIds = pruningService.getIntegersFromRanges(pruningService.getIntRangesFromString(vlanExpression));
             Set<Integer> validVlans = pruningService.addToOverlap(availableVlans, reqVlanIds);
@@ -311,7 +284,10 @@ public class TranslationPCE {
         return overlap.iterator().next();
     }
 
-    public Set<Integer> getAvailableVlanIds(RequestedVlanFixtureE reqFix, Map<UrnE, List<ReservedVlanE>> rsvVlanMap){
+    public Set<Integer> getAvailableVlanIds(RequestedVlanFixtureE reqFix, List<ReservedVlanE> rsvVlans){
+
+        // Build map from URNs to Reserved VLAN lists
+        Map<UrnE, List<ReservedVlanE>> rsvVlanMap = pruningService.buildReservedVlanMap(rsvVlans);
 
         List<ReservedVlanE> rsvVlansAtFixture = rsvVlanMap.get(reqFix.getPortUrn());
         Set<Integer> reservedVlanIds = rsvVlansAtFixture.stream().map(ReservedVlanE::getVlan).collect(Collectors.toSet());
@@ -324,12 +300,10 @@ public class TranslationPCE {
                         .map(IntRangeE::toDtoIntRange)
                         .collect(Collectors.toList()));
 
-        Set<Integer> availableVlans = reservableVlanIds
+        return reservableVlanIds
                 .stream()
                 .filter(id -> !reservedVlanIds.contains(id))
                 .collect(Collectors.toSet());
-
-        return availableVlans;
     }
 
     public List<ReservedBandwidthE> retrieveReservedBandwidths(Set<ReservedVlanJunctionE> junctions){
@@ -367,13 +341,4 @@ public class TranslationPCE {
         }
         return retrieveReservedVlans(junctions);
     }
-
-
-
-    public void reserveRequestedPipe(RequestedVlanPipeE pipe, ScheduleSpecificationE schedSpec,
-                                     Set<ReservedVlanJunctionE> simpleJunctions, Set<ReservedEthPipeE> reservedPipes,
-                                     Set<ReservedVlanJunctionE> reservedEthJunctions) {
-
-    }
-
 }

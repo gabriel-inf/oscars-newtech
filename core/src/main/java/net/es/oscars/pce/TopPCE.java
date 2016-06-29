@@ -113,7 +113,10 @@ public class TopPCE {
                     reservedPipes, reservedEthJunctions);
             if(verifyEros(eroMapForPipe)){
                 numReserved++;
-                transPCE.reserveRequestedPipe(pipe, schedSpec, simpleJunctions, reservedPipes, reservedEthJunctions);
+                List<TopoEdge> azEros = eroMapForPipe.get("az");
+                List<TopoEdge> zaEros = eroMapForPipe.get("za");
+                transPCE.reserveRequestedPipe(pipe, schedSpec, azEros, zaEros, simpleJunctions, reservedPipes,
+                        reservedEthJunctions);
             }
         }
     }
