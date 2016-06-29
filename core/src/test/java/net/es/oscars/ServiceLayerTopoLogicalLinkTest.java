@@ -42,6 +42,8 @@ public class ServiceLayerTopoLogicalLinkTest
     @Autowired
     private ServiceLayerTopology serviceLayerTopo;
 
+    // Testing Jeremy Git
+
     private Set<TopoVertex> ethernetTopoVertices;
     private Set<TopoVertex> mplsTopoVertices;
     private Set<TopoVertex> internalTopoVertices;
