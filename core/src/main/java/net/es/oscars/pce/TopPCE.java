@@ -127,13 +127,18 @@ public class TopPCE {
                                                                    Set<ReservedEthPipeE> reservedPipes,
                                                                    Set<ReservedVlanJunctionE> reservedEthJunctions) {
         Map<String, List<TopoEdge>> eroMap = null;
-
         Set<ReservedVlanJunctionE> reservedJunctions = new HashSet<>(simpleJunctions);
         reservedJunctions.addAll(reservedEthJunctions);
 
+        List<ReservedBandwidthE> rsvBandwidths = transPCE.retrieveReservedBandwidths(reservedJunctions);
+        rsvBandwidths.addAll(transPCE.retrieveReservedBandwidthsFromPipes(reservedPipes));
+
+        List<ReservedVlanE> rsvVlans = transPCE.retrieveReservedVlans(reservedJunctions);
+        rsvVlans.addAll(transPCE.retrieveReservedVlansFromPipes(reservedPipes));
+
         if(pipe.getEroPalindromic()){
             try{
-                eroMap = palindromicalPCE.computePalindromicERO(pipe, schedSpec, reservedJunctions, reservedPipes);       // A->Z ERO is palindrome of Z->A ERO
+                eroMap = palindromicalPCE.computePalindromicERO(pipe, schedSpec, rsvBandwidths, rsvVlans);       // A->Z ERO is palindrome of Z->A ERO
             }
             catch(PCEException e){
                 log.error("PCE Unsuccessful", e);
@@ -141,7 +146,7 @@ public class TopPCE {
         }
         else{
             try{
-                eroMap = nonPalindromicPCE.computeCimordnilapERO(pipe, schedSpec, reservedJunctions, reservedPipes);       // A->Z ERO is NOT palindrome of Z->A ERO
+                eroMap = nonPalindromicPCE.computeCimordnilapERO(pipe, schedSpec, rsvBandwidths, rsvVlans);       // A->Z ERO is NOT palindrome of Z->A ERO
             }
             catch(PCEException e){
                 log.error("PCE Unsuccessful", e);
