@@ -1,14 +1,11 @@
 package net.es.oscars.pce;
 
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.pss.PSSException;
-import net.es.oscars.resv.ent.RequestedVlanPipeE;
-import net.es.oscars.resv.ent.ScheduleSpecificationE;
+import net.es.oscars.resv.ent.*;
 import net.es.oscars.servicetopo.ServiceLayerTopology;
 import net.es.oscars.topo.beans.TopoEdge;
 import net.es.oscars.topo.beans.TopoVertex;
 import net.es.oscars.topo.beans.Topology;
-import net.es.oscars.topo.dao.UrnAdjcyRepository;
 import net.es.oscars.topo.dao.UrnRepository;
 import net.es.oscars.topo.ent.UrnE;
 import net.es.oscars.topo.enums.*;
@@ -17,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Created by jeremy on 6/22/16.
@@ -49,7 +45,7 @@ public class LacimordnilapPCE
      * @return A two-element Map containing both the forward-direction (A->Z) ERO and the reverse-direction (Z->A) ERO
      * @throws PCEException
      */
-    public Map<String, List<TopoEdge>> computeCimordnilapERO(RequestedVlanPipeE requestPipe, ScheduleSpecificationE requestSched) throws PCEException
+    public Map<String, List<TopoEdge>> computeCimordnilapERO(RequestedVlanPipeE requestPipe, ScheduleSpecificationE requestSched, List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList) throws PCEException
     {
 
         /* These calls only need to be made once when topology is updated */
@@ -82,10 +78,10 @@ public class LacimordnilapPCE
         serviceLayerTopology.buildLogicalLayerDstNodes(dstDevice, dstPort);
 
         // Performs shortest path routing on MPLS-layer to properly assign weights to each logical link on Service-Layer
-        serviceLayerTopology.calculateLogicalLinkWeights(requestPipe, requestSched, urnRepo.findAll());
+        serviceLayerTopology.calculateLogicalLinkWeights(requestPipe, requestSched, urnRepo.findAll(), rsvBwList, rsvVlanList);
 
         Topology slTopo = serviceLayerTopology.getSLTopology();
-        Topology prunedSlTopo = pruningService.pruneWithPipe(slTopo, requestPipe, requestSched);
+        Topology prunedSlTopo = pruningService.pruneWithPipe(slTopo, requestPipe, requestSched, rsvBwList, rsvVlanList);
 
         TopoVertex serviceLayerSrcNode;
         TopoVertex serviceLayerDstNode;

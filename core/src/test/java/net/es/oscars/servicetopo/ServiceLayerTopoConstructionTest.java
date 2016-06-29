@@ -2,20 +2,12 @@ package net.es.oscars.servicetopo;
 
 
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.CoreUnitTestConfiguration;
-import net.es.oscars.servicetopo.LogicalEdge;
-import net.es.oscars.servicetopo.SLTopoUnitTestConfiguration;
-import net.es.oscars.servicetopo.ServiceLayerTopology;
-import net.es.oscars.topo.beans.Topology;
-import net.es.oscars.topo.enums.*;
 import net.es.oscars.topo.beans.TopoEdge;
 import net.es.oscars.topo.beans.TopoVertex;
-
+import net.es.oscars.topo.beans.Topology;
+import net.es.oscars.topo.enums.Layer;
+import net.es.oscars.topo.enums.VertexType;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -23,8 +15,6 @@ import java.util.Set;
 @Slf4j
 public class ServiceLayerTopoConstructionTest {
 
-    //@Autowired
-    //private ServiceLayerTopology serviceLayerTopology;
     private ServiceLayerTopology serviceLayerTopology = new ServiceLayerTopology();
 
     private Set<TopoVertex> ethernetTopoVertices = new HashSet<>();
@@ -456,7 +446,7 @@ public class ServiceLayerTopoConstructionTest {
                     else if(aURN.equals("nodeD:1"))
                         assert(zURN.equals("nodeB:2"));
                     else
-                        assert(false);
+                        assert false;
                 });
 
         log.info("test complete.");
@@ -543,7 +533,7 @@ public class ServiceLayerTopoConstructionTest {
                     else if(aURN.equals("nodeC:2"))
                         assert(zURN.equals("nodeC:1"));
                     else
-                        assert(false);
+                        assert false;
                 });
 
         log.info("test complete.");
@@ -629,7 +619,7 @@ public class ServiceLayerTopoConstructionTest {
                     else if(aURN.equals("nodeD:1"))
                         assert(zURN.equals("nodeA:2"));
                     else
-                        assert(false);
+                        assert false;
                 });
 
         log.info("test complete.");
@@ -751,7 +741,7 @@ public class ServiceLayerTopoConstructionTest {
                     else if(aURN.equals("nodeA:3"))
                         assert(zURN.equals("nodeA:2") || zURN.equals("nodeD:1"));
                     else
-                        assert(false);
+                        assert false;
                 });
 
         log.info("test complete.");

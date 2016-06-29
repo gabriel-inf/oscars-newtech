@@ -8,16 +8,16 @@ import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.pce.DijkstraPCE;
 import net.es.oscars.pce.PruningService;
 import net.es.oscars.resv.ent.RequestedVlanPipeE;
+import net.es.oscars.resv.ent.ReservedBandwidthE;
+import net.es.oscars.resv.ent.ReservedVlanE;
 import net.es.oscars.resv.ent.ScheduleSpecificationE;
 import net.es.oscars.topo.beans.TopoEdge;
 import net.es.oscars.topo.beans.TopoVertex;
 import net.es.oscars.topo.beans.Topology;
-import net.es.oscars.topo.dao.UrnRepository;
 import net.es.oscars.topo.ent.UrnE;
-import net.es.oscars.topo.enums.*;
-import net.es.oscars.topo.svc.TopoService;
+import net.es.oscars.topo.enums.Layer;
+import net.es.oscars.topo.enums.VertexType;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.method.P;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -31,9 +31,6 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 public class ServiceLayerTopology
 {
-    @Autowired
-    TopoService topoService;
-
     @Autowired
     PruningService pruningService;
 
@@ -222,7 +219,7 @@ public class ServiceLayerTopology
     }
 
     //Calls Pruner and Dijkstra to compute shortest MPLS-layer paths, calculates weights of those paths, and maps them to the appropriate logical links
-    public void calculateLogicalLinkWeights(RequestedVlanPipeE requestedVlanPipe, ScheduleSpecificationE requestedSchedule, List<UrnE> urnList)
+    public void calculateLogicalLinkWeights(RequestedVlanPipeE requestedVlanPipe, ScheduleSpecificationE requestedSchedule, List<UrnE> urnList, List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList)
     {
         log.info("Performing routing on MPLS-Layer topology to assign weights to Service-Layer logical links.");
         Set<LogicalEdge> logicalLinksToRemoveFromServiceLayer = new HashSet<>();
@@ -234,7 +231,7 @@ public class ServiceLayerTopology
 
         // Step 1: Prune MPLS-Layer topology once before considering any logical links.
         log.info("step 1: pruning MPLS-layer by bandwidth and vlan availability.");
-        Topology prunedMPLSTopo = pruningService.pruneWithPipe(mplsLayerTopo, requestedVlanPipe, urnList, requestedSchedule);
+        Topology prunedMPLSTopo = pruningService.pruneWithPipe(mplsLayerTopo, requestedVlanPipe, requestedSchedule, urnList, rsvBwList, rsvVlanList);
 
         log.info("step 1 COMPLETE.");
 
@@ -292,7 +289,7 @@ public class ServiceLayerTopology
             if(physEdgeAtoMpls == null || physEdgeZtoMpls == null || physEdgeMplstoA == null || physEdgeMplstoZ == null)
             {
                 log.error("service-layer topology has incorrectly identified adaptation edges");
-                assert(false);
+                assert false;
             }
 
             // Step 2: Prune the adaptation (Ethernet-MPLS) edges and ports to ensure this logical link is worth building.
@@ -313,7 +310,7 @@ public class ServiceLayerTopology
             adaptationTopo.setVertices(adaptationPorts);
             adaptationTopo.setEdges(adaptationEdges);
 
-            Topology prunedAdaptationTopo = pruningService.pruneWithPipe(adaptationTopo, requestedVlanPipe, requestedSchedule);
+            Topology prunedAdaptationTopo = pruningService.pruneWithPipe(adaptationTopo, requestedVlanPipe, requestedSchedule, rsvBwList, rsvVlanList);
 
             if(!prunedAdaptationTopo.equals(adaptationTopo))
             {
@@ -466,7 +463,7 @@ public class ServiceLayerTopology
         else
         {
             log.error("Topology passed to ServiceLayerTopology class with invalid Layer.");
-            assert(false);
+            assert false;
         }
     }
 

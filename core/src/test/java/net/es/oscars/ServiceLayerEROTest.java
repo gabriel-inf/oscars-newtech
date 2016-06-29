@@ -1,18 +1,12 @@
 package net.es.oscars;
 
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.CoreUnitTestConfiguration;
 import net.es.oscars.dto.pss.EthFixtureType;
 import net.es.oscars.dto.pss.EthJunctionType;
 import net.es.oscars.dto.pss.EthPipeType;
 import net.es.oscars.pce.DijkstraPCE;
-import net.es.oscars.pce.PCEException;
 import net.es.oscars.pce.PruningService;
-import net.es.oscars.resv.ent.RequestedVlanFixtureE;
-import net.es.oscars.resv.ent.RequestedVlanJunctionE;
-import net.es.oscars.resv.ent.RequestedVlanPipeE;
-import net.es.oscars.resv.ent.ScheduleSpecificationE;
-import net.es.oscars.servicetopo.LogicalEdge;
+import net.es.oscars.resv.ent.*;
 import net.es.oscars.servicetopo.ServiceLayerTopology;
 import net.es.oscars.topo.beans.TopoEdge;
 import net.es.oscars.topo.beans.TopoVertex;
@@ -37,6 +31,8 @@ import java.util.stream.Collectors;
 
 /**
  * Created by jeremy on 6/24/16.
+ *
+ * Primarily tests correctness of service-layer topology logical edge construction, initialization, and population during MPLS-layer routing
  */
 
 @Slf4j
@@ -64,6 +60,8 @@ public class ServiceLayerEROTest
     private RequestedVlanPipeE requestedPipe;
     private ScheduleSpecificationE requestedSched;
     private List<UrnE> urnList;
+    private List<ReservedBandwidthE> resvBW;
+    private List<ReservedVlanE> resvVLAN;
 
     @Test
     public void verifyVirtualSrcDest()
@@ -93,7 +91,7 @@ public class ServiceLayerEROTest
 
         log.info("Beginning test: 'verifyVirtualSrcDest'.");
 
-         serviceLayerTopo.buildLogicalLayerSrcNodes(srcDevice, srcPort);     // should create VIRTUAL nodes
+        serviceLayerTopo.buildLogicalLayerSrcNodes(srcDevice, srcPort);     // should create VIRTUAL nodes
         serviceLayerTopo.buildLogicalLayerDstNodes(dstDevice, dstPort);     // should create VIRTUAL nodes
 
         TopoVertex virtSrc = serviceLayerTopo.getVirtualNode(srcDevice);
@@ -562,7 +560,7 @@ public class ServiceLayerEROTest
         serviceLayerTopo.buildLogicalLayerDstNodes(dstDevice, dstPort);     // should create VIRTUAL nodes
 
         // Performs shortest path routing on MPLS-layer to properly assign weights to each logical link on Service-Layer
-        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, requestedSched, urnList);
+        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, requestedSched, urnList, resvBW, resvVLAN);
 
         Topology slTopo = serviceLayerTopo.getSLTopology();
         Topology prunedSlTopo = pruningService.pruneWithPipe(slTopo, requestedPipe, requestedSched);
@@ -595,7 +593,7 @@ public class ServiceLayerEROTest
 
         if (azServiceLayerERO.isEmpty())
         {
-            assert(false);
+            assert false;
         }
 
         // Get symmetric Service-Layer path in reverse-direction
@@ -654,6 +652,9 @@ public class ServiceLayerEROTest
         serviceLayerTopo.setTopology(dummyMPLSTopo);
 
         serviceLayerTopo.createMultilayerTopology();
+
+        resvBW = new ArrayList<>();
+        resvVLAN = new ArrayList<>();
     }
 
     private void buildLinearTopo()

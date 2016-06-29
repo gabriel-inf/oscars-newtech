@@ -1,13 +1,13 @@
 package net.es.oscars.pce;
 
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.ent.RequestedVlanPipeE;
+import net.es.oscars.resv.ent.ReservedBandwidthE;
+import net.es.oscars.resv.ent.ReservedVlanE;
 import net.es.oscars.resv.ent.ScheduleSpecificationE;
 import net.es.oscars.topo.beans.TopoEdge;
 import net.es.oscars.topo.beans.TopoVertex;
 import net.es.oscars.topo.beans.Topology;
-import net.es.oscars.topo.dao.UrnAdjcyRepository;
 import net.es.oscars.topo.ent.UrnE;
 import net.es.oscars.topo.enums.Layer;
 import net.es.oscars.topo.enums.VertexType;
@@ -41,7 +41,7 @@ public class PalindromicalPCE
      * @return A two-element Map containing both the forward-direction (A->Z) ERO and the reverse-direction (Z->A) ERO
      * @throws PCEException
      */
-    public Map<String, List<TopoEdge>> computePalindromicERO(RequestedVlanPipeE requestPipe, ScheduleSpecificationE requestSched) throws PCEException
+    public Map<String, List<TopoEdge>> computePalindromicERO(RequestedVlanPipeE requestPipe, ScheduleSpecificationE requestSched, List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList) throws PCEException
     {
         Topology multiLayerTopo = new Topology();
         multiLayerTopo.getVertices().addAll(topoService.layer(Layer.ETHERNET).getVertices());
@@ -58,7 +58,7 @@ public class PalindromicalPCE
         TopoVertex dstPort = new TopoVertex(dstPortURN.getUrn(), VertexType.PORT);
 
         // Bandwidth and Vlan pruning
-        Topology prunedTopo = pruningService.pruneWithPipe(multiLayerTopo, requestPipe, requestSched);
+        Topology prunedTopo = pruningService.pruneWithPipe(multiLayerTopo, requestPipe, requestSched, rsvBwList, rsvVlanList);
 
         // Shortest path routing
         List<TopoEdge> azERO = dijkstraPCE.computeShortestPathEdges(prunedTopo, srcPort, dstPort);

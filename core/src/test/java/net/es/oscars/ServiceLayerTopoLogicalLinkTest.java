@@ -4,10 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.pss.EthFixtureType;
 import net.es.oscars.dto.pss.EthJunctionType;
 import net.es.oscars.dto.pss.EthPipeType;
-import net.es.oscars.resv.ent.RequestedVlanFixtureE;
-import net.es.oscars.resv.ent.RequestedVlanJunctionE;
-import net.es.oscars.resv.ent.RequestedVlanPipeE;
-import net.es.oscars.resv.ent.ScheduleSpecificationE;
+import net.es.oscars.resv.ent.*;
 import net.es.oscars.servicetopo.LogicalEdge;
 import net.es.oscars.servicetopo.ServiceLayerTopology;
 import net.es.oscars.topo.beans.TopoEdge;
@@ -20,7 +17,6 @@ import net.es.oscars.topo.ent.UrnE;
 import net.es.oscars.topo.enums.Layer;
 import net.es.oscars.topo.enums.UrnType;
 import net.es.oscars.topo.enums.VertexType;
-import net.es.oscars.topo.svc.TopoService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +30,8 @@ import java.util.stream.Collectors;
 
 /**
  * Created by jeremy on 6/15/16.
+ *
+ * Primarily tests correctness of Logical Link construction and end-point assignment in service-layer topology
  */
 
 @Slf4j
@@ -55,6 +53,8 @@ public class ServiceLayerTopoLogicalLinkTest
     private RequestedVlanPipeE requestedPipe;
     private ScheduleSpecificationE requestedSched;
     private List<UrnE> urnList;
+    private List<ReservedBandwidthE> resvBW;
+    private List<ReservedVlanE> resvVLAN;
 
     @Test
     public void verifyLogicalLinksLinear()
@@ -80,7 +80,7 @@ public class ServiceLayerTopoLogicalLinkTest
                     else if(aURN.equals("switchE:1"))
                         assert(zURN.equals("switchA:2"));
                     else
-                        assert(false);
+                        assert false;
                 });
 
         TopoVertex srcDevice = null, dstDevice = null, srcPort = null, dstPort = null;
@@ -99,7 +99,7 @@ public class ServiceLayerTopoLogicalLinkTest
 
         serviceLayerTopo.buildLogicalLayerSrcNodes(srcDevice, srcPort);
         serviceLayerTopo.buildLogicalLayerDstNodes(dstDevice, dstPort);
-        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, requestedSched, urnList);
+        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, requestedSched, urnList, resvBW, resvVLAN);
 
         log.info("Beginning test: 'verifyLogicalLinksLinear'.");
 
@@ -131,7 +131,7 @@ public class ServiceLayerTopoLogicalLinkTest
             assert(physicalEdges.size() == 10);
 
             String physicalURNs = "";
-            String correctURNs = "";
+            String correctURNs;
 
             if(ll.getA().equals(portA2))
             {
@@ -185,7 +185,7 @@ public class ServiceLayerTopoLogicalLinkTest
                     else if(aURN.equals("switchE:1"))
                         assert(zURN.equals("switchA:2"));
                     else
-                        assert(false);
+                        assert false;
                 });
 
         TopoVertex srcDevice = null, dstDevice = null, srcPort = null, dstPort = null;
@@ -204,7 +204,7 @@ public class ServiceLayerTopoLogicalLinkTest
 
         serviceLayerTopo.buildLogicalLayerSrcNodes(srcDevice, srcPort);
         serviceLayerTopo.buildLogicalLayerDstNodes(dstDevice, dstPort);
-        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, requestedSched, urnList);
+        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, requestedSched, urnList, resvBW, resvVLAN);
 
         log.info("Beginning test: 'verifyLogicalLinksMultipath'.");
 
@@ -306,7 +306,7 @@ public class ServiceLayerTopoLogicalLinkTest
                     else if(aURN.equals("switchE:1"))
                         assert(zURN.equals("switchA:2"));
                     else
-                        assert(false);
+                        assert false;
                 });
 
         TopoVertex srcDevice = null, dstDevice = null, srcPort = null, dstPort = null;
@@ -326,7 +326,7 @@ public class ServiceLayerTopoLogicalLinkTest
         
         serviceLayerTopo.buildLogicalLayerSrcNodes(srcDevice, srcPort);
         serviceLayerTopo.buildLogicalLayerDstNodes(dstDevice, dstPort);
-        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, requestedSched, urnList);
+        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, requestedSched, urnList, resvBW, resvVLAN);
 
         log.info("Beginning test: 'verifyLogicalLinksLongerPath'.");
 
@@ -429,7 +429,7 @@ public class ServiceLayerTopoLogicalLinkTest
                     else if(aURN.equals("switchE:1"))
                         assert(zURN.equals("switchA:2"));
                     else
-                        assert(false);
+                        assert false;
                 });
 
         TopoVertex srcDevice = null, dstDevice = null, srcPort = null, dstPort = null;
@@ -449,7 +449,7 @@ public class ServiceLayerTopoLogicalLinkTest
 
         serviceLayerTopo.buildLogicalLayerSrcNodes(srcDevice, srcPort);
         serviceLayerTopo.buildLogicalLayerDstNodes(dstDevice, dstPort);
-        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, requestedSched, urnList);
+        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, requestedSched, urnList, resvBW, resvVLAN);
 
         log.info("Beginning test: 'verifyLogicalLinksAsymmetric'.");
 
@@ -543,7 +543,7 @@ public class ServiceLayerTopoLogicalLinkTest
                     else if(aURN.equals("switchE:3"))
                         assert(zURN.equals("switchA:2") || zURN.equals("switchA:3") || zURN.equals("switchE:1"));
                     else
-                        assert(false);
+                        assert false;
                 });
 
         TopoVertex srcDevice = null, dstDevice = null, srcPort = null, dstPort = null;
@@ -562,7 +562,7 @@ public class ServiceLayerTopoLogicalLinkTest
 
         serviceLayerTopo.buildLogicalLayerSrcNodes(srcDevice, srcPort);
         serviceLayerTopo.buildLogicalLayerDstNodes(dstDevice, dstPort);
-        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, requestedSched, urnList);
+        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, requestedSched, urnList, resvBW, resvVLAN);
 
         log.info("Beginning test: 'verifyLogicalLinksDisjointMpls'.");
 
@@ -611,7 +611,7 @@ public class ServiceLayerTopoLogicalLinkTest
             }
             else
             {
-                assert(false);
+                assert false;
             }
 
             String physicalURNs = "";
@@ -723,10 +723,10 @@ public class ServiceLayerTopoLogicalLinkTest
                 else if(aURN.equals("routerE:2-virtual"))
                     assert(zURN.equals("routerA:1-virtual"));
                 else
-                    assert(false);
+                    assert false;
             });
 
-        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, requestedSched, urnList);
+        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, requestedSched, urnList, resvBW, resvVLAN);
 
         logicalLinks = serviceLayerTopo.getLogicalLinks();
         llBackup = serviceLayerTopo.getLlBackup();
@@ -911,10 +911,10 @@ public class ServiceLayerTopoLogicalLinkTest
                     else if(aURN.equals("switchE:1"))
                         assert(zURN.equals("routerA:1-virtual"));
                     else
-                        assert(false);
+                        assert false;
                 });
 
-        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, requestedSched, urnList);
+        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, requestedSched, urnList, resvBW, resvVLAN);
 
         logicalLinks = serviceLayerTopo.getLogicalLinks();
         llBackup = serviceLayerTopo.getLlBackup();
@@ -1098,10 +1098,10 @@ public class ServiceLayerTopoLogicalLinkTest
                     else if(aURN.equals("routerE:2-virtual"))
                         assert(zURN.equals("switchA:2"));
                     else
-                        assert(false);
+                        assert false;
                 });
 
-        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, requestedSched, urnList);
+        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, requestedSched, urnList, resvBW, resvVLAN);
 
         logicalLinks = serviceLayerTopo.getLogicalLinks();
         llBackup = serviceLayerTopo.getLlBackup();
@@ -1182,6 +1182,9 @@ public class ServiceLayerTopoLogicalLinkTest
         serviceLayerTopo.setTopology(dummyMPLSTopo);
 
         serviceLayerTopo.createMultilayerTopology();
+
+        resvBW = new ArrayList<>();
+        resvVLAN = new ArrayList<>();
     }
 
     private void buildLinearTopo()
@@ -1408,7 +1411,6 @@ public class ServiceLayerTopoLogicalLinkTest
         mplsTopoEdges.add(edgeMpls_D2_E1);
         mplsTopoEdges.add(edgeMpls_E1_D2);
     }
-
 
 
     private void buildLinearTopoWithMultipleMPLSBranch()
