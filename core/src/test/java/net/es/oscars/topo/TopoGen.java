@@ -55,7 +55,6 @@ public class TopoGen {
 
         switchUrn.setReservableVlans(swResvVlans);
 
-        result.urns.add(switchUrn);
 
 
 
@@ -129,6 +128,10 @@ public class TopoGen {
                 .z(portTwoUrn)
                 .metrics(swPortTwoMetrics)
                 .build();
+
+        result.urns.add(switchUrn);
+        result.urns.add(portOneUrn);
+        result.urns.add(portTwoUrn);
 
         result.urnAdjcys.add(swToPortOne);
         result.urnAdjcys.add(swToPortTwo);

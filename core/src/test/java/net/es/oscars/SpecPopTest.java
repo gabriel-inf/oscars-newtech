@@ -1,6 +1,7 @@
 package net.es.oscars;
 
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.topo.dao.UrnRepository;
 import net.es.oscars.topo.enums.Layer;
 import net.es.oscars.pce.PCEException;
 import net.es.oscars.pss.PSSException;
@@ -18,6 +19,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -28,18 +30,21 @@ import java.util.HashSet;
 @Slf4j
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(CoreUnitTestConfiguration.class)
+@Transactional
 public class SpecPopTest {
 
     @Autowired
     private SpecificationRepository specRepo;
 
+    @Autowired
+    private UrnRepository urnRepo;
 
     @Test
     public void testSave() throws PCEException, PSSException {
 
         if (specRepo.findAll().isEmpty()) {
             SpecificationE spec = getBasicSpec();
-            addEndpoints(spec);
+            this.addEndpoints(spec);
 
             specRepo.save(spec);
 
@@ -50,7 +55,7 @@ public class SpecPopTest {
 
 
 
-    public static SpecificationE addEndpoints(SpecificationE spec) {
+    public SpecificationE addEndpoints(SpecificationE spec) {
 
         RequestedVlanFlowE flow = spec.getRequested().getVlanFlows().iterator().next();
 
@@ -65,6 +70,8 @@ public class SpecPopTest {
                 .build();
         startb1.getCapabilities().add(Layer.ETHERNET);
 
+        urnRepo.save(startb1);
+
         UrnE nersctb1 = UrnE.builder()
                 .deviceModel(DeviceModel.JUNIPER_EX)
                 .capabilities(new HashSet<>())
@@ -75,6 +82,7 @@ public class SpecPopTest {
                 .build();
         nersctb1.getCapabilities().add(Layer.ETHERNET);
 
+        urnRepo.save(nersctb1);
 
 
         UrnE nersctb1_3_1_1 = UrnE.builder()
@@ -85,6 +93,9 @@ public class SpecPopTest {
                 .build();
         nersctb1_3_1_1.getCapabilities().add(Layer.ETHERNET);
 
+        urnRepo.save(nersctb1_3_1_1);
+
+
         UrnE startb1_1_1_1 = UrnE.builder()
                 .capabilities(new HashSet<>())
                 .urnType(UrnType.IFCE)
@@ -93,6 +104,7 @@ public class SpecPopTest {
                 .build();
         startb1_1_1_1.getCapabilities().add(Layer.ETHERNET);
 
+        urnRepo.save(startb1_1_1_1);
 
 
         RequestedVlanJunctionE aj = RequestedVlanJunctionE.builder()
@@ -143,7 +155,7 @@ public class SpecPopTest {
     }
 
 
-    public static SpecificationE getBasicSpec() {
+    public SpecificationE getBasicSpec() {
         Instant nowInstant = Instant.now();
         Date notBefore = new Date(nowInstant.plus(15L, ChronoUnit.MINUTES).getEpochSecond());
         Date notAfter = new Date(nowInstant.plus(1L, ChronoUnit.DAYS).getEpochSecond());

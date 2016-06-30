@@ -51,6 +51,7 @@ public class TopoPopTest {
         TopoGen tg = new TopoGen();
         TopoGen.TopoGenResult tgr = tg.singleSwitch();
         urnRepo.save(tgr.urns);
+        urnRepo.findAll();
 
     }
 

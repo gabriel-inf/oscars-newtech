@@ -19,6 +19,8 @@ public class ReservableVlanE {
     @GeneratedValue
     private Long id;
 
+    @OneToOne
+    private UrnE urn;
 
     @ElementCollection
     @CollectionTable
