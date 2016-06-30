@@ -11,9 +11,11 @@ import net.es.oscars.topo.beans.TopoEdge;
 import net.es.oscars.topo.ent.UrnE;
 import net.es.oscars.topo.enums.DeviceModel;
 import net.es.oscars.topo.enums.Layer;
+import net.es.oscars.topo.enums.UrnType;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -374,13 +376,14 @@ public class PCEAssistant {
 
         // Create Reserved Bandwidth
         // NOTE: Has null urn (for now)
-        ReservedBandwidthE rsvBw = createReservedBandwidth(aJunction.getDeviceUrn(), azMbps, zaMbps, sched);
+        Set<ReservedBandwidthE> rsvBws = createBandwidthForEros(azEro, azMbps, zaMbps, sched, urnMap);
+        rsvBws.addAll(createBandwidthForEros(zaEro, azMbps, zaMbps, sched, urnMap));
         return ReservedEthPipeE.builder()
                 .pipeType(decidePipeType(aModel, zModel))
                 .aJunction(aJunction)
                 .zJunction(zJunction)
                 .reservedPssResources(new HashSet<>())
-                .reservedBandwidth(rsvBw)
+                .reservedBandwidths(rsvBws)
                 .azERO(azEro)
                 .zaERO(zaEro)
                 .build();
@@ -459,6 +462,17 @@ public class PCEAssistant {
                 .beginning(sched.getNotBefore().toInstant())
                 .ending(sched.getNotAfter().toInstant())
                 .build();
+    }
+
+    private Set<ReservedBandwidthE> createBandwidthForEros(List<String> ero, Integer azMbps, Integer zaMbps,
+                                                           ScheduleSpecificationE sched, Map<String, UrnE> urnMap) {
+        return ero
+                .stream()
+                .filter(urnMap::containsKey)
+                .map(urnMap::get)
+                .filter(urn -> urn.getUrnType().equals(UrnType.IFCE))
+                .map(urn -> createReservedBandwidth(urn, azMbps, zaMbps, sched))
+                .collect(Collectors.toSet());
     }
 
     // TODO: fix this
