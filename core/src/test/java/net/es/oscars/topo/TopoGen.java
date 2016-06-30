@@ -50,7 +50,6 @@ public class TopoGen {
 
         ReservableVlanE swResvVlans = ReservableVlanE.builder()
                 .vlanRanges(swVlanRangeSet)
-                .urn(switchUrn)
                 .build();
 
         switchUrn.setReservableVlans(swResvVlans);
@@ -80,7 +79,6 @@ public class TopoGen {
 
         ReservableVlanE portOneResvVlans = ReservableVlanE.builder()
                 .vlanRanges(portOneVlanRangeSet)
-                .urn(portOneUrn)
                 .build();
         portOneUrn.setReservableVlans(portOneResvVlans);
 
@@ -107,7 +105,6 @@ public class TopoGen {
 
         ReservableVlanE portTwoResvVlans = ReservableVlanE.builder()
                 .vlanRanges(portTwoVlanRangeSet)
-                .urn(portTwoUrn)
                 .build();
         portTwoUrn.setReservableVlans(portTwoResvVlans);
 
