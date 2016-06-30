@@ -20,11 +20,6 @@ public class ReservableVlanE {
     private Long id;
 
 
-    @NonNull
-    @OneToOne
-    private UrnE urn;
-
-
     @ElementCollection
     @CollectionTable
     private Set<IntRangeE> vlanRanges;

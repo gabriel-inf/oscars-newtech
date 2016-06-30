@@ -148,4 +148,13 @@ public class TopoService {
                 .map(UrnE::getUrn)
                 .collect(Collectors.toList());
     }
+
+
+    public VertexType getVertexTypeFromDeviceType(DeviceType deviceType)
+    {
+        if(deviceType.equals(DeviceType.SWITCH))
+            return VertexType.SWITCH;
+        else
+            return VertexType.ROUTER;
+    }
 }

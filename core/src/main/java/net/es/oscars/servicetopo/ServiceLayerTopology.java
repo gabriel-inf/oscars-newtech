@@ -8,18 +8,19 @@ import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.pce.DijkstraPCE;
 import net.es.oscars.pce.PruningService;
 import net.es.oscars.resv.ent.RequestedVlanPipeE;
+import net.es.oscars.resv.ent.ReservedBandwidthE;
+import net.es.oscars.resv.ent.ReservedVlanE;
+import net.es.oscars.resv.ent.ScheduleSpecificationE;
 import net.es.oscars.topo.beans.TopoEdge;
 import net.es.oscars.topo.beans.TopoVertex;
 import net.es.oscars.topo.beans.Topology;
-import net.es.oscars.topo.enums.*;
-import net.es.oscars.topo.svc.TopoService;
+import net.es.oscars.topo.ent.UrnE;
+import net.es.oscars.topo.enums.Layer;
+import net.es.oscars.topo.enums.VertexType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -30,9 +31,6 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 public class ServiceLayerTopology
 {
-    @Autowired
-    TopoService topoService;
-
     @Autowired
     PruningService pruningService;
 
@@ -221,7 +219,7 @@ public class ServiceLayerTopology
     }
 
     //Calls Pruner and Dijkstra to compute shortest MPLS-layer paths, calculates weights of those paths, and maps them to the appropriate logical links
-    public void calculateLogicalLinkWeights(RequestedVlanPipeE requestedVlanPipe)
+    public void calculateLogicalLinkWeights(RequestedVlanPipeE requestedVlanPipe, ScheduleSpecificationE requestedSchedule, List<UrnE> urnList, List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList)
     {
         log.info("Performing routing on MPLS-Layer topology to assign weights to Service-Layer logical links.");
         Set<LogicalEdge> logicalLinksToRemoveFromServiceLayer = new HashSet<>();
@@ -233,11 +231,8 @@ public class ServiceLayerTopology
 
         // Step 1: Prune MPLS-Layer topology once before considering any logical links.
         log.info("step 1: pruning MPLS-layer by bandwidth and vlan availability.");
-        //Topology prunedMPLSTopo = pruningService.pruneWithPipe(mplsLayerTopo, requestedVlanPipe);  //PUT ME BACK IN!!!!!!!!!!!!!!!
-        Topology prunedMPLSTopo = new Topology();
-        prunedMPLSTopo.getEdges().addAll(mplsLayerTopo.getEdges());                                  // DELETE ME!!!!!!
-        prunedMPLSTopo.getVertices().addAll(mplsLayerTopo.getVertices());                            // DELETE ME!!!!!!
-        prunedMPLSTopo.setLayer(mplsLayerTopo.getLayer());                                           // DELETE ME!!!!!!
+        Topology prunedMPLSTopo = pruningService.pruneWithPipe(mplsLayerTopo, requestedVlanPipe, requestedSchedule, urnList, rsvBwList, rsvVlanList);
+
         log.info("step 1 COMPLETE.");
 
         for(LogicalEdge oneLogicalLink : logicalLinks)
@@ -294,7 +289,7 @@ public class ServiceLayerTopology
             if(physEdgeAtoMpls == null || physEdgeZtoMpls == null || physEdgeMplstoA == null || physEdgeMplstoZ == null)
             {
                 log.error("service-layer topology has incorrectly identified adaptation edges");
-                assert(false);
+                assert false;
             }
 
             // Step 2: Prune the adaptation (Ethernet-MPLS) edges and ports to ensure this logical link is worth building.
@@ -314,11 +309,8 @@ public class ServiceLayerTopology
 
             adaptationTopo.setVertices(adaptationPorts);
             adaptationTopo.setEdges(adaptationEdges);
-            //Topology prunedAdaptationTopo = pruningService.pruneWithPipe(adaptationTopo, requestedVlanPipe);  //PUT ME BACK IN!!!!!!!!!!!!!!!
-            Topology prunedAdaptationTopo = new Topology();
-            prunedAdaptationTopo.getEdges().addAll(adaptationTopo.getEdges());                                  // DELETE ME!!!!!!
-            prunedAdaptationTopo.getVertices().addAll(adaptationTopo.getVertices());                            // DELETE ME!!!!!!
-            prunedAdaptationTopo.setLayer(adaptationTopo.getLayer());                                           // DELETE ME!!!!!!
+
+            Topology prunedAdaptationTopo = pruningService.pruneWithPipe(adaptationTopo, requestedVlanPipe, requestedSchedule, rsvBwList, rsvVlanList);
 
             if(!prunedAdaptationTopo.equals(adaptationTopo))
             {
@@ -471,7 +463,77 @@ public class ServiceLayerTopology
         else
         {
             log.error("Topology passed to ServiceLayerTopology class with invalid Layer.");
-            assert(false);
+            assert false;
         }
+    }
+
+
+    public Topology getSLTopology()
+    {
+        Topology topo = new Topology();
+
+        topo.setLayer(Layer.ETHERNET);
+        topo.getVertices().addAll(serviceLayerDevices);
+        topo.getVertices().addAll(serviceLayerPorts);
+        topo.getEdges().addAll(serviceLayerLinks);
+        topo.getEdges().addAll(logicalLinks);
+
+        return topo;
+    }
+
+    public TopoVertex getVirtualNode(TopoVertex realNode)
+    {
+        for(TopoVertex oneNode : serviceLayerDevices)
+        {
+            if(oneNode.getVertexType().equals(VertexType.VIRTUAL))
+            {
+                if(oneNode.getUrn().contains(realNode.getUrn()))
+                {
+                    return oneNode;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public List<TopoEdge> getActualERO(List<TopoEdge> serviceLayerERO)
+    {
+        List<TopoEdge> actualERO = new LinkedList<>();
+
+        for(TopoEdge oneEdge : serviceLayerERO)
+        {
+            TopoVertex physicalA = oneEdge.getA();
+            TopoVertex physicalZ = oneEdge.getZ();
+
+            boolean edgeIsLogical = false;
+
+            for(LogicalEdge oneLogical : logicalLinks)
+            {
+                TopoVertex logicalA = oneLogical.getA();
+                TopoVertex logicalZ = oneLogical.getZ();
+
+                // This link is logical - Get corresponding physical ERO
+                if(physicalA.equals(logicalA) && physicalZ.equals(logicalZ))
+                {
+                    actualERO.addAll(oneLogical.getCorrespondingTopoEdges());
+                    edgeIsLogical = true;
+
+                    break;
+                }
+            }
+
+            // This link is NOT logical - Part of actual ERO
+            if(!edgeIsLogical)
+            {
+                actualERO.add(oneEdge);
+            }
+        }
+
+        // Remove any edges containing VIRTUAL nodes - they don't exist in the actual ERO
+        actualERO.removeIf(e -> e.getA().getVertexType().equals(VertexType.VIRTUAL));
+        actualERO.removeIf(e -> e.getZ().getVertexType().equals(VertexType.VIRTUAL));
+
+        return  actualERO;
     }
 }

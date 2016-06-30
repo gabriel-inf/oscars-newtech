@@ -5,7 +5,6 @@ import net.es.oscars.topo.ent.UrnE;
 
 import javax.persistence.*;
 import java.time.Instant;
-import java.util.List;
 
 @Data
 @Builder
@@ -22,7 +21,7 @@ public class ReservedBandwidthE {
     @OneToOne(cascade = CascadeType.ALL)
     private UrnE urn;
 
-    private Integer bandwidth;
+    //private Integer bandwidth;
 
     private Integer inBandwidth;
 

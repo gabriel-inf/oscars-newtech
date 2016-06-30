@@ -18,10 +18,6 @@ public class ReservablePssResourceE {
     private Long id;
 
     @NonNull
-    @ManyToOne
-    private UrnE urn;
-
-    @NonNull
     private ResourceType type;
 
     @ElementCollection
