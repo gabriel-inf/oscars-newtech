@@ -26,7 +26,4 @@ public class BasicVlanSpecification {
 
     @NonNull
     private BasicVlanFlow basicVlanFlow;
-
-
-
 }

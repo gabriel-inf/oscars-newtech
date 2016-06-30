@@ -24,8 +24,8 @@ public class ReservedEthPipeE {
     @OneToOne(cascade = CascadeType.ALL)
     private ReservedVlanJunctionE zJunction;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    private ReservedBandwidthE reservedBandwidth;
+    @OneToMany(cascade = CascadeType.ALL)
+    private Set<ReservedBandwidthE> reservedBandwidths;
 
     @OneToMany(cascade = CascadeType.ALL)
     private Set<ReservedPssResourceE> reservedPssResources;

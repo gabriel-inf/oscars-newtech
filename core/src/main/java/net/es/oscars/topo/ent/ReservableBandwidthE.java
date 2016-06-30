@@ -11,15 +11,10 @@ import javax.persistence.*;
 @AllArgsConstructor
 @Builder
 @Entity
-
 public class ReservableBandwidthE {
     @Id
     @GeneratedValue
     private Long id;
-
-    @NonNull
-    @OneToOne
-    private UrnE urn;
 
 
     private Integer bandwidth;

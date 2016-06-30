@@ -134,6 +134,7 @@ public class SpecPopTest {
                 .zJunction(zj)
                 .azMbps(1000)
                 .zaMbps(1000)
+                .eroPalindromic(true)
                 .pipeType(EthPipeType.REQUESTED)
                 .build();
 

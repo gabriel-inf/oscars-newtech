@@ -2,15 +2,16 @@ package net.es.oscars.pce;
 
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.CoreUnitTestConfiguration;
+import net.es.oscars.resv.ent.ReservedBandwidthE;
+import net.es.oscars.resv.ent.ReservedVlanE;
+import net.es.oscars.topo.beans.TopoEdge;
+import net.es.oscars.topo.beans.TopoVertex;
 import net.es.oscars.topo.beans.Topology;
-import net.es.oscars.topo.dao.UrnRepository;
 import net.es.oscars.topo.ent.IntRangeE;
 import net.es.oscars.topo.ent.ReservableBandwidthE;
 import net.es.oscars.topo.ent.ReservableVlanE;
-import net.es.oscars.topo.enums.*;
-import net.es.oscars.topo.beans.TopoEdge;
-import net.es.oscars.topo.beans.TopoVertex;
 import net.es.oscars.topo.ent.UrnE;
+import net.es.oscars.topo.enums.*;
 import net.es.oscars.topo.svc.TopoService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.time.Instant;
 import java.util.*;
 
 @Slf4j
@@ -41,17 +43,23 @@ public class PruningServiceTest {
         List<UrnE> urns = buildUrnList();
         log.info("Built list of URNs");
         log.info(urns.toString());
+        List<ReservedBandwidthE> rsvBwList = buildReservedBandwidthList(urns, 10);
+        log.info("Built list of Reserved Bandwidth");
+        log.info(rsvBwList.toString());
+        List<ReservedVlanE> rsvVlanList = buildReservedVlanList(urns, Arrays.asList(1,2,3));
+        log.info("Built list of Reserved VLANs");
+        log.info(rsvVlanList.toString());
 
         log.info("Pruning - Remove no edges");
-        Topology pruned = pruningService.pruneWithBw(topo, 100, urns);
+        Topology pruned = pruningService.pruneWithBw(topo, 100, urns, rsvBwList, rsvVlanList);
         assert(pruned.getEdges().size() == topo.getEdges().size());
 
         log.info("Pruning - Remove every edge");
-        pruned = pruningService.pruneWithBw(topo, 175, urns);
+        pruned = pruningService.pruneWithBw(topo, 175, urns, rsvBwList, rsvVlanList);
         assert(pruned.getEdges().isEmpty());
 
         log.info("Pruning - Remove only some edges");
-        pruned = pruningService.pruneWithBw(topo, 150, urns);
+        pruned = pruningService.pruneWithBw(topo, 140, urns, rsvBwList, rsvVlanList);
         assert(pruned.getEdges().size() < topo.getEdges().size());
         assert(!pruned.getEdges().isEmpty());
         assert(!getEdgeByEndpoints(pruned, "swA", "swA:1").isPresent());
@@ -62,7 +70,27 @@ public class PruningServiceTest {
         assert(!getEdgeByEndpoints(pruned, "swB:2", "swC:1").isPresent());
         assert(!getEdgeByEndpoints(pruned, "swC:1", "swC").isPresent());
         assert(!getEdgeByEndpoints(pruned, "swC", "swC:2").isPresent());
+
+        log.info("Pruning - Too much Bandwidth Already Reserved");
+        pruned = pruningService.pruneWithBw(topo, 1, urns, buildReservedBandwidthList(urns, 300), rsvVlanList);
+        assert(pruned.getEdges().isEmpty());
+
+
+        log.info("Pruning - All VLANs reserved");
+        pruned = pruningService.pruneWithBw(topo, 1, urns, rsvBwList,
+                buildReservedVlanList(urns, Arrays.asList(1,2,3,4,5,6,7,8,9,10,11,12,13,
+                        14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,
+                        35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50)));
+        assert(pruned.getEdges().isEmpty());
+
+        log.info("Pruning - All VLANs and Bandwidth reserved");
+        pruned = pruningService.pruneWithBw(topo, 1, urns, buildReservedBandwidthList(urns, 300),
+                buildReservedVlanList(urns, Arrays.asList(1,2,3,4,5,6,7,8,9,10,11,12,13,
+                        14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,
+                        35,36,37,38,39,40,41,42,43,44,45,46,47,49,50)));
+        assert(pruned.getEdges().isEmpty());
     }
+
 
     @Test
     public void testAZBwPrune(){
@@ -73,17 +101,23 @@ public class PruningServiceTest {
         List<UrnE> urns = buildUrnList();
         log.info("Built list of URNs");
         log.info(urns.toString());
+        List<ReservedBandwidthE> rsvBwList = buildReservedBandwidthList(urns, 10);
+        log.info("Built list of Reserved Bandwidth");
+        log.info(rsvBwList.toString());
+        List<ReservedVlanE> rsvVlanList = buildReservedVlanList(urns, Arrays.asList(1,2,3));
+        log.info("Built list of Reserved VLANs");
+        log.info(rsvVlanList.toString());
 
         log.info("Pruning - Remove no edges");
-        Topology pruned = pruningService.pruneWithAZBw(topo, 100, 125, urns);
+        Topology pruned = pruningService.pruneWithAZBw(topo, 100, 115, urns, rsvBwList, rsvVlanList);
         assert(pruned.getEdges().size() == topo.getEdges().size());
 
         log.info("Pruning - Remove every edge");
-        pruned = pruningService.pruneWithAZBw(topo, 175, 100, urns);
+        pruned = pruningService.pruneWithAZBw(topo, 175, 100, urns, rsvBwList, rsvVlanList);
         assert(pruned.getEdges().isEmpty());
 
         log.info("Pruning - Remove only some edges");
-        pruned = pruningService.pruneWithAZBw(topo, 150, 125, urns);
+        pruned = pruningService.pruneWithAZBw(topo, 140, 115, urns, rsvBwList, rsvVlanList);
         assert(pruned.getEdges().size() < topo.getEdges().size());
         assert(!pruned.getEdges().isEmpty());
         assert(getEdgeByEndpoints(pruned, "swA", "swA:1").isPresent());
@@ -94,6 +128,25 @@ public class PruningServiceTest {
         assert(!getEdgeByEndpoints(pruned, "swB:2", "swC:1").isPresent());
         assert(!getEdgeByEndpoints(pruned, "swC:1", "swC").isPresent());
         assert(getEdgeByEndpoints(pruned, "swC", "swC:2").isPresent());
+
+        log.info("Pruning - Too much Bandwidth Already Reserved");
+        pruned = pruningService.pruneWithAZBw(topo, 1, 1, urns, buildReservedBandwidthList(urns, 300), rsvVlanList);
+        assert(pruned.getEdges().isEmpty());
+
+
+        log.info("Pruning - All VLANs reserved");
+        pruned = pruningService.pruneWithAZBw(topo, 1, 1, urns, rsvBwList,
+                buildReservedVlanList(urns, Arrays.asList(1,2,3,4,5,6,7,8,9,10,11,12,13,
+                        14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,
+                        35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50)));
+        assert(pruned.getEdges().isEmpty());
+
+        log.info("Pruning - All VLANs and Bandwidth reserved");
+        pruned = pruningService.pruneWithAZBw(topo, 1, 1, urns, buildReservedBandwidthList(urns, 300),
+                buildReservedVlanList(urns, Arrays.asList(1,2,3,4,5,6,7,8,9,10,11,12,13,
+                        14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,
+                        35,36,37,38,39,40,41,42,43,44,45,46,47,49,50)));
+        assert(pruned.getEdges().isEmpty());
     }
 
     @Test
@@ -105,17 +158,23 @@ public class PruningServiceTest {
         List<UrnE> urns = buildUrnList();
         log.info("Built list of URNs");
         log.info(urns.toString());
+        List<ReservedBandwidthE> rsvBwList = buildReservedBandwidthList(urns, 10);
+        log.info("Built list of Reserved Bandwidth");
+        log.info(rsvBwList.toString());
+        List<ReservedVlanE> rsvVlanList = buildReservedVlanList(urns, Arrays.asList(1,2,3));
+        log.info("Built list of Reserved VLANs");
+        log.info(rsvVlanList.toString());
 
         log.info("Pruning - Remove no edges");
-        Topology pruned = pruningService.pruneWithBwVlans(topo, 100, "2:5", urns);
+        Topology pruned = pruningService.pruneWithBwVlans(topo, 100, "2:5", urns, rsvBwList, rsvVlanList);
         assert(pruned.getEdges().size() == topo.getEdges().size());
 
         log.info("Pruning - Remove every edge");
-        pruned = pruningService.pruneWithBwVlans(topo, 150, "90:120", urns);
+        pruned = pruningService.pruneWithBwVlans(topo, 150, "90:120", urns, rsvBwList, rsvVlanList);
         assert(pruned.getEdges().isEmpty());
 
         log.info("Pruning - Remove only some edges");
-        pruned = pruningService.pruneWithBwVlans(topo, 125, "11:20,21:27,29", urns);
+        pruned = pruningService.pruneWithBwVlans(topo, 115, "11:20,21:27,29", urns, rsvBwList, rsvVlanList);
         log.info(pruned.getEdges().toString());
         assert(pruned.getEdges().size() < topo.getEdges().size());
         assert(!pruned.getEdges().isEmpty());
@@ -127,6 +186,27 @@ public class PruningServiceTest {
         assert(getEdgeByEndpoints(pruned, "swB:2", "swC:1").isPresent());
         assert(getEdgeByEndpoints(pruned, "swC:1", "swC").isPresent());
         assert(getEdgeByEndpoints(pruned, "swC", "swC:2").isPresent());
+
+
+        log.info("Pruning - Too much Bandwidth Already Reserved");
+        pruned = pruningService.pruneWithBwVlans(topo, 1, "1:51", urns, buildReservedBandwidthList(urns, 300), rsvVlanList);
+        assert(pruned.getEdges().isEmpty());
+
+
+        log.info("Pruning - All VLANs reserved");
+        pruned = pruningService.pruneWithBwVlans(topo, 1, "1:50", urns, rsvBwList,
+                buildReservedVlanList(urns, Arrays.asList(1,2,3,4,5,6,7,8,9,10,11,12,13,
+                        14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,
+                        35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50)));
+        assert(pruned.getEdges().isEmpty());
+
+        log.info("Pruning - All VLANs and Bandwidth reserved");
+        pruned = pruningService.pruneWithBwVlans(topo, 1, "1:50", urns, buildReservedBandwidthList(urns, 300),
+                buildReservedVlanList(urns, Arrays.asList(1,2,3,4,5,6,7,8,9,10,11,12,13,
+                        14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,
+                        35,36,37,38,39,40,41,42,43,44,45,46,47,49,50)));
+        assert(pruned.getEdges().isEmpty());
+
     }
 
     @Test
@@ -138,17 +218,23 @@ public class PruningServiceTest {
         List<UrnE> urns = buildUrnList();
         log.info("Built list of URNs");
         log.info(urns.toString());
+        List<ReservedBandwidthE> rsvBwList = buildReservedBandwidthList(urns, 10);
+        log.info("Built list of Reserved Bandwidth");
+        log.info(rsvBwList.toString());
+        List<ReservedVlanE> rsvVlanList = buildReservedVlanList(urns, Arrays.asList(1,2,3));
+        log.info("Built list of Reserved VLANs");
+        log.info(rsvVlanList.toString());
 
         log.info("Pruning - Remove no edges");
-        Topology pruned = pruningService.pruneWithAZBwVlans(topo, 100, 125, "3,4,10", urns);
+        Topology pruned = pruningService.pruneWithAZBwVlans(topo, 100, 115, "3,4,10", urns, rsvBwList, rsvVlanList);
         assert(pruned.getEdges().size() == topo.getEdges().size());
 
         log.info("Pruning - Remove every edge");
-        pruned = pruningService.pruneWithAZBwVlans(topo, 175, 100, "80:90", urns);
+        pruned = pruningService.pruneWithAZBwVlans(topo, 175, 100, "80:90", urns, rsvBwList, rsvVlanList);
         assert(pruned.getEdges().isEmpty());
 
         log.info("Pruning - Remove only some edges");
-        pruned = pruningService.pruneWithAZBwVlans(topo, 100, 125, "40:45,50", urns);
+        pruned = pruningService.pruneWithAZBwVlans(topo, 100, 115, "40:45,50", urns, rsvBwList, rsvVlanList);
         assert(pruned.getEdges().size() < topo.getEdges().size());
         assert(!pruned.getEdges().isEmpty());
         assert(!getEdgeByEndpoints(pruned, "swA", "swA:1").isPresent());
@@ -159,6 +245,27 @@ public class PruningServiceTest {
         assert(!getEdgeByEndpoints(pruned, "swB:2", "swC:1").isPresent());
         assert(getEdgeByEndpoints(pruned, "swC:1", "swC").isPresent());
         assert(getEdgeByEndpoints(pruned, "swC", "swC:2").isPresent());
+
+
+        log.info("Pruning - Too much Bandwidth Already Reserved");
+        pruned = pruningService.pruneWithAZBwVlans(topo, 1, 1, "1:51", urns, buildReservedBandwidthList(urns, 300),
+                rsvVlanList);
+        assert(pruned.getEdges().isEmpty());
+
+
+        log.info("Pruning - All VLANs reserved");
+        pruned = pruningService.pruneWithAZBwVlans(topo, 1, 1, "1:50", urns, rsvBwList,
+                buildReservedVlanList(urns, Arrays.asList(1,2,3,4,5,6,7,8,9,10,11,12,13,
+                        14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,
+                        35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50)));
+        assert(pruned.getEdges().isEmpty());
+
+        log.info("Pruning - All VLANs and Bandwidth reserved");
+        pruned = pruningService.pruneWithAZBwVlans(topo, 1, 1, "1:50", urns, buildReservedBandwidthList(urns, 300),
+                buildReservedVlanList(urns, Arrays.asList(1,2,3,4,5,6,7,8,9,10,11,12,13,
+                        14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,
+                        35,36,37,38,39,40,41,42,43,44,45,46,47,49,50)));
+        assert(pruned.getEdges().isEmpty());
     }
 
     @Test
@@ -166,57 +273,36 @@ public class PruningServiceTest {
         log.info("Pruning using poorly formatted VLAN expressions");
         Topology topo = buildTopology();
         List<UrnE> urns = buildUrnList();
+        List<ReservedBandwidthE> rsvBwList = buildReservedBandwidthList(urns, 10);
+        List<ReservedVlanE> rsvVlanList = buildReservedVlanList(urns, Arrays.asList(1,2,3));
+
         log.info("VLAN expression: 9-10");
-        Topology pruned = pruningService.pruneWithBwVlans(topo, 20, "9-10", urns);
+        Topology pruned = pruningService.pruneWithBwVlans(topo, 20, "9-10", urns, rsvBwList, rsvVlanList);
         assert(pruned.getEdges().size() == topo.getEdges().size());
+
         log.info("VLAN expression: 20:3");
-        pruned = pruningService.pruneWithBwVlans(topo, 20, "20:3", urns);
+        pruned = pruningService.pruneWithBwVlans(topo, 20, "20:3", urns, rsvBwList, rsvVlanList);
         assert(pruned.getEdges().size() == topo.getEdges().size());
+
         log.info("VLAN expression: jiofashjfiasf");
-        pruned = pruningService.pruneWithBwVlans(topo, 20, "jiofashjfiasf", urns);
-        assert(pruned.getEdges().size() == topo.getEdges().size());
-    }
-
-    //@Test
-    public void testBwPruneEthernet(){
-        log.info("Pruning using only Bandwidth");
-        Topology topo = topoService.layer(Layer.ETHERNET);
-        log.info("Retrieved Topology");
-        log.info(topo.toString());
-
-        log.info("Pruning - Remove no edges");
-        Topology pruned = pruningService.pruneWithBw(topo, 100);
+        pruned = pruningService.pruneWithBwVlans(topo, 20, "jiofashjfiasf", urns, rsvBwList, rsvVlanList);
         assert(pruned.getEdges().size() == topo.getEdges().size());
 
-        log.info("Pruning - Remove every edge");
-        pruned = pruningService.pruneWithBw(topo, 175);
-        assert(pruned.getEdges().isEmpty());
-
-        log.info("Pruning - Remove only some edges");
-        pruned = pruningService.pruneWithBw(topo, 150);
-        assert(pruned.getEdges().size() < topo.getEdges().size());
-        assert(!pruned.getEdges().isEmpty());
-    }
-
-    //@Test
-    public void testBwPruneMPLS(){
-        log.info("Pruning using only Bandwidth");
-        Topology topo = topoService.layer(Layer.MPLS);
-        log.info("Retrieved Topology");
-        log.info(topo.toString());
-
-        log.info("Pruning - Remove no edges");
-        Topology pruned = pruningService.pruneWithBw(topo, 100);
+        log.info("Pruning using empty Reserved Bandwidth List");
+        pruned = pruningService.pruneWithBwVlans(topo, 20, "1:10", urns, new ArrayList<>(), rsvVlanList);
         assert(pruned.getEdges().size() == topo.getEdges().size());
 
-        log.info("Pruning - Remove every edge");
-        pruned = pruningService.pruneWithBw(topo, 175);
-        assert(pruned.getEdges().isEmpty());
+        log.info("Pruning using empty Reserved VLAN List");
+        pruned = pruningService.pruneWithBwVlans(topo, 20, "1", urns, rsvBwList, new ArrayList<>());
+        assert(pruned.getEdges().size() == topo.getEdges().size());
 
-        log.info("Pruning - Remove only some edges");
-        pruned = pruningService.pruneWithBw(topo, 150);
-        assert(pruned.getEdges().size() < topo.getEdges().size());
-        assert(!pruned.getEdges().isEmpty());
+        log.info("Pruning using empty Reserved VLAN and Bandwidth List");
+        pruned = pruningService.pruneWithBwVlans(topo, 20, "1", urns, new ArrayList<>(), new ArrayList<>());
+        assert(pruned.getEdges().size() == topo.getEdges().size());
+
+        log.info("Pruning using empty Reserved VLAN and Bandwidth List and incorrect expression");
+        pruned = pruningService.pruneWithBwVlans(topo, 20, "~~~", urns, new ArrayList<>(), new ArrayList<>());
+        assert(pruned.getEdges().size() == topo.getEdges().size());
     }
 
 
@@ -315,8 +401,8 @@ public class PruningServiceTest {
                 .valid(true)
                 .build();
         swAIn.getCapabilities().add(Layer.ETHERNET);
-        swAIn.setReservableBandwidth(createReservableBandwidth(swAIn, 125, 150));
-        swAIn.setReservableVlans(createReservableVlans(swAIn, 1, 10));
+        swAIn.setReservableBandwidth(createReservableBandwidth(125, 150));
+        swAIn.setReservableVlans(createReservableVlans(1, 10));
 
         UrnE swAOut = UrnE.builder()
                 .capabilities(new HashSet<>())
@@ -325,8 +411,8 @@ public class PruningServiceTest {
                 .valid(true)
                 .build();
         swAOut.getCapabilities().add(Layer.ETHERNET);
-        swAOut.setReservableBandwidth(createReservableBandwidth(swAOut, 150, 150));
-        swAOut.setReservableVlans(createReservableVlans(swAOut, 1, 10));
+        swAOut.setReservableBandwidth(createReservableBandwidth(150, 150));
+        swAOut.setReservableVlans(createReservableVlans(1, 10));
 
         UrnE swBIn = UrnE.builder()
                 .capabilities(new HashSet<>())
@@ -335,8 +421,8 @@ public class PruningServiceTest {
                 .valid(true)
                 .build();
         swBIn.getCapabilities().add(Layer.ETHERNET);
-        swBIn.setReservableBandwidth(createReservableBandwidth(swBIn, 150, 150));
-        swBIn.setReservableVlans(createReservableVlans(swBIn, 1, 20));
+        swBIn.setReservableBandwidth(createReservableBandwidth(150, 150));
+        swBIn.setReservableVlans(createReservableVlans(1, 20));
 
         UrnE swBOut = UrnE.builder()
                 .capabilities(new HashSet<>())
@@ -345,8 +431,8 @@ public class PruningServiceTest {
                 .valid(true)
                 .build();
         swBOut.getCapabilities().add(Layer.ETHERNET);
-        swBOut.setReservableBandwidth(createReservableBandwidth(swBOut, 125, 150));
-        swBOut.setReservableVlans(createReservableVlans(swBOut, 1, 20));
+        swBOut.setReservableBandwidth(createReservableBandwidth(125, 150));
+        swBOut.setReservableVlans(createReservableVlans(1, 20));
 
         UrnE swCIn = UrnE.builder()
                 .capabilities(new HashSet<>())
@@ -355,8 +441,8 @@ public class PruningServiceTest {
                 .valid(true)
                 .build();
         swCIn.getCapabilities().add(Layer.ETHERNET);
-        swCIn.setReservableBandwidth(createReservableBandwidth(swCIn, 125, 125));
-        swCIn.setReservableVlans(createReservableVlans(swCIn, 1, 50));
+        swCIn.setReservableBandwidth(createReservableBandwidth(125, 125));
+        swCIn.setReservableVlans(createReservableVlans(1, 50));
 
         UrnE swCOut = UrnE.builder()
                 .capabilities(new HashSet<>())
@@ -365,8 +451,8 @@ public class PruningServiceTest {
                 .valid(true)
                 .build();
         swCOut.getCapabilities().add(Layer.ETHERNET);
-        swCOut.setReservableBandwidth(createReservableBandwidth(swCOut, 150, 125));
-        swCOut.setReservableVlans(createReservableVlans(swCOut, 1, 50));
+        swCOut.setReservableBandwidth(createReservableBandwidth(150, 125));
+        swCOut.setReservableVlans(createReservableVlans(1, 50));
 
         urns.add(swA);
         urns.add(swAIn);
@@ -387,22 +473,57 @@ public class PruningServiceTest {
                 .findAny();
     }
 
-    private ReservableVlanE createReservableVlans(UrnE urn, Integer floor, Integer ceiling){
+    private ReservableVlanE createReservableVlans(Integer floor, Integer ceiling){
         Set<IntRangeE> intRanges= new HashSet<>();
         intRanges.add(IntRangeE.builder().ceiling(ceiling).floor(floor).build());
         return ReservableVlanE.builder()
                 .vlanRanges(intRanges)
-                .urn(urn)
                 .build();
     }
 
-    private ReservableBandwidthE createReservableBandwidth(UrnE urn, Integer ingress, Integer egress){
+    private ReservableBandwidthE createReservableBandwidth(Integer ingress, Integer egress){
         Integer max = Math.max(ingress, egress);
         return ReservableBandwidthE.builder()
                 .bandwidth(max)
                 .ingressBw(ingress)
                 .egressBw(egress)
-                .urn(urn)
                 .build();
+    }
+
+    private List<ReservedBandwidthE> buildReservedBandwidthList(List<UrnE> urns, Integer bandwidth) {
+        List<ReservedBandwidthE> reservedBandwidth = new ArrayList<>();
+
+        for(UrnE urn : urns){
+            if(urn.getUrnType() == UrnType.IFCE){
+                ReservedBandwidthE rsvBw = ReservedBandwidthE.builder()
+                        .urn(urn)
+                        .inBandwidth(bandwidth)
+                        .egBandwidth(bandwidth)
+                        .beginning(Instant.MIN)
+                        .ending(Instant.MAX)
+                        .build();
+                reservedBandwidth.add(rsvBw);
+            }
+        }
+        return reservedBandwidth;
+    }
+
+    private List<ReservedVlanE> buildReservedVlanList(List<UrnE> urns, List<Integer> vlanIds) {
+        List<ReservedVlanE> reservedVlans = new ArrayList<>();
+
+        for(UrnE urn : urns){
+            for(Integer vlanId : vlanIds){
+                if(urn.getUrnType() == UrnType.IFCE){
+                    ReservedVlanE rsvVlan = ReservedVlanE.builder()
+                            .urn(urn)
+                            .vlan(vlanId)
+                            .beginning(Instant.MIN)
+                            .ending(Instant.MAX)
+                            .build();
+                    reservedVlans.add(rsvVlan);
+                }
+            }
+        }
+        return reservedVlans;
     }
 }

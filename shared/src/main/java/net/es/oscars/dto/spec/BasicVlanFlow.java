@@ -32,4 +32,7 @@ public class BasicVlanFlow {
     @NonNull
     private Integer zaMbps;
 
+    @NonNull
+    private Boolean eroPalindromic;
+
 }
