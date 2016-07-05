@@ -43,9 +43,10 @@ public class CoreTest {
     public void testSpecification() throws PCEException, PSSException {
 
         if (specRepo.findAll().isEmpty()) {
-            SpecificationE spec = SpecPopTest.getBasicSpec();
+            SpecPopTest spt = new SpecPopTest();
+            SpecificationE spec = spt.getBasicSpec();
 
-            SpecPopTest.addEndpoints(spec);
+            spt.addEndpoints(spec);
 
             log.info("spec: " + spec.toString());
 
@@ -63,7 +64,8 @@ public class CoreTest {
 
     @Test(expected = PCEException.class)
     public void testNoFixtures() throws PCEException {
-        SpecificationE spec = SpecPopTest.getBasicSpec();
+        SpecPopTest spt = new SpecPopTest();
+        SpecificationE spec = spt.getBasicSpec();
         UrnE urnE = UrnE.builder()
                 .deviceModel(DeviceModel.JUNIPER_EX)
                 .capabilities(new HashSet<>())

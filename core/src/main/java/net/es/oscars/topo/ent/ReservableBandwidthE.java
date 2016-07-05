@@ -16,6 +16,9 @@ public class ReservableBandwidthE {
     @GeneratedValue
     private Long id;
 
+    @OneToOne
+    private UrnE urn;
+
 
     private Integer bandwidth;
 

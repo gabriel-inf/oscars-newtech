@@ -20,7 +20,7 @@ public class RequestedVlanJunctionE {
     private Long id;
 
     @NonNull
-    @OneToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.REMOVE)
     private UrnE deviceUrn;
 
     @NonNull
