@@ -43,10 +43,11 @@ public class TestEntityBuilder {
 
             TopoVertex z = edge.getZ();
 
-            UrnE aUrn = findOrMakeUrn(a, urnList, portToDeviceMap, edge.getLayer());
+
+            UrnE aUrn = findOrMakeUrn(a, urnList, portToDeviceMap);
             urnList.add(aUrn);
 
-            UrnE zUrn = findOrMakeUrn(z, urnList, portToDeviceMap, edge.getLayer());
+            UrnE zUrn = findOrMakeUrn(z, urnList, portToDeviceMap);
             urnList.add(zUrn);
 
             UrnAdjcyE adj = buildUrnAdjcy(edge, aUrn, zUrn);
@@ -171,14 +172,25 @@ public class TestEntityBuilder {
                 .build();
     }
 
-    public UrnE findOrMakeUrn(TopoVertex v, List<UrnE> urnList, Map<TopoVertex,TopoVertex> portToDeviceMap, Layer layer){
+    public UrnE findOrMakeUrn(TopoVertex v, List<UrnE> urnList, Map<TopoVertex,TopoVertex> portToDeviceMap){
         UrnE urn = getFromUrnList(v.getUrn(), urnList);
         if(urn == null){
             if (!v.getVertexType().equals(VertexType.PORT)) {
-                urn = buildUrn(v, null, layer);
+                if(v.getVertexType().equals(VertexType.ROUTER)) {
+                    urn = buildUrn(v, null, Layer.MPLS);
+                }
+                else {
+                    urn = buildUrn(v, null, Layer.ETHERNET);
+                }
             } else {
                 TopoVertex deviceVertex = portToDeviceMap.get(v);
-                urn = buildUrn(v, determineDeviceModel(deviceVertex.getVertexType()), layer);
+                VertexType deviceVertexType = deviceVertex.getVertexType();
+                if(deviceVertexType.equals(VertexType.ROUTER)) {
+                    urn = buildUrn(v, determineDeviceModel(deviceVertexType), Layer.MPLS);
+                }
+                else {
+                    urn = buildUrn(v, determineDeviceModel(deviceVertexType), Layer.ETHERNET);
+                }
             }
         }
         return urn;
