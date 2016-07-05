@@ -167,8 +167,6 @@ public class TestEntityBuilder {
                 .deviceType(deviceType)
                 .ifceType(ifceType)
                 .deviceModel(model)
-                .reservableBandwidth(null)
-                .reservableVlans(null)
                 .reservablePssResources(new HashSet<>())
                 .valid(true)
                 .build();
@@ -178,8 +176,8 @@ public class TestEntityBuilder {
         List<Integer> floors = Arrays.asList(1, 10, 20, 30);
         List<Integer> ceilings = Arrays.asList(9, 19, 29, 39);
         if(vertexType.equals(VertexType.PORT)){
-            ReservableBandwidthE resvBw = buildReservableBandwidth(urn, ingressBw, egressBw);
-            ReservableVlanE resvVlan = buildReservableVlan(urn, buildIntRanges(floors, ceilings));
+            ReservableBandwidthE resvBw = buildReservableBandwidth(ingressBw, egressBw);
+            ReservableVlanE resvVlan = buildReservableVlan(buildIntRanges(floors, ceilings));
             urn.setReservableBandwidth(resvBw);
             urn.setReservableVlans(resvVlan);
         }
@@ -289,18 +287,16 @@ public class TestEntityBuilder {
                 .build();
     }
 
-    public ReservableBandwidthE buildReservableBandwidth(UrnE urn, Integer azMbps, Integer zaMbps){
+    public ReservableBandwidthE buildReservableBandwidth(Integer azMbps, Integer zaMbps){
         return ReservableBandwidthE.builder()
-                .urn(urn)
                 .bandwidth(Math.max(azMbps, zaMbps))
                 .egressBw(azMbps)
                 .ingressBw(zaMbps)
                 .build();
     }
 
-    public ReservableVlanE buildReservableVlan(UrnE urn, Set<IntRangeE> ranges){
+    public ReservableVlanE buildReservableVlan(Set<IntRangeE> ranges){
         return ReservableVlanE.builder()
-                .urn(urn)
                 .vlanRanges(ranges)
                 .build();
     }
