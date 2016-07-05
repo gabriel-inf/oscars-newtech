@@ -44,11 +44,9 @@ public class TestEntityBuilder {
             TopoVertex z = edge.getZ();
 
 
-            UrnE aUrn = findOrMakeUrn(a, urnList, portToDeviceMap);
-            urnList.add(aUrn);
+            UrnE aUrn = addUrnToList(a, urnList, portToDeviceMap);
 
-            UrnE zUrn = findOrMakeUrn(z, urnList, portToDeviceMap);
-            urnList.add(zUrn);
+            UrnE zUrn = addUrnToList(z, urnList, portToDeviceMap);
 
             UrnAdjcyE adj = buildUrnAdjcy(edge, aUrn, zUrn);
             adjcyList.add(adj);
@@ -88,8 +86,8 @@ public class TestEntityBuilder {
         log.info("Device: " + deviceName);
         fixtureNames.stream()
                 .forEach(f -> log.info("Fixture: " + f));
-        log.info("A-Z Mbps: " + azMbps.intValue());
-        log.info("Z-A Mbps: " + zaMbps.intValue());
+        log.info("A-Z Mbps: " + azMbps);
+        log.info("Z-A Mbps: " + zaMbps);
         log.info("VLAN Expression: " + vlanExp);
 
         Set<RequestedVlanJunctionE> junctions = new HashSet<>();
@@ -172,7 +170,7 @@ public class TestEntityBuilder {
                 .build();
     }
 
-    public UrnE findOrMakeUrn(TopoVertex v, List<UrnE> urnList, Map<TopoVertex,TopoVertex> portToDeviceMap){
+    public UrnE addUrnToList(TopoVertex v, List<UrnE> urnList, Map<TopoVertex,TopoVertex> portToDeviceMap){
         UrnE urn = getFromUrnList(v.getUrn(), urnList);
         if(urn == null){
             if (!v.getVertexType().equals(VertexType.PORT)) {
@@ -192,6 +190,7 @@ public class TestEntityBuilder {
                     urn = buildUrn(v, determineDeviceModel(deviceVertexType), Layer.ETHERNET);
                 }
             }
+            urnList.add(urn);
         }
         return urn;
     }
