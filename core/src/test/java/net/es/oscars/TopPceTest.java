@@ -1,24 +1,20 @@
 package net.es.oscars;
 
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.dto.pss.*;
-import net.es.oscars.pce.DijkstraPCE;
+import net.es.oscars.dto.pss.EthFixtureType;
+import net.es.oscars.dto.pss.EthJunctionType;
+import net.es.oscars.dto.pss.Layer3FixtureType;
+import net.es.oscars.dto.pss.Layer3JunctionType;
 import net.es.oscars.pce.PCEException;
-import net.es.oscars.pce.PruningService;
 import net.es.oscars.pce.TopPCE;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.ent.*;
-import net.es.oscars.servicetopo.ServiceLayerTopology;
 import net.es.oscars.topo.beans.TopoEdge;
 import net.es.oscars.topo.beans.TopoVertex;
-import net.es.oscars.topo.beans.Topology;
 import net.es.oscars.topo.dao.UrnAdjcyRepository;
 import net.es.oscars.topo.dao.UrnRepository;
 import net.es.oscars.topo.ent.*;
-import net.es.oscars.topo.enums.DeviceType;
-import net.es.oscars.topo.enums.Layer;
-import net.es.oscars.topo.enums.UrnType;
-import net.es.oscars.topo.enums.VertexType;
+import net.es.oscars.topo.enums.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Created by jeremy on 6/30/16.
@@ -117,13 +112,46 @@ public class TopPceTest
         for(TopoVertex oneNode : topoNodes)
         {
             UrnType urnType;
+            DeviceType deviceType = null;
+            DeviceModel deviceModel = null;
 
             if(oneNode.getVertexType().equals(VertexType.SWITCH))
+            {
                 urnType = UrnType.DEVICE;
+                deviceType = DeviceType.SWITCH;
+                deviceModel = DeviceModel.JUNIPER_EX;
+            }
             else if(oneNode.getVertexType().equals(VertexType.ROUTER))
+            {
                 urnType = UrnType.DEVICE;
+                deviceType = DeviceType.ROUTER;
+                deviceModel = DeviceModel.JUNIPER_MX;
+            }
             else
+            {
                 urnType = UrnType.IFCE;
+
+                VertexType deviceVertType = null;
+                for(TopoEdge oneEdge : topoLinks)
+                {
+                    if(oneEdge.getA().getUrn().equals(oneNode.getUrn()))
+                    {
+                        deviceVertType = oneEdge.getZ().getVertexType();
+                        break;
+                    }
+                }
+
+                assert(deviceVertType != null);
+
+                if(deviceVertType.equals(VertexType.SWITCH))
+                {
+                    deviceModel = DeviceModel.JUNIPER_EX;
+                }
+                else
+                {
+                    deviceModel = DeviceModel.JUNIPER_MX;
+                }
+            }
 
             IntRangeE onlyVlanRange = IntRangeE.builder()
                     .ceiling(100)
@@ -149,6 +177,16 @@ public class TopPceTest
                     .urnType(urnType)
                     .valid(true)
                     .build();
+
+            if(deviceType == null)
+            {
+                oneURN.setIfceType(IfceType.PORT);
+            }
+            else
+            {
+                oneURN.setDeviceType(deviceType);
+                oneURN.setDeviceModel(deviceModel);
+            }
 
             urnList.add(oneURN);
 

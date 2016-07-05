@@ -9,7 +9,6 @@ import net.es.oscars.resv.dao.ReservedPssResourceRepository;
 import net.es.oscars.resv.dao.ReservedVlanRepository;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.topo.beans.TopoEdge;
-import net.es.oscars.topo.beans.TopoVertex;
 import net.es.oscars.topo.dao.UrnRepository;
 import net.es.oscars.topo.ent.IntRangeE;
 import net.es.oscars.topo.ent.ReservableBandwidthE;
@@ -63,6 +62,7 @@ public class TranslationPCE {
         // Retrieve the URN of the requested junction, if it is in the repository
         String deviceUrn = req_j.getDeviceUrn().getUrn();
         Optional<UrnE> optUrn = urnRepository.findByUrn(deviceUrn);
+
         UrnE urn;
         if(optUrn.isPresent()){
             urn = optUrn.get();
@@ -76,12 +76,14 @@ public class TranslationPCE {
         ReservedVlanJunctionE rsv_j = pceAssistant.createReservedJunction(urn, new HashSet<>(), new HashSet<>(),
                 pceAssistant.decideJunctionType(urn.getDeviceModel()));
 
+        log.info("IN TransPCE 1");
         // Select a VLAN ID for this junction
         Integer vlanId = selectVLANForJunction(req_j, sched, simpleJunctions);
         if(vlanId == -1){
             return null;
         }
 
+        log.info("IN TransPCE 2");
         // Confirm that there is sufficient available bandwidth
         boolean sufficientBandwidth = confirmSufficientBandwidth(req_j, sched, simpleJunctions);
         if(!sufficientBandwidth){
@@ -497,6 +499,7 @@ public class TranslationPCE {
                                          Set<ReservedVlanJunctionE> rsvJunctions){
         // Get Reserved VLANs from Repository
         List<ReservedVlanE> rsvVlans = pruningService.getReservedVlans(sched.getNotBefore(), sched.getNotAfter());
+
         // Add already reserved VLANs from passed in junctions
         rsvVlans.addAll(retrieveReservedVlans(rsvJunctions));
 
@@ -509,7 +512,9 @@ public class TranslationPCE {
         // For each requested fixture
         for(RequestedVlanFixtureE reqFix : reqFixtures){
             // Get the available VLAN IDs
+            log.info("IN TransPCE: selectVLAN 1");
             Set<Integer> availableVlans = getAvailableVlanIds(reqFix, rsvVlans);
+            log.info("IN TransPCE: selectVLAN 2");
 
             // Get the requested VLAN expression
             String vlanExpression = reqFix.getVlanExpression();
@@ -551,7 +556,10 @@ public class TranslationPCE {
 
         // Get the set of reserved VLAN IDs at this fixture
         List<ReservedVlanE> rsvVlansAtFixture = rsvVlanMap.get(reqFix.getPortUrn());
+        log.info("IN TransPCE: getVlanIDs 3");
+        log.info("FIX URN: " + reqFix.getPortUrn());
         Set<Integer> reservedVlanIds = rsvVlansAtFixture.stream().map(ReservedVlanE::getVlan).collect(Collectors.toSet());
+        log.info("IN TransPCE: getVlanIDs 4");
 
         // Find all reservable VLAN IDs at this fixture
         Set<Integer> reservableVlanIds = pruningService.getIntegersFromRanges(
