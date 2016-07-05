@@ -131,6 +131,36 @@ public class TestEntityBuilder {
 
     }
 
+    public RequestedBlueprintE buildRequest(List<String> aPorts, List<String> aDevices, List<String> zPorts,
+                                            List<String> zDevices, List<Integer> azMbpsList, List<Integer> zaMbpsList,
+                                            List<Boolean> palindromicList, List<String> vlanExps){
+        Set<RequestedVlanPipeE> pipes = new HashSet<>();
+        for(int i = 0; i < aPorts.size(); i++){
+            RequestedVlanPipeE pipe = buildRequestedPipe(
+                    aPorts.get(i),
+                    aDevices.get(i),
+                    zPorts.get(i),
+                    zDevices.get(i),
+                    azMbpsList.get(i),
+                    zaMbpsList.get(i),
+                    palindromicList.get(i),
+                    vlanExps.get(i));
+            pipes.add(pipe);
+        }
+
+        Set<RequestedVlanFlowE> vlanFlows = new HashSet<>();
+        RequestedVlanFlowE flow = RequestedVlanFlowE.builder()
+                .junctions(new HashSet<>())
+                .pipes(pipes)
+                .build();
+        vlanFlows.add(flow);
+
+        return RequestedBlueprintE.builder()
+                .vlanFlows(vlanFlows)
+                .layer3Flows(new HashSet<>())
+                .build();
+    }
+
     public ScheduleSpecificationE buildSchedule(Date start, Date end){
         log.info("Populating request schedule");
 
