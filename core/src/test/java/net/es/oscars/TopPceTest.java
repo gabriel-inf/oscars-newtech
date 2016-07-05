@@ -181,6 +181,7 @@ public class TopPceTest
             if(deviceType == null)
             {
                 oneURN.setIfceType(IfceType.PORT);
+                oneURN.setDeviceModel(deviceModel);
             }
             else
             {
