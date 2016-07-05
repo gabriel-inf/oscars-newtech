@@ -518,6 +518,9 @@ public class TranslationPCE {
 
             // Get the requested VLAN expression
             String vlanExpression = reqFix.getVlanExpression();
+            if(vlanExpression == null){
+                vlanExpression = "any";
+            }
             // Convert that expression into a set of requested IDs
             Set<Integer> reqVlanIds = pruningService.getIntegersFromRanges(pruningService.getIntRangesFromString(vlanExpression));
             // Find the overlap between available VLAN iDs and requested VLAN IDs
@@ -555,7 +558,8 @@ public class TranslationPCE {
         Map<UrnE, List<ReservedVlanE>> rsvVlanMap = pruningService.buildReservedVlanMap(rsvVlans);
 
         // Get the set of reserved VLAN IDs at this fixture
-        List<ReservedVlanE> rsvVlansAtFixture = rsvVlanMap.get(reqFix.getPortUrn());
+        List<ReservedVlanE> rsvVlansAtFixture = rsvVlanMap.containsKey(reqFix.getPortUrn()) ?
+                rsvVlanMap.get(reqFix.getPortUrn()) : new ArrayList<>();
         log.info("IN TransPCE: getVlanIDs 3");
         log.info("FIX URN: " + reqFix.getPortUrn());
         Set<Integer> reservedVlanIds = rsvVlansAtFixture.stream().map(ReservedVlanE::getVlan).collect(Collectors.toSet());
