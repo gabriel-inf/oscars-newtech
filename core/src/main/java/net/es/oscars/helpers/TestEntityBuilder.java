@@ -13,12 +13,14 @@ import net.es.oscars.topo.dao.UrnRepository;
 import net.es.oscars.topo.ent.*;
 import net.es.oscars.topo.enums.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
+@Component
 public class TestEntityBuilder {
 
     @Autowired
@@ -29,6 +31,8 @@ public class TestEntityBuilder {
 
 
     public void populateRepos(Collection<TopoVertex> vertices, Collection<TopoEdge> edges, Map<TopoVertex,TopoVertex> portToDeviceMap){
+        log.info("Populating URN Repo and Adjcy Repo");
+
         urnRepo.deleteAll();
         adjcyRepo.deleteAll();
 
@@ -79,6 +83,13 @@ public class TestEntityBuilder {
 
     public RequestedBlueprintE buildRequest(String deviceName, Set<String> fixtureNames,
                                             Integer azMbps, Integer zaMbps, String vlanExp){
+        log.info("Building RequestedBlueprintE");
+        log.info("Device: " + deviceName);
+        fixtureNames.stream()
+                .forEach(f -> log.info("Fixture: " + f));
+        log.info("A-Z Mbps: " + azMbps.intValue());
+        log.info("Z-A Mbps: " + zaMbps.intValue());
+        log.info("VLAN Expression: " + vlanExp);
 
         Set<RequestedVlanJunctionE> junctions = new HashSet<>();
         RequestedVlanJunctionE junction = buildRequestedJunction(deviceName, fixtureNames, azMbps, zaMbps, vlanExp);
@@ -99,6 +110,8 @@ public class TestEntityBuilder {
 
     public RequestedBlueprintE buildRequest(String aPort, String aDevice, String zPort, String zDevice,
                                             Integer azMbps, Integer zaMbps, Boolean palindromic, String vlanExp){
+        log.info("Building RequestedBlueprintE");
+
 
         Set<RequestedVlanPipeE> pipes = new HashSet<>();
         RequestedVlanPipeE pipe = buildRequestedPipe(aPort, aDevice, zPort, zDevice, azMbps, zaMbps, palindromic, vlanExp);
@@ -119,6 +132,8 @@ public class TestEntityBuilder {
     }
 
     public ScheduleSpecificationE buildSchedule(Date start, Date end){
+        log.info("Populating request schedule");
+
         return ScheduleSpecificationE.builder()
                 .notAfter(start)
                 .notBefore(end)
@@ -205,8 +220,11 @@ public class TestEntityBuilder {
 
     public RequestedVlanJunctionE buildRequestedJunction(String deviceName, Set<String> fixtureNames,
                                                          Integer azMbps, Integer zaMbps, String vlanExp){
+        log.info("Building requested junction");
 
         Optional<UrnE> optUrn = urnRepo.findByUrn(deviceName);
+
+        log.info("URN from repo: " + optUrn.get());
 
         Set<RequestedVlanFixtureE> fixtures = fixtureNames
                 .stream()
@@ -222,8 +240,11 @@ public class TestEntityBuilder {
 
     public RequestedVlanFixtureE buildRequestedFixture(String fixName, Integer azMbps, Integer zaMbps,
                                                        String vlanExp){
+        log.info("Building requested fixture");
 
         Optional<UrnE> optUrn = urnRepo.findByUrn(fixName);
+
+        log.info("URN from repo: " + optUrn.get());
 
         return RequestedVlanFixtureE.builder()
                 .portUrn(optUrn.isPresent() ? optUrn.get() : null)

@@ -18,7 +18,6 @@ import net.es.oscars.topo.ent.UrnE;
 import net.es.oscars.topo.enums.Layer;
 import net.es.oscars.topo.enums.UrnType;
 import net.es.oscars.topo.enums.VertexType;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
@@ -63,7 +62,7 @@ public class ServiceLayerEROTest
     private List<ReservedBandwidthE> resvBW;
     private List<ReservedVlanE> resvVLAN;
 
-    @Test
+    //@Test
     public void verifyVirtualSrcDest()
     {
         this.buildLinearMPLSTopo();
@@ -120,7 +119,7 @@ public class ServiceLayerEROTest
         log.info("test 'verifyVirtualSrcDest' passed.");
     }
 
-    @Test
+    //@Test
     public void verifyVirtualDestOnly()
     {
         this.buildLinearEthToMPLSTopo();
@@ -181,7 +180,7 @@ public class ServiceLayerEROTest
     }
 
 
-    @Test
+    //@Test
     public void verifyVirtualSrcOnly()
     {
         this.buildLinearMPLSToEthTopo();
@@ -242,7 +241,7 @@ public class ServiceLayerEROTest
     }
 
 
-    @Test
+    //@Test
     public void verifyNoVirtualSrcDest()
     {
         this.buildLinearTopo();
@@ -297,7 +296,7 @@ public class ServiceLayerEROTest
     }
 
     // Test ERO accuracy when all devices are Ethernet - No logical MPLS links
-    @Test
+    //@Test
     public void verifyCorrectEROsNoLogicalLinks()
     {
         this.buildLinearEthernetTopo();
@@ -360,7 +359,7 @@ public class ServiceLayerEROTest
     }
 
     // Test ERO accuracy when Src and Dest are the only Ethernet devices
-    @Test
+    //@Test
     public void verifyCorrectEROsSimpleLogicalLinks()
     {
         this.buildLinearTopo();
@@ -423,7 +422,7 @@ public class ServiceLayerEROTest
     }
 
     // Test ERO accuracy when all devices are MPLS - Virtual Src/Dst created
-    @Test
+    //@Test
     public void verifyCorrectEROsWithVirtualNodes()
     {
         this.buildLinearMPLSTopo();
@@ -486,7 +485,7 @@ public class ServiceLayerEROTest
     }
 
     // Test ERO accuracy when topology is non-linear, and azERO != zaERO
-    @Test
+    //@Test
     public void verifyCorrectEROsNonLinearAssymetric()
     {
         this.buildLinearTopoWithMultipleMPLSBranch();

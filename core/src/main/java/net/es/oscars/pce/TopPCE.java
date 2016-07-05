@@ -58,9 +58,8 @@ public class TopPCE {
             Set<ReservedVlanJunctionE> simpleJunctions = new HashSet<>();
             for(RequestedVlanJunctionE reqJunction : req_f.getJunctions())
             {
-                log.info("HERE 1");
                 ReservedVlanJunctionE junction = transPCE.reserveSimpleJunction(reqJunction, schedSpec, simpleJunctions);
-                log.info("HERE 2");
+
                 if(junction != null){
                     simpleJunctions.add(junction);
                 }
