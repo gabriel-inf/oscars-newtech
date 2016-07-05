@@ -191,6 +191,9 @@ public class TestEntityBuilder {
         IfceType ifceType = determineIfceType(vertexType);
         DeviceModel model = parentModel == null ? determineDeviceModel(vertexType) : parentModel;
 
+        Set<Layer> capabilities = new HashSet<>();
+        capabilities.add(layer);
+
         UrnE urn =  UrnE.builder()
                 .urn(vertex.getUrn())
                 .urnType(urnType)
@@ -199,7 +202,7 @@ public class TestEntityBuilder {
                 .deviceModel(model)
                 .reservablePssResources(new HashSet<>())
                 .valid(true)
-                .capabilities(Collections.singleton(layer))
+                .capabilities(capabilities)
                 .build();
 
         Integer ingressBw = 1000;
