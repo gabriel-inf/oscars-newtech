@@ -43,10 +43,10 @@ public class TestEntityBuilder {
 
             TopoVertex z = edge.getZ();
 
-            UrnE aUrn = findOrMakeUrn(a, urnList, portToDeviceMap);
+            UrnE aUrn = findOrMakeUrn(a, urnList, portToDeviceMap, edge.getLayer());
             urnList.add(aUrn);
 
-            UrnE zUrn = findOrMakeUrn(z, urnList, portToDeviceMap);
+            UrnE zUrn = findOrMakeUrn(z, urnList, portToDeviceMap, edge.getLayer());
             urnList.add(zUrn);
 
             UrnAdjcyE adj = buildUrnAdjcy(edge, aUrn, zUrn);
@@ -171,20 +171,20 @@ public class TestEntityBuilder {
                 .build();
     }
 
-    public UrnE findOrMakeUrn(TopoVertex v, List<UrnE> urnList, Map<TopoVertex,TopoVertex> portToDeviceMap){
+    public UrnE findOrMakeUrn(TopoVertex v, List<UrnE> urnList, Map<TopoVertex,TopoVertex> portToDeviceMap, Layer layer){
         UrnE urn = getFromUrnList(v.getUrn(), urnList);
         if(urn == null){
             if (!v.getVertexType().equals(VertexType.PORT)) {
-                urn = buildUrn(v, null);
+                urn = buildUrn(v, null, layer);
             } else {
                 TopoVertex deviceVertex = portToDeviceMap.get(v);
-                urn = buildUrn(v, determineDeviceModel(deviceVertex.getVertexType()));
+                urn = buildUrn(v, determineDeviceModel(deviceVertex.getVertexType()), layer);
             }
         }
         return urn;
     }
 
-    public UrnE buildUrn(TopoVertex vertex, DeviceModel parentModel){
+    public UrnE buildUrn(TopoVertex vertex, DeviceModel parentModel, Layer layer){
         VertexType vertexType = vertex.getVertexType();
         UrnType urnType = determineUrnType(vertexType);
         DeviceType deviceType = determineDeviceType(vertexType);
@@ -199,6 +199,7 @@ public class TestEntityBuilder {
                 .deviceModel(model)
                 .reservablePssResources(new HashSet<>())
                 .valid(true)
+                .capabilities(Collections.singleton(layer))
                 .build();
 
         Integer ingressBw = 1000;
