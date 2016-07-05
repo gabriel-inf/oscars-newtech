@@ -85,7 +85,7 @@ public class TopPCE {
             handleRequestedPipes(pipes, schedSpec, simpleJunctions, reservedPipes, reservedEthJunctions, numReserved);
 
             // If pipes were not able to be reserved in the original order, try reversing the order pipes are attempted
-            if(numReserved != pipes.size()){
+            if((numReserved != pipes.size()) && (pipes.size() > 1)){
                 Collections.reverse(pipes);
                 numReserved = 0;
                 reservedPipes = new HashSet<>();

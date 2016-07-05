@@ -268,8 +268,6 @@ public class TestEntityBuilder {
 
         Optional<UrnE> optUrn = urnRepo.findByUrn(deviceName);
 
-        log.info("URN from repo: " + optUrn.get());
-
         Set<RequestedVlanFixtureE> fixtures = fixtureNames
                 .stream()
                 .map(fixName -> buildRequestedFixture(fixName, azMbps, zaMbps, vlanExp))
@@ -287,8 +285,6 @@ public class TestEntityBuilder {
         log.info("Building requested fixture");
 
         Optional<UrnE> optUrn = urnRepo.findByUrn(fixName);
-
-        log.info("URN from repo: " + optUrn.get());
 
         return RequestedVlanFixtureE.builder()
                 .portUrn(optUrn.isPresent() ? optUrn.get() : null)

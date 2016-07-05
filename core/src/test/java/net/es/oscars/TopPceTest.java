@@ -102,7 +102,7 @@ public class TopPceTest
         log.info("test 'simpleTest' passed.");
     }
 
-    //@Test
+    @Test
     public void basicPceTest2()
     {
         log.info("Initializing test: 'basicPceTest2'.");
