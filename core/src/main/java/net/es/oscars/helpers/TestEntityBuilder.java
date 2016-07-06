@@ -117,16 +117,9 @@ public class TestEntityBuilder {
         pipes.add(pipe);
 
         Set<RequestedVlanFlowE> vlanFlows = new HashSet<>();
-        RequestedVlanFlowE flow = RequestedVlanFlowE.builder()
-                .junctions(new HashSet<>())
-                .pipes(pipes)
-                .build();
-        vlanFlows.add(flow);
+        vlanFlows.add(buildRequestedFlow(new HashSet<>(), pipes));
 
-        return RequestedBlueprintE.builder()
-                .vlanFlows(vlanFlows)
-                .layer3Flows(new HashSet<>())
-                .build();
+        return buildRequestedBlueprint(vlanFlows, new HashSet<>());
 
     }
 
@@ -148,15 +141,41 @@ public class TestEntityBuilder {
         }
 
         Set<RequestedVlanFlowE> vlanFlows = new HashSet<>();
-        RequestedVlanFlowE flow = RequestedVlanFlowE.builder()
-                .junctions(new HashSet<>())
-                .pipes(pipes)
-                .build();
-        vlanFlows.add(flow);
+        vlanFlows.add(buildRequestedFlow(new HashSet<>(), pipes));
 
+        return buildRequestedBlueprint(vlanFlows, new HashSet<>());
+    }
+
+    public RequestedBlueprintE buildRequest(List<String> deviceNames, List<Set<String>> portNames,
+                                            List<Integer> azMbpsList, List<Integer> zaMbpsList, List<String> vlanExps){
+        Set<RequestedVlanJunctionE> junctions = new HashSet<>();
+        for(int i = 0; i < deviceNames.size(); i++){
+            RequestedVlanJunctionE junction = buildRequestedJunction(
+                    deviceNames.get(i),
+                    portNames.get(i),
+                    azMbpsList.get(i),
+                    zaMbpsList.get(i),
+                    vlanExps.get(i));
+            junctions.add(junction);
+        }
+
+        Set<RequestedVlanFlowE> vlanFlows = new HashSet<>();
+        vlanFlows.add(buildRequestedFlow(junctions, new HashSet<>()));
+
+        return buildRequestedBlueprint(vlanFlows, new HashSet<>());
+    }
+
+    public RequestedBlueprintE buildRequestedBlueprint(Set<RequestedVlanFlowE> vlanFlows, Set<Layer3FlowE> l3Flows){
         return RequestedBlueprintE.builder()
                 .vlanFlows(vlanFlows)
-                .layer3Flows(new HashSet<>())
+                .layer3Flows(l3Flows)
+                .build();
+    }
+
+    public RequestedVlanFlowE buildRequestedFlow(Set<RequestedVlanJunctionE> junctions, Set<RequestedVlanPipeE> pipes){
+        return RequestedVlanFlowE.builder()
+                .junctions(junctions)
+                .pipes(pipes)
                 .build();
     }
 
@@ -173,21 +192,27 @@ public class TestEntityBuilder {
     public UrnE addUrnToList(TopoVertex v, List<UrnE> urnList, Map<TopoVertex,TopoVertex> portToDeviceMap){
         UrnE urn = getFromUrnList(v.getUrn(), urnList);
         if(urn == null){
+            Set<Layer> capabilities = new HashSet<>();
+            capabilities.add(Layer.INTERNAL);
+            capabilities.add(Layer.ETHERNET);
+
             if (!v.getVertexType().equals(VertexType.PORT)) {
                 if(v.getVertexType().equals(VertexType.ROUTER)) {
-                    urn = buildUrn(v, null, Layer.MPLS);
+                    capabilities.add(Layer.MPLS);
+                    urn = buildUrn(v, null, capabilities);
                 }
                 else {
-                    urn = buildUrn(v, null, Layer.ETHERNET);
+                    urn = buildUrn(v, null, capabilities);
                 }
             } else {
                 TopoVertex deviceVertex = portToDeviceMap.get(v);
                 VertexType deviceVertexType = deviceVertex.getVertexType();
                 if(deviceVertexType.equals(VertexType.ROUTER)) {
-                    urn = buildUrn(v, determineDeviceModel(deviceVertexType), Layer.MPLS);
+                    capabilities.add(Layer.MPLS);
+                    urn = buildUrn(v, determineDeviceModel(deviceVertexType), capabilities);
                 }
                 else {
-                    urn = buildUrn(v, determineDeviceModel(deviceVertexType), Layer.ETHERNET);
+                    urn = buildUrn(v, determineDeviceModel(deviceVertexType), capabilities);
                 }
             }
             urnList.add(urn);
@@ -195,15 +220,12 @@ public class TestEntityBuilder {
         return urn;
     }
 
-    public UrnE buildUrn(TopoVertex vertex, DeviceModel parentModel, Layer layer){
+    public UrnE buildUrn(TopoVertex vertex, DeviceModel parentModel, Set<Layer> capabilities){
         VertexType vertexType = vertex.getVertexType();
         UrnType urnType = determineUrnType(vertexType);
         DeviceType deviceType = determineDeviceType(vertexType);
         IfceType ifceType = determineIfceType(vertexType);
         DeviceModel model = parentModel == null ? determineDeviceModel(vertexType) : parentModel;
-
-        Set<Layer> capabilities = new HashSet<>();
-        capabilities.add(layer);
 
         UrnE urn =  UrnE.builder()
                 .urn(vertex.getUrn())
