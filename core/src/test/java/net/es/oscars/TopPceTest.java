@@ -133,16 +133,15 @@ public class TopPceTest
         {
             reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
         }
-        catch(PCEException pceE){ log.error("", pceE); }
-        catch(PSSException pssE){ log.error("", pssE); }
+        catch(PCEException | PSSException pceE){ log.error("", pceE); }
 
         assert(reservedBlueprint != null);
-
 
         Set<ReservedEthPipeE> allResPipes;
         Set<ReservedBandwidthE> allresBW;
 
         ReservedVlanFlowE reservedFlow = reservedBlueprint.getVlanFlows().iterator().next();
+        log.info(reservedFlow.toString());
         allResPipes = reservedFlow.getPipes();
         ReservedEthPipeE reservedPipe = allResPipes.iterator().next();
 

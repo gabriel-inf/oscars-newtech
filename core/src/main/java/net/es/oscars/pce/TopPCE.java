@@ -82,7 +82,9 @@ public class TopPCE {
 
             // Attempt to reserve all requested pipes
             log.info("Starting to handle pipes");
-            handleRequestedPipes(pipes, schedSpec, simpleJunctions, reservedPipes, reservedEthJunctions, numReserved);
+            numReserved = handleRequestedPipes(pipes, schedSpec, simpleJunctions, reservedPipes, reservedEthJunctions, numReserved);
+            log.info("Pipes handled: " + pipes.toString());
+            log.info("Num Reserved: " + numReserved + " -- Num Requested Pipes: " + pipes.size());
 
             // If pipes were not able to be reserved in the original order, try reversing the order pipes are attempted
             if((numReserved != pipes.size()) && (pipes.size() > 1)){
@@ -90,7 +92,7 @@ public class TopPCE {
                 numReserved = 0;
                 reservedPipes = new HashSet<>();
                 reservedEthJunctions = new HashSet<>();
-                handleRequestedPipes(pipes, schedSpec, simpleJunctions, reservedPipes, reservedEthJunctions, numReserved);
+                numReserved = handleRequestedPipes(pipes, schedSpec, simpleJunctions, reservedPipes, reservedEthJunctions, numReserved);
             }
 
             // If the pipes still cannot be reserved, return the blank Reserved Vlan Flow
@@ -110,7 +112,7 @@ public class TopPCE {
 
     }
 
-    private void handleRequestedPipes(List<RequestedVlanPipeE> pipes, ScheduleSpecificationE schedSpec,
+    private Integer handleRequestedPipes(List<RequestedVlanPipeE> pipes, ScheduleSpecificationE schedSpec,
                                       Set<ReservedVlanJunctionE> simpleJunctions, Set<ReservedEthPipeE> reservedPipes,
                                       Set<ReservedVlanJunctionE> reservedEthJunctions, Integer numReserved) {
 
@@ -127,10 +129,12 @@ public class TopPCE {
                             reservedEthJunctions);
                 }
                 catch(Exception e){
+                    log.info(e.toString());
                     numReserved--;
                 }
             }
         }
+        return numReserved;
     }
 
     private Map<String,List<TopoEdge>> findShortestConstrainedPath(RequestedVlanPipeE pipe,

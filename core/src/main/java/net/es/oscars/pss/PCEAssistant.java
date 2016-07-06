@@ -165,6 +165,7 @@ public class PCEAssistant {
         Integer startAt = 0;
         Integer limit = edges.size();
         if (mergeA.isPresent()) {
+            log.info("Merging the first junction: " + mergeA.get().toString());
             startAt = 1;
 
             ReservedVlanJunctionE mergeThis = mergeA.get();
@@ -172,18 +173,21 @@ public class PCEAssistant {
             EthFixtureType fixtureType = decideFixtureType(model);
 
             String zUrn = edges.get(0).getZ().getUrn();
-            log.info("making fixture for z urn: "+zUrn);
+            log.info("Making fixture using : "+ zUrn);
 
             UrnE urn = urnMap.get(zUrn);
 
-            assert urn != null;
+            assert(urn != null);
 
             // Create new Reserved Bandwidth
             ReservedBandwidthE rsvBw = createReservedBandwidth(urn, azMbps, zaMbps, sched);
+            log.info("Reserved bandwidth for " + urn.getUrn() + ": " + rsvBw.toString());
 
             ReservedVlanE rsvVlan = createReservedVlan(urn, vlanId, sched);
+            log.info("Reserved VLAN for " + urn.getUrn() + ": " + rsvVlan.toString());
 
             ReservedVlanFixtureE fx = createReservedFixture(urn, new HashSet<>(), rsvVlan, rsvBw, fixtureType);
+            log.info("Reserved fixture for " + urn.getUrn() + ": " + fx.toString());
 
             ReservedVlanJunctionE copy = ReservedVlanJunctionE.copyFrom(mergeThis);
             copy.setJunctionType(decideJunctionType(model));
@@ -191,8 +195,6 @@ public class PCEAssistant {
             for (ReservedVlanFixtureE f : copy.getFixtures()) {
                 f.setFixtureType(fixtureType);
             }
-
-
             result.add(copy);
         }
         if (mergeZ.isPresent()) {
@@ -201,13 +203,19 @@ public class PCEAssistant {
 
         // now we work with pairs as described above
 
-        for (int i = startAt; i + 2 <= limit; i += 2) {
+        for (int i = 2; i + 2 <= limit; i += 2) {
             TopoEdge edgeOne = edges.get(i);
             TopoEdge edgeTwo = edges.get(i + 1);
 
             String urnAPortString = edgeOne.getA().getUrn();
             String urnDeviceString = edgeOne.getZ().getUrn();
             String urnZPortString = edgeTwo.getZ().getUrn();
+
+            log.info("Edge One A: " + urnAPortString);
+            log.info("Edge One Z: " + urnDeviceString);
+            log.info("Edge Two A: " + edgeTwo.getA().getUrn());
+            log.info("Edge Two Z: " + urnZPortString);
+
             if(!urnMap.containsKey(urnAPortString) || !urnMap.containsKey(urnZPortString) || !urnMap.containsKey(urnDeviceString)){
                     throw new PSSException("URNs " + urnAPortString + " and/or " + urnZPortString + " Not found in URN map");
             }
@@ -216,7 +224,9 @@ public class PCEAssistant {
             UrnE urnPortZ = urnMap.get(urnZPortString);
 
 
-            DeviceModel model = deviceModels.get(edgeOne.getZ().getUrn());
+
+
+            DeviceModel model = deviceModels.get(urnDevice.getUrn());
             EthFixtureType fixtureType = decideFixtureType(model);
 
             // Create new Reserved Bandwidth for URN A
@@ -245,7 +255,6 @@ public class PCEAssistant {
             newJunction.getFixtures().add(fOne);
             newJunction.getFixtures().add(fTwo);
 
-
             result.add(newJunction);
 
         }
@@ -255,7 +264,7 @@ public class PCEAssistant {
             DeviceModel model = deviceModels.get(mergeThis.getDeviceUrn().getUrn());
             EthFixtureType fixtureType = decideFixtureType(model);
 
-            String urnZString = edges.get(edges.size()-1).getZ().getUrn();
+            String urnZString = edges.get(edges.size()-1).getA().getUrn();
             if(!urnMap.containsKey(urnZString)){
                 throw new PSSException(("URN Map does not contain: " + urnZString));
             }
@@ -275,6 +284,7 @@ public class PCEAssistant {
             for (ReservedVlanFixtureE f : copy.getFixtures()) {
                 f.setFixtureType(fixtureType);
             }
+            log.info(copy.toString());
             result.add(copy);
         }
         return result;
