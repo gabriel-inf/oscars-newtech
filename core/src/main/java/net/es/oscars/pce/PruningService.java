@@ -516,7 +516,7 @@ public class PruningService {
 
             // If neither edge has reservable VLAN fields, add the edge to the "-1" VLAN tag list.
             // These edges do not need to be pruned, and will be added at the end to the best set of edges
-            if(aRanges.isEmpty() && zRanges.isEmpty()){
+            if(aRanges.isEmpty() && zRanges.isEmpty() || edge.getLayer().equals(Layer.MPLS)){
                 edgesPerId.get(-1).add(edge);
             }
             // Otherwise, find the intersection between the VLAN ranges (if any), and add the edge to the list

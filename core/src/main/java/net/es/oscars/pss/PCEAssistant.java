@@ -52,6 +52,8 @@ public class PCEAssistant {
 
        */
 
+        log.info(edges.toString());
+
         assert edges.size() >= 3;
 
         assert Math.floorMod(edges.size(), 3) == 0;
