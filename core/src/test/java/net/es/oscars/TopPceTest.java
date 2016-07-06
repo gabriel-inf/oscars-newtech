@@ -156,8 +156,8 @@ public class TopPceTest
         List<String> azERO = reservedPipe.getAzERO();
         List<String> zaERO = reservedPipe.getZaERO();
 
-        String expectedAzERO = "portA-nodeP-portP:1-portL:1-nodeL-portL:2-portM:1-nodeM-portZ-";
-        String expectedZaERO = "portZ-nodeM-portM:1-portL:2-nodeL-portL:1-portP:1-nodeP-portA-";
+        String expectedAzERO = "nodeP-portP:1-portL:1-nodeL-portL:2-portM:1-nodeM-";
+        String expectedZaERO = "nodeM-portM:1-portL:2-nodeL-portL:1-portP:1-nodeP-";
 
         String actualAzERO = "";
         String actualZaERO = "";
