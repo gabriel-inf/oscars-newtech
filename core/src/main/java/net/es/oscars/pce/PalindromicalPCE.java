@@ -56,16 +56,6 @@ public class PalindromicalPCE
         multiLayerTopo.getEdges().addAll(intTopo.getEdges());
         multiLayerTopo.getEdges().addAll(mplsTopo.getEdges());
 
-        for(TopoVertex oneNode : multiLayerTopo.getVertices())
-        {
-            log.info("Node: " + oneNode.getUrn());
-        }
-
-        for(TopoEdge oneEdge : multiLayerTopo.getEdges())
-        {
-            log.info("Link: (" + oneEdge.getA().getUrn() + "," + oneEdge.getZ().getUrn() + "," + oneEdge.getLayer());
-        }
-
         UrnE srcPortURN = requestPipe.getAJunction().getFixtures().iterator().next().getPortUrn();
         UrnE dstPortURN = requestPipe.getZJunction().getFixtures().iterator().next().getPortUrn();
 

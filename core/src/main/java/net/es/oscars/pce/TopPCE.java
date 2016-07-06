@@ -121,6 +121,7 @@ public class TopPCE {
                 numReserved++;
                 List<TopoEdge> azEros = eroMapForPipe.get("az");
                 List<TopoEdge> zaEros = eroMapForPipe.get("za");
+
                 try {
                     transPCE.reserveRequestedPipe(pipe, schedSpec, azEros, zaEros, simpleJunctions, reservedPipes,
                             reservedEthJunctions);

@@ -10,9 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.topo.beans.TopoEdge;
 import net.es.oscars.topo.beans.TopoVertex;
 import net.es.oscars.topo.beans.Topology;
-import net.es.oscars.topo.ent.ReservableBandwidthE;
-import net.es.oscars.topo.enums.Layer;
-import net.es.oscars.topo.enums.VertexType;
 import net.es.oscars.topo.svc.TopoService;
 import org.apache.commons.collections15.Transformer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +17,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Created by jeremy on 6/15/16.
@@ -69,8 +65,7 @@ public class DijkstraPCE
             log.error("no path found");
         }
 
-        path.stream()
-            .forEach(h -> log.info(h.getA().getUrn() + " -- " + h.getLayer() + " -- " + h.getZ().getUrn()));
+        path.stream().forEach(h -> log.info(h.getA().getUrn() + " -- " + h.getLayer() + " -- " + h.getZ().getUrn()));
 
         return path;
     }
@@ -140,7 +135,8 @@ public class DijkstraPCE
                 TopoVertex nodeZ = new TopoVertex(e.getZ().getUrn(), e.getZ().getVertexType());
                 TopoEdge az = TopoEdge.builder().a(nodeA).z(nodeZ).build();
 
-                az.setMetric(e.getMetric());;
+                az.setMetric(e.getMetric());
+                az.setLayer(e.getLayer());
                 //log.info("adding edge to Dijkstra graph: (" + e.getA() + "," + e.getZ() + ")");
 
                 g.addEdge(az, nodeA, nodeZ, EdgeType.DIRECTED);
