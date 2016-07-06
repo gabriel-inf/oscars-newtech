@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by jeremy on 6/22/16.
@@ -47,11 +48,45 @@ public class LacimordnilapPCE
      */
     public Map<String, List<TopoEdge>> computeCimordnilapERO(RequestedVlanPipeE requestPipe, ScheduleSpecificationE requestSched, List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList) throws PCEException
     {
+        Topology ethTopo = topoService.layer(Layer.ETHERNET);
+        Topology intTopo = topoService.layer(Layer.INTERNAL);
+        Topology mplsTopo = topoService.layer(Layer.MPLS);
+
+        // Filter MPLS-ports and MPLS-devices out of ethTopo
+        Set<TopoVertex> portsOnly = ethTopo.getVertices().stream()
+                .filter(v -> v.getVertexType().equals(VertexType.PORT))
+                .collect(Collectors.toSet());
+
+        for(TopoEdge intEdge : intTopo.getEdges())
+        {
+            TopoVertex vertA = intEdge.getA();
+            TopoVertex vertZ = intEdge.getZ();
+
+            if(portsOnly.isEmpty())
+            {
+                break;
+            }
+
+            if(portsOnly.contains(vertA))
+            {
+                if(!vertZ.getVertexType().equals(VertexType.ROUTER))
+                {
+                    portsOnly.remove(vertA);
+                }
+            }
+        }
+
+        ethTopo.getVertices().removeIf(v -> v.getVertexType().equals(VertexType.ROUTER));
+        ethTopo.getVertices().removeAll(portsOnly);
+
+        // Filter Devices and Ports out of intTopo
+        intTopo.getVertices().removeAll(intTopo.getVertices());
+
 
         /* These calls only need to be made once when topology is updated */
-        serviceLayerTopology.setTopology(topoService.layer(Layer.ETHERNET));
-        serviceLayerTopology.setTopology(topoService.layer(Layer.INTERNAL));
-        serviceLayerTopology.setTopology(topoService.layer(Layer.MPLS));
+        serviceLayerTopology.setTopology(ethTopo);
+        serviceLayerTopology.setTopology(intTopo);
+        serviceLayerTopology.setTopology(mplsTopo);
 
         serviceLayerTopology.createMultilayerTopology();
         /* * */

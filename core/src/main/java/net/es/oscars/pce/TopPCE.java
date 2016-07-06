@@ -83,8 +83,6 @@ public class TopPCE {
             // Attempt to reserve all requested pipes
             log.info("Starting to handle pipes");
             numReserved = handleRequestedPipes(pipes, schedSpec, simpleJunctions, reservedPipes, reservedEthJunctions, numReserved);
-            log.info("Pipes handled: " + pipes.toString());
-            log.info("Num Reserved: " + numReserved + " -- Num Requested Pipes: " + pipes.size());
 
             // If pipes were not able to be reserved in the original order, try reversing the order pipes are attempted
             if((numReserved != pipes.size()) && (pipes.size() > 1)){

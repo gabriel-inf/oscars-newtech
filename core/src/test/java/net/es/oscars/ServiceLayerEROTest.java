@@ -18,6 +18,7 @@ import net.es.oscars.topo.ent.UrnE;
 import net.es.oscars.topo.enums.Layer;
 import net.es.oscars.topo.enums.UrnType;
 import net.es.oscars.topo.enums.VertexType;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
@@ -241,7 +242,7 @@ public class ServiceLayerEROTest
     }
 
 
-    //@Test
+    @Test
     public void verifyNoVirtualSrcDest()
     {
         this.buildLinearTopo();

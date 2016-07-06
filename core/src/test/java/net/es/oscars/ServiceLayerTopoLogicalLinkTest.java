@@ -17,6 +17,7 @@ import net.es.oscars.topo.ent.UrnE;
 import net.es.oscars.topo.enums.Layer;
 import net.es.oscars.topo.enums.UrnType;
 import net.es.oscars.topo.enums.VertexType;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
@@ -55,7 +56,7 @@ public class ServiceLayerTopoLogicalLinkTest
     private List<ReservedBandwidthE> resvBW;
     private List<ReservedVlanE> resvVLAN;
 
-    //@Test
+    @Test
     public void verifyLogicalLinksLinear()
     {
         buildLinearTopo();

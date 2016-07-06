@@ -137,59 +137,48 @@ public class TopPceTest
 
         assert(reservedBlueprint != null);
 
-        Set<ReservedEthPipeE> allResPipes;
-        Set<ReservedBandwidthE> allresBW;
-
         ReservedVlanFlowE reservedFlow = reservedBlueprint.getVlanFlows().iterator().next();
-        log.info(reservedFlow.toString());
-        allResPipes = reservedFlow.getPipes();
-        ReservedEthPipeE reservedPipe = allResPipes.iterator().next();
 
-        allresBW = reservedPipe.getReservedBandwidths();
+        Set<ReservedEthPipeE> allResPipes = reservedFlow.getPipes();
+        Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
+        List<ReservedBandwidthE> allResBWs = new ArrayList<>();
 
-        ReservedVlanJunctionE reservedJunctionA = reservedPipe.getAJunction();
-        ReservedVlanJunctionE reservedJunctionZ = reservedPipe.getZJunction();
-        ReservedVlanFixtureE reservedFixA = reservedJunctionA.getFixtures().iterator().next();
-        ReservedVlanFixtureE reservedFixZ = reservedJunctionZ.getFixtures().iterator().next();
+        assert(allResPipes.size() == 0);
+        assert(allResJunctions.size() == 3);
 
-        List<String> azERO = reservedPipe.getAzERO();
-        List<String> zaERO = reservedPipe.getZaERO();
+        allResJunctions.stream()
+                .forEach(j -> {
+                    if(j.getDeviceUrn().equals("nodeL") || j.getDeviceUrn().equals("nodeM") || j.getDeviceUrn().equals("nodeP"))
+                        assert(true);
 
-        String expectedAzERO = "nodeP-portP:1-portL:1-nodeL-portL:2-portM:1-nodeM-";
-        String expectedZaERO = "nodeM-portM:1-portL:2-nodeL-portL:1-portP:1-nodeP-";
+                    assert(j.getFixtures().size() == 2);
 
-        String actualAzERO = "";
-        String actualZaERO = "";
+                    Iterator<ReservedVlanFixtureE> jIter = j.getFixtures().iterator();
+                    ReservedVlanFixtureE fixA = jIter.next();
+                    ReservedVlanFixtureE fixZ = jIter.next();
 
-        for(String oneHop : azERO)
-        {
-            actualAzERO = actualAzERO + oneHop + "-";
-        }
+                    if(j.getDeviceUrn().equals("nodeL"))
+                    {
+                        assert(fixA.getIfceUrn().equals("nodeL:1") && fixZ.getIfceUrn().equals("nodeL:2") || fixZ.getIfceUrn().equals("nodeL:1") && fixA.getIfceUrn().equals("nodeL:2"));
+                    }
+                    else if(j.getDeviceUrn().equals("nodeM"))
+                    {
+                        assert(fixA.getIfceUrn().equals("nodeM:1") && fixZ.getIfceUrn().equals("portZ") || fixZ.getIfceUrn().equals("nodeM:1") && fixA.getIfceUrn().equals("portZ"));
+                    }
+                    else if(j.getDeviceUrn().equals("nodeP"))
+                    {
+                        assert(fixA.getIfceUrn().equals("portA") && fixZ.getIfceUrn().equals("nodeP:1") || fixZ.getIfceUrn().equals("portA") && fixA.getIfceUrn().equals("nodeP:1"));
+                    }
 
-        for(String oneHop : zaERO)
-        {
-            actualZaERO = actualZaERO + oneHop + "-";
-        }
-
-        // Verify EROs //
-        assert(actualAzERO.equals(expectedAzERO));
-        assert(actualZaERO.equals(expectedZaERO));
-
-        // Verify Pipes/Junctions/Fixtures //
-        assert(allResPipes.size() == 1);
-
-        for(ReservedBandwidthE oneResBW : allresBW)
-        {
-            assert(oneResBW.getInBandwidth() == azBW);
-            assert(oneResBW.getEgBandwidth() == zaBW);
-        }
-
-        assert(reservedJunctionA.getDeviceUrn().getUrn().equals("nodeP"));
-        assert(reservedJunctionZ.getDeviceUrn().getUrn().equals("nodeM"));
-        assert(reservedJunctionA.getFixtures().size() == 1);
-        assert(reservedJunctionZ.getFixtures().size() == 1);
-        assert(reservedFixA.getIfceUrn().getUrn().equals("portA"));
-        assert(reservedFixZ.getIfceUrn().getUrn().equals("portZ"));
+                    allResBWs.add(j.getFixtures().iterator().next().getReservedBandwidth());
+                    allResBWs.add(j.getFixtures().iterator().next().getReservedBandwidth());
+                });
+        log.info("HERE 2");
+        allResBWs.stream()
+                .forEach(bw -> {
+                    assert(bw.getInBandwidth() == bw.getEgBandwidth());
+                    assert(bw.getInBandwidth() == azBW);
+                });
 
         log.info("test 'basicPceTest2' passed.");
     }
