@@ -80,7 +80,9 @@ public class PCEAssistant {
 
     public List<ReservedVlanJunctionE> createJunctions(List<TopoVertex> vertices, Map<String, UrnE> urnMap,
                                                         Map<String, DeviceModel> deviceModels, Integer azMbps, Integer zaMbps,
-                                                        Integer vlanId, ScheduleSpecificationE sched) throws PSSException{
+                                                        Integer vlanId, ScheduleSpecificationE sched,
+                                                       RequestedVlanJunctionE reqJunctionA,
+                                                       RequestedVlanJunctionE reqJunctionZ) throws PSSException{
         assert(vertices.size() % 3 == 0);
 
 
@@ -101,6 +103,12 @@ public class PCEAssistant {
                 ports.add(portOneVertex);
                 ports.add(portTwoVertex);
 
+                // Add in requested ports for this junction if they are not already included
+                Set<TopoVertex> extraPortsA = getExtraRequestedPorts(reqJunctionA, deviceVertex, ports);
+                Set<TopoVertex> extraPortsZ = getExtraRequestedPorts(reqJunctionZ, deviceVertex, ports);
+                ports.addAll(extraPortsA);
+                ports.addAll(extraPortsZ);
+
                 // Build the junction
                 ReservedVlanJunctionE rsvJunction = createJunctionAndFixtures(deviceVertex, ports, urnMap,
                         deviceModels, azMbps, zaMbps, vlanId, sched);
@@ -118,25 +126,47 @@ public class PCEAssistant {
 
     public ReservedEthPipeE createPipe(List<TopoVertex> azVertices, List<TopoVertex> zaVertices,
                                         Map<String, DeviceModel> deviceModels, Map<String, UrnE> urnMap, Integer azMbps,
-                                        Integer zaMbps, Integer vlanId, ScheduleSpecificationE sched) throws PSSException{
-        // Pull out the first two and last two element of each vertex list
-        // This will get you the starting/ending port and device
+                                        Integer zaMbps, Integer vlanId, ScheduleSpecificationE sched,
+                                       RequestedVlanJunctionE reqJunctionA, RequestedVlanJunctionE reqJunctionZ)
+            throws PSSException{
+        // Pull out the first and last element of each vertex list
+        // This will get you the starting/ending port
+        // Also retrieve the starting and ending device (but do not remove them from the list, they are included in
+        // the AZ and ZA EROs).
         // Build a junction for the starting and ending device
         // Note: Junctions only need to be made for the AZ path, not both
 
         // Ingress into the pipe
+        // Get and remove the ingress port
         TopoVertex ingressPort = azVertices.remove(0);
-        TopoVertex ingressDevice = azVertices.remove(0);
+        // Get (and do not remove) the ingress device
+        TopoVertex ingressDevice = azVertices.get(0);
+
         Set<TopoVertex> ingressPorts = new HashSet<>();
         ingressPorts.add(ingressPort);
+
+        // Get extra ports that were requested for ingress junction (if applicable)
+        Set<TopoVertex> extraIngressPortsA = getExtraRequestedPorts(reqJunctionA, ingressDevice, ingressPorts);
+        Set<TopoVertex> extraIngressPortsZ = getExtraRequestedPorts(reqJunctionZ, ingressDevice, ingressPorts);
+        ingressPorts.addAll(extraIngressPortsA);
+        ingressPorts.addAll(extraIngressPortsZ);
 
         DeviceModel ingressModel = deviceModels.get(ingressDevice.getUrn());
 
         // Egress from the pipe
+        // Get and remove the egress port
         TopoVertex egressPort = azVertices.remove(azVertices.size()-1);
-        TopoVertex egressDevice = azVertices.remove(azVertices.size()-1);
+        // Get (and do not remove) the egress device
+        TopoVertex egressDevice = azVertices.get(azVertices.size()-1);
+
         Set<TopoVertex> egressPorts = new HashSet<>();
         egressPorts.add(egressPort);
+
+        // Get extra ports that were requested for egress junction (if applicable)
+        Set<TopoVertex> extraEgressPortsA = getExtraRequestedPorts(reqJunctionA, egressDevice, egressPorts);
+        Set<TopoVertex> extraEgressPortsZ = getExtraRequestedPorts(reqJunctionZ, egressDevice, egressPorts);
+        egressPorts.addAll(extraEgressPortsA);
+        egressPorts.addAll(extraEgressPortsZ);
 
         DeviceModel egressModel = deviceModels.get(egressDevice.getUrn());
 
@@ -146,11 +176,7 @@ public class PCEAssistant {
         // Just remove from ZA path, do not need to be saved
         // Remove ingress port
         zaVertices.remove(0);
-        // Remove ingress device
-        zaVertices.remove(0);
         // Remove egress port
-        zaVertices.remove(zaVertices.size()-1);
-        // Remove egress device
         zaVertices.remove(zaVertices.size()-1);
 
         assert(zaVertices.size() >= 2);
@@ -178,6 +204,20 @@ public class PCEAssistant {
                 .reservedPssResources(new HashSet<>())
                 .pipeType(decidePipeType(ingressModel, egressModel))
                 .build();
+    }
+
+    public Set<TopoVertex> getExtraRequestedPorts(RequestedVlanJunctionE reqJunctionA, TopoVertex deviceVertex,
+                                                   Set<TopoVertex> ports) {
+        Set<TopoVertex> extraPorts = new HashSet<>();
+        if(reqJunctionA.getDeviceUrn().getUrn().equals(deviceVertex.getUrn())){
+            extraPorts = reqJunctionA.getFixtures()
+                    .stream()
+                    .map(fx -> fx.getPortUrn().getUrn())
+                    .map(s -> TopoVertex.builder().urn(s).vertexType(VertexType.PORT).build())
+                    .filter(ports::contains)
+                    .collect(Collectors.toSet());
+        }
+        return extraPorts;
     }
 
 

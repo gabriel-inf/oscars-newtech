@@ -143,6 +143,7 @@ public class TranslationPCE {
             urnMap.put(u.getUrn(), u);
         });
 
+
         // Combine the lists of reserved junctions
         Set<ReservedVlanJunctionE> reservedJunctions = new HashSet<>(simpleJunctions);
         reservedJunctions.addAll(reservedEthJunctions);
@@ -200,7 +201,8 @@ public class TranslationPCE {
                 List<TopoVertex> vertices = azSegment.get(Layer.ETHERNET);
                 // Create list of new junctions
                 List<ReservedVlanJunctionE> newJunctions = pceAssistant.createJunctions(vertices, urnMap, deviceModels, azMbps,
-                        zaMbps, vlanId, sched);
+                        zaMbps, vlanId, sched, reqPipe.getAJunction(), reqPipe.getZJunction());
+                log.info("New junctions: " + newJunctions.toString());
                 // Add to list of reserved junctions
                 reservedEthJunctions.addAll(newJunctions);
             }
@@ -212,8 +214,10 @@ public class TranslationPCE {
                 List<TopoVertex> zaVertices = zaSegment.get(Layer.MPLS);
                 // Create pipe
                 ReservedEthPipeE pipe = pceAssistant.createPipe(azVertices, zaVertices, deviceModels, urnMap, azMbps, zaMbps,
-                        vlanId, sched);
+                        vlanId, sched, reqPipe.getAJunction(), reqPipe.getZJunction());
 
+
+                log.info("New pipe: " + pipe.toString());
                 // Add to set of reserved pipes
                 reservedPipes.add(pipe);
             }
