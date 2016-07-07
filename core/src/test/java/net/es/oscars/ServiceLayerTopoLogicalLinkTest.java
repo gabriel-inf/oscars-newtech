@@ -162,7 +162,7 @@ public class ServiceLayerTopoLogicalLinkTest
         log.info("test 'verifyLogicalLinksLinear' passed.");
     }
 
-    //@Test
+    @Test
     public void verifyLogicalLinksMultipath()
     {
         buildLinearTopoWithMultipleMPLSBranch();
@@ -270,7 +270,7 @@ public class ServiceLayerTopoLogicalLinkTest
         log.info("test 'verifyLogicalLinksMultipath' passed.");
     }
 
-    //@Test
+    @Test
     public void verifyLogicalLinksLongerPath()
     {
         buildLinearTopoWithMultipleMPLSBranch();
@@ -391,7 +391,7 @@ public class ServiceLayerTopoLogicalLinkTest
     }
 
 
-    //@Test
+    @Test
     public void verifyLogicalLinksAsymmetric()
     {
         buildLinearTopoWithMultipleMPLSBranch();
@@ -516,7 +516,7 @@ public class ServiceLayerTopoLogicalLinkTest
     }
 
 
-    //@Test
+    @Test
     public void verifyLogicalLinksDisjointMpls()
     {
         buildTwoMPlsPathTopo();
@@ -662,7 +662,7 @@ public class ServiceLayerTopoLogicalLinkTest
 
 
     /* Expected behavior: Add two VIRTUAL nodes and to VIRTUAL ports to Service-Layer topology to represent source and destination end-points. */
-    //@Test
+    @Test
     public void verifyLogicalLinksAllMPLS()
     {
         this.buildLinearMPLSTopo();
@@ -783,7 +783,7 @@ public class ServiceLayerTopoLogicalLinkTest
 
 
     /* Expected behavior: Add one VIRTUAL nodes and to VIRTUAL ports to Service-Layer topology to represent source end-points. */
-    //@Test
+    @Test
     public void verifyLogicalLinksSrcMPLS()
     {
         this.buildLinearMPLSTopo();
@@ -970,7 +970,7 @@ public class ServiceLayerTopoLogicalLinkTest
     }
 
     /* Expected behavior: Add one VIRTUAL nodes and to VIRTUAL ports to Service-Layer topology to represent destination end-points. */
-    //@Test
+    @Test
     public void verifyLogicalLinksDstMPLS()
     {
         this.buildLinearMPLSTopo();
