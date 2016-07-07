@@ -60,7 +60,6 @@ public class PCEAssistant {
 
 
         for (int i = 0; i < edges.size(); i++) {
-            log.info(edges.get(i).toString());
             Integer mod = Math.floorMod(i, 3);
             if (mod == 0) {
                 // this is device - to - port
@@ -92,17 +91,20 @@ public class PCEAssistant {
 
 
         for (int i = 0; i < edges.size(); i++) {
+            log.info("Considering edge: " + edges.get(i).toString());
             Integer mod = Math.floorMod(i, 3);
             // we are at the port-to-device connection (the third one, so offset 2)
             // this needs belong to a new segment IFF the layer of the NEXT port-to-port connection is different
             if (mod == 2) {
+                log.info("Edge is a port-to-device edge");
                 // at the very last one, there's no next port-to-port, so skip that
+                segmentEdges.add(edges.get(i));
                 if (i + 1 != edges.size()) {
                     TopoEdge nextPortToPort = edges.get(i + 2);
                     if (!nextPortToPort.getLayer().equals(currentLayer)) {
-                        log.info("switching layers to " + nextPortToPort.getLayer());
+                        log.info("Ending segment of: " + segment.toString());
+                        log.info("Switching layers to " + nextPortToPort.getLayer() + " from " + currentLayer);
                         currentLayer = nextPortToPort.getLayer();
-
                         segment = new HashMap<>();
                         segmentEdges = new ArrayList<>();
                         segment.put(currentLayer, segmentEdges);
@@ -111,7 +113,9 @@ public class PCEAssistant {
 
                 }
             }
-            segmentEdges.add(edges.get(i));
+            else {
+                segmentEdges.add(edges.get(i));
+            }
 
         }
 
