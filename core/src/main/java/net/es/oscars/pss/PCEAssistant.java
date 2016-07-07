@@ -206,15 +206,23 @@ public class PCEAssistant {
                 .build();
     }
 
-    public Set<TopoVertex> getExtraRequestedPorts(RequestedVlanJunctionE reqJunctionA, TopoVertex deviceVertex,
+    /**
+     * Retrieve all requested fixtures at a junction where those ports are not already included in the input list
+     * of ports
+     * @param reqJunction - The requested junction, containing the requested fixtures
+     * @param deviceVertex - The device corresponding to that junction
+     * @param ports - The input list of ports (at that device)
+     * @return All requested ports that are not already in the input list of ports.
+     */
+    public Set<TopoVertex> getExtraRequestedPorts(RequestedVlanJunctionE reqJunction, TopoVertex deviceVertex,
                                                    Set<TopoVertex> ports) {
         Set<TopoVertex> extraPorts = new HashSet<>();
-        if(reqJunctionA.getDeviceUrn().getUrn().equals(deviceVertex.getUrn())){
-            extraPorts = reqJunctionA.getFixtures()
+        if(reqJunction.getDeviceUrn().getUrn().equals(deviceVertex.getUrn())){
+            extraPorts = reqJunction.getFixtures()
                     .stream()
                     .map(fx -> fx.getPortUrn().getUrn())
                     .map(s -> TopoVertex.builder().urn(s).vertexType(VertexType.PORT).build())
-                    .filter(ports::contains)
+                    .filter(v -> !ports.contains(v))
                     .collect(Collectors.toSet());
         }
         return extraPorts;
