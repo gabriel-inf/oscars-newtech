@@ -17,6 +17,7 @@ import net.es.oscars.topo.ent.ReservableBandwidthE;
 import net.es.oscars.topo.ent.UrnE;
 import net.es.oscars.topo.enums.DeviceModel;
 import net.es.oscars.topo.enums.Layer;
+import net.es.oscars.topo.enums.VertexType;
 import net.es.oscars.topo.svc.TopoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -129,6 +130,10 @@ public class TranslationPCE {
                                      Set<ReservedEthPipeE> reservedPipes, Set<ReservedVlanJunctionE> reservedEthJunctions)
     throws PCEException, PSSException{
 
+        // Get requested bandwidth
+        Integer azMbps = reqPipe.getAzMbps();
+        Integer zaMbps = reqPipe.getZaMbps();
+
         // Retrieve a map of URN strings to device models
         Map<String, DeviceModel> deviceModels = topoService.deviceModels();
 
@@ -167,138 +172,52 @@ public class TranslationPCE {
                     reqPipe.toString() + " given previous reservations in flow");
         }
 
-
-        // Remove the ingress/egress ports at the end of the EROs
-        UrnE inFixUrn = null;
-        UrnE egFixUrn = null;
-        try{
-
-            TopoEdge azInEdge = azERO.remove(0);
-            TopoEdge azEgEdge = azERO.remove(azERO.size()-1);
-
-            TopoVertex azInPort = azInEdge.getA();
-            TopoVertex azEgPort = azEgEdge.getZ();
-
-            zaERO.remove(0);
-            zaERO.remove(zaERO.size()-1);
-
-            // Retrieve the URNs for the egress & ingress point
-            inFixUrn = urnMap.get(azInPort.getUrn());
-            egFixUrn = urnMap.get(azEgPort.getUrn());
-        }catch(Exception e){
-            log.error("Failed to remove ingress and egress points from AZ or ZA ERO");
-        }
-
-        assert(inFixUrn != null);
-        assert(egFixUrn != null);
-
-
         // now, decompose the path
-        List<Map<Layer, List<TopoEdge>>> azSegments = PCEAssistant.decompose(azERO, deviceModels);
-        List<Map<Layer, List<TopoEdge>>> zaSegments = PCEAssistant.decompose(zaERO, deviceModels);
+        List<Map<Layer, List<TopoVertex>>> azSegments = PCEAssistant.decompose(azERO);
+        List<Map<Layer, List<TopoVertex>>> zaSegments = PCEAssistant.decompose(zaERO);
         assert(azSegments.size() == zaSegments.size());
-
-
 
         // for each segment:
         // if it is an Ethernet segment, make junctions, one per device
         // if it is an MPLS segment, make a pipe
         // all the while, make sure to merge in the current first and last junctions as needed
 
+
+        // Get Chosen VLAN ID
+        Integer vlanId = validVlanIds.iterator().next();
+
         for (int i = 0; i < azSegments.size(); i++) {
             // Get az segment and za segment
-            Map<Layer, List<TopoEdge>> azSegment = azSegments.get(i);
-            Map<Layer, List<TopoEdge>> zaSegment = zaSegments.get(zaSegments.size()-i-1);
+            Map<Layer, List<TopoVertex>> azSegment = azSegments.get(i);
+            Map<Layer, List<TopoVertex>> zaSegment = zaSegments.get(zaSegments.size()-i-1);
             log.info("AZ Segment: " + azSegment.toString());
             log.info("ZA Segment: " + zaSegment.toString());
-
-            // Get Chosen VLAN ID for segment
-            Integer vlanId = validVlanIds.iterator().next();
-
-            // Create mergeA and MergeZ for AZ segment
-            Optional<ReservedVlanJunctionE> mergeA = Optional.empty();
-            Optional<ReservedVlanJunctionE> mergeZ = Optional.empty();
-            if (i == 0) {
-                UrnE urnA = reqPipe.getAJunction().getDeviceUrn();
-                mergeA = createMergeJunction(urnA, reqPipe, deviceModels, inFixUrn, sched, vlanId);
+            assert(azSegment.keySet().equals(zaSegment.keySet()));
+            // ETHERNET - Make Ethernet Junctions
+            // Structure - Fix - Junction - Fix, Fix - Junction - Fix, etc
+            // Only have to do for AZ direction
+            if(azSegment.containsKey(Layer.ETHERNET)){
+                List<TopoVertex> vertices = azSegment.get(Layer.ETHERNET);
+                // Create list of new junctions
+                List<ReservedVlanJunctionE> newJunctions = pceAssistant.createJunctions(vertices, urnMap, deviceModels, azMbps,
+                        zaMbps, vlanId, sched);
+                // Add to list of reserved junctions
+                reservedEthJunctions.addAll(newJunctions);
             }
-            if (i == azSegments.size() - 1) {
-                UrnE urnZ = reqPipe.getZJunction().getDeviceUrn();
-                mergeZ = createMergeJunction(urnZ, reqPipe, deviceModels, egFixUrn, sched, vlanId);
-            }
+            // MPLS - Make VPLS Pipe
+            // Pipe Structure - Fix - Junction - Pipe - Junction - Fix
+            // AZ and ZA EROs go into pipe
+            else{
+                List<TopoVertex> azVertices = azSegment.get(Layer.MPLS);
+                List<TopoVertex> zaVertices = zaSegment.get(Layer.MPLS);
+                // Create pipe
+                ReservedEthPipeE pipe = pceAssistant.createPipe(azVertices, zaVertices, deviceModels, urnMap, azMbps, zaMbps,
+                        vlanId, sched);
 
-
-            List<TopoEdge> azEdges;
-            List<TopoEdge> zaEdges;
-
-            if (azSegment.size() != 1) {
-                throw new PCEException("invalid segmentation: more than one segment in map");
-            }
-            if (azSegment.containsKey(Layer.ETHERNET)) {
-                if (azSegment.get(Layer.ETHERNET).size() % 3 != 0) {
-                    throw new PCEException("invalid segmentation: ethernet layer segment has size of "
-                            + azSegment.get(Layer.ETHERNET).size() + " rather than 3.");
-                }
-
-                azEdges = azSegment.get(Layer.ETHERNET);
-
-                // an ethernet segment: a list of junctions, one per device
-
-                List<ReservedVlanJunctionE> azVjs = pceAssistant.makeEthernetJunctions(azEdges,
-                        reqPipe.getAzMbps(), reqPipe.getZaMbps(), vlanId,
-                        mergeA, mergeZ,
-                        sched,
-                        urnMap,
-                        deviceModels);
-                log.info("Reserved VLAN Junctions: " + azVjs.toString());
-
-                // Add these to the list of ongoing reserved junctions
-                reservedEthJunctions.addAll(azVjs);
-            } else if (azSegment.containsKey(Layer.MPLS)) {
-                azEdges = azSegment.get(Layer.MPLS);
-                zaEdges = zaSegment.get(Layer.MPLS);
-
-                log.info("Reserving MPLS Layer Segment");
-                log.info(azEdges.toString());
-                log.info(zaEdges.toString());
-
-                ReservedEthPipeE pipe = pceAssistant.makeVplsPipe(azEdges, zaEdges, reqPipe.getAzMbps(),
-                        reqPipe.getZaMbps(), vlanId, mergeA, mergeZ, urnMap, deviceModels, sched);
-
-                // Add this pipe to the list of ongoing reserved pipes
+                // Add to set of reserved pipes
                 reservedPipes.add(pipe);
-
-            } else {
-                throw new PCEException("invalid segmentation");
             }
         }
-    }
-
-    private Optional<ReservedVlanJunctionE> createMergeJunction(UrnE urn, RequestedVlanPipeE reqPipe, Map<String,
-            DeviceModel> deviceModels, UrnE additionalUrn, ScheduleSpecificationE sched, Integer vlanId)
-            throws PSSException, PCEException{
-
-        // Add the ingress port to this first junction
-        DeviceModel model = deviceModels.get(urn.getUrn());
-        EthFixtureType fixtureType = pceAssistant.decideFixtureType(model);
-
-        // Create new Reserved Bandwidth
-        ReservedBandwidthE rsvBw = pceAssistant.createReservedBandwidth(additionalUrn, reqPipe.getAzMbps(),
-                reqPipe.getZaMbps(), sched);
-
-        // Create new Reserved VLANs
-        ReservedVlanE rsvVlan = pceAssistant.createReservedVlan(additionalUrn, vlanId, sched);
-
-        // Create new Reserved Fixture
-        ReservedVlanFixtureE fx = pceAssistant.createReservedFixture(additionalUrn, new HashSet<>(),
-                rsvVlan, rsvBw, fixtureType);
-
-        HashSet<ReservedVlanFixtureE> fixtures = new HashSet<>();
-        fixtures.add(fx);
-
-        // Add fixture to this new junction
-        return Optional.of(pceAssistant.createReservedJunction(urn, new HashSet<>(), fixtures,
-                pceAssistant.decideJunctionType(deviceModels.get(urn.getUrn()))));
     }
 
     /**
