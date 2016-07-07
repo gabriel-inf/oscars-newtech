@@ -404,11 +404,11 @@ public class TopPceTest
 
         String expectedAzERO1 = "nodeP-nodeP:2-nodeQ:1-nodeQ-";
         String expectedZaERO1 = "nodeQ-nodeQ:1-nodeP:2-nodeP-";
-        String expectedAzERO2 = "nodeR-nodeR:1-nodeQ:1-nodeQ-";
-        String expectedZaERO2 = "nodeQ-nodeQ:1-nodeR:1-nodeR-";
+        String expectedAzERO2 = "nodeR-nodeR:3-nodeQ:2-nodeQ-";
+        String expectedZaERO2 = "nodeQ-nodeQ:2-nodeR:3-nodeR-";
 
         assert(actualAzERO.equals(expectedAzERO1) || actualAzERO.equals(expectedAzERO2));
-        assert(actualZaERO.equals(expectedZaERO1) || actualZaERO.equals(expectedAzERO2));
+        assert(actualZaERO.equals(expectedZaERO1) || actualZaERO.equals(expectedZaERO2));
 
         log.info("test 'basicPceTest4' passed.");
     }
