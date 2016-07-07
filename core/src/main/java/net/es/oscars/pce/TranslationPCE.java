@@ -208,9 +208,9 @@ public class TranslationPCE {
         for (int i = 0; i < azSegments.size(); i++) {
             // Get az segment and za segment
             Map<Layer, List<TopoEdge>> azSegment = azSegments.get(i);
-            Map<Layer, List<TopoEdge>> zaSegment = zaSegments.get(i);
-            log.info(azSegment.toString());
-            log.info(zaSegment.toString());
+            Map<Layer, List<TopoEdge>> zaSegment = zaSegments.get(zaSegments.size()-i-1);
+            log.info("AZ Segment: " + azSegment.toString());
+            log.info("ZA Segment: " + zaSegment.toString());
 
             // Get Chosen VLAN ID for segment
             Integer vlanId = validVlanIds.iterator().next();
@@ -420,9 +420,11 @@ public class TranslationPCE {
         Set<Integer> requestedVlanIds = pruningService
                 .getIntegersFromRanges(pruningService.getIntRangesFromString(vlanExpression));
 
+        log.info("Requested VLAN IDs: " + requestedVlanIds.toString());
         // Find all valid IDs for the AZ path
         // Find all valid IDs for the ETHERNET segment
         Set<Integer> azValidIds = getValidIdsForPath(azERO, requestedVlanIds, urnMap, rsvVlanMap);
+        log.info("Valid AZ VLAN IDs: " + azValidIds.toString());
         // If that segment has no valid IDs return an empty set
         if(azValidIds.isEmpty()){
             return overlappingVlanIds;
@@ -431,6 +433,7 @@ public class TranslationPCE {
 
         // Find all valid IDs for the ZA segments
         Set<Integer> zaValidIds = getValidIdsForPath(zaERO, requestedVlanIds, urnMap, rsvVlanMap);
+        log.info("Valid ZA VLAN IDs: " + azValidIds.toString());
         // If that segment has no valid IDs return an empty set
         if(zaValidIds.isEmpty()){
             return overlappingVlanIds;
@@ -460,13 +463,14 @@ public class TranslationPCE {
         // Return a map of VLAN ID to sets of edges that support that ID
         Map<Integer, Set<TopoEdge>> edgesPerVlanId = pruningService.findEdgesPerVlanId(new HashSet<>(ERO), urnMap, rsvVlanMap);
 
+        Set<TopoEdge> mplsEdges = edgesPerVlanId.get(-1);
         // For each VLAN ID
         for (Integer id : edgesPerVlanId.keySet()) {
             // Get the edges
             Set<TopoEdge> edgesForId = edgesPerVlanId.get(id);
             // Confirm that all edges in the segment support this id
             // If they do, add this ID as a valid ID
-            if (edgesForId.size() == ERO.size()) {
+            if (edgesForId.size() + mplsEdges.size() == ERO.size()) {
                 if (requestedVlanIds.contains(id) || requestedVlanIds.isEmpty()) {
                     validIds.add(id);
                 }
