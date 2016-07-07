@@ -275,8 +275,8 @@ public class TopPceTest
         List<String> azERO = onlyPipe.getAzERO();
         List<String> zaERO = onlyPipe.getZaERO();
 
-        String actualAzERO = juncA.getDeviceUrn() + "-";
-        String actualZaERO = juncZ.getDeviceUrn() + "-";
+        String actualAzERO = "";
+        String actualZaERO = "";
 
         for(String x : azERO)
             actualAzERO = actualAzERO + x + "-";
@@ -284,11 +284,8 @@ public class TopPceTest
         for(String x : zaERO)
             actualZaERO = actualZaERO + x + "-";
 
-        actualAzERO = actualAzERO + juncZ.getDeviceUrn();
-        actualZaERO = actualZaERO + juncA.getDeviceUrn();
-
-        String expectedAzERO = "nodeP-nodeP:2-nodeQ:1-nodeQ";
-        String expectedZaERO = "nodeQ-nodeQ:1-nodeP:2-nodeP";
+        String expectedAzERO = "nodeP-nodeP:2-nodeQ:1-nodeQ-";
+        String expectedZaERO = "nodeQ-nodeQ:1-nodeP:2-nodeP-";
 
         assert(actualAzERO.equals(expectedAzERO));
         assert(actualZaERO.equals(expectedZaERO));
@@ -352,10 +349,6 @@ public class TopPceTest
             assert(fix1.getReservedBandwidth().getInBandwidth() == azBW);
             assert(fix2.getReservedBandwidth().getInBandwidth() == azBW);
 
-            log.info("Junction URN: " + oneJunc.getDeviceUrn().getUrn());
-            log.info("FixtureA URN: " + fix1.getIfceUrn().getUrn());
-            log.info("FixtureZ URN: " + fix2.getIfceUrn().getUrn());
-
             if(oneJunc.getDeviceUrn().getUrn().equals("nodeK"))
             {
                 assert(fix1.getIfceUrn().getUrn().equals("portA") || fix1.getIfceUrn().getUrn().equals("nodeK:1") || fix1.getIfceUrn().getUrn().equals("nodeK:2"));
@@ -389,7 +382,7 @@ public class TopPceTest
 
         assert(juncA.getDeviceUrn().getUrn().equals("nodeP") || juncA.getDeviceUrn().getUrn().equals("nodeR"));
         assert(juncZ.getDeviceUrn().getUrn().equals("nodeQ"));
-        assert(fixA.getIfceUrn().getUrn().equals("nodeP:1"));
+        assert(fixA.getIfceUrn().getUrn().equals("nodeP:1") || fixA.getIfceUrn().getUrn().equals("nodeR:1"));
         assert(fixZ.getIfceUrn().getUrn().equals("portZ"));
 
         assert(fixA.getReservedBandwidth().getInBandwidth() == azBW);
@@ -400,8 +393,8 @@ public class TopPceTest
         List<String> azERO = onlyPipe.getAzERO();
         List<String> zaERO = onlyPipe.getZaERO();
 
-        String actualAzERO = juncA.getDeviceUrn() + "-";
-        String actualZaERO = juncZ.getDeviceUrn() + "-";
+        String actualAzERO = "";
+        String actualZaERO = "";
 
         for(String x : azERO)
             actualAzERO = actualAzERO + x + "-";
@@ -409,13 +402,10 @@ public class TopPceTest
         for(String x : zaERO)
             actualZaERO = actualZaERO + x + "-";
 
-        actualAzERO = actualAzERO + juncZ.getDeviceUrn();
-        actualZaERO = actualZaERO + juncA.getDeviceUrn();
-
-        String expectedAzERO1 = "nodeP-nodeP:2-nodeQ:1-nodeQ";
-        String expectedZaERO1 = "nodeQ-nodeQ:1-nodeP:2-nodeP";
-        String expectedAzERO2 = "nodeR-nodeR:1-nodeQ:1-nodeQ";
-        String expectedZaERO2 = "nodeQ-nodeQ:1-nodeR:1-nodeR";
+        String expectedAzERO1 = "nodeP-nodeP:2-nodeQ:1-nodeQ-";
+        String expectedZaERO1 = "nodeQ-nodeQ:1-nodeP:2-nodeP-";
+        String expectedAzERO2 = "nodeR-nodeR:1-nodeQ:1-nodeQ-";
+        String expectedZaERO2 = "nodeQ-nodeQ:1-nodeR:1-nodeR-";
 
         assert(actualAzERO.equals(expectedAzERO1) || actualAzERO.equals(expectedAzERO2));
         assert(actualZaERO.equals(expectedZaERO1) || actualZaERO.equals(expectedAzERO2));
@@ -511,8 +501,8 @@ public class TopPceTest
         List<String> azERO = onlyPipe.getAzERO();
         List<String> zaERO = onlyPipe.getZaERO();
 
-        String actualAzERO = juncA.getDeviceUrn() + "-";
-        String actualZaERO = juncZ.getDeviceUrn() + "-";
+        String actualAzERO = "";
+        String actualZaERO = "";
 
         for(String x : azERO)
             actualAzERO = actualAzERO + x + "-";
@@ -520,11 +510,8 @@ public class TopPceTest
         for(String x : zaERO)
             actualZaERO = actualZaERO + x + "-";
 
-        actualAzERO = actualAzERO + juncZ.getDeviceUrn();
-        actualZaERO = actualZaERO + juncA.getDeviceUrn();
-
-        String expectedAzERO = "nodeP-nodeP:3-nodeQ:1-nodeQ";
-        String expectedZaERO = "nodeQ-nodeQ:1-nodeP:3-nodeP";
+        String expectedAzERO = "nodeP-nodeP:3-nodeQ:1-nodeQ-";
+        String expectedZaERO = "nodeQ-nodeQ:1-nodeP:3-nodeP-";
 
         assert(actualAzERO.equals(expectedAzERO));
         assert(actualZaERO.equals(expectedZaERO));
@@ -725,8 +712,8 @@ public class TopPceTest
         List<String> azERO = onlyPipe.getAzERO();
         List<String> zaERO = onlyPipe.getZaERO();
 
-        String actualAzERO = juncA.getDeviceUrn() + "-";
-        String actualZaERO = juncZ.getDeviceUrn() + "-";
+        String actualAzERO = "";
+        String actualZaERO = "";
 
         for(String x : azERO)
             actualAzERO = actualAzERO + x + "-";
@@ -734,11 +721,8 @@ public class TopPceTest
         for(String x : zaERO)
             actualZaERO = actualZaERO + x + "-";
 
-        actualAzERO = actualAzERO + juncZ.getDeviceUrn();
-        actualZaERO = actualZaERO + juncA.getDeviceUrn();
-
-        String expectedAzERO = "nodeP-nodeP:1-nodeQ:1-nodeQ";
-        String expectedZaERO = "nodeQ-nodeQ:1-nodeP:1-nodeP";
+        String expectedAzERO = "nodeP-nodeP:1-nodeQ:1-nodeQ-";
+        String expectedZaERO = "nodeQ-nodeQ:1-nodeP:1-nodeP-";
 
         assert(actualAzERO.equals(expectedAzERO));
         assert(actualZaERO.equals(expectedZaERO));
@@ -955,8 +939,8 @@ public class TopPceTest
         List<String> azERO = onlyPipe.getAzERO();
         List<String> zaERO = onlyPipe.getZaERO();
 
-        String actualAzERO = juncA.getDeviceUrn() + "-";
-        String actualZaERO = juncZ.getDeviceUrn() + "-";
+        String actualAzERO = "";
+        String actualZaERO = "";
 
         for(String x : azERO)
             actualAzERO = actualAzERO + x + "-";
@@ -964,11 +948,8 @@ public class TopPceTest
         for(String x : zaERO)
             actualZaERO = actualZaERO + x + "-";
 
-        actualAzERO = actualAzERO + juncZ.getDeviceUrn();
-        actualZaERO = actualZaERO + juncA.getDeviceUrn();
-
-        String expectedAzERO = "nodeP-nodeP:1-nodeQ:1-nodeQ-nodeQ:2-nodeR:1-nodeR";
-        String expectedZaERO = "nodeR-nodeR:1-nodeQ:2-nodeQ-nodeQ:1-nodeP:1-nodeP";
+        String expectedAzERO = "nodeP-nodeP:1-nodeQ:1-nodeQ-nodeQ:2-nodeR:1-nodeR-";
+        String expectedZaERO = "nodeR-nodeR:1-nodeQ:2-nodeQ-nodeQ:1-nodeP:1-nodeP-";
 
         assert(actualAzERO.equals(expectedAzERO));
         assert(actualZaERO.equals(expectedZaERO));
