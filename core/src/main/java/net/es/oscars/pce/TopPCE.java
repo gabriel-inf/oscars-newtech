@@ -33,13 +33,11 @@ public class TopPCE {
     @Autowired
     private LacimordnilapPCE nonPalindromicPCE;
 
-    public ReservedBlueprintE makeReserved(RequestedBlueprintE requested, ScheduleSpecificationE schedSpec) throws PCEException, PSSException {
+    public Optional<ReservedBlueprintE> makeReserved(RequestedBlueprintE requested, ScheduleSpecificationE schedSpec) throws PCEException, PSSException {
 
         verifyRequested(requested);
 
-        ReservedBlueprintE reserved = ReservedBlueprintE.builder()
-                .vlanFlows(new HashSet<>())
-                .build();
+        Optional<ReservedBlueprintE> reserved = Optional.empty();
 
         /*
         for (Layer3FlowE req_f : requested.getLayer3Flows()) {
@@ -49,63 +47,64 @@ public class TopPCE {
         */
 
         log.info("Handling Request");
-        for (RequestedVlanFlowE req_f : requested.getVlanFlows())
+        RequestedVlanFlowE req_f = requested.getVlanFlow();
+
+        // Attempt to reserve simple junctions
+        log.info("Handling Simple Junctions");
+        Set<ReservedVlanJunctionE> simpleJunctions = new HashSet<>();
+        for(RequestedVlanJunctionE reqJunction : req_f.getJunctions())
         {
-            ReservedVlanFlowE res_f = new ReservedVlanFlowE();
+            ReservedVlanJunctionE junction = transPCE.reserveSimpleJunction(reqJunction, schedSpec, simpleJunctions);
 
-            // Attempt to reserve simple junctions
-            log.info("Handling Simple Junctions");
-            Set<ReservedVlanJunctionE> simpleJunctions = new HashSet<>();
-            for(RequestedVlanJunctionE reqJunction : req_f.getJunctions())
-            {
-                ReservedVlanJunctionE junction = transPCE.reserveSimpleJunction(reqJunction, schedSpec, simpleJunctions);
-
-                if(junction != null){
-                    simpleJunctions.add(junction);
-                }
-            }
-            log.info("All simple junctions handled");
-            // If not all junctions were able to be reserved, return the blank Reserved Vlan FLow
-            if(simpleJunctions.size() != req_f.getJunctions().size()){
-                reserved.getVlanFlows().add(res_f);
-            }
-
-            List<RequestedVlanPipeE> pipes = new ArrayList<>();
-            pipes.addAll(req_f.getPipes());
-
-            // Create temporary storage for reserved pipes and junctions
-            Set<ReservedEthPipeE> reservedPipes = new HashSet<>();
-            Set<ReservedVlanJunctionE> reservedEthJunctions = new HashSet<>();
-
-            // Keep track of the number of successfully reserved pipes
-            Integer numReserved = 0;
-
-            // Attempt to reserve all requested pipes
-            log.info("Starting to handle pipes");
-            numReserved = handleRequestedPipes(pipes, schedSpec, simpleJunctions, reservedPipes, reservedEthJunctions, numReserved);
-
-            // If pipes were not able to be reserved in the original order, try reversing the order pipes are attempted
-            if((numReserved != pipes.size()) && (pipes.size() > 1)){
-                Collections.reverse(pipes);
-                numReserved = 0;
-                reservedPipes = new HashSet<>();
-                reservedEthJunctions = new HashSet<>();
-                numReserved = handleRequestedPipes(pipes, schedSpec, simpleJunctions, reservedPipes, reservedEthJunctions, numReserved);
-            }
-
-            // If the pipes still cannot be reserved, return the blank Reserved Vlan Flow
-            if(numReserved != pipes.size()){
-                reserved.getVlanFlows().add(res_f);
-            }
-            // All pipes were successfully found, translate store the reserved resources
-            else{
-                Set<ReservedVlanJunctionE> rsvJunctions = new HashSet<>(simpleJunctions);
-                rsvJunctions.addAll(reservedEthJunctions);
-                res_f.setJunctions(rsvJunctions);
-                res_f.setPipes(reservedPipes);
-                reserved.getVlanFlows().add(res_f);
+            if(junction != null){
+                simpleJunctions.add(junction);
             }
         }
+        log.info("All simple junctions handled");
+        // If not all junctions were able to be reserved, return the empty Optional<Blueprint>
+        if(simpleJunctions.size() != req_f.getJunctions().size()){
+            return reserved;
+        }
+
+        List<RequestedVlanPipeE> pipes = new ArrayList<>();
+        pipes.addAll(req_f.getPipes());
+
+        // Create temporary storage for reserved pipes and junctions
+        Set<ReservedEthPipeE> reservedPipes = new HashSet<>();
+        Set<ReservedVlanJunctionE> reservedEthJunctions = new HashSet<>();
+
+        // Keep track of the number of successfully reserved pipes
+        Integer numReserved = 0;
+
+        // Attempt to reserve all requested pipes
+        log.info("Starting to handle pipes");
+        numReserved = handleRequestedPipes(pipes, schedSpec, simpleJunctions, reservedPipes, reservedEthJunctions, numReserved);
+
+        // If pipes were not able to be reserved in the original order, try reversing the order pipes are attempted
+        if((numReserved != pipes.size()) && (pipes.size() > 1)){
+            Collections.reverse(pipes);
+            numReserved = 0;
+            reservedPipes = new HashSet<>();
+            reservedEthJunctions = new HashSet<>();
+            numReserved = handleRequestedPipes(pipes, schedSpec, simpleJunctions, reservedPipes, reservedEthJunctions, numReserved);
+        }
+
+        // If the pipes still cannot be reserved, return the blank Reserved Vlan Flow
+        if(numReserved != pipes.size()){
+            return reserved;
+        }
+        // All pipes were successfully found, store the reserved resources
+        Set<ReservedVlanJunctionE> reservedJunctions = new HashSet<>(simpleJunctions);
+        reservedJunctions.addAll(reservedEthJunctions);
+
+        // Make the reserved flow
+        ReservedVlanFlowE res_f = ReservedVlanFlowE.builder()
+                .junctions(reservedJunctions)
+                .pipes(reservedPipes)
+                .build();
+
+        // Build the reserved Blueprint
+        reserved = Optional.of(ReservedBlueprintE.builder().vlanFlow(res_f).build());
         return reserved;
 
     }
@@ -192,13 +191,12 @@ public class TopPCE {
         log.info("starting verification");
         if (requested == null) {
             throw new PCEException("Null blueprint!");
-        } else if (requested.getVlanFlows() == null || requested.getVlanFlows().isEmpty()) {
+        }
+        if (requested.getVlanFlow() == null) {
             throw new PCEException("No VLAN flows");
-        } else if (requested.getVlanFlows().size() != 1) {
-            throw new PCEException("Exactly one flow supported right now");
         }
 
-        RequestedVlanFlowE flow = requested.getVlanFlows().iterator().next();
+        RequestedVlanFlowE flow = requested.getVlanFlow();
 
         log.info("verifying junctions & pipes");
         if (flow.getJunctions().isEmpty() && flow.getPipes().isEmpty()) {

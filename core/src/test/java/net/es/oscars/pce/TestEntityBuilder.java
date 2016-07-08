@@ -1,4 +1,4 @@
-package net.es.oscars.helpers;
+package net.es.oscars.pce;
 
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.pss.EthFixtureType;
@@ -94,17 +94,9 @@ public class TestEntityBuilder {
         RequestedVlanJunctionE junction = buildRequestedJunction(deviceName, fixtureNames, azMbps, zaMbps, vlanExp);
         junctions.add(junction);
 
-        Set<RequestedVlanFlowE> vlanFlows = new HashSet<>();
-        RequestedVlanFlowE flow = RequestedVlanFlowE.builder()
-                .junctions(junctions)
-                .pipes(new HashSet<>())
-                .build();
-        vlanFlows.add(flow);
 
-        return RequestedBlueprintE.builder()
-                .vlanFlows(vlanFlows)
-                .layer3Flows(new HashSet<>())
-                .build();
+
+        return buildRequestedBlueprint(buildRequestedFlow(junctions, new HashSet<>()), Layer3FlowE.builder().build());
     }
 
     public RequestedBlueprintE buildRequest(String aPort, String aDevice, String zPort, String zDevice,
@@ -116,10 +108,7 @@ public class TestEntityBuilder {
         RequestedVlanPipeE pipe = buildRequestedPipe(aPort, aDevice, zPort, zDevice, azMbps, zaMbps, palindromic, vlanExp);
         pipes.add(pipe);
 
-        Set<RequestedVlanFlowE> vlanFlows = new HashSet<>();
-        vlanFlows.add(buildRequestedFlow(new HashSet<>(), pipes));
-
-        return buildRequestedBlueprint(vlanFlows, new HashSet<>());
+        return buildRequestedBlueprint(buildRequestedFlow(new HashSet<>(), pipes), Layer3FlowE.builder().build());
 
     }
 
@@ -140,10 +129,7 @@ public class TestEntityBuilder {
             pipes.add(pipe);
         }
 
-        Set<RequestedVlanFlowE> vlanFlows = new HashSet<>();
-        vlanFlows.add(buildRequestedFlow(new HashSet<>(), pipes));
-
-        return buildRequestedBlueprint(vlanFlows, new HashSet<>());
+        return buildRequestedBlueprint(buildRequestedFlow(new HashSet<>(), pipes), Layer3FlowE.builder().build());
     }
 
     public RequestedBlueprintE buildRequest(List<String> deviceNames, List<Set<String>> portNames,
@@ -159,16 +145,13 @@ public class TestEntityBuilder {
             junctions.add(junction);
         }
 
-        Set<RequestedVlanFlowE> vlanFlows = new HashSet<>();
-        vlanFlows.add(buildRequestedFlow(junctions, new HashSet<>()));
-
-        return buildRequestedBlueprint(vlanFlows, new HashSet<>());
+        return buildRequestedBlueprint(buildRequestedFlow(junctions, new HashSet<>()), Layer3FlowE.builder().build());
     }
 
-    public RequestedBlueprintE buildRequestedBlueprint(Set<RequestedVlanFlowE> vlanFlows, Set<Layer3FlowE> l3Flows){
+    public RequestedBlueprintE buildRequestedBlueprint(RequestedVlanFlowE vlanFlow, Layer3FlowE l3Flow){
         return RequestedBlueprintE.builder()
-                .vlanFlows(vlanFlows)
-                .layer3Flows(l3Flows)
+                .vlanFlow(vlanFlow)
+                .layer3Flow(l3Flow)
                 .build();
     }
 

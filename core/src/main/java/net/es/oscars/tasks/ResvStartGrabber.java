@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -50,19 +51,24 @@ public class ResvStartGrabber {
                     RequestedBlueprintE req = c.getSpecification().getRequested();
 
                     try {
-                        ReservedBlueprintE res = topPCE.makeReserved(req, c.getSpecification().getScheduleSpec());
-                        c.setReserved(res);
-                        c.getStates().setResv(ResvState.HELD);
-                        c = connRepo.save(c);
+                        Optional<ReservedBlueprintE> res = topPCE.makeReserved(req, c.getSpecification().getScheduleSpec());
 
-                        String pretty = null;
-                        try {
-                            pretty = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(c);
-                            log.info(pretty);
-                        } catch (JsonProcessingException e) {
-                            e.printStackTrace();
+                        if(res.isPresent()){
+                            c.setReserved(res.get());
+                            c.getStates().setResv(ResvState.HELD);
+                            c = connRepo.save(c);
+
+                            String pretty = null;
+                            try {
+                                pretty = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(c);
+                                log.info(pretty);
+                            } catch (JsonProcessingException e) {
+                                e.printStackTrace();
+                            }
                         }
-
+                        else{
+                            log.error("Reservation Unsuccessful!");
+                        }
 
                     } catch (PSSException ex) {
                         log.error("PSS Exception", ex);

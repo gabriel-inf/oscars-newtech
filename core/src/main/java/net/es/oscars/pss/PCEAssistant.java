@@ -24,31 +24,46 @@ import java.util.stream.Collectors;
 public class PCEAssistant {
 
 
+    /**
+     * Given a list of edges, convert that list to into a number of segments, based on layer.
+     * An ETHERNET segment is made entirely of switches and their ports, while a MPLS segment consists
+     * of routers and their ports.
+     * @param edges
+     * @return
+     */
     public static List<Map<Layer, List<TopoVertex>>> decompose(List<TopoEdge> edges) {
         List<Map<Layer, List<TopoVertex>>> result = new ArrayList<>();
 
 
         log.info(edges.toString());
 
-        // New Assumption
         // We have List of edges like this
         // Port -INTERNAL- Device -INTERNAL- Port -ETHERNET/MPLS- Port -INTERNAL- Device -INTERNAL- Port, etc
         // We want to make several lists of vertices
         assert(edges.size() > 2);
 
+        // Find the first applicable non-INTERNAL edge on the path, and set it as the current layer
         Layer currentLayer = edges.get(2).getLayer();
+
+        // Initialize the containers for holding vertices per segment
         List<TopoVertex> segmentVertices = new ArrayList<>();
         HashMap<Layer, List<TopoVertex>> segment = new HashMap<>();
         segment.put(currentLayer, segmentVertices);
         result.add(segment);
 
+        // Loop through each edge, add the nodes connected to that edge to different segments based
+        // on certain conditions
         for(int i = 0; i < edges.size(); i++){
+            // Retrieve the current edge and nodes
             TopoEdge currentEdge = edges.get(i);
             TopoVertex nodeA = currentEdge.getA();
             TopoVertex nodeZ = currentEdge.getZ();
+            // If this is the first edge, add the node on the "A" side of the edge
             if(i==0){
                 segmentVertices.add(nodeA);
             }
+            // If we've been in a MPLS segment, check if the currently considered edge is ETHERNET
+            // If so, switch the layer to ETHERNET and start a new segment
             if(currentLayer.equals(Layer.MPLS)){
                 Layer currentEdgeLayer = edges.get(i).getLayer();
                 if(currentEdgeLayer.equals(Layer.ETHERNET)){
@@ -59,9 +74,11 @@ public class PCEAssistant {
                     result.add(segment);
                 }
             }
+            // If we've been in an ETHERNET segment, check if next non-internal edge is MPLS
+            // If so, switch the layer to MPLS and start a new segment
             else if(currentLayer.equals(Layer.ETHERNET) && i % 3 == 2 && i + 3 != edges.size()){
                 Layer nextPortToPortLayer = edges.get(i+3).getLayer();
-                if(nextPortToPortLayer != currentLayer){
+                if(nextPortToPortLayer.equals(Layer.MPLS)){
                     currentLayer = nextPortToPortLayer;
                     segment = new HashMap<>();
                     segmentVertices = new ArrayList<>();
@@ -69,6 +86,7 @@ public class PCEAssistant {
                     result.add(segment);
                 }
             }
+            // Add the node on the "Z" end of the current edge
             segmentVertices.add(nodeZ);
 
         }
@@ -77,7 +95,21 @@ public class PCEAssistant {
 
     }
 
-
+    /**
+     * Build a junction for each device in the input set of vertices. Each junction has two fixtures (made from the vertex
+     * prior to the device, and the vertex after the device).
+     * @param vertices - A list of vertices, comprised of ports and devices.
+     * @param urnMap - A map of URN string to URN object
+     * @param deviceModels - A map of URN string to device model
+     * @param azMbps - Requested AZ bandwidth
+     * @param zaMbps - Requested ZA bandwidth
+     * @param vlanId - The requested VLAN ID
+     * @param sched - The requested schedule (start/end date)
+     * @param reqJunctionA - Requested junction A
+     * @param reqJunctionZ - Requested junction Z
+     * @return A list of reserved VLAN junctions, one per device.
+     * @throws PSSException
+     */
     public List<ReservedVlanJunctionE> createJunctions(List<TopoVertex> vertices, Map<String, UrnE> urnMap,
                                                         Map<String, DeviceModel> deviceModels, Integer azMbps, Integer zaMbps,
                                                         Integer vlanId, ScheduleSpecificationE sched,

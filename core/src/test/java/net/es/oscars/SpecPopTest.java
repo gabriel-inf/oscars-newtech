@@ -57,7 +57,7 @@ public class SpecPopTest {
 
     public SpecificationE addEndpoints(SpecificationE spec) {
 
-        RequestedVlanFlowE flow = spec.getRequested().getVlanFlows().iterator().next();
+        RequestedVlanFlowE flow = spec.getRequested().getVlanFlow();
 
 
         UrnE startb1 = UrnE.builder()
@@ -166,26 +166,28 @@ public class SpecPopTest {
                 .durationMinutes(30L)
                 .build();
 
-        SpecificationE spec = SpecificationE.builder()
-                .scheduleSpec(sse)
-                .version(1)
-                .connectionId("UFAWE")
-                .description("a description")
-                .username("some user")
-                .build();
-
-        RequestedBlueprintE bp = RequestedBlueprintE.builder()
-                .vlanFlows(new HashSet<>())
-                .layer3Flows(new HashSet<>())
-                .build();
-
         RequestedVlanFlowE flow = RequestedVlanFlowE.builder()
                 .junctions(new HashSet<>())
                 .pipes(new HashSet<>())
                 .build();
 
+        RequestedBlueprintE bp = RequestedBlueprintE.builder()
+                .vlanFlow(flow)
+                .layer3Flow(Layer3FlowE.builder().build())
+                .build();
+
+        SpecificationE spec = SpecificationE.builder()
+                .scheduleSpec(sse)
+                .version(1)
+                .requested(bp)
+                .connectionId("UFAWE")
+                .description("a description")
+                .username("some user")
+                .build();
+
+
+
         spec.setRequested(bp);
-        bp.getVlanFlows().add(flow);
         return spec;
     }
 

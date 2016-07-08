@@ -17,8 +17,8 @@ public class ReservedBlueprintE {
     @GeneratedValue
     private Long id;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL)
     @NonNull
-    private Set<ReservedVlanFlowE> vlanFlows;
+    private ReservedVlanFlowE vlanFlow;
 
 }
