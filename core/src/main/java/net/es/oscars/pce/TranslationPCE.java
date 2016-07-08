@@ -2,6 +2,7 @@ package net.es.oscars.pce;
 
 
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.dto.pss.EthFixtureType;
 import net.es.oscars.pss.PCEAssistant;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.dao.ReservedBandwidthRepository;
@@ -16,6 +17,7 @@ import net.es.oscars.topo.ent.ReservableBandwidthE;
 import net.es.oscars.topo.ent.UrnE;
 import net.es.oscars.topo.enums.DeviceModel;
 import net.es.oscars.topo.enums.Layer;
+import net.es.oscars.topo.enums.VertexType;
 import net.es.oscars.topo.svc.TopoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -63,6 +65,7 @@ public class TranslationPCE {
         // Retrieve the URN of the requested junction, if it is in the repository
         String deviceUrn = req_j.getDeviceUrn().getUrn();
         Optional<UrnE> optUrn = urnRepository.findByUrn(deviceUrn);
+
         UrnE urn;
         if(optUrn.isPresent()){
             urn = optUrn.get();
@@ -127,14 +130,12 @@ public class TranslationPCE {
                                      Set<ReservedEthPipeE> reservedPipes, Set<ReservedVlanJunctionE> reservedEthJunctions)
     throws PCEException, PSSException{
 
+        // Get requested bandwidth
+        Integer azMbps = reqPipe.getAzMbps();
+        Integer zaMbps = reqPipe.getZaMbps();
+
         // Retrieve a map of URN strings to device models
         Map<String, DeviceModel> deviceModels = topoService.deviceModels();
-
-
-        // now, decompose the path
-        List<Map<Layer, List<TopoEdge>>> azSegments = PCEAssistant.decompose(azERO, deviceModels);
-        List<Map<Layer, List<TopoEdge>>> zaSegments = PCEAssistant.decompose(zaERO, deviceModels);
-        assert(azSegments.size() == zaSegments.size());
 
         // Build a urn map
         Map<String , UrnE> urnMap = new HashMap<>();
@@ -158,86 +159,67 @@ public class TranslationPCE {
         rsvVlans.addAll(pruningService.getReservedVlans(sched.getNotBefore(), sched.getNotAfter()));
 
         // Confirm that there is sufficient bandwidth to meet the request (given what has been reserved so far)
-        boolean sufficientBw = checkForSufficientBw(urnMap, reqPipe, sched, azSegments, zaSegments, rsvBandwidths);
+        boolean sufficientBw = checkForSufficientBw(urnMap, reqPipe, azERO, zaERO, rsvBandwidths);
         if(!sufficientBw){
             throw new PCEException("Insufficient Bandwidth to meet requested pipe" +
-                    reqPipe.toString() + " given previous pipes in flow");
+                    reqPipe.toString() + " given previous reservations in flow");
         }
 
 
         // Confirm that there is at least one VLAN ID that can support every segment (given what has been reserved so far)
-        Set<Integer> validVlanIds = selectVlanIds(urnMap, reqPipe, sched, azSegments, zaSegments, rsvVlans);
+        Set<Integer> validVlanIds = selectVlanIds(urnMap, reqPipe, azERO, zaERO, rsvVlans);
         if(validVlanIds.isEmpty()){
             throw new PCEException("Insufficient VLANs to meet requested pipe " +
-                    reqPipe.toString() + " viven previous pipes in flow");
+                    reqPipe.toString() + " given previous reservations in flow");
         }
+
+        // now, decompose the path
+        List<Map<Layer, List<TopoVertex>>> azSegments = PCEAssistant.decompose(azERO);
+        List<Map<Layer, List<TopoVertex>>> zaSegments = PCEAssistant.decompose(zaERO);
+        assert(azSegments.size() == zaSegments.size());
 
         // for each segment:
         // if it is an Ethernet segment, make junctions, one per device
         // if it is an MPLS segment, make a pipe
         // all the while, make sure to merge in the current first and last junctions as needed
 
+
+        // Get Chosen VLAN ID
+        Integer vlanId = validVlanIds.iterator().next();
+
         for (int i = 0; i < azSegments.size(); i++) {
             // Get az segment and za segment
-            Map<Layer, List<TopoEdge>> azSegment = azSegments.get(i);
-            Map<Layer, List<TopoEdge>> zaSegment = zaSegments.get(i);
-
-            // Get Chosen VLAN ID for segment
-            Integer vlanId = validVlanIds.iterator().next();
-
-            // Create mergeA and MergeZ for AZ segment
-            Optional<ReservedVlanJunctionE> mergeA = Optional.empty();
-            Optional<ReservedVlanJunctionE> mergeZ = Optional.empty();
-            if (i == 0) {
-                UrnE urn = reqPipe.getAJunction().getDeviceUrn();
-
-                mergeA = Optional.of(pceAssistant.createReservedJunction(urn, new HashSet<>(), new HashSet<>()
-                        , pceAssistant.decideJunctionType(deviceModels.get(urn.getUrn()))));
+            Map<Layer, List<TopoVertex>> azSegment = azSegments.get(i);
+            Map<Layer, List<TopoVertex>> zaSegment = zaSegments.get(zaSegments.size()-i-1);
+            log.info("AZ Segment: " + azSegment.toString());
+            log.info("ZA Segment: " + zaSegment.toString());
+            assert(azSegment.keySet().equals(zaSegment.keySet()));
+            // ETHERNET - Make Ethernet Junctions
+            // Structure - Fix - Junction - Fix, Fix - Junction - Fix, etc
+            // Only have to do for AZ direction
+            if(azSegment.containsKey(Layer.ETHERNET)){
+                List<TopoVertex> vertices = azSegment.get(Layer.ETHERNET);
+                // Create list of new junctions
+                List<ReservedVlanJunctionE> newJunctions = pceAssistant.createJunctions(vertices, urnMap, deviceModels, azMbps,
+                        zaMbps, vlanId, sched, reqPipe.getAJunction(), reqPipe.getZJunction());
+                log.info("New junctions: " + newJunctions.toString());
+                // Add to list of reserved junctions
+                reservedEthJunctions.addAll(newJunctions);
             }
-            if (i == azSegments.size() - 1) {
-                UrnE urn = reqPipe.getZJunction().getDeviceUrn();
-                mergeZ = Optional.of(pceAssistant.createReservedJunction(urn, new HashSet<>(), new HashSet<>()
-                        , pceAssistant.decideJunctionType(deviceModels.get(urn.getUrn()))));
-            }
+            // MPLS - Make VPLS Pipe
+            // Pipe Structure - Fix - Junction - Pipe - Junction - Fix
+            // AZ and ZA EROs go into pipe
+            else{
+                List<TopoVertex> azVertices = azSegment.get(Layer.MPLS);
+                List<TopoVertex> zaVertices = zaSegment.get(Layer.MPLS);
+                // Create pipe
+                ReservedEthPipeE pipe = pceAssistant.createPipe(azVertices, zaVertices, deviceModels, urnMap, azMbps, zaMbps,
+                        vlanId, sched, reqPipe.getAJunction(), reqPipe.getZJunction());
 
 
-            List<TopoEdge> azEdges;
-            List<TopoEdge> zaEdges;
-
-            if (azSegment.size() != 1) {
-                throw new PCEException("invalid segmentation");
-            }
-            if (azSegment.containsKey(Layer.ETHERNET)) {
-                if (azSegment.get(Layer.ETHERNET).size() != 3) {
-                    throw new PCEException("invalid segmentation");
-                }
-
-                azEdges = azSegment.get(Layer.ETHERNET);
-
-                // an ethernet segment: a list of junctions, one per device
-
-                List<ReservedVlanJunctionE> azVjs = pceAssistant.makeEthernetJunctions(azEdges,
-                        reqPipe.getAzMbps(), reqPipe.getZaMbps(), vlanId,
-                        mergeA, mergeZ,
-                        sched,
-                        urnMap,
-                        deviceModels);
-
-                // Add these to the list of ongoing reserved junctions
-                reservedEthJunctions.addAll(azVjs);
-
-            } else if (azSegment.containsKey(Layer.MPLS)) {
-                azEdges = azSegment.get(Layer.MPLS);
-                zaEdges = zaSegment.get(Layer.MPLS);
-
-                ReservedEthPipeE pipe = pceAssistant.makeVplsPipe(azEdges, zaEdges, reqPipe.getAzMbps(),
-                        reqPipe.getZaMbps(), vlanId, mergeA, mergeZ, urnMap, deviceModels, sched);
-
-                // Add this pipe to the list of ongoing reserved pipes
+                log.info("New pipe: " + pipe.toString());
+                // Add to set of reserved pipes
                 reservedPipes.add(pipe);
-
-            } else {
-                throw new PCEException("invalid segmentation");
             }
         }
     }
@@ -247,15 +229,13 @@ public class TranslationPCE {
      * passed in.
      * @param urnMap - A map of URN string to URN objects
      * @param reqPipe - The requested pipe
-     * @param sched - The requested schedule
-     * @param azSegments - The path in the A->Z direction, split up into ETHERNET and MPLS segments
-     * @param zaSegments - The path in the Z->A direction, split up into ETHERNET and MPLS segments
+     * @param azERO - The path in the A->Z direction
+     * @param zaERO - The path in the Z->A direction
      * @param rsvBandwidths - A list of bandwidth reservations, which affect bandwidth availability
-     * @return True, if there is sufficient bandwidth across all segments. False, otherwise.
+     * @return True, if there is sufficient bandwidth across all edges. False, otherwise.
      */
-    private boolean checkForSufficientBw(Map<String, UrnE> urnMap, RequestedVlanPipeE reqPipe,
-                                         ScheduleSpecificationE sched, List<Map<Layer, List<TopoEdge>>> azSegments,
-                                         List<Map<Layer, List<TopoEdge>>> zaSegments, List<ReservedBandwidthE> rsvBandwidths) {
+    private boolean checkForSufficientBw(Map<String, UrnE> urnMap, RequestedVlanPipeE reqPipe, List<TopoEdge> azERO,
+                                         List<TopoEdge> zaERO, List<ReservedBandwidthE> rsvBandwidths) {
 
         // Build a map, allowing us to retrieve a list of ReservedBandwidth given the associated URN
         Map<UrnE, List<ReservedBandwidthE>> resvBwMap = pruningService.buildReservedBandwidthMap(rsvBandwidths);
@@ -264,18 +244,15 @@ public class TranslationPCE {
         Integer azMbps = reqPipe.getAzMbps();
         Integer zaMbps = reqPipe.getZaMbps();
 
-        // For each AZ segment, fail the test if there is insufficient bandwidth
-        for(Map<Layer, List<TopoEdge>> segment : azSegments){
-            if(!sufficientBandwidthForSegment(segment, urnMap, resvBwMap, azMbps, zaMbps)){
-                return false;
-            }
+
+        // For the AZ direction, fail the test if there is insufficient bandwidth
+        if(!sufficientBandwidthForERO(azERO, urnMap, resvBwMap, azMbps, zaMbps)){
+            return false;
         }
 
-        // For each ZA segment, fail the test if there is insufficient bandwidth
-        for(Map<Layer, List<TopoEdge>> segment : zaSegments){
-            if(!sufficientBandwidthForSegment(segment, urnMap, resvBwMap, azMbps, zaMbps)){
-                return false;
-            }
+        // For each ZA direction, fail the test if there is insufficient bandwidth
+        if(!sufficientBandwidthForERO(zaERO, urnMap, resvBwMap, azMbps, zaMbps)){
+            return false;
         }
         return true;
     }
@@ -283,42 +260,38 @@ public class TranslationPCE {
     /**
      * Given a particular segment, iterate through the edges and confirm that there is sufficient bandwidth
      * available
-     * @param segment - A segment map, mapping a layer type to a series of edges
+     * @param ERO - A series of edges
      * @param urnMap - A mapping of URN strings to URN objects
      * @param resvBwMap - A mapping of URN objects to lists of reserved bandwidth for that URN
      * @param azMbps - The bandwidth in the AZ direction
      * @param zaMbps - The bandwidth the ZA direction
      * @return True, if the segment can support the requested bandwidth. False, otherwise.
      */
-    private boolean sufficientBandwidthForSegment(Map<Layer, List<TopoEdge>> segment, Map<String, UrnE> urnMap,
+    private boolean sufficientBandwidthForERO(List<TopoEdge> ERO, Map<String, UrnE> urnMap,
                                                  Map<UrnE, List<ReservedBandwidthE>> resvBwMap, Integer azMbps,
                                                  Integer zaMbps){
-        // For each list of edges in the segment
-        for(List<TopoEdge> edges : segment.values()){
-            // For each edge in that list
-            for(TopoEdge edge : edges){
+        // For each edge in that list
+        for(TopoEdge edge : ERO){
+            // Retrieve the URNs
+            String urnStringA = edge.getA().getUrn();
+            String urnStringZ = edge.getZ().getUrn();
+            if(!urnMap.containsKey(urnStringA) || !urnMap.containsKey(urnStringZ)){
+                return false;
+            }
+            UrnE urnA = urnMap.get(urnStringA);
+            UrnE urnZ = urnMap.get(urnStringZ);
 
-                // Retrieve the URNs
-                String urnStringA = edge.getA().getUrn();
-                String urnStringZ = edge.getZ().getUrn();
-                if(!urnMap.containsKey(urnStringA) || !urnMap.containsKey(urnStringZ)){
+            // If URN A has reservable bandwidth, confirm that there is enough available
+            if(urnA.getReservableBandwidth() != null){
+                if(!sufficientBandwidthAtUrn(urnA, urnA.getReservableBandwidth(), resvBwMap, azMbps, zaMbps)){
                     return false;
                 }
-                UrnE urnA = urnMap.get(urnStringA);
-                UrnE urnZ = urnMap.get(urnStringZ);
+            }
 
-                // If URN A has reservable bandwidth, confirm that there is enough available
-                if(urnA.getReservableBandwidth() != null){
-                    if(!sufficientBandwidthAtUrn(urnA, urnA.getReservableBandwidth(), resvBwMap, azMbps, zaMbps)){
-                        return false;
-                    }
-                }
-
-                // If URN Z has reservable bandwidth, confirm that there is enough available
-                if(urnZ.getReservableBandwidth() != null){
-                    if(!sufficientBandwidthAtUrn(urnZ, urnZ.getReservableBandwidth(), resvBwMap, azMbps, zaMbps)){
-                        return false;
-                    }
+            // If URN Z has reservable bandwidth, confirm that there is enough available
+            if(urnZ.getReservableBandwidth() != null){
+                if(!sufficientBandwidthAtUrn(urnZ, urnZ.getReservableBandwidth(), resvBwMap, azMbps, zaMbps)){
+                    return false;
                 }
             }
         }
@@ -351,16 +324,13 @@ public class TranslationPCE {
      * the VLAN IDs reserved so far.
      * @param urnMap - Mapping of URN string to URN object
      * @param reqPipe - The requested pipe
-     * @param sched - The requested schedule
-     * @param azSegments - The AZ path, divided into list of edges per ETHERNET/MPLS segment
-     * @param zaSegments - The ZA path, dividied into list of edges per ETHERNET/MPLS segment
+     * @param azERO - The AZ path.
+     * @param zaERO - The ZA path.
      * @param rsvVlans - The reserved VLAN IDs
      * @return A set of all viable VLAN IDs to meet the demand (set may be empty)
      */
-    private Set<Integer> selectVlanIds(Map<String, UrnE> urnMap,
-                                        RequestedVlanPipeE reqPipe, ScheduleSpecificationE sched,
-                                        List<Map<Layer, List<TopoEdge>>> azSegments,
-                                        List<Map<Layer, List<TopoEdge>>> zaSegments, List<ReservedVlanE> rsvVlans) {
+    private Set<Integer> selectVlanIds(Map<String, UrnE> urnMap, RequestedVlanPipeE reqPipe, List<TopoEdge> azERO,
+                                       List<TopoEdge> zaERO, List<ReservedVlanE> rsvVlans) {
 
 
         Set<Integer> overlappingVlanIds = new HashSet<>();
@@ -373,77 +343,59 @@ public class TranslationPCE {
         Set<Integer> requestedVlanIds = pruningService
                 .getIntegersFromRanges(pruningService.getIntRangesFromString(vlanExpression));
 
-        // Find all valid IDs for the AZ segments
-        List<Set<Integer>> azValidIdsPerSegment = new ArrayList<>();
-        for(Map<Layer, List<TopoEdge>> segment: azSegments){
-            if(segment.containsKey(Layer.ETHERNET)){
-                // Find all valid IDs for the ETHERNET segment
-                Set<Integer> validIdsForSegment = getValidIdsForSegment(segment, requestedVlanIds, urnMap, rsvVlanMap);
-                // If that segment has no valid IDs return an empty set
-                if(validIdsForSegment.isEmpty()){
-                    return overlappingVlanIds;
-                }
-                azValidIdsPerSegment.add(getValidIdsForSegment(segment, requestedVlanIds, urnMap, rsvVlanMap));
-            }
+        log.info("Requested VLAN IDs: " + requestedVlanIds.toString());
+        // Find all valid IDs for the AZ path
+        // Find all valid IDs for the ETHERNET segment
+        Set<Integer> azValidIds = getValidIdsForPath(azERO, requestedVlanIds, urnMap, rsvVlanMap);
+        log.info("Valid AZ VLAN IDs: " + azValidIds.toString());
+        // If that segment has no valid IDs return an empty set
+        if(azValidIds.isEmpty()){
+            return overlappingVlanIds;
         }
 
+
         // Find all valid IDs for the ZA segments
-        List<Set<Integer>> zaValidIdsPerSegment = new ArrayList<>();
-        for(Map<Layer, List<TopoEdge>> segment: zaSegments){
-            if(segment.containsKey(Layer.ETHERNET)){
-                // Find all valid IDs for the ETHERNET segment
-                Set<Integer> validIdsForSegment = getValidIdsForSegment(segment, requestedVlanIds, urnMap, rsvVlanMap);
-                // If that segment has no valid IDs return an empty set
-                if(validIdsForSegment.isEmpty()){
-                    return overlappingVlanIds;
-                }
-                zaValidIdsPerSegment.add(getValidIdsForSegment(segment, requestedVlanIds, urnMap, rsvVlanMap));
-            }
+        Set<Integer> zaValidIds = getValidIdsForPath(zaERO, requestedVlanIds, urnMap, rsvVlanMap);
+        log.info("Valid ZA VLAN IDs: " + azValidIds.toString());
+        // If that segment has no valid IDs return an empty set
+        if(zaValidIds.isEmpty()){
+            return overlappingVlanIds;
         }
 
         //TODO: VLAN Translation
         //For now: Just use same VLAN ID on all segments
         // Find the intersection between the AZ and ZA valid VLAN IDs
-        for(Set<Integer> validIds : azValidIdsPerSegment){
-            overlappingVlanIds = pruningService.addToOverlap(overlappingVlanIds, validIds);
-        }
-        for(Set<Integer> validIds : zaValidIdsPerSegment){
-            overlappingVlanIds = pruningService.addToOverlap(overlappingVlanIds, validIds);
-        }
+        overlappingVlanIds = pruningService.addToOverlap(overlappingVlanIds, azValidIds);
+        overlappingVlanIds = pruningService.addToOverlap(overlappingVlanIds, zaValidIds);
         return overlappingVlanIds;
     }
 
     /**
-     * Find all valid VLAN iDs for a given (ETHERNET) segment.
-     * @param segment - The given segment (only checks for valid IDs if segment map key is ETHERNET)
+     * Find all valid VLAN iDs for a given path.
+     * @param ERO - The given path
      * @param requestedVlanIds - The requested VLAN IDs
      * @param urnMap - Map of URN string to URN objects
      * @param rsvVlanMap - Map of URN objects to list of reserved VLAN IDs at that URN
-     * @return The set of vlaid VLAN IDs for this segments
+     * @return The set of vlaid VLAN IDs for this path
      */
-    private Set<Integer> getValidIdsForSegment(Map<Layer, List<TopoEdge>> segment, Set<Integer> requestedVlanIds,
+    private Set<Integer> getValidIdsForPath(List<TopoEdge> ERO, Set<Integer> requestedVlanIds,
                                                Map<String, UrnE> urnMap, Map<UrnE, List<ReservedVlanE>> rsvVlanMap){
         // Set for holding valid VLAN IDs
         Set<Integer> validIds = new HashSet<>();
-        // Only check if segment is on the ETHERNET layer
-        if(segment.containsKey(Layer.ETHERNET)) {
-            // Get the list of edges
-            List<TopoEdge> segmentEdges = segment.get(Layer.ETHERNET);
 
-            // Return a map of VLAN ID to sets of edges that support that ID
-            Map<Integer, Set<TopoEdge>> edgesPerVlanId = pruningService
-                    .findEdgesPerVlanId(new HashSet<>(segmentEdges), urnMap, rsvVlanMap);
+        // Return a map of VLAN ID to sets of edges that support that ID
+        Map<Integer, Set<TopoEdge>> edgesPerVlanId = pruningService.findEdgesPerVlanId(new HashSet<>(ERO), urnMap, rsvVlanMap);
 
-            // For each VLAN ID
-            for (Integer id : edgesPerVlanId.keySet()) {
-                // Get the edges
-                Set<TopoEdge> edgesForId = edgesPerVlanId.get(id);
-                // Confirm that all edges in the segment support this id
-                // If they do, add this ID as a valid ID
-                if (edgesForId.size() == segmentEdges.size()) {
-                    if (requestedVlanIds.contains(id) || requestedVlanIds.isEmpty()) {
-                        validIds.add(id);
-                    }
+        Set<TopoEdge> mplsEdges = edgesPerVlanId.get(-1);
+        // For each VLAN ID
+        for (Integer id : edgesPerVlanId.keySet()) {
+            // Get the edges
+            Set<TopoEdge> edgesForId = edgesPerVlanId.get(id);
+            // Confirm that all edges in the segment support this id
+            // If they do, add this ID as a valid ID
+            if (edgesForId.size() + mplsEdges.size() == ERO.size()) {
+                if (requestedVlanIds.contains(id) || requestedVlanIds.isEmpty()) {
+                    validIds.add(id);
                 }
             }
         }
@@ -497,6 +449,7 @@ public class TranslationPCE {
                                          Set<ReservedVlanJunctionE> rsvJunctions){
         // Get Reserved VLANs from Repository
         List<ReservedVlanE> rsvVlans = pruningService.getReservedVlans(sched.getNotBefore(), sched.getNotAfter());
+
         // Add already reserved VLANs from passed in junctions
         rsvVlans.addAll(retrieveReservedVlans(rsvJunctions));
 
@@ -513,6 +466,9 @@ public class TranslationPCE {
 
             // Get the requested VLAN expression
             String vlanExpression = reqFix.getVlanExpression();
+            if(vlanExpression == null){
+                vlanExpression = "any";
+            }
             // Convert that expression into a set of requested IDs
             Set<Integer> reqVlanIds = pruningService.getIntegersFromRanges(pruningService.getIntRangesFromString(vlanExpression));
             // Find the overlap between available VLAN iDs and requested VLAN IDs
@@ -550,7 +506,8 @@ public class TranslationPCE {
         Map<UrnE, List<ReservedVlanE>> rsvVlanMap = pruningService.buildReservedVlanMap(rsvVlans);
 
         // Get the set of reserved VLAN IDs at this fixture
-        List<ReservedVlanE> rsvVlansAtFixture = rsvVlanMap.get(reqFix.getPortUrn());
+        List<ReservedVlanE> rsvVlansAtFixture = rsvVlanMap.containsKey(reqFix.getPortUrn()) ?
+                rsvVlanMap.get(reqFix.getPortUrn()) : new ArrayList<>();
         Set<Integer> reservedVlanIds = rsvVlansAtFixture.stream().map(ReservedVlanE::getVlan).collect(Collectors.toSet());
 
         // Find all reservable VLAN IDs at this fixture

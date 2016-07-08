@@ -44,12 +44,17 @@ public class PalindromicalPCE
     public Map<String, List<TopoEdge>> computePalindromicERO(RequestedVlanPipeE requestPipe, ScheduleSpecificationE requestSched, List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList) throws PCEException
     {
         Topology multiLayerTopo = new Topology();
-        multiLayerTopo.getVertices().addAll(topoService.layer(Layer.ETHERNET).getVertices());
-        multiLayerTopo.getVertices().addAll(topoService.layer(Layer.INTERNAL).getVertices());
-        multiLayerTopo.getVertices().addAll(topoService.layer(Layer.MPLS).getVertices());
-        multiLayerTopo.getEdges().addAll(topoService.layer(Layer.ETHERNET).getEdges());
-        multiLayerTopo.getEdges().addAll(topoService.layer(Layer.INTERNAL).getEdges());
-        multiLayerTopo.getEdges().addAll(topoService.layer(Layer.MPLS).getEdges());
+
+        Topology ethTopo = topoService.layer(Layer.ETHERNET);
+        Topology intTopo = topoService.layer(Layer.INTERNAL);
+        Topology mplsTopo = topoService.layer(Layer.MPLS);
+
+        multiLayerTopo.getVertices().addAll(ethTopo.getVertices());
+        multiLayerTopo.getVertices().addAll(intTopo.getVertices());
+        multiLayerTopo.getVertices().addAll(mplsTopo.getVertices());
+        multiLayerTopo.getEdges().addAll(ethTopo.getEdges());
+        multiLayerTopo.getEdges().addAll(intTopo.getEdges());
+        multiLayerTopo.getEdges().addAll(mplsTopo.getEdges());
 
         UrnE srcPortURN = requestPipe.getAJunction().getFixtures().iterator().next().getPortUrn();
         UrnE dstPortURN = requestPipe.getZJunction().getFixtures().iterator().next().getPortUrn();

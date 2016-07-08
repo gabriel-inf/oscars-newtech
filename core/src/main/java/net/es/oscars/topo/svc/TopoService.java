@@ -45,9 +45,8 @@ public class TopoService {
         List<UrnAdjcyE> adjcies = adjcyRepo.findAll();
 
         urns.stream()
-                .filter(u -> u.getCapabilities().contains(layer))
+                .filter(u -> u.getCapabilities().contains(layer) || layer.equals(Layer.INTERNAL))
                 .forEach(u -> {
-                    log.info("added urn " + u.getUrn() + " to topo for " + layer);
                     VertexType type = null;
                     if(u.getDeviceType() == null && u.getIfceType() != null){
                         type = VertexType.PORT;
@@ -72,6 +71,7 @@ public class TopoService {
                     Long metric = adj.getMetrics().get(layer);
                     Optional<TopoVertex> a = topo.getVertexByUrn(adj.getA().getUrn());
                     Optional<TopoVertex> z = topo.getVertexByUrn(adj.getZ().getUrn());
+
                     if(a.isPresent() && z.isPresent()){
                         TopoEdge edge = TopoEdge.builder()
                                 .a(a.get())

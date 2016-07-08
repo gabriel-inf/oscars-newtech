@@ -8,10 +8,12 @@ import net.es.oscars.dto.resv.ResourceType;
 import net.es.oscars.pce.TopoAssistant;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.topo.beans.TopoEdge;
+import net.es.oscars.topo.beans.TopoVertex;
 import net.es.oscars.topo.ent.UrnE;
 import net.es.oscars.topo.enums.DeviceModel;
 import net.es.oscars.topo.enums.Layer;
 import net.es.oscars.topo.enums.UrnType;
+import net.es.oscars.topo.enums.VertexType;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -22,404 +24,249 @@ import java.util.stream.Collectors;
 public class PCEAssistant {
 
 
-    public static List<Map<Layer, List<TopoEdge>>> decompose(List<TopoEdge> edges, Map<String, DeviceModel> deviceModels) {
-        List<Map<Layer, List<TopoEdge>>> result = new ArrayList<>();
-
-        /*
-        let's remember: pipes go from device URN to device URN
-        the shortest possible pipe we could possibly be decomposing looks like this:
-
-        alpha -- INTERNAL -- alpha:1/1/1
-        alpha:1/1/1 -- MPLS or ETHERNET -- beta:1/1/1
-        beta:1/1/1 -- INTERNAL -- beta
-
-        in general, this would continue on as follows:
-
-        beta            -- INTERNAL -- beta:2/1/1
-        beta:2/1/1      -- ETHERNET / MPLS-- charlie:1/1/1
-        charlie:1/1/1   -- INTERNAL -- charlie
-        charlie         -- INTERNAL -- charlie:2/1/1
-        charlie:2/1/1   -- ETHERNET / MPLS-- delta:1/1/1
-        delta:1/1/1     -- INTERNAL -- delta
-
-        and so on and so forth. very first one and very last one is always INTERNAL, from and to devices specifically
-
-        the size of the path is always a multiple of 3
-
-        offset mod 3 == 0 : an INTERNAL device-to-port
-        offset mod 3 == 1 : an ETHERNET / MPLS port-to-port
-        offset mod 3 == 2 : an INTERNAL port-to-device
-
-       */
-
-        assert edges.size() >= 3;
-
-        assert Math.floorMod(edges.size(), 3) == 0;
+    public static List<Map<Layer, List<TopoVertex>>> decompose(List<TopoEdge> edges) {
+        List<Map<Layer, List<TopoVertex>>> result = new ArrayList<>();
 
 
-        for (int i = 0; i < edges.size(); i++) {
-            log.info(edges.get(i).toString());
-            Integer mod = Math.floorMod(i, 3);
-            if (mod == 0) {
-                // this is device - to - port
-                assert edges.get(i).getLayer().equals(Layer.INTERNAL);
-                assert deviceModels.containsKey(edges.get(i).getA().getUrn());
+        log.info(edges.toString());
 
-            } else if (mod == 1) {
-                // this is port - to - port
-                assert !edges.get(i).getLayer().equals(Layer.INTERNAL);
-                assert !deviceModels.containsKey(edges.get(i).getA().getUrn());
-                assert !deviceModels.containsKey(edges.get(i).getZ().getUrn());
-            } else if (mod == 2) {
-                // this is port - to - device
-                assert edges.get(i).getLayer().equals(Layer.INTERNAL);
-                assert deviceModels.containsKey(edges.get(i).getZ().getUrn());
-            }
+        // New Assumption
+        // We have List of edges like this
+        // Port -INTERNAL- Device -INTERNAL- Port -ETHERNET/MPLS- Port -INTERNAL- Device -INTERNAL- Port, etc
+        // We want to make several lists of vertices
+        assert(edges.size() > 2);
 
-
-        }
-
-        // this is the very first meaningful layer (edge offset 0 is INTERNAL)
-        Layer currentLayer = edges.get(1).getLayer();
-
-        Map<Layer, List<TopoEdge>> segment = new HashMap<>();
-        List<TopoEdge> segmentEdges = new ArrayList<>();
-
-        segment.put(currentLayer, segmentEdges);
+        Layer currentLayer = edges.get(2).getLayer();
+        List<TopoVertex> segmentVertices = new ArrayList<>();
+        HashMap<Layer, List<TopoVertex>> segment = new HashMap<>();
+        segment.put(currentLayer, segmentVertices);
         result.add(segment);
 
-
-        for (int i = 0; i < edges.size(); i++) {
-            Integer mod = Math.floorMod(i, 3);
-            // we are at the port-to-device connection (the third one, so offset 2)
-            // this needs belong to a new segment IFF the layer of the NEXT port-to-port connection is different
-            if (mod == 2) {
-                // at the very last one, there's no next port-to-port, so skip that
-                if (i + 1 != edges.size()) {
-                    TopoEdge nextPortToPort = edges.get(i + 2);
-                    if (!nextPortToPort.getLayer().equals(currentLayer)) {
-                        log.info("switching layers to " + nextPortToPort.getLayer());
-                        currentLayer = nextPortToPort.getLayer();
-
-                        segment = new HashMap<>();
-                        segmentEdges = new ArrayList<>();
-                        segment.put(currentLayer, segmentEdges);
-                        result.add(segment);
-                    }
-
+        for(int i = 0; i < edges.size(); i++){
+            TopoEdge currentEdge = edges.get(i);
+            TopoVertex nodeA = currentEdge.getA();
+            TopoVertex nodeZ = currentEdge.getZ();
+            if(i==0){
+                segmentVertices.add(nodeA);
+            }
+            if(currentLayer.equals(Layer.MPLS)){
+                Layer currentEdgeLayer = edges.get(i).getLayer();
+                if(currentEdgeLayer.equals(Layer.ETHERNET)){
+                    currentLayer = currentEdgeLayer;
+                    segment = new HashMap<>();
+                    segmentVertices = new ArrayList<>();
+                    segment.put(currentLayer, segmentVertices);
+                    result.add(segment);
                 }
             }
-            segmentEdges.add(edges.get(i));
+            else if(currentLayer.equals(Layer.ETHERNET) && i % 3 == 2 && i + 3 != edges.size()){
+                Layer nextPortToPortLayer = edges.get(i+3).getLayer();
+                if(nextPortToPortLayer != currentLayer){
+                    currentLayer = nextPortToPortLayer;
+                    segment = new HashMap<>();
+                    segmentVertices = new ArrayList<>();
+                    segment.put(currentLayer, segmentVertices);
+                    result.add(segment);
+                }
+            }
+            segmentVertices.add(nodeZ);
 
         }
-
+        log.info(result.toString());
         return result;
 
     }
 
-    public List<ReservedVlanJunctionE> makeEthernetJunctions(List<TopoEdge> edges,
-                                                              Integer azMbps, Integer zaMbps, Integer vlanId,
-                                                              Optional<ReservedVlanJunctionE> mergeA,
-                                                              Optional<ReservedVlanJunctionE> mergeZ,
-                                                              ScheduleSpecificationE sched,
-                                                              Map<String, UrnE> urnMap,
-                                                              Map<String, DeviceModel> deviceModels)
-            throws PSSException {
-        List<ReservedVlanJunctionE> result = new ArrayList<>();
-        if (mergeA.isPresent()) {
-            // we will find the device URN at the A of the first edge
-            String aaUrn = edges.get(0).getA().getUrn();
-            UrnE deviceUrn = mergeA.get().getDeviceUrn();
-            assert aaUrn.equals(deviceUrn.getUrn());
-        }
-        if (mergeZ.isPresent()) {
-            // we will find the device URN at Z of the last edge
-            String zzUrn = edges.get(edges.size() - 1).getZ().getUrn();
-            UrnE deviceUrn = mergeZ.get().getDeviceUrn();
-            assert zzUrn.equals(deviceUrn.getUrn());
-        }
 
-        /*
-        a few different cases to handle:
-
-        if we need to mergeA for the first device at the first edge we will only get:
-        edge.a -> device
-        edge.a -> port
-
-        if we need to mergeZ for the second device for the second edge we will only get:
-        edge.a -> port
-        edge.a -> device
-
-        otherwise, per device, there will be TWO edges to look at:
-        edge1.a -> port
-        edge1.a -> device
-
-        edge2.a -> device
-        edge2.a -> port
-
-        */
+    public List<ReservedVlanJunctionE> createJunctions(List<TopoVertex> vertices, Map<String, UrnE> urnMap,
+                                                        Map<String, DeviceModel> deviceModels, Integer azMbps, Integer zaMbps,
+                                                        Integer vlanId, ScheduleSpecificationE sched,
+                                                       RequestedVlanJunctionE reqJunctionA,
+                                                       RequestedVlanJunctionE reqJunctionZ) throws PSSException{
+        assert(vertices.size() % 3 == 0);
 
 
-        Integer startAt = 0;
-        Integer limit = edges.size();
-        if (mergeA.isPresent()) {
-            startAt = 1;
+        List<ReservedVlanJunctionE> rsvJunctions = new ArrayList<>();
+        // Maintain a sublist of vertices, that together can be made into junctions
+        // Sublist is reset after a junction is made
+        List<TopoVertex> junctionBuilder = new ArrayList<>();
+        for(TopoVertex vertice : vertices) {
+            junctionBuilder.add(vertice);
+            // Build a junction
+            if (junctionBuilder.size() == 3) {
+                // Retrieve the two port vertices and the device vertex
+                TopoVertex portOneVertex = junctionBuilder.get(0);
+                TopoVertex deviceVertex = junctionBuilder.get(1);
+                TopoVertex portTwoVertex = junctionBuilder.get(2);
 
-            ReservedVlanJunctionE mergeThis = mergeA.get();
-            DeviceModel model = deviceModels.get(mergeThis.getDeviceUrn().getUrn());
-            EthFixtureType fixtureType = decideFixtureType(model);
+                Set<TopoVertex> ports = new HashSet<>();
+                ports.add(portOneVertex);
+                ports.add(portTwoVertex);
 
-            String zUrn = edges.get(0).getZ().getUrn();
-            log.info("making fixture for z urn: "+zUrn);
+                // Add in requested ports for this junction if they are not already included
+                Set<TopoVertex> extraPortsA = getExtraRequestedPorts(reqJunctionA, deviceVertex, ports);
+                Set<TopoVertex> extraPortsZ = getExtraRequestedPorts(reqJunctionZ, deviceVertex, ports);
+                ports.addAll(extraPortsA);
+                ports.addAll(extraPortsZ);
 
-            UrnE urn = urnMap.get(zUrn);
+                // Build the junction
+                ReservedVlanJunctionE rsvJunction = createJunctionAndFixtures(deviceVertex, ports, urnMap,
+                        deviceModels, azMbps, zaMbps, vlanId, sched);
 
-            assert urn != null;
+                // Add it to the set of reserved junctions
+                rsvJunctions.add(rsvJunction);
 
-            // Create new Reserved Bandwidth
-            ReservedBandwidthE rsvBw = createReservedBandwidth(urn, azMbps, zaMbps, sched);
-
-            ReservedVlanE rsvVlan = createReservedVlan(urn, vlanId, sched);
-
-            ReservedVlanFixtureE fx = createReservedFixture(urn, new HashSet<>(), rsvVlan, rsvBw, fixtureType);
-
-            ReservedVlanJunctionE copy = ReservedVlanJunctionE.copyFrom(mergeThis);
-            copy.setJunctionType(decideJunctionType(model));
-            copy.getFixtures().add(fx);
-            for (ReservedVlanFixtureE f : copy.getFixtures()) {
-                f.setFixtureType(fixtureType);
+                // Reset the current list of vertices, so the next junction can be collected together
+                junctionBuilder = new ArrayList<>();
             }
-
-
-            result.add(copy);
         }
-        if (mergeZ.isPresent()) {
-            limit = limit - 1;
-        }
-
-        // now we work with pairs as described above
-
-        for (int i = startAt; i + 2 <= limit; i += 2) {
-            TopoEdge edgeOne = edges.get(i);
-            TopoEdge edgeTwo = edges.get(i + 1);
-
-            String urnAPortString = edgeOne.getA().getUrn();
-            String urnDeviceString = edgeOne.getZ().getUrn();
-            String urnZPortString = edgeTwo.getZ().getUrn();
-            if(!urnMap.containsKey(urnAPortString) || !urnMap.containsKey(urnZPortString) || !urnMap.containsKey(urnDeviceString)){
-                    throw new PSSException("URNs " + urnAPortString + " and/or " + urnZPortString + " Not found in URN map");
-            }
-            UrnE urnPortA = urnMap.get(urnAPortString);
-            UrnE urnDevice = urnMap.get(urnDeviceString);
-            UrnE urnPortZ = urnMap.get(urnZPortString);
-
-
-            DeviceModel model = deviceModels.get(edgeOne.getZ().getUrn());
-            EthFixtureType fixtureType = decideFixtureType(model);
-
-            // Create new Reserved Bandwidth for URN A
-            ReservedBandwidthE rsvBwA = createReservedBandwidth(urnPortA, azMbps, zaMbps, sched);
-
-            // Create new Reserved Bandwidth for URN Z
-            ReservedBandwidthE rsvBwZ = createReservedBandwidth(urnPortZ, azMbps, zaMbps, sched);
-
-            // Create new Reserved VLAN for Urn A
-            ReservedVlanE rsvVlanA = createReservedVlan(urnPortA, vlanId, sched);
-
-            // Create new Reserved VLAN for Urn Z
-            ReservedVlanE rsvVlanZ = createReservedVlan(urnPortZ, vlanId, sched);
-
-            // Create junction for device
-            ReservedVlanJunctionE newJunction = createReservedJunction(urnDevice, new HashSet<>(), new HashSet<>(),
-                    decideJunctionType(model));
-
-            // For URN Port A
-            ReservedVlanFixtureE fOne = createReservedFixture(urnPortA, new HashSet<>(), rsvVlanA, rsvBwA, fixtureType);
-
-
-            // For URN Port Z
-            ReservedVlanFixtureE fTwo = createReservedFixture(urnPortZ, new HashSet<>(), rsvVlanZ, rsvBwZ, fixtureType);
-
-            newJunction.getFixtures().add(fOne);
-            newJunction.getFixtures().add(fTwo);
-
-
-            result.add(newJunction);
-
-        }
-
-        if (mergeZ.isPresent()) {
-            ReservedVlanJunctionE mergeThis = mergeZ.get();
-            DeviceModel model = deviceModels.get(mergeThis.getDeviceUrn().getUrn());
-            EthFixtureType fixtureType = decideFixtureType(model);
-
-            String urnZString = edges.get(edges.size()-1).getZ().getUrn();
-            if(!urnMap.containsKey(urnZString)){
-                throw new PSSException(("URN Map does not contain: " + urnZString));
-            }
-            UrnE urnZ = urnMap.get(urnZString);
-            // Create new Reserved Bandwidth for URN Z
-            ReservedBandwidthE rsvBw = createReservedBandwidth(urnZ, azMbps, zaMbps, sched);
-
-            // Create new Reserved VLAN for Urn Z
-            ReservedVlanE rsvVlan = createReservedVlan(urnZ, vlanId, sched);
-
-            // Create fixture for UrnZ
-            ReservedVlanFixtureE fx = createReservedFixture(urnZ, new HashSet<>(), rsvVlan, rsvBw, fixtureType);
-
-            ReservedVlanJunctionE copy = ReservedVlanJunctionE.copyFrom(mergeThis);
-            copy.setJunctionType(decideJunctionType(model));
-            copy.getFixtures().add(fx);
-            for (ReservedVlanFixtureE f : copy.getFixtures()) {
-                f.setFixtureType(fixtureType);
-            }
-            result.add(copy);
-        }
-        return result;
-
+        return rsvJunctions;
     }
 
-    public ReservedEthPipeE makeVplsPipe(List<TopoEdge> azEdges, List<TopoEdge> zaEdges,
-                                         Integer azMbps, Integer zaMbps,
-                                         Integer vlanId,
-                                         Optional<ReservedVlanJunctionE> mergeA,
-                                         Optional<ReservedVlanJunctionE> mergeZ,
-                                         Map<String, UrnE> urnMap,
-                                         Map<String, DeviceModel> deviceModels,
-                                         ScheduleSpecificationE sched) throws PSSException {
-        /*
-        a few different cases to handle:
-        if we need to merge either A or Z junction from the originally Reserved pipe, we just copy the junction over
 
-        if at either end of the pipe we are not provided a junction to merge, we will be provided the port URN
-        if it's at A, it will be the A of the first edge
-        if it's at Z, it will be the Z of the last edge
+    public ReservedEthPipeE createPipe(List<TopoVertex> azVertices, List<TopoVertex> zaVertices,
+                                        Map<String, DeviceModel> deviceModels, Map<String, UrnE> urnMap, Integer azMbps,
+                                        Integer zaMbps, Integer vlanId, ScheduleSpecificationE sched,
+                                       RequestedVlanJunctionE reqJunctionA, RequestedVlanJunctionE reqJunctionZ)
+            throws PSSException{
+        // Pull out the first and last element of each vertex list
+        // This will get you the starting/ending port
+        // Also retrieve the starting and ending device (but do not remove them from the list, they are included in
+        // the AZ and ZA EROs).
+        // Build a junction for the starting and ending device
+        // Note: Junctions only need to be made for the AZ path, not both
 
-        in either case, we will need to create a new junction for our pipe and add that single port as a fixture
+        // Ingress into the pipe
+        // Get and remove the ingress port
+        TopoVertex ingressPort = azVertices.remove(0);
+        // Get (and do not remove) the ingress device
+        TopoVertex ingressDevice = azVertices.get(0);
 
-        */
-        ReservedVlanJunctionE aJunction;
-        ReservedVlanJunctionE zJunction;
+        Set<TopoVertex> ingressPorts = new HashSet<>();
+        ingressPorts.add(ingressPort);
 
-        if (mergeA.isPresent()) {
-            DeviceModel model = deviceModels.get(mergeA.get().getDeviceUrn().getUrn());
-            aJunction = mergeJunction(mergeA.get(), model);
+        // Get extra ports that were requested for ingress junction (if applicable)
+        Set<TopoVertex> extraIngressPortsA = getExtraRequestedPorts(reqJunctionA, ingressDevice, ingressPorts);
+        Set<TopoVertex> extraIngressPortsZ = getExtraRequestedPorts(reqJunctionZ, ingressDevice, ingressPorts);
+        ingressPorts.addAll(extraIngressPortsA);
+        ingressPorts.addAll(extraIngressPortsZ);
 
+        DeviceModel ingressModel = deviceModels.get(ingressDevice.getUrn());
 
-        } else {
-            TopoEdge aEdge = azEdges.get(0);
-            UrnE deviceUrn = urnMap.get(aEdge.getZ().getUrn());
-            UrnE portUrn = urnMap.get(aEdge.getA().getUrn());
-            DeviceModel model = deviceUrn.getDeviceModel();
+        // Egress from the pipe
+        // Get and remove the egress port
+        TopoVertex egressPort = azVertices.remove(azVertices.size()-1);
+        // Get (and do not remove) the egress device
+        TopoVertex egressDevice = azVertices.get(azVertices.size()-1);
 
-            aJunction = makeEdgeJunction(deviceUrn, portUrn, model, azMbps, zaMbps, vlanId, sched);
+        Set<TopoVertex> egressPorts = new HashSet<>();
+        egressPorts.add(egressPort);
 
-        }
-        if (mergeZ.isPresent()) {
-            DeviceModel model = deviceModels.get(mergeZ.get().getDeviceUrn().getUrn());
-            zJunction = mergeJunction(mergeZ.get(), model);
+        // Get extra ports that were requested for egress junction (if applicable)
+        Set<TopoVertex> extraEgressPortsA = getExtraRequestedPorts(reqJunctionA, egressDevice, egressPorts);
+        Set<TopoVertex> extraEgressPortsZ = getExtraRequestedPorts(reqJunctionZ, egressDevice, egressPorts);
+        egressPorts.addAll(extraEgressPortsA);
+        egressPorts.addAll(extraEgressPortsZ);
 
-        } else {
-            TopoEdge zEdge = azEdges.get(azEdges.size() - 1);
+        DeviceModel egressModel = deviceModels.get(egressDevice.getUrn());
 
-            UrnE deviceUrn = urnMap.get(zEdge.getZ().getUrn());
-            UrnE portUrn = urnMap.get(zEdge.getA().getUrn());
-            DeviceModel model = deviceUrn.getDeviceModel();
+        // Should be at least two ports left in between, if not several ports/devices
+        assert(azVertices.size() >= 2);
 
-            zJunction = makeEdgeJunction(deviceUrn, portUrn, model, azMbps, zaMbps, vlanId, sched);
+        // Just remove from ZA path, do not need to be saved
+        // Remove ingress port
+        zaVertices.remove(0);
+        // Remove egress port
+        zaVertices.remove(zaVertices.size()-1);
 
-        }
+        assert(zaVertices.size() >= 2);
 
-        /* generating the ERO
-        basically we are given edges in a sequence like so:
+        ReservedVlanJunctionE ingressJunction = createJunctionAndFixtures(ingressDevice, ingressPorts,
+                urnMap, deviceModels, azMbps, zaMbps, vlanId, sched);
 
-        0. port_A_1 - device_A
-        1. device_A - port_A_2
-        2. port_A_2 - port_B_1
-        3. port_B_1 - device_B
-        4. device_B - port_B_2
+        ReservedVlanJunctionE egressJunction = createJunctionAndFixtures(egressDevice, egressPorts,
+                urnMap, deviceModels, azMbps, zaMbps, vlanId, sched);
 
-          etc, etc. exceptions:
-              at the very first segment, if merging, we would start at a device not a port
-              at the very last segment,  if merging, we would finish at a device not a port
+        // Make the ERO for AZ
+        List<String> azStrings = azVertices.stream().map(TopoVertex::getUrn).collect(Collectors.toList());
+        // Make the ERO for ZA
+        List<String> zaStrings = zaVertices.stream().map(TopoVertex::getUrn).collect(Collectors.toList());
 
-        what we will save as the ERO is
-        device - port - port - device - port - port - device - port - port - device
+        // Build a reserved bandwidth for each intermediate port
+        Set<ReservedBandwidthE> rsvBws = createBandwidthForEros(azStrings, azMbps, zaMbps, sched, urnMap);
 
-        we will be adding the A edge to everything plus the Z of the last one
-
-        if we are NOT merging A, we should skip the first edge
-        if we are NOT merging Z, we skip the last one
-
-
-        and we just flip the ERO to reverse for the z-a direction (for now!)
-
-         */
-        int firstIdx = 0;
-        int lastIdxExclusive = azEdges.size();
-        if (!mergeA.isPresent()) {
-            firstIdx = 1;
-        }
-        if (!mergeZ.isPresent()) {
-            lastIdxExclusive = lastIdxExclusive - 1;
-        }
-
-        List<TopoEdge> azSubList = azEdges.subList(firstIdx, lastIdxExclusive);
-        List<TopoEdge> zaSubList = zaEdges.subList(firstIdx, lastIdxExclusive);
-        List<String> azEro = TopoAssistant.makeEro(azSubList, false);
-        List<String> zaEro = zaSubList.equals(azSubList) ?
-                TopoAssistant.makeEro(zaSubList, true) : TopoAssistant.makeEro(zaSubList, false);
-
-
-        DeviceModel aModel = deviceModels.get(aJunction.getDeviceUrn().getUrn());
-        DeviceModel zModel = deviceModels.get(zJunction.getDeviceUrn().getUrn());
-
-        // Create Reserved Bandwidth
-        // NOTE: Has null urn (for now)
-        Set<ReservedBandwidthE> rsvBws = createBandwidthForEros(azEro, azMbps, zaMbps, sched, urnMap);
-        rsvBws.addAll(createBandwidthForEros(zaEro, azMbps, zaMbps, sched, urnMap));
         return ReservedEthPipeE.builder()
-                .pipeType(decidePipeType(aModel, zModel))
-                .aJunction(aJunction)
-                .zJunction(zJunction)
-                .reservedPssResources(new HashSet<>())
+                .aJunction(ingressJunction)
+                .zJunction(egressJunction)
+                .azERO(azStrings)
+                .zaERO(zaStrings)
                 .reservedBandwidths(rsvBws)
-                .azERO(azEro)
-                .zaERO(zaEro)
+                .reservedPssResources(new HashSet<>())
+                .pipeType(decidePipeType(ingressModel, egressModel))
                 .build();
+    }
 
+    /**
+     * Retrieve all requested fixtures at a junction where those ports are not already included in the input list
+     * of ports
+     * @param reqJunction - The requested junction, containing the requested fixtures
+     * @param deviceVertex - The device corresponding to that junction
+     * @param ports - The input list of ports (at that device)
+     * @return All requested ports that are not already in the input list of ports.
+     */
+    public Set<TopoVertex> getExtraRequestedPorts(RequestedVlanJunctionE reqJunction, TopoVertex deviceVertex,
+                                                   Set<TopoVertex> ports) {
+        Set<TopoVertex> extraPorts = new HashSet<>();
+        if(reqJunction.getDeviceUrn().getUrn().equals(deviceVertex.getUrn())){
+            extraPorts = reqJunction.getFixtures()
+                    .stream()
+                    .map(fx -> fx.getPortUrn().getUrn())
+                    .map(s -> TopoVertex.builder().urn(s).vertexType(VertexType.PORT).build())
+                    .filter(v -> !ports.contains(v))
+                    .collect(Collectors.toSet());
+        }
+        return extraPorts;
     }
 
 
-    private ReservedVlanJunctionE mergeJunction(ReservedVlanJunctionE junction, DeviceModel model) throws PSSException {
-        ReservedVlanJunctionE result = ReservedVlanJunctionE.copyFrom(junction);
+    public ReservedVlanJunctionE createJunctionAndFixtures(TopoVertex device, Set<TopoVertex> ports,
+                                                            Map<String, UrnE> urnMap, Map<String, DeviceModel> deviceModels,
+                                                            Integer azMbps, Integer zaMbps, Integer vlanId,
+                                                            ScheduleSpecificationE sched) throws PSSException {
+        String deviceString = device.getUrn();
+        assert(urnMap.containsKey(deviceString));
+        UrnE deviceUrn = urnMap.get(deviceString);
 
-        result.setJunctionType(decideJunctionType(model));
+        DeviceModel model = deviceModels.get(deviceString);
+
+        Set<ReservedVlanFixtureE> fixtures = new HashSet<>();
+
+        for(TopoVertex port : ports){
+            String portString = port.getUrn();
+            assert(urnMap.containsKey(portString));
+            UrnE portUrn = urnMap.get(portString);
+            ReservedVlanFixtureE fix = createFixtureAndResources(portUrn, model, azMbps, zaMbps, vlanId, sched);
+            fixtures.add(fix);
+        }
+
+        return ReservedVlanJunctionE.builder()
+                .deviceUrn(deviceUrn)
+                .fixtures(fixtures)
+                .reservedPssResources(new HashSet<>())
+                .junctionType(decideJunctionType(model))
+                .build();
+    }
+
+    public ReservedVlanFixtureE createFixtureAndResources(UrnE portUrn, DeviceModel model, Integer azMbps,
+                                                           Integer zaMbps, Integer vlanId,
+                                                           ScheduleSpecificationE sched) throws PSSException{
         EthFixtureType fixtureType = decideFixtureType(model);
 
-        for (ReservedVlanFixtureE f : result.getFixtures()) {
-            f.setFixtureType(fixtureType);
-        }
-        return result;
-    }
-
-    private ReservedVlanJunctionE makeEdgeJunction(UrnE deviceUrn, UrnE portUrn, DeviceModel model, Integer azMbps,
-                                                   Integer zaMbps, Integer vlanId, ScheduleSpecificationE sched) throws PSSException {
-        // TODO: verify urns exist / pass them in method
-
-        // Create new Reserved Bandwidth
+        // Create reserved resources for Fixture
         ReservedBandwidthE rsvBw = createReservedBandwidth(portUrn, azMbps, zaMbps, sched);
-
         ReservedVlanE rsvVlan = createReservedVlan(portUrn, vlanId, sched);
-
-        ReservedVlanJunctionE result = createReservedJunction(deviceUrn, new HashSet<>(), new HashSet<>(),
-                decideJunctionType(model));
-
-        ReservedVlanFixtureE fx = createReservedFixture(portUrn, new HashSet<>(), rsvVlan, rsvBw,
-                decideFixtureType(model));
-
-        result.getFixtures().add(fx);
-        return result;
+        // Create Fixture
+        return createReservedFixture(portUrn, new HashSet<>(), rsvVlan, rsvBw, fixtureType);
     }
 
     public ReservedVlanJunctionE createReservedJunction(UrnE urn, Set<ReservedPssResourceE> pssResources,
@@ -464,7 +311,7 @@ public class PCEAssistant {
                 .build();
     }
 
-    private Set<ReservedBandwidthE> createBandwidthForEros(List<String> ero, Integer azMbps, Integer zaMbps,
+    public Set<ReservedBandwidthE> createBandwidthForEros(List<String> ero, Integer azMbps, Integer zaMbps,
                                                            ScheduleSpecificationE sched, Map<String, UrnE> urnMap) {
         return ero
                 .stream()
