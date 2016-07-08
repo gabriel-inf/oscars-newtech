@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 /**
  * Created by jeremy on 6/30/16.
  *
- * Tests End-to-End correctness of the PCE modules
+ * Tests correctness of how the NonPalindromicalPCE removes nodes/ports/links from different topology layers returned by TopoService and prior to passing them into ServiceLayerTopology.
  */
 
 @Slf4j
