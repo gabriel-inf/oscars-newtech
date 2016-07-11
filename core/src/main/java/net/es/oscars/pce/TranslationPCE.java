@@ -593,8 +593,8 @@ public class TranslationPCE {
             // From Port to Port -- Consider Egress for portA, and Ingress for portZ
             else if(nodeA.getVertexType().equals(VertexType.PORT) && nodeZ.getVertexType().equals(VertexType.PORT))
             {
-                urnIngressDirectionMap.put(urnA, true);
-                urnIngressDirectionMap.put(urnZ, false);
+                urnIngressDirectionMap.put(urnA, false);
+                urnIngressDirectionMap.put(urnZ, true);
             }
 
             // If URN A has reservable bandwidth, confirm that there is enough available
@@ -661,12 +661,12 @@ public class TranslationPCE {
         if(ingressDirection)
         {
             unidirectionalBW = bwAvail.get("Ingress");
-            direction = "In.";
+            direction = " In.";
         }
         else
         {
             unidirectionalBW = bwAvail.get("Egress");
-            direction = "Out.";
+            direction = " Out.";
         }
 
         if(unidirectionalBW < bwMbps)

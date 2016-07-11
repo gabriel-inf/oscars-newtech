@@ -542,6 +542,8 @@ public class ServiceLayerTopology
             oneLogicalLink.setMetricAZ(weightMetricAZ);
             oneLogicalLink.setMetricZA(weightMetricZA);
 
+            oneLogicalLink.setMetric(weightMetricAZ);   // The calling function expects metric to be set. Pathfinding is done in the forward direction, so we use that value here
+
             log.info("step 4 COMPLETE.");
 
             // Step 5: Store the physical route corresponding to this logical link

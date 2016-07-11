@@ -9,6 +9,8 @@ import net.es.oscars.resv.ent.*;
 import net.es.oscars.topo.AsymmTopologyBuilder;
 import net.es.oscars.topo.AsymmTopologyBuilder2;
 import net.es.oscars.topo.TopologyBuilder;
+import net.es.oscars.topo.dao.UrnAdjcyRepository;
+import net.es.oscars.topo.enums.Layer;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +38,9 @@ public class TopPceTestNonPalindromic
 {
     @Autowired
     private TopPCE topPCE;
+
+    @Autowired
+    private UrnAdjcyRepository adjcyRepo;
 
     @Autowired
     private TestEntityBuilder testBuilder;
@@ -276,8 +281,8 @@ public class TopPceTestNonPalindromic
         for(String x : zaERO)
             actualZaERO = actualZaERO + x + "-";
 
-        String expectedAzERO = "nodeP-nodeP:1-nodeQ:1-nodeQ-nodeQ:2-nodeS:1-nodeS";
-        String expectedZaERO = "nodeS-nodeS:2-nodeR:2-nodeR-nodeR:1-nodeQ:3-nodeQ-nodeQ:1-nodeP:1-nodeP";
+        String expectedAzERO = "nodeP-nodeP:1-nodeQ:1-nodeQ-nodeQ:2-nodeS:1-nodeS-";
+        String expectedZaERO = "nodeS-nodeS:2-nodeR:2-nodeR-nodeR:1-nodeQ:3-nodeQ-nodeQ:1-nodeP:1-nodeP-";
 
         assert(actualAzERO.equals(expectedAzERO));
         assert(actualZaERO.equals(expectedZaERO));
@@ -381,8 +386,8 @@ public class TopPceTestNonPalindromic
         for(String x : zaERO)
             actualZaERO = actualZaERO + x + "-";
 
-        String expectedAzERO = "nodeQ-nodeQ:2-nodeS:1-nodeS";
-        String expectedZaERO = "nodeS-nodeS:2-nodeR:2-nodeR-nodeR:1-nodeQ:3-nodeQ-nodeQ:1-nodeK:1-nodeK";
+        String expectedAzERO = "nodeQ-nodeQ:2-nodeS:1-nodeS-";
+        String expectedZaERO = "nodeS-nodeS:2-nodeR:2-nodeR-nodeR:1-nodeQ:3-nodeQ-";
 
         assert(actualAzERO.equals(expectedAzERO));
         assert(actualZaERO.equals(expectedZaERO));
@@ -2478,4 +2483,107 @@ public class TopPceTestNonPalindromic
 
         log.info("test 'basicPceTest12' passed.");
     }
+
+
+    /* All of the following tests are copied from TopPceTest, but modify link metrics to evaluate NonPalindromicalPCE pathfinding in networks with sufficient B/W at all ingress/egress ports */
+    @Test
+    public void nonPalPceHighLinkCostTest1()
+    {
+        log.info("Initializing test: 'nonPalPceHighLinkCostTest1'.");
+
+        RequestedBlueprintE requestedBlueprint;
+        Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
+        ScheduleSpecificationE requestedSched;
+
+        Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
+        Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
+
+        String srcPort = "portA";
+        String srcDevice = "nodeP";
+        String dstPort = "portZ";
+        String dstDevice = "nodeM";
+        Integer azBW = 25;
+        Integer zaBW = 25;
+        Boolean palindrome = false;
+        String vlan = "any";
+
+        topologyBuilder.buildTopo2();
+        requestedSched = testBuilder.buildSchedule(startDate, endDate);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+
+        // Modify link weights to *potentially* force NonPalindromical ERO computations //
+        String linkSrc1 = "nodeM:1";
+        String linkDst1 = "nodeL:2";
+
+        adjcyRepo.findAll().stream()
+                .filter(adj -> adj.getA().getUrn().equals(linkSrc1) && adj.getZ().getUrn().equals(linkDst1))
+                .forEach(adj -> {
+                    Map<Layer, Long> newMetric = new HashMap<>();
+                    Long ethMetric = adj.getMetrics().get(Layer.ETHERNET);
+                    Long mplsMetric = adj.getMetrics().get(Layer.MPLS);
+                    if(ethMetric != null)
+                        if(ethMetric > 0)
+                            newMetric.put(Layer.ETHERNET, 400L);
+                    if(mplsMetric != null)
+                        if(mplsMetric > 0)
+                        newMetric.put(Layer.MPLS, 400L);
+                    adj.setMetrics(newMetric);
+                });
+
+
+        log.info("Beginning test: 'nonPalPceHighLinkCostTest1'.");
+
+        try
+        {
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
+        }
+        catch(PCEException | PSSException pceE){ log.error("", pceE); }
+
+        assert(reservedBlueprint.isPresent());
+
+        ReservedVlanFlowE reservedFlow = reservedBlueprint.get().getVlanFlow();
+
+        Set<ReservedEthPipeE> allResPipes = reservedFlow.getPipes();
+        Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
+        List<ReservedBandwidthE> allResBWs = new ArrayList<>();
+
+        assert(allResPipes.size() == 0);
+        assert(allResJunctions.size() == 3);
+
+        allResJunctions.stream()
+                .forEach(j -> {
+                    assert(j.getDeviceUrn().getUrn().equals("nodeL") || j.getDeviceUrn().getUrn().equals("nodeM") || j.getDeviceUrn().getUrn().equals("nodeP"));
+
+                    assert(j.getFixtures().size() == 2);
+
+                    Iterator<ReservedVlanFixtureE> jIter = j.getFixtures().iterator();
+                    ReservedVlanFixtureE fixA = jIter.next();
+                    ReservedVlanFixtureE fixZ = jIter.next();
+
+                    if(j.getDeviceUrn().getUrn().equals("nodeL"))
+                    {
+                        assert(fixA.getIfceUrn().getUrn().equals("nodeL:1") && fixZ.getIfceUrn().getUrn().equals("nodeL:2") || fixZ.getIfceUrn().getUrn().equals("nodeL:1") && fixA.getIfceUrn().getUrn().equals("nodeL:2"));
+                    }
+                    else if(j.getDeviceUrn().getUrn().equals("nodeM"))
+                    {
+                        assert(fixA.getIfceUrn().getUrn().equals("nodeM:1") && fixZ.getIfceUrn().getUrn().equals("portZ") || fixZ.getIfceUrn().getUrn().equals("nodeM:1") && fixA.getIfceUrn().getUrn().equals("portZ"));
+                    }
+                    else if(j.getDeviceUrn().getUrn().equals("nodeP"))
+                    {
+                        assert(fixA.getIfceUrn().getUrn().equals("portA") && fixZ.getIfceUrn().getUrn().equals("nodeP:1") || fixZ.getIfceUrn().getUrn().equals("portA") && fixA.getIfceUrn().getUrn().equals("nodeP:1"));
+                    }
+
+                    allResBWs.add(j.getFixtures().iterator().next().getReservedBandwidth());
+                    allResBWs.add(j.getFixtures().iterator().next().getReservedBandwidth());
+                });
+
+        allResBWs.stream()
+                .forEach(bw -> {
+                    assert(bw.getInBandwidth().equals(bw.getEgBandwidth()));
+                    assert(bw.getInBandwidth().equals(azBW));
+                });
+
+        log.info("test 'nonPalPceHighLinkCostTest1' passed.");
+    }
+
 }
