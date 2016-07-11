@@ -27,8 +27,12 @@ public class LogicalEdge extends TopoEdge
     private TopoVertex z;
 
     private Long metric;
+    private Long metricAZ;
+    private Long metricZA;
 
     private Layer layer;
 
     private List<TopoEdge> correspondingTopoEdges;
+    private List<TopoEdge> correspondingAZTopoEdges;
+    private List<TopoEdge> correspondingZATopoEdges;
 }

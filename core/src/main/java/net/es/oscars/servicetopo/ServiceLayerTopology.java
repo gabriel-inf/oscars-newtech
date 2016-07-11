@@ -200,8 +200,8 @@ public class ServiceLayerTopology
                     continue;
                 }
 
-                LogicalEdge azLogicalEdge = new LogicalEdge(nonAdjacentA,nonAdjacentZ, 0L, Layer.LOGICAL, new ArrayList<>());
-                LogicalEdge zaLogicalEdge = new LogicalEdge(nonAdjacentZ,nonAdjacentA, 0L, Layer.LOGICAL, new ArrayList<>());
+                LogicalEdge azLogicalEdge = new LogicalEdge(nonAdjacentA,nonAdjacentZ, 0L, 0L, 0L, Layer.LOGICAL, new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+                LogicalEdge zaLogicalEdge = new LogicalEdge(nonAdjacentZ,nonAdjacentA, 0L, 0L, 0L, Layer.LOGICAL, new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
 
                 logicalLinks.add(azLogicalEdge);
                 logicalLinks.add(zaLogicalEdge);
@@ -218,10 +218,19 @@ public class ServiceLayerTopology
                 .forEach(llBackup::add);
     }
 
-    //Calls Pruner and Dijkstra to compute shortest MPLS-layer paths, calculates weights of those paths, and maps them to the appropriate logical links
+    // Determines whether to use symmetric or asymmetric logical link computation
     public void calculateLogicalLinkWeights(RequestedVlanPipeE requestedVlanPipe, ScheduleSpecificationE requestedSchedule, List<UrnE> urnList, List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList)
     {
-        log.info("Performing routing on MPLS-Layer topology to assign weights to Service-Layer logical links.");
+        //if(requestedVlanPipe.getAzMbps() == requestedVlanPipe.getZaMbps())
+        //    this.calculateLogicalLinkWeightsSymmetric(requestedVlanPipe, requestedSchedule, urnList, rsvBwList, rsvVlanList);
+        //else
+            this.calculateLogicalLinkWeightsAsymmetric(requestedVlanPipe, requestedSchedule, urnList, rsvBwList, rsvVlanList);
+    }
+
+    //Calls Pruner and Dijkstra to compute shortest MPLS-layer paths, calculates weights of those paths, and maps them to the appropriate logical links
+    private void calculateLogicalLinkWeightsSymmetric(RequestedVlanPipeE requestedVlanPipe, ScheduleSpecificationE requestedSchedule, List<UrnE> urnList, List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList)
+    {
+        log.info("Performing Symmetric routing on MPLS-Layer topology to assign weights to Service-Layer logical links.");
         Set<LogicalEdge> logicalLinksToRemoveFromServiceLayer = new HashSet<>();
 
         Topology mplsLayerTopo = new Topology();
@@ -232,7 +241,6 @@ public class ServiceLayerTopology
         // Step 1: Prune MPLS-Layer topology once before considering any logical links.
         log.info("step 1: pruning MPLS-layer by bandwidth and vlan availability.");
         Topology prunedMPLSTopo = pruningService.pruneWithPipe(mplsLayerTopo, requestedVlanPipe, requestedSchedule, urnList, rsvBwList, rsvVlanList);
-
         log.info("step 1 COMPLETE.");
 
         for(LogicalEdge oneLogicalLink : logicalLinks)
@@ -323,6 +331,19 @@ public class ServiceLayerTopology
             }
             log.info("step 2 COMPLETE.");
 
+            for(TopoEdge tedge : mplsLayerTopo.getEdges())
+            {
+                log.info("MPLS Edge: (" + tedge.getA().getUrn() + "," + tedge.getZ().getUrn() + ")");
+            }
+
+            for(TopoEdge tedge : prunedMPLSTopo.getEdges())
+            {
+                log.info("MPLS After Edge: (" + tedge.getA().getUrn() + "," + tedge.getZ().getUrn() + ")");
+            }
+
+            log.info("MPLS edge SIZE = " + mplsLayerTopo.getEdges().size());
+            log.info("MPLS after SIZE = " + prunedMPLSTopo.getEdges().size());
+
             // Step 3: Perform routing on MPLS layer to construct physical routes corresponding to the logical link.
             log.info("step 3: performing MPLS-Layer routing.");
 
@@ -357,7 +378,181 @@ public class ServiceLayerTopology
             // Step 5: Store the physical route corresponding to this logical link
             path.add(0, physEdgeAtoMpls);
             path.add(physEdgeMplstoZ);
+
             oneLogicalLink.setCorrespondingTopoEdges(path);
+        }
+
+        // Step 6: If any logical links cannot be built, remove them from the Service-Layer Topology for this request.
+        logicalLinks.removeAll(logicalLinksToRemoveFromServiceLayer);
+    }
+
+    //Calls Pruner and Dijkstra to compute shortest MPLS-layer paths, calculates weights of those paths, and maps them to the appropriate logical links
+    private void calculateLogicalLinkWeightsAsymmetric(RequestedVlanPipeE requestedVlanPipe, ScheduleSpecificationE requestedSchedule, List<UrnE> urnList, List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList)
+    {
+        log.info("Performing Asymmetric routing on MPLS-Layer topology to assign weights to Service-Layer logical links.");
+        Set<LogicalEdge> logicalLinksToRemoveFromServiceLayer = new HashSet<>();
+
+        Topology mplsLayerTopo = new Topology();
+        mplsLayerTopo.getVertices().addAll(mplsLayerDevices);
+        mplsLayerTopo.getVertices().addAll(mplsLayerPorts);
+        mplsLayerTopo.getEdges().addAll(mplsLayerLinks);
+
+        // Step 1: Prune MPLS-Layer topology once before considering any logical links.
+        log.info("step 1: pruning MPLS-layer by bandwidth and vlan availability for each direction.");
+        Topology prunedMPLSTopoAZ = pruningService.pruneWithPipeAZ(mplsLayerTopo, requestedVlanPipe, requestedSchedule, urnList, rsvBwList, rsvVlanList);
+        Topology prunedMPLSTopoZA = pruningService.pruneWithPipeZA(mplsLayerTopo, requestedVlanPipe, requestedSchedule, urnList, rsvBwList, rsvVlanList);
+        log.info("step 1 COMPLETE.");
+
+        //log.info("MPLS Link Set Size: " + mplsLayerTopo.getEdges().size());
+        //log.info("Pruned MPLS (A->Z) Link Set Size: " + prunedMPLSTopoAZ.getEdges().size());
+        //log.info("Pruned MPLS (Z->A) Link Set Size: " + prunedMPLSTopoZA.getEdges().size());
+
+        //for(TopoEdge oneEdge : prunedMPLSTopoAZ.getEdges())
+        //    log.info("A-Z Edge: (" + oneEdge.getA().getUrn() + "," + oneEdge.getZ().getUrn() + ")");
+
+        //for(TopoEdge oneEdge : prunedMPLSTopoZA.getEdges())
+        //    log.info("Z-A Edge: (" + oneEdge.getA().getUrn() + "," + oneEdge.getZ().getUrn() + ")");
+
+        for(LogicalEdge oneLogicalLink : logicalLinks)
+        {
+            TopoVertex srcEthPort = oneLogicalLink.getA();      //Ethernet-source of logical link
+            TopoVertex dstEthPort = oneLogicalLink.getZ();      //Ethernet-dest of logical link
+            TopoVertex mplsSrc;                                 //MPLS port adjacent to srcEthPort
+            TopoVertex mplsDst;                                 //MPLS port adjacent to dstEthPort
+
+            TopoEdge physEdgeAtoMpls = null;
+            TopoEdge physEdgeZtoMpls = null;
+            TopoEdge physEdgeMplstoA = null;
+            TopoEdge physEdgeMplstoZ = null;
+
+            Set<TopoVertex> adaptationPorts = new HashSet<>();
+            Set<TopoEdge> adaptationEdges = new HashSet<>();
+
+            Topology adaptationTopo = new Topology();
+
+            long weightMetricAZ = 0;
+            long weightMetricZA = 0;
+
+            for(TopoEdge oneSLLink : serviceLayerLinks)
+            {
+                if(oneSLLink.getA().equals(srcEthPort))
+                {
+                    if(oneSLLink.getZ().getVertexType().equals(VertexType.PORT))
+                    {
+                        physEdgeAtoMpls = oneSLLink;
+                    }
+                }
+                else if(oneSLLink.getZ().equals(srcEthPort))
+                {
+                    if(oneSLLink.getA().getVertexType().equals(VertexType.PORT))
+                    {
+                        physEdgeMplstoA = oneSLLink;
+                    }
+                }
+
+                if(oneSLLink.getZ().equals(dstEthPort))
+                {
+                    if (oneSLLink.getA().getVertexType().equals(VertexType.PORT)) {
+                        physEdgeMplstoZ = oneSLLink;
+                    }
+                }
+                else if(oneSLLink.getA().equals(dstEthPort))
+                {
+                    if(oneSLLink.getZ().getVertexType().equals(VertexType.PORT))
+                    {
+                        physEdgeZtoMpls = oneSLLink;
+                    }
+                }
+            }
+
+            if(physEdgeAtoMpls == null || physEdgeZtoMpls == null || physEdgeMplstoA == null || physEdgeMplstoZ == null)
+            {
+                log.error("service-layer topology has incorrectly identified adaptation edges");
+                assert false;
+            }
+
+            // Step 2: Prune the adaptation (Ethernet-MPLS) edges and ports to ensure this logical link is worth building.
+            log.info("step 2: pruning adaptation (Ethernet-MPLS) edges and ports to ensure logical link is worth building.");
+            mplsSrc = physEdgeAtoMpls.getZ();
+            mplsDst = physEdgeMplstoZ.getA();
+
+            adaptationPorts.add(srcEthPort);
+            adaptationPorts.add(dstEthPort);
+            adaptationPorts.add(mplsSrc);
+            adaptationPorts.add(mplsDst);
+
+            adaptationEdges.add(physEdgeAtoMpls);
+            adaptationEdges.add(physEdgeZtoMpls);
+            adaptationEdges.add(physEdgeMplstoA);
+            adaptationEdges.add(physEdgeMplstoZ);
+
+            adaptationTopo.setVertices(adaptationPorts);
+            adaptationTopo.setEdges(adaptationEdges);
+
+            Topology prunedAdaptationTopo = pruningService.pruneWithPipe(adaptationTopo, requestedVlanPipe, requestedSchedule, rsvBwList, rsvVlanList);
+
+            if(!prunedAdaptationTopo.equals(adaptationTopo))
+            {
+                log.info("cannot assign weight to logical edge: adaptation ports/links do not support demand.");
+                log.info("step 2 FAILED.");
+                log.info("removing logical link from Service-Layer topology.");
+
+                logicalLinksToRemoveFromServiceLayer.add(oneLogicalLink);
+                continue;
+            }
+            log.info("step 2 COMPLETE.");
+
+
+            // Step 3: Perform routing on MPLS layer to construct physical routes corresponding to the logical link.
+            log.info("step 3: performing MPLS-Layer routing.");
+
+            List<TopoEdge> pathAZ = dijkstraPCE.computeShortestPathEdges(prunedMPLSTopoAZ, mplsSrc, mplsDst);
+            List<TopoEdge> pathZA = dijkstraPCE.computeShortestPathEdges(prunedMPLSTopoZA, mplsSrc, mplsDst);
+
+            if(pathAZ.isEmpty() && pathZA.isEmpty())
+            {
+                log.error("no path found for logical link.");
+                log.info("step 3 FAILED.");
+                log.info("removing logical link from Service-Layer topology.");
+                logicalLinksToRemoveFromServiceLayer.add(oneLogicalLink);
+                continue;
+            }
+
+            log.info("step 3 COMPLETE.");
+
+            // Step 4: Calculate total cost-metric for logical link.
+            log.info("step 4: compute logical link-weights.");
+            for(TopoEdge pathEdge : pathAZ)
+            {
+                weightMetricAZ += pathEdge.getMetric();
+            }
+
+            for(TopoEdge pathEdge : pathZA)
+            {
+                weightMetricZA += pathEdge.getMetric();
+            }
+
+            // Add *uni-directional* cost of adaptation links to Logical Link weight since these are ETHERNET links, but will implicitly be used in BOTH directions across two logical links
+            weightMetricAZ += physEdgeAtoMpls.getMetric();
+            weightMetricAZ += physEdgeMplstoZ.getMetric();
+
+            weightMetricZA += physEdgeAtoMpls.getMetric();
+            weightMetricZA += physEdgeMplstoZ.getMetric();
+
+            oneLogicalLink.setMetricAZ(weightMetricAZ);
+            oneLogicalLink.setMetricZA(weightMetricZA);
+
+            log.info("step 4 COMPLETE.");
+
+            // Step 5: Store the physical route corresponding to this logical link
+            pathAZ.add(0, physEdgeAtoMpls);
+            pathAZ.add(physEdgeMplstoZ);
+
+            pathZA.add(0, physEdgeAtoMpls);
+            pathZA.add(physEdgeMplstoZ);
+
+            oneLogicalLink.setCorrespondingAZTopoEdges(pathAZ);
+            oneLogicalLink.setCorrespondingZATopoEdges(pathZA);
         }
 
         // Step 6: If any logical links cannot be built, remove them from the Service-Layer Topology for this request.
@@ -369,7 +564,8 @@ public class ServiceLayerTopology
     {
         llBackup.stream()
                 .forEach(ll -> {
-                    ll.getCorrespondingTopoEdges().clear();
+                    ll.getCorrespondingAZTopoEdges().clear();
+                    ll.getCorrespondingZATopoEdges().clear();
                     ll.setMetric(0L);
                 });
 
@@ -481,6 +677,46 @@ public class ServiceLayerTopology
         return topo;
     }
 
+    public Topology getSLTopologyAZ()
+    {
+        Topology topo = new Topology();
+
+        topo.setLayer(Layer.ETHERNET);
+        topo.getVertices().addAll(serviceLayerDevices);
+        topo.getVertices().addAll(serviceLayerPorts);
+        topo.getEdges().addAll(serviceLayerLinks);
+
+        Set<LogicalEdge> copyOfLogicalLinks = logicalLinks.stream()
+                .collect(Collectors.toSet());
+
+        for(LogicalEdge oneEdge : copyOfLogicalLinks)
+            oneEdge.setMetric(oneEdge.getMetricAZ());
+
+        topo.getEdges().addAll(copyOfLogicalLinks);
+
+        return topo;
+    }
+
+    public Topology getSLTopologyZA()
+    {
+        Topology topo = new Topology();
+
+        topo.setLayer(Layer.ETHERNET);
+        topo.getVertices().addAll(serviceLayerDevices);
+        topo.getVertices().addAll(serviceLayerPorts);
+        topo.getEdges().addAll(serviceLayerLinks);
+
+        Set<LogicalEdge> copyOfLogicalLinks = logicalLinks.stream()
+                .collect(Collectors.toSet());
+
+        for(LogicalEdge oneEdge : copyOfLogicalLinks)
+            oneEdge.setMetric(oneEdge.getMetricZA());
+
+        topo.getEdges().addAll(copyOfLogicalLinks);
+
+        return topo;
+    }
+
     public TopoVertex getVirtualNode(TopoVertex realNode)
     {
         for(TopoVertex oneNode : serviceLayerDevices)
@@ -517,6 +753,86 @@ public class ServiceLayerTopology
                 if(physicalA.equals(logicalA) && physicalZ.equals(logicalZ))
                 {
                     actualERO.addAll(oneLogical.getCorrespondingTopoEdges());
+                    edgeIsLogical = true;
+
+                    break;
+                }
+            }
+
+            // This link is NOT logical - Part of actual ERO
+            if(!edgeIsLogical)
+            {
+                actualERO.add(oneEdge);
+            }
+        }
+
+        // Remove any edges containing VIRTUAL nodes - they don't exist in the actual ERO
+        actualERO.removeIf(e -> e.getA().getVertexType().equals(VertexType.VIRTUAL));
+        actualERO.removeIf(e -> e.getZ().getVertexType().equals(VertexType.VIRTUAL));
+
+        return  actualERO;
+    }
+
+    public List<TopoEdge> getActualEROAZ(List<TopoEdge> serviceLayerERO)
+    {
+        List<TopoEdge> actualERO = new LinkedList<>();
+
+        for(TopoEdge oneEdge : serviceLayerERO)
+        {
+            TopoVertex physicalA = oneEdge.getA();
+            TopoVertex physicalZ = oneEdge.getZ();
+
+            boolean edgeIsLogical = false;
+
+            for(LogicalEdge oneLogical : logicalLinks)
+            {
+                TopoVertex logicalA = oneLogical.getA();
+                TopoVertex logicalZ = oneLogical.getZ();
+
+                // This link is logical - Get corresponding physical ERO
+                if(physicalA.equals(logicalA) && physicalZ.equals(logicalZ))
+                {
+                    actualERO.addAll(oneLogical.getCorrespondingAZTopoEdges());
+                    edgeIsLogical = true;
+
+                    break;
+                }
+            }
+
+            // This link is NOT logical - Part of actual ERO
+            if(!edgeIsLogical)
+            {
+                actualERO.add(oneEdge);
+            }
+        }
+
+        // Remove any edges containing VIRTUAL nodes - they don't exist in the actual ERO
+        actualERO.removeIf(e -> e.getA().getVertexType().equals(VertexType.VIRTUAL));
+        actualERO.removeIf(e -> e.getZ().getVertexType().equals(VertexType.VIRTUAL));
+
+        return  actualERO;
+    }
+
+    public List<TopoEdge> getActualEROZA(List<TopoEdge> serviceLayerERO)
+    {
+        List<TopoEdge> actualERO = new LinkedList<>();
+
+        for(TopoEdge oneEdge : serviceLayerERO)
+        {
+            TopoVertex physicalA = oneEdge.getA();
+            TopoVertex physicalZ = oneEdge.getZ();
+
+            boolean edgeIsLogical = false;
+
+            for(LogicalEdge oneLogical : logicalLinks)
+            {
+                TopoVertex logicalA = oneLogical.getA();
+                TopoVertex logicalZ = oneLogical.getZ();
+
+                // This link is logical - Get corresponding physical ERO
+                if(physicalA.equals(logicalA) && physicalZ.equals(logicalZ))
+                {
+                    actualERO.addAll(oneLogical.getCorrespondingZATopoEdges());
                     edgeIsLogical = true;
 
                     break;

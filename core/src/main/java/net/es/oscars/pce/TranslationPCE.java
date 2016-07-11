@@ -2,7 +2,6 @@ package net.es.oscars.pce;
 
 
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.dto.pss.EthFixtureType;
 import net.es.oscars.pss.PCEAssistant;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.dao.ReservedBandwidthRepository;
@@ -159,10 +158,45 @@ public class TranslationPCE {
         rsvVlans.addAll(pruningService.getReservedVlans(sched.getNotBefore(), sched.getNotAfter()));
 
         // Confirm that there is sufficient bandwidth to meet the request (given what has been reserved so far)
-        boolean sufficientBw = checkForSufficientBw(urnMap, reqPipe, azERO, zaERO, rsvBandwidths);
-        if(!sufficientBw){
-            throw new PCEException("Insufficient Bandwidth to meet requested pipe" +
-                    reqPipe.toString() + " given previous reservations in flow");
+        if(this.palindromicEros(azERO, zaERO))      // Palindromic EROs -- consider both directions at each port for pruning
+        {
+            boolean sufficientBw = checkForSufficientBw(urnMap, reqPipe, azERO, zaERO, rsvBandwidths);
+            if(!sufficientBw)
+                throw new PCEException("Insufficient Bandwidth to meet requested pipe" + reqPipe.toString() + " given previous reservations in flow");
+        }
+        else  // Non-Palindromic EROs
+        {
+            boolean sufficientBwAZ = checkForSufficientBwUni(urnMap, reqPipe, azERO, zaERO, rsvBandwidths, true);  // Consider A->Z ERO with bwAZ
+            boolean sufficientBwZA = checkForSufficientBwUni(urnMap, reqPipe, azERO, zaERO, rsvBandwidths, false); // Consider Z->A ERO with bwZA
+            if(!sufficientBwAZ)
+            {
+                throw new PCEException("Insufficient Bandwidth to meet requested A->Z pipe" + reqPipe.toString() + " given previous reservations in flow");
+            }
+            if(!sufficientBwZA)
+            {
+                throw new PCEException("Insufficient Bandwidth to meet requested Z->A pipe" + reqPipe.toString() + " given previous reservations in flow");
+            }
+
+            // Now consider those ports which are shared by both A->Z and Z->A -- they must be checked for both directions.
+            Set<TopoVertex> bidirectionalPorts = identifyBidirectionalPorts(azERO, zaERO);
+
+            for(TopoVertex biPort : bidirectionalPorts)
+            {
+                if(!urnMap.containsKey(biPort.getUrn()))
+                {
+                    assert false;
+                }
+                UrnE biURN = urnMap.get(biPort.getUrn());
+
+                boolean sufficientBwBidirectional = this.sufficientBandwidthAtUrn(biURN, )
+
+                if(!sufficientBwBidirectional)
+                {
+                    throw new PCEException("Insufficient Bandwidth to meet requested pipe" + reqPipe.toString() + " given previous reservations in flow");
+                }
+            }
+
+
         }
 
 
@@ -224,6 +258,169 @@ public class TranslationPCE {
         }
     }
 
+    private Set<TopoVertex> identifyBidirectionalPorts(List<TopoEdge> azERO, List<TopoEdge> zaERO)
+    {
+        Set<TopoVertex> bidirectionalPorts = new HashSet<>();
+        Set<TopoVertex> ingressPorts = new HashSet<>();
+        Set<TopoVertex> egressPorts = new HashSet<>();
+
+        for(TopoEdge azEdge : azERO)
+        {
+            TopoVertex nodeA = azEdge.getA();
+            TopoVertex nodeZ = azEdge.getZ();
+
+            // Case 1: portA -> portZ -- portA = egress, portZ = ingress
+            if(nodeA.getVertexType().equals(VertexType.PORT) && nodeZ.getVertexType().equals(VertexType.PORT))
+            {
+                egressPorts.add(nodeA);
+                ingressPorts.add(nodeZ);
+            }
+            // Case 2: portA -> deviceZ -- portA = ingress
+            else if(nodeA.getVertexType().equals(VertexType.PORT) && !nodeZ.getVertexType().equals(VertexType.PORT))
+            {
+                ingressPorts.add(nodeA);
+            }
+            // Case 3: deviceA -> portZ -- portZ = egress
+            else if(!nodeA.getVertexType().equals(VertexType.PORT) && nodeZ.getVertexType().equals(VertexType.PORT))
+            {
+                egressPorts.add(nodeZ);
+            }
+        }
+
+        for(TopoEdge zaEdge : zaERO)
+        {
+            TopoVertex nodeA = zaEdge.getA();
+            TopoVertex nodeZ = zaEdge.getZ();
+
+            // Case 1: portA -> portZ -- portA = egress, portZ = ingress
+            if(nodeA.getVertexType().equals(VertexType.PORT) && nodeZ.getVertexType().equals(VertexType.PORT))
+            {
+                egressPorts.add(nodeA);
+                ingressPorts.add(nodeZ);
+            }
+            // Case 2: portA -> deviceZ -- portA = ingress
+            else if(nodeA.getVertexType().equals(VertexType.PORT) && !nodeZ.getVertexType().equals(VertexType.PORT))
+            {
+                ingressPorts.add(nodeA);
+            }
+            // Case 3: deviceA -> portZ -- portZ = egress
+            else if(!nodeA.getVertexType().equals(VertexType.PORT) && nodeZ.getVertexType().equals(VertexType.PORT))
+            {
+                egressPorts.add(nodeZ);
+            }
+        }
+
+        for(TopoVertex onePort : ingressPorts)
+        {
+            if(egressPorts.contains(onePort))
+            {
+                bidirectionalPorts.add(onePort);
+            }
+        }
+
+        return bidirectionalPorts;
+    }
+
+    private boolean palindromicEros(List<TopoEdge> azERO, List<TopoEdge> zaERO)
+    {
+        Set<TopoVertex> azVertices = new HashSet<>();
+        Set<TopoVertex> zaVertices = new HashSet<>();
+
+        for(TopoEdge azEdge : azERO)
+        {
+            azVertices.add(azEdge.getA());
+            azVertices.add(azEdge.getZ());
+        }
+
+        for(TopoEdge zaEdge : zaERO)
+        {
+            zaVertices.add(zaEdge.getA());
+            zaVertices.add(zaEdge.getZ());
+        }
+
+        if(azVertices.size() != zaVertices.size())
+            return false;
+
+        for(TopoVertex oneVert : azVertices)
+        {
+            if(!zaVertices.contains(oneVert))
+                return false;
+        }
+
+        Set<TopoVertex> azPorts = azVertices.stream().filter(v -> v.getVertexType().equals(VertexType.PORT)).collect(Collectors.toSet());
+        Set<TopoVertex> zaPorts = zaVertices.stream().filter(v -> v.getVertexType().equals(VertexType.PORT)).collect(Collectors.toSet());
+
+        if(azPorts.size() != zaPorts.size())
+            return false;
+
+        // Now see if all ports are traversed in both the ingress and egress directions
+        Set<TopoVertex> ingressPorts = new HashSet<>();
+        Set<TopoVertex> egressPorts = new HashSet<>();
+
+        // Identify which ports are used as ingress vs the ones that are used as egress
+        for(TopoEdge azEdge : azERO)
+        {
+            TopoVertex nodeA = azEdge.getA();
+            TopoVertex nodeZ = azEdge.getZ();
+
+            // Case 1: portA -> portZ -- portA = egress, portZ = ingress
+            if(nodeA.getVertexType().equals(VertexType.PORT) && nodeZ.getVertexType().equals(VertexType.PORT))
+            {
+                egressPorts.add(nodeA);
+                ingressPorts.add(nodeZ);
+            }
+            // Case 2: portA -> deviceZ -- portA = ingress
+            else if(nodeA.getVertexType().equals(VertexType.PORT) && !nodeZ.getVertexType().equals(VertexType.PORT))
+            {
+                ingressPorts.add(nodeA);
+            }
+            // Case 3: deviceA -> portZ -- portZ = egress
+            else if(!nodeA.getVertexType().equals(VertexType.PORT) && nodeZ.getVertexType().equals(VertexType.PORT))
+            {
+                egressPorts.add(nodeZ);
+            }
+        }
+
+        // repeat above for Z->A
+        for(TopoEdge zaEdge : zaERO)
+        {
+            TopoVertex nodeA = zaEdge.getA();
+            TopoVertex nodeZ = zaEdge.getZ();
+
+            // Case 1: portA -> portZ -- portA = egress, portZ = ingress
+            if(nodeA.getVertexType().equals(VertexType.PORT) && nodeZ.getVertexType().equals(VertexType.PORT))
+            {
+                egressPorts.add(nodeA);
+                ingressPorts.add(nodeZ);
+            }
+            // Case 2: portA -> deviceZ -- portA = ingress
+            else if(nodeA.getVertexType().equals(VertexType.PORT) && !nodeZ.getVertexType().equals(VertexType.PORT))
+            {
+                ingressPorts.add(nodeA);
+            }
+            // Case 3: deviceA -> portZ -- portZ = egress
+            else if(!nodeA.getVertexType().equals(VertexType.PORT) && nodeZ.getVertexType().equals(VertexType.PORT))
+            {
+                egressPorts.add(nodeZ);
+            }
+        }
+
+        // Now check to see if all ports used are both ingress and egress -- if so, palindromic port usage!
+        if(ingressPorts.size() != egressPorts.size())
+            return false;
+
+        if(ingressPorts.size() != azPorts.size())
+            return false;
+
+        for(TopoVertex onePort : azPorts)
+        {
+            if(!(zaPorts.contains(onePort) && ingressPorts.contains(onePort) && egressPorts.contains(onePort)))
+                return false;
+        }
+
+        return true;
+    }
+
     /**
      * Examine all segments, confirm that the requested bandwidth can be supported given the bandwidth reservations
      * passed in.
@@ -254,6 +451,46 @@ public class TranslationPCE {
         if(!sufficientBandwidthForERO(zaERO, urnMap, resvBwMap, azMbps, zaMbps)){
             return false;
         }
+        return true;
+    }
+
+    /**
+     * Examine all segments, confirm that the requested bandwidth can be supported given the bandwidth reservations
+     * passed in.
+     * @param urnMap - A map of URN string to URN objects
+     * @param reqPipe - The requested pipe
+     * @param rsvBandwidths - A list of bandwidth reservations, which affect bandwidth availability
+     * @param azDirection - True if B/W check should be performed for A->Z direction, false if Z->A
+     * @return True, if there is sufficient bandwidth across all edges. False, otherwise.
+     */
+    private boolean checkForSufficientBwUni(Map<String, UrnE> urnMap, RequestedVlanPipeE reqPipe, List<TopoEdge> azERO, List<TopoEdge> zaERO, List<ReservedBandwidthE> rsvBandwidths, boolean azDirection)
+    {
+        // Build a map, allowing us to retrieve a list of ReservedBandwidth given the associated URN
+        Map<UrnE, List<ReservedBandwidthE>> resvBwMap = pruningService.buildReservedBandwidthMap(rsvBandwidths);
+
+        // Get the requested unidirectional bandwidth
+        Integer bwMbps;
+        if(azDirection)
+        {
+            bwMbps = reqPipe.getAzMbps();
+
+            // For the AZ direction, fail the test if there is insufficient bandwidth
+            if(!sufficientBandwidthForEROUni(azERO, urnMap, resvBwMap, bwMbps))
+            {
+                return false;
+            }
+        }
+        else
+        {
+            bwMbps = reqPipe.getZaMbps();
+
+            // For each ZA direction, fail the test if there is insufficient bandwidth
+            if(!sufficientBandwidthForEROUni(zaERO, urnMap, resvBwMap, bwMbps))
+            {
+                return false;
+            }
+        }
+
         return true;
     }
 
@@ -298,13 +535,112 @@ public class TranslationPCE {
         return true;
     }
 
+
+    /**
+     * Given a particular segment, iterate through the edges and confirm that there is sufficient bandwidth
+     * available in the specified (ingress/egress) direction
+     * @param ERO - A series of edges
+     * @param urnMap - A mapping of URN strings to URN objects
+     * @param resvBwMap - A mapping of URN objects to lists of reserved bandwidth for that URN
+     * @param bwMbps - The bandwidth in the specified direction
+     * @return True, if the segment can support the requested bandwidth. False, otherwise.
+     */
+    private boolean sufficientBandwidthForEROUni(List<TopoEdge> ERO, Map<String, UrnE> urnMap, Map<UrnE, List<ReservedBandwidthE>> resvBwMap, Integer bwMbps)
+    {
+        // For each edge in that list
+        for(TopoEdge edge : ERO)
+        {
+            Map<UrnE, Boolean> urnIngressDirectionMap = new HashMap<>();
+            TopoVertex nodeA = edge.getA();
+            TopoVertex nodeZ = edge.getZ();
+            String urnStringA = nodeA.getUrn();
+            String urnStringZ = nodeZ.getUrn();
+
+            if(!urnMap.containsKey(urnStringA) || !urnMap.containsKey(urnStringZ))
+            {
+                return false;
+            }
+
+            UrnE urnA = urnMap.get(urnStringA);
+            UrnE urnZ = urnMap.get(urnStringZ);
+
+            // From Port to Device -- Consider Ingress direction for this Port
+            if(nodeA.getVertexType().equals(VertexType.PORT) && !nodeZ.getVertexType().equals(VertexType.PORT))
+            {
+                urnIngressDirectionMap.put(urnA, true);
+            }
+            // From Device to Port -- Consider Egress direction for this Port
+            else if(!nodeA.getVertexType().equals(VertexType.PORT) && nodeZ.getVertexType().equals(VertexType.PORT))
+            {
+                urnIngressDirectionMap.put(urnZ, false);
+            }
+            // From Port to Port -- Consider Egress for portA, and Ingress for portZ
+            else if(nodeA.getVertexType().equals(VertexType.PORT) && nodeZ.getVertexType().equals(VertexType.PORT))
+            {
+                urnIngressDirectionMap.put(urnA, true);
+                urnIngressDirectionMap.put(urnZ, false);
+            }
+
+            // If URN A has reservable bandwidth, confirm that there is enough available
+            if(urnA.getReservableBandwidth() != null)
+            {
+                boolean ingressDirection = urnIngressDirectionMap.get(urnA);
+
+                if(!sufficientBandwidthAtUrnUni(urnA, urnA.getReservableBandwidth(), resvBwMap, bwMbps, ingressDirection))
+                {
+                    return false;
+                }
+            }
+
+            // If URN Z has reservable bandwidth, confirm that there is enough available
+            if(urnZ.getReservableBandwidth() != null)
+            {
+                boolean ingressDirection = urnIngressDirectionMap.get(urnZ);
+
+                if(!sufficientBandwidthAtUrnUni(urnZ, urnZ.getReservableBandwidth(), resvBwMap, bwMbps, ingressDirection))
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+
+    /**
+     * Given a specific URN, determine if there is enough bandwidth available to support the requested bandwidth
+     * @param urn - The URN
+     * @param rsvBandwidths -
+     * @param inMbps - Requested ingress Mbps
+     * @param egMbps - Requested egress Mbps
+     * @return True, if there is enough available bandwidth at the URN. False, otherwise
+     */
+    private boolean sufficientBandwidthAtUrn(UrnE urn, List<ReservedBandwidthE> rsvBandwidths, Integer inMbps, Integer egMbps)
+    {
+        // Build a map, allowing us to retrieve a list of ReservedBandwidth given the associated URN
+        Map<UrnE, List<ReservedBandwidthE>> resvBwMap = pruningService.buildReservedBandwidthMap(rsvBandwidths);
+        ReservableBandwidthE reservableBw = urn.getReservableBandwidth();
+
+        Map<String, Integer> bwAvail = pruningService.getBwAvailabilityForUrn(urn, reservableBw, resvBwMap);
+        if(bwAvail.get("Ingress") < inMbps || bwAvail.get("Egress") < egMbps)
+        {
+            log.error("Insufficient Bandwidth at " + urn.toString() + ". Requested: " +
+                    inMbps + " In and " + egMbps + " Out. Available: " + bwAvail.get("Ingress") +
+                    " In and " + bwAvail.get("Egress") + " Out.");
+
+            return false;
+        }
+
+        return true;
+    }
+
     /**
      * Given a specific URN, determine if there is enough bandwidth available to support the requested bandwidth
      * @param urn - The URN
      * @param reservableBw - List of Reservable Bandwidth at that URN
      * @param resvBwMap - Map of URNs to Reserved Bandwidth
-     * @param inMbps - Requested ingress MBPS
-     * @param egMbps - Requested egress MBPS
+     * @param inMbps - Requested ingress Mbps
+     * @param egMbps - Requested egress Mbps
      * @return True, if there is enough available bandwidth at the URN. False, otherwise
      */
     private boolean sufficientBandwidthAtUrn(UrnE urn, ReservableBandwidthE reservableBw,
@@ -316,6 +652,42 @@ public class TranslationPCE {
                     " In and " + bwAvail.get("Egress") + " Out.");
             return false;
         }
+        return true;
+    }
+
+    /**
+     * Given a specific URN, determine if there is enough bandwidth available to support the requested bandwidth in a specific (ingress/egress) direction
+     * @param urn - The URN
+     * @param reservableBw - List of Reservable Bandwidth at that URN
+     * @param resvBwMap - Map of URNs to Reserved Bandwidth
+     * @param bwMbps - Requested Mbps
+     * @param ingressDirection - True if pruning is done based upon port ingress b/w, false if done by egress b/w
+     * @return True, if there is enough available bandwidth at the URN. False, otherwise
+     */
+    private boolean sufficientBandwidthAtUrnUni(UrnE urn, ReservableBandwidthE reservableBw,
+                                             Map<UrnE, List<ReservedBandwidthE>> resvBwMap, Integer bwMbps, boolean ingressDirection){
+        Map<String, Integer> bwAvail = pruningService.getBwAvailabilityForUrn(urn, reservableBw, resvBwMap);
+
+        Integer unidirectionalBW;
+        String direction = "";
+
+        if(ingressDirection)
+        {
+            unidirectionalBW = bwAvail.get("Ingress");
+            direction = "In.";
+        }
+        else
+        {
+            unidirectionalBW = bwAvail.get("Egress");
+            direction = "Out.";
+        }
+
+        if(unidirectionalBW < bwMbps)
+        {
+            log.error("Insufficient Bandwidth at " + urn.toString() + ". Requested: " + bwMbps + direction);
+            return false;
+        }
+
         return true;
     }
 

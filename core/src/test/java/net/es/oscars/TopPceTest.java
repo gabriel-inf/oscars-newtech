@@ -45,8 +45,6 @@ public class TopPceTest
 
     private ScheduleSpecificationE requestedSched;
 
-    List<UrnE> urnList;
-    List<UrnAdjcyE> adjcyList;
 
     @Test
     public void basicPceTest1()

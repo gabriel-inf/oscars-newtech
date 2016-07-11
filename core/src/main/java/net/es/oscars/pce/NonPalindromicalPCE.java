@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Component
-public class LacimordnilapPCE
+public class NonPalindromicalPCE
 {
     @Autowired
     private TopoService topoService;
@@ -46,7 +46,7 @@ public class LacimordnilapPCE
      * @return A two-element Map containing both the forward-direction (A->Z) ERO and the reverse-direction (Z->A) ERO
      * @throws PCEException
      */
-    public Map<String, List<TopoEdge>> computeCimordnilapERO(RequestedVlanPipeE requestPipe, ScheduleSpecificationE requestSched, List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList) throws PCEException
+    public Map<String, List<TopoEdge>> computeNonPalindromicERO(RequestedVlanPipeE requestPipe, ScheduleSpecificationE requestSched, List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList) throws PCEException
     {
         Topology ethTopo = topoService.layer(Layer.ETHERNET);
         Topology intTopo = topoService.layer(Layer.INTERNAL);
@@ -82,7 +82,6 @@ public class LacimordnilapPCE
         // Filter Devices and Ports out of intTopo
         intTopo.getVertices().removeAll(intTopo.getVertices());
 
-
         /* These calls only need to be made once when topology is updated */
         serviceLayerTopology.setTopology(ethTopo);
         serviceLayerTopology.setTopology(intTopo);
@@ -93,6 +92,7 @@ public class LacimordnilapPCE
 
         serviceLayerTopology.resetLogicalLinks();
 
+
         UrnE srcDeviceURN = requestPipe.getAJunction().getDeviceUrn();
         UrnE dstDeviceURN = requestPipe.getZJunction().getDeviceUrn();
 
@@ -100,7 +100,7 @@ public class LacimordnilapPCE
         VertexType dstType = topoService.getVertexTypeFromDeviceType(dstDeviceURN.getDeviceType());
 
         TopoVertex srcDevice = new TopoVertex(srcDeviceURN.getUrn(), srcType);
-        TopoVertex dstDevice = new TopoVertex(srcDeviceURN.getUrn(), dstType);
+        TopoVertex dstDevice = new TopoVertex(dstDeviceURN.getUrn(), dstType);
 
         UrnE srcPortURN = requestPipe.getAJunction().getFixtures().iterator().next().getPortUrn();
         UrnE dstPortURN = requestPipe.getZJunction().getFixtures().iterator().next().getPortUrn();
@@ -115,7 +115,17 @@ public class LacimordnilapPCE
         // Performs shortest path routing on MPLS-layer to properly assign weights to each logical link on Service-Layer
         serviceLayerTopology.calculateLogicalLinkWeights(requestPipe, requestSched, urnRepo.findAll(), rsvBwList, rsvVlanList);
 
-        Topology slTopo = serviceLayerTopology.getSLTopology();
+        Topology slTopo;
+
+        if(requestPipe.getAzMbps() == requestPipe.getZaMbps())
+        {
+            slTopo = serviceLayerTopology.getSLTopology();
+        }
+        else
+        {
+            slTopo = serviceLayerTopology.getSLTopologyAZ();
+        }
+
         Topology prunedSlTopo = pruningService.pruneWithPipe(slTopo, requestPipe, requestSched, rsvBwList, rsvVlanList);
 
         TopoVertex serviceLayerSrcNode;
@@ -141,40 +151,81 @@ public class LacimordnilapPCE
             assert(serviceLayerDstNode != null);
         }
 
+
         // Shortest path routing on Service-Layer
         List<TopoEdge> azServiceLayerERO = dijkstraPCE.computeShortestPathEdges(prunedSlTopo, serviceLayerSrcNode, serviceLayerDstNode);
 
         if (azServiceLayerERO.isEmpty())
         {
-            throw new PCEException("Empty path from Asymmetric PCE");
+            throw new PCEException("Empty path NonPalindromic PCE");
         }
 
         // Get symmetric Service-Layer path in reverse-direction
         List<TopoEdge> zaServiceLayerERO = new LinkedList<>();
 
+        for(TopoEdge topEdge : prunedSlTopo.getEdges())
+                log.info("TOPOLOGY EDGE: (" + topEdge.getA().getUrn() + "," + topEdge.getZ().getUrn() + ")");
+
         // 1. Reverse the links
         for(TopoEdge azEdge : azServiceLayerERO)
         {
+            log.info("FORWARD EDGE: (" + azEdge.getA().getUrn() + "," + azEdge.getZ().getUrn() + ")");
             Optional<TopoEdge> reverseEdge = prunedSlTopo.getEdges().stream()
                     .filter(r -> r.getA().equals(azEdge.getZ()))
                     .filter(r -> r.getZ().equals(azEdge.getA()))
                     .findFirst();
 
             if(reverseEdge.isPresent())
+            {
+                log.info("REVERSE EDGE: (" + reverseEdge.get().getA().getUrn() + "," + reverseEdge.get().getZ().getUrn() + ")");
                 zaServiceLayerERO.add(reverseEdge.get());
+            }
         }
 
         // 2. Reverse the order
         Collections.reverse(zaServiceLayerERO);
 
-        assert(azServiceLayerERO.size() == zaServiceLayerERO.size());
+        log.info("AZ ERO");
+        for(int i = 0; i < azServiceLayerERO.size(); i++)
+            log.info("(" + azServiceLayerERO.get(i).getA().getUrn() + "," + azServiceLayerERO.get(i).getZ().getUrn() + ")");
 
-        // Obtain physical ERO from Service-Layer EROs
-        List<TopoEdge> azERO = serviceLayerTopology.getActualERO(azServiceLayerERO);
-        List<TopoEdge> zaERO = serviceLayerTopology.getActualERO(zaServiceLayerERO);
-
+        log.info("ZA ERO");
+        for(int i = 0; i < zaServiceLayerERO.size(); i++)
+            log.info("(" + zaServiceLayerERO.get(i).getA().getUrn() + "," + zaServiceLayerERO.get(i).getZ().getUrn() + ")");
 
         Map<String, List<TopoEdge>> theMap = new HashMap<>();
+
+        if(!(azServiceLayerERO.size() == zaServiceLayerERO.size()))
+            return  theMap;
+
+        List<TopoEdge> azERO;
+        List<TopoEdge> zaERO;
+
+        // Obtain physical ERO from Service-Layer EROs
+        //if(requestPipe.getAzMbps() == requestPipe.getZaMbps())
+        //{
+            azERO = serviceLayerTopology.getActualERO(azServiceLayerERO);
+            zaERO = serviceLayerTopology.getActualERO(zaServiceLayerERO);
+        //}
+        //else
+        //{
+            azERO = serviceLayerTopology.getActualEROAZ(azServiceLayerERO);
+            zaERO = serviceLayerTopology.getActualEROZA(zaServiceLayerERO);
+
+            String loggingAZ = "azERO: ";
+            for(TopoEdge oneURN : azERO)
+                loggingAZ = loggingAZ + oneURN.getA().getUrn() + "-";
+            loggingAZ = loggingAZ + azERO.get(azERO.size()-1).getZ().getUrn();
+            log.info(loggingAZ);
+
+            String loggingZA = "zaERO: ";
+            for(TopoEdge oneURN : zaERO)
+                loggingZA = loggingZA + oneURN.getA().getUrn() + "-";
+            loggingZA = loggingZA + zaERO.get(zaERO.size()-1).getZ().getUrn();
+            log.info(loggingZA);
+        //}
+
+
         theMap.put("az", azERO);
         theMap.put("za", zaERO);
 

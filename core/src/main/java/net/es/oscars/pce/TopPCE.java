@@ -31,7 +31,7 @@ public class TopPCE {
     private PalindromicalPCE palindromicalPCE;
 
     @Autowired
-    private LacimordnilapPCE nonPalindromicPCE;
+    private NonPalindromicalPCE nonPalindromicPCE;
 
     /**
      * Given a requested Blueprint (made up of a VLAN or Layer3 Flow) and a Schedule Specification, attempt
@@ -194,7 +194,7 @@ public class TopPCE {
         else{
             try{
                 log.info("Entering NON-Palindromical PCE");
-                eroMap = nonPalindromicPCE.computeCimordnilapERO(pipe, schedSpec, rsvBandwidths, rsvVlans);       // A->Z ERO is NOT palindrome of Z->A ERO
+                eroMap = nonPalindromicPCE.computeNonPalindromicERO(pipe, schedSpec, rsvBandwidths, rsvVlans);       // A->Z ERO is NOT palindrome of Z->A ERO
                 log.info("Exiting NON-Palindromical PCE");
             }
             catch(PCEException e){

@@ -14,6 +14,7 @@ import net.es.oscars.topo.ent.IntRangeE;
 import net.es.oscars.topo.ent.ReservableBandwidthE;
 import net.es.oscars.topo.ent.UrnE;
 import net.es.oscars.topo.enums.Layer;
+import net.es.oscars.topo.enums.VertexType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
@@ -197,6 +198,60 @@ public class PruningService {
     }
 
     /**
+     * Prune the topology based on A->Z bandwidth using a logical pipe. The pipe contains the requested bandwidth and VLANs (through
+     * querying the attached junctions/fixtures). The URNs are pulled from the URN repository.
+     * @param topo - The topology to be pruned.
+     * @param pipe - The logical pipe, from which the requested bandwidth and VLANs are retrieved.
+     * @param sched - The requested schedule, containing the start and end Dates
+     * @param rsvBwList - A list of Reserved Bandwidth to be considered when pruning (along with Bandwidth in the Repo)
+     * @param rsvVlanList - A list of Reserved VLAN tags to be considered when pruning (along with VLANs in the Repo)
+     * @return The topology with ineligible edges removed.
+     */
+    public Topology pruneWithPipeAZ(Topology topo, RequestedVlanPipeE pipe, ScheduleSpecificationE sched,
+                                  List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList){
+        Date start = sched.getNotBefore();
+        Date end = sched.getNotAfter();
+
+        // Combine the passed in list of Reserved Bandwidth with the Reserved Bandwidth in the Repository
+        List<ReservedBandwidthE> reservedBwSoFar = getReservedBandwidth(start, end);
+        reservedBwSoFar.addAll(rsvBwList);
+
+
+        // Combine the passed in list of Reserved VLANs with the Reserved Vlans in the Repository
+        List<ReservedVlanE> reservedVlansSoFar = getReservedVlans(start, end);
+        reservedVlansSoFar.addAll(rsvVlanList);
+
+        return pruneWithPipeAZ(topo, pipe, urnRepo.findAll(), reservedBwSoFar, reservedVlansSoFar);
+    }
+
+    /**
+     * Prune the topology based on Z->A bandwidth using a logical pipe. The pipe contains the requested bandwidth and VLANs (through
+     * querying the attached junctions/fixtures). The URNs are pulled from the URN repository.
+     * @param topo - The topology to be pruned.
+     * @param pipe - The logical pipe, from which the requested bandwidth and VLANs are retrieved.
+     * @param sched - The requested schedule, containing the start and end Dates
+     * @param rsvBwList - A list of Reserved Bandwidth to be considered when pruning (along with Bandwidth in the Repo)
+     * @param rsvVlanList - A list of Reserved VLAN tags to be considered when pruning (along with VLANs in the Repo)
+     * @return The topology with ineligible edges removed.
+     */
+    public Topology pruneWithPipeZA(Topology topo, RequestedVlanPipeE pipe, ScheduleSpecificationE sched,
+                                    List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList){
+        Date start = sched.getNotBefore();
+        Date end = sched.getNotAfter();
+
+        // Combine the passed in list of Reserved Bandwidth with the Reserved Bandwidth in the Repository
+        List<ReservedBandwidthE> reservedBwSoFar = getReservedBandwidth(start, end);
+        reservedBwSoFar.addAll(rsvBwList);
+
+
+        // Combine the passed in list of Reserved VLANs with the Reserved Vlans in the Repository
+        List<ReservedVlanE> reservedVlansSoFar = getReservedVlans(start, end);
+        reservedVlansSoFar.addAll(rsvVlanList);
+
+        return pruneWithPipeZA(topo, pipe, urnRepo.findAll(), reservedBwSoFar, reservedVlansSoFar);
+    }
+
+    /**
      * Prune the topology using a logical pipe. The pipe contains the requested bandwidth and VLANs (through
      * querying the attached junctions/fixtures). A list of URNs is passed into match devices/interfaces to
      * topology elements.
@@ -213,6 +268,42 @@ public class PruningService {
         vlans.addAll(getVlansFromJunction(pipe.getAJunction()));
         vlans.addAll(getVlansFromJunction(pipe.getZJunction()));
         return pruneTopology(topo, azBw, zaBw, vlans, urns, rsvBwList, rsvVlanList);
+    }
+
+    /**
+     * Prune the topology based on A->Z bandwidth using a logical pipe. The pipe contains the requested bandwidth and VLANs (through
+     * querying the attached junctions/fixtures). A list of URNs is passed into match devices/interfaces to
+     * topology elements.
+     * @param topo - The topology to be pruned.
+     * @param pipe - The logical pipe, from which the requested bandwidth and VLANs are retrieved.
+     * @param urns - The URNs that will be used to match available resources with elements of the topology.
+     * @return The topology with ineligible edges removed.
+     */
+    private Topology pruneWithPipeAZ(Topology topo, RequestedVlanPipeE pipe, List<UrnE> urns,
+                                  List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList){
+        Integer azBw = pipe.getAzMbps();
+        List<IntRange> vlans = new ArrayList<>();
+        vlans.addAll(getVlansFromJunction(pipe.getAJunction()));
+        vlans.addAll(getVlansFromJunction(pipe.getZJunction()));
+        return pruneTopologyUni(topo, azBw, vlans, urns, rsvBwList, rsvVlanList);
+    }
+
+    /**
+     * Prune the topology based on Z->A bandwidth  using a logical pipe. The pipe contains the requested bandwidth and VLANs (through
+     * querying the attached junctions/fixtures). A list of URNs is passed into match devices/interfaces to
+     * topology elements.
+     * @param topo - The topology to be pruned.
+     * @param pipe - The logical pipe, from which the requested bandwidth and VLANs are retrieved.
+     * @param urns - The URNs that will be used to match available resources with elements of the topology.
+     * @return The topology with ineligible edges removed.
+     */
+    private Topology pruneWithPipeZA(Topology topo, RequestedVlanPipeE pipe, List<UrnE> urns,
+                                     List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList){
+        Integer zaBw = pipe.getZaMbps();
+        List<IntRange> vlans = new ArrayList<>();
+        vlans.addAll(getVlansFromJunction(pipe.getAJunction()));
+        vlans.addAll(getVlansFromJunction(pipe.getZJunction()));
+        return pruneTopologyUni(topo, zaBw, vlans, urns, rsvBwList, rsvVlanList);
     }
 
     /**
@@ -267,6 +358,60 @@ public class PruningService {
     }
 
     /**
+     * Prune the topology based on A->Z bandwidth using a logical pipe. The pipe contains the requested bandwidth and VLANs (through
+     * querying the attached junctions/fixtures). The URNs are pulled from the URN repository.
+     * @param topo - The topology to be pruned.
+     * @param pipe - The logical pipe, from which the requested bandwidth and VLANs are retrieved.
+     * @param sched - The requested schedule, containing the start and end Dates
+     * @param rsvBwList - A list of Reserved Bandwidth to be considered when pruning (along with Bandwidth in the Repo)
+     * @param rsvVlanList - A list of Reserved VLAN tags to be considered when pruning (along with VLANs in the Repo)
+     * @return The topology with ineligible edges removed.
+     */
+    public Topology pruneWithPipeAZ(Topology topo, RequestedVlanPipeE pipe, ScheduleSpecificationE sched, List<UrnE> urns,
+                                  List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList){
+        Date start = sched.getNotBefore();
+        Date end = sched.getNotAfter();
+
+        // Combine the passed in list of Reserved Bandwidth with the Reserved Bandwidth in the Repository
+        List<ReservedBandwidthE> reservedBwSoFar = getReservedBandwidth(start, end);
+        reservedBwSoFar.addAll(rsvBwList);
+
+
+        // Combine the passed in list of Reserved VLANs with the Reserved Vlans in the Repository
+        List<ReservedVlanE> reservedVlansSoFar = getReservedVlans(start, end);
+        reservedVlansSoFar.addAll(rsvVlanList);
+
+        return pruneWithPipeAZ(topo, pipe, urns, reservedBwSoFar, reservedVlansSoFar);
+    }
+
+    /**
+     * Prune the topology based on Z->A bandwidth using a logical pipe. The pipe contains the requested bandwidth and VLANs (through
+     * querying the attached junctions/fixtures). The URNs are pulled from the URN repository.
+     * @param topo - The topology to be pruned.
+     * @param pipe - The logical pipe, from which the requested bandwidth and VLANs are retrieved.
+     * @param sched - The requested schedule, containing the start and end Dates
+     * @param rsvBwList - A list of Reserved Bandwidth to be considered when pruning (along with Bandwidth in the Repo)
+     * @param rsvVlanList - A list of Reserved VLAN tags to be considered when pruning (along with VLANs in the Repo)
+     * @return The topology with ineligible edges removed.
+     */
+    public Topology pruneWithPipeZA(Topology topo, RequestedVlanPipeE pipe, ScheduleSpecificationE sched, List<UrnE> urns,
+                                    List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList){
+        Date start = sched.getNotBefore();
+        Date end = sched.getNotAfter();
+
+        // Combine the passed in list of Reserved Bandwidth with the Reserved Bandwidth in the Repository
+        List<ReservedBandwidthE> reservedBwSoFar = getReservedBandwidth(start, end);
+        reservedBwSoFar.addAll(rsvBwList);
+
+
+        // Combine the passed in list of Reserved VLANs with the Reserved Vlans in the Repository
+        List<ReservedVlanE> reservedVlansSoFar = getReservedVlans(start, end);
+        reservedVlansSoFar.addAll(rsvVlanList);
+
+        return pruneWithPipeZA(topo, pipe, urns, reservedBwSoFar, reservedVlansSoFar);
+    }
+
+    /**
      * Prune the topology. Called by all outward facing methods to actually perform the pruning. Given the parameters,
      * filter out the edges where the terminating nodes (a/z) do not meet the bandwidth/vlan requirements.
      * @param topo - The topology to be pruned.
@@ -295,6 +440,45 @@ public class PruningService {
         // Also filters out all edges where either terminating node is not present in the URN map.
         Set<TopoEdge> availableEdges = topo.getEdges().stream()
                 .filter(e -> bwAvailable(e, azBw, zaBw, urnMap, resvBwMap))
+                .collect(Collectors.toSet());
+        // If this is an MPLS topology, or there are no edges left, just take the bandwidth-pruned set of edges.
+        // Otherwise, find all the remaining edges that can support the requested VLAN(s).
+        if(pruned.getLayer() == Layer.MPLS || pruned.getLayer() == null || availableEdges.isEmpty()){
+            pruned.setEdges(availableEdges);
+        }else {
+            pruned.setEdges(findEdgesWithAvailableVlans(availableEdges, urnMap, vlans, resvVlanMap));
+        }
+        return pruned;
+    }
+
+    /**
+     * Prune the topology for bandwidth in a single direction. Called by all outward facing methods to actually perform the pruning. Given the parameters,
+     * filter out the edges where the terminating nodes (a/z) do not meet the unidirectional bandwidth/vlan requirements.
+     * @param topo - The topology to be pruned.
+     * @param theBw - The required bandwidth that must be supported in one direction on each edge.
+     * @param vlans - Requested VLAN ranges. Any VLAN ID within those ranges can be accepted.
+     * @param urns - The URNs that will be matched to elements in the topology.
+     * @return The topology with ineligible edges removed.
+     */
+    private Topology pruneTopologyUni(Topology topo, Integer theBw, List<IntRange> vlans, List<UrnE> urns,
+                                   List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList){
+        //Build map of URN name to UrnE
+        Map<String, UrnE> urnMap = buildUrnMap(urns);
+
+        // Build map of URN to resvBw
+        Map<UrnE, List<ReservedBandwidthE>> resvBwMap = buildReservedBandwidthMap(rsvBwList);
+
+        // Build map of URN to resvVlan
+        Map<UrnE, List<ReservedVlanE>> resvVlanMap = buildReservedVlanMap(rsvVlanList);
+
+        // Copy the original topology's layer and set of vertices.
+        Topology pruned = new Topology();
+        pruned.setLayer(topo.getLayer());
+        pruned.setVertices(topo.getVertices());
+        // Filter out edges from the topology that do not have sufficient bandwidth available on both terminating nodes.
+        // Also filters out all edges where either terminating node is not present in the URN map.
+        Set<TopoEdge> availableEdges = topo.getEdges().stream()
+                .filter(e -> bwAvailableUni(e, theBw, urnMap, resvBwMap))
                 .collect(Collectors.toSet());
         // If this is an MPLS topology, or there are no edges left, just take the bandwidth-pruned set of edges.
         // Otherwise, find all the remaining edges that can support the requested VLAN(s).
@@ -418,6 +602,50 @@ public class PruningService {
 
     }
 
+    /**
+     * Evaluate an edge to determine if the nodes on either end of the edge support the requested
+     * unidriectional bandwidth. An edge will only fail the test if one or both URNs (corresponding to the nodes):
+     * (1) have valid reservable bandwidth fields, and (2) the URN(s) do not have sufficient available bandwidth
+     * available in the unique direction.
+     * @param edge - The edge to be evaluated.
+     * @param theBw - The requested bandwidth in one direction.
+     * @param urnMap - Map of URN name to UrnE object.
+     * @param resvBwMap - Map of UrnE objects to Lists of Reserved Bandwidth
+     * @return True if there is sufficient reservable bandwidth, False otherwise.
+     */
+    private boolean bwAvailableUni(TopoEdge edge, Integer theBw, Map<String, UrnE> urnMap, Map<UrnE, List<ReservedBandwidthE>> resvBwMap){
+
+        if(!edge.getA().getVertexType().equals(VertexType.PORT) || !edge.getZ().getVertexType().equals(VertexType.PORT))
+            return true;
+
+        // Get the reservable bandwidth for the URN matching the node on the "a" side of the edge.
+        ReservableBandwidthE aBandwidth = urnMap.get(edge.getA().getUrn()) != null ?
+                urnMap.get(edge.getA().getUrn()).getReservableBandwidth() : null;
+        // Get the reservable bandwidth for the URN matching the node on the "z" side of the edge.
+        ReservableBandwidthE zBandwidth = urnMap.get(edge.getZ().getUrn()) != null ?
+                urnMap.get(edge.getZ().getUrn()).getReservableBandwidth() : null;
+
+        // At least one of the two has reservable bandwidth, so check the valid nodes to determine
+        // If they have sufficient bandwidth In the case of a (device, port) edge, only the port must be checked.
+        // If it is a (port, port) edge, then both must be checked.
+        boolean aPasses = true;
+        boolean zPasses = true;
+
+        if(aBandwidth != null)
+        {
+            // Get a map of the available Ingress/Egress bandwidth for URN a
+            Map<String, Integer> aAvailBwMap = getBwAvailabilityForUrn(urnMap.get(edge.getA().getUrn()), aBandwidth, resvBwMap);
+            aPasses = aAvailBwMap.get("Egress") >= theBw;
+        }
+        if(zBandwidth != null)
+        {
+            // Get a map of the available Ingress/Egress bandwidth for URN z
+            Map<String, Integer> zAvailBwMap = getBwAvailabilityForUrn(urnMap.get(edge.getZ().getUrn()), zBandwidth, resvBwMap);
+            zPasses = zAvailBwMap.get("Ingress") >= theBw;
+        }
+
+        return aPasses && zPasses;
+    }
     /**
      * Determine how much Ingress/Egress bandwidth is still available at a URN. If the list of reserved bandwidths
      * is empty, then all of the Reservable Bandwidth at that URN is available. Otherwise,

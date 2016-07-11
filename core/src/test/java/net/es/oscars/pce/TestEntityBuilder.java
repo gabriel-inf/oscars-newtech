@@ -55,6 +55,31 @@ public class TestEntityBuilder {
         adjcyRepo.save(adjcyList);
     }
 
+    public void populateRepos(Collection<TopoVertex> vertices, Collection<TopoEdge> edges, Map<TopoVertex,TopoVertex> portToDeviceMap,  Map<TopoVertex, List<Integer>> portBWs){
+        log.info("Populating URN Repo and Adjcy Repo");
+
+        urnRepo.deleteAll();
+        adjcyRepo.deleteAll();
+
+        List<UrnE> urnList = new ArrayList<>();
+        List<UrnAdjcyE> adjcyList = new ArrayList<>();
+        for(TopoEdge edge : edges){
+            TopoVertex a = edge.getA();
+
+            TopoVertex z = edge.getZ();
+
+
+            UrnE aUrn = addUrnToList(a, urnList, portToDeviceMap, portBWs);
+
+            UrnE zUrn = addUrnToList(z, urnList, portToDeviceMap, portBWs);
+
+            UrnAdjcyE adj = buildUrnAdjcy(edge, aUrn, zUrn);
+            adjcyList.add(adj);
+        }
+        urnRepo.save(urnList);
+        adjcyRepo.save(adjcyList);
+    }
+
     public Topology buildTopology(List<String> nodeNames, Map<String, VertexType> typeMap,
                                   Map<String, List<String>> neighborMap, Layer layer, Long metric){
         Topology topo = new Topology();
@@ -203,6 +228,38 @@ public class TestEntityBuilder {
         return urn;
     }
 
+    public UrnE addUrnToList(TopoVertex v, List<UrnE> urnList, Map<TopoVertex,TopoVertex> portToDeviceMap, Map<TopoVertex, List<Integer>> portBWs){
+        UrnE urn = getFromUrnList(v.getUrn(), urnList);
+        if(urn == null){
+            Set<Layer> capabilities = new HashSet<>();
+            capabilities.add(Layer.INTERNAL);
+            capabilities.add(Layer.ETHERNET);
+
+            if (!v.getVertexType().equals(VertexType.PORT)) {
+                if(v.getVertexType().equals(VertexType.ROUTER)) {
+                    capabilities.add(Layer.MPLS);
+                    urn = buildUrn(v, null, capabilities);
+                }
+                else {
+                    urn = buildUrn(v, null, capabilities);
+                }
+            } else {
+                TopoVertex deviceVertex = portToDeviceMap.get(v);
+                VertexType deviceVertexType = deviceVertex.getVertexType();
+                List<Integer> portInEgBw = portBWs.get(v);
+                if(deviceVertexType.equals(VertexType.ROUTER)) {
+                    capabilities.add(Layer.MPLS);
+                    urn = buildUrn(v, determineDeviceModel(deviceVertexType), capabilities, portInEgBw.get(0), portInEgBw.get(1));
+                }
+                else {
+                    urn = buildUrn(v, determineDeviceModel(deviceVertexType), capabilities, portInEgBw.get(0), portInEgBw.get(1));
+                }
+            }
+            urnList.add(urn);
+        }
+        return urn;
+    }
+
     public UrnE buildUrn(TopoVertex vertex, DeviceModel parentModel, Set<Layer> capabilities){
         VertexType vertexType = vertex.getVertexType();
         UrnType urnType = determineUrnType(vertexType);
@@ -227,6 +284,35 @@ public class TestEntityBuilder {
         List<Integer> ceilings = Arrays.asList(9, 19, 29, 39);
         if(vertexType.equals(VertexType.PORT)){
             ReservableBandwidthE resvBw = buildReservableBandwidth(ingressBw, egressBw);
+            ReservableVlanE resvVlan = buildReservableVlan(buildIntRanges(floors, ceilings));
+            urn.setReservableBandwidth(resvBw);
+            urn.setReservableVlans(resvVlan);
+        }
+        return urn;
+    }
+
+    public UrnE buildUrn(TopoVertex vertex, DeviceModel parentModel, Set<Layer> capabilities, Integer inBW, Integer egBW){
+        VertexType vertexType = vertex.getVertexType();
+        UrnType urnType = determineUrnType(vertexType);
+        DeviceType deviceType = determineDeviceType(vertexType);
+        IfceType ifceType = determineIfceType(vertexType);
+        DeviceModel model = parentModel == null ? determineDeviceModel(vertexType) : parentModel;
+
+        UrnE urn =  UrnE.builder()
+                .urn(vertex.getUrn())
+                .urnType(urnType)
+                .deviceType(deviceType)
+                .ifceType(ifceType)
+                .deviceModel(model)
+                .reservablePssResources(new HashSet<>())
+                .valid(true)
+                .capabilities(capabilities)
+                .build();
+
+        List<Integer> floors = Arrays.asList(1, 10, 20, 30);
+        List<Integer> ceilings = Arrays.asList(9, 19, 29, 39);
+        if(vertexType.equals(VertexType.PORT)){
+            ReservableBandwidthE resvBw = buildReservableBandwidth(inBW, egBW);
             ReservableVlanE resvVlan = buildReservableVlan(buildIntRanges(floors, ceilings));
             urn.setReservableBandwidth(resvBw);
             urn.setReservableVlans(resvVlan);
@@ -336,8 +422,8 @@ public class TestEntityBuilder {
     public ReservableBandwidthE buildReservableBandwidth(Integer azMbps, Integer zaMbps){
         return ReservableBandwidthE.builder()
                 .bandwidth(Math.max(azMbps, zaMbps))
-                .egressBw(azMbps)
-                .ingressBw(zaMbps)
+                .egressBw(zaMbps)
+                .ingressBw(azMbps)
                 .build();
     }
 
