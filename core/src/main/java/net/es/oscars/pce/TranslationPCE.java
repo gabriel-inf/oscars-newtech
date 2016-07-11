@@ -149,23 +149,26 @@ public class TranslationPCE {
 
 
         // Get map of "Ingress" and "Egress" bandwidth availability
-        Map<UrnE, Map<String, Integer>> availBwMap = createBandwidthAvailabilityMap(reservedJunctions, reservedPipes, sched);
+        Map<UrnE, Map<String, Integer>> availBwMap;
+        availBwMap = createBandwidthAvailabilityMap(reservedJunctions, reservedPipes, sched);
 
         // Returns a mapping from topovertices (ports) to an "Ingress"/"Egress" map of the total Ingress/Egress
         // Requested bandwidth at that port across both the azERO and the zaERO
         Map<TopoVertex, Map<String, Integer>> requestedBandwidthMap = createRequestedBandwidthMap(azERO, zaERO, azMbps, zaMbps);
 
         // Confirm that there is sufficient bandwidth to meet the request (given what has been reserved so far)
-        if(this.palindromicEros(azERO, zaERO))      // Palindromic EROs -- consider both directions at each port for pruning
-        {
+        // Palindromic EROs -- evaluate both directions at each port - traffic flows both ways
+        if(this.palindromicEros(azERO, zaERO)){
             boolean sufficientBw = checkForSufficientBw(urnMap, azMbps, zaMbps, azERO, zaERO, availBwMap);
             if(!sufficientBw)
                 throw new PCEException("Insufficient Bandwidth to meet requested pipe" + reqPipe.toString() + " given previous reservations in flow");
         }
-        else  // Non-Palindromic EROs
-        {
-            boolean sufficientBwAZ = checkForSufficientBwUni(urnMap, reqPipe, azERO, zaERO, availBwMap, true);  // Consider A->Z ERO with bwAZ
-            boolean sufficientBwZA = checkForSufficientBwUni(urnMap, reqPipe, azERO, zaERO, availBwMap, false); // Consider Z->A ERO with bwZA
+        // Non-Palindromic EROs -- evaluate the ports in each ERO just for traffic in the AZ or ZA direction
+        else{
+            // Consider A->Z ERO with bwAZ
+            boolean sufficientBwAZ = checkForSufficientBwUni(urnMap, azMbps, azERO, availBwMap);
+            // Consider Z->A ERO with bwZA
+            boolean sufficientBwZA = checkForSufficientBwUni(urnMap, zaMbps, zaERO, availBwMap);
             if(!sufficientBwAZ)
             {
                 throw new PCEException("Insufficient Bandwidth to meet requested A->Z pipe" + reqPipe.toString() + " given previous reservations in flow");
@@ -265,6 +268,14 @@ public class TranslationPCE {
         }
     }
 
+    /**
+     * Build a map of the available bandwidth at each URN. For each URN, there is a map of "Ingress" and "Egress"
+     * bandwidth available. Only port URNs can be found in this map.
+     * @param reservedJunctions - A set of reserved junctions
+     * @param reservedPipes - A set of reserved pipes.
+     * @param sched - The requested schedule (used to retrieve reserved bandwidth from repository)
+     * @return A mapping of URN to Ingress/Egress bandwidth availability
+     */
     private Map<UrnE, Map<String, Integer>> createBandwidthAvailabilityMap(Set<ReservedVlanJunctionE> reservedJunctions,
                                                                            Set<ReservedEthPipeE> reservedPipes, ScheduleSpecificationE sched){
         // Retrieve all bandwidth reserved so far from pipes & junctions
@@ -286,38 +297,57 @@ public class TranslationPCE {
         return availBwMap;
     }
 
+    /**
+     * Build a map of the requested bandwidth at each port TopoVertex contained within the az and za EROs.
+     * @param azERO - The path in the AZ direction
+     * @param zaERO - The path in the ZA direction
+     * @param azMbps - The requested bandwidth in the AZ direction
+     * @param zaMbps - The requested bandwidth in the ZA direction
+     * @return A mapping from TopoVertex (ports only) to requested "Ingress" and "Egress" bandwidth
+     */
     private Map<TopoVertex, Map<String, Integer>> createRequestedBandwidthMap(List<TopoEdge> azERO, List<TopoEdge> zaERO,
                                                                              Integer azMbps, Integer zaMbps){
         // Map a port node to a map of "Ingress" and "Egress" requested bandwidth values
         Map<TopoVertex, Map<String, Integer>> requestedBandwidthMap = new HashMap<>();
 
-        for(TopoEdge azEdge : azERO)
-        {
-            TopoVertex nodeA = azEdge.getA();
-            TopoVertex nodeZ = azEdge.getZ();
-            updateRequestedBandwidthMap(nodeA, nodeZ, azMbps, requestedBandwidthMap);
+        // Iterate through the AZ edges, update the map for each port node found in the path
+        for(TopoEdge azEdge : azERO){
+            updateRequestedBandwidthMap(azEdge, azMbps, requestedBandwidthMap);
         }
 
-        for(TopoEdge zaEdge : zaERO)
-        {
-            TopoVertex nodeA = zaEdge.getA();
-            TopoVertex nodeZ = zaEdge.getZ();
-            updateRequestedBandwidthMap(nodeA, nodeZ, zaMbps, requestedBandwidthMap);
+        // Iterate through the ZA edges, update the map for each port node in the path
+        for(TopoEdge zaEdge : zaERO){
+            updateRequestedBandwidthMap(zaEdge, zaMbps, requestedBandwidthMap);
         }
 
         return requestedBandwidthMap;
     }
 
-    private void updateRequestedBandwidthMap(TopoVertex nodeA, TopoVertex nodeZ, Integer bandwidth,
+    /**
+     * Update the values in a mapping of port vertices to requested Ingress/Egress bandwidth.
+     * @param edge - An edge, with a vertex on the "A" side and on the "Z" side
+     * @param bandwidth - The requested bandwidth in one direction
+     * @param requestedBandwidthMap - The soon-to-be updated map of requested bandwidth per port
+     */
+    private void updateRequestedBandwidthMap(TopoEdge edge, Integer bandwidth,
                                              Map<TopoVertex, Map<String, Integer>> requestedBandwidthMap){
 
+        // Retrieve the "A" side of the edge
+        TopoVertex nodeA = edge.getA();
+        // Retrieve the "Z" side of the edge
+        TopoVertex nodeZ = edge.getZ();
+
+        // Add node A to the map if it is a port and it is not already in the map
         if(nodeA.getVertexType().equals(VertexType.PORT) && !requestedBandwidthMap.containsKey(nodeA)){
-            requestedBandwidthMap.put(nodeA, makeInitialRequestedPortBandwidthMap());
+            requestedBandwidthMap.put(nodeA, makeInitialBandwidthMap());
         }
+        // Add node Z to the map if it is a port and it is not already in the map
         if(nodeZ.getVertexType().equals(VertexType.PORT) && !requestedBandwidthMap.containsKey(nodeZ)){
-            requestedBandwidthMap.put(nodeZ, makeInitialRequestedPortBandwidthMap());
+            requestedBandwidthMap.put(nodeZ, makeInitialBandwidthMap());
         }
 
+
+        // All Cases: Add the requested bandwidth to the amount already stored in the map
         // Case 1: portA -> portZ -- portA = egress, portZ = ingress
         if(nodeA.getVertexType().equals(VertexType.PORT) && nodeZ.getVertexType().equals(VertexType.PORT))
         {
@@ -342,13 +372,23 @@ public class TranslationPCE {
 
     }
 
-    private Map<String, Integer> makeInitialRequestedPortBandwidthMap(){
+    /**
+     * Build an initial map of requested bandwidth in the Ingress and Egress directions
+     * @return A new map with 0 Ingress and Egress bandwidth.
+     */
+    private Map<String, Integer> makeInitialBandwidthMap(){
         Map<String, Integer> initialMap = new HashMap<>();
         initialMap.put("Ingress", 0);
         initialMap.put("Egress", 0);
         return initialMap;
     }
 
+    /**
+     * Confirm that the two EROs are identical
+     * @param azERO - A path in one direction
+     * @param zaERO - A path in another direction
+     * @return True if they are identical, False otherwise.
+     */
     private boolean palindromicEros(List<TopoEdge> azERO, List<TopoEdge> zaERO)
     {
         Set<TopoVertex> azVertices = new HashSet<>();
@@ -375,8 +415,14 @@ public class TranslationPCE {
                 return false;
         }
 
-        Set<TopoVertex> azPorts = azVertices.stream().filter(v -> v.getVertexType().equals(VertexType.PORT)).collect(Collectors.toSet());
-        Set<TopoVertex> zaPorts = zaVertices.stream().filter(v -> v.getVertexType().equals(VertexType.PORT)).collect(Collectors.toSet());
+        Set<TopoVertex> azPorts = azVertices
+                .stream()
+                .filter(v -> v.getVertexType().equals(VertexType.PORT))
+                .collect(Collectors.toSet());
+        Set<TopoVertex> zaPorts = zaVertices
+                .stream()
+                .filter(v -> v.getVertexType().equals(VertexType.PORT))
+                .collect(Collectors.toSet());
 
         if(azPorts.size() != zaPorts.size())
             return false;
@@ -450,8 +496,7 @@ public class TranslationPCE {
     }
 
     /**
-     * Examine all segments, confirm that the requested bandwidth can be supported given the bandwidth reservations
-     * passed in.
+     * Examine all AZ and ZA edges, confirm that the requested bandwidth can be supported given the available bandwidth.
      * @param urnMap - A map of URN string to URN objects
      * @param azERO - The path in the A->Z direction
      * @param zaERO - The path in the Z->A direction
@@ -471,48 +516,20 @@ public class TranslationPCE {
     }
 
     /**
-     * Examine all segments, confirm that the requested bandwidth can be supported given the bandwidth reservations
-     * passed in.
+     * Examine all edges, confirm that the requested bandwidth can be supported given the available bandwidth.
      * @param urnMap - A map of URN string to URN objects
-     * @param reqPipe - The requested pipe
+     * @param bwMbps - The requested bandwidth (in one direction)
      * @param availBwMap - A map of bandwidth availability
-     * @param azDirection - True if B/W check should be performed for A->Z direction, false if Z->A
      * @return True, if there is sufficient bandwidth across all edges. False, otherwise.
      */
-    private boolean checkForSufficientBwUni(Map<String, UrnE> urnMap, RequestedVlanPipeE reqPipe,
-                                            List<TopoEdge> azERO, List<TopoEdge> zaERO,
-                                            Map<UrnE, Map<String, Integer>> availBwMap, boolean azDirection){
-
-
-        // Get the requested unidirectional bandwidth
-        Integer bwMbps;
-        if(azDirection)
-        {
-            bwMbps = reqPipe.getAzMbps();
-
-            // For the AZ direction, fail the test if there is insufficient bandwidth
-            if(!sufficientBandwidthForEROUni(azERO, urnMap, availBwMap, bwMbps))
-            {
-                return false;
-            }
-        }
-        else
-        {
-            bwMbps = reqPipe.getZaMbps();
-
-            // For each ZA direction, fail the test if there is insufficient bandwidth
-            if(!sufficientBandwidthForEROUni(zaERO, urnMap, availBwMap, bwMbps))
-            {
-                return false;
-            }
-        }
-
-        return true;
+    private boolean checkForSufficientBwUni(Map<String, UrnE> urnMap, Integer bwMbps, List<TopoEdge> ERO,
+                                            Map<UrnE, Map<String, Integer>> availBwMap){
+        // For the AZ direction, fail the test if there is insufficient bandwidth
+        return sufficientBandwidthForEROUni(ERO, urnMap, availBwMap, bwMbps);
     }
 
     /**
-     * Given a particular segment, iterate through the edges and confirm that there is sufficient bandwidth
-     * available
+     * Given a particular list of edges, iterate and confirm that there is sufficient bandwidth available in both directions
      * @param ERO - A series of edges
      * @param urnMap - A mapping of URN strings to URN objects
      * @param availBwMap - A mapping of URN objects to lists of available bandwidth for that URN
@@ -553,15 +570,15 @@ public class TranslationPCE {
 
 
     /**
-     * Given a particular segment, iterate through the edges and confirm that there is sufficient bandwidth
-     * available in the specified (ingress/egress) direction
+     * Given a list of edges, confirm that there is sufficient bandwidth available in the one direction
      * @param ERO - A series of edges
      * @param urnMap - A mapping of URN strings to URN objects
      * @param availBwMap - A mapping of URN objects to lists of reserved bandwidth for that URN
      * @param bwMbps - The bandwidth in the specified direction
      * @return True, if the segment can support the requested bandwidth. False, otherwise.
      */
-    private boolean sufficientBandwidthForEROUni(List<TopoEdge> ERO, Map<String, UrnE> urnMap, Map<UrnE, Map<String, Integer>> availBwMap, Integer bwMbps)
+    private boolean sufficientBandwidthForEROUni(List<TopoEdge> ERO, Map<String, UrnE> urnMap,
+                                                 Map<UrnE, Map<String, Integer>> availBwMap, Integer bwMbps)
     {
         // For each edge in that list
         for(TopoEdge edge : ERO)
