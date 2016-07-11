@@ -1,8 +1,9 @@
-package net.es.oscars;
+package net.es.oscars.pce;
 
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.pce.TestEntityBuilder;
+import net.es.oscars.CoreUnitTestConfiguration;
 import net.es.oscars.pce.PCEException;
+import net.es.oscars.pce.TestEntityBuilder;
 import net.es.oscars.pce.TopPCE;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.ent.*;
@@ -23,16 +24,16 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Created by jeremy on 6/30/16.
+ * Created by jeremy on 7/8/16.
  *
- * Tests End-to-End correctness of the PCE modules
+ * Tests End-to-End correctness of the PCE modules with Asymmetric bandwidth requirements
  */
 
 @Slf4j
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(CoreUnitTestConfiguration.class)
 @Transactional
-public class TopPceTest
+public class AsymmTopPceTest
 {
     @Autowired
     private TopPCE topPCE;
@@ -45,11 +46,13 @@ public class TopPceTest
 
     private ScheduleSpecificationE requestedSched;
 
+    List<UrnE> urnList;
+    List<UrnAdjcyE> adjcyList;
 
     @Test
-    public void basicPceTest1()
+    public void asymmPceTest1()
     {
-        log.info("Initializing test: 'basicPceTest1'.");
+        log.info("Initializing test: 'asymmPceTest1'.");
 
         RequestedBlueprintE requestedBlueprint;
         Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
@@ -61,14 +64,14 @@ public class TopPceTest
         String srcDevice = "nodeK";
         Set<String> portNames = Stream.of("portA", "portZ").collect(Collectors.toSet());
         Integer azBW = 25;
-        Integer zaBW = 25;
+        Integer zaBW = 50;
         String vlan = "any";
 
         topologyBuilder.buildTopo1();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
         requestedBlueprint = testBuilder.buildRequest(srcDevice, portNames, azBW, zaBW, vlan);
 
-        log.info("Beginning test: 'basicPceTest1'.");
+        log.info("Beginning test: 'asymmPceTest1'.");
 
         try
         {
@@ -95,21 +98,33 @@ public class TopPceTest
             ReservedVlanFixtureE fix1 = iterF.next();
             ReservedVlanFixtureE fix2 = iterF.next();
 
-            assert(Objects.equals(fix1.getReservedBandwidth().getInBandwidth(), azBW));
-            assert(Objects.equals(fix2.getReservedBandwidth().getInBandwidth(), azBW));
+            int fix1InBW = fix1.getReservedBandwidth().getInBandwidth().intValue();
+            int fix1EgBW = fix1.getReservedBandwidth().getEgBandwidth().intValue();
+            int fix2InBW = fix2.getReservedBandwidth().getInBandwidth().intValue();
+            int fix2EgBW = fix2.getReservedBandwidth().getEgBandwidth().intValue();
+
+            log.info("fix1 URN: " + fix1.getIfceUrn().getUrn());
+            log.info("fix2 URN: " + fix2.getIfceUrn().getUrn());
+            log.info("fix1 In-B/W: " + fix1InBW);
+            log.info("fix1 Eg-B/W: " + fix1EgBW);
+            log.info("fix2 In-B/W: " + fix2InBW);
+            log.info("fix2 Eg-B/W: " + fix2EgBW);
+
+            assert((fix1InBW == azBW && fix1EgBW == zaBW) || (fix1EgBW == azBW && fix1InBW == zaBW));
+            assert((fix2InBW == azBW && fix2EgBW == zaBW) || (fix2EgBW == azBW && fix2InBW == zaBW));
 
             assert(fix1.getIfceUrn().getUrn().equals("portA") || fix1.getIfceUrn().getUrn().equals("portZ"));
             assert(fix2.getIfceUrn().getUrn().equals("portA") || fix2.getIfceUrn().getUrn().equals("portZ"));
         }
 
 
-        log.info("test 'basicPceTest1' passed.");
+        log.info("test 'asymmPceTest1' passed.");
     }
 
     @Test
-    public void basicPceTest2()
+    public void asymmPceTest2()
     {
-        log.info("Initializing test: 'basicPceTest2'.");
+        log.info("Initializing test: 'asymmPceTest2'.");
 
         RequestedBlueprintE requestedBlueprint;
         Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
@@ -123,7 +138,7 @@ public class TopPceTest
         String dstPort = "portZ";
         String dstDevice = "nodeM";
         Integer azBW = 25;
-        Integer zaBW = 25;
+        Integer zaBW = 50;
         Boolean palindrome = true;
         String vlan = "any";
 
@@ -131,7 +146,7 @@ public class TopPceTest
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
         requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
 
-        log.info("Beginning test: 'basicPceTest2'.");
+        log.info("Beginning test: 'asymmPceTest2'.");
 
         try
         {
@@ -145,7 +160,6 @@ public class TopPceTest
 
         Set<ReservedEthPipeE> allResPipes = reservedFlow.getPipes();
         Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
-        List<ReservedBandwidthE> allResBWs = new ArrayList<>();
 
         assert(allResPipes.size() == 0);
         assert(allResJunctions.size() == 3);
@@ -159,6 +173,13 @@ public class TopPceTest
                     Iterator<ReservedVlanFixtureE> jIter = j.getFixtures().iterator();
                     ReservedVlanFixtureE fixA = jIter.next();
                     ReservedVlanFixtureE fixZ = jIter.next();
+                    int fixAInBW = fixA.getReservedBandwidth().getInBandwidth().intValue();
+                    int fixAEgBW = fixA.getReservedBandwidth().getEgBandwidth().intValue();
+                    int fixZInBW = fixZ.getReservedBandwidth().getInBandwidth().intValue();
+                    int fixZEgBW = fixZ.getReservedBandwidth().getEgBandwidth().intValue();
+
+                    assert((fixAInBW == azBW && fixAEgBW == zaBW) || (fixAEgBW == azBW && fixAInBW == zaBW));
+                    assert((fixZInBW == azBW && fixZEgBW == zaBW) || (fixZEgBW == azBW && fixZInBW == zaBW));
 
                     if(j.getDeviceUrn().getUrn().equals("nodeL"))
                     {
@@ -172,24 +193,15 @@ public class TopPceTest
                     {
                         assert(fixA.getIfceUrn().getUrn().equals("portA") && fixZ.getIfceUrn().getUrn().equals("nodeP:1") || fixZ.getIfceUrn().getUrn().equals("portA") && fixA.getIfceUrn().getUrn().equals("nodeP:1"));
                     }
-
-                    allResBWs.add(j.getFixtures().iterator().next().getReservedBandwidth());
-                    allResBWs.add(j.getFixtures().iterator().next().getReservedBandwidth());
                 });
 
-        allResBWs.stream()
-                .forEach(bw -> {
-                    assert(bw.getInBandwidth().equals(bw.getEgBandwidth()));
-                    assert(bw.getInBandwidth().equals(azBW));
-                });
-
-        log.info("test 'basicPceTest2' passed.");
+        log.info("test 'asymmPceTest2' passed.");
     }
 
     @Test
-    public void basicPceTest3()
+    public void asymmPceTest3()
     {
-        log.info("Initializing test: 'basicPceTest3'.");
+        log.info("Initializing test: 'asymmPceTest3'.");
 
         RequestedBlueprintE requestedBlueprint;
         Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
@@ -203,7 +215,7 @@ public class TopPceTest
         String dstPort = "portZ";
         String dstDevice = "nodeQ";
         Integer azBW = 25;
-        Integer zaBW = 25;
+        Integer zaBW = 50;
         Boolean palindrome = true;
         String vlan = "any";
 
@@ -211,7 +223,7 @@ public class TopPceTest
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
         requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
 
-        log.info("Beginning test: 'basicPceTest3'.");
+        log.info("Beginning test: 'asymmPceTest3'.");
 
         try
         {
@@ -233,14 +245,18 @@ public class TopPceTest
         Iterator<ReservedVlanFixtureE> iterF = onlyJunc.getFixtures().iterator();
         ReservedVlanFixtureE fixJ1 = iterF.next();
         ReservedVlanFixtureE fixJ2 = iterF.next();
+        int fixJ1InBW = fixJ1.getReservedBandwidth().getInBandwidth().intValue();
+        int fixJ1EgBW = fixJ1.getReservedBandwidth().getEgBandwidth().intValue();
+        int fixJ2InBW = fixJ2.getReservedBandwidth().getInBandwidth().intValue();
+        int fixJ2EgBW = fixJ2.getReservedBandwidth().getEgBandwidth().intValue();
+
+        assert((fixJ1InBW == azBW && fixJ1EgBW == zaBW) || (fixJ1EgBW == azBW && fixJ1InBW == zaBW));
+        assert((fixJ2InBW == azBW && fixJ2EgBW == zaBW) || (fixJ2EgBW == azBW && fixJ2InBW == zaBW));
 
         assert(onlyJunc.getDeviceUrn().getUrn().equals("nodeK"));
 
         assert(fixJ1.getIfceUrn().getUrn().equals("portA") || fixJ1.getIfceUrn().getUrn().equals("nodeK:1"));
         assert(fixJ2.getIfceUrn().getUrn().equals("portA") || fixJ2.getIfceUrn().getUrn().equals("nodeK:1"));
-
-        assert(fixJ1.getReservedBandwidth().getInBandwidth().equals(azBW));
-        assert(fixJ2.getReservedBandwidth().getInBandwidth().equals(azBW));
 
         ReservedEthPipeE onlyPipe = allResPipes.iterator().next();
 
@@ -248,17 +264,18 @@ public class TopPceTest
         ReservedVlanJunctionE juncZ = onlyPipe.getZJunction();
         ReservedVlanFixtureE fixA = juncA.getFixtures().iterator().next();
         ReservedVlanFixtureE fixZ = juncZ.getFixtures().iterator().next();
+        int fixAInBW = fixA.getReservedBandwidth().getInBandwidth().intValue();
+        int fixAEgBW = fixA.getReservedBandwidth().getEgBandwidth().intValue();
+        int fixZInBW = fixZ.getReservedBandwidth().getInBandwidth().intValue();
+        int fixZEgBW = fixZ.getReservedBandwidth().getEgBandwidth().intValue();
+
+        assert((fixAInBW == azBW && fixAEgBW == zaBW) || (fixAEgBW == azBW && fixAInBW == zaBW));
+        assert((fixZInBW == azBW && fixZEgBW == zaBW) || (fixZEgBW == azBW && fixZInBW == zaBW));
 
         assert(juncA.getDeviceUrn().getUrn().equals("nodeP"));
         assert(juncZ.getDeviceUrn().getUrn().equals("nodeQ"));
         assert(fixA.getIfceUrn().getUrn().equals("nodeP:1"));
         assert(fixZ.getIfceUrn().getUrn().equals("portZ"));
-
-
-        assert(fixA.getReservedBandwidth().getInBandwidth().equals(azBW));
-        assert(fixZ.getReservedBandwidth().getInBandwidth().equals(azBW));
-        assert(fixA.getReservedBandwidth().getEgBandwidth().equals(azBW));
-        assert(fixZ.getReservedBandwidth().getEgBandwidth().equals(azBW));
 
         List<String> azERO = onlyPipe.getAzERO();
         List<String> zaERO = onlyPipe.getZaERO();
@@ -278,14 +295,14 @@ public class TopPceTest
         assert(actualAzERO.equals(expectedAzERO));
         assert(actualZaERO.equals(expectedZaERO));
 
-        log.info("test 'basicPceTest3' passed.");
+        log.info("test 'asymmPceTest3' passed.");
     }
 
     @Test
-    public void basicPceTest4()
+    public void asymmPceTest4()
     {
         // Two possible shortest routes here!
-        log.info("Initializing test: 'basicPceTest4'.");
+        log.info("Initializing test: 'asymmPceTest4'.");
 
         RequestedBlueprintE requestedBlueprint;
         Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
@@ -299,7 +316,7 @@ public class TopPceTest
         String dstPort = "portZ";
         String dstDevice = "nodeQ";
         Integer azBW = 25;
-        Integer zaBW = 25;
+        Integer zaBW = 50;
         Boolean palindrome = true;
         String vlan = "any";
 
@@ -307,7 +324,7 @@ public class TopPceTest
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
         requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
 
-        log.info("Beginning test: 'basicPceTest4'.");
+        log.info("Beginning test: 'asymmPceTest4'.");
 
         try
         {
@@ -333,9 +350,13 @@ public class TopPceTest
             Iterator<ReservedVlanFixtureE> iterF = oneJunc.getFixtures().iterator();
             ReservedVlanFixtureE fix1 = iterF.next();
             ReservedVlanFixtureE fix2 = iterF.next();
+            int fix1InBW = fix1.getReservedBandwidth().getInBandwidth().intValue();
+            int fix1EgBW = fix1.getReservedBandwidth().getEgBandwidth().intValue();
+            int fix2InBW = fix2.getReservedBandwidth().getInBandwidth().intValue();
+            int fix2EgBW = fix2.getReservedBandwidth().getEgBandwidth().intValue();
 
-            assert(fix1.getReservedBandwidth().getInBandwidth() == azBW);
-            assert(fix2.getReservedBandwidth().getInBandwidth() == azBW);
+            assert((fix1InBW == azBW && fix1EgBW == zaBW) || (fix1EgBW == azBW && fix1InBW == zaBW));
+            assert((fix2InBW == azBW && fix2EgBW == zaBW) || (fix2EgBW == azBW && fix2InBW == zaBW));
 
             if(oneJunc.getDeviceUrn().getUrn().equals("nodeK"))
             {
@@ -367,16 +388,18 @@ public class TopPceTest
         ReservedVlanJunctionE juncZ = onlyPipe.getZJunction();
         ReservedVlanFixtureE fixA = juncA.getFixtures().iterator().next();
         ReservedVlanFixtureE fixZ = juncZ.getFixtures().iterator().next();
+        int fixAInBW = fixA.getReservedBandwidth().getInBandwidth().intValue();
+        int fixAEgBW = fixA.getReservedBandwidth().getEgBandwidth().intValue();
+        int fixZInBW = fixZ.getReservedBandwidth().getInBandwidth().intValue();
+        int fixZEgBW = fixZ.getReservedBandwidth().getEgBandwidth().intValue();
+
+        assert((fixAInBW == azBW && fixAEgBW == zaBW) || (fixAEgBW == azBW && fixAInBW == zaBW));
+        assert((fixZInBW == azBW && fixZEgBW == zaBW) || (fixZEgBW == azBW && fixZInBW == zaBW));
 
         assert(juncA.getDeviceUrn().getUrn().equals("nodeP") || juncA.getDeviceUrn().getUrn().equals("nodeR"));
         assert(juncZ.getDeviceUrn().getUrn().equals("nodeQ"));
         assert(fixA.getIfceUrn().getUrn().equals("nodeP:1") || fixA.getIfceUrn().getUrn().equals("nodeR:1"));
         assert(fixZ.getIfceUrn().getUrn().equals("portZ"));
-
-        assert(fixA.getReservedBandwidth().getInBandwidth().equals(azBW));
-        assert(fixZ.getReservedBandwidth().getInBandwidth().equals(azBW));
-        assert(fixA.getReservedBandwidth().getEgBandwidth().equals(azBW));
-        assert(fixZ.getReservedBandwidth().getEgBandwidth().equals(azBW));
 
         List<String> azERO = onlyPipe.getAzERO();
         List<String> zaERO = onlyPipe.getZaERO();
@@ -398,13 +421,13 @@ public class TopPceTest
         assert(actualAzERO.equals(expectedAzERO1) || actualAzERO.equals(expectedAzERO2));
         assert(actualZaERO.equals(expectedZaERO1) || actualZaERO.equals(expectedZaERO2));
 
-        log.info("test 'basicPceTest4' passed.");
+        log.info("test 'asymmPceTest4' passed.");
     }
 
     @Test
-    public void basicPceTest5()
+    public void asymmPceTest5()
     {
-        log.info("Initializing test: 'basicPceTest5'.");
+        log.info("Initializing test: 'asymmPceTest5'.");
 
         RequestedBlueprintE requestedBlueprint;
         Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
@@ -418,7 +441,7 @@ public class TopPceTest
         String dstPort = "portZ";
         String dstDevice = "nodeS";
         Integer azBW = 25;
-        Integer zaBW = 25;
+        Integer zaBW = 50;
         Boolean palindrome = true;
         String vlan = "any";
 
@@ -426,7 +449,7 @@ public class TopPceTest
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
         requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
 
-        log.info("Beginning test: 'basicPceTest5'.");
+        log.info("Beginning test: 'asymmPceTest5'.");
 
         try
         {
@@ -452,9 +475,13 @@ public class TopPceTest
             Iterator<ReservedVlanFixtureE> iterF = oneJunc.getFixtures().iterator();
             ReservedVlanFixtureE fix1 = iterF.next();
             ReservedVlanFixtureE fix2 = iterF.next();
+            int fix1InBW = fix1.getReservedBandwidth().getInBandwidth().intValue();
+            int fix1EgBW = fix1.getReservedBandwidth().getEgBandwidth().intValue();
+            int fix2InBW = fix2.getReservedBandwidth().getInBandwidth().intValue();
+            int fix2EgBW = fix2.getReservedBandwidth().getEgBandwidth().intValue();
 
-            assert(fix1.getReservedBandwidth().getInBandwidth().equals(azBW));
-            assert(fix2.getReservedBandwidth().getInBandwidth().equals(azBW));
+            assert((fix1InBW == azBW && fix1EgBW == zaBW) || (fix1EgBW == azBW && fix1InBW == zaBW));
+            assert((fix2InBW == azBW && fix2EgBW == zaBW) || (fix2EgBW == azBW && fix2InBW == zaBW));
 
             if(oneJunc.getDeviceUrn().getUrn().equals("nodeK"))
             {
@@ -475,16 +502,18 @@ public class TopPceTest
         ReservedVlanJunctionE juncZ = onlyPipe.getZJunction();
         ReservedVlanFixtureE fixA = juncA.getFixtures().iterator().next();
         ReservedVlanFixtureE fixZ = juncZ.getFixtures().iterator().next();
+        int fixAInBW = fixA.getReservedBandwidth().getInBandwidth().intValue();
+        int fixAEgBW = fixA.getReservedBandwidth().getEgBandwidth().intValue();
+        int fixZInBW = fixZ.getReservedBandwidth().getInBandwidth().intValue();
+        int fixZEgBW = fixZ.getReservedBandwidth().getEgBandwidth().intValue();
+
+        assert((fixAInBW == azBW && fixAEgBW == zaBW) || (fixAEgBW == azBW && fixAInBW == zaBW));
+        assert((fixZInBW == azBW && fixZEgBW == zaBW) || (fixZEgBW == azBW && fixZInBW == zaBW));
 
         assert(juncA.getDeviceUrn().getUrn().equals("nodeP"));
         assert(juncZ.getDeviceUrn().getUrn().equals("nodeQ"));
         assert(fixA.getIfceUrn().getUrn().equals("nodeP:1"));
         assert(fixZ.getIfceUrn().getUrn().equals("nodeQ:3"));
-
-        assert(fixA.getReservedBandwidth().getInBandwidth().equals(azBW));
-        assert(fixZ.getReservedBandwidth().getInBandwidth().equals(azBW));
-        assert(fixA.getReservedBandwidth().getEgBandwidth().equals(azBW));
-        assert(fixZ.getReservedBandwidth().getEgBandwidth().equals(azBW));
 
         List<String> azERO = onlyPipe.getAzERO();
         List<String> zaERO = onlyPipe.getZaERO();
@@ -504,13 +533,13 @@ public class TopPceTest
         assert(actualAzERO.equals(expectedAzERO));
         assert(actualZaERO.equals(expectedZaERO));
 
-        log.info("test 'basicPceTest5' passed.");
+        log.info("test 'asymmPceTest5' passed.");
     }
 
     @Test
-    public void basicPceTest6()
+    public void asymmPceTest6()
     {
-        log.info("Initializing test: 'basicPceTest6'.");
+        log.info("Initializing test: 'asymmPceTest6'.");
 
         RequestedBlueprintE requestedBlueprint;
         Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
@@ -522,14 +551,14 @@ public class TopPceTest
         String srcDevice = "nodeP";
         Set<String> portNames = Stream.of("portA", "portZ").collect(Collectors.toSet());
         Integer azBW = 25;
-        Integer zaBW = 25;
+        Integer zaBW = 50;
         String vlan = "any";
 
         topologyBuilder.buildTopo6();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
         requestedBlueprint = testBuilder.buildRequest(srcDevice, portNames, azBW, zaBW, vlan);
 
-        log.info("Beginning test: 'basicPceTest6'.");
+        log.info("Beginning test: 'asymmPceTest6'.");
 
         try
         {
@@ -555,21 +584,25 @@ public class TopPceTest
             Iterator<ReservedVlanFixtureE> iterF = oneJunc.getFixtures().iterator();
             ReservedVlanFixtureE fix1 = iterF.next();
             ReservedVlanFixtureE fix2 = iterF.next();
+            int fix1InBW = fix1.getReservedBandwidth().getInBandwidth().intValue();
+            int fix1EgBW = fix1.getReservedBandwidth().getEgBandwidth().intValue();
+            int fix2InBW = fix2.getReservedBandwidth().getInBandwidth().intValue();
+            int fix2EgBW = fix2.getReservedBandwidth().getEgBandwidth().intValue();
 
-            assert(fix1.getReservedBandwidth().getInBandwidth().equals(azBW));
-            assert(fix2.getReservedBandwidth().getInBandwidth().equals(azBW));
+            assert((fix1InBW == azBW && fix1EgBW == zaBW) || (fix1EgBW == azBW && fix1InBW == zaBW));
+            assert((fix2InBW == azBW && fix2EgBW == zaBW) || (fix2EgBW == azBW && fix2InBW == zaBW));
 
             assert(fix1.getIfceUrn().getUrn().equals("portA") || fix1.getIfceUrn().getUrn().equals("portZ"));
             assert(fix2.getIfceUrn().getUrn().equals("portA") || fix2.getIfceUrn().getUrn().equals("portZ"));
         }
 
-        log.info("test 'basicPceTest6' passed.");
+        log.info("test 'asymmPceTest6' passed.");
     }
 
     @Test
-    public void basicPceTest7()
+    public void asymmPceTest7()
     {
-        log.info("Initializing test: 'basicPceTest7'.");
+        log.info("Initializing test: 'asymmPceTest7'.");
 
         RequestedBlueprintE requestedBlueprint;
         Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
@@ -583,7 +616,7 @@ public class TopPceTest
         String dstPort = "portZ";
         String dstDevice = "nodeL";
         Integer azBW = 25;
-        Integer zaBW = 25;
+        Integer zaBW = 50;
         Boolean palindrome = true;
         String vlan = "any";
 
@@ -591,7 +624,7 @@ public class TopPceTest
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
         requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
 
-        log.info("Beginning test: 'basicPceTest7'.");
+        log.info("Beginning test: 'asymmPceTest7'.");
 
         try
         {
@@ -617,9 +650,13 @@ public class TopPceTest
             Iterator<ReservedVlanFixtureE> iterF = oneJunc.getFixtures().iterator();
             ReservedVlanFixtureE fix1 = iterF.next();
             ReservedVlanFixtureE fix2 = iterF.next();
+            int fix1InBW = fix1.getReservedBandwidth().getInBandwidth().intValue();
+            int fix1EgBW = fix1.getReservedBandwidth().getEgBandwidth().intValue();
+            int fix2InBW = fix2.getReservedBandwidth().getInBandwidth().intValue();
+            int fix2EgBW = fix2.getReservedBandwidth().getEgBandwidth().intValue();
 
-            assert(fix1.getReservedBandwidth().getInBandwidth().equals(azBW));
-            assert(fix2.getReservedBandwidth().getInBandwidth().equals(azBW));
+            assert((fix1InBW == azBW && fix1EgBW == zaBW) || (fix1EgBW == azBW && fix1InBW == zaBW));
+            assert((fix2InBW == azBW && fix2EgBW == zaBW) || (fix2EgBW == azBW && fix2InBW == zaBW));
 
             if(oneJunc.getDeviceUrn().getUrn().equals("nodeK"))
             {
@@ -633,13 +670,13 @@ public class TopPceTest
             }
         }
 
-        log.info("test 'basicPceTest7' passed.");
+        log.info("test 'asymmPceTest7' passed.");
     }
 
     @Test
-    public void basicPceTest8()
+    public void asymmPceTest8()
     {
-        log.info("Initializing test: 'basicPceTest8'.");
+        log.info("Initializing test: 'asymmPceTest8'.");
 
         RequestedBlueprintE requestedBlueprint;
         Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
@@ -653,7 +690,7 @@ public class TopPceTest
         String dstPort = "portZ";
         String dstDevice = "nodeQ";
         Integer azBW = 25;
-        Integer zaBW = 25;
+        Integer zaBW = 50;
         Boolean palindrome = true;
         String vlan = "any";
 
@@ -661,7 +698,7 @@ public class TopPceTest
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
         requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
 
-        log.info("Beginning test: 'basicPceTest8'.");
+        log.info("Beginning test: 'asymmPceTest8'.");
 
         try
         {
@@ -686,17 +723,19 @@ public class TopPceTest
         ReservedVlanJunctionE juncZ = onlyPipe.getZJunction();
         ReservedVlanFixtureE fixA = juncA.getFixtures().iterator().next();
         ReservedVlanFixtureE fixZ = juncZ.getFixtures().iterator().next();
+        int fixAInBW = fixA.getReservedBandwidth().getInBandwidth().intValue();
+        int fixAEgBW = fixA.getReservedBandwidth().getEgBandwidth().intValue();
+        int fixZInBW = fixZ.getReservedBandwidth().getInBandwidth().intValue();
+        int fixZEgBW = fixZ.getReservedBandwidth().getEgBandwidth().intValue();
+
+        assert((fixAInBW == azBW && fixAEgBW == zaBW) || (fixAEgBW == azBW && fixAInBW == zaBW));
+        assert((fixZInBW == azBW && fixZEgBW == zaBW) || (fixZEgBW == azBW && fixZInBW == zaBW));
 
         assert(juncA.getDeviceUrn().getUrn().equals("nodeP"));
         assert(juncZ.getDeviceUrn().getUrn().equals("nodeQ"));
         assert(fixA.getIfceUrn().getUrn().equals("portA"));
         assert(fixZ.getIfceUrn().getUrn().equals("portZ"));
-
-        assert(fixA.getReservedBandwidth().getInBandwidth().equals(azBW));
-        assert(fixZ.getReservedBandwidth().getInBandwidth().equals(azBW));
-        assert(fixA.getReservedBandwidth().getEgBandwidth().equals(azBW));
-        assert(fixZ.getReservedBandwidth().getEgBandwidth().equals(azBW));
-
+        
         List<String> azERO = onlyPipe.getAzERO();
         List<String> zaERO = onlyPipe.getZaERO();
 
@@ -715,13 +754,13 @@ public class TopPceTest
         assert(actualAzERO.equals(expectedAzERO));
         assert(actualZaERO.equals(expectedZaERO));
 
-        log.info("test 'basicPceTest8' passed.");
+        log.info("test 'asymmPceTest8' passed.");
     }
 
     @Test
-    public void basicPceTest9()
+    public void asymmPceTest9()
     {
-        log.info("Initializing test: 'basicPceTest9'.");
+        log.info("Initializing test: 'asymmPceTest9'.");
 
         RequestedBlueprintE requestedBlueprint;
         Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
@@ -735,7 +774,7 @@ public class TopPceTest
         String dstPort = "portZ";
         String dstDevice = "nodeP";
         Integer azBW = 25;
-        Integer zaBW = 25;
+        Integer zaBW = 50;
         Boolean palindrome = true;
         String vlan = "any";
 
@@ -743,7 +782,7 @@ public class TopPceTest
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
         requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
 
-        log.info("Beginning test: 'basicPceTest9'.");
+        log.info("Beginning test: 'asymmPceTest9'.");
 
         try
         {
@@ -769,9 +808,13 @@ public class TopPceTest
             Iterator<ReservedVlanFixtureE> iterF = oneJunc.getFixtures().iterator();
             ReservedVlanFixtureE fix1 = iterF.next();
             ReservedVlanFixtureE fix2 = iterF.next();
+            int fix1InBW = fix1.getReservedBandwidth().getInBandwidth().intValue();
+            int fix1EgBW = fix1.getReservedBandwidth().getEgBandwidth().intValue();
+            int fix2InBW = fix2.getReservedBandwidth().getInBandwidth().intValue();
+            int fix2EgBW = fix2.getReservedBandwidth().getEgBandwidth().intValue();
 
-            assert(fix1.getReservedBandwidth().getInBandwidth().equals(azBW));
-            assert(fix2.getReservedBandwidth().getInBandwidth().equals(azBW));
+            assert((fix1InBW == azBW && fix1EgBW == zaBW) || (fix1EgBW == azBW && fix1InBW == zaBW));
+            assert((fix2InBW == azBW && fix2EgBW == zaBW) || (fix2EgBW == azBW && fix2InBW == zaBW));
 
             if(oneJunc.getDeviceUrn().getUrn().equals("nodeK"))
             {
@@ -785,13 +828,13 @@ public class TopPceTest
             }
         }
 
-        log.info("test 'basicPceTest9' passed.");
+        log.info("test 'asymmPceTest9' passed.");
     }
 
     @Test
-    public void basicPceTest10()
+    public void asymmPceTest10()
     {
-        log.info("Initializing test: 'basicPceTest10'.");
+        log.info("Initializing test: 'asymmPceTest10'.");
 
         RequestedBlueprintE requestedBlueprint;
         Optional<ReservedBlueprintE > reservedBlueprint = Optional.empty();
@@ -805,7 +848,7 @@ public class TopPceTest
         String dstPort = "portZ";
         String dstDevice = "nodeM";
         Integer azBW = 25;
-        Integer zaBW = 25;
+        Integer zaBW = 50;
         Boolean palindrome = true;
         String vlan = "any";
 
@@ -813,7 +856,7 @@ public class TopPceTest
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
         requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
 
-        log.info("Beginning test: 'basicPceTest10'.");
+        log.info("Beginning test: 'asymmPceTest10'.");
 
         try
         {
@@ -839,9 +882,13 @@ public class TopPceTest
             Iterator<ReservedVlanFixtureE> iterF = oneJunc.getFixtures().iterator();
             ReservedVlanFixtureE fix1 = iterF.next();
             ReservedVlanFixtureE fix2 = iterF.next();
+            int fix1InBW = fix1.getReservedBandwidth().getInBandwidth().intValue();
+            int fix1EgBW = fix1.getReservedBandwidth().getEgBandwidth().intValue();
+            int fix2InBW = fix2.getReservedBandwidth().getInBandwidth().intValue();
+            int fix2EgBW = fix2.getReservedBandwidth().getEgBandwidth().intValue();
 
-            assert(fix1.getReservedBandwidth().getInBandwidth().equals(azBW));
-            assert(fix2.getReservedBandwidth().getInBandwidth().equals(azBW));
+            assert((fix1InBW == azBW && fix1EgBW == zaBW) || (fix1EgBW == azBW && fix1InBW == zaBW));
+            assert((fix2InBW == azBW && fix2EgBW == zaBW) || (fix2EgBW == azBW && fix2InBW == zaBW));
 
             if(oneJunc.getDeviceUrn().getUrn().equals("nodeK"))
             {
@@ -860,13 +907,13 @@ public class TopPceTest
             }
         }
 
-        log.info("test 'basicPceTest10' passed.");
+        log.info("test 'asymmPceTest10' passed.");
     }
 
     @Test
-    public void basicPceTest11()
+    public void asymmPceTest11()
     {
-        log.info("Initializing test: 'basicPceTest11'.");
+        log.info("Initializing test: 'asymmPceTest11'.");
 
         RequestedBlueprintE requestedBlueprint;
         Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
@@ -880,7 +927,7 @@ public class TopPceTest
         String dstPort = "portZ";
         String dstDevice = "nodeR";
         Integer azBW = 25;
-        Integer zaBW = 25;
+        Integer zaBW = 50;
         Boolean palindrome = true;
         String vlan = "any";
 
@@ -888,7 +935,7 @@ public class TopPceTest
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
         requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
 
-        log.info("Beginning test: 'basicPceTest11'.");
+        log.info("Beginning test: 'asymmPceTest11'.");
 
         try
         {
@@ -913,16 +960,18 @@ public class TopPceTest
         ReservedVlanJunctionE juncZ = onlyPipe.getZJunction();
         ReservedVlanFixtureE fixA = juncA.getFixtures().iterator().next();
         ReservedVlanFixtureE fixZ = juncZ.getFixtures().iterator().next();
+        int fixAInBW = fixA.getReservedBandwidth().getInBandwidth().intValue();
+        int fixAEgBW = fixA.getReservedBandwidth().getEgBandwidth().intValue();
+        int fixZInBW = fixZ.getReservedBandwidth().getInBandwidth().intValue();
+        int fixZEgBW = fixZ.getReservedBandwidth().getEgBandwidth().intValue();
+
+        assert((fixAInBW == azBW && fixAEgBW == zaBW) || (fixAEgBW == azBW && fixAInBW == zaBW));
+        assert((fixZInBW == azBW && fixZEgBW == zaBW) || (fixZEgBW == azBW && fixZInBW == zaBW));
 
         assert(juncA.getDeviceUrn().getUrn().equals("nodeP"));
         assert(juncZ.getDeviceUrn().getUrn().equals("nodeR"));
         assert(fixA.getIfceUrn().getUrn().equals("portA"));
         assert(fixZ.getIfceUrn().getUrn().equals("portZ"));
-
-        assert(fixA.getReservedBandwidth().getInBandwidth().equals(azBW));
-        assert(fixZ.getReservedBandwidth().getInBandwidth().equals(azBW));
-        assert(fixA.getReservedBandwidth().getEgBandwidth().equals(azBW));
-        assert(fixZ.getReservedBandwidth().getEgBandwidth().equals(azBW));
 
         List<String> azERO = onlyPipe.getAzERO();
         List<String> zaERO = onlyPipe.getZaERO();
@@ -942,13 +991,13 @@ public class TopPceTest
         assert(actualAzERO.equals(expectedAzERO));
         assert(actualZaERO.equals(expectedZaERO));
 
-        log.info("test 'basicPceTest11' passed.");
+        log.info("test 'asymmPceTest11' passed.");
     }
 
     @Test
-    public void basicPceTest12()
+    public void asymmPceTest12()
     {
-        log.info("Initializing test: 'basicPceTest12'.");
+        log.info("Initializing test: 'asymmPceTest12'.");
 
         RequestedBlueprintE requestedBlueprint;
         Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
@@ -962,7 +1011,7 @@ public class TopPceTest
         String dstPort = "portZ";
         String dstDevice = "nodeQ";
         Integer azBW = 25;
-        Integer zaBW = 25;
+        Integer zaBW = 50;
         Boolean palindrome = true;
         String vlan = "any";
 
@@ -970,7 +1019,7 @@ public class TopPceTest
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
         requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
 
-        log.info("Beginning test: 'basicPceTest12'.");
+        log.info("Beginning test: 'asymmPceTest12'.");
 
         try
         {
@@ -996,9 +1045,13 @@ public class TopPceTest
             Iterator<ReservedVlanFixtureE> iterF = oneJunc.getFixtures().iterator();
             ReservedVlanFixtureE fix1 = iterF.next();
             ReservedVlanFixtureE fix2 = iterF.next();
+            int fix1InBW = fix1.getReservedBandwidth().getInBandwidth().intValue();
+            int fix1EgBW = fix1.getReservedBandwidth().getEgBandwidth().intValue();
+            int fix2InBW = fix2.getReservedBandwidth().getInBandwidth().intValue();
+            int fix2EgBW = fix2.getReservedBandwidth().getEgBandwidth().intValue();
 
-            assert(fix1.getReservedBandwidth().getInBandwidth().equals(azBW));
-            assert(fix2.getReservedBandwidth().getInBandwidth().equals(azBW));
+            assert((fix1InBW == azBW && fix1EgBW == zaBW) || (fix1EgBW == azBW && fix1InBW == zaBW));
+            assert((fix2InBW == azBW && fix2EgBW == zaBW) || (fix2EgBW == azBW && fix2InBW == zaBW));
 
             if(oneJunc.getDeviceUrn().getUrn().equals("nodeK"))
             {
@@ -1017,6 +1070,6 @@ public class TopPceTest
             }
         }
 
-        log.info("test 'basicPceTest12' passed.");
+        log.info("test 'asymmPceTest12' passed.");
     }
 }

@@ -1,6 +1,7 @@
-package net.es.oscars;
+package net.es.oscars.servicetopo;
 
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.CoreUnitTestConfiguration;
 import net.es.oscars.dto.pss.EthFixtureType;
 import net.es.oscars.dto.pss.EthJunctionType;
 import net.es.oscars.dto.pss.EthPipeType;

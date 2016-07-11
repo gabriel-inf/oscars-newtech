@@ -1,6 +1,7 @@
-package net.es.oscars;
+package net.es.oscars.pce;
 
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.CoreUnitTestConfiguration;
 import net.es.oscars.topo.TopologyBuilder;
 import net.es.oscars.topo.beans.TopoEdge;
 import net.es.oscars.topo.beans.TopoVertex;
