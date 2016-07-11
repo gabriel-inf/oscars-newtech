@@ -217,7 +217,7 @@ public class PCEAssistant {
                 urnMap, deviceModels, azMbps, zaMbps, vlanId, sched);
 
         ReservedVlanJunctionE egressJunction = createJunctionAndFixtures(egressDevice, egressPorts,
-                urnMap, deviceModels, azMbps, zaMbps, vlanId, sched);
+                urnMap, deviceModels, zaMbps, azMbps, vlanId, sched);
 
         // Make the ERO for AZ
         List<String> azStrings = azVertices.stream().map(TopoVertex::getUrn).collect(Collectors.toList());
@@ -324,11 +324,11 @@ public class PCEAssistant {
     }
 
 
-    public ReservedBandwidthE createReservedBandwidth(UrnE urn, Integer azMbps, Integer zaMbps, ScheduleSpecificationE sched){
+    public ReservedBandwidthE createReservedBandwidth(UrnE urn, Integer inMbps, Integer egMbps, ScheduleSpecificationE sched){
         return ReservedBandwidthE.builder()
                 .urn(urn)
-                .egBandwidth(azMbps)
-                .inBandwidth(zaMbps)
+                .inBandwidth(inMbps)
+                .egBandwidth(egMbps)
                 .beginning(sched.getNotBefore().toInstant())
                 .ending(sched.getNotAfter().toInstant())
                 .build();

@@ -403,15 +403,11 @@ public class ServiceLayerTopology
         Topology prunedMPLSTopoZA = pruningService.pruneWithPipeZA(mplsLayerTopo, requestedVlanPipe, requestedSchedule, urnList, rsvBwList, rsvVlanList);
         log.info("step 1 COMPLETE.");
 
-        //log.info("MPLS Link Set Size: " + mplsLayerTopo.getEdges().size());
-        //log.info("Pruned MPLS (A->Z) Link Set Size: " + prunedMPLSTopoAZ.getEdges().size());
-        //log.info("Pruned MPLS (Z->A) Link Set Size: " + prunedMPLSTopoZA.getEdges().size());
-
         //for(TopoEdge oneEdge : prunedMPLSTopoAZ.getEdges())
-        //    log.info("A-Z Edge: (" + oneEdge.getA().getUrn() + "," + oneEdge.getZ().getUrn() + ")");
+        //    log.info("A-Z Edge: (" + oneEdge.getA().getUrn() + "," + oneEdge.getZ().getUrn() + "), Metric=" + oneEdge.getMetric());
 
         //for(TopoEdge oneEdge : prunedMPLSTopoZA.getEdges())
-        //    log.info("Z-A Edge: (" + oneEdge.getA().getUrn() + "," + oneEdge.getZ().getUrn() + ")");
+        //    log.info("Z-A Edge: (" + oneEdge.getA().getUrn() + "," + oneEdge.getZ().getUrn() + "), Metric=" + oneEdge.getMetric());
 
         for(LogicalEdge oneLogicalLink : logicalLinks)
         {
