@@ -5,7 +5,6 @@ import net.es.oscars.dto.pss.EthFixtureType;
 import net.es.oscars.dto.pss.EthJunctionType;
 import net.es.oscars.dto.pss.EthPipeType;
 import net.es.oscars.dto.resv.ResourceType;
-import net.es.oscars.pce.TopoAssistant;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.topo.beans.TopoEdge;
 import net.es.oscars.topo.beans.TopoVertex;
@@ -135,15 +134,28 @@ public class PCEAssistant {
                 ports.add(portOneVertex);
                 ports.add(portTwoVertex);
 
+                Set<ReservedVlanFixtureE> fixtures = new HashSet<>();
+                ReservedVlanFixtureE portOneFixture = createFixtureAndResources(
+                        urnMap.get(portOneVertex.getUrn()), deviceModels.get(deviceVertex.getUrn()),
+                                azMbps, zaMbps, vlanId, sched);
+                ReservedVlanFixtureE portTwoFixture = createFixtureAndResources(
+                        urnMap.get(portTwoVertex.getUrn()), deviceModels.get(deviceVertex.getUrn()),
+                        zaMbps, azMbps, vlanId, sched);
+                fixtures.add(portOneFixture);
+                fixtures.add(portTwoFixture);
+
                 // Add in requested ports for this junction if they are not already included
-                Set<TopoVertex> extraPortsA = getExtraRequestedPorts(reqJunctionA, deviceVertex, ports);
-                Set<TopoVertex> extraPortsZ = getExtraRequestedPorts(reqJunctionZ, deviceVertex, ports);
-                ports.addAll(extraPortsA);
-                ports.addAll(extraPortsZ);
+                Set<ReservedVlanFixtureE> extraFixturesA = getExtraRequestedPorts(reqJunctionA, deviceVertex, ports,
+                        urnMap, deviceModels, vlanId, sched);
+                Set<ReservedVlanFixtureE> extraFixturesZ = getExtraRequestedPorts(reqJunctionZ, deviceVertex, ports,
+                        urnMap, deviceModels, vlanId, sched);
+                fixtures.addAll(extraFixturesA);
+                fixtures.addAll(extraFixturesZ);
 
                 // Build the junction
-                ReservedVlanJunctionE rsvJunction = createJunctionAndFixtures(deviceVertex, ports, urnMap,
-                        deviceModels, azMbps, zaMbps, vlanId, sched);
+                UrnE deviceUrn = urnMap.get(deviceVertex.getUrn());
+                ReservedVlanJunctionE rsvJunction = createReservedJunction(deviceUrn, new HashSet<>(), fixtures,
+                        decideJunctionType(deviceModels.get(deviceUrn.getUrn())));
 
                 // Add it to the set of reserved junctions
                 rsvJunctions.add(rsvJunction);
@@ -178,11 +190,14 @@ public class PCEAssistant {
         ingressPorts.add(ingressPort);
 
         // Get extra ports that were requested for ingress junction (if applicable)
-        Set<TopoVertex> extraIngressPortsA = getExtraRequestedPorts(reqJunctionA, ingressDevice, ingressPorts);
-        Set<TopoVertex> extraIngressPortsZ = getExtraRequestedPorts(reqJunctionZ, ingressDevice, ingressPorts);
+        /*
+        Set<TopoVertex> extraIngressPortsA = getExtraRequestedPorts(reqJunctionA, ingressDevice, ingressPorts,
+                urnMap, deviceModels, vlanId, sched);
+        Set<TopoVertex> extraIngressPortsZ = getExtraRequestedPorts(reqJunctionZ, ingressDevice, ingressPorts, urnMap, deviceModels);
         ingressPorts.addAll(extraIngressPortsA);
         ingressPorts.addAll(extraIngressPortsZ);
 
+        */
         DeviceModel ingressModel = deviceModels.get(ingressDevice.getUrn());
 
         // Egress from the pipe
@@ -195,10 +210,12 @@ public class PCEAssistant {
         egressPorts.add(egressPort);
 
         // Get extra ports that were requested for egress junction (if applicable)
-        Set<TopoVertex> extraEgressPortsA = getExtraRequestedPorts(reqJunctionA, egressDevice, egressPorts);
-        Set<TopoVertex> extraEgressPortsZ = getExtraRequestedPorts(reqJunctionZ, egressDevice, egressPorts);
+        /*
+        Set<TopoVertex> extraEgressPortsA = getExtraRequestedPorts(reqJunctionA, egressDevice, egressPorts, urnMap, deviceModels);
+        Set<TopoVertex> extraEgressPortsZ = getExtraRequestedPorts(reqJunctionZ, egressDevice, egressPorts, urnMap, deviceModels);
         egressPorts.addAll(extraEgressPortsA);
         egressPorts.addAll(extraEgressPortsZ);
+        */
 
         DeviceModel egressModel = deviceModels.get(egressDevice.getUrn());
 
@@ -244,18 +261,24 @@ public class PCEAssistant {
      * @param reqJunction - The requested junction, containing the requested fixtures
      * @param deviceVertex - The device corresponding to that junction
      * @param ports - The input list of ports (at that device)
-     * @return All requested ports that are not already in the input list of ports.
+     * @param urnMap
+     *@param deviceModels @return All requested ports that are not already in the input list of ports.
      */
-    public Set<TopoVertex> getExtraRequestedPorts(RequestedVlanJunctionE reqJunction, TopoVertex deviceVertex,
-                                                   Set<TopoVertex> ports) {
-        Set<TopoVertex> extraPorts = new HashSet<>();
+    public Set<ReservedVlanFixtureE> getExtraRequestedPorts(RequestedVlanJunctionE reqJunction, TopoVertex deviceVertex,
+                                                  Set<TopoVertex> ports, Map<String, UrnE> urnMap,
+                                                            Map<String, DeviceModel> deviceModels, Integer vlanId,
+                                                            ScheduleSpecificationE sched) throws PSSException{
+        Set<ReservedVlanFixtureE> extraPorts = new HashSet<>();
         if(reqJunction.getDeviceUrn().getUrn().equals(deviceVertex.getUrn())){
-            extraPorts = reqJunction.getFixtures()
-                    .stream()
-                    .map(fx -> fx.getPortUrn().getUrn())
-                    .map(s -> TopoVertex.builder().urn(s).vertexType(VertexType.PORT).build())
-                    .filter(v -> !ports.contains(v))
-                    .collect(Collectors.toSet());
+            for(RequestedVlanFixtureE fix : reqJunction.getFixtures()){
+                TopoVertex fixVertex = TopoVertex.builder().urn(fix.getPortUrn().getUrn()).vertexType(VertexType.PORT).build();
+                DeviceModel model = deviceModels.get(deviceVertex.getUrn());
+                if(!ports.contains(fixVertex)){
+                    ReservedVlanFixtureE resFix = createFixtureAndResources(fix.getPortUrn(), model,
+                            fix.getInMbps(), fix.getEgMbps(), vlanId, sched);
+                    extraPorts.add(resFix);
+                }
+            }
         }
         return extraPorts;
     }
