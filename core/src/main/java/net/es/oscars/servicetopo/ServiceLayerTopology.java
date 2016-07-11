@@ -555,6 +555,8 @@ public class ServiceLayerTopology
 
             oneLogicalLink.setCorrespondingAZTopoEdges(pathAZ);
             oneLogicalLink.setCorrespondingZATopoEdges(pathZA);
+
+            oneLogicalLink.setCorrespondingTopoEdges(pathAZ);   // Palindromic calling functions expect correspondingTopoEdges to be set. Pathfinding is done in the forward direction, so we use that value here.
         }
 
         // Step 6: If any logical links cannot be built, remove them from the Service-Layer Topology for this request.
