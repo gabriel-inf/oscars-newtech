@@ -17,6 +17,7 @@ import net.es.oscars.topo.ent.ReservableBandwidthE;
 import net.es.oscars.topo.ent.ReservableVlanE;
 import net.es.oscars.topo.ent.UrnE;
 import net.es.oscars.topo.enums.Layer;
+import net.es.oscars.topo.enums.PalindromicType;
 import net.es.oscars.topo.enums.UrnType;
 import net.es.oscars.topo.enums.VertexType;
 import org.junit.Test;
@@ -1419,7 +1420,7 @@ public class ServiceLayerEROTest
         bwPipe.setZaMbps(20);
         bwPipe.setAJunction(aJunc);
         bwPipe.setZJunction(zJunc);
-        bwPipe.setEroPalindromic(false);
+        bwPipe.setEroPalindromic(PalindromicType.NON_PALINDROME);
         bwPipe.setPipeType(EthPipeType.REQUESTED);
 
         requestedPipe = bwPipe;
@@ -1483,7 +1484,7 @@ public class ServiceLayerEROTest
         bwPipe.setZaMbps(20);
         bwPipe.setAJunction(aJunc);
         bwPipe.setZJunction(zJunc);
-        bwPipe.setEroPalindromic(false);
+        bwPipe.setEroPalindromic(PalindromicType.NON_PALINDROME);
         bwPipe.setPipeType(EthPipeType.REQUESTED);
 
         requestedPipe = bwPipe;
@@ -1547,7 +1548,7 @@ public class ServiceLayerEROTest
         bwPipe.setZaMbps(20);
         bwPipe.setAJunction(aJunc);
         bwPipe.setZJunction(zJunc);
-        bwPipe.setEroPalindromic(false);
+        bwPipe.setEroPalindromic(PalindromicType.NON_PALINDROME);
         bwPipe.setPipeType(EthPipeType.REQUESTED);
 
         requestedPipe = bwPipe;
@@ -1611,7 +1612,7 @@ public class ServiceLayerEROTest
         bwPipe.setZaMbps(20);
         bwPipe.setAJunction(aJunc);
         bwPipe.setZJunction(zJunc);
-        bwPipe.setEroPalindromic(false);
+        bwPipe.setEroPalindromic(PalindromicType.NON_PALINDROME);
         bwPipe.setPipeType(EthPipeType.REQUESTED);
 
         requestedPipe = bwPipe;

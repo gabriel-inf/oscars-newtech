@@ -2,7 +2,7 @@ package net.es.oscars;
 
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.topo.dao.UrnRepository;
-import net.es.oscars.topo.enums.Layer;
+import net.es.oscars.topo.enums.*;
 import net.es.oscars.pce.PCEException;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.dto.pss.EthFixtureType;
@@ -11,9 +11,6 @@ import net.es.oscars.dto.pss.EthPipeType;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.resv.dao.SpecificationRepository;
 import net.es.oscars.topo.ent.UrnE;
-import net.es.oscars.topo.enums.DeviceModel;
-import net.es.oscars.topo.enums.DeviceType;
-import net.es.oscars.topo.enums.UrnType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -146,7 +143,7 @@ public class SpecPopTest {
                 .zJunction(zj)
                 .azMbps(1000)
                 .zaMbps(1000)
-                .eroPalindromic(true)
+                .eroPalindromic(PalindromicType.PALINDROME)
                 .pipeType(EthPipeType.REQUESTED)
                 .build();
 

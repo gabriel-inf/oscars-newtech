@@ -32,31 +32,33 @@ import java.util.stream.Collectors;
 public class ServiceLayerTopology
 {
     @Autowired
-    PruningService pruningService;
+    private PruningService pruningService;
 
     @Autowired
-    DijkstraPCE dijkstraPCE;
+    private DijkstraPCE dijkstraPCE;
 
-    Set<TopoVertex> serviceLayerDevices;
-    Set<TopoVertex> serviceLayerPorts;
-    Set<TopoEdge> serviceLayerLinks;
+    private Set<TopoVertex> serviceLayerDevices;    // ETHERNET and VIRTUAL devices
+    private Set<TopoVertex> serviceLayerPorts;      // ETHERNET and VIRTUAL ports
+    private Set<TopoEdge> serviceLayerLinks;        // ETHERNET and LOGICAL edges
 
-    Set<TopoVertex> mplsLayerDevices;
-    Set<TopoVertex> mplsLayerPorts;
-    Set<TopoEdge> mplsLayerLinks;
+    private Set<TopoVertex> mplsLayerDevices;       // MPLS devices
+    private Set<TopoVertex> mplsLayerPorts;         // MPLS ports
+    private Set<TopoEdge> mplsLayerLinks;           // MPLS edges
 
-    Set<TopoVertex> nonAdjacentPorts;
-    Set<LogicalEdge> logicalLinks;
-    Set<LogicalEdge> llBackup;
+    private Set<TopoVertex> nonAdjacentPorts;       // Service-layer ports which connect to MPLS-layer ports
+    private Set<LogicalEdge> logicalLinks;          // Abstraction of path between two nonadjacent ports
+    private Set<LogicalEdge> llBackup;              // Copy of logicalLinks, used for resetting, etc.
 
-    Set<TopoVertex> logicalSrcNodes = null;
-    Set<TopoVertex> logicalDstNodes = null;
+    // Set by calling object - Refer to NonPalindromicPCE for details //
+    private Topology ethernetTopology;
+    private Topology mplsTopology;
+    private Topology internalTopology;
 
-    Topology ethernetTopology;
-    Topology mplsTopology;
-    Topology internalTopology;
-
-    // This method should be called whenever the physical topology is updated
+    /**
+     * Managing method in charge of constructing the multi-layer service-topology.
+     * Divides physical topology into two layers: MPLS-only layer, and Service-layer:
+     * MPLS-only layer contains: all MPLS devices, adjacent ports, INTERNAL links between MPLSdevices-MPLSports, links between MPLS-ports.
+     */
     public void createMultilayerTopology()
     {
         serviceLayerDevices = new HashSet<>();
@@ -75,7 +77,9 @@ public class ServiceLayerTopology
         buildLogicalLayerTopo();
     }
 
-
+    /**
+     * Parses physical ethernet and internal topologies to construct service-layer topology.
+     */
     private void buildServiceLayerTopo()
     {
         Set<TopoVertex> ethernetVertices = ethernetTopology.getVertices();
@@ -111,7 +115,9 @@ public class ServiceLayerTopology
         serviceLayerLinks.addAll(allInternalEthernetEdges);
     }
 
-
+    /**
+     * Parses physical mpls and internal topologies to construct MPLS-layer topology.
+     */
     private void buildMplsLayerTopo()
     {
         Set<TopoVertex> mplsVertices = mplsTopology.getVertices();
@@ -140,14 +146,16 @@ public class ServiceLayerTopology
                 .collect(Collectors.toSet());
 
 
-        //Compose MPLS Mesh Layer
+        // Compose MPLS Mesh Layer
         mplsLayerDevices.addAll(allMplsDevices);
         mplsLayerPorts.addAll(allMplsPorts);
         mplsLayerLinks.addAll(allMplsEdges);
         mplsLayerLinks.addAll(allInternalMPLSEdges);
     }
 
-
+    /**
+     * Adds zero-weight logical links between every pair of NonAdjacent Service-layer ports
+     */
     private void buildLogicalLayerTopo()
     {
         identifyNonAdjacentSLPorts();
@@ -155,7 +163,9 @@ public class ServiceLayerTopology
     }
 
 
-    //Identify switch ports which have links connected to router ports. All of these srvice-layer ports will have logical edges to each other.
+    /**
+     * Identifies which Service-layer ports connect to MPLS-layer ports.
+     */
     private void identifyNonAdjacentSLPorts()
     {
         nonAdjacentPorts = new HashSet<>();
@@ -186,7 +196,9 @@ public class ServiceLayerTopology
     }
 
 
-    //Establish a logical edge between non-adjacent service-layer ports. Weights will be assigned later.
+    /**
+     * Establishes a zero-weight LOGICAL edge on the Service-layer topology between every pair of NonAdjacent Service-layer ports.
+     */
     private void buildLogicalLayerLinks()
     {
         logicalLinks = new HashSet<>();
@@ -219,6 +231,18 @@ public class ServiceLayerTopology
     }
 
     // Determines whether to use symmetric or asymmetric logical link computation
+    /**
+     *
+     */
+    /**
+     * Managing method - Determines whether to perform logical edge weight computation Symmetrically or Asymmetrically.
+     * This method may no longer be necessary, since the Symmetric subroutine was too naive to work in general cases.
+     * @param requestedVlanPipe - Request pipe
+     * @param requestedSchedule - Request schedule
+     * @param urnList - List of URNs in the network; Necessary for passing to PruningService methods
+     * @param rsvBwList - List of currently reserved Bandwidth elements (during request schedule)
+     * @param rsvVlanList - List of currently reserved VLAN elements (during request schedule)
+     */
     public void calculateLogicalLinkWeights(RequestedVlanPipeE requestedVlanPipe, ScheduleSpecificationE requestedSchedule, List<UrnE> urnList, List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList)
     {
         //if(requestedVlanPipe.getAzMbps() == requestedVlanPipe.getZaMbps())
@@ -227,7 +251,16 @@ public class ServiceLayerTopology
             this.calculateLogicalLinkWeightsAsymmetric(requestedVlanPipe, requestedSchedule, urnList, rsvBwList, rsvVlanList);
     }
 
-    //Calls Pruner and Dijkstra to compute shortest MPLS-layer paths, calculates weights of those paths, and maps them to the appropriate logical links
+
+    /**
+     * Calls PruningService and DijkstraPCE methods to compute shortest MPLS-layer paths, calculates the combined weight of each path, and maps them to the appropriate logical links.
+     * This method may no longer be worth keeping since it was too naive to handle a number of general cases.
+     * @param requestedVlanPipe - Request pipe
+     * @param requestedSchedule - Request schedule
+     * @param urnList - List of URNs in the network; Necessary for passing to PruningService methods
+     * @param rsvBwList - List of currently reserved Bandwidth elements (during request schedule)
+     * @param rsvVlanList - List of currently reserved VLAN elements (during request schedule)
+     */
     private void calculateLogicalLinkWeightsSymmetric(RequestedVlanPipeE requestedVlanPipe, ScheduleSpecificationE requestedSchedule, List<UrnE> urnList, List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList)
     {
         log.info("Performing Symmetric routing on MPLS-Layer topology to assign weights to Service-Layer logical links.");
@@ -386,7 +419,20 @@ public class ServiceLayerTopology
         logicalLinks.removeAll(logicalLinksToRemoveFromServiceLayer);
     }
 
-    //Calls Pruner and Dijkstra to compute shortest MPLS-layer paths, calculates weights of those paths, and maps them to the appropriate logical links
+    /**
+     * Calls PruningService and DijkstraPCE methods to compute shortest MPLS-layer paths, calculates the combined weight of each path, and maps them to the appropriate logical links.
+     * This method has tentatively replacd its Symmetric counterpart and provides the same coverage (with more complexity).
+     * Each logical link is considered for pruned MPLS-layer topologies given requested A->Z b/w, and reuqested Z->A b/w.
+     * If a link's beginning/terminating ports do not support both of those requested b/w values, the logical link is removed from the network.
+     * The DijkstraPCE is called to perform shortest-path routing given both of the requested b/w values.
+     * If A->Z b/w =/= Z->A b/w, then the physical MPLS-layer EROs will differ.
+     * Weights are set according to sum of weights of the underlying MPLS-layer edges.
+     * @param requestedVlanPipe - Request pipe
+     * @param requestedSchedule - Request schedule
+     * @param urnList - List of URNs in the network; Necessary for passing to PruningService methods
+     * @param rsvBwList - List of currently reserved Bandwidth elements (during request schedule)
+     * @param rsvVlanList - List of currently reserved VLAN elements (during request schedule)
+     */
     private void calculateLogicalLinkWeightsAsymmetric(RequestedVlanPipeE requestedVlanPipe, ScheduleSpecificationE requestedSchedule, List<UrnE> urnList, List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList)
     {
         log.info("Performing Asymmetric routing on MPLS-Layer topology to assign weights to Service-Layer logical links.");
@@ -402,12 +448,6 @@ public class ServiceLayerTopology
         Topology prunedMPLSTopoAZ = pruningService.pruneWithPipeAZ(mplsLayerTopo, requestedVlanPipe, requestedSchedule, urnList, rsvBwList, rsvVlanList);
         Topology prunedMPLSTopoZA = pruningService.pruneWithPipeZA(mplsLayerTopo, requestedVlanPipe, requestedSchedule, urnList, rsvBwList, rsvVlanList);
         log.info("step 1 COMPLETE.");
-
-        //for(TopoEdge oneEdge : prunedMPLSTopoAZ.getEdges())
-        //    log.info("A-Z Edge: (" + oneEdge.getA().getUrn() + "," + oneEdge.getZ().getUrn() + "), Metric=" + oneEdge.getMetric());
-
-        //for(TopoEdge oneEdge : prunedMPLSTopoZA.getEdges())
-        //    log.info("Z-A Edge: (" + oneEdge.getA().getUrn() + "," + oneEdge.getZ().getUrn() + "), Metric=" + oneEdge.getMetric());
 
         for(LogicalEdge oneLogicalLink : logicalLinks)
         {
@@ -559,7 +599,11 @@ public class ServiceLayerTopology
         logicalLinks.removeAll(logicalLinksToRemoveFromServiceLayer);
     }
 
-    // Doesn't destroy logical links, but resets cost metrics to 0, and clears the correspondingTopoEdges lists. This needs to be done, for example, prior to every call to calculateLogicalLinkWeights().
+
+    /**
+     * Doesn't destroy logical links, but resets cost metrics to 0, and clears the corresponding phyical TopoEdges (MPLS-ERO) lists.
+     * This needs to be done, for example, prior to every call to calculateLogicalLinkWeights().
+     */
     public void resetLogicalLinks()
     {
         llBackup.stream()
