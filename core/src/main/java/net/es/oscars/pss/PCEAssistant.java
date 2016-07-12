@@ -4,7 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.pss.EthFixtureType;
 import net.es.oscars.dto.pss.EthJunctionType;
 import net.es.oscars.dto.pss.EthPipeType;
+import net.es.oscars.dto.pss.MplsPipeType;
 import net.es.oscars.dto.resv.ResourceType;
+import net.es.oscars.dto.rsrc.ReservableBandwidth;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.topo.beans.TopoEdge;
 import net.es.oscars.topo.beans.TopoVertex;
@@ -94,228 +96,30 @@ public class PCEAssistant {
 
     }
 
-    /**
-     * Build a junction for each device in the input set of vertices. Each junction has two fixtures (made from the vertex
-     * prior to the device, and the vertex after the device).
-     * @param vertices - A list of vertices, comprised of ports and devices.
-     * @param urnMap - A map of URN string to URN object
-     * @param deviceModels - A map of URN string to device model
-     * @param azMbps - Requested AZ bandwidth
-     * @param zaMbps - Requested ZA bandwidth
-     * @param vlanId - The requested VLAN ID
-     * @param sched - The requested schedule (start/end date)
-     * @param reqJunctionA - Requested junction A
-     * @param reqJunctionZ - Requested junction Z
-     * @return A list of reserved VLAN junctions, one per device.
-     * @throws PSSException
-     */
-    public List<ReservedVlanJunctionE> createJunctions(List<TopoVertex> vertices, Map<String, UrnE> urnMap,
-                                                        Map<String, DeviceModel> deviceModels, Integer azMbps, Integer zaMbps,
-                                                        Integer vlanId, ScheduleSpecificationE sched,
-                                                       RequestedVlanJunctionE reqJunctionA,
-                                                       RequestedVlanJunctionE reqJunctionZ) throws PSSException{
-        assert(vertices.size() % 3 == 0);
 
-
-        List<ReservedVlanJunctionE> rsvJunctions = new ArrayList<>();
-        // Maintain a sublist of vertices, that together can be made into junctions
-        // Sublist is reset after a junction is made
-        List<TopoVertex> junctionBuilder = new ArrayList<>();
-        for(TopoVertex vertice : vertices) {
-            junctionBuilder.add(vertice);
-            // Build a junction
-            if (junctionBuilder.size() == 3) {
-                // Retrieve the two port vertices and the device vertex
-                TopoVertex portOneVertex = junctionBuilder.get(0);
-                TopoVertex deviceVertex = junctionBuilder.get(1);
-                TopoVertex portTwoVertex = junctionBuilder.get(2);
-
-                Set<TopoVertex> ports = new HashSet<>();
-                ports.add(portOneVertex);
-                ports.add(portTwoVertex);
-
-                Set<ReservedVlanFixtureE> fixtures = new HashSet<>();
-                ReservedVlanFixtureE portOneFixture = createFixtureAndResources(
-                        urnMap.get(portOneVertex.getUrn()), deviceModels.get(deviceVertex.getUrn()),
-                                azMbps, zaMbps, vlanId, sched);
-                ReservedVlanFixtureE portTwoFixture = createFixtureAndResources(
-                        urnMap.get(portTwoVertex.getUrn()), deviceModels.get(deviceVertex.getUrn()),
-                        zaMbps, azMbps, vlanId, sched);
-                fixtures.add(portOneFixture);
-                fixtures.add(portTwoFixture);
-
-                // Add in requested ports for this junction if they are not already included
-                Set<ReservedVlanFixtureE> extraFixturesA = getExtraRequestedPorts(reqJunctionA, deviceVertex, ports,
-                        urnMap, deviceModels, vlanId, sched);
-                Set<ReservedVlanFixtureE> extraFixturesZ = getExtraRequestedPorts(reqJunctionZ, deviceVertex, ports,
-                        urnMap, deviceModels, vlanId, sched);
-                fixtures.addAll(extraFixturesA);
-                fixtures.addAll(extraFixturesZ);
-
-                // Build the junction
-                UrnE deviceUrn = urnMap.get(deviceVertex.getUrn());
-                ReservedVlanJunctionE rsvJunction = createReservedJunction(deviceUrn, new HashSet<>(), fixtures,
-                        decideJunctionType(deviceModels.get(deviceUrn.getUrn())));
-
-                // Add it to the set of reserved junctions
-                rsvJunctions.add(rsvJunction);
-
-                // Reset the current list of vertices, so the next junction can be collected together
-                junctionBuilder = new ArrayList<>();
-            }
-        }
-        return rsvJunctions;
+    public ReservedVlanJunctionE createJunctionAndFixtures(TopoVertex device, Map<String, UrnE> urnMap,
+                                                            Map<String, DeviceModel> deviceModels,
+                                                           Set<RequestedVlanJunctionE> requestedJunctions,
+                                                           Integer vlanId, ScheduleSpecificationE sched) throws PSSException {
+        UrnE aUrn = urnMap.get(device.getUrn());
+        DeviceModel model = deviceModels.get(aUrn.getUrn());
+        EthFixtureType fixType = decideFixtureType(model);
+        Set<ReservedVlanFixtureE> reservedVlanFixtures = requestedJunctions
+                .stream()
+                .filter(reqJunction -> reqJunction.getDeviceUrn().equals(aUrn))
+                .map(RequestedVlanJunctionE::getFixtures)
+                .flatMap(Collection::stream)
+                .map(reqFix -> createFixtureAndResources(reqFix.getPortUrn(), fixType,
+                        reqFix.getInMbps(), reqFix.getEgMbps(), vlanId, sched))
+                .collect(Collectors.toSet());
+        return createReservedJunction(aUrn, new HashSet<>(),
+                reservedVlanFixtures, decideJunctionType(model));
     }
 
-
-    public ReservedEthPipeE createPipe(List<TopoVertex> azVertices, List<TopoVertex> zaVertices,
-                                        Map<String, DeviceModel> deviceModels, Map<String, UrnE> urnMap, Integer azMbps,
-                                        Integer zaMbps, Integer vlanId, ScheduleSpecificationE sched,
-                                       RequestedVlanJunctionE reqJunctionA, RequestedVlanJunctionE reqJunctionZ)
-            throws PSSException{
-        // Pull out the first and last element of each vertex list
-        // This will get you the starting/ending port
-        // Also retrieve the starting and ending device (but do not remove them from the list, they are included in
-        // the AZ and ZA EROs).
-        // Build a junction for the starting and ending device
-        // Note: Junctions only need to be made for the AZ path, not both
-
-        // Ingress into the pipe
-        // Get and remove the ingress port
-        TopoVertex ingressPort = azVertices.remove(0);
-        // Get (and do not remove) the ingress device
-        TopoVertex ingressDevice = azVertices.get(0);
-
-        Set<TopoVertex> ingressPorts = new HashSet<>();
-        ingressPorts.add(ingressPort);
-
-        // Get extra ports that were requested for ingress junction (if applicable)
-        /*
-        Set<TopoVertex> extraIngressPortsA = getExtraRequestedPorts(reqJunctionA, ingressDevice, ingressPorts,
-                urnMap, deviceModels, vlanId, sched);
-        Set<TopoVertex> extraIngressPortsZ = getExtraRequestedPorts(reqJunctionZ, ingressDevice, ingressPorts, urnMap, deviceModels);
-        ingressPorts.addAll(extraIngressPortsA);
-        ingressPorts.addAll(extraIngressPortsZ);
-
-        */
-        DeviceModel ingressModel = deviceModels.get(ingressDevice.getUrn());
-
-        // Egress from the pipe
-        // Get and remove the egress port
-        TopoVertex egressPort = azVertices.remove(azVertices.size()-1);
-        // Get (and do not remove) the egress device
-        TopoVertex egressDevice = azVertices.get(azVertices.size()-1);
-
-        Set<TopoVertex> egressPorts = new HashSet<>();
-        egressPorts.add(egressPort);
-
-        // Get extra ports that were requested for egress junction (if applicable)
-        /*
-        Set<TopoVertex> extraEgressPortsA = getExtraRequestedPorts(reqJunctionA, egressDevice, egressPorts, urnMap, deviceModels);
-        Set<TopoVertex> extraEgressPortsZ = getExtraRequestedPorts(reqJunctionZ, egressDevice, egressPorts, urnMap, deviceModels);
-        egressPorts.addAll(extraEgressPortsA);
-        egressPorts.addAll(extraEgressPortsZ);
-        */
-
-        DeviceModel egressModel = deviceModels.get(egressDevice.getUrn());
-
-        // Should be at least two ports left in between, if not several ports/devices
-        assert(azVertices.size() >= 2);
-
-        // Just remove from ZA path, do not need to be saved
-        // Remove ingress port
-        zaVertices.remove(0);
-        // Remove egress port
-        zaVertices.remove(zaVertices.size()-1);
-
-        assert(zaVertices.size() >= 2);
-
-        ReservedVlanJunctionE ingressJunction = createJunctionAndFixtures(ingressDevice, ingressPorts,
-                urnMap, deviceModels, azMbps, zaMbps, vlanId, sched);
-
-        ReservedVlanJunctionE egressJunction = createJunctionAndFixtures(egressDevice, egressPorts,
-                urnMap, deviceModels, zaMbps, azMbps, vlanId, sched);
-
-        // Make the ERO for AZ
-        List<String> azStrings = azVertices.stream().map(TopoVertex::getUrn).collect(Collectors.toList());
-        // Make the ERO for ZA
-        List<String> zaStrings = zaVertices.stream().map(TopoVertex::getUrn).collect(Collectors.toList());
-
-        // Build a reserved bandwidth for each intermediate port
-        Set<ReservedBandwidthE> rsvBws = createBandwidthForEros(azStrings, azMbps, zaMbps, sched, urnMap);
-
-        return ReservedEthPipeE.builder()
-                .aJunction(ingressJunction)
-                .zJunction(egressJunction)
-                .azERO(azStrings)
-                .zaERO(zaStrings)
-                .reservedBandwidths(rsvBws)
-                .reservedPssResources(new HashSet<>())
-                .pipeType(decidePipeType(ingressModel, egressModel))
-                .build();
-    }
-
-    /**
-     * Retrieve all requested fixtures at a junction where those ports are not already included in the input list
-     * of ports
-     * @param reqJunction - The requested junction, containing the requested fixtures
-     * @param deviceVertex - The device corresponding to that junction
-     * @param ports - The input list of ports (at that device)
-     * @param urnMap
-     *@param deviceModels @return All requested ports that are not already in the input list of ports.
-     */
-    public Set<ReservedVlanFixtureE> getExtraRequestedPorts(RequestedVlanJunctionE reqJunction, TopoVertex deviceVertex,
-                                                  Set<TopoVertex> ports, Map<String, UrnE> urnMap,
-                                                            Map<String, DeviceModel> deviceModels, Integer vlanId,
-                                                            ScheduleSpecificationE sched) throws PSSException{
-        Set<ReservedVlanFixtureE> extraPorts = new HashSet<>();
-        if(reqJunction.getDeviceUrn().getUrn().equals(deviceVertex.getUrn())){
-            for(RequestedVlanFixtureE fix : reqJunction.getFixtures()){
-                TopoVertex fixVertex = TopoVertex.builder().urn(fix.getPortUrn().getUrn()).vertexType(VertexType.PORT).build();
-                DeviceModel model = deviceModels.get(deviceVertex.getUrn());
-                if(!ports.contains(fixVertex)){
-                    ReservedVlanFixtureE resFix = createFixtureAndResources(fix.getPortUrn(), model,
-                            fix.getInMbps(), fix.getEgMbps(), vlanId, sched);
-                    extraPorts.add(resFix);
-                }
-            }
-        }
-        return extraPorts;
-    }
-
-
-    public ReservedVlanJunctionE createJunctionAndFixtures(TopoVertex device, Set<TopoVertex> ports,
-                                                            Map<String, UrnE> urnMap, Map<String, DeviceModel> deviceModels,
-                                                            Integer azMbps, Integer zaMbps, Integer vlanId,
-                                                            ScheduleSpecificationE sched) throws PSSException {
-        String deviceString = device.getUrn();
-        assert(urnMap.containsKey(deviceString));
-        UrnE deviceUrn = urnMap.get(deviceString);
-
-        DeviceModel model = deviceModels.get(deviceString);
-
-        Set<ReservedVlanFixtureE> fixtures = new HashSet<>();
-
-        for(TopoVertex port : ports){
-            String portString = port.getUrn();
-            assert(urnMap.containsKey(portString));
-            UrnE portUrn = urnMap.get(portString);
-            ReservedVlanFixtureE fix = createFixtureAndResources(portUrn, model, azMbps, zaMbps, vlanId, sched);
-            fixtures.add(fix);
-        }
-
-        return ReservedVlanJunctionE.builder()
-                .deviceUrn(deviceUrn)
-                .fixtures(fixtures)
-                .reservedPssResources(new HashSet<>())
-                .junctionType(decideJunctionType(model))
-                .build();
-    }
-
-    public ReservedVlanFixtureE createFixtureAndResources(UrnE portUrn, DeviceModel model, Integer azMbps,
+    public ReservedVlanFixtureE createFixtureAndResources(UrnE portUrn, EthFixtureType fixtureType, Integer azMbps,
                                                            Integer zaMbps, Integer vlanId,
-                                                           ScheduleSpecificationE sched) throws PSSException{
-        EthFixtureType fixtureType = decideFixtureType(model);
+                                                           ScheduleSpecificationE sched){
+
 
         // Create reserved resources for Fixture
         ReservedBandwidthE rsvBw = createReservedBandwidth(portUrn, azMbps, zaMbps, sched);
@@ -366,19 +170,8 @@ public class PCEAssistant {
                 .build();
     }
 
-    public Set<ReservedBandwidthE> createBandwidthForEros(List<String> ero, Integer azMbps, Integer zaMbps,
-                                                           ScheduleSpecificationE sched, Map<String, UrnE> urnMap) {
-        return ero
-                .stream()
-                .filter(urnMap::containsKey)
-                .map(urnMap::get)
-                .filter(urn -> urn.getUrnType().equals(UrnType.IFCE))
-                .map(urn -> createReservedBandwidth(urn, azMbps, zaMbps, sched))
-                .collect(Collectors.toSet());
-    }
-
     // TODO: fix this
-    public Map<String, ResourceType> neededPipeResources(ReservedEthPipeE vp) throws PSSException {
+    public Map<String, ResourceType> neededPipeResources(ReservedMplsPipeE vp) throws PSSException {
         Map<String, ResourceType> result = new HashMap<>();
         switch (vp.getPipeType()) {
             case ALU_TO_ALU_VPLS:
@@ -453,28 +246,238 @@ public class PCEAssistant {
 
     }
 
-    public EthPipeType decidePipeType(DeviceModel aModel, DeviceModel zModel) throws PSSException {
+    public MplsPipeType decideMplsPipeType(DeviceModel aModel, DeviceModel zModel) throws PSSException {
 
         switch (aModel) {
             case ALCATEL_SR7750:
                 switch (zModel) {
                     case ALCATEL_SR7750:
-                        return EthPipeType.ALU_TO_ALU_VPLS;
+                        return MplsPipeType.ALU_TO_ALU_VPLS;
                     case JUNIPER_MX:
-                        return EthPipeType.ALU_TO_JUNOS_VPLS;
+                        return MplsPipeType.ALU_TO_JUNOS_VPLS;
                 }
 
                 break;
             case JUNIPER_MX:
                 switch (zModel) {
                     case ALCATEL_SR7750:
-                        return EthPipeType.ALU_TO_JUNOS_VPLS;
+                        return MplsPipeType.ALU_TO_JUNOS_VPLS;
                     case JUNIPER_MX:
-                        return EthPipeType.JUNOS_TO_JUNOS_VPLS;
+                        return MplsPipeType.JUNOS_TO_JUNOS_VPLS;
                 }
 
         }
-        throw new PSSException("Could not determine pipe type");
+        throw new PSSException("Could not determine MPLS pipe type");
     }
 
+
+    public EthPipeType decideEthPipeType(DeviceModel aModel, DeviceModel zModel) throws PSSException {
+
+        switch (aModel) {
+            case ALCATEL_SR7750:
+                switch (zModel) {
+                    case JUNIPER_EX:
+                        return EthPipeType.ALU_VPLS_TO_JUNOS_SWITCH;
+                }
+            case JUNIPER_MX:
+                switch (zModel) {
+                    case JUNIPER_EX:
+                        return EthPipeType.JUNOS_VPLS_TO_JUNOS_SWITCH;
+                }
+            case JUNIPER_EX:
+                switch (zModel) {
+                    case JUNIPER_EX:
+                        return EthPipeType.JUNOS_SWITCH_TO_JUNOS_SWITCH;
+                    case JUNIPER_MX:
+                        return EthPipeType.JUNOS_SWITCH_TO_JUNOS_VPLS;
+                    case ALCATEL_SR7750:
+                        return EthPipeType.JUNOS_SWITCH_TO_ALU_VPLS;
+                }
+        }
+        throw new PSSException("Could not determine Ethernet pipe type");
+    }
+
+    public void constructJunctionPairToPipeEROMap(Map<List<TopoVertex>, Map<String, List<TopoVertex>>> junctionPairToPipeEROMap,
+                                                  Map<List<TopoVertex>, Layer> allJunctionPairs,
+                                                  List<Map<Layer, List<TopoVertex>>> azSegments,
+                                                  List<Map<Layer, List<TopoVertex>>> zaSegments) {
+        List<TopoVertex> currentAZPipeERO = new ArrayList<>();
+        List<TopoVertex> currentZAPipeERO = new ArrayList<>();
+        List<TopoVertex> currentJunctionPair = new ArrayList<>();
+
+        Map<String, List<TopoVertex>> directionalMap = makeDirectionalEROMap(currentAZPipeERO, currentZAPipeERO);
+
+        List<TopoVertex> currentIntersegmentJunctionPair = new ArrayList<>();
+        List<TopoVertex> currentIntersegmentAZPipeERO = new ArrayList<>();
+        List<TopoVertex> currentIntersegmentZAPipeERO = new ArrayList<>();
+
+        Map<String, List<TopoVertex>> interDirectionalMap = makeDirectionalEROMap(currentIntersegmentAZPipeERO,
+                currentIntersegmentZAPipeERO);
+
+        junctionPairToPipeEROMap.put(currentJunctionPair, directionalMap);
+        junctionPairToPipeEROMap.put(currentIntersegmentJunctionPair, interDirectionalMap);
+
+        for (int i = 0; i < azSegments.size(); i++) {
+            // Get az segment and za segment
+            Map<Layer, List<TopoVertex>> azSegment = azSegments.get(i);
+            Map<Layer, List<TopoVertex>> zaSegment = zaSegments.get(zaSegments.size() - i - 1);
+            log.info("AZ Segment: " + azSegment.toString());
+            log.info("ZA Segment: " + zaSegment.toString());
+            assert (azSegment.keySet().equals(zaSegment.keySet()));
+
+            Layer layer = azSegment.containsKey(Layer.ETHERNET) ? Layer.ETHERNET : Layer.MPLS;
+
+            List<TopoVertex> azVertices = azSegment.get(layer);
+
+            List<TopoVertex> zaVertices = zaSegment.get(layer);
+
+
+            // Retrieve and remove the AZ ingress and egress ports
+            TopoVertex azIngress = azVertices.remove(0);
+            TopoVertex azEgress = azVertices.remove(azVertices.size() - 1);
+
+            // Remove the ZA ingress and egress ports
+            zaVertices.remove(0);
+            zaVertices.remove(zaVertices.size() - 1);
+
+
+            TopoVertex currentVertex = azVertices.get(0);
+            if (i < azSegments.size() - 1) {
+                // Add the current vertex to the current intersegment junction pair
+                // The intersegment pipe can now be completed by adding the ingress point
+                // To the intersegment pipe
+                if (currentIntersegmentJunctionPair.size() == 1) {
+                    // Add the starting device to the junction pair
+                    currentIntersegmentJunctionPair.add(currentVertex);
+
+                    // Add to the list of all junction pairs
+                    allJunctionPairs.put(currentIntersegmentJunctionPair, layer);
+
+                    // Add the ingress point to the intersegment AZ ERO
+                    currentIntersegmentAZPipeERO.add(azIngress);
+                    // Add the ingress port to the front of the intersegment ZA ERO
+                    // This should reverse the order
+                    currentIntersegmentZAPipeERO.add(0, azIngress);
+
+
+                    // Reset the collections of intersection junction pairs and pipes
+                    currentIntersegmentJunctionPair = new ArrayList<>();
+                    currentIntersegmentAZPipeERO = new ArrayList<>();
+                    currentIntersegmentZAPipeERO = new ArrayList<>();
+
+                    interDirectionalMap = makeDirectionalEROMap(currentIntersegmentAZPipeERO,
+                            currentIntersegmentZAPipeERO);
+
+                    // Store the new junction pair and map of EROs
+                    junctionPairToPipeEROMap.put(currentIntersegmentJunctionPair, interDirectionalMap);
+                }
+            }
+
+            // Reset the current junction pair and pipe EROs
+
+            // If we're in a MPLS segment:
+            // Create a junction pair from first and last device
+            // Create the AZ pipe from all vertices in between
+            // Create the ZA pipe from all vertices in between
+            if(azSegment.containsKey(Layer.MPLS)) {
+
+                // Remove the first and last device from the ZA direction
+                zaVertices.remove(0);
+                zaVertices.remove(zaVertices.size()-1);
+
+                // Retrieve and remove the first and last device from the AZ direction
+                TopoVertex firstDevice = azVertices.remove(0);
+                TopoVertex lastDevice = azVertices.remove(azVertices.size()-1);
+
+                // Store the last device to be added to the next intersegment junction pair
+                currentVertex = lastDevice;
+
+                currentJunctionPair.add(firstDevice);
+                currentJunctionPair.add(lastDevice);
+
+
+                // Add to the list of all junction pairs
+                allJunctionPairs.put(currentJunctionPair, layer);
+
+                // Store the ports/device in between the current junction pair
+                directionalMap.put("AZ", new ArrayList<>(azVertices));
+                directionalMap.put("ZA", new ArrayList<>(zaVertices));
+
+                // Reset the current junction pair and pipe ERO lists
+                currentJunctionPair = new ArrayList<>();
+                currentAZPipeERO = new ArrayList<>();
+                currentZAPipeERO = new ArrayList<>();
+                directionalMap = makeDirectionalEROMap(currentAZPipeERO, currentZAPipeERO);
+                junctionPairToPipeEROMap.put(currentJunctionPair,
+                        makeDirectionalEROMap(currentAZPipeERO, currentZAPipeERO));
+            }
+
+
+            for (Integer v = 0; v < azVertices.size(); v++) {
+                currentVertex = azVertices.get(v);
+                TopoVertex zaVertex = zaVertices.get(zaVertices.size() - 1 - v);
+
+                if (currentVertex.getVertexType().equals(VertexType.SWITCH)) {
+                    currentJunctionPair.add(currentVertex);
+                    if (currentJunctionPair.size() == 2) {
+                        // Add to the list of all junction pairs
+                        allJunctionPairs.put(currentJunctionPair, layer);
+
+                        // Reset the current junction pair and pipe ERO lists
+                        currentJunctionPair = new ArrayList<>();
+                        currentAZPipeERO = new ArrayList<>();
+                        currentZAPipeERO = new ArrayList<>();
+                        directionalMap = makeDirectionalEROMap(currentAZPipeERO, currentZAPipeERO);
+                        junctionPairToPipeEROMap.put(currentJunctionPair,
+                                makeDirectionalEROMap(currentAZPipeERO, currentZAPipeERO));
+
+                    }
+                }
+                // This is a port
+                else {
+                    currentAZPipeERO.add(currentVertex);
+                    currentZAPipeERO.add(zaVertex);
+                }
+            }
+
+
+            // If this is not the last segment
+            // Start a new intersegment junction pair, and add the last device in the segment
+            // Add the egress point of this segment to a new intersegment pipe ERO
+            if (i < azSegments.size() - 1) {
+                currentIntersegmentJunctionPair.add(currentVertex);
+                currentIntersegmentAZPipeERO.add(azEgress);
+                currentIntersegmentZAPipeERO.add(azEgress);
+            }
+        }
+
+    }
+
+    private Map<String, List<TopoVertex>> makeDirectionalEROMap(List<TopoVertex> azERO, List<TopoVertex> zaERO) {
+        Map<String, List<TopoVertex>> directionalEROMap = new HashMap<>();
+        directionalEROMap.put("AZ", azERO);
+        directionalEROMap.put("ZA", zaERO);
+        return directionalEROMap;
+    }
+
+
+    public Set<ReservedBandwidthE> createReservedBandwidthForEROs(List<TopoVertex> az, List<TopoVertex> za,
+                                                                  Map<String, UrnE> urnMap,
+                                                                  Map<TopoVertex, Map<String, Integer>> requestedBandwidthMap,
+                                                                  ScheduleSpecificationE sched) {
+        Set<TopoVertex> combined = new HashSet<>(az);
+        combined.addAll(za);
+
+        Set<ReservedBandwidthE> reservedBandwidths = new HashSet<>();
+        combined.stream().filter(requestedBandwidthMap::containsKey).forEach(vertex -> {
+            UrnE urn = urnMap.get(vertex.getUrn());
+            Integer reqInMbps = requestedBandwidthMap.get(vertex).get("Ingress");
+            Integer reqEgMbps = requestedBandwidthMap.get(vertex).get("Egress");
+
+            ReservedBandwidthE rsvBw = createReservedBandwidth(urn, reqInMbps, reqEgMbps, sched);
+            reservedBandwidths.add(rsvBw);
+
+        });
+        return reservedBandwidths;
+    }
 }

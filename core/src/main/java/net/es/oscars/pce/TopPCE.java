@@ -54,12 +54,21 @@ public class TopPCE {
         // Retrieve the VLAN flow
         RequestedVlanFlowE req_f = requested.getVlanFlow();
 
+        // Create temporary storage for reserved pipes and junctions
+        Set<ReservedMplsPipeE> reservedMplsPipes = new HashSet<>();
+        Set<ReservedEthPipeE> reservedEthPipes = new HashSet<>();
+        Set<ReservedVlanJunctionE> reservedEthJunctions = new HashSet<>();
+
         // Attempt to reserve simple junctions
         log.info("Handling Simple Junctions");
         Set<ReservedVlanJunctionE> simpleJunctions = new HashSet<>();
         for(RequestedVlanJunctionE reqJunction : req_f.getJunctions())
         {
-            ReservedVlanJunctionE junction = transPCE.reserveSimpleJunction(reqJunction, schedSpec, simpleJunctions);
+            List<ReservedBandwidthE> rsvBandwidths = transPCE.createReservedBandwidthList(simpleJunctions, reservedMplsPipes,
+                    reservedEthPipes, schedSpec);
+
+            ReservedVlanJunctionE junction = transPCE.reserveSimpleJunction(reqJunction, schedSpec, simpleJunctions,
+                    rsvBandwidths);
 
             if(junction != null){
                 simpleJunctions.add(junction);
@@ -74,21 +83,20 @@ public class TopPCE {
         List<RequestedVlanPipeE> pipes = new ArrayList<>();
         pipes.addAll(req_f.getPipes());
 
-        // Create temporary storage for reserved pipes and junctions
-        Set<ReservedEthPipeE> reservedPipes = new HashSet<>();
-        Set<ReservedVlanJunctionE> reservedEthJunctions = new HashSet<>();
-
         // Keep track of the number of successfully reserved pipes (numReserved)
         // Attempt to reserve all requested pipes
         log.info("Starting to handle pipes");
-        Integer numReserved = handleRequestedPipes(pipes, schedSpec, simpleJunctions, reservedPipes, reservedEthJunctions);
+        Integer numReserved = handleRequestedPipes(pipes, schedSpec, simpleJunctions, reservedMplsPipes,
+                reservedEthPipes);
 
         // If pipes were not able to be reserved in the original order, try reversing the order pipes are attempted
         if((numReserved != pipes.size()) && (pipes.size() > 1)){
             Collections.reverse(pipes);
-            reservedPipes = new HashSet<>();
+            reservedEthPipes = new HashSet<>();
+            reservedMplsPipes = new HashSet<>();
             reservedEthJunctions = new HashSet<>();
-            numReserved = handleRequestedPipes(pipes, schedSpec, simpleJunctions, reservedPipes, reservedEthJunctions);
+            numReserved = handleRequestedPipes(pipes, schedSpec, simpleJunctions, reservedMplsPipes,
+                    reservedEthPipes);
         }
 
         // If the pipes still cannot be reserved, return the blank Reserved Vlan Flow
@@ -102,7 +110,8 @@ public class TopPCE {
         // Make the reserved flow
         ReservedVlanFlowE res_f = ReservedVlanFlowE.builder()
                 .junctions(reservedJunctions)
-                .pipes(reservedPipes)
+                .ethPipes(reservedEthPipes)
+                .mplsPipes(reservedMplsPipes)
                 .build();
 
         // Build the reserved Blueprint
@@ -117,21 +126,27 @@ public class TopPCE {
      * @param pipes - The requested pipes
      * @param schedSpec - The requested schedule
      * @param simpleJunctions - The currently reserved independent junctions
-     * @param reservedPipes - The currently reserved pipes
-     * @param reservedEthJunctions - The currently reserved junctions (from an ethernet segment)
+     * @param reservedMplsPipes - The currently reserved MPLS pipes
+     * @param reservedEthPipes - The currently reserved Ethernet pipes
      * @return The number of requested pipes which were able to be reserved
      */
     private Integer handleRequestedPipes(List<RequestedVlanPipeE> pipes, ScheduleSpecificationE schedSpec,
-                                      Set<ReservedVlanJunctionE> simpleJunctions, Set<ReservedEthPipeE> reservedPipes,
-                                      Set<ReservedVlanJunctionE> reservedEthJunctions) {
+                                      Set<ReservedVlanJunctionE> simpleJunctions,  Set<ReservedMplsPipeE> reservedMplsPipes,
+                                         Set<ReservedEthPipeE> reservedEthPipes) {
 
         // The number of requested pipes successfully reserved
         Integer numReserved = 0;
+
+        List<ReservedBandwidthE> rsvBandwidths = transPCE.createReservedBandwidthList(simpleJunctions, reservedMplsPipes,
+                reservedEthPipes, schedSpec);
+
+        List<ReservedVlanE> rsvVlans = transPCE.createReservedVlanList(simpleJunctions, reservedEthPipes, schedSpec);
+
         // Loop through all requested pipes
         for(RequestedVlanPipeE pipe: pipes){
             // Find the shortest path for the pipe, build a map for the AZ and ZA path
             Map<String, List<TopoEdge>> eroMapForPipe = findShortestConstrainedPath(pipe, schedSpec, simpleJunctions,
-                    reservedPipes, reservedEthJunctions);
+                    reservedMplsPipes, reservedEthPipes);
             // If there paths are valid, attempt to reserve the resources
             if(verifyEros(eroMapForPipe)){
                 // Increment the number reserved
@@ -142,8 +157,8 @@ public class TopPCE {
 
                 // Try to get the reserved resources
                 try {
-                    transPCE.reserveRequestedPipe(pipe, schedSpec, azEros, zaEros, simpleJunctions, reservedPipes,
-                            reservedEthJunctions);
+                    transPCE.reserveRequestedPipe(pipe, schedSpec, azEros, zaEros, rsvBandwidths, rsvVlans,
+                            reservedMplsPipes, reservedEthPipes);
                 }
                 // If it failed, decrement the number reserved
                 catch(Exception e){
@@ -161,25 +176,22 @@ public class TopPCE {
      * @param pipe - The requested pipe.
      * @param schedSpec - The requested schedule
      * @param simpleJunctions - A set of all discrete junctions reserved so far
-     * @param reservedPipes - A set of all pipes reserved so far
-     * @param reservedEthJunctions - A set of all junctions (one per device per ethernet segment)
+     * @param reservedMplsPipes - A set of all MPLS pipes reserved so far
+     * @param reservedEthPipes - A set of all Ethernet pipes reserved so far
      * @return A map containing the AZ and ZA shortest paths
      */
     private Map<String,List<TopoEdge>> findShortestConstrainedPath(RequestedVlanPipeE pipe,
                                                                    ScheduleSpecificationE schedSpec,
                                                                    Set<ReservedVlanJunctionE> simpleJunctions,
-                                                                   Set<ReservedEthPipeE> reservedPipes,
-                                                                   Set<ReservedVlanJunctionE> reservedEthJunctions) {
+                                                                   Set<ReservedMplsPipeE> reservedMplsPipes,
+                                                                   Set<ReservedEthPipeE> reservedEthPipes) {
         log.info("Computing Shortest Constrained Path");
         Map<String, List<TopoEdge>> eroMap = null;
-        Set<ReservedVlanJunctionE> reservedJunctions = new HashSet<>(simpleJunctions);
-        reservedJunctions.addAll(reservedEthJunctions);
 
-        List<ReservedBandwidthE> rsvBandwidths = transPCE.retrieveReservedBandwidths(reservedJunctions);
-        rsvBandwidths.addAll(transPCE.retrieveReservedBandwidthsFromPipes(reservedPipes));
+        List<ReservedBandwidthE> rsvBandwidths = transPCE.createReservedBandwidthList(simpleJunctions, reservedMplsPipes,
+                reservedEthPipes, schedSpec);
 
-        List<ReservedVlanE> rsvVlans = transPCE.retrieveReservedVlans(reservedJunctions);
-        rsvVlans.addAll(transPCE.retrieveReservedVlansFromPipes(reservedPipes));
+        List<ReservedVlanE> rsvVlans = transPCE.createReservedVlanList(simpleJunctions, reservedEthPipes, schedSpec);
 
         if(pipe.getEroPalindromic()){
             try{
