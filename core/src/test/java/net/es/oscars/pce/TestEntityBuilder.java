@@ -125,7 +125,7 @@ public class TestEntityBuilder {
     }
 
     public RequestedBlueprintE buildRequest(String aPort, String aDevice, String zPort, String zDevice,
-                                            Integer azMbps, Integer zaMbps, Boolean palindromic, String vlanExp){
+                                            Integer azMbps, Integer zaMbps, PalindromicType palindromic, String vlanExp){
         log.info("Building RequestedBlueprintE");
 
 
@@ -139,7 +139,7 @@ public class TestEntityBuilder {
 
     public RequestedBlueprintE buildRequest(List<String> aPorts, List<String> aDevices, List<String> zPorts,
                                             List<String> zDevices, List<Integer> azMbpsList, List<Integer> zaMbpsList,
-                                            List<Boolean> palindromicList, List<String> vlanExps){
+                                            List<PalindromicType> palindromicList, List<String> vlanExps){
         Set<RequestedVlanPipeE> pipes = new HashSet<>();
         for(int i = 0; i < aPorts.size(); i++){
             RequestedVlanPipeE pipe = buildRequestedPipe(
@@ -341,7 +341,7 @@ public class TestEntityBuilder {
 
 
     public RequestedVlanPipeE buildRequestedPipe(String aPort, String aDevice, String zPort, String zDevice,
-                                                 Integer azMbps, Integer zaMbps, Boolean palindromic, String vlanExp){
+                                                 Integer azMbps, Integer zaMbps, PalindromicType palindromic, String vlanExp){
 
         List<String> aFixNames = new ArrayList<>();
         aFixNames.add(aPort);

@@ -5,6 +5,7 @@ import net.es.oscars.CoreUnitTestConfiguration;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.topo.TopologyBuilder;
+import net.es.oscars.topo.enums.PalindromicType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -120,7 +121,7 @@ public class TopPceTestAsymmetric
         String dstDevice = "nodeM";
         Integer azBW = 50;
         Integer zaBW = 25;
-        Boolean palindrome = true;
+        PalindromicType palindrome = PalindromicType.PALINDROME;
         String vlan = "any";
 
         topologyBuilder.buildTopo2();
@@ -226,7 +227,7 @@ public class TopPceTestAsymmetric
         String dstDevice = "nodeQ";
         Integer azBW = 50;
         Integer zaBW = 25;
-        Boolean palindrome = true;
+        PalindromicType palindrome = PalindromicType.PALINDROME;
         String vlan = "any";
 
         topologyBuilder.buildTopo3();
@@ -349,7 +350,7 @@ public class TopPceTestAsymmetric
         String dstDevice = "nodeQ";
         Integer azBW = 50;
         Integer zaBW = 25;
-        Boolean palindrome = true;
+        PalindromicType palindrome = PalindromicType.PALINDROME;
         String vlan = "any";
 
         topologyBuilder.buildTopo4();
@@ -523,7 +524,7 @@ public class TopPceTestAsymmetric
         String dstDevice = "nodeS";
         Integer azBW = 50;
         Integer zaBW = 25;
-        Boolean palindrome = true;
+        PalindromicType palindrome = PalindromicType.PALINDROME;
         String vlan = "any";
 
         topologyBuilder.buildTopo5();
@@ -722,7 +723,7 @@ public class TopPceTestAsymmetric
         String dstDevice = "nodeL";
         Integer azBW = 50;
         Integer zaBW = 25;
-        Boolean palindrome = true;
+        PalindromicType palindrome = PalindromicType.PALINDROME;
         String vlan = "any";
 
         topologyBuilder.buildTopo7();
@@ -811,7 +812,7 @@ public class TopPceTestAsymmetric
         String dstDevice = "nodeQ";
         Integer azBW = 50;
         Integer zaBW = 25;
-        Boolean palindrome = true;
+        PalindromicType palindrome = PalindromicType.PALINDROME;
         String vlan = "any";
 
         topologyBuilder.buildTopo8();
@@ -900,7 +901,7 @@ public class TopPceTestAsymmetric
         String dstDevice = "nodeP";
         Integer azBW = 50;
         Integer zaBW = 25;
-        Boolean palindrome = true;
+        PalindromicType palindrome = PalindromicType.PALINDROME;
         String vlan = "any";
 
         topologyBuilder.buildTopo9();
@@ -989,7 +990,7 @@ public class TopPceTestAsymmetric
         String dstDevice = "nodeM";
         Integer azBW = 50;
         Integer zaBW = 25;
-        Boolean palindrome = true;
+        PalindromicType palindrome = PalindromicType.PALINDROME;
         String vlan = "any";
 
         topologyBuilder.buildTopo10();
@@ -1096,7 +1097,7 @@ public class TopPceTestAsymmetric
         String dstDevice = "nodeR";
         Integer azBW = 50;
         Integer zaBW = 25;
-        Boolean palindrome = true;
+        PalindromicType palindrome = PalindromicType.PALINDROME;
         String vlan = "any";
 
         topologyBuilder.buildTopo11();
@@ -1185,7 +1186,7 @@ public class TopPceTestAsymmetric
         String dstDevice = "nodeQ";
         Integer azBW = 50;
         Integer zaBW = 25;
-        Boolean palindrome = true;
+        PalindromicType palindrome = PalindromicType.PALINDROME;
         String vlan = "any";
 
         topologyBuilder.buildTopo12();

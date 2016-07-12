@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.topo.beans.TopoEdge;
+import net.es.oscars.topo.enums.PalindromicType;
 import net.es.oscars.topo.svc.TopoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -193,7 +194,8 @@ public class TopPCE {
 
         List<ReservedVlanE> rsvVlans = transPCE.createReservedVlanList(simpleJunctions, reservedEthPipes, schedSpec);
 
-        if(pipe.getEroPalindromic()){
+        if(pipe.getEroPalindromic().equals(PalindromicType.PALINDROME))
+        {
             try{
                 log.info("Entering Palindromical PCE");
                 eroMap = palindromicalPCE.computePalindromicERO(pipe, schedSpec, rsvBandwidths, rsvVlans);       // A->Z ERO is palindrome of Z->A ERO
