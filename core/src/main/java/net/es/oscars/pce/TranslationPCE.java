@@ -300,6 +300,8 @@ public class TranslationPCE {
                         .reservedPssResources(new HashSet<>())
                         .pipeType(pceAssistant.decideMplsPipeType(aModel, zModel))
                         .build();
+
+                reservedMplsPipes.add(mplsPipe);
             }
             // ETHERNET
             else{
@@ -313,6 +315,7 @@ public class TranslationPCE {
                         .reservedPssResources(new HashSet<>())
                         .pipeType(pceAssistant.decideEthPipeType(aModel, zModel))
                         .build();
+                reservedEthPipes.add(ethPipe);
             }
         }
 

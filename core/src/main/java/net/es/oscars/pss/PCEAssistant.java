@@ -351,7 +351,7 @@ public class PCEAssistant {
                     currentIntersegmentJunctionPair.add(currentVertex);
 
                     // Add to the list of all junction pairs
-                    allJunctionPairs.put(currentIntersegmentJunctionPair, layer);
+                    allJunctionPairs.put(currentIntersegmentJunctionPair, Layer.ETHERNET);
 
                     // Add the ingress point to the intersegment AZ ERO
                     currentIntersegmentAZPipeERO.add(azIngress);

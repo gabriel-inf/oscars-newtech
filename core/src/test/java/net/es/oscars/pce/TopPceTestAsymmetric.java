@@ -2,14 +2,9 @@ package net.es.oscars.pce;
 
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.CoreUnitTestConfiguration;
-import net.es.oscars.pce.TestEntityBuilder;
-import net.es.oscars.pce.PCEException;
-import net.es.oscars.pce.TopPCE;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.topo.TopologyBuilder;
-import net.es.oscars.topo.ent.UrnAdjcyE;
-import net.es.oscars.topo.ent.UrnE;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,16 +19,16 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Created by jeremy on 6/30/16.
+ * Created by jeremy on 7/8/16.
  *
- * Tests End-to-End correctness of the PCE modules
+ * Tests End-to-End correctness of the PCE modules with Asymmetric bandwidth requirements
  */
 
 @Slf4j
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(CoreUnitTestConfiguration.class)
 @Transactional
-public class TopPceTest
+public class TopPceTestAsymmetric
 {
     @Autowired
     private TopPCE topPCE;
@@ -46,9 +41,9 @@ public class TopPceTest
 
 
     @Test
-    public void basicPceTest1()
+    public void asymmPceTest1()
     {
-        log.info("Initializing test: 'basicPceTest1'.");
+        log.info("Initializing test: 'asymmPceTest1'.");
 
         RequestedBlueprintE requestedBlueprint;
         Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
@@ -59,7 +54,7 @@ public class TopPceTest
 
         String srcDevice = "nodeK";
         List<String> portNames = Stream.of("portA", "portZ").collect(Collectors.toList());
-        Integer azBW = 25;
+        Integer azBW = 50;
         Integer zaBW = 25;
         String vlan = "any";
 
@@ -67,7 +62,7 @@ public class TopPceTest
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
         requestedBlueprint = testBuilder.buildRequest(srcDevice, portNames, azBW, zaBW, vlan);
 
-        log.info("Beginning test: 'basicPceTest1'.");
+        log.info("Beginning test: 'asymmPceTest1'.");
 
         try
         {
@@ -104,13 +99,13 @@ public class TopPceTest
         }
 
 
-        log.info("test 'basicPceTest1' passed.");
+        log.info("test 'asymmPceTest1' passed.");
     }
 
     @Test
-    public void basicPceTest2()
+    public void asymmPceTest2()
     {
-        log.info("Initializing test: 'basicPceTest2'.");
+        log.info("Initializing test: 'asymmPceTest2'.");
 
         RequestedBlueprintE requestedBlueprint;
         Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
@@ -123,7 +118,7 @@ public class TopPceTest
         String srcDevice = "nodeP";
         String dstPort = "portZ";
         String dstDevice = "nodeM";
-        Integer azBW = 25;
+        Integer azBW = 50;
         Integer zaBW = 25;
         Boolean palindrome = true;
         String vlan = "any";
@@ -132,7 +127,7 @@ public class TopPceTest
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
         requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
 
-        log.info("Beginning test: 'basicPceTest2'.");
+        log.info("Beginning test: 'asymmPceTest2'.");
 
         try
         {
@@ -210,13 +205,13 @@ public class TopPceTest
             }
         }
 
-        log.info("test 'basicPceTest2' passed.");
+        log.info("test 'asymmPceTest2' passed.");
     }
 
     @Test
-    public void basicPceTest3()
+    public void asymmPceTest3()
     {
-        log.info("Initializing test: 'basicPceTest3'.");
+        log.info("Initializing test: 'asymmPceTest3'.");
 
         RequestedBlueprintE requestedBlueprint;
         Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
@@ -229,7 +224,7 @@ public class TopPceTest
         String srcDevice = "nodeK";
         String dstPort = "portZ";
         String dstDevice = "nodeQ";
-        Integer azBW = 25;
+        Integer azBW = 50;
         Integer zaBW = 25;
         Boolean palindrome = true;
         String vlan = "any";
@@ -238,7 +233,7 @@ public class TopPceTest
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
         requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
 
-        log.info("Beginning test: 'basicPceTest3'.");
+        log.info("Beginning test: 'asymmPceTest3'.");
 
         try
         {
@@ -315,8 +310,8 @@ public class TopPceTest
 
             actualAzERO = actualAzERO + zJunc.getDeviceUrn();
             actualZaERO = actualZaERO + aJunc.getDeviceUrn();
-            String expectedAzERO = "nodeP-nodeP:2-nodeQ:1-nodeQ";
-            String expectedZaERO = "nodeQ-nodeQ:1-nodeP:2-nodeP";
+            String expectedAzERO = "nodeP-nodeP:1-nodeQ:1-nodeQ";
+            String expectedZaERO = "nodeQ-nodeQ:1-nodeP:1-nodeP";
 
             assert (aJunc.getDeviceUrn().getUrn().equals("nodeP"));
             assert (zJunc.getDeviceUrn().getUrn().equals("nodeQ"));
@@ -332,14 +327,14 @@ public class TopPceTest
             assert (actualZaERO.equals(expectedZaERO));
         }
 
-        log.info("test 'basicPceTest3' passed.");
+        log.info("test 'asymmPceTest3' passed.");
     }
 
     @Test
-    public void basicPceTest4()
+    public void asymmPceTest4()
     {
         // Two possible shortest routes here!
-        log.info("Initializing test: 'basicPceTest4'.");
+        log.info("Initializing test: 'asymmPceTest4'.");
 
         RequestedBlueprintE requestedBlueprint;
         Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
@@ -352,7 +347,7 @@ public class TopPceTest
         String srcDevice = "nodeK";
         String dstPort = "portZ";
         String dstDevice = "nodeQ";
-        Integer azBW = 25;
+        Integer azBW = 50;
         Integer zaBW = 25;
         Boolean palindrome = true;
         String vlan = "any";
@@ -361,7 +356,7 @@ public class TopPceTest
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
         requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
 
-        log.info("Beginning test: 'basicPceTest4'.");
+        log.info("Beginning test: 'asymmPceTest4'.");
 
         try
         {
@@ -507,13 +502,13 @@ public class TopPceTest
             }
         }
 
-        log.info("test 'basicPceTest4' passed.");
+        log.info("test 'asymmPceTest4' passed.");
     }
 
     @Test
-    public void basicPceTest5()
+    public void asymmPceTest5()
     {
-        log.info("Initializing test: 'basicPceTest5'.");
+        log.info("Initializing test: 'asymmPceTest5'.");
 
         RequestedBlueprintE requestedBlueprint;
         Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
@@ -526,7 +521,7 @@ public class TopPceTest
         String srcDevice = "nodeK";
         String dstPort = "portZ";
         String dstDevice = "nodeS";
-        Integer azBW = 25;
+        Integer azBW = 50;
         Integer zaBW = 25;
         Boolean palindrome = true;
         String vlan = "any";
@@ -535,7 +530,7 @@ public class TopPceTest
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
         requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
 
-        log.info("Beginning test: 'basicPceTest5'.");
+        log.info("Beginning test: 'asymmPceTest5'.");
 
         try
         {
@@ -645,13 +640,13 @@ public class TopPceTest
             assert (actualZaERO.equals(expectedZaERO));
         }
 
-        log.info("test 'basicPceTest5' passed.");
+        log.info("test 'asymmPceTest5' passed.");
     }
 
     @Test
-    public void basicPceTest6()
+    public void asymmPceTest6()
     {
-        log.info("Initializing test: 'basicPceTest6'.");
+        log.info("Initializing test: 'asymmPceTest6'.");
 
         RequestedBlueprintE requestedBlueprint;
         Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
@@ -662,7 +657,7 @@ public class TopPceTest
 
         String srcDevice = "nodeP";
         List<String> portNames = Stream.of("portA", "portZ").collect(Collectors.toList());
-        Integer azBW = 25;
+        Integer azBW = 50;
         Integer zaBW = 25;
         String vlan = "any";
 
@@ -670,7 +665,7 @@ public class TopPceTest
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
         requestedBlueprint = testBuilder.buildRequest(srcDevice, portNames, azBW, zaBW, vlan);
 
-        log.info("Beginning test: 'basicPceTest6'.");
+        log.info("Beginning test: 'asymmPceTest6'.");
 
         try
         {
@@ -706,13 +701,13 @@ public class TopPceTest
             assert(fix2.getIfceUrn().getUrn().equals("portA") || fix2.getIfceUrn().getUrn().equals("portZ"));
         }
 
-        log.info("test 'basicPceTest6' passed.");
+        log.info("test 'asymmPceTest6' passed.");
     }
 
     @Test
-    public void basicPceTest7()
+    public void asymmPceTest7()
     {
-        log.info("Initializing test: 'basicPceTest7'.");
+        log.info("Initializing test: 'asymmPceTest7'.");
 
         RequestedBlueprintE requestedBlueprint;
         Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
@@ -725,7 +720,7 @@ public class TopPceTest
         String srcDevice = "nodeK";
         String dstPort = "portZ";
         String dstDevice = "nodeL";
-        Integer azBW = 25;
+        Integer azBW = 50;
         Integer zaBW = 25;
         Boolean palindrome = true;
         String vlan = "any";
@@ -734,7 +729,7 @@ public class TopPceTest
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
         requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
 
-        log.info("Beginning test: 'basicPceTest7'.");
+        log.info("Beginning test: 'asymmPceTest7'.");
 
         try
         {
@@ -795,13 +790,13 @@ public class TopPceTest
             assert (actualZaERO.equals(expectedZaERO));
         }
 
-        log.info("test 'basicPceTest7' passed.");
+        log.info("test 'asymmPceTest7' passed.");
     }
 
     @Test
-    public void basicPceTest8()
+    public void asymmPceTest8()
     {
-        log.info("Initializing test: 'basicPceTest8'.");
+        log.info("Initializing test: 'asymmPceTest8'.");
 
         RequestedBlueprintE requestedBlueprint;
         Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
@@ -814,7 +809,7 @@ public class TopPceTest
         String srcDevice = "nodeP";
         String dstPort = "portZ";
         String dstDevice = "nodeQ";
-        Integer azBW = 25;
+        Integer azBW = 50;
         Integer zaBW = 25;
         Boolean palindrome = true;
         String vlan = "any";
@@ -823,7 +818,7 @@ public class TopPceTest
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
         requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
 
-        log.info("Beginning test: 'basicPceTest8'.");
+        log.info("Beginning test: 'asymmPceTest8'.");
 
         try
         {
@@ -884,13 +879,13 @@ public class TopPceTest
             assert (actualZaERO.equals(expectedZaERO));
         }
 
-        log.info("test 'basicPceTest8' passed.");
+        log.info("test 'asymmPceTest8' passed.");
     }
 
     @Test
-    public void basicPceTest9()
+    public void asymmPceTest9()
     {
-        log.info("Initializing test: 'basicPceTest9'.");
+        log.info("Initializing test: 'asymmPceTest9'.");
 
         RequestedBlueprintE requestedBlueprint;
         Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
@@ -903,7 +898,7 @@ public class TopPceTest
         String srcDevice = "nodeK";
         String dstPort = "portZ";
         String dstDevice = "nodeP";
-        Integer azBW = 25;
+        Integer azBW = 50;
         Integer zaBW = 25;
         Boolean palindrome = true;
         String vlan = "any";
@@ -912,7 +907,7 @@ public class TopPceTest
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
         requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
 
-        log.info("Beginning test: 'basicPceTest9'.");
+        log.info("Beginning test: 'asymmPceTest9'.");
 
         try
         {
@@ -973,13 +968,13 @@ public class TopPceTest
             assert (actualZaERO.equals(expectedZaERO));
         }
 
-        log.info("test 'basicPceTest9' passed.");
+        log.info("test 'asymmPceTest9' passed.");
     }
 
     @Test
-    public void basicPceTest10()
+    public void asymmPceTest10()
     {
-        log.info("Initializing test: 'basicPceTest10'.");
+        log.info("Initializing test: 'asymmPceTest10'.");
 
         RequestedBlueprintE requestedBlueprint;
         Optional<ReservedBlueprintE > reservedBlueprint = Optional.empty();
@@ -992,7 +987,7 @@ public class TopPceTest
         String srcDevice = "nodeK";
         String dstPort = "portZ";
         String dstDevice = "nodeM";
-        Integer azBW = 25;
+        Integer azBW = 50;
         Integer zaBW = 25;
         Boolean palindrome = true;
         String vlan = "any";
@@ -1001,7 +996,7 @@ public class TopPceTest
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
         requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
 
-        log.info("Beginning test: 'basicPceTest10'.");
+        log.info("Beginning test: 'asymmPceTest10'.");
 
         try
         {
@@ -1080,13 +1075,13 @@ public class TopPceTest
             }
         }
 
-        log.info("test 'basicPceTest10' passed.");
+        log.info("test 'asymmPceTest10' passed.");
     }
 
     @Test
-    public void basicPceTest11()
+    public void asymmPceTest11()
     {
-        log.info("Initializing test: 'basicPceTest11'.");
+        log.info("Initializing test: 'asymmPceTest11'.");
 
         RequestedBlueprintE requestedBlueprint;
         Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
@@ -1099,7 +1094,7 @@ public class TopPceTest
         String srcDevice = "nodeP";
         String dstPort = "portZ";
         String dstDevice = "nodeR";
-        Integer azBW = 25;
+        Integer azBW = 50;
         Integer zaBW = 25;
         Boolean palindrome = true;
         String vlan = "any";
@@ -1108,7 +1103,7 @@ public class TopPceTest
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
         requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
 
-        log.info("Beginning test: 'basicPceTest11'.");
+        log.info("Beginning test: 'asymmPceTest11'.");
 
         try
         {
@@ -1169,13 +1164,13 @@ public class TopPceTest
             assert (actualZaERO.equals(expectedZaERO));
         }
 
-        log.info("test 'basicPceTest11' passed.");
+        log.info("test 'asymmPceTest11' passed.");
     }
 
     @Test
-    public void basicPceTest12()
+    public void asymmPceTest12()
     {
-        log.info("Initializing test: 'basicPceTest12'.");
+        log.info("Initializing test: 'asymmPceTest12'.");
 
         RequestedBlueprintE requestedBlueprint;
         Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
@@ -1188,7 +1183,7 @@ public class TopPceTest
         String srcDevice = "nodeK";
         String dstPort = "portZ";
         String dstDevice = "nodeQ";
-        Integer azBW = 25;
+        Integer azBW = 50;
         Integer zaBW = 25;
         Boolean palindrome = true;
         String vlan = "any";
@@ -1197,7 +1192,7 @@ public class TopPceTest
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
         requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
 
-        log.info("Beginning test: 'basicPceTest12'.");
+        log.info("Beginning test: 'asymmPceTest12'.");
 
         try
         {
@@ -1276,6 +1271,6 @@ public class TopPceTest
             }
         }
 
-        log.info("test 'basicPceTest12' passed.");
+        log.info("test 'asymmPceTest12' passed.");
     }
 }
