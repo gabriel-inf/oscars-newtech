@@ -253,6 +253,7 @@ public class TranslationPCE {
 
         log.info("0: All Junction Pairs - " + allJunctionPairs.toString());
         for(List<TopoVertex> junctionPair : allJunctionPairs.keySet()){
+            log.info("0.5: Junction Pair - " + junctionPair);
             Layer thisLayer = allJunctionPairs.get(junctionPair);
             log.info("1: Layer " + thisLayer);
             Map<String, List<TopoVertex>> pipeEroMap = junctionPairToPipeEROMap.get(junctionPair);

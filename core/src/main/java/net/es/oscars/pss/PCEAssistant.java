@@ -345,31 +345,31 @@ public class PCEAssistant {
 
 
             TopoVertex currentVertex = azVertices.get(0);
-            if (i < azSegments.size() - 1) {
-                // Add the current vertex to the current intersegment junction pair
-                // The intersegment pipe can now be completed by adding the ingress point
-                // To the intersegment pipe
-                if (interJunctionPairs.get(currInterJunctionPairIndex).size() == 1) {
-                    // Add the starting device to the junction pair
-                    interJunctionPairs.get(currInterJunctionPairIndex).add(currentVertex);
+            TopoVertex lastDevice = azVertices.get(azVertices.size()-1);
 
-                    // Add to the list of all junction pairs
-                    allJunctionPairs.put(interJunctionPairs.get(currInterJunctionPairIndex), Layer.ETHERNET);
+            // Add the current vertex to the current intersegment junction pair
+            // The intersegment pipe can now be completed by adding the ingress point
+            // To the intersegment pipe
+            if (interJunctionPairs.get(currInterJunctionPairIndex).size() == 1) {
+                // Add the starting device to the junction pair
+                interJunctionPairs.get(currInterJunctionPairIndex).add(currentVertex);
 
-
-                    // Add the ingress point to the intersegment AZ ERO
-                    interAzEROs.get(currInterJunctionPairIndex).add(azIngress);
-                    // Add the ingress port to the front of the intersegment ZA ERO
-                    // This should reverse the order
-                    interZaEROs.get(currInterJunctionPairIndex).add(0, azIngress);
+                // Add to the list of all junction pairs
+                allJunctionPairs.put(interJunctionPairs.get(currInterJunctionPairIndex), Layer.ETHERNET);
 
 
-                    // Reset the collections of intersection junction pairs and pipes
-                    interJunctionPairs.add(new ArrayList<>());
-                    interAzEROs.add(new ArrayList<>());
-                    interZaEROs.add(new ArrayList<>());
-                    currInterJunctionPairIndex += 1;
-                }
+                // Add the ingress point to the intersegment AZ ERO
+                interAzEROs.get(currInterJunctionPairIndex).add(azIngress);
+                // Add the ingress port to the front of the intersegment ZA ERO
+                // This should reverse the order
+                interZaEROs.get(currInterJunctionPairIndex).add(0, azIngress);
+
+
+                // Reset the collections of intersection junction pairs and pipes
+                interJunctionPairs.add(new ArrayList<>());
+                interAzEROs.add(new ArrayList<>());
+                interZaEROs.add(new ArrayList<>());
+                currInterJunctionPairIndex += 1;
             }
 
             // If we're in a MPLS segment:
@@ -384,10 +384,7 @@ public class PCEAssistant {
 
                 // Retrieve and remove the first and last device from the AZ direction
                 TopoVertex firstDevice = azVertices.remove(0);
-                TopoVertex lastDevice = azVertices.remove(azVertices.size()-1);
-
-                // Store the last device to be added to the next intersegment junction pair
-                currentVertex = lastDevice;
+                lastDevice = azVertices.remove(azVertices.size()-1);
 
                 junctionPairs.get(currJunctionPairIndex).add(firstDevice);
                 junctionPairs.get(currJunctionPairIndex).add(lastDevice);
@@ -406,43 +403,48 @@ public class PCEAssistant {
                 zaEros.add(new ArrayList<>());
                 currJunctionPairIndex += 1;
             }
+            else {
+                for (Integer v = 0; v < azVertices.size(); v++) {
+                    currentVertex = azVertices.get(v);
+                    TopoVertex zaVertex = zaVertices.get(zaVertices.size() - 1 - v);
 
+                    if (!currentVertex.getVertexType().equals(VertexType.PORT)) {
+                        junctionPairs.get(currJunctionPairIndex).add(currentVertex);
 
+                        if (junctionPairs.get(currJunctionPairIndex).size() == 2) {
+                            // Add to the list of all junction pairs
+                            allJunctionPairs.put(junctionPairs.get(currJunctionPairIndex), layer);
 
-            for (Integer v = 0; v < azVertices.size(); v++) {
-                currentVertex = azVertices.get(v);
-                TopoVertex zaVertex = zaVertices.get(zaVertices.size() - 1 - v);
-
-                if (!currentVertex.getVertexType().equals(VertexType.PORT)) {
-                    junctionPairs.get(currJunctionPairIndex).add(currentVertex);
-                    if (junctionPairs.get(currJunctionPairIndex).size() == 2) {
-                        // Add to the list of all junction pairs
-                        allJunctionPairs.put(junctionPairs.get(currJunctionPairIndex), layer);
-
-                        // Reset the current junction pair and pipe ERO lists
-                        if(v < azVertices.size()-1){
+                            // Reset the current junction pair and pipe ERO lists
                             junctionPairs.add(new ArrayList<>());
                             azEros.add(new ArrayList<>());
                             zaEros.add(new ArrayList<>());
                             currJunctionPairIndex += 1;
 
-                            junctionPairs.get(currJunctionPairIndex).add(currentVertex);
+                            // If this is not the last vertex, or there is not another segment
+                            // Add to the current junction pair
+                            if (v != azVertices.size() - 1)
+                                junctionPairs.get(currJunctionPairIndex).add(currentVertex);
                         }
                     }
-                }
-                // This is a port
-                else {
-                    azEros.get(currJunctionPairIndex).add(currentVertex);
-                    zaEros.get(currJunctionPairIndex).add(0, zaVertex);
+                    // This is a port
+                    else {
+                        azEros.get(currJunctionPairIndex).add(currentVertex);
+                        zaEros.get(currJunctionPairIndex).add(0, zaVertex);
+                    }
                 }
             }
 
-
+            if(junctionPairs.get(currJunctionPairIndex).size() == 1){
+                junctionPairs.set(currJunctionPairIndex, new ArrayList<>());
+                azEros.set(currJunctionPairIndex, new ArrayList<>());
+                zaEros.set(currJunctionPairIndex, new ArrayList<>());
+            }
             // If this is not the last segment
             // Start a new intersegment junction pair, and add the last device in the segment
             // Add the egress point of this segment to a new intersegment pipe ERO
             if (i < azSegments.size() - 1) {
-                interJunctionPairs.get(currInterJunctionPairIndex).add(currentVertex);
+                interJunctionPairs.get(currInterJunctionPairIndex).add(lastDevice);
                 interAzEROs.get(currInterJunctionPairIndex).add(azEgress);
                 interZaEROs.get(currInterJunctionPairIndex).add(azEgress);
             }
@@ -450,6 +452,7 @@ public class PCEAssistant {
 
         for(Integer jp = 0; jp < junctionPairs.size(); jp++){
             List<TopoVertex> junctionPair = junctionPairs.get(jp);
+            log.info("Junction Pair: " + junctionPair);
             if(junctionPair.size() == 2) {
                 List<TopoVertex> azERO = azEros.get(jp);
                 List<TopoVertex> zaEro = zaEros.get(jp);
@@ -459,6 +462,7 @@ public class PCEAssistant {
 
         for(Integer jp = 0; jp < interJunctionPairs.size(); jp++){
             List<TopoVertex> junctionPair = interJunctionPairs.get(jp);
+            log.info("InterSegment Junction Pair: " + junctionPair);
             if(junctionPair.size() == 2) {
                 List<TopoVertex> azERO = interAzEROs.get(jp);
                 List<TopoVertex> zaEro = interZaEROs.get(jp);
