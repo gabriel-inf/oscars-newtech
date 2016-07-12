@@ -151,7 +151,7 @@ public class TopPceTestAsymmetric
         for(ReservedEthPipeE ethPipe : allResEthPipes)
         {
             ReservedVlanJunctionE aJunc = ethPipe.getAJunction();
-            ReservedVlanJunctionE zJunc = ethPipe.getAJunction();
+            ReservedVlanJunctionE zJunc = ethPipe.getZJunction();
             Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
             Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
             List<String> azERO = ethPipe.getAzERO();
@@ -197,7 +197,7 @@ public class TopPceTestAsymmetric
                 String expectedZaERO = "nodeM-nodeM:1-nodeL:2-nodeL";
 
                 assert (zJunc.getDeviceUrn().getUrn().equals("nodeM"));
-                assert (theFix.getIfceUrn().getUrn().equals("portz"));
+                assert (theFix.getIfceUrn().getUrn().equals("portZ"));
                 assert (theFix.getReservedBandwidth().getInBandwidth().equals(zaBW));
                 assert (theFix.getReservedBandwidth().getEgBandwidth().equals(azBW));
                 assert (actualAzERO.equals(expectedAzERO));
@@ -257,7 +257,7 @@ public class TopPceTestAsymmetric
         for(ReservedEthPipeE ethPipe : allResEthPipes)
         {
             ReservedVlanJunctionE aJunc = ethPipe.getAJunction();
-            ReservedVlanJunctionE zJunc = ethPipe.getAJunction();
+            ReservedVlanJunctionE zJunc = ethPipe.getZJunction();
             Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
             Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
             List<String> azERO = ethPipe.getAzERO();
@@ -380,7 +380,7 @@ public class TopPceTestAsymmetric
         for(ReservedEthPipeE ethPipe : allResEthPipes)
         {
             ReservedVlanJunctionE aJunc = ethPipe.getAJunction();
-            ReservedVlanJunctionE zJunc = ethPipe.getAJunction();
+            ReservedVlanJunctionE zJunc = ethPipe.getZJunction();
             Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
             Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
             List<String> azERO = ethPipe.getAzERO();
@@ -448,7 +448,7 @@ public class TopPceTestAsymmetric
         for(ReservedMplsPipeE mplsPipe : allResMplsPipes)
         {
             ReservedVlanJunctionE aJunc = mplsPipe.getAJunction();
-            ReservedVlanJunctionE zJunc = mplsPipe.getAJunction();
+            ReservedVlanJunctionE zJunc = mplsPipe.getZJunction();
             Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
             Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
             List<String> azERO = mplsPipe.getAzERO();
@@ -554,7 +554,7 @@ public class TopPceTestAsymmetric
         for(ReservedEthPipeE ethPipe : allResEthPipes)
         {
             ReservedVlanJunctionE aJunc = ethPipe.getAJunction();
-            ReservedVlanJunctionE zJunc = ethPipe.getAJunction();
+            ReservedVlanJunctionE zJunc = ethPipe.getZJunction();
             Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
             Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
             List<String> azERO = ethPipe.getAzERO();
@@ -753,7 +753,7 @@ public class TopPceTestAsymmetric
         for(ReservedEthPipeE ethPipe : allResEthPipes)
         {
             ReservedVlanJunctionE aJunc = ethPipe.getAJunction();
-            ReservedVlanJunctionE zJunc = ethPipe.getAJunction();
+            ReservedVlanJunctionE zJunc = ethPipe.getZJunction();
             Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
             Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
             List<String> azERO = ethPipe.getAzERO();
@@ -778,7 +778,7 @@ public class TopPceTestAsymmetric
             assert (zFixes.size() == 1);
 
             ReservedVlanFixtureE aFix = aFixes.iterator().next();
-            ReservedVlanFixtureE zFix = aFixes.iterator().next();
+            ReservedVlanFixtureE zFix = zFixes.iterator().next();
 
             assert (aFix.getIfceUrn().getUrn().equals("portA"));
             assert (aFix.getReservedBandwidth().getInBandwidth().equals(azBW));
@@ -842,7 +842,7 @@ public class TopPceTestAsymmetric
         for(ReservedMplsPipeE mplsPipe : allResMplsPipes)
         {
             ReservedVlanJunctionE aJunc = mplsPipe.getAJunction();
-            ReservedVlanJunctionE zJunc = mplsPipe.getAJunction();
+            ReservedVlanJunctionE zJunc = mplsPipe.getZJunction();
             Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
             Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
             List<String> azERO = mplsPipe.getAzERO();
@@ -867,7 +867,7 @@ public class TopPceTestAsymmetric
             assert (zFixes.size() == 1);
 
             ReservedVlanFixtureE aFix = aFixes.iterator().next();
-            ReservedVlanFixtureE zFix = aFixes.iterator().next();
+            ReservedVlanFixtureE zFix = zFixes.iterator().next();
 
             assert (aFix.getIfceUrn().getUrn().equals("portA"));
             assert (aFix.getReservedBandwidth().getInBandwidth().equals(azBW));
@@ -931,7 +931,7 @@ public class TopPceTestAsymmetric
         for(ReservedEthPipeE ethPipe : allResEthPipes)
         {
             ReservedVlanJunctionE aJunc = ethPipe.getAJunction();
-            ReservedVlanJunctionE zJunc = ethPipe.getAJunction();
+            ReservedVlanJunctionE zJunc = ethPipe.getZJunction();
             Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
             Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
             List<String> azERO = ethPipe.getAzERO();
@@ -956,7 +956,7 @@ public class TopPceTestAsymmetric
             assert (zFixes.size() == 1);
 
             ReservedVlanFixtureE aFix = aFixes.iterator().next();
-            ReservedVlanFixtureE zFix = aFixes.iterator().next();
+            ReservedVlanFixtureE zFix = zFixes.iterator().next();
 
             assert (aFix.getIfceUrn().getUrn().equals("portA"));
             assert (aFix.getReservedBandwidth().getInBandwidth().equals(azBW));
@@ -1020,7 +1020,7 @@ public class TopPceTestAsymmetric
         for(ReservedEthPipeE ethPipe : allResEthPipes)
         {
             ReservedVlanJunctionE aJunc = ethPipe.getAJunction();
-            ReservedVlanJunctionE zJunc = ethPipe.getAJunction();
+            ReservedVlanJunctionE zJunc = ethPipe.getZJunction();
             Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
             Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
             List<String> azERO = ethPipe.getAzERO();
@@ -1048,7 +1048,7 @@ public class TopPceTestAsymmetric
                 ReservedVlanFixtureE theFix = aFixes.iterator().next();
 
                 String expectedAzERO = "nodeK-nodeK:1-nodeL:1-nodeL";
-                String expectedZaERO = "nodeL-nodeL:1-nodeK:1-nodek";
+                String expectedZaERO = "nodeL-nodeL:1-nodeK:1-nodeK";
 
                 assert (zJunc.getDeviceUrn().getUrn().equals("nodeL"));
                 assert (theFix.getIfceUrn().getUrn().equals("portA"));
@@ -1127,7 +1127,7 @@ public class TopPceTestAsymmetric
         for(ReservedMplsPipeE mplsPipe : allResMplsPipes)
         {
             ReservedVlanJunctionE aJunc = mplsPipe.getAJunction();
-            ReservedVlanJunctionE zJunc = mplsPipe.getAJunction();
+            ReservedVlanJunctionE zJunc = mplsPipe.getZJunction();
             Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
             Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
             List<String> azERO = mplsPipe.getAzERO();
@@ -1152,7 +1152,7 @@ public class TopPceTestAsymmetric
             assert (zFixes.size() == 1);
 
             ReservedVlanFixtureE aFix = aFixes.iterator().next();
-            ReservedVlanFixtureE zFix = aFixes.iterator().next();
+            ReservedVlanFixtureE zFix = zFixes.iterator().next();
 
             assert (aFix.getIfceUrn().getUrn().equals("portA"));
             assert (aFix.getReservedBandwidth().getInBandwidth().equals(azBW));
@@ -1216,7 +1216,7 @@ public class TopPceTestAsymmetric
         for(ReservedEthPipeE ethPipe : allResEthPipes)
         {
             ReservedVlanJunctionE aJunc = ethPipe.getAJunction();
-            ReservedVlanJunctionE zJunc = ethPipe.getAJunction();
+            ReservedVlanJunctionE zJunc = ethPipe.getZJunction();
             Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
             Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
             List<String> azERO = ethPipe.getAzERO();

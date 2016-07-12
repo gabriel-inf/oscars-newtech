@@ -1366,4 +1366,260 @@ public class TopologyBuilder
 
         testBuilder.populateRepos(topoNodes, topoLinks, portDeviceMap);
     }
+
+
+    public void buildSharedLinkTopo1()
+    {
+        log.info("Building Shared-Link Test Topology 1");
+
+        List<TopoVertex> topoNodes = new ArrayList<>();
+        List<TopoEdge> topoLinks = new ArrayList<>();
+        Map<TopoVertex, TopoVertex> portDeviceMap = new HashMap<>();
+
+        VertexType kType = VertexType.SWITCH;
+        VertexType lType = VertexType.SWITCH;
+        VertexType mType = VertexType.SWITCH;
+        VertexType nType = VertexType.SWITCH;
+
+        buildSharedLinkTopology(topoNodes, topoLinks, portDeviceMap, kType, lType, mType, nType);
+
+        testBuilder.populateRepos(topoNodes, topoLinks, portDeviceMap);
+    }
+
+    public void buildSharedLinkTopo2()
+    {
+        log.info("Building Shared-Link Test Topology 2");
+
+        List<TopoVertex> topoNodes = new ArrayList<>();
+        List<TopoEdge> topoLinks = new ArrayList<>();
+        Map<TopoVertex, TopoVertex> portDeviceMap = new HashMap<>();
+
+        VertexType kType = VertexType.ROUTER;
+        VertexType lType = VertexType.ROUTER;
+        VertexType mType = VertexType.ROUTER;
+        VertexType nType = VertexType.ROUTER;
+
+        buildSharedLinkTopology(topoNodes, topoLinks, portDeviceMap, kType, lType, mType, nType);
+
+        testBuilder.populateRepos(topoNodes, topoLinks, portDeviceMap);
+    }
+
+    public void buildSharedLinkTopo3()
+    {
+        log.info("Building Shared-Link Test Topology 3");
+
+        List<TopoVertex> topoNodes = new ArrayList<>();
+        List<TopoEdge> topoLinks = new ArrayList<>();
+        Map<TopoVertex, TopoVertex> portDeviceMap = new HashMap<>();
+
+        VertexType kType = VertexType.SWITCH;
+        VertexType lType = VertexType.ROUTER;
+        VertexType mType = VertexType.ROUTER;
+        VertexType nType = VertexType.SWITCH;
+
+        buildSharedLinkTopology(topoNodes, topoLinks, portDeviceMap, kType, lType, mType, nType);
+
+        testBuilder.populateRepos(topoNodes, topoLinks, portDeviceMap);
+    }
+
+    public void buildSharedLinkTopo4()
+    {
+        log.info("Building Shared-Link Test Topology 4");
+
+        List<TopoVertex> topoNodes = new ArrayList<>();
+        List<TopoEdge> topoLinks = new ArrayList<>();
+        Map<TopoVertex, TopoVertex> portDeviceMap = new HashMap<>();
+
+        VertexType kType = VertexType.ROUTER;
+        VertexType lType = VertexType.SWITCH;
+        VertexType mType = VertexType.SWITCH;
+        VertexType nType = VertexType.ROUTER;
+
+        buildSharedLinkTopology(topoNodes, topoLinks, portDeviceMap, kType, lType, mType, nType);
+
+        testBuilder.populateRepos(topoNodes, topoLinks, portDeviceMap);
+    }
+
+    private void buildSharedLinkTopology(List<TopoVertex> topoNodes, List<TopoEdge> topoLinks, Map<TopoVertex,TopoVertex> portDeviceMap, VertexType typeK, VertexType typeL, VertexType typeM, VertexType typeN)
+    {
+        class VertTypeTuple<V, T>
+        {
+            public final V v;
+            public final T t;
+
+            public VertTypeTuple(V vSpec, T tSpec)
+            {
+                v = vSpec;
+                t = tSpec;
+            }
+        }
+
+        List<VertTypeTuple<TopoVertex, VertexType>> networkPorts = new ArrayList<>();
+
+        // Devices //
+        TopoVertex nodeK = new TopoVertex("nodeK", typeK);
+        TopoVertex nodeL = new TopoVertex("nodeL", typeL);
+        TopoVertex nodeM = new TopoVertex("nodeM", typeM);
+        TopoVertex nodeN = new TopoVertex("nodeN", typeN);
+
+        // Ports //
+        TopoVertex portA = new TopoVertex("portA", VertexType.PORT);
+        TopoVertex portZ = new TopoVertex("portZ", VertexType.PORT);
+        TopoVertex portK1 = new TopoVertex("nodeK:1", VertexType.PORT);
+        TopoVertex portK2 = new TopoVertex("nodeK:2", VertexType.PORT);
+        TopoVertex portL1 = new TopoVertex("nodeL:1", VertexType.PORT);
+        TopoVertex portL2 = new TopoVertex("nodeL:2", VertexType.PORT);
+        TopoVertex portL3 = new TopoVertex("nodeL:3", VertexType.PORT);
+        TopoVertex portM1 = new TopoVertex("nodeM:1", VertexType.PORT);
+        TopoVertex portM2 = new TopoVertex("nodeM:2", VertexType.PORT);
+        TopoVertex portM3 = new TopoVertex("nodeM:3", VertexType.PORT);
+        TopoVertex portN1 = new TopoVertex("nodeN:1", VertexType.PORT);
+        TopoVertex portN2 = new TopoVertex("nodeN:2", VertexType.PORT);
+
+        networkPorts.add(new VertTypeTuple<>(portK1, nodeK.getVertexType()));
+        networkPorts.add(new VertTypeTuple<>(portK2, nodeK.getVertexType()));
+        networkPorts.add(new VertTypeTuple<>(portL1, nodeL.getVertexType()));
+        networkPorts.add(new VertTypeTuple<>(portL2, nodeL.getVertexType()));
+        networkPorts.add(new VertTypeTuple<>(portL3, nodeL.getVertexType()));
+        networkPorts.add(new VertTypeTuple<>(portM1, nodeM.getVertexType()));
+        networkPorts.add(new VertTypeTuple<>(portM2, nodeM.getVertexType()));
+        networkPorts.add(new VertTypeTuple<>(portM3, nodeM.getVertexType()));
+        networkPorts.add(new VertTypeTuple<>(portN1, nodeN.getVertexType()));
+        networkPorts.add(new VertTypeTuple<>(portN2, nodeN.getVertexType()));
+
+        // End-Port Links //
+        TopoEdge edgeInt_A_K = new TopoEdge(portA, nodeK, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_Z_N = new TopoEdge(portZ, nodeN, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_K_A = new TopoEdge(nodeK, portA, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_N_Z = new TopoEdge(nodeN, portZ, 0L, Layer.INTERNAL);
+
+        // Internal Links //
+        TopoEdge edgeInt_K1_K = new TopoEdge(portK1, nodeK, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_K2_K = new TopoEdge(portK2, nodeK, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_L1_L = new TopoEdge(portL1, nodeL, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_L2_L = new TopoEdge(portL2, nodeL, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_L3_L = new TopoEdge(portL3, nodeL, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_M1_M = new TopoEdge(portM1, nodeM, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_M2_M = new TopoEdge(portM2, nodeM, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_M3_M = new TopoEdge(portM3, nodeM, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_N1_N = new TopoEdge(portN1, nodeN, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_N2_N = new TopoEdge(portN2, nodeN, 0L, Layer.INTERNAL);
+
+        // Internal-Reverse Links //
+        TopoEdge edgeInt_K_K1 = new TopoEdge(nodeK, portK1, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_K_K2 = new TopoEdge(nodeK, portK2, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_L_L1 = new TopoEdge(nodeL, portL1, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_L_L2 = new TopoEdge(nodeL, portL2, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_L_L3 = new TopoEdge(nodeL, portL3, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_M_M1 = new TopoEdge(nodeM, portM1, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_M_M2 = new TopoEdge(nodeM, portM2, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_M_M3 = new TopoEdge(nodeM, portM3, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_N_N1 = new TopoEdge(nodeN, portN1, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_N_N2 = new TopoEdge(nodeN, portN2, 0L, Layer.INTERNAL);
+
+
+        // Network Links //
+        for(VertTypeTuple onePort : networkPorts)
+        {
+            TopoVertex oneVertex = (TopoVertex)onePort.v;
+            VertexType oneType = (VertexType)onePort.t;
+
+            for(VertTypeTuple anotherPort : networkPorts)
+            {
+                TopoVertex anotherVertex = (TopoVertex)anotherPort.v;
+                VertexType anotherType = (VertexType)anotherPort.t;
+
+                TopoEdge edgeNet;
+                Layer linkLayer = Layer.ETHERNET;
+                Long linkMetric = 1L;
+                if(oneVertex.getUrn().equals("nodeK:1") && anotherVertex.getUrn().equals("nodeL:1"))
+                    linkMetric = 50L;
+                else if(oneVertex.getUrn().equals("nodeK:2") && anotherVertex.getUrn().equals("nodeM:1"))
+                    linkMetric = 300L;
+                else if(oneVertex.getUrn().equals("nodeL:1") && anotherVertex.getUrn().equals("nodeK:1"))
+                    linkMetric = 200L;
+                else if(oneVertex.getUrn().equals("nodeL:2") && anotherVertex.getUrn().equals("nodeN:1"))
+                    linkMetric = 200L;
+                else if(oneVertex.getUrn().equals("nodeL:3") && anotherVertex.getUrn().equals("nodeM:2"))
+                    linkMetric = 50L;
+                else if(oneVertex.getUrn().equals("nodeM:1") && anotherVertex.getUrn().equals("nodeK:2"))
+                    linkMetric = 50L;
+                else if(oneVertex.getUrn().equals("nodeM:2") && anotherVertex.getUrn().equals("nodeL:3"))
+                    linkMetric = 100L;
+                else if(oneVertex.getUrn().equals("nodeM:3") && anotherVertex.getUrn().equals("nodeN:2"))
+                    linkMetric = 50L;
+                else if(oneVertex.getUrn().equals("nodeN:1") && anotherVertex.getUrn().equals("nodeL:2"))
+                    linkMetric = 50L;
+                else if(oneVertex.getUrn().equals("nodeN:2") && anotherVertex.getUrn().equals("nodeM:3"))
+                    linkMetric = 300L;
+                else
+                    continue;
+
+
+                if(oneType.equals(Layer.MPLS) && anotherType.equals(Layer.MPLS))
+                {
+                    linkLayer = Layer.MPLS;
+                }
+
+                edgeNet = new TopoEdge(oneVertex, anotherVertex, linkMetric, linkLayer);
+                topoLinks.add(edgeNet);
+            }
+        }
+
+        topoNodes.add(nodeK);
+        topoNodes.add(nodeL);
+        topoNodes.add(nodeM);
+        topoNodes.add(nodeN);
+
+        topoNodes.add(portA);
+        topoNodes.add(portZ);
+        topoNodes.add(portK1);
+        topoNodes.add(portK2);
+        topoNodes.add(portL1);
+        topoNodes.add(portL2);
+        topoNodes.add(portL3);
+        topoNodes.add(portM1);
+        topoNodes.add(portM2);
+        topoNodes.add(portM3);
+        topoNodes.add(portN1);
+        topoNodes.add(portN2);
+
+        topoLinks.add(edgeInt_A_K);
+        topoLinks.add(edgeInt_Z_N);
+        topoLinks.add(edgeInt_K1_K);
+        topoLinks.add(edgeInt_K2_K);
+        topoLinks.add(edgeInt_L1_L);
+        topoLinks.add(edgeInt_L2_L);
+        topoLinks.add(edgeInt_L3_L);
+        topoLinks.add(edgeInt_M1_M);
+        topoLinks.add(edgeInt_M2_M);
+        topoLinks.add(edgeInt_M3_M);
+        topoLinks.add(edgeInt_N1_N);
+        topoLinks.add(edgeInt_N2_N);
+
+        topoLinks.add(edgeInt_K_A);
+        topoLinks.add(edgeInt_N_Z);
+        topoLinks.add(edgeInt_K_K1);
+        topoLinks.add(edgeInt_K_K2);
+        topoLinks.add(edgeInt_L_L1);
+        topoLinks.add(edgeInt_L_L2);
+        topoLinks.add(edgeInt_L_L3);
+        topoLinks.add(edgeInt_M_M1);
+        topoLinks.add(edgeInt_M_M2);
+        topoLinks.add(edgeInt_M_M3);
+        topoLinks.add(edgeInt_N_N1);
+        topoLinks.add(edgeInt_N_N2);
+
+        // Map Ports to Devices for simplicity in utility class //
+        for(TopoEdge oneEdge : topoLinks)
+        {
+            if(oneEdge.getLayer().equals(Layer.INTERNAL))
+            {
+                if(oneEdge.getA().getVertexType().equals(VertexType.PORT))
+                {
+                    portDeviceMap.put(oneEdge.getA(), oneEdge.getZ());
+                }
+            }
+        }
+    }
 }
