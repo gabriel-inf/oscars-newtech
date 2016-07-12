@@ -81,11 +81,13 @@ public class TopPceTest
 
         ReservedVlanFlowE reservedFlow = reservedBlueprint.get().getVlanFlow();
 
-        Set<ReservedEthPipeE> allResPipes = reservedFlow.getPipes();
+        Set<ReservedEthPipeE> allResEthPipes = reservedFlow.getEthPipes();
+        Set<ReservedMplsPipeE> allResMplsPipes = reservedFlow.getMplsPipes();
         Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
 
-        assert(allResPipes.size() == 0);
         assert(allResJunctions.size() == 1);
+        assert(allResEthPipes.size() == 0);
+        assert(allResMplsPipes.size() == 0);
 
         // Junctions
         for(ReservedVlanJunctionE oneJunc : allResJunctions)
@@ -144,45 +146,71 @@ public class TopPceTest
 
         ReservedVlanFlowE reservedFlow = reservedBlueprint.get().getVlanFlow();
 
-        Set<ReservedEthPipeE> allResPipes = reservedFlow.getPipes();
+        Set<ReservedEthPipeE> allResEthPipes = reservedFlow.getEthPipes();
+        Set<ReservedMplsPipeE> allResMplsPipes = reservedFlow.getMplsPipes();
         Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
-        List<ReservedBandwidthE> allResBWs = new ArrayList<>();
 
-        assert(allResPipes.size() == 0);
-        assert(allResJunctions.size() == 3);
+        assert(allResJunctions.size() == 0);
+        assert(allResEthPipes.size() == 2);
+        assert(allResMplsPipes.size() == 0);
 
-        allResJunctions.stream()
-                .forEach(j -> {
-                    assert(j.getDeviceUrn().getUrn().equals("nodeL") || j.getDeviceUrn().getUrn().equals("nodeM") || j.getDeviceUrn().getUrn().equals("nodeP"));
+        // Ethernet Pipes
+        for(ReservedEthPipeE ethPipe : allResEthPipes)
+        {
+            ReservedVlanJunctionE aJunc = ethPipe.getAJunction();
+            ReservedVlanJunctionE zJunc = ethPipe.getAJunction();
+            Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
+            Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
+            List<String> azERO = ethPipe.getAzERO();
+            List<String> zaERO = ethPipe.getZaERO();
+            String actualAzERO = aJunc.getDeviceUrn().getUrn() + "-";
+            String actualZaERO = zJunc.getDeviceUrn().getUrn() + "-";
 
-                    assert(j.getFixtures().size() == 2);
+            for(String x : azERO)
+                actualAzERO = actualAzERO + x + "-";
 
-                    Iterator<ReservedVlanFixtureE> jIter = j.getFixtures().iterator();
-                    ReservedVlanFixtureE fixA = jIter.next();
-                    ReservedVlanFixtureE fixZ = jIter.next();
+            for(String x : zaERO)
+                actualZaERO = actualZaERO + x + "-";
 
-                    if(j.getDeviceUrn().getUrn().equals("nodeL"))
-                    {
-                        assert(fixA.getIfceUrn().getUrn().equals("nodeL:1") && fixZ.getIfceUrn().getUrn().equals("nodeL:2") || fixZ.getIfceUrn().getUrn().equals("nodeL:1") && fixA.getIfceUrn().getUrn().equals("nodeL:2"));
-                    }
-                    else if(j.getDeviceUrn().getUrn().equals("nodeM"))
-                    {
-                        assert(fixA.getIfceUrn().getUrn().equals("nodeM:1") && fixZ.getIfceUrn().getUrn().equals("portZ") || fixZ.getIfceUrn().getUrn().equals("nodeM:1") && fixA.getIfceUrn().getUrn().equals("portZ"));
-                    }
-                    else if(j.getDeviceUrn().getUrn().equals("nodeP"))
-                    {
-                        assert(fixA.getIfceUrn().getUrn().equals("portA") && fixZ.getIfceUrn().getUrn().equals("nodeP:1") || fixZ.getIfceUrn().getUrn().equals("portA") && fixA.getIfceUrn().getUrn().equals("nodeP:1"));
-                    }
+            actualAzERO = actualAzERO + zJunc.getDeviceUrn();
+            actualZaERO = actualZaERO + aJunc.getDeviceUrn();
 
-                    allResBWs.add(j.getFixtures().iterator().next().getReservedBandwidth());
-                    allResBWs.add(j.getFixtures().iterator().next().getReservedBandwidth());
-                });
+            assert (aJunc.getDeviceUrn().getUrn().equals("nodeP") || aJunc.getDeviceUrn().getUrn().equals("nodeL"));
+            assert (zJunc.getDeviceUrn().getUrn().equals("nodeL") || zJunc.getDeviceUrn().getUrn().equals("nodeM"));
 
-        allResBWs.stream()
-                .forEach(bw -> {
-                    assert(bw.getInBandwidth().equals(bw.getEgBandwidth()));
-                    assert(bw.getInBandwidth().equals(azBW));
-                });
+            if(aJunc.getDeviceUrn().getUrn().equals("nodeP"))
+            {
+                assert (aFixes.size() == 1);
+                assert (zFixes.size() == 0);
+                ReservedVlanFixtureE theFix = aFixes.iterator().next();
+
+                String expectedAzERO = "nodeP-nodeP:1-nodeL:1-nodeL";
+                String expectedZaERO = "nodeL-nodeL:1-nodeP:1-nodeP";
+
+                assert (zJunc.getDeviceUrn().getUrn().equals("nodeL"));
+                assert (theFix.getIfceUrn().getUrn().equals("portA"));
+                assert (theFix.getReservedBandwidth().getInBandwidth().equals(azBW));
+                assert (theFix.getReservedBandwidth().getEgBandwidth().equals(zaBW));
+                assert (actualAzERO.equals(expectedAzERO));
+                assert (actualZaERO.equals(expectedZaERO));
+            }
+            else
+            {
+                assert (aFixes.size() == 0);
+                assert (zFixes.size() == 1);
+                ReservedVlanFixtureE theFix = zFixes.iterator().next();
+
+                String expectedAzERO = "nodeL-nodeL:2-nodeM:1-nodeM";
+                String expectedZaERO = "nodeM-nodeM:1-nodeL:2-nodeL";
+
+                assert (zJunc.getDeviceUrn().getUrn().equals("nodeM"));
+                assert (theFix.getIfceUrn().getUrn().equals("portz"));
+                assert (theFix.getReservedBandwidth().getInBandwidth().equals(zaBW));
+                assert (theFix.getReservedBandwidth().getEgBandwidth().equals(azBW));
+                assert (actualAzERO.equals(expectedAzERO));
+                assert (actualZaERO.equals(expectedZaERO));
+            }
+        }
 
         log.info("test 'basicPceTest2' passed.");
     }
@@ -224,60 +252,87 @@ public class TopPceTest
 
         ReservedVlanFlowE reservedFlow = reservedBlueprint.get().getVlanFlow();
 
-        Set<ReservedEthPipeE> allResPipes = reservedFlow.getPipes();
+        Set<ReservedEthPipeE> allResEthPipes = reservedFlow.getEthPipes();
+        Set<ReservedMplsPipeE> allResMplsPipes = reservedFlow.getMplsPipes();
         Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
 
-        assert(allResPipes.size() == 1);
-        assert(allResJunctions.size() == 1);
+        assert(allResJunctions.size() == 0);
+        assert(allResEthPipes.size() == 1);
+        assert(allResMplsPipes.size() == 1);
 
-        ReservedVlanJunctionE onlyJunc = allResJunctions.iterator().next();
-        Iterator<ReservedVlanFixtureE> iterF = onlyJunc.getFixtures().iterator();
-        ReservedVlanFixtureE fixJ1 = iterF.next();
-        ReservedVlanFixtureE fixJ2 = iterF.next();
+        // Ethernet Pipes
+        for(ReservedEthPipeE ethPipe : allResEthPipes)
+        {
+            ReservedVlanJunctionE aJunc = ethPipe.getAJunction();
+            ReservedVlanJunctionE zJunc = ethPipe.getAJunction();
+            Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
+            Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
+            List<String> azERO = ethPipe.getAzERO();
+            List<String> zaERO = ethPipe.getZaERO();
+            String actualAzERO = aJunc.getDeviceUrn().getUrn() + "-";
+            String actualZaERO = zJunc.getDeviceUrn().getUrn() + "-";
 
-        assert(onlyJunc.getDeviceUrn().getUrn().equals("nodeK"));
+            for(String x : azERO)
+                actualAzERO = actualAzERO + x + "-";
 
-        assert(fixJ1.getIfceUrn().getUrn().equals("portA") || fixJ1.getIfceUrn().getUrn().equals("nodeK:1"));
-        assert(fixJ2.getIfceUrn().getUrn().equals("portA") || fixJ2.getIfceUrn().getUrn().equals("nodeK:1"));
+            for(String x : zaERO)
+                actualZaERO = actualZaERO + x + "-";
 
-        assert(fixJ1.getReservedBandwidth().getInBandwidth().equals(azBW));
-        assert(fixJ2.getReservedBandwidth().getInBandwidth().equals(azBW));
+            actualAzERO = actualAzERO + zJunc.getDeviceUrn();
+            actualZaERO = actualZaERO + aJunc.getDeviceUrn();
+            String expectedAzERO = "nodeK-nodeK:1-nodeP:1-nodeP";
+            String expectedZaERO = "nodeP-nodeP:1-nodeK:1-nodeK";
 
-        ReservedEthPipeE onlyPipe = allResPipes.iterator().next();
+            assert (aJunc.getDeviceUrn().getUrn().equals("nodeK"));
+            assert (zJunc.getDeviceUrn().getUrn().equals("nodeP"));
+            assert (aFixes.size() == 1);
+            assert (zFixes.size() == 0);
 
-        ReservedVlanJunctionE juncA = onlyPipe.getAJunction();
-        ReservedVlanJunctionE juncZ = onlyPipe.getZJunction();
-        ReservedVlanFixtureE fixA = juncA.getFixtures().iterator().next();
-        ReservedVlanFixtureE fixZ = juncZ.getFixtures().iterator().next();
+            ReservedVlanFixtureE theFix = aFixes.iterator().next();
 
-        assert(juncA.getDeviceUrn().getUrn().equals("nodeP"));
-        assert(juncZ.getDeviceUrn().getUrn().equals("nodeQ"));
-        assert(fixA.getIfceUrn().getUrn().equals("nodeP:1"));
-        assert(fixZ.getIfceUrn().getUrn().equals("portZ"));
+            assert (theFix.getIfceUrn().getUrn().equals("portA"));
+            assert (theFix.getReservedBandwidth().getInBandwidth().equals(azBW));
+            assert (theFix.getReservedBandwidth().getEgBandwidth().equals(zaBW));
+            assert (actualAzERO.equals(expectedAzERO));
+            assert (actualZaERO.equals(expectedZaERO));
+        }
 
+        // Mpls Pipes
+        for(ReservedMplsPipeE mplsPipe : allResMplsPipes)
+        {
+            ReservedVlanJunctionE aJunc = mplsPipe.getAJunction();
+            ReservedVlanJunctionE zJunc = mplsPipe.getZJunction();
+            Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
+            Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
+            List<String> azERO = mplsPipe.getAzERO();
+            List<String> zaERO = mplsPipe.getZaERO();
+            String actualAzERO = aJunc.getDeviceUrn().getUrn() + "-";
+            String actualZaERO = zJunc.getDeviceUrn().getUrn() + "-";
 
-        assert(fixA.getReservedBandwidth().getInBandwidth().equals(azBW));
-        assert(fixZ.getReservedBandwidth().getInBandwidth().equals(azBW));
-        assert(fixA.getReservedBandwidth().getEgBandwidth().equals(azBW));
-        assert(fixZ.getReservedBandwidth().getEgBandwidth().equals(azBW));
+            for(String x : azERO)
+                actualAzERO = actualAzERO + x + "-";
 
-        List<String> azERO = onlyPipe.getAzERO();
-        List<String> zaERO = onlyPipe.getZaERO();
+            for(String x : zaERO)
+                actualZaERO = actualZaERO + x + "-";
 
-        String actualAzERO = "";
-        String actualZaERO = "";
+            actualAzERO = actualAzERO + zJunc.getDeviceUrn();
+            actualZaERO = actualZaERO + aJunc.getDeviceUrn();
+            String expectedAzERO = "nodeP-nodeP:1-nodeQ:1-nodeQ";
+            String expectedZaERO = "nodeQ-nodeQ:1-nodeP:1-nodeP";
 
-        for(String x : azERO)
-            actualAzERO = actualAzERO + x + "-";
+            assert (aJunc.getDeviceUrn().getUrn().equals("nodeP"));
+            assert (zJunc.getDeviceUrn().getUrn().equals("nodeQ"));
+            assert (aFixes.size() == 0);
+            assert (zFixes.size() == 1);
 
-        for(String x : zaERO)
-            actualZaERO = actualZaERO + x + "-";
+            ReservedVlanFixtureE theFix = zFixes.iterator().next();
 
-        String expectedAzERO = "nodeP-nodeP:2-nodeQ:1-nodeQ-";
-        String expectedZaERO = "nodeQ-nodeQ:1-nodeP:2-nodeP-";
-
-        assert(actualAzERO.equals(expectedAzERO));
-        assert(actualZaERO.equals(expectedZaERO));
+            assert (theFix.getIfceUrn().getUrn().equals("portZ"));
+            assert (theFix.getReservedBandwidth().getInBandwidth().equals(zaBW));
+            assert (theFix.getReservedBandwidth().getEgBandwidth().equals(azBW));
+            assert (actualAzERO.equals(expectedAzERO));
+            assert (actualZaERO.equals(expectedZaERO));
+        }
 
         log.info("test 'basicPceTest3' passed.");
     }
@@ -320,84 +375,139 @@ public class TopPceTest
 
         ReservedVlanFlowE reservedFlow = reservedBlueprint.get().getVlanFlow();
 
-        Set<ReservedEthPipeE> allResPipes = reservedFlow.getPipes();
+        Set<ReservedEthPipeE> allResEthPipes = reservedFlow.getEthPipes();
+        Set<ReservedMplsPipeE> allResMplsPipes = reservedFlow.getMplsPipes();
         Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
 
-        assert(allResPipes.size() == 1);
-        assert(allResJunctions.size() == 2);
+        assert(allResJunctions.size() == 0);
+        assert(allResEthPipes.size() == 2);
+        assert(allResMplsPipes.size() == 1);
 
-        // Junctions
-        for(ReservedVlanJunctionE oneJunc : allResJunctions)
+        // Ethernet Pipes
+        for(ReservedEthPipeE ethPipe : allResEthPipes)
         {
-            assert(oneJunc.getDeviceUrn().getUrn().equals("nodeK") || oneJunc.getDeviceUrn().getUrn().equals("nodeL") || oneJunc.getDeviceUrn().getUrn().equals("nodeM"));
+            ReservedVlanJunctionE aJunc = ethPipe.getAJunction();
+            ReservedVlanJunctionE zJunc = ethPipe.getAJunction();
+            Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
+            Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
+            List<String> azERO = ethPipe.getAzERO();
+            List<String> zaERO = ethPipe.getZaERO();
+            String actualAzERO = aJunc.getDeviceUrn().getUrn() + "-";
+            String actualZaERO = zJunc.getDeviceUrn().getUrn() + "-";
 
-            Iterator<ReservedVlanFixtureE> iterF = oneJunc.getFixtures().iterator();
-            ReservedVlanFixtureE fix1 = iterF.next();
-            ReservedVlanFixtureE fix2 = iterF.next();
+            for(String x : azERO)
+                actualAzERO = actualAzERO + x + "-";
 
-            assert(fix1.getReservedBandwidth().getInBandwidth() == azBW);
-            assert(fix2.getReservedBandwidth().getInBandwidth() == azBW);
+            for(String x : zaERO)
+                actualZaERO = actualZaERO + x + "-";
 
-            if(oneJunc.getDeviceUrn().getUrn().equals("nodeK"))
+            actualAzERO = actualAzERO + zJunc.getDeviceUrn();
+            actualZaERO = actualZaERO + aJunc.getDeviceUrn();
+
+            assert (aJunc.getDeviceUrn().getUrn().equals("nodeK") || aJunc.getDeviceUrn().getUrn().equals("nodeL") || aJunc.getDeviceUrn().getUrn().equals("nodeM"));
+            assert (zJunc.getDeviceUrn().getUrn().equals("nodeL") || zJunc.getDeviceUrn().getUrn().equals("nodeM") || zJunc.getDeviceUrn().getUrn().equals("nodeP") || zJunc.getDeviceUrn().getUrn().equals("nodeR"));
+
+            if(aJunc.getDeviceUrn().getUrn().equals("nodeK"))
             {
-                assert(fix1.getIfceUrn().getUrn().equals("portA") || fix1.getIfceUrn().getUrn().equals("nodeK:1") || fix1.getIfceUrn().getUrn().equals("nodeK:2"));
-                assert(fix2.getIfceUrn().getUrn().equals("portA") || fix2.getIfceUrn().getUrn().equals("nodeK:1") || fix2.getIfceUrn().getUrn().equals("nodeK:2"));
+                assert (aFixes.size() == 1);
+                assert (zFixes.size() == 0);
+                ReservedVlanFixtureE theFix = aFixes.iterator().next();
 
-                if(fix1.getIfceUrn().getUrn().equals("nodeK:1") || fix1.getIfceUrn().getUrn().equals("nodeK:2"))
-                    assert(fix2.getIfceUrn().getUrn().equals("portA"));
+                String expectedAzERO1 = "nodeK-nodeK:1-nodeL:1-nodeL";
+                String expectedAzERO2 = "nodeK-nodeK:2-nodeM:1-nodeM";
+                String expectedZaERO1 = "nodeL-nodeL:1-nodeK:1-nodeK";
+                String expectedZaERO2 = "nodeM-nodeM:1-nodeK:2-nodeK";
 
-                if(fix2.getIfceUrn().getUrn().equals("nodeK:1") || fix2.getIfceUrn().getUrn().equals("nodeK:2"))
-                    assert(fix1.getIfceUrn().getUrn().equals("portA"));
+                assert (zJunc.getDeviceUrn().getUrn().equals("nodeL") || zJunc.getDeviceUrn().getUrn().equals("nodeL"));
+                assert (theFix.getIfceUrn().getUrn().equals("portA"));
+                assert (theFix.getReservedBandwidth().getInBandwidth().equals(azBW));
+                assert (theFix.getReservedBandwidth().getEgBandwidth().equals(zaBW));
+                assert (actualAzERO.equals(expectedAzERO1) || actualAzERO.equals(expectedAzERO2));
+                assert (actualZaERO.equals(expectedZaERO1) || actualZaERO.equals(expectedZaERO1));
             }
-            else if(oneJunc.getDeviceUrn().getUrn().equals("nodeL"))
+            else if(aJunc.getDeviceUrn().getUrn().equals("nodeL"))
             {
-                assert(fix1.getIfceUrn().getUrn().equals("nodeL:1") || fix1.getIfceUrn().getUrn().equals("nodeL:3"));
-                assert(fix2.getIfceUrn().getUrn().equals("nodeL:1") || fix2.getIfceUrn().getUrn().equals("nodeL:3"));
+                assert (aFixes.size() == 0);
+                assert (zFixes.size() == 0);
+
+                String expectedAzERO = "nodeL-nodeL:3-nodeP:1-nodeP";
+                String expectedZaERO = "nodeP-nodeP:1-nodeL:3-nodeL";
+
+                assert (zJunc.getDeviceUrn().getUrn().equals("nodeP"));
+                assert (actualAzERO.equals(expectedAzERO));
+                assert (actualZaERO.equals(expectedZaERO));
             }
             else
             {
-                assert(fix1.getIfceUrn().getUrn().equals("nodeM:1") || fix1.getIfceUrn().getUrn().equals("nodeM:3"));
-                assert(fix2.getIfceUrn().getUrn().equals("nodeM:1") || fix2.getIfceUrn().getUrn().equals("nodeM:3"));
+                assert (aFixes.size() == 0);
+                assert (zFixes.size() == 0);
+
+                String expectedAzERO = "nodeM-nodeM:3-nodeR:1-nodeR";
+                String expectedZaERO = "nodeR-nodeR:1-nodeM:3-nodeM";
+
+                assert (zJunc.getDeviceUrn().getUrn().equals("nodeR"));
+                assert (actualAzERO.equals(expectedAzERO));
+                assert (actualZaERO.equals(expectedZaERO));
             }
         }
 
-        // Pipes
-        ReservedEthPipeE onlyPipe = allResPipes.iterator().next();
+        // Mpls Pipes
+        for(ReservedMplsPipeE mplsPipe : allResMplsPipes)
+        {
+            ReservedVlanJunctionE aJunc = mplsPipe.getAJunction();
+            ReservedVlanJunctionE zJunc = mplsPipe.getAJunction();
+            Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
+            Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
+            List<String> azERO = mplsPipe.getAzERO();
+            List<String> zaERO = mplsPipe.getZaERO();
+            String actualAzERO = aJunc.getDeviceUrn().getUrn() + "-";
+            String actualZaERO = zJunc.getDeviceUrn().getUrn() + "-";
 
-        ReservedVlanJunctionE juncA = onlyPipe.getAJunction();
-        ReservedVlanJunctionE juncZ = onlyPipe.getZJunction();
-        ReservedVlanFixtureE fixA = juncA.getFixtures().iterator().next();
-        ReservedVlanFixtureE fixZ = juncZ.getFixtures().iterator().next();
+            for(String x : azERO)
+                actualAzERO = actualAzERO + x + "-";
 
-        assert(juncA.getDeviceUrn().getUrn().equals("nodeP") || juncA.getDeviceUrn().getUrn().equals("nodeR"));
-        assert(juncZ.getDeviceUrn().getUrn().equals("nodeQ"));
-        assert(fixA.getIfceUrn().getUrn().equals("nodeP:1") || fixA.getIfceUrn().getUrn().equals("nodeR:1"));
-        assert(fixZ.getIfceUrn().getUrn().equals("portZ"));
+            for(String x : zaERO)
+                actualZaERO = actualZaERO + x + "-";
 
-        assert(fixA.getReservedBandwidth().getInBandwidth().equals(azBW));
-        assert(fixZ.getReservedBandwidth().getInBandwidth().equals(azBW));
-        assert(fixA.getReservedBandwidth().getEgBandwidth().equals(azBW));
-        assert(fixZ.getReservedBandwidth().getEgBandwidth().equals(azBW));
+            actualAzERO = actualAzERO + zJunc.getDeviceUrn();
+            actualZaERO = actualZaERO + aJunc.getDeviceUrn();
 
-        List<String> azERO = onlyPipe.getAzERO();
-        List<String> zaERO = onlyPipe.getZaERO();
+            assert (aJunc.getDeviceUrn().getUrn().equals("nodeP") || aJunc.getDeviceUrn().getUrn().equals("nodeR"));
+            assert (zJunc.getDeviceUrn().getUrn().equals("nodeQ"));
 
-        String actualAzERO = "";
-        String actualZaERO = "";
+            if(aJunc.getDeviceUrn().getUrn().equals("nodeP"))
+            {
+                assert (aFixes.size() == 0);
+                assert (zFixes.size() == 1);
+                ReservedVlanFixtureE theFix = zFixes.iterator().next();
 
-        for(String x : azERO)
-            actualAzERO = actualAzERO + x + "-";
+                String expectedAzERO = "nodeP-nodeP:2-nodeQ:1-nodeQ";
+                String expectedZaERO = "nodeQ-nodeQ:1-nodeP:2-nodeP";
 
-        for(String x : zaERO)
-            actualZaERO = actualZaERO + x + "-";
+                assert (zJunc.getDeviceUrn().getUrn().equals("nodeQ"));
+                assert (theFix.getIfceUrn().getUrn().equals("portZ"));
+                assert (theFix.getReservedBandwidth().getInBandwidth().equals(zaBW));
+                assert (theFix.getReservedBandwidth().getEgBandwidth().equals(azBW));
+                assert (actualAzERO.equals(expectedAzERO));
+                assert (actualZaERO.equals(expectedZaERO));
+            }
+            else
+            {
+                assert (aFixes.size() == 0);
+                assert (zFixes.size() == 1);
+                ReservedVlanFixtureE theFix = zFixes.iterator().next();
 
-        String expectedAzERO1 = "nodeP-nodeP:2-nodeQ:1-nodeQ-";
-        String expectedZaERO1 = "nodeQ-nodeQ:1-nodeP:2-nodeP-";
-        String expectedAzERO2 = "nodeR-nodeR:3-nodeQ:2-nodeQ-";
-        String expectedZaERO2 = "nodeQ-nodeQ:2-nodeR:3-nodeR-";
+                String expectedAzERO = "nodeR-nodeR:3-nodeQ:2-nodeQ";
+                String expectedZaERO = "nodeQ-nodeQ:2-nodeR:3-nodeR";
 
-        assert(actualAzERO.equals(expectedAzERO1) || actualAzERO.equals(expectedAzERO2));
-        assert(actualZaERO.equals(expectedZaERO1) || actualZaERO.equals(expectedZaERO2));
+                assert (zJunc.getDeviceUrn().getUrn().equals("nodeQ"));
+                assert (theFix.getIfceUrn().getUrn().equals("portZ"));
+                assert (theFix.getReservedBandwidth().getInBandwidth().equals(zaBW));
+                assert (theFix.getReservedBandwidth().getEgBandwidth().equals(azBW));
+                assert (actualAzERO.equals(expectedAzERO));
+                assert (actualZaERO.equals(expectedZaERO));
+            }
+        }
 
         log.info("test 'basicPceTest4' passed.");
     }
@@ -439,71 +549,103 @@ public class TopPceTest
 
         ReservedVlanFlowE reservedFlow = reservedBlueprint.get().getVlanFlow();
 
-        Set<ReservedEthPipeE> allResPipes = reservedFlow.getPipes();
+        Set<ReservedEthPipeE> allResEthPipes = reservedFlow.getEthPipes();
+        Set<ReservedMplsPipeE> allResMplsPipes = reservedFlow.getMplsPipes();
         Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
 
-        assert(allResPipes.size() == 1);
-        assert(allResJunctions.size() == 2);
+        assert(allResJunctions.size() == 0);
+        assert(allResEthPipes.size() == 2);
+        assert(allResMplsPipes.size() == 1);
 
-        // Junctions
-        for(ReservedVlanJunctionE oneJunc : allResJunctions)
+        // Ethernet Pipes
+        for(ReservedEthPipeE ethPipe : allResEthPipes)
         {
-            assert(oneJunc.getDeviceUrn().getUrn().equals("nodeK") || oneJunc.getDeviceUrn().getUrn().equals("nodeS"));
+            ReservedVlanJunctionE aJunc = ethPipe.getAJunction();
+            ReservedVlanJunctionE zJunc = ethPipe.getAJunction();
+            Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
+            Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
+            List<String> azERO = ethPipe.getAzERO();
+            List<String> zaERO = ethPipe.getZaERO();
+            String actualAzERO = aJunc.getDeviceUrn().getUrn() + "-";
+            String actualZaERO = zJunc.getDeviceUrn().getUrn() + "-";
 
-            Iterator<ReservedVlanFixtureE> iterF = oneJunc.getFixtures().iterator();
-            ReservedVlanFixtureE fix1 = iterF.next();
-            ReservedVlanFixtureE fix2 = iterF.next();
+            for(String x : azERO)
+                actualAzERO = actualAzERO + x + "-";
 
-            assert(fix1.getReservedBandwidth().getInBandwidth().equals(azBW));
-            assert(fix2.getReservedBandwidth().getInBandwidth().equals(azBW));
+            for(String x : zaERO)
+                actualZaERO = actualZaERO + x + "-";
 
-            if(oneJunc.getDeviceUrn().getUrn().equals("nodeK"))
+            actualAzERO = actualAzERO + zJunc.getDeviceUrn();
+            actualZaERO = actualZaERO + aJunc.getDeviceUrn();
+
+
+            assert (aJunc.getDeviceUrn().getUrn().equals("nodeK") || aJunc.getDeviceUrn().getUrn().equals("nodeQ"));
+            assert (zJunc.getDeviceUrn().getUrn().equals("nodeP") || zJunc.getDeviceUrn().getUrn().equals("nodeS"));
+
+            if(aJunc.getDeviceUrn().getUrn().equals("nodeK"))
             {
-                assert(fix1.getIfceUrn().getUrn().equals("portA") || fix1.getIfceUrn().getUrn().equals("nodeK:2"));
-                assert(fix2.getIfceUrn().getUrn().equals("portA") || fix2.getIfceUrn().getUrn().equals("nodeK:2"));
+                assert (aFixes.size() == 1);
+                assert (zFixes.size() == 0);
+                ReservedVlanFixtureE theFix = aFixes.iterator().next();
+
+                String expectedAzERO = "nodeK-nodeK:2-nodeP:1-nodeP";
+                String expectedZaERO = "nodeP-nodeP:1-nodeK:2-nodeK";
+
+                assert (zJunc.getDeviceUrn().getUrn().equals("nodeP"));
+                assert (theFix.getIfceUrn().getUrn().equals("portA"));
+                assert (theFix.getReservedBandwidth().getInBandwidth().equals(azBW));
+                assert (theFix.getReservedBandwidth().getEgBandwidth().equals(zaBW));
+                assert (actualAzERO.equals(expectedAzERO));
+                assert (actualZaERO.equals(expectedZaERO));
             }
             else
             {
-                assert(fix1.getIfceUrn().getUrn().equals("nodeS:1") || fix1.getIfceUrn().getUrn().equals("portZ"));
-                assert(fix2.getIfceUrn().getUrn().equals("nodeS:1") || fix2.getIfceUrn().getUrn().equals("portZ"));
+                assert (aFixes.size() == 0);
+                assert (zFixes.size() == 1);
+                ReservedVlanFixtureE theFix = zFixes.iterator().next();
+
+                String expectedAzERO = "nodeQ-nodeQ:3-nodeS:1-nodeS";
+                String expectedZaERO = "nodeS-nodeS:1-nodeQ:3-nodeQ";
+
+                assert (zJunc.getDeviceUrn().getUrn().equals("nodeS"));
+                assert (theFix.getIfceUrn().getUrn().equals("portZ"));
+                assert (theFix.getReservedBandwidth().getInBandwidth().equals(zaBW));
+                assert (theFix.getReservedBandwidth().getEgBandwidth().equals(azBW));
+                assert (actualAzERO.equals(expectedAzERO));
+                assert (actualZaERO.equals(expectedZaERO));
             }
         }
 
-        // Pipes
-        ReservedEthPipeE onlyPipe = allResPipes.iterator().next();
+        // Mpls Pipes
+        for(ReservedMplsPipeE mplsPipe : allResMplsPipes)
+        {
+            ReservedVlanJunctionE aJunc = mplsPipe.getAJunction();
+            ReservedVlanJunctionE zJunc = mplsPipe.getZJunction();
+            Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
+            Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
+            List<String> azERO = mplsPipe.getAzERO();
+            List<String> zaERO = mplsPipe.getZaERO();
+            String actualAzERO = aJunc.getDeviceUrn().getUrn() + "-";
+            String actualZaERO = zJunc.getDeviceUrn().getUrn() + "-";
 
-        ReservedVlanJunctionE juncA = onlyPipe.getAJunction();
-        ReservedVlanJunctionE juncZ = onlyPipe.getZJunction();
-        ReservedVlanFixtureE fixA = juncA.getFixtures().iterator().next();
-        ReservedVlanFixtureE fixZ = juncZ.getFixtures().iterator().next();
+            for(String x : azERO)
+                actualAzERO = actualAzERO + x + "-";
 
-        assert(juncA.getDeviceUrn().getUrn().equals("nodeP"));
-        assert(juncZ.getDeviceUrn().getUrn().equals("nodeQ"));
-        assert(fixA.getIfceUrn().getUrn().equals("nodeP:1"));
-        assert(fixZ.getIfceUrn().getUrn().equals("nodeQ:3"));
+            for(String x : zaERO)
+                actualZaERO = actualZaERO + x + "-";
 
-        assert(fixA.getReservedBandwidth().getInBandwidth().equals(azBW));
-        assert(fixZ.getReservedBandwidth().getInBandwidth().equals(azBW));
-        assert(fixA.getReservedBandwidth().getEgBandwidth().equals(azBW));
-        assert(fixZ.getReservedBandwidth().getEgBandwidth().equals(azBW));
+            actualAzERO = actualAzERO + zJunc.getDeviceUrn();
+            actualZaERO = actualZaERO + aJunc.getDeviceUrn();
+            String expectedAzERO = "nodeP-nodeP:3-nodeQ:1-nodeQ";
+            String expectedZaERO = "nodeQ-nodeQ:1-nodeP:3-nodeP";
 
-        List<String> azERO = onlyPipe.getAzERO();
-        List<String> zaERO = onlyPipe.getZaERO();
-
-        String actualAzERO = "";
-        String actualZaERO = "";
-
-        for(String x : azERO)
-            actualAzERO = actualAzERO + x + "-";
-
-        for(String x : zaERO)
-            actualZaERO = actualZaERO + x + "-";
-
-        String expectedAzERO = "nodeP-nodeP:3-nodeQ:1-nodeQ-";
-        String expectedZaERO = "nodeQ-nodeQ:1-nodeP:3-nodeP-";
-
-        assert(actualAzERO.equals(expectedAzERO));
-        assert(actualZaERO.equals(expectedZaERO));
+            assert (aJunc.getDeviceUrn().getUrn().equals("nodeP"));
+            assert (zJunc.getDeviceUrn().getUrn().equals("nodeQ"));
+            assert (aFixes.size() == 0);
+            assert (zFixes.size() == 0);
+            assert (actualAzERO.equals(expectedAzERO));
+            assert (actualZaERO.equals(expectedZaERO));
+        }
 
         log.info("test 'basicPceTest5' passed.");
     }
@@ -542,11 +684,13 @@ public class TopPceTest
 
         ReservedVlanFlowE reservedFlow = reservedBlueprint.get().getVlanFlow();
 
-        Set<ReservedEthPipeE> allResPipes = reservedFlow.getPipes();
+        Set<ReservedEthPipeE> allResEthPipes = reservedFlow.getEthPipes();
+        Set<ReservedMplsPipeE> allResMplsPipes = reservedFlow.getMplsPipes();
         Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
 
-        assert(allResPipes.size() == 0);
         assert(allResJunctions.size() == 1);
+        assert(allResEthPipes.size() == 0);
+        assert(allResMplsPipes.size() == 0);
 
         // Junctions
         for(ReservedVlanJunctionE oneJunc : allResJunctions)
@@ -604,34 +748,53 @@ public class TopPceTest
 
         ReservedVlanFlowE reservedFlow = reservedBlueprint.get().getVlanFlow();
 
-        Set<ReservedEthPipeE> allResPipes = reservedFlow.getPipes();
+        Set<ReservedEthPipeE> allResEthPipes = reservedFlow.getEthPipes();
+        Set<ReservedMplsPipeE> allResMplsPipes = reservedFlow.getMplsPipes();
         Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
 
-        assert(allResPipes.size() == 0);
-        assert(allResJunctions.size() == 2);
+        assert(allResJunctions.size() == 0);
+        assert(allResEthPipes.size() == 1);
+        assert(allResMplsPipes.size() == 0);
 
-        // Junctions
-        for(ReservedVlanJunctionE oneJunc : allResJunctions)
+        // Ethernet Pipes
+        for(ReservedEthPipeE ethPipe : allResEthPipes)
         {
-            assert(oneJunc.getDeviceUrn().getUrn().equals("nodeK") || oneJunc.getDeviceUrn().getUrn().equals("nodeL"));
+            ReservedVlanJunctionE aJunc = ethPipe.getAJunction();
+            ReservedVlanJunctionE zJunc = ethPipe.getAJunction();
+            Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
+            Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
+            List<String> azERO = ethPipe.getAzERO();
+            List<String> zaERO = ethPipe.getZaERO();
+            String actualAzERO = aJunc.getDeviceUrn().getUrn() + "-";
+            String actualZaERO = zJunc.getDeviceUrn().getUrn() + "-";
 
-            Iterator<ReservedVlanFixtureE> iterF = oneJunc.getFixtures().iterator();
-            ReservedVlanFixtureE fix1 = iterF.next();
-            ReservedVlanFixtureE fix2 = iterF.next();
+            for(String x : azERO)
+                actualAzERO = actualAzERO + x + "-";
 
-            assert(fix1.getReservedBandwidth().getInBandwidth().equals(azBW));
-            assert(fix2.getReservedBandwidth().getInBandwidth().equals(azBW));
+            for(String x : zaERO)
+                actualZaERO = actualZaERO + x + "-";
 
-            if(oneJunc.getDeviceUrn().getUrn().equals("nodeK"))
-            {
-                assert(fix1.getIfceUrn().getUrn().equals("portA") || fix1.getIfceUrn().getUrn().equals("nodeK:1"));
-                assert(fix2.getIfceUrn().getUrn().equals("portA") || fix2.getIfceUrn().getUrn().equals("nodeK:1"));
-            }
-            else
-            {
-                assert(fix1.getIfceUrn().getUrn().equals("nodeL:1") || fix1.getIfceUrn().getUrn().equals("portZ"));
-                assert(fix2.getIfceUrn().getUrn().equals("nodeL:1") || fix2.getIfceUrn().getUrn().equals("portZ"));
-            }
+            actualAzERO = actualAzERO + zJunc.getDeviceUrn();
+            actualZaERO = actualZaERO + aJunc.getDeviceUrn();
+            String expectedAzERO = "nodeK-nodeK:1-nodeL:1-nodeL";
+            String expectedZaERO = "nodeL-nodeL:1-nodeK:1-nodeK";
+
+            assert (aJunc.getDeviceUrn().getUrn().equals("nodeK"));
+            assert (zJunc.getDeviceUrn().getUrn().equals("nodeL"));
+            assert (aFixes.size() == 1);
+            assert (zFixes.size() == 1);
+
+            ReservedVlanFixtureE aFix = aFixes.iterator().next();
+            ReservedVlanFixtureE zFix = aFixes.iterator().next();
+
+            assert (aFix.getIfceUrn().getUrn().equals("portA"));
+            assert (aFix.getReservedBandwidth().getInBandwidth().equals(azBW));
+            assert (aFix.getReservedBandwidth().getEgBandwidth().equals(zaBW));
+            assert (zFix.getIfceUrn().getUrn().equals("portZ"));
+            assert (zFix.getReservedBandwidth().getInBandwidth().equals(zaBW));
+            assert (zFix.getReservedBandwidth().getEgBandwidth().equals(azBW));
+            assert (actualAzERO.equals(expectedAzERO));
+            assert (actualZaERO.equals(expectedZaERO));
         }
 
         log.info("test 'basicPceTest7' passed.");
@@ -674,47 +837,54 @@ public class TopPceTest
 
         ReservedVlanFlowE reservedFlow = reservedBlueprint.get().getVlanFlow();
 
-        Set<ReservedEthPipeE> allResPipes = reservedFlow.getPipes();
+        Set<ReservedEthPipeE> allResEthPipes = reservedFlow.getEthPipes();
+        Set<ReservedMplsPipeE> allResMplsPipes = reservedFlow.getMplsPipes();
         Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
 
-        assert(allResPipes.size() == 1);
         assert(allResJunctions.size() == 0);
+        assert(allResEthPipes.size() == 0);
+        assert(allResMplsPipes.size() == 1);
 
-        // Pipes
-        ReservedEthPipeE onlyPipe = allResPipes.iterator().next();
+        // Mpls Pipes
+        for(ReservedMplsPipeE mplsPipe : allResMplsPipes)
+        {
+            ReservedVlanJunctionE aJunc = mplsPipe.getAJunction();
+            ReservedVlanJunctionE zJunc = mplsPipe.getAJunction();
+            Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
+            Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
+            List<String> azERO = mplsPipe.getAzERO();
+            List<String> zaERO = mplsPipe.getZaERO();
+            String actualAzERO = aJunc.getDeviceUrn().getUrn() + "-";
+            String actualZaERO = zJunc.getDeviceUrn().getUrn() + "-";
 
-        ReservedVlanJunctionE juncA = onlyPipe.getAJunction();
-        ReservedVlanJunctionE juncZ = onlyPipe.getZJunction();
-        ReservedVlanFixtureE fixA = juncA.getFixtures().iterator().next();
-        ReservedVlanFixtureE fixZ = juncZ.getFixtures().iterator().next();
+            for(String x : azERO)
+                actualAzERO = actualAzERO + x + "-";
 
-        assert(juncA.getDeviceUrn().getUrn().equals("nodeP"));
-        assert(juncZ.getDeviceUrn().getUrn().equals("nodeQ"));
-        assert(fixA.getIfceUrn().getUrn().equals("portA"));
-        assert(fixZ.getIfceUrn().getUrn().equals("portZ"));
+            for(String x : zaERO)
+                actualZaERO = actualZaERO + x + "-";
 
-        assert(fixA.getReservedBandwidth().getInBandwidth().equals(azBW));
-        assert(fixZ.getReservedBandwidth().getInBandwidth().equals(azBW));
-        assert(fixA.getReservedBandwidth().getEgBandwidth().equals(azBW));
-        assert(fixZ.getReservedBandwidth().getEgBandwidth().equals(azBW));
+            actualAzERO = actualAzERO + zJunc.getDeviceUrn();
+            actualZaERO = actualZaERO + aJunc.getDeviceUrn();
+            String expectedAzERO = "nodeP-nodeP:1-nodeQ:1-nodeQ";
+            String expectedZaERO = "nodeQ-nodeQ:1-nodeP:1-nodeP";
 
-        List<String> azERO = onlyPipe.getAzERO();
-        List<String> zaERO = onlyPipe.getZaERO();
+            assert (aJunc.getDeviceUrn().getUrn().equals("nodeP"));
+            assert (zJunc.getDeviceUrn().getUrn().equals("nodeQ"));
+            assert (aFixes.size() == 1);
+            assert (zFixes.size() == 1);
 
-        String actualAzERO = "";
-        String actualZaERO = "";
+            ReservedVlanFixtureE aFix = aFixes.iterator().next();
+            ReservedVlanFixtureE zFix = aFixes.iterator().next();
 
-        for(String x : azERO)
-            actualAzERO = actualAzERO + x + "-";
-
-        for(String x : zaERO)
-            actualZaERO = actualZaERO + x + "-";
-
-        String expectedAzERO = "nodeP-nodeP:1-nodeQ:1-nodeQ-";
-        String expectedZaERO = "nodeQ-nodeQ:1-nodeP:1-nodeP-";
-
-        assert(actualAzERO.equals(expectedAzERO));
-        assert(actualZaERO.equals(expectedZaERO));
+            assert (aFix.getIfceUrn().getUrn().equals("portA"));
+            assert (aFix.getReservedBandwidth().getInBandwidth().equals(azBW));
+            assert (aFix.getReservedBandwidth().getEgBandwidth().equals(zaBW));
+            assert (zFix.getIfceUrn().getUrn().equals("portZ"));
+            assert (zFix.getReservedBandwidth().getInBandwidth().equals(zaBW));
+            assert (zFix.getReservedBandwidth().getEgBandwidth().equals(azBW));
+            assert (actualAzERO.equals(expectedAzERO));
+            assert (actualZaERO.equals(expectedZaERO));
+        }
 
         log.info("test 'basicPceTest8' passed.");
     }
@@ -756,34 +926,53 @@ public class TopPceTest
 
         ReservedVlanFlowE reservedFlow = reservedBlueprint.get().getVlanFlow();
 
-        Set<ReservedEthPipeE> allResPipes = reservedFlow.getPipes();
+        Set<ReservedEthPipeE> allResEthPipes = reservedFlow.getEthPipes();
+        Set<ReservedMplsPipeE> allResMplsPipes = reservedFlow.getMplsPipes();
         Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
 
-        assert(allResPipes.size() == 0);
-        assert(allResJunctions.size() == 2);
+        assert(allResJunctions.size() == 0);
+        assert(allResEthPipes.size() == 1);
+        assert(allResMplsPipes.size() == 0);
 
-        // Junctions
-        for(ReservedVlanJunctionE oneJunc : allResJunctions)
+        // Ethernet Pipes
+        for(ReservedEthPipeE ethPipe : allResEthPipes)
         {
-            assert(oneJunc.getDeviceUrn().getUrn().equals("nodeK") || oneJunc.getDeviceUrn().getUrn().equals("nodeP"));
+            ReservedVlanJunctionE aJunc = ethPipe.getAJunction();
+            ReservedVlanJunctionE zJunc = ethPipe.getAJunction();
+            Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
+            Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
+            List<String> azERO = ethPipe.getAzERO();
+            List<String> zaERO = ethPipe.getZaERO();
+            String actualAzERO = aJunc.getDeviceUrn().getUrn() + "-";
+            String actualZaERO = zJunc.getDeviceUrn().getUrn() + "-";
 
-            Iterator<ReservedVlanFixtureE> iterF = oneJunc.getFixtures().iterator();
-            ReservedVlanFixtureE fix1 = iterF.next();
-            ReservedVlanFixtureE fix2 = iterF.next();
+            for(String x : azERO)
+                actualAzERO = actualAzERO + x + "-";
 
-            assert(fix1.getReservedBandwidth().getInBandwidth().equals(azBW));
-            assert(fix2.getReservedBandwidth().getInBandwidth().equals(azBW));
+            for(String x : zaERO)
+                actualZaERO = actualZaERO + x + "-";
 
-            if(oneJunc.getDeviceUrn().getUrn().equals("nodeK"))
-            {
-                assert(fix1.getIfceUrn().getUrn().equals("portA") || fix1.getIfceUrn().getUrn().equals("nodeK:1"));
-                assert(fix2.getIfceUrn().getUrn().equals("portA") || fix2.getIfceUrn().getUrn().equals("nodeK:1"));
-            }
-            else
-            {
-                assert(fix1.getIfceUrn().getUrn().equals("nodeP:1") || fix1.getIfceUrn().getUrn().equals("portZ"));
-                assert(fix2.getIfceUrn().getUrn().equals("nodeP:1") || fix2.getIfceUrn().getUrn().equals("portZ"));
-            }
+            actualAzERO = actualAzERO + zJunc.getDeviceUrn();
+            actualZaERO = actualZaERO + aJunc.getDeviceUrn();
+            String expectedAzERO = "nodeK-nodeK:1-nodeP:1-nodeP";
+            String expectedZaERO = "nodeP-nodeP:1-nodeK:1-nodeK";
+
+            assert (aJunc.getDeviceUrn().getUrn().equals("nodeK"));
+            assert (zJunc.getDeviceUrn().getUrn().equals("nodeP"));
+            assert (aFixes.size() == 1);
+            assert (zFixes.size() == 1);
+
+            ReservedVlanFixtureE aFix = aFixes.iterator().next();
+            ReservedVlanFixtureE zFix = aFixes.iterator().next();
+
+            assert (aFix.getIfceUrn().getUrn().equals("portA"));
+            assert (aFix.getReservedBandwidth().getInBandwidth().equals(azBW));
+            assert (aFix.getReservedBandwidth().getEgBandwidth().equals(zaBW));
+            assert (zFix.getIfceUrn().getUrn().equals("portZ"));
+            assert (zFix.getReservedBandwidth().getInBandwidth().equals(zaBW));
+            assert (zFix.getReservedBandwidth().getEgBandwidth().equals(azBW));
+            assert (actualAzERO.equals(expectedAzERO));
+            assert (actualZaERO.equals(expectedZaERO));
         }
 
         log.info("test 'basicPceTest9' passed.");
@@ -826,38 +1015,70 @@ public class TopPceTest
 
         ReservedVlanFlowE reservedFlow = reservedBlueprint.get().getVlanFlow();
 
-        Set<ReservedEthPipeE> allResPipes = reservedFlow.getPipes();
+        Set<ReservedEthPipeE> allResEthPipes = reservedFlow.getEthPipes();
+        Set<ReservedMplsPipeE> allResMplsPipes = reservedFlow.getMplsPipes();
         Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
 
-        assert(allResPipes.size() == 0);
-        assert(allResJunctions.size() == 3);
+        assert(allResJunctions.size() == 0);
+        assert(allResEthPipes.size() == 2);
+        assert(allResMplsPipes.size() == 0);
 
-        // Junctions
-        for(ReservedVlanJunctionE oneJunc : allResJunctions)
+        // Ethernet Pipes
+        for(ReservedEthPipeE ethPipe : allResEthPipes)
         {
-            assert(oneJunc.getDeviceUrn().getUrn().equals("nodeK") || oneJunc.getDeviceUrn().getUrn().equals("nodeL") || oneJunc.getDeviceUrn().getUrn().equals("nodeM"));
+            ReservedVlanJunctionE aJunc = ethPipe.getAJunction();
+            ReservedVlanJunctionE zJunc = ethPipe.getAJunction();
+            Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
+            Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
+            List<String> azERO = ethPipe.getAzERO();
+            List<String> zaERO = ethPipe.getZaERO();
+            String actualAzERO = aJunc.getDeviceUrn().getUrn() + "-";
+            String actualZaERO = zJunc.getDeviceUrn().getUrn() + "-";
 
-            Iterator<ReservedVlanFixtureE> iterF = oneJunc.getFixtures().iterator();
-            ReservedVlanFixtureE fix1 = iterF.next();
-            ReservedVlanFixtureE fix2 = iterF.next();
+            for(String x : azERO)
+                actualAzERO = actualAzERO + x + "-";
 
-            assert(fix1.getReservedBandwidth().getInBandwidth().equals(azBW));
-            assert(fix2.getReservedBandwidth().getInBandwidth().equals(azBW));
+            for(String x : zaERO)
+                actualZaERO = actualZaERO + x + "-";
 
-            if(oneJunc.getDeviceUrn().getUrn().equals("nodeK"))
+            actualAzERO = actualAzERO + zJunc.getDeviceUrn();
+            actualZaERO = actualZaERO + aJunc.getDeviceUrn();
+
+
+            assert (aJunc.getDeviceUrn().getUrn().equals("nodeK") || aJunc.getDeviceUrn().getUrn().equals("nodeL"));
+            assert (zJunc.getDeviceUrn().getUrn().equals("nodeL") || zJunc.getDeviceUrn().getUrn().equals("nodeM"));
+
+            if(aJunc.getDeviceUrn().getUrn().equals("nodeK"))
             {
-                assert(fix1.getIfceUrn().getUrn().equals("portA") || fix1.getIfceUrn().getUrn().equals("nodeK:1"));
-                assert(fix2.getIfceUrn().getUrn().equals("portA") || fix2.getIfceUrn().getUrn().equals("nodeK:1"));
-            }
-            else if(oneJunc.getDeviceUrn().getUrn().equals("nodeL"))
-            {
-                assert(fix1.getIfceUrn().getUrn().equals("nodeL:1") || fix1.getIfceUrn().getUrn().equals("nodeL:2"));
-                assert(fix2.getIfceUrn().getUrn().equals("nodeL:1") || fix2.getIfceUrn().getUrn().equals("nodeL:2"));
+                assert (aFixes.size() == 1);
+                assert (zFixes.size() == 0);
+                ReservedVlanFixtureE theFix = aFixes.iterator().next();
+
+                String expectedAzERO = "nodeK-nodeK:1-nodeL:1-nodeL";
+                String expectedZaERO = "nodeL-nodeL:1-nodeK:1-nodek";
+
+                assert (zJunc.getDeviceUrn().getUrn().equals("nodeL"));
+                assert (theFix.getIfceUrn().getUrn().equals("portA"));
+                assert (theFix.getReservedBandwidth().getInBandwidth().equals(azBW));
+                assert (theFix.getReservedBandwidth().getEgBandwidth().equals(zaBW));
+                assert (actualAzERO.equals(expectedAzERO));
+                assert (actualZaERO.equals(expectedZaERO));
             }
             else
             {
-                assert(fix1.getIfceUrn().getUrn().equals("nodeM:1") || fix1.getIfceUrn().getUrn().equals("portZ"));
-                assert(fix2.getIfceUrn().getUrn().equals("nodeM:1") || fix2.getIfceUrn().getUrn().equals("portZ"));
+                assert (aFixes.size() == 0);
+                assert (zFixes.size() == 1);
+                ReservedVlanFixtureE theFix = zFixes.iterator().next();
+
+                String expectedAzERO = "nodeL-nodeL:2-nodeM:1-nodeM";
+                String expectedZaERO = "nodeM-nodeM:1-nodeL:2-nodeL";
+
+                assert (zJunc.getDeviceUrn().getUrn().equals("nodeM"));
+                assert (theFix.getIfceUrn().getUrn().equals("portZ"));
+                assert (theFix.getReservedBandwidth().getInBandwidth().equals(zaBW));
+                assert (theFix.getReservedBandwidth().getEgBandwidth().equals(azBW));
+                assert (actualAzERO.equals(expectedAzERO));
+                assert (actualZaERO.equals(expectedZaERO));
             }
         }
 
@@ -901,47 +1122,54 @@ public class TopPceTest
 
         ReservedVlanFlowE reservedFlow = reservedBlueprint.get().getVlanFlow();
 
-        Set<ReservedEthPipeE> allResPipes = reservedFlow.getPipes();
+        Set<ReservedEthPipeE> allResEthPipes = reservedFlow.getEthPipes();
+        Set<ReservedMplsPipeE> allResMplsPipes = reservedFlow.getMplsPipes();
         Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
 
-        assert(allResPipes.size() == 1);
         assert(allResJunctions.size() == 0);
+        assert(allResEthPipes.size() == 0);
+        assert(allResMplsPipes.size() == 1);
 
-        // Pipes
-        ReservedEthPipeE onlyPipe = allResPipes.iterator().next();
+        // Mpls Pipes
+        for(ReservedMplsPipeE mplsPipe : allResMplsPipes)
+        {
+            ReservedVlanJunctionE aJunc = mplsPipe.getAJunction();
+            ReservedVlanJunctionE zJunc = mplsPipe.getAJunction();
+            Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
+            Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
+            List<String> azERO = mplsPipe.getAzERO();
+            List<String> zaERO = mplsPipe.getZaERO();
+            String actualAzERO = aJunc.getDeviceUrn().getUrn() + "-";
+            String actualZaERO = zJunc.getDeviceUrn().getUrn() + "-";
 
-        ReservedVlanJunctionE juncA = onlyPipe.getAJunction();
-        ReservedVlanJunctionE juncZ = onlyPipe.getZJunction();
-        ReservedVlanFixtureE fixA = juncA.getFixtures().iterator().next();
-        ReservedVlanFixtureE fixZ = juncZ.getFixtures().iterator().next();
+            for(String x : azERO)
+                actualAzERO = actualAzERO + x + "-";
 
-        assert(juncA.getDeviceUrn().getUrn().equals("nodeP"));
-        assert(juncZ.getDeviceUrn().getUrn().equals("nodeR"));
-        assert(fixA.getIfceUrn().getUrn().equals("portA"));
-        assert(fixZ.getIfceUrn().getUrn().equals("portZ"));
+            for(String x : zaERO)
+                actualZaERO = actualZaERO + x + "-";
 
-        assert(fixA.getReservedBandwidth().getInBandwidth().equals(azBW));
-        assert(fixZ.getReservedBandwidth().getInBandwidth().equals(azBW));
-        assert(fixA.getReservedBandwidth().getEgBandwidth().equals(azBW));
-        assert(fixZ.getReservedBandwidth().getEgBandwidth().equals(azBW));
+            actualAzERO = actualAzERO + zJunc.getDeviceUrn();
+            actualZaERO = actualZaERO + aJunc.getDeviceUrn();
+            String expectedAzERO = "nodeP-nodeP:1-nodeQ:1-nodeQ-nodeQ:2-nodeR:1-nodeR";
+            String expectedZaERO = "nodeR-nodeR:1-nodeQ:2-nodeQ-nodeQ:1-nodeP:1-nodeP";
 
-        List<String> azERO = onlyPipe.getAzERO();
-        List<String> zaERO = onlyPipe.getZaERO();
+            assert (aJunc.getDeviceUrn().getUrn().equals("nodeP"));
+            assert (zJunc.getDeviceUrn().getUrn().equals("nodeR"));
+            assert (aFixes.size() == 1);
+            assert (zFixes.size() == 1);
 
-        String actualAzERO = "";
-        String actualZaERO = "";
+            ReservedVlanFixtureE aFix = aFixes.iterator().next();
+            ReservedVlanFixtureE zFix = aFixes.iterator().next();
 
-        for(String x : azERO)
-            actualAzERO = actualAzERO + x + "-";
-
-        for(String x : zaERO)
-            actualZaERO = actualZaERO + x + "-";
-
-        String expectedAzERO = "nodeP-nodeP:1-nodeQ:1-nodeQ-nodeQ:2-nodeR:1-nodeR-";
-        String expectedZaERO = "nodeR-nodeR:1-nodeQ:2-nodeQ-nodeQ:1-nodeP:1-nodeP-";
-
-        assert(actualAzERO.equals(expectedAzERO));
-        assert(actualZaERO.equals(expectedZaERO));
+            assert (aFix.getIfceUrn().getUrn().equals("portA"));
+            assert (aFix.getReservedBandwidth().getInBandwidth().equals(azBW));
+            assert (aFix.getReservedBandwidth().getEgBandwidth().equals(zaBW));
+            assert (zFix.getIfceUrn().getUrn().equals("portZ"));
+            assert (zFix.getReservedBandwidth().getInBandwidth().equals(zaBW));
+            assert (zFix.getReservedBandwidth().getEgBandwidth().equals(azBW));
+            assert (actualAzERO.equals(expectedAzERO));
+            assert (actualZaERO.equals(expectedZaERO));
+        }
 
         log.info("test 'basicPceTest11' passed.");
     }
@@ -983,38 +1211,70 @@ public class TopPceTest
 
         ReservedVlanFlowE reservedFlow = reservedBlueprint.get().getVlanFlow();
 
-        Set<ReservedEthPipeE> allResPipes = reservedFlow.getPipes();
+        Set<ReservedEthPipeE> allResEthPipes = reservedFlow.getEthPipes();
+        Set<ReservedMplsPipeE> allResMplsPipes = reservedFlow.getMplsPipes();
         Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
 
-        assert(allResPipes.size() == 0);
-        assert(allResJunctions.size() == 3);
+        assert(allResJunctions.size() == 0);
+        assert(allResEthPipes.size() == 2);
+        assert(allResMplsPipes.size() == 0);
 
-        // Junctions
-        for(ReservedVlanJunctionE oneJunc : allResJunctions)
+        // Ethernet Pipes
+        for(ReservedEthPipeE ethPipe : allResEthPipes)
         {
-            assert(oneJunc.getDeviceUrn().getUrn().equals("nodeK") || oneJunc.getDeviceUrn().getUrn().equals("nodeM") || oneJunc.getDeviceUrn().getUrn().equals("nodeQ"));
+            ReservedVlanJunctionE aJunc = ethPipe.getAJunction();
+            ReservedVlanJunctionE zJunc = ethPipe.getAJunction();
+            Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
+            Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
+            List<String> azERO = ethPipe.getAzERO();
+            List<String> zaERO = ethPipe.getZaERO();
+            String actualAzERO = aJunc.getDeviceUrn().getUrn() + "-";
+            String actualZaERO = zJunc.getDeviceUrn().getUrn() + "-";
 
-            Iterator<ReservedVlanFixtureE> iterF = oneJunc.getFixtures().iterator();
-            ReservedVlanFixtureE fix1 = iterF.next();
-            ReservedVlanFixtureE fix2 = iterF.next();
+            for(String x : azERO)
+                actualAzERO = actualAzERO + x + "-";
 
-            assert(fix1.getReservedBandwidth().getInBandwidth().equals(azBW));
-            assert(fix2.getReservedBandwidth().getInBandwidth().equals(azBW));
+            for(String x : zaERO)
+                actualZaERO = actualZaERO + x + "-";
 
-            if(oneJunc.getDeviceUrn().getUrn().equals("nodeK"))
+            actualAzERO = actualAzERO + zJunc.getDeviceUrn();
+            actualZaERO = actualZaERO + aJunc.getDeviceUrn();
+
+
+            assert (aJunc.getDeviceUrn().getUrn().equals("nodeK") || aJunc.getDeviceUrn().getUrn().equals("nodeM"));
+            assert (zJunc.getDeviceUrn().getUrn().equals("nodeM") || zJunc.getDeviceUrn().getUrn().equals("nodeQ"));
+
+            if(aJunc.getDeviceUrn().getUrn().equals("nodeK"))
             {
-                assert(fix1.getIfceUrn().getUrn().equals("portA") || fix1.getIfceUrn().getUrn().equals("nodeK:2"));
-                assert(fix2.getIfceUrn().getUrn().equals("portA") || fix2.getIfceUrn().getUrn().equals("nodeK:2"));
-            }
-            else if(oneJunc.getDeviceUrn().getUrn().equals("nodeM"))
-            {
-                assert(fix1.getIfceUrn().getUrn().equals("nodeM:1") || fix1.getIfceUrn().getUrn().equals("nodeM:2"));
-                assert(fix2.getIfceUrn().getUrn().equals("nodeM:1") || fix2.getIfceUrn().getUrn().equals("nodeM:2"));
+                assert (aFixes.size() == 1);
+                assert (zFixes.size() == 0);
+                ReservedVlanFixtureE theFix = aFixes.iterator().next();
+
+                String expectedAzERO = "nodeK-nodeK:2-nodeM:1-nodeM";
+                String expectedZaERO = "nodeM-nodeM:1-nodeK:2-nodeK";
+
+                assert (zJunc.getDeviceUrn().getUrn().equals("nodeM"));
+                assert (theFix.getIfceUrn().getUrn().equals("portA"));
+                assert (theFix.getReservedBandwidth().getInBandwidth().equals(azBW));
+                assert (theFix.getReservedBandwidth().getEgBandwidth().equals(zaBW));
+                assert (actualAzERO.equals(expectedAzERO));
+                assert (actualZaERO.equals(expectedZaERO));
             }
             else
             {
-                assert(fix1.getIfceUrn().getUrn().equals("nodeQ:2") || fix1.getIfceUrn().getUrn().equals("portZ"));
-                assert(fix2.getIfceUrn().getUrn().equals("nodeQ:2") || fix2.getIfceUrn().getUrn().equals("portZ"));
+                assert (aFixes.size() == 0);
+                assert (zFixes.size() == 1);
+                ReservedVlanFixtureE theFix = zFixes.iterator().next();
+
+                String expectedAzERO = "nodeM-nodeM:2-nodeQ:2-nodeQ";
+                String expectedZaERO = "nodeQ-nodeQ:2-nodeM:2-nodeM";
+
+                assert (zJunc.getDeviceUrn().getUrn().equals("nodeQ"));
+                assert (theFix.getIfceUrn().getUrn().equals("portZ"));
+                assert (theFix.getReservedBandwidth().getInBandwidth().equals(zaBW));
+                assert (theFix.getReservedBandwidth().getEgBandwidth().equals(azBW));
+                assert (actualAzERO.equals(expectedAzERO));
+                assert (actualZaERO.equals(expectedZaERO));
             }
         }
 

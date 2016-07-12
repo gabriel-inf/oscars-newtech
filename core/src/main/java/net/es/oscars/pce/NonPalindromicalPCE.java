@@ -215,6 +215,8 @@ public class NonPalindromicalPCE
         theMap.put("az", azERO);
         theMap.put("za", zaERO);
 
+        // TODO: Current implementation only tries the shortest forward-direction route. May result in false-negatives if reverse-direction is unavailable. If unsuccessful, prune out bad ports and try again.
+
         return theMap;
     }
 }
