@@ -439,7 +439,7 @@ public class TopPceTestNonPalindromic
             actualAzERO = actualAzERO + zJunc.getDeviceUrn();
             actualZaERO = actualZaERO + aJunc.getDeviceUrn();
             String expectedAzERO = "nodeQ-nodeQ:2-nodeS:1-nodeS";
-            String expectedZaERO = "nodeS-nodeS:2-nodeR:2-nodeR-nodeQ:3-nodeQ";
+            String expectedZaERO = "nodeS-nodeS:2-nodeR:2-nodeR-nodeR:1-nodeQ:3-nodeQ";
 
             assert (aJunc.getDeviceUrn().getUrn().equals("nodeQ"));
             assert (zJunc.getDeviceUrn().getUrn().equals("nodeS"));
@@ -803,7 +803,7 @@ public class TopPceTestNonPalindromic
             actualAzERO = actualAzERO + zJunc.getDeviceUrn();
             actualZaERO = actualZaERO + aJunc.getDeviceUrn();
             String expectedAzERO = "nodeQ-nodeQ:2-nodeS:1-nodeS";
-            String expectedZaERO = "nodeS-nodeS:2-nodeR:2-nodeR-nodeQ:3-nodeQ";
+            String expectedZaERO = "nodeS-nodeS:2-nodeR:2-nodeR-nodeR:1-nodeQ:3-nodeQ";
 
             assert (aJunc.getDeviceUrn().getUrn().equals("nodeQ"));
             assert (zJunc.getDeviceUrn().getUrn().equals("nodeS"));
@@ -1133,7 +1133,7 @@ public class TopPceTestNonPalindromic
                 String expectedZaERO1 = "nodeL-nodeL:1-nodeK:1-nodeK";
                 String expectedZaERO2 = "nodeM-nodeM:1-nodeK:2-nodeK";
 
-                assert (zJunc.getDeviceUrn().getUrn().equals("nodeL") || zJunc.getDeviceUrn().getUrn().equals("nodeL"));
+                assert (zJunc.getDeviceUrn().getUrn().equals("nodeL") || zJunc.getDeviceUrn().getUrn().equals("nodeM"));
                 assert (theFix.getIfceUrn().getUrn().equals("portA"));
                 assert (theFix.getReservedBandwidth().getInBandwidth().equals(azBW));
                 assert (theFix.getReservedBandwidth().getEgBandwidth().equals(zaBW));
@@ -2148,8 +2148,8 @@ public class TopPceTestNonPalindromic
 
             actualAzERO = actualAzERO + zJunc.getDeviceUrn();
             actualZaERO = actualZaERO + aJunc.getDeviceUrn();
-            String expectedAzERO = "nodeP-nodeP:1-nodeQ:1-nodeQ";
-            String expectedZaERO = "nodeQ-nodeQ:1-nodeP:1-nodeP";
+            String expectedAzERO = "nodeP-nodeP:2-nodeQ:1-nodeQ";
+            String expectedZaERO = "nodeQ-nodeQ:1-nodeP:2-nodeP";
 
             assert (aJunc.getDeviceUrn().getUrn().equals("nodeP"));
             assert (zJunc.getDeviceUrn().getUrn().equals("nodeQ"));
@@ -2249,7 +2249,7 @@ public class TopPceTestNonPalindromic
                 String expectedZaERO1 = "nodeL-nodeL:1-nodeK:1-nodeK";
                 String expectedZaERO2 = "nodeM-nodeM:1-nodeK:2-nodeK";
 
-                assert (zJunc.getDeviceUrn().getUrn().equals("nodeL") || zJunc.getDeviceUrn().getUrn().equals("nodeL"));
+                assert (zJunc.getDeviceUrn().getUrn().equals("nodeL") || zJunc.getDeviceUrn().getUrn().equals("nodeM"));
                 assert (theFix.getIfceUrn().getUrn().equals("portA"));
                 assert (theFix.getReservedBandwidth().getInBandwidth().equals(azBW));
                 assert (theFix.getReservedBandwidth().getEgBandwidth().equals(zaBW));
@@ -3168,7 +3168,7 @@ public class TopPceTestNonPalindromic
                 String expectedZaERO = "nodeM-nodeM:1-nodeL:2-nodeL";
 
                 assert (zJunc.getDeviceUrn().getUrn().equals("nodeM"));
-                assert (theFix.getIfceUrn().getUrn().equals("portz"));
+                assert (theFix.getIfceUrn().getUrn().equals("portZ"));
                 assert (theFix.getReservedBandwidth().getInBandwidth().equals(zaBW));
                 assert (theFix.getReservedBandwidth().getEgBandwidth().equals(azBW));
                 assert (actualAzERO.equals(expectedAzERO));
@@ -3302,7 +3302,7 @@ public class TopPceTestNonPalindromic
             actualAzERO = actualAzERO + zJunc.getDeviceUrn();
             actualZaERO = actualZaERO + aJunc.getDeviceUrn();
             String expectedAzERO = "nodeP-nodeP:2-nodeQ:1-nodeQ";
-            String expectedZaERO = "nodeQ-nodeQ:2-nodeR:2-nodeR-nodeR:1-nodeP:2-nodeP";
+            String expectedZaERO = "nodeQ-nodeQ:2-nodeR:2-nodeR-nodeR:1-nodeP:3-nodeP";
 
             assert (aJunc.getDeviceUrn().getUrn().equals("nodeP"));
             assert (zJunc.getDeviceUrn().getUrn().equals("nodeQ"));
@@ -3789,7 +3789,7 @@ public class TopPceTestNonPalindromic
                 ReservedVlanFixtureE theFix = aFixes.iterator().next();
 
                 String expectedAzERO = "nodeK-nodeK:1-nodeL:1-nodeL";
-                String expectedZaERO = "nodeL-nodeL:3-nodeM:2-nodeM";
+                String expectedZaERO = "nodeL-nodeL:1-nodeK:1-nodeK";
 
                 assert (zJunc.getDeviceUrn().getUrn().equals("nodeL"));
                 assert (theFix.getIfceUrn().getUrn().equals("portA"));
@@ -3820,7 +3820,7 @@ public class TopPceTestNonPalindromic
                 String expectedZaERO = "nodeN-nodeN:2-nodeM:3-nodeM";
 
                 assert (zJunc.getDeviceUrn().getUrn().equals("nodeN"));
-                assert (theFix.getIfceUrn().getUrn().equals("portz"));
+                assert (theFix.getIfceUrn().getUrn().equals("portZ"));
                 assert (theFix.getReservedBandwidth().getInBandwidth().equals(zaBW));
                 assert (theFix.getReservedBandwidth().getEgBandwidth().equals(azBW));
                 assert (actualAzERO.equals(expectedAzERO));
@@ -4133,7 +4133,7 @@ public class TopPceTestNonPalindromic
                 ReservedVlanFixtureE theFix = aFixes.iterator().next();
 
                 String expectedAzERO = "nodeK-nodeK:1-nodeL:1-nodeL";
-                String expectedZaERO = "nodeL-nodeL:3-nodeM:2-nodeM";
+                String expectedZaERO = "nodeL-nodeL:1-nodeK:1-nodeK";
 
                 assert (zJunc.getDeviceUrn().getUrn().equals("nodeL"));
                 assert (theFix.getIfceUrn().getUrn().equals("portA"));
@@ -4164,7 +4164,7 @@ public class TopPceTestNonPalindromic
                 String expectedZaERO = "nodeN-nodeN:2-nodeM:3-nodeM";
 
                 assert (zJunc.getDeviceUrn().getUrn().equals("nodeN"));
-                assert (theFix.getIfceUrn().getUrn().equals("portz"));
+                assert (theFix.getIfceUrn().getUrn().equals("portZ"));
                 assert (theFix.getReservedBandwidth().getInBandwidth().equals(zaBW));
                 assert (theFix.getReservedBandwidth().getEgBandwidth().equals(azBW));
                 assert (actualAzERO.equals(expectedAzERO));

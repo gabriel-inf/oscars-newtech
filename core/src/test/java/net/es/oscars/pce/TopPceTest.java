@@ -412,7 +412,7 @@ public class TopPceTest
                 String expectedZaERO1 = "nodeL-nodeL:1-nodeK:1-nodeK";
                 String expectedZaERO2 = "nodeM-nodeM:1-nodeK:2-nodeK";
 
-                assert (zJunc.getDeviceUrn().getUrn().equals("nodeL") || zJunc.getDeviceUrn().getUrn().equals("nodeL"));
+                assert (zJunc.getDeviceUrn().getUrn().equals("nodeL") || zJunc.getDeviceUrn().getUrn().equals("nodeM"));
                 assert (theFix.getIfceUrn().getUrn().equals("portA"));
                 assert (theFix.getReservedBandwidth().getInBandwidth().equals(azBW));
                 assert (theFix.getReservedBandwidth().getEgBandwidth().equals(zaBW));

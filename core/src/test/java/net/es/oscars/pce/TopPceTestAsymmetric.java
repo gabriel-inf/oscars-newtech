@@ -92,11 +92,26 @@ public class TopPceTestAsymmetric
             ReservedVlanFixtureE fix1 = iterF.next();
             ReservedVlanFixtureE fix2 = iterF.next();
 
-            assert(Objects.equals(fix1.getReservedBandwidth().getInBandwidth(), azBW));
-            assert(Objects.equals(fix2.getReservedBandwidth().getInBandwidth(), azBW));
 
             assert(fix1.getIfceUrn().getUrn().equals("portA") || fix1.getIfceUrn().getUrn().equals("portZ"));
             assert(fix2.getIfceUrn().getUrn().equals("portA") || fix2.getIfceUrn().getUrn().equals("portZ"));
+
+            if(fix1.getIfceUrn().getUrn().equals("portA")){
+                assert(Objects.equals(fix1.getReservedBandwidth().getInBandwidth(), azBW));
+                assert(Objects.equals(fix2.getReservedBandwidth().getInBandwidth(), zaBW));
+
+                assert(Objects.equals(fix1.getReservedBandwidth().getEgBandwidth(), zaBW));
+                assert(Objects.equals(fix2.getReservedBandwidth().getEgBandwidth(), azBW));
+            }
+            else{
+                assert(Objects.equals(fix1.getReservedBandwidth().getInBandwidth(), zaBW));
+                assert(Objects.equals(fix2.getReservedBandwidth().getInBandwidth(), azBW));
+
+                assert(Objects.equals(fix1.getReservedBandwidth().getEgBandwidth(), azBW));
+                assert(Objects.equals(fix2.getReservedBandwidth().getEgBandwidth(), zaBW));
+            }
+
+
         }
 
 
@@ -311,8 +326,8 @@ public class TopPceTestAsymmetric
 
             actualAzERO = actualAzERO + zJunc.getDeviceUrn();
             actualZaERO = actualZaERO + aJunc.getDeviceUrn();
-            String expectedAzERO = "nodeP-nodeP:1-nodeQ:1-nodeQ";
-            String expectedZaERO = "nodeQ-nodeQ:1-nodeP:1-nodeP";
+            String expectedAzERO = "nodeP-nodeP:2-nodeQ:1-nodeQ";
+            String expectedZaERO = "nodeQ-nodeQ:1-nodeP:2-nodeP";
 
             assert (aJunc.getDeviceUrn().getUrn().equals("nodeP"));
             assert (zJunc.getDeviceUrn().getUrn().equals("nodeQ"));
@@ -412,7 +427,7 @@ public class TopPceTestAsymmetric
                 String expectedZaERO1 = "nodeL-nodeL:1-nodeK:1-nodeK";
                 String expectedZaERO2 = "nodeM-nodeM:1-nodeK:2-nodeK";
 
-                assert (zJunc.getDeviceUrn().getUrn().equals("nodeL") || zJunc.getDeviceUrn().getUrn().equals("nodeL"));
+                assert (zJunc.getDeviceUrn().getUrn().equals("nodeL") || zJunc.getDeviceUrn().getUrn().equals("nodeM"));
                 assert (theFix.getIfceUrn().getUrn().equals("portA"));
                 assert (theFix.getReservedBandwidth().getInBandwidth().equals(azBW));
                 assert (theFix.getReservedBandwidth().getEgBandwidth().equals(zaBW));
@@ -695,11 +710,23 @@ public class TopPceTestAsymmetric
             ReservedVlanFixtureE fix1 = iterF.next();
             ReservedVlanFixtureE fix2 = iterF.next();
 
-            assert(fix1.getReservedBandwidth().getInBandwidth().equals(azBW));
-            assert(fix2.getReservedBandwidth().getInBandwidth().equals(azBW));
-
             assert(fix1.getIfceUrn().getUrn().equals("portA") || fix1.getIfceUrn().getUrn().equals("portZ"));
             assert(fix2.getIfceUrn().getUrn().equals("portA") || fix2.getIfceUrn().getUrn().equals("portZ"));
+
+            if(fix1.getIfceUrn().getUrn().equals("portA")){
+                assert(Objects.equals(fix1.getReservedBandwidth().getInBandwidth(), azBW));
+                assert(Objects.equals(fix2.getReservedBandwidth().getInBandwidth(), zaBW));
+
+                assert(Objects.equals(fix1.getReservedBandwidth().getEgBandwidth(), zaBW));
+                assert(Objects.equals(fix2.getReservedBandwidth().getEgBandwidth(), azBW));
+            }
+            else{
+                assert(Objects.equals(fix1.getReservedBandwidth().getInBandwidth(), zaBW));
+                assert(Objects.equals(fix2.getReservedBandwidth().getInBandwidth(), azBW));
+
+                assert(Objects.equals(fix1.getReservedBandwidth().getEgBandwidth(), azBW));
+                assert(Objects.equals(fix2.getReservedBandwidth().getEgBandwidth(), zaBW));
+            }
         }
 
         log.info("test 'asymmPceTest6' passed.");
