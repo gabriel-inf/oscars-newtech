@@ -62,7 +62,7 @@ public class AsymmTopPceTest
         Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
 
         String srcDevice = "nodeK";
-        Set<String> portNames = Stream.of("portA", "portZ").collect(Collectors.toSet());
+        List<String> portNames = Stream.of("portA", "portZ").collect(Collectors.toList());
         Integer azBW = 25;
         Integer zaBW = 50;
         String vlan = "any";
@@ -103,18 +103,26 @@ public class AsymmTopPceTest
             int fix2InBW = fix2.getReservedBandwidth().getInBandwidth().intValue();
             int fix2EgBW = fix2.getReservedBandwidth().getEgBandwidth().intValue();
 
-            log.info("fix1 URN: " + fix1.getIfceUrn().getUrn());
-            log.info("fix2 URN: " + fix2.getIfceUrn().getUrn());
-            log.info("fix1 In-B/W: " + fix1InBW);
-            log.info("fix1 Eg-B/W: " + fix1EgBW);
-            log.info("fix2 In-B/W: " + fix2InBW);
-            log.info("fix2 Eg-B/W: " + fix2EgBW);
-
             assert((fix1InBW == azBW && fix1EgBW == zaBW) || (fix1EgBW == azBW && fix1InBW == zaBW));
             assert((fix2InBW == azBW && fix2EgBW == zaBW) || (fix2EgBW == azBW && fix2InBW == zaBW));
 
             assert(fix1.getIfceUrn().getUrn().equals("portA") || fix1.getIfceUrn().getUrn().equals("portZ"));
             assert(fix2.getIfceUrn().getUrn().equals("portA") || fix2.getIfceUrn().getUrn().equals("portZ"));
+
+            if(fix1.getIfceUrn().getUrn().equals("portA") && fix2.getIfceUrn().getUrn().equals("portZ"))
+            {
+                assert(fix1.getReservedBandwidth().getInBandwidth().intValue() == azBW);
+                assert(fix1.getReservedBandwidth().getEgBandwidth().intValue() == zaBW);
+                assert(fix2.getReservedBandwidth().getInBandwidth().intValue() == zaBW);
+                assert(fix2.getReservedBandwidth().getEgBandwidth().intValue() == azBW);
+            }
+            else
+            {
+                assert(fix2.getReservedBandwidth().getInBandwidth().intValue() == azBW);
+                assert(fix2.getReservedBandwidth().getEgBandwidth().intValue() == zaBW);
+                assert(fix1.getReservedBandwidth().getInBandwidth().intValue() == zaBW);
+                assert(fix1.getReservedBandwidth().getEgBandwidth().intValue() == azBW);
+            }
         }
 
 
@@ -549,7 +557,7 @@ public class AsymmTopPceTest
         Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
 
         String srcDevice = "nodeP";
-        Set<String> portNames = Stream.of("portA", "portZ").collect(Collectors.toSet());
+        List<String> portNames = Stream.of("portA", "portZ").collect(Collectors.toList());
         Integer azBW = 25;
         Integer zaBW = 50;
         String vlan = "any";

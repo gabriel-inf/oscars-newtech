@@ -105,7 +105,7 @@ public class TestEntityBuilder {
         return topo;
     }
 
-    public RequestedBlueprintE buildRequest(String deviceName, Set<String> fixtureNames,
+    public RequestedBlueprintE buildRequest(String deviceName, List<String> fixtureNames,
                                             Integer azMbps, Integer zaMbps, String vlanExp){
         log.info("Building RequestedBlueprintE");
         log.info("Device: " + deviceName);
@@ -116,7 +116,7 @@ public class TestEntityBuilder {
         log.info("VLAN Expression: " + vlanExp);
 
         Set<RequestedVlanJunctionE> junctions = new HashSet<>();
-        RequestedVlanJunctionE junction = buildRequestedJunction(deviceName, fixtureNames, azMbps, zaMbps, vlanExp);
+        RequestedVlanJunctionE junction = buildRequestedJunction(deviceName, fixtureNames, azMbps, zaMbps, vlanExp, true);
         junctions.add(junction);
 
 
@@ -157,16 +157,25 @@ public class TestEntityBuilder {
         return buildRequestedBlueprint(buildRequestedFlow(new HashSet<>(), pipes), Layer3FlowE.builder().build());
     }
 
-    public RequestedBlueprintE buildRequest(List<String> deviceNames, List<Set<String>> portNames,
+    public RequestedBlueprintE buildRequest(List<String> deviceNames, List<List<String>> portNames,
                                             List<Integer> azMbpsList, List<Integer> zaMbpsList, List<String> vlanExps){
         Set<RequestedVlanJunctionE> junctions = new HashSet<>();
-        for(int i = 0; i < deviceNames.size(); i++){
+        for(int i = 0; i < deviceNames.size(); i++)
+        {
+            boolean aJunction;
+
+            if(i == 0)
+                aJunction = true;
+            else
+                aJunction = false;
+
             RequestedVlanJunctionE junction = buildRequestedJunction(
                     deviceNames.get(i),
                     portNames.get(i),
                     azMbpsList.get(i),
                     zaMbpsList.get(i),
-                    vlanExps.get(i));
+                    vlanExps.get(i),
+                    aJunction);
             junctions.add(junction);
         }
 
@@ -334,15 +343,15 @@ public class TestEntityBuilder {
     public RequestedVlanPipeE buildRequestedPipe(String aPort, String aDevice, String zPort, String zDevice,
                                                  Integer azMbps, Integer zaMbps, Boolean palindromic, String vlanExp){
 
-        Set<String> aFixNames = new HashSet<>();
+        List<String> aFixNames = new ArrayList<>();
         aFixNames.add(aPort);
 
-        Set<String> zFixNames = new HashSet<>();
+        List<String> zFixNames = new ArrayList<>();
         zFixNames.add(zPort);
 
         return RequestedVlanPipeE.builder()
-                .aJunction(buildRequestedJunction(aDevice, aFixNames, azMbps, zaMbps, vlanExp))
-                .zJunction(buildRequestedJunction(zDevice, zFixNames, azMbps, zaMbps, vlanExp))
+                .aJunction(buildRequestedJunction(aDevice, aFixNames, azMbps, zaMbps, vlanExp, true))
+                .zJunction(buildRequestedJunction(zDevice, zFixNames, azMbps, zaMbps, vlanExp, false))
                 .pipeType(EthPipeType.REQUESTED)
                 .azERO(new ArrayList<>())
                 .zaERO(new ArrayList<>())
@@ -352,16 +361,44 @@ public class TestEntityBuilder {
                 .build();
     }
 
-    public RequestedVlanJunctionE buildRequestedJunction(String deviceName, Set<String> fixtureNames,
-                                                         Integer azMbps, Integer zaMbps, String vlanExp){
+    public RequestedVlanJunctionE buildRequestedJunction(String deviceName, List<String> fixtureNames,
+                                                         Integer azMbps, Integer zaMbps, String vlanExp, boolean startJunc){
         log.info("Building requested junction");
 
         Optional<UrnE> optUrn = urnRepo.findByUrn(deviceName);
 
-        Set<RequestedVlanFixtureE> fixtures = fixtureNames
-                .stream()
-                .map(fixName -> buildRequestedFixture(fixName, azMbps, zaMbps, vlanExp))
-                .collect(Collectors.toSet());
+        Set<RequestedVlanFixtureE> fixtures = new HashSet<>();
+
+        assert(fixtureNames.size() <= 2);
+
+        if(fixtureNames.size() == 2)
+        {
+            RequestedVlanFixtureE aFix = buildRequestedFixture(fixtureNames.get(0), azMbps, zaMbps, vlanExp);
+            RequestedVlanFixtureE zFix = buildRequestedFixture(fixtureNames.get(1), zaMbps, azMbps, vlanExp);
+
+            fixtures.add(aFix);
+            fixtures.add(zFix);
+        }
+        else if(fixtureNames.size() == 1)
+        {
+            RequestedVlanFixtureE theFix;
+
+            if(startJunc == true)
+            {
+                theFix = buildRequestedFixture(fixtureNames.get(0), azMbps, zaMbps, vlanExp);
+            }
+            else
+            {
+                theFix = buildRequestedFixture(fixtureNames.get(0), zaMbps, azMbps, vlanExp);
+            }
+
+            fixtures.add(theFix);
+        }
+
+        //Set<RequestedVlanFixtureE> fixtures = fixtureNames
+        //        .stream()
+        //        .map(fixName -> buildRequestedFixture(fixName, azMbps, zaMbps, vlanExp))
+        //        .collect(Collectors.toSet());
 
         return RequestedVlanJunctionE.builder()
                 .deviceUrn(optUrn.isPresent() ? optUrn.get() : null)

@@ -60,7 +60,7 @@ public class TopPceTest
         Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
 
         String srcDevice = "nodeK";
-        Set<String> portNames = Stream.of("portA", "portZ").collect(Collectors.toSet());
+        List<String> portNames = Stream.of("portA", "portZ").collect(Collectors.toList());
         Integer azBW = 25;
         Integer zaBW = 25;
         String vlan = "any";
@@ -521,7 +521,7 @@ public class TopPceTest
         Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
 
         String srcDevice = "nodeP";
-        Set<String> portNames = Stream.of("portA", "portZ").collect(Collectors.toSet());
+        List<String> portNames = Stream.of("portA", "portZ").collect(Collectors.toList());
         Integer azBW = 25;
         Integer zaBW = 25;
         String vlan = "any";
