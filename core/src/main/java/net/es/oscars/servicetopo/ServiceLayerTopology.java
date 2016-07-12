@@ -617,8 +617,14 @@ public class ServiceLayerTopology
         logicalLinks.addAll(llBackup);
     }
 
-
-    // Should only be called if Source Device is MPLS
+    /**
+     * Adds a VIRTUAL device and port onto the Service-layer to represent a request's starting node which is on the MPLS-layer.
+     * This is necessary since if the request is sourced on the MPLS-layer, it has no foothold on the service-layer; VIRTUAL nodes are dummy hooks.
+     * A bidirectional zero-cost link is added between the VIRTUAL port and MPLS-layer srcInPort.
+     * If the specified topology nodes are already on the Service-layer, this method does nothing to modify the Service-layer topology.
+     * @param srcDevice - Request's source device
+     * @param srcInPort - Request's source port
+     */
     public void buildLogicalLayerSrcNodes(TopoVertex srcDevice, TopoVertex srcInPort)
     {
         log.info("determining if source is already represented on Service-Layer topology.");
@@ -652,7 +658,14 @@ public class ServiceLayerTopology
         buildLogicalLayerLinks();               // Should filter out duplicates
     }
 
-    // Should only be called if Source Device is MPLS
+    /**
+     * Adds a VIRTUAL device and port onto the Service-layer to represent a request's terminating node which is on the MPLS-layer.
+     * This is necessary since if the request is destined on the MPLS-layer, it has no foothold on the service-layer; VIRTUAL nodes are dummy hooks.
+     * A bidirectional zero-cost link is added between the VIRTUAL port and MPLS-layer dstOutPort.
+     * If the specified topology nodes are already on the Service-layer, this method does nothing to modify the Service-layer topology.
+     * @param dstDevice - Request's destination device
+     * @param dstOutPort - Request's destination port
+     */
     public void buildLogicalLayerDstNodes(TopoVertex dstDevice, TopoVertex dstOutPort)
     {
         log.info("determining if destination is already represented on Service-Layer topology.");
@@ -687,7 +700,10 @@ public class ServiceLayerTopology
     }
 
 
-
+    /**
+     * Assigns the passed in topology to the appropriate layer's global class variable
+     * @param topology - Single-layer topology; Pre-managed and altered if necessary
+     */
     public void setTopology(Topology topology)
     {
         assert(topology != null);
@@ -707,7 +723,10 @@ public class ServiceLayerTopology
         }
     }
 
-
+    /**
+     * Get the service-layer topology, including: ETHERNET devices, VIRTUAL devices, ETHERNET ports, VIRTUAL ports, INTERNAL links, ETHERNET links, LOGICAL links
+     * @return Service-Layer topology as a combined Topology object
+     */
     public Topology getSLTopology()
     {
         Topology topo = new Topology();
@@ -721,6 +740,10 @@ public class ServiceLayerTopology
         return topo;
     }
 
+    /**
+     * Same as getSLTopology, except the logical link metrics and corresponding MPLS-layer EROs are assigned using the requested A->Z b/w constraint.
+     * @return Service-Layer topology as a combined Topology object
+     */
     public Topology getSLTopologyAZ()
     {
         Topology topo = new Topology();
@@ -741,6 +764,10 @@ public class ServiceLayerTopology
         return topo;
     }
 
+    /**
+     * Same as getSLTopology, except the logical link metrics and corresponding MPLS-layer EROs are assigned using the requested Z->A b/w constraint.
+     * @return Service-Layer topology as a combined Topology object
+     */
     public Topology getSLTopologyZA()
     {
         Topology topo = new Topology();
@@ -761,6 +788,11 @@ public class ServiceLayerTopology
         return topo;
     }
 
+    /**
+     * Looks up a given MPLS-Layer node to find the corresponding VIRTUAL Service-layer node.
+     * @param realNode - Physical node for which to find corresponding VIRTUAL node.
+     * @return the appropriate VIRTUAL node, or null is no such node exists.
+     */
     public TopoVertex getVirtualNode(TopoVertex realNode)
     {
         for(TopoVertex oneNode : serviceLayerDevices)
@@ -777,6 +809,11 @@ public class ServiceLayerTopology
         return null;
     }
 
+    /**
+     * Gets MPLS-Layer ERO given a Service-layer ERO, which possibly contains LOGICAL edges
+     * @param serviceLayerERO - Service-layer ERO; may contain LOGICAL edges
+     * @return Corresponding physical ERO
+     */
     public List<TopoEdge> getActualERO(List<TopoEdge> serviceLayerERO)
     {
         List<TopoEdge> actualERO = new LinkedList<>();
@@ -817,6 +854,11 @@ public class ServiceLayerTopology
         return  actualERO;
     }
 
+    /**
+     * Same as getActualERO, except returns only the physical ERO as constrained by the requested A->Z b/w.
+     * @param serviceLayerERO - Service-layer ERO; may contain LOGICAL edges
+     * @return Corresponding physical ERO, constrained by requested A->Z b/w.
+     */
     public List<TopoEdge> getActualEROAZ(List<TopoEdge> serviceLayerERO)
     {
         List<TopoEdge> actualERO = new LinkedList<>();
@@ -857,6 +899,11 @@ public class ServiceLayerTopology
         return  actualERO;
     }
 
+    /**
+     * Same as getActualERO, except returns only the physical ERO as constrained by the requested Z->A b/w.
+     * @param serviceLayerERO - Service-layer ERO; may contain LOGICAL edges
+     * @return Corresponding physical ERO, constrained by requested Z->A b/w.
+     */
     public List<TopoEdge> getActualEROZA(List<TopoEdge> serviceLayerERO)
     {
         List<TopoEdge> actualERO = new LinkedList<>();
