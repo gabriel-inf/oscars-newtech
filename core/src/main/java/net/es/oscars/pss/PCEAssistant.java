@@ -79,7 +79,7 @@ public class PCEAssistant {
             // If so, switch the layer to MPLS and start a new segment
             else if(currentLayer.equals(Layer.ETHERNET) && i % 3 == 2 && i + 3 != edges.size()){
                 Layer nextPortToPortLayer = edges.get(i+3).getLayer();
-                if(nextPortToPortLayer.equals(Layer.MPLS)){
+                if(currentLayer != nextPortToPortLayer){
                     currentLayer = nextPortToPortLayer;
                     segment = new HashMap<>();
                     segmentVertices = new ArrayList<>();
@@ -301,21 +301,24 @@ public class PCEAssistant {
                                                   Map<List<TopoVertex>, Layer> allJunctionPairs,
                                                   List<Map<Layer, List<TopoVertex>>> azSegments,
                                                   List<Map<Layer, List<TopoVertex>>> zaSegments) {
-        List<TopoVertex> currentAZPipeERO = new ArrayList<>();
-        List<TopoVertex> currentZAPipeERO = new ArrayList<>();
-        List<TopoVertex> currentJunctionPair = new ArrayList<>();
 
-        Map<String, List<TopoVertex>> directionalMap = makeDirectionalEROMap(currentAZPipeERO, currentZAPipeERO);
+        List<List<TopoVertex>> junctionPairs = new ArrayList<>();
+        junctionPairs.add(new ArrayList<>());
+        List<List<TopoVertex>> azEros = new ArrayList<>();
+        azEros.add(new ArrayList<>());
+        List<List<TopoVertex>> zaEros = new ArrayList<>();
+        zaEros.add(new ArrayList<>());
 
-        List<TopoVertex> currentIntersegmentJunctionPair = new ArrayList<>();
-        List<TopoVertex> currentIntersegmentAZPipeERO = new ArrayList<>();
-        List<TopoVertex> currentIntersegmentZAPipeERO = new ArrayList<>();
+        List<List<TopoVertex>> interJunctionPairs = new ArrayList<>();
+        interJunctionPairs.add(new ArrayList<>());
+        List<List<TopoVertex>> interAzEROs = new ArrayList<>();
+        interAzEROs.add(new ArrayList<>());
+        List<List<TopoVertex>> interZaEROs = new ArrayList<>();
+        interZaEROs.add(new ArrayList<>());
 
-        Map<String, List<TopoVertex>> interDirectionalMap = makeDirectionalEROMap(currentIntersegmentAZPipeERO,
-                currentIntersegmentZAPipeERO);
+        Integer currJunctionPairIndex = 0;
+        Integer currInterJunctionPairIndex = 0;
 
-        junctionPairToPipeEROMap.put(currentJunctionPair, directionalMap);
-        junctionPairToPipeEROMap.put(currentIntersegmentJunctionPair, interDirectionalMap);
 
         for (int i = 0; i < azSegments.size(); i++) {
             // Get az segment and za segment
@@ -346,34 +349,28 @@ public class PCEAssistant {
                 // Add the current vertex to the current intersegment junction pair
                 // The intersegment pipe can now be completed by adding the ingress point
                 // To the intersegment pipe
-                if (currentIntersegmentJunctionPair.size() == 1) {
+                if (interJunctionPairs.get(currInterJunctionPairIndex).size() == 1) {
                     // Add the starting device to the junction pair
-                    currentIntersegmentJunctionPair.add(currentVertex);
+                    interJunctionPairs.get(currInterJunctionPairIndex).add(currentVertex);
 
                     // Add to the list of all junction pairs
-                    allJunctionPairs.put(currentIntersegmentJunctionPair, Layer.ETHERNET);
+                    allJunctionPairs.put(interJunctionPairs.get(currInterJunctionPairIndex), Layer.ETHERNET);
+
 
                     // Add the ingress point to the intersegment AZ ERO
-                    currentIntersegmentAZPipeERO.add(azIngress);
+                    interAzEROs.get(currInterJunctionPairIndex).add(azIngress);
                     // Add the ingress port to the front of the intersegment ZA ERO
                     // This should reverse the order
-                    currentIntersegmentZAPipeERO.add(0, azIngress);
+                    interZaEROs.get(currInterJunctionPairIndex).add(0, azIngress);
 
 
                     // Reset the collections of intersection junction pairs and pipes
-                    currentIntersegmentJunctionPair = new ArrayList<>();
-                    currentIntersegmentAZPipeERO = new ArrayList<>();
-                    currentIntersegmentZAPipeERO = new ArrayList<>();
-
-                    interDirectionalMap = makeDirectionalEROMap(currentIntersegmentAZPipeERO,
-                            currentIntersegmentZAPipeERO);
-
-                    // Store the new junction pair and map of EROs
-                    junctionPairToPipeEROMap.put(currentIntersegmentJunctionPair, interDirectionalMap);
+                    interJunctionPairs.add(new ArrayList<>());
+                    interAzEROs.add(new ArrayList<>());
+                    interZaEROs.add(new ArrayList<>());
+                    currInterJunctionPairIndex += 1;
                 }
             }
-
-            // Reset the current junction pair and pipe EROs
 
             // If we're in a MPLS segment:
             // Create a junction pair from first and last device
@@ -392,25 +389,24 @@ public class PCEAssistant {
                 // Store the last device to be added to the next intersegment junction pair
                 currentVertex = lastDevice;
 
-                currentJunctionPair.add(firstDevice);
-                currentJunctionPair.add(lastDevice);
+                junctionPairs.get(currJunctionPairIndex).add(firstDevice);
+                junctionPairs.get(currJunctionPairIndex).add(lastDevice);
 
 
                 // Add to the list of all junction pairs
-                allJunctionPairs.put(currentJunctionPair, layer);
+                allJunctionPairs.put(junctionPairs.get(currJunctionPairIndex), layer);
 
                 // Store the ports/device in between the current junction pair
-                directionalMap.put("AZ", new ArrayList<>(azVertices));
-                directionalMap.put("ZA", new ArrayList<>(zaVertices));
+                azEros.get(currJunctionPairIndex).addAll(azVertices);
+                zaEros.get(currJunctionPairIndex).addAll(zaVertices);
 
                 // Reset the current junction pair and pipe ERO lists
-                currentJunctionPair = new ArrayList<>();
-                currentAZPipeERO = new ArrayList<>();
-                currentZAPipeERO = new ArrayList<>();
-                directionalMap = makeDirectionalEROMap(currentAZPipeERO, currentZAPipeERO);
-                junctionPairToPipeEROMap.put(currentJunctionPair,
-                        makeDirectionalEROMap(currentAZPipeERO, currentZAPipeERO));
+                junctionPairs.add(new ArrayList<>());
+                azEros.add(new ArrayList<>());
+                zaEros.add(new ArrayList<>());
+                currJunctionPairIndex += 1;
             }
+
 
 
             for (Integer v = 0; v < azVertices.size(); v++) {
@@ -418,25 +414,26 @@ public class PCEAssistant {
                 TopoVertex zaVertex = zaVertices.get(zaVertices.size() - 1 - v);
 
                 if (currentVertex.getVertexType().equals(VertexType.SWITCH)) {
-                    currentJunctionPair.add(currentVertex);
-                    if (currentJunctionPair.size() == 2) {
+                    junctionPairs.get(currJunctionPairIndex).add(currentVertex);
+                    if (junctionPairs.get(currJunctionPairIndex).size() == 2) {
                         // Add to the list of all junction pairs
-                        allJunctionPairs.put(currentJunctionPair, layer);
+                        allJunctionPairs.put(junctionPairs.get(currJunctionPairIndex), layer);
 
                         // Reset the current junction pair and pipe ERO lists
-                        currentJunctionPair = new ArrayList<>();
-                        currentAZPipeERO = new ArrayList<>();
-                        currentZAPipeERO = new ArrayList<>();
-                        directionalMap = makeDirectionalEROMap(currentAZPipeERO, currentZAPipeERO);
-                        junctionPairToPipeEROMap.put(currentJunctionPair,
-                                makeDirectionalEROMap(currentAZPipeERO, currentZAPipeERO));
+                        if(v < azVertices.size()-1){
+                            junctionPairs.add(new ArrayList<>());
+                            azEros.add(new ArrayList<>());
+                            zaEros.add(new ArrayList<>());
+                            currJunctionPairIndex += 1;
 
+                            junctionPairs.get(currJunctionPairIndex).add(currentVertex);
+                        }
                     }
                 }
                 // This is a port
                 else {
-                    currentAZPipeERO.add(currentVertex);
-                    currentZAPipeERO.add(zaVertex);
+                    azEros.get(currJunctionPairIndex).add(currentVertex);
+                    zaEros.get(currJunctionPairIndex).add(0, zaVertex);
                 }
             }
 
@@ -445,9 +442,27 @@ public class PCEAssistant {
             // Start a new intersegment junction pair, and add the last device in the segment
             // Add the egress point of this segment to a new intersegment pipe ERO
             if (i < azSegments.size() - 1) {
-                currentIntersegmentJunctionPair.add(currentVertex);
-                currentIntersegmentAZPipeERO.add(azEgress);
-                currentIntersegmentZAPipeERO.add(azEgress);
+                interJunctionPairs.get(currInterJunctionPairIndex).add(currentVertex);
+                interAzEROs.get(currInterJunctionPairIndex).add(azEgress);
+                interZaEROs.get(currInterJunctionPairIndex).add(azEgress);
+            }
+        }
+
+        for(Integer jp = 0; jp < junctionPairs.size(); jp++){
+            List<TopoVertex> junctionPair = junctionPairs.get(jp);
+            if(junctionPair.size() == 2) {
+                List<TopoVertex> azERO = azEros.get(jp);
+                List<TopoVertex> zaEro = zaEros.get(jp);
+                junctionPairToPipeEROMap.put(junctionPair, makeDirectionalEROMap(azERO, zaEro));
+            }
+        }
+
+        for(Integer jp = 0; jp < interJunctionPairs.size(); jp++){
+            List<TopoVertex> junctionPair = interJunctionPairs.get(jp);
+            if(junctionPair.size() == 2) {
+                List<TopoVertex> azERO = interAzEROs.get(jp);
+                List<TopoVertex> zaEro = interZaEROs.get(jp);
+                junctionPairToPipeEROMap.put(junctionPair, makeDirectionalEROMap(azERO, zaEro));
             }
         }
 

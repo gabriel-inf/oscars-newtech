@@ -165,7 +165,8 @@ public class TranslationPCE {
         if(this.palindromicEros(azERO, zaERO)){
             boolean sufficientBw = checkForSufficientBw(urnMap, azMbps, zaMbps, azERO, zaERO, availBwMap);
             if(!sufficientBw)
-                throw new PCEException("Insufficient Bandwidth to meet requested pipe" + reqPipe.toString() + " given previous reservations in flow");
+                throw new PCEException("Insufficient Bandwidth to meet requested pipe" + reqPipe.toString() +
+                        " given previous reservations in flow");
         }
         // Non-Palindromic EROs -- evaluate the ports in each ERO just for traffic in the AZ or ZA direction
         else{
@@ -175,11 +176,13 @@ public class TranslationPCE {
             boolean sufficientBwZA = checkForSufficientBwUni(urnMap, zaMbps, zaERO, availBwMap);
             if(!sufficientBwAZ)
             {
-                throw new PCEException("Insufficient Bandwidth to meet requested A->Z pipe" + reqPipe.toString() + " given previous reservations in flow");
+                throw new PCEException("Insufficient Bandwidth to meet requested A->Z pipe" + reqPipe.toString() +
+                        " given previous reservations in flow");
             }
             if(!sufficientBwZA)
             {
-                throw new PCEException("Insufficient Bandwidth to meet requested Z->A pipe" + reqPipe.toString() + " given previous reservations in flow");
+                throw new PCEException("Insufficient Bandwidth to meet requested Z->A pipe" + reqPipe.toString() +
+                        " given previous reservations in flow");
             }
 
             // Now consider those ports which are shared by both A->Z and Z->A -- they must be checked for both directions.
@@ -231,6 +234,7 @@ public class TranslationPCE {
         Integer vlanId = validVlanIds.iterator().next();
 
 
+        // Map of junction pairs to pipe EROs
         Map<List<TopoVertex>, Map<String, List<TopoVertex>>> junctionPairToPipeEROMap = new HashMap<>();
 
         // Mapping of Junction Pairs to Layer
@@ -249,15 +253,19 @@ public class TranslationPCE {
 
         for(List<TopoVertex> junctionPair : allJunctionPairs.keySet()){
             Layer thisLayer = allJunctionPairs.get(junctionPair);
+            log.info("1: Layer " + thisLayer);
             Map<String, List<TopoVertex>> pipeEroMap = junctionPairToPipeEROMap.get(junctionPair);
+            log.info("2: Pipe ERO Map " + pipeEroMap.toString());
             List<String> azPipeEro = pipeEroMap.get("AZ")
                     .stream()
                     .map(TopoVertex::getUrn)
                     .collect(Collectors.toList());
+            log.info("3: AZ ERO " + azPipeEro);
             List<String> zaPipeEro = pipeEroMap.get("ZA")
                     .stream()
                     .map(TopoVertex::getUrn)
-                    .collect(Collectors.toList());;
+                    .collect(Collectors.toList());
+            log.info("4: ZA ERO " + zaPipeEro);
 
             TopoVertex aVertex = junctionPair.get(0);
             TopoVertex zVertex = junctionPair.get(1);
@@ -274,6 +282,7 @@ public class TranslationPCE {
             else{
                 aJunction = junctionMap.get(aVertex);
             }
+            log.info("5: A Junction " + aJunction.toString());
             // Create Z Junction
             if(!junctionMap.containsKey(zVertex)){
                 zJunction = pceAssistant.createJunctionAndFixtures(zVertex, urnMap, deviceModels, reqPipeJunctions,
@@ -283,12 +292,17 @@ public class TranslationPCE {
             else{
                 zJunction = junctionMap.get(zVertex);
             }
+            log.info("6: Z Junction " + zJunction.toString());
 
             DeviceModel aModel = deviceModels.get(aJunction.getDeviceUrn().getUrn());
+            log.info("7: A Model " + aModel);
             DeviceModel zModel = deviceModels.get(zJunction.getDeviceUrn().getUrn());
+            log.info("8: Z Model " + zModel);
 
             Set<ReservedBandwidthE> pipeBandwidths = pceAssistant.createReservedBandwidthForEROs(pipeEroMap.get("AZ"),
                     pipeEroMap.get("ZA"), urnMap, requestedBandwidthMap, sched);
+
+            log.info("9: Pipe bandwidths" + pipeBandwidths.toString());
 
             if(thisLayer.equals(Layer.MPLS)){
                 ReservedMplsPipeE mplsPipe = ReservedMplsPipeE.builder()
@@ -300,7 +314,7 @@ public class TranslationPCE {
                         .reservedPssResources(new HashSet<>())
                         .pipeType(pceAssistant.decideMplsPipeType(aModel, zModel))
                         .build();
-
+                log.info("10-1: MPLS Pipe " + mplsPipe.toString());
                 reservedMplsPipes.add(mplsPipe);
             }
             // ETHERNET
@@ -315,6 +329,7 @@ public class TranslationPCE {
                         .reservedPssResources(new HashSet<>())
                         .pipeType(pceAssistant.decideEthPipeType(aModel, zModel))
                         .build();
+                log.info("10-2: Ethernet Pipe " + ethPipe.toString());
                 reservedEthPipes.add(ethPipe);
             }
         }
@@ -415,9 +430,9 @@ public class TranslationPCE {
             requestedBandwidthMap.put(nodeZ, makeInitialBandwidthMap());
         }
 
-
         // All Cases: Add the requested bandwidth to the amount already stored in the map
         // Case 1: portA -> portZ -- portA = egress, portZ = ingress
+        /*
         if(nodeA.getVertexType().equals(VertexType.PORT) && nodeZ.getVertexType().equals(VertexType.PORT))
         {
             Integer updatedEgress = requestedBandwidthMap.get(nodeA).get("Egress") + bandwidth;
@@ -425,9 +440,9 @@ public class TranslationPCE {
 
             Integer updatedIngress = requestedBandwidthMap.get(nodeZ).get("Ingress") + bandwidth;
             requestedBandwidthMap.get(nodeZ).put("Ingress", updatedIngress);
-        }
+        }*/
         // Case 2: portA -> deviceZ -- portA = ingress
-        else if(nodeA.getVertexType().equals(VertexType.PORT) && !nodeZ.getVertexType().equals(VertexType.PORT))
+        if(nodeA.getVertexType().equals(VertexType.PORT) && !nodeZ.getVertexType().equals(VertexType.PORT))
         {
             Integer updatedIngress = requestedBandwidthMap.get(nodeA).get("Ingress") + bandwidth;
             requestedBandwidthMap.get(nodeA).put("Ingress", updatedIngress);
