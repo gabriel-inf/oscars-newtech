@@ -251,6 +251,7 @@ public class TranslationPCE {
 
         Map<TopoVertex, ReservedVlanJunctionE> junctionMap = new HashMap<>();
 
+        log.info("0: All Junction Pairs - " + allJunctionPairs.toString());
         for(List<TopoVertex> junctionPair : allJunctionPairs.keySet()){
             Layer thisLayer = allJunctionPairs.get(junctionPair);
             log.info("1: Layer " + thisLayer);

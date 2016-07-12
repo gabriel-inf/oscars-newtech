@@ -413,7 +413,7 @@ public class PCEAssistant {
                 currentVertex = azVertices.get(v);
                 TopoVertex zaVertex = zaVertices.get(zaVertices.size() - 1 - v);
 
-                if (currentVertex.getVertexType().equals(VertexType.SWITCH)) {
+                if (!currentVertex.getVertexType().equals(VertexType.PORT)) {
                     junctionPairs.get(currJunctionPairIndex).add(currentVertex);
                     if (junctionPairs.get(currJunctionPairIndex).size() == 2) {
                         // Add to the list of all junction pairs
