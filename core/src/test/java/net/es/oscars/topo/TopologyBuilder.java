@@ -1556,7 +1556,7 @@ public class TopologyBuilder
                     continue;
 
 
-                if(oneType.equals(Layer.MPLS) && anotherType.equals(Layer.MPLS))
+                if(oneType.equals(VertexType.ROUTER) && anotherType.equals(VertexType.ROUTER))
                 {
                     linkLayer = Layer.MPLS;
                 }

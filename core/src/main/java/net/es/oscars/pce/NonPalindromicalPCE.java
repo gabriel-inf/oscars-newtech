@@ -118,14 +118,7 @@ public class NonPalindromicalPCE
 
         Topology slTopo;
 
-        if(requestPipe.getAzMbps() == requestPipe.getZaMbps())
-        {
-            slTopo = serviceLayerTopology.getSLTopology();
-        }
-        else
-        {
-            slTopo = serviceLayerTopology.getSLTopologyAZ();
-        }
+        slTopo = serviceLayerTopology.getSLTopology();
 
         Topology prunedSlTopo = pruningService.pruneWithPipe(slTopo, requestPipe, requestSched, rsvBwList, rsvVlanList);
 
@@ -151,7 +144,6 @@ public class NonPalindromicalPCE
             serviceLayerDstNode = serviceLayerTopology.getVirtualNode(dstDevice);
             assert(serviceLayerDstNode != null);
         }
-
 
         // Shortest path routing on Service-Layer
         List<TopoEdge> azServiceLayerERO = dijkstraPCE.computeShortestPathEdges(prunedSlTopo, serviceLayerSrcNode, serviceLayerDstNode);

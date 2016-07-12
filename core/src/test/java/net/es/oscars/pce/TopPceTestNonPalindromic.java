@@ -8,6 +8,7 @@ import net.es.oscars.topo.AsymmTopologyBuilder;
 import net.es.oscars.topo.TopologyBuilder;
 import net.es.oscars.topo.dao.UrnAdjcyRepository;
 import net.es.oscars.topo.dao.UrnRepository;
+import net.es.oscars.topo.ent.UrnE;
 import net.es.oscars.topo.enums.Layer;
 import net.es.oscars.topo.enums.PalindromicType;
 import net.es.oscars.topo.enums.UrnType;
@@ -3729,7 +3730,7 @@ public class TopPceTestNonPalindromic
         String srcDevice = "nodeK";
         String dstPort = "portZ";
         String dstDevice = "nodeN";
-        Integer azBW = 25;
+        Integer azBW = 50;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
         String vlan = "any";
@@ -3809,6 +3810,24 @@ public class TopPceTestNonPalindromic
                 assert (zJunc.getDeviceUrn().getUrn().equals("nodeM"));
                 assert (actualAzERO.equals(expectedAzERO));
                 assert (actualZaERO.equals(expectedZaERO));
+
+                UrnE portL3 = urnRepo.findByUrn("nodeL:3").get();
+                UrnE portM2 = urnRepo.findByUrn("nodeM:2").get();
+
+                ethPipe.getReservedBandwidths().stream()
+                        .filter(bw -> bw.getUrn().equals(portL3) || bw.getUrn().equals(portM2))
+                        .forEach(bw -> {
+                            if(bw.getUrn().equals(portL3))
+                            {
+                                assert(bw.getInBandwidth().equals(zaBW));
+                                assert(bw.getEgBandwidth().equals(azBW));
+                            }
+                            else
+                            {
+                                assert(bw.getInBandwidth().equals(azBW));
+                                assert(bw.getEgBandwidth().equals(zaBW));
+                            }
+                        });
             }
             else
             {
@@ -3847,7 +3866,7 @@ public class TopPceTestNonPalindromic
         String srcDevice = "nodeK";
         String dstPort = "portZ";
         String dstDevice = "nodeN";
-        Integer azBW = 25;
+        Integer azBW = 50;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
         String vlan = "any";
@@ -3897,7 +3916,7 @@ public class TopPceTestNonPalindromic
             actualAzERO = actualAzERO + zJunc.getDeviceUrn();
             actualZaERO = actualZaERO + aJunc.getDeviceUrn();
             String expectedAzERO = "nodeK-nodeK:1-nodeL:1-nodeL-nodeL:3-nodeM:2-nodeM-nodeM:3-nodeN:2-nodeN";
-            String expectedZaERO = "nodeN-nodeN:2-nodeL:2-nodeL-nodeL:3-nodeM:2-nodeM-nodeM:1-nodeK:2-nodeK";
+            String expectedZaERO = "nodeN-nodeN:1-nodeL:2-nodeL-nodeL:3-nodeM:2-nodeM-nodeM:1-nodeK:2-nodeK";
 
             assert (aJunc.getDeviceUrn().getUrn().equals("nodeK"));
             assert (zJunc.getDeviceUrn().getUrn().equals("nodeN"));
@@ -3915,6 +3934,24 @@ public class TopPceTestNonPalindromic
             assert (zFix.getReservedBandwidth().getEgBandwidth().equals(azBW));
             assert (actualAzERO.equals(expectedAzERO));
             assert (actualZaERO.equals(expectedZaERO));
+
+            UrnE portL3 = urnRepo.findByUrn("nodeL:3").get();
+            UrnE portM2 = urnRepo.findByUrn("nodeM:2").get();
+
+            mplsPipe.getReservedBandwidths().stream()
+                    .filter(bw -> bw.getUrn().equals(portL3) || bw.getUrn().equals(portM2))
+                    .forEach(bw -> {
+                        if(bw.getUrn().equals(portL3))
+                        {
+                            assert(bw.getInBandwidth().equals(0));
+                            assert(bw.getEgBandwidth().equals(azBW + zaBW));
+                        }
+                        else
+                        {
+                            assert(bw.getInBandwidth().equals(azBW + zaBW));
+                            assert(bw.getEgBandwidth().equals(0));
+                        }
+                    });
         }
 
         log.info("test 'sharedLinkPceTest2' passed.");
@@ -3936,7 +3973,7 @@ public class TopPceTestNonPalindromic
         String srcDevice = "nodeK";
         String dstPort = "portZ";
         String dstDevice = "nodeN";
-        Integer azBW = 25;
+        Integer azBW = 50;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
         String vlan = "any";
@@ -4052,6 +4089,24 @@ public class TopPceTestNonPalindromic
             assert (zFixes.size() == 0);
             assert (actualAzERO.equals(expectedAzERO));
             assert (actualZaERO.equals(expectedZaERO));
+
+            UrnE portL3 = urnRepo.findByUrn("nodeL:3").get();
+            UrnE portM2 = urnRepo.findByUrn("nodeM:2").get();
+
+            mplsPipe.getReservedBandwidths().stream()
+                    .filter(bw -> bw.getUrn().equals(portL3) || bw.getUrn().equals(portM2))
+                    .forEach(bw -> {
+                        if(bw.getUrn().equals(portL3))
+                        {
+                            assert(bw.getInBandwidth().equals(zaBW));
+                            assert(bw.getEgBandwidth().equals(azBW));
+                        }
+                        else
+                        {
+                            assert(bw.getInBandwidth().equals(azBW));
+                            assert(bw.getEgBandwidth().equals(zaBW));
+                        }
+                    });
         }
 
         log.info("test 'sharedLinkPceTest3' passed.");
@@ -4073,7 +4128,7 @@ public class TopPceTestNonPalindromic
         String srcDevice = "nodeK";
         String dstPort = "portZ";
         String dstDevice = "nodeN";
-        Integer azBW = 25;
+        Integer azBW = 50;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
         String vlan = "any";
@@ -4153,6 +4208,24 @@ public class TopPceTestNonPalindromic
                 assert (zJunc.getDeviceUrn().getUrn().equals("nodeM"));
                 assert (actualAzERO.equals(expectedAzERO));
                 assert (actualZaERO.equals(expectedZaERO));
+
+                UrnE portL3 = urnRepo.findByUrn("nodeL:3").get();
+                UrnE portM2 = urnRepo.findByUrn("nodeM:2").get();
+
+                ethPipe.getReservedBandwidths().stream()
+                        .filter(bw -> bw.getUrn().equals(portL3) || bw.getUrn().equals(portM2))
+                        .forEach(bw -> {
+                            if(bw.getUrn().equals(portL3))
+                            {
+                                assert(bw.getInBandwidth().equals(zaBW));
+                                assert(bw.getEgBandwidth().equals(azBW));
+                            }
+                            else
+                            {
+                                assert(bw.getInBandwidth().equals(azBW));
+                                assert(bw.getEgBandwidth().equals(zaBW));
+                            }
+                        });
             }
             else
             {
