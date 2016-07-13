@@ -1622,4 +1622,104 @@ public class TopologyBuilder
             }
         }
     }
+
+    public void buildTopo7MultiFix()
+    {
+        log.info("Building Test Topology 7 with multiple src/dest fixtures");
+
+        Map<TopoVertex, TopoVertex> portDeviceMap = new HashMap<>();
+
+        // Devices //
+        TopoVertex nodeK = new TopoVertex("nodeK", VertexType.SWITCH);
+        TopoVertex nodeL = new TopoVertex("nodeL", VertexType.SWITCH);
+
+        // Ports //
+        TopoVertex portA = new TopoVertex("portA", VertexType.PORT);
+        TopoVertex portB = new TopoVertex("portB", VertexType.PORT);
+        TopoVertex portC = new TopoVertex("portC", VertexType.PORT);
+        TopoVertex portX = new TopoVertex("portX", VertexType.PORT);
+        TopoVertex portY = new TopoVertex("portY", VertexType.PORT);
+        TopoVertex portZ = new TopoVertex("portZ", VertexType.PORT);
+        TopoVertex portK1 = new TopoVertex("nodeK:1", VertexType.PORT);
+        TopoVertex portL1 = new TopoVertex("nodeL:1", VertexType.PORT);
+
+        // End-Port Links //
+        TopoEdge edgeInt_A_K = new TopoEdge(portA, nodeK, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_B_K = new TopoEdge(portB, nodeK, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_C_K = new TopoEdge(portC, nodeK, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_X_L = new TopoEdge(portX, nodeL, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_Y_L = new TopoEdge(portY, nodeL, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_Z_L = new TopoEdge(portZ, nodeL, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_K_A = new TopoEdge(nodeK, portA, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_K_B = new TopoEdge(nodeK, portB, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_K_C = new TopoEdge(nodeK, portC, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_L_X = new TopoEdge(nodeL, portX, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_L_Y = new TopoEdge(nodeL, portY, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_L_Z = new TopoEdge(nodeL, portZ, 0L, Layer.INTERNAL);
+
+        // Internal Links //
+        TopoEdge edgeInt_K1_K = new TopoEdge(portK1, nodeK, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_L1_L = new TopoEdge(portL1, nodeL, 0L, Layer.INTERNAL);
+
+        // Internal-Reverse Links //
+        TopoEdge edgeInt_K_K1 = new TopoEdge(nodeK, portK1, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_L_L1 = new TopoEdge(nodeL, portL1, 0L, Layer.INTERNAL);
+
+        // Network Links //
+        TopoEdge edgeEth_K1_L1 = new TopoEdge(portK1, portL1, 100L, Layer.ETHERNET);
+        TopoEdge edgeEth_L1_K1 = new TopoEdge(portL1, portK1, 100L, Layer.ETHERNET);
+
+
+        List<TopoVertex> topoNodes = new ArrayList<>();
+        List<TopoEdge> topoLinks = new ArrayList<>();
+
+        topoNodes.add(nodeK);
+        topoNodes.add(nodeL);
+
+        topoNodes.add(portA);
+        topoNodes.add(portB);
+        topoNodes.add(portC);
+        topoNodes.add(portX);
+        topoNodes.add(portY);
+        topoNodes.add(portZ);
+        topoNodes.add(portK1);
+        topoNodes.add(portL1);
+
+        topoLinks.add(edgeInt_A_K);
+        topoLinks.add(edgeInt_B_K);
+        topoLinks.add(edgeInt_C_K);
+        topoLinks.add(edgeInt_X_L);
+        topoLinks.add(edgeInt_Y_L);
+        topoLinks.add(edgeInt_Z_L);
+        topoLinks.add(edgeInt_K1_K);
+        topoLinks.add(edgeInt_L1_L);
+
+        topoLinks.add(edgeInt_K_A);
+        topoLinks.add(edgeInt_K_B);
+        topoLinks.add(edgeInt_K_C);
+        topoLinks.add(edgeInt_L_X);
+        topoLinks.add(edgeInt_L_Y);
+        topoLinks.add(edgeInt_L_Z);
+        topoLinks.add(edgeInt_K_K1);
+        topoLinks.add(edgeInt_L_L1);
+
+        topoLinks.add(edgeEth_K1_L1);
+        topoLinks.add(edgeEth_L1_K1);
+
+
+        // Map Ports to Devices for simplicity in utility class //
+        for(TopoEdge oneEdge : topoLinks)
+        {
+            if(oneEdge.getLayer().equals(Layer.INTERNAL))
+            {
+                if(oneEdge.getA().getVertexType().equals(VertexType.PORT))
+                {
+                    portDeviceMap.put(oneEdge.getA(), oneEdge.getZ());
+                }
+            }
+        }
+
+        testBuilder.populateRepos(topoNodes, topoLinks, portDeviceMap);
+    }
+
 }
