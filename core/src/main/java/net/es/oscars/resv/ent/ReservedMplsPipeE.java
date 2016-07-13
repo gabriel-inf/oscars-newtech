@@ -1,7 +1,7 @@
 package net.es.oscars.resv.ent;
 
 import lombok.*;
-import net.es.oscars.dto.pss.EthPipeType;
+import net.es.oscars.dto.pss.MplsPipeType;
 
 import javax.persistence.*;
 import java.util.List;
@@ -12,8 +12,7 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-
-public class ReservedEthPipeE {
+public class ReservedMplsPipeE {
     @Id
     @GeneratedValue
     private Long id;
@@ -27,9 +26,6 @@ public class ReservedEthPipeE {
     @OneToMany(cascade = CascadeType.ALL)
     private Set<ReservedBandwidthE> reservedBandwidths;
 
-
-    private Integer reservedVlan;
-
     @OneToMany(cascade = CascadeType.ALL)
     private Set<ReservedPssResourceE> reservedPssResources;
 
@@ -42,7 +38,5 @@ public class ReservedEthPipeE {
     private List<String> zaERO;
 
     @NonNull
-    private EthPipeType pipeType;
-
-
+    private MplsPipeType pipeType;
 }

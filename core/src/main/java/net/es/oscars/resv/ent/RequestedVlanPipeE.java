@@ -2,6 +2,7 @@ package net.es.oscars.resv.ent;
 
 import lombok.*;
 import net.es.oscars.dto.pss.EthPipeType;
+import net.es.oscars.topo.enums.PalindromicType;
 
 import javax.persistence.*;
 import java.util.List;
@@ -41,5 +42,5 @@ public class RequestedVlanPipeE {
     private EthPipeType pipeType;
 
     @NonNull
-    private Boolean eroPalindromic;
+    private PalindromicType eroPalindromic;
 }

@@ -1,12 +1,9 @@
 package net.es.oscars.acct;
 
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.resv.ent.*;
 import net.es.oscars.topo.enums.Layer;
-import net.es.oscars.resv.ent.RequestedVlanFlowE;
-import net.es.oscars.resv.ent.RequestedVlanFixtureE;
-import net.es.oscars.resv.ent.RequestedVlanJunctionE;
 import net.es.oscars.dto.pss.EthJunctionType;
-import net.es.oscars.resv.ent.RequestedBlueprintE;
 import net.es.oscars.topo.ent.UrnE;
 import net.es.oscars.topo.enums.DeviceModel;
 import net.es.oscars.topo.enums.DeviceType;
@@ -18,15 +15,15 @@ import java.util.HashSet;
 public class SpecPopulator {
 
     public RequestedBlueprintE aBlueprint() {
-        RequestedBlueprintE bp = RequestedBlueprintE.builder()
-                .vlanFlows(new HashSet<>())
-                .layer3Flows(new HashSet<>())
-                .build();
         RequestedVlanFlowE fl = RequestedVlanFlowE.builder()
                 .junctions(new HashSet<>())
                 .pipes(new HashSet<>())
                 .build();
-        bp.getVlanFlows().add(fl);
+
+        RequestedBlueprintE bp = RequestedBlueprintE.builder()
+                .vlanFlow(fl)
+                .layer3Flow(Layer3FlowE.builder().build())
+                .build();
 
 
         UrnE albqcr5 = UrnE.builder()

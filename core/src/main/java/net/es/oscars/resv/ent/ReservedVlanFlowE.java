@@ -23,6 +23,9 @@ public class ReservedVlanFlowE {
     private Set<ReservedVlanJunctionE> junctions;
 
     @OneToMany (cascade = CascadeType.ALL)
-    private Set<ReservedEthPipeE> pipes;
+    private Set<ReservedEthPipeE> ethPipes;
+
+    @OneToMany(cascade = CascadeType.ALL)
+    private Set<ReservedMplsPipeE> mplsPipes;
 
 }

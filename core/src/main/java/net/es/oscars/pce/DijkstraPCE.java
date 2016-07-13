@@ -137,7 +137,7 @@ public class DijkstraPCE
 
                 az.setMetric(e.getMetric());
                 az.setLayer(e.getLayer());
-                //log.info("adding edge to Dijkstra graph: (" + e.getA() + "," + e.getZ() + ")");
+                //log.info("adding edge to Dijkstra graph: (" + e.getA().getUrn() + "," + e.getZ().getUrn() + ")");
 
                 g.addEdge(az, nodeA, nodeZ, EdgeType.DIRECTED);
             }

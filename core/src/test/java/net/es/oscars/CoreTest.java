@@ -76,7 +76,7 @@ public class CoreTest {
                 .build();
 
 
-        RequestedVlanFlowE flow = spec.getRequested().getVlanFlows().iterator().next();
+        RequestedVlanFlowE flow = spec.getRequested().getVlanFlow();
 
         RequestedVlanJunctionE somejunction = RequestedVlanJunctionE.builder()
                 .junctionType(EthJunctionType.REQUESTED)
@@ -92,14 +92,11 @@ public class CoreTest {
 
 
     private void populateTopo(SpecificationE spec) {
-        spec.getRequested().getVlanFlows().stream().forEach(t -> {
-            t.getJunctions().forEach(this::makeDeviceUrn);
-            t.getPipes().forEach(p -> {
+        spec.getRequested().getVlanFlow().getJunctions().forEach(this::makeDeviceUrn);
+        spec.getRequested().getVlanFlow().getPipes().forEach(p -> {
                 makeDeviceUrn(p.getAJunction());
                 makeDeviceUrn(p.getZJunction());
             });
-
-        });
     }
 
     private void makeDeviceUrn(RequestedVlanJunctionE junction) {

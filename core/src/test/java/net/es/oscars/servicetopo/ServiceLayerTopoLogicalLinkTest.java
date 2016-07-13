@@ -1,6 +1,7 @@
-package net.es.oscars;
+package net.es.oscars.servicetopo;
 
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.CoreUnitTestConfiguration;
 import net.es.oscars.dto.pss.EthFixtureType;
 import net.es.oscars.dto.pss.EthJunctionType;
 import net.es.oscars.dto.pss.EthPipeType;
@@ -15,6 +16,7 @@ import net.es.oscars.topo.ent.ReservableBandwidthE;
 import net.es.oscars.topo.ent.ReservableVlanE;
 import net.es.oscars.topo.ent.UrnE;
 import net.es.oscars.topo.enums.Layer;
+import net.es.oscars.topo.enums.PalindromicType;
 import net.es.oscars.topo.enums.UrnType;
 import net.es.oscars.topo.enums.VertexType;
 import org.junit.Test;
@@ -1694,7 +1696,7 @@ public class ServiceLayerTopoLogicalLinkTest
         bwPipe.setZaMbps(20);
         bwPipe.setAJunction(aJunc);
         bwPipe.setZJunction(zJunc);
-        bwPipe.setEroPalindromic(false);
+        bwPipe.setEroPalindromic(PalindromicType.NON_PALINDROME);
         bwPipe.setPipeType(EthPipeType.REQUESTED);
 
         requestedPipe = bwPipe;
@@ -1758,7 +1760,7 @@ public class ServiceLayerTopoLogicalLinkTest
         bwPipe.setZaMbps(20);
         bwPipe.setAJunction(aJunc);
         bwPipe.setZJunction(zJunc);
-        bwPipe.setEroPalindromic(false);
+        bwPipe.setEroPalindromic(PalindromicType.NON_PALINDROME);
         bwPipe.setPipeType(EthPipeType.REQUESTED);
 
         requestedPipe = bwPipe;
@@ -1822,7 +1824,7 @@ public class ServiceLayerTopoLogicalLinkTest
         bwPipe.setZaMbps(20);
         bwPipe.setAJunction(aJunc);
         bwPipe.setZJunction(zJunc);
-        bwPipe.setEroPalindromic(false);
+        bwPipe.setEroPalindromic(PalindromicType.NON_PALINDROME);
         bwPipe.setPipeType(EthPipeType.REQUESTED);
 
         requestedPipe = bwPipe;
@@ -1886,7 +1888,7 @@ public class ServiceLayerTopoLogicalLinkTest
         bwPipe.setZaMbps(20);
         bwPipe.setAJunction(aJunc);
         bwPipe.setZJunction(zJunc);
-        bwPipe.setEroPalindromic(false);
+        bwPipe.setEroPalindromic(PalindromicType.NON_PALINDROME);
         bwPipe.setPipeType(EthPipeType.REQUESTED);
 
         requestedPipe = bwPipe;

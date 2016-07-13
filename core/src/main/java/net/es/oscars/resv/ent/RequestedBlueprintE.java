@@ -16,13 +16,13 @@ public class RequestedBlueprintE {
     @GeneratedValue
     private Long id;
 
-    @OneToMany (cascade = CascadeType.ALL)
+    @OneToOne (cascade = CascadeType.ALL)
     @NonNull
-    private Set<RequestedVlanFlowE> vlanFlows;
+    private RequestedVlanFlowE vlanFlow;
 
-    @OneToMany (cascade = CascadeType.ALL)
+    @OneToOne (cascade = CascadeType.ALL)
     @NonNull
-    private Set<Layer3FlowE> layer3Flows;
+    private Layer3FlowE layer3Flow;
 
 
 }

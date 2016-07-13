@@ -1,1044 +1,37 @@
-package net.es.oscars;
+package net.es.oscars.topo;
 
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.helpers.TestEntityBuilder;
-import net.es.oscars.pce.PCEException;
-import net.es.oscars.pce.TopPCE;
-import net.es.oscars.pss.PSSException;
-import net.es.oscars.resv.ent.*;
+import net.es.oscars.pce.TestEntityBuilder;
 import net.es.oscars.topo.beans.TopoEdge;
 import net.es.oscars.topo.beans.TopoVertex;
-import net.es.oscars.topo.dao.UrnAdjcyRepository;
-import net.es.oscars.topo.dao.UrnRepository;
 import net.es.oscars.topo.ent.UrnAdjcyE;
 import net.es.oscars.topo.ent.UrnE;
 import net.es.oscars.topo.enums.Layer;
 import net.es.oscars.topo.enums.VertexType;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.stereotype.Component;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
- * Created by jeremy on 6/30/16.
- *
- * Tests End-to-End correctness of the PCE modules
+ * Created by Jeremy on 7/8/2016.
  */
-
 @Slf4j
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(CoreUnitTestConfiguration.class)
-@Transactional
-public class TopPceTest
+@Component
+public class TopologyBuilder
 {
     @Autowired
-    private TopPCE topPCE;
-
-    @Autowired
-    private UrnRepository urnRepo;
-
-    @Autowired
-    private UrnAdjcyRepository adjcyRepo;
-
-    @Autowired
     private TestEntityBuilder testBuilder;
-
-    private ScheduleSpecificationE requestedSched;
 
     List<UrnE> urnList;
     List<UrnAdjcyE> adjcyList;
 
-    @Test
-    public void basicPceTest1()
-    {
-        log.info("Initializing test: 'basicPceTest1'.");
-
-        RequestedBlueprintE requestedBlueprint;
-        ReservedBlueprintE reservedBlueprint = null;
-        ScheduleSpecificationE requestedSched;
-
-        Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
-        Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
-
-        String srcDevice = "nodeK";
-        Set<String> portNames = Stream.of("portA", "portZ").collect(Collectors.toSet());
-        Integer azBW = 25;
-        Integer zaBW = 25;
-        String vlan = "any";
-
-        this.buildTopo1();
-        requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcDevice, portNames, azBW, zaBW, vlan);
-
-        log.info("Beginning test: 'basicPceTest1'.");
-
-        try
-        {
-            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
-        }
-        catch(PCEException pceE){ log.error("", pceE); }
-        catch(PSSException pssE){ log.error("", pssE); }
-
-        assert(reservedBlueprint != null);
-
-        ReservedVlanFlowE reservedFlow = reservedBlueprint.getVlanFlows().iterator().next();
-
-        Set<ReservedEthPipeE> allResPipes = reservedFlow.getPipes();
-        Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
-
-        assert(allResPipes.size() == 0);
-        assert(allResJunctions.size() == 1);
-
-        // Junctions
-        for(ReservedVlanJunctionE oneJunc : allResJunctions)
-        {
-            assert(oneJunc.getDeviceUrn().getUrn().equals("nodeK"));
-
-            Iterator<ReservedVlanFixtureE> iterF = oneJunc.getFixtures().iterator();
-            ReservedVlanFixtureE fix1 = iterF.next();
-            ReservedVlanFixtureE fix2 = iterF.next();
-
-            assert(fix1.getReservedBandwidth().getInBandwidth() == azBW);
-            assert(fix2.getReservedBandwidth().getInBandwidth() == azBW);
-
-            assert(fix1.getIfceUrn().getUrn().equals("portA") || fix1.getIfceUrn().getUrn().equals("portZ"));
-            assert(fix2.getIfceUrn().getUrn().equals("portA") || fix2.getIfceUrn().getUrn().equals("portZ"));
-        }
-
-
-        log.info("test 'basicPceTest1' passed.");
-    }
-
-    @Test
-    public void basicPceTest2()
-    {
-        log.info("Initializing test: 'basicPceTest2'.");
-
-        RequestedBlueprintE requestedBlueprint;
-        ReservedBlueprintE reservedBlueprint = null;
-        ScheduleSpecificationE requestedSched;
-
-        Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
-        Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
-
-        String srcPort = "portA";
-        String srcDevice = "nodeP";
-        String dstPort = "portZ";
-        String dstDevice = "nodeM";
-        Integer azBW = 25;
-        Integer zaBW = 25;
-        Boolean palindrome = true;
-        String vlan = "any";
-
-        this.buildTopo2();
-        requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
-
-        log.info("Beginning test: 'basicPceTest2'.");
-
-        try
-        {
-            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
-        }
-        catch(PCEException | PSSException pceE){ log.error("", pceE); }
-
-        assert(reservedBlueprint != null);
-
-        ReservedVlanFlowE reservedFlow = reservedBlueprint.getVlanFlows().iterator().next();
-
-        Set<ReservedEthPipeE> allResPipes = reservedFlow.getPipes();
-        Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
-        List<ReservedBandwidthE> allResBWs = new ArrayList<>();
-
-        assert(allResPipes.size() == 0);
-        assert(allResJunctions.size() == 3);
-
-        allResJunctions.stream()
-                .forEach(j -> {
-                    if(j.getDeviceUrn().equals("nodeL") || j.getDeviceUrn().equals("nodeM") || j.getDeviceUrn().equals("nodeP"))
-                        assert(true);
-
-                    assert(j.getFixtures().size() == 2);
-
-                    Iterator<ReservedVlanFixtureE> jIter = j.getFixtures().iterator();
-                    ReservedVlanFixtureE fixA = jIter.next();
-                    ReservedVlanFixtureE fixZ = jIter.next();
-
-                    if(j.getDeviceUrn().equals("nodeL"))
-                    {
-                        assert(fixA.getIfceUrn().equals("nodeL:1") && fixZ.getIfceUrn().equals("nodeL:2") || fixZ.getIfceUrn().equals("nodeL:1") && fixA.getIfceUrn().equals("nodeL:2"));
-                    }
-                    else if(j.getDeviceUrn().equals("nodeM"))
-                    {
-                        assert(fixA.getIfceUrn().equals("nodeM:1") && fixZ.getIfceUrn().equals("portZ") || fixZ.getIfceUrn().equals("nodeM:1") && fixA.getIfceUrn().equals("portZ"));
-                    }
-                    else if(j.getDeviceUrn().equals("nodeP"))
-                    {
-                        assert(fixA.getIfceUrn().equals("portA") && fixZ.getIfceUrn().equals("nodeP:1") || fixZ.getIfceUrn().equals("portA") && fixA.getIfceUrn().equals("nodeP:1"));
-                    }
-
-                    allResBWs.add(j.getFixtures().iterator().next().getReservedBandwidth());
-                    allResBWs.add(j.getFixtures().iterator().next().getReservedBandwidth());
-                });
-
-        allResBWs.stream()
-                .forEach(bw -> {
-                    assert(bw.getInBandwidth() == bw.getEgBandwidth());
-                    assert(bw.getInBandwidth() == azBW);
-                });
-
-        log.info("test 'basicPceTest2' passed.");
-    }
-
-    @Test
-    public void basicPceTest3()
-    {
-        log.info("Initializing test: 'basicPceTest3'.");
-
-        RequestedBlueprintE requestedBlueprint;
-        ReservedBlueprintE reservedBlueprint = null;
-        ScheduleSpecificationE requestedSched;
-
-        Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
-        Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
-
-        String srcPort = "portA";
-        String srcDevice = "nodeK";
-        String dstPort = "portZ";
-        String dstDevice = "nodeQ";
-        Integer azBW = 25;
-        Integer zaBW = 25;
-        Boolean palindrome = true;
-        String vlan = "any";
-
-        this.buildTopo3();
-        requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
-
-        log.info("Beginning test: 'basicPceTest3'.");
-
-        try
-        {
-            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
-        }
-        catch(PCEException | PSSException pceE){ log.error("", pceE); }
-
-        assert(reservedBlueprint != null);
-
-        ReservedVlanFlowE reservedFlow = reservedBlueprint.getVlanFlows().iterator().next();
-
-        Set<ReservedEthPipeE> allResPipes = reservedFlow.getPipes();
-        Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
-
-        assert(allResPipes.size() == 1);
-        assert(allResJunctions.size() == 1);
-
-        ReservedVlanJunctionE onlyJunc = allResJunctions.iterator().next();
-        Iterator<ReservedVlanFixtureE> iterF = onlyJunc.getFixtures().iterator();
-        ReservedVlanFixtureE fixJ1 = iterF.next();
-        ReservedVlanFixtureE fixJ2 = iterF.next();
-
-        assert(onlyJunc.getDeviceUrn().getUrn().equals("nodeK"));
-
-        assert(fixJ1.getIfceUrn().getUrn().equals("portA") || fixJ1.getIfceUrn().getUrn().equals("nodeK:1"));
-        assert(fixJ2.getIfceUrn().getUrn().equals("portA") || fixJ2.getIfceUrn().getUrn().equals("nodeK:1"));
-
-        assert(fixJ1.getReservedBandwidth().getInBandwidth() == azBW);
-        assert(fixJ2.getReservedBandwidth().getInBandwidth() == azBW);
-
-        ReservedEthPipeE onlyPipe = allResPipes.iterator().next();
-
-        ReservedVlanJunctionE juncA = onlyPipe.getAJunction();
-        ReservedVlanJunctionE juncZ = onlyPipe.getZJunction();
-        ReservedVlanFixtureE fixA = juncA.getFixtures().iterator().next();
-        ReservedVlanFixtureE fixZ = juncZ.getFixtures().iterator().next();
-
-        assert(juncA.getDeviceUrn().getUrn().equals("nodeP"));
-        assert(juncZ.getDeviceUrn().getUrn().equals("nodeQ"));
-        assert(fixA.getIfceUrn().getUrn().equals("nodeP:1"));
-        assert(fixZ.getIfceUrn().getUrn().equals("portZ"));
-
-
-        assert(fixA.getReservedBandwidth().getInBandwidth() == azBW);
-        assert(fixZ.getReservedBandwidth().getInBandwidth() == azBW);
-        assert(fixA.getReservedBandwidth().getEgBandwidth() == azBW);
-        assert(fixZ.getReservedBandwidth().getEgBandwidth() == azBW);
-
-        List<String> azERO = onlyPipe.getAzERO();
-        List<String> zaERO = onlyPipe.getZaERO();
-
-        String actualAzERO = "";
-        String actualZaERO = "";
-
-        for(String x : azERO)
-            actualAzERO = actualAzERO + x + "-";
-
-        for(String x : zaERO)
-            actualZaERO = actualZaERO + x + "-";
-
-        String expectedAzERO = "nodeP-nodeP:2-nodeQ:1-nodeQ-";
-        String expectedZaERO = "nodeQ-nodeQ:1-nodeP:2-nodeP-";
-
-        assert(actualAzERO.equals(expectedAzERO));
-        assert(actualZaERO.equals(expectedZaERO));
-
-        log.info("test 'basicPceTest3' passed.");
-    }
-
-    @Test
-    public void basicPceTest4()
-    {
-        // Two possible shortest routes here!
-        log.info("Initializing test: 'basicPceTest4'.");
-
-        RequestedBlueprintE requestedBlueprint;
-        ReservedBlueprintE reservedBlueprint = null;
-        ScheduleSpecificationE requestedSched;
-
-        Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
-        Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
-
-        String srcPort = "portA";
-        String srcDevice = "nodeK";
-        String dstPort = "portZ";
-        String dstDevice = "nodeQ";
-        Integer azBW = 25;
-        Integer zaBW = 25;
-        Boolean palindrome = true;
-        String vlan = "any";
-
-        this.buildTopo4();
-        requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
-
-        log.info("Beginning test: 'basicPceTest4'.");
-
-        try
-        {
-            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
-        }
-        catch(PCEException | PSSException pceE){ log.error("", pceE); }
-
-        assert(reservedBlueprint != null);
-
-        ReservedVlanFlowE reservedFlow = reservedBlueprint.getVlanFlows().iterator().next();
-
-        Set<ReservedEthPipeE> allResPipes = reservedFlow.getPipes();
-        Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
-
-        assert(allResPipes.size() == 1);
-        assert(allResJunctions.size() == 2);
-
-        // Junctions
-        for(ReservedVlanJunctionE oneJunc : allResJunctions)
-        {
-            assert(oneJunc.getDeviceUrn().getUrn().equals("nodeK") || oneJunc.getDeviceUrn().getUrn().equals("nodeL") || oneJunc.getDeviceUrn().getUrn().equals("nodeM"));
-
-            Iterator<ReservedVlanFixtureE> iterF = oneJunc.getFixtures().iterator();
-            ReservedVlanFixtureE fix1 = iterF.next();
-            ReservedVlanFixtureE fix2 = iterF.next();
-
-            assert(fix1.getReservedBandwidth().getInBandwidth() == azBW);
-            assert(fix2.getReservedBandwidth().getInBandwidth() == azBW);
-
-            if(oneJunc.getDeviceUrn().getUrn().equals("nodeK"))
-            {
-                assert(fix1.getIfceUrn().getUrn().equals("portA") || fix1.getIfceUrn().getUrn().equals("nodeK:1") || fix1.getIfceUrn().getUrn().equals("nodeK:2"));
-                assert(fix2.getIfceUrn().getUrn().equals("portA") || fix2.getIfceUrn().getUrn().equals("nodeK:1") || fix2.getIfceUrn().getUrn().equals("nodeK:2"));
-
-                if(fix1.getIfceUrn().getUrn().equals("nodeK:1") || fix1.getIfceUrn().getUrn().equals("nodeK:2"))
-                    assert(fix2.getIfceUrn().getUrn().equals("portA"));
-
-                if(fix2.getIfceUrn().getUrn().equals("nodeK:1") || fix2.getIfceUrn().getUrn().equals("nodeK:2"))
-                    assert(fix1.getIfceUrn().getUrn().equals("portA"));
-            }
-            else if(oneJunc.getDeviceUrn().getUrn().equals("nodeL"))
-            {
-                assert(fix1.getIfceUrn().getUrn().equals("nodeL:1") || fix1.getIfceUrn().getUrn().equals("nodeL:3"));
-                assert(fix2.getIfceUrn().getUrn().equals("nodeL:1") || fix2.getIfceUrn().getUrn().equals("nodeL:3"));
-            }
-            else
-            {
-                assert(fix1.getIfceUrn().getUrn().equals("nodeM:1") || fix1.getIfceUrn().getUrn().equals("nodeM:3"));
-                assert(fix2.getIfceUrn().getUrn().equals("nodeM:1") || fix2.getIfceUrn().getUrn().equals("nodeM:3"));
-            }
-        }
-
-        // Pipes
-        ReservedEthPipeE onlyPipe = allResPipes.iterator().next();
-
-        ReservedVlanJunctionE juncA = onlyPipe.getAJunction();
-        ReservedVlanJunctionE juncZ = onlyPipe.getZJunction();
-        ReservedVlanFixtureE fixA = juncA.getFixtures().iterator().next();
-        ReservedVlanFixtureE fixZ = juncZ.getFixtures().iterator().next();
-
-        assert(juncA.getDeviceUrn().getUrn().equals("nodeP") || juncA.getDeviceUrn().getUrn().equals("nodeR"));
-        assert(juncZ.getDeviceUrn().getUrn().equals("nodeQ"));
-        assert(fixA.getIfceUrn().getUrn().equals("nodeP:1") || fixA.getIfceUrn().getUrn().equals("nodeR:1"));
-        assert(fixZ.getIfceUrn().getUrn().equals("portZ"));
-
-        assert(fixA.getReservedBandwidth().getInBandwidth() == azBW);
-        assert(fixZ.getReservedBandwidth().getInBandwidth() == azBW);
-        assert(fixA.getReservedBandwidth().getEgBandwidth() == azBW);
-        assert(fixZ.getReservedBandwidth().getEgBandwidth() == azBW);
-
-        List<String> azERO = onlyPipe.getAzERO();
-        List<String> zaERO = onlyPipe.getZaERO();
-
-        String actualAzERO = "";
-        String actualZaERO = "";
-
-        for(String x : azERO)
-            actualAzERO = actualAzERO + x + "-";
-
-        for(String x : zaERO)
-            actualZaERO = actualZaERO + x + "-";
-
-        String expectedAzERO1 = "nodeP-nodeP:2-nodeQ:1-nodeQ-";
-        String expectedZaERO1 = "nodeQ-nodeQ:1-nodeP:2-nodeP-";
-        String expectedAzERO2 = "nodeR-nodeR:3-nodeQ:2-nodeQ-";
-        String expectedZaERO2 = "nodeQ-nodeQ:2-nodeR:3-nodeR-";
-
-        assert(actualAzERO.equals(expectedAzERO1) || actualAzERO.equals(expectedAzERO2));
-        assert(actualZaERO.equals(expectedZaERO1) || actualZaERO.equals(expectedZaERO2));
-
-        log.info("test 'basicPceTest4' passed.");
-    }
-
-    @Test
-    public void basicPceTest5()
-    {
-        log.info("Initializing test: 'basicPceTest5'.");
-
-        RequestedBlueprintE requestedBlueprint;
-        ReservedBlueprintE reservedBlueprint = null;
-        ScheduleSpecificationE requestedSched;
-
-        Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
-        Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
-
-        String srcPort = "portA";
-        String srcDevice = "nodeK";
-        String dstPort = "portZ";
-        String dstDevice = "nodeS";
-        Integer azBW = 25;
-        Integer zaBW = 25;
-        Boolean palindrome = true;
-        String vlan = "any";
-
-        this.buildTopo5();
-        requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
-
-        log.info("Beginning test: 'basicPceTest5'.");
-
-        try
-        {
-            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
-        }
-        catch(PCEException | PSSException pceE){ log.error("", pceE); }
-
-        assert(reservedBlueprint != null);
-
-        ReservedVlanFlowE reservedFlow = reservedBlueprint.getVlanFlows().iterator().next();
-
-        Set<ReservedEthPipeE> allResPipes = reservedFlow.getPipes();
-        Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
-
-        assert(allResPipes.size() == 1);
-        assert(allResJunctions.size() == 2);
-
-        // Junctions
-        for(ReservedVlanJunctionE oneJunc : allResJunctions)
-        {
-            assert(oneJunc.getDeviceUrn().getUrn().equals("nodeK") || oneJunc.getDeviceUrn().getUrn().equals("nodeS"));
-
-            Iterator<ReservedVlanFixtureE> iterF = oneJunc.getFixtures().iterator();
-            ReservedVlanFixtureE fix1 = iterF.next();
-            ReservedVlanFixtureE fix2 = iterF.next();
-
-            assert(fix1.getReservedBandwidth().getInBandwidth() == azBW);
-            assert(fix2.getReservedBandwidth().getInBandwidth() == azBW);
-
-            if(oneJunc.getDeviceUrn().getUrn().equals("nodeK"))
-            {
-                assert(fix1.getIfceUrn().getUrn().equals("portA") || fix1.getIfceUrn().getUrn().equals("nodeK:2"));
-                assert(fix2.getIfceUrn().getUrn().equals("portA") || fix2.getIfceUrn().getUrn().equals("nodeK:2"));
-            }
-            else
-            {
-                assert(fix1.getIfceUrn().getUrn().equals("nodeS:1") || fix1.getIfceUrn().getUrn().equals("portZ"));
-                assert(fix2.getIfceUrn().getUrn().equals("nodeS:1") || fix2.getIfceUrn().getUrn().equals("portZ"));
-            }
-        }
-
-        // Pipes
-        ReservedEthPipeE onlyPipe = allResPipes.iterator().next();
-
-        ReservedVlanJunctionE juncA = onlyPipe.getAJunction();
-        ReservedVlanJunctionE juncZ = onlyPipe.getZJunction();
-        ReservedVlanFixtureE fixA = juncA.getFixtures().iterator().next();
-        ReservedVlanFixtureE fixZ = juncZ.getFixtures().iterator().next();
-
-        assert(juncA.getDeviceUrn().getUrn().equals("nodeP"));
-        assert(juncZ.getDeviceUrn().getUrn().equals("nodeQ"));
-        assert(fixA.getIfceUrn().getUrn().equals("nodeP:1"));
-        assert(fixZ.getIfceUrn().getUrn().equals("nodeQ:3"));
-
-        assert(fixA.getReservedBandwidth().getInBandwidth() == azBW);
-        assert(fixZ.getReservedBandwidth().getInBandwidth() == azBW);
-        assert(fixA.getReservedBandwidth().getEgBandwidth() == azBW);
-        assert(fixZ.getReservedBandwidth().getEgBandwidth() == azBW);
-
-        List<String> azERO = onlyPipe.getAzERO();
-        List<String> zaERO = onlyPipe.getZaERO();
-
-        String actualAzERO = "";
-        String actualZaERO = "";
-
-        for(String x : azERO)
-            actualAzERO = actualAzERO + x + "-";
-
-        for(String x : zaERO)
-            actualZaERO = actualZaERO + x + "-";
-
-        String expectedAzERO = "nodeP-nodeP:3-nodeQ:1-nodeQ-";
-        String expectedZaERO = "nodeQ-nodeQ:1-nodeP:3-nodeP-";
-
-        assert(actualAzERO.equals(expectedAzERO));
-        assert(actualZaERO.equals(expectedZaERO));
-
-        log.info("test 'basicPceTest5' passed.");
-    }
-
-    @Test
-    public void basicPceTest6()
-    {
-        log.info("Initializing test: 'basicPceTest6'.");
-
-        RequestedBlueprintE requestedBlueprint;
-        ReservedBlueprintE reservedBlueprint = null;
-        ScheduleSpecificationE requestedSched;
-
-        Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
-        Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
-
-        String srcDevice = "nodeP";
-        Set<String> portNames = Stream.of("portA", "portZ").collect(Collectors.toSet());
-        Integer azBW = 25;
-        Integer zaBW = 25;
-        String vlan = "any";
-
-        this.buildTopo6();
-        requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcDevice, portNames, azBW, zaBW, vlan);
-
-        log.info("Beginning test: 'basicPceTest6'.");
-
-        try
-        {
-            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
-        }
-        catch(PCEException | PSSException pceE){ log.error("", pceE); }
-
-        assert(reservedBlueprint != null);
-
-        ReservedVlanFlowE reservedFlow = reservedBlueprint.getVlanFlows().iterator().next();
-
-        Set<ReservedEthPipeE> allResPipes = reservedFlow.getPipes();
-        Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
-
-        assert(allResPipes.size() == 0);
-        assert(allResJunctions.size() == 1);
-
-        // Junctions
-        for(ReservedVlanJunctionE oneJunc : allResJunctions)
-        {
-            assert(oneJunc.getDeviceUrn().getUrn().equals("nodeP"));
-
-            Iterator<ReservedVlanFixtureE> iterF = oneJunc.getFixtures().iterator();
-            ReservedVlanFixtureE fix1 = iterF.next();
-            ReservedVlanFixtureE fix2 = iterF.next();
-
-            assert(fix1.getReservedBandwidth().getInBandwidth() == azBW);
-            assert(fix2.getReservedBandwidth().getInBandwidth() == azBW);
-
-            assert(fix1.getIfceUrn().getUrn().equals("portA") || fix1.getIfceUrn().getUrn().equals("portZ"));
-            assert(fix2.getIfceUrn().getUrn().equals("portA") || fix2.getIfceUrn().getUrn().equals("portZ"));
-        }
-
-        log.info("test 'basicPceTest6' passed.");
-    }
-
-    @Test
-    public void basicPceTest7()
-    {
-        log.info("Initializing test: 'basicPceTest7'.");
-
-        RequestedBlueprintE requestedBlueprint;
-        ReservedBlueprintE reservedBlueprint = null;
-        ScheduleSpecificationE requestedSched;
-
-        Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
-        Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
-
-        String srcPort = "portA";
-        String srcDevice = "nodeK";
-        String dstPort = "portZ";
-        String dstDevice = "nodeL";
-        Integer azBW = 25;
-        Integer zaBW = 25;
-        Boolean palindrome = true;
-        String vlan = "any";
-
-        this.buildTopo7();
-        requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
-
-        log.info("Beginning test: 'basicPceTest7'.");
-
-        try
-        {
-            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
-        }
-        catch(PCEException | PSSException pceE){ log.error("", pceE); }
-
-        assert(reservedBlueprint != null);
-
-        ReservedVlanFlowE reservedFlow = reservedBlueprint.getVlanFlows().iterator().next();
-
-        Set<ReservedEthPipeE> allResPipes = reservedFlow.getPipes();
-        Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
-
-        assert(allResPipes.size() == 0);
-        assert(allResJunctions.size() == 2);
-
-        // Junctions
-        for(ReservedVlanJunctionE oneJunc : allResJunctions)
-        {
-            assert(oneJunc.getDeviceUrn().getUrn().equals("nodeK") || oneJunc.getDeviceUrn().getUrn().equals("nodeL"));
-
-            Iterator<ReservedVlanFixtureE> iterF = oneJunc.getFixtures().iterator();
-            ReservedVlanFixtureE fix1 = iterF.next();
-            ReservedVlanFixtureE fix2 = iterF.next();
-
-            assert(fix1.getReservedBandwidth().getInBandwidth() == azBW);
-            assert(fix2.getReservedBandwidth().getInBandwidth() == azBW);
-
-            if(oneJunc.getDeviceUrn().getUrn().equals("nodeK"))
-            {
-                assert(fix1.getIfceUrn().getUrn().equals("portA") || fix1.getIfceUrn().getUrn().equals("nodeK:1"));
-                assert(fix2.getIfceUrn().getUrn().equals("portA") || fix2.getIfceUrn().getUrn().equals("nodeK:1"));
-            }
-            else
-            {
-                assert(fix1.getIfceUrn().getUrn().equals("nodeL:1") || fix1.getIfceUrn().getUrn().equals("portZ"));
-                assert(fix2.getIfceUrn().getUrn().equals("nodeL:1") || fix2.getIfceUrn().getUrn().equals("portZ"));
-            }
-        }
-
-        log.info("test 'basicPceTest7' passed.");
-    }
-
-    @Test
-    public void basicPceTest8()
-    {
-        log.info("Initializing test: 'basicPceTest8'.");
-
-        RequestedBlueprintE requestedBlueprint;
-        ReservedBlueprintE reservedBlueprint = null;
-        ScheduleSpecificationE requestedSched;
-
-        Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
-        Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
-
-        String srcPort = "portA";
-        String srcDevice = "nodeP";
-        String dstPort = "portZ";
-        String dstDevice = "nodeQ";
-        Integer azBW = 25;
-        Integer zaBW = 25;
-        Boolean palindrome = true;
-        String vlan = "any";
-
-        this.buildTopo8();
-        requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
-
-        log.info("Beginning test: 'basicPceTest8'.");
-
-        try
-        {
-            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
-        }
-        catch(PCEException | PSSException pceE){ log.error("", pceE); }
-
-        assert(reservedBlueprint != null);
-
-        ReservedVlanFlowE reservedFlow = reservedBlueprint.getVlanFlows().iterator().next();
-
-        Set<ReservedEthPipeE> allResPipes = reservedFlow.getPipes();
-        Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
-
-        assert(allResPipes.size() == 1);
-        assert(allResJunctions.size() == 0);
-
-        // Pipes
-        ReservedEthPipeE onlyPipe = allResPipes.iterator().next();
-
-        ReservedVlanJunctionE juncA = onlyPipe.getAJunction();
-        ReservedVlanJunctionE juncZ = onlyPipe.getZJunction();
-        ReservedVlanFixtureE fixA = juncA.getFixtures().iterator().next();
-        ReservedVlanFixtureE fixZ = juncZ.getFixtures().iterator().next();
-
-        assert(juncA.getDeviceUrn().getUrn().equals("nodeP"));
-        assert(juncZ.getDeviceUrn().getUrn().equals("nodeQ"));
-        assert(fixA.getIfceUrn().getUrn().equals("portA"));
-        assert(fixZ.getIfceUrn().getUrn().equals("portZ"));
-
-        assert(fixA.getReservedBandwidth().getInBandwidth() == azBW);
-        assert(fixZ.getReservedBandwidth().getInBandwidth() == azBW);
-        assert(fixA.getReservedBandwidth().getEgBandwidth() == azBW);
-        assert(fixZ.getReservedBandwidth().getEgBandwidth() == azBW);
-
-        List<String> azERO = onlyPipe.getAzERO();
-        List<String> zaERO = onlyPipe.getZaERO();
-
-        String actualAzERO = "";
-        String actualZaERO = "";
-
-        for(String x : azERO)
-            actualAzERO = actualAzERO + x + "-";
-
-        for(String x : zaERO)
-            actualZaERO = actualZaERO + x + "-";
-
-        String expectedAzERO = "nodeP-nodeP:1-nodeQ:1-nodeQ-";
-        String expectedZaERO = "nodeQ-nodeQ:1-nodeP:1-nodeP-";
-
-        assert(actualAzERO.equals(expectedAzERO));
-        assert(actualZaERO.equals(expectedZaERO));
-
-        log.info("test 'basicPceTest8' passed.");
-    }
-
-    @Test
-    public void basicPceTest9()
-    {
-        log.info("Initializing test: 'basicPceTest9'.");
-
-        RequestedBlueprintE requestedBlueprint;
-        ReservedBlueprintE reservedBlueprint = null;
-        ScheduleSpecificationE requestedSched;
-
-        Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
-        Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
-
-        String srcPort = "portA";
-        String srcDevice = "nodeK";
-        String dstPort = "portZ";
-        String dstDevice = "nodeP";
-        Integer azBW = 25;
-        Integer zaBW = 25;
-        Boolean palindrome = true;
-        String vlan = "any";
-
-        this.buildTopo9();
-        requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
-
-        log.info("Beginning test: 'basicPceTest9'.");
-
-        try
-        {
-            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
-        }
-        catch(PCEException | PSSException pceE){ log.error("", pceE); }
-
-        assert(reservedBlueprint != null);
-
-        ReservedVlanFlowE reservedFlow = reservedBlueprint.getVlanFlows().iterator().next();
-
-        Set<ReservedEthPipeE> allResPipes = reservedFlow.getPipes();
-        Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
-
-        assert(allResPipes.size() == 0);
-        assert(allResJunctions.size() == 2);
-
-        // Junctions
-        for(ReservedVlanJunctionE oneJunc : allResJunctions)
-        {
-            assert(oneJunc.getDeviceUrn().getUrn().equals("nodeK") || oneJunc.getDeviceUrn().getUrn().equals("nodeP"));
-
-            Iterator<ReservedVlanFixtureE> iterF = oneJunc.getFixtures().iterator();
-            ReservedVlanFixtureE fix1 = iterF.next();
-            ReservedVlanFixtureE fix2 = iterF.next();
-
-            assert(fix1.getReservedBandwidth().getInBandwidth() == azBW);
-            assert(fix2.getReservedBandwidth().getInBandwidth() == azBW);
-
-            if(oneJunc.getDeviceUrn().getUrn().equals("nodeK"))
-            {
-                assert(fix1.getIfceUrn().getUrn().equals("portA") || fix1.getIfceUrn().getUrn().equals("nodeK:1"));
-                assert(fix2.getIfceUrn().getUrn().equals("portA") || fix2.getIfceUrn().getUrn().equals("nodeK:1"));
-            }
-            else
-            {
-                assert(fix1.getIfceUrn().getUrn().equals("nodeP:1") || fix1.getIfceUrn().getUrn().equals("portZ"));
-                assert(fix2.getIfceUrn().getUrn().equals("nodeP:1") || fix2.getIfceUrn().getUrn().equals("portZ"));
-            }
-        }
-
-        log.info("test 'basicPceTest9' passed.");
-    }
-
-    @Test
-    public void basicPceTest10()
-    {
-        log.info("Initializing test: 'basicPceTest10'.");
-
-        RequestedBlueprintE requestedBlueprint;
-        ReservedBlueprintE reservedBlueprint = null;
-        ScheduleSpecificationE requestedSched;
-
-        Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
-        Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
-
-        String srcPort = "portA";
-        String srcDevice = "nodeK";
-        String dstPort = "portZ";
-        String dstDevice = "nodeM";
-        Integer azBW = 25;
-        Integer zaBW = 25;
-        Boolean palindrome = true;
-        String vlan = "any";
-
-        this.buildTopo10();
-        requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
-
-        log.info("Beginning test: 'basicPceTest10'.");
-
-        try
-        {
-            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
-        }
-        catch(PCEException | PSSException pceE){ log.error("", pceE); }
-
-        assert(reservedBlueprint != null);
-
-        ReservedVlanFlowE reservedFlow = reservedBlueprint.getVlanFlows().iterator().next();
-
-        Set<ReservedEthPipeE> allResPipes = reservedFlow.getPipes();
-        Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
-
-        assert(allResPipes.size() == 0);
-        assert(allResJunctions.size() == 3);
-
-        // Junctions
-        for(ReservedVlanJunctionE oneJunc : allResJunctions)
-        {
-            assert(oneJunc.getDeviceUrn().getUrn().equals("nodeK") || oneJunc.getDeviceUrn().getUrn().equals("nodeL") || oneJunc.getDeviceUrn().getUrn().equals("nodeM"));
-
-            Iterator<ReservedVlanFixtureE> iterF = oneJunc.getFixtures().iterator();
-            ReservedVlanFixtureE fix1 = iterF.next();
-            ReservedVlanFixtureE fix2 = iterF.next();
-
-            assert(fix1.getReservedBandwidth().getInBandwidth() == azBW);
-            assert(fix2.getReservedBandwidth().getInBandwidth() == azBW);
-
-            if(oneJunc.getDeviceUrn().getUrn().equals("nodeK"))
-            {
-                assert(fix1.getIfceUrn().getUrn().equals("portA") || fix1.getIfceUrn().getUrn().equals("nodeK:1"));
-                assert(fix2.getIfceUrn().getUrn().equals("portA") || fix2.getIfceUrn().getUrn().equals("nodeK:1"));
-            }
-            else if(oneJunc.getDeviceUrn().getUrn().equals("nodeL"))
-            {
-                assert(fix1.getIfceUrn().getUrn().equals("nodeL:1") || fix1.getIfceUrn().getUrn().equals("nodeL:2"));
-                assert(fix2.getIfceUrn().getUrn().equals("nodeL:1") || fix2.getIfceUrn().getUrn().equals("nodeL:2"));
-            }
-            else
-            {
-                assert(fix1.getIfceUrn().getUrn().equals("nodeM:1") || fix1.getIfceUrn().getUrn().equals("portZ"));
-                assert(fix2.getIfceUrn().getUrn().equals("nodeM:1") || fix2.getIfceUrn().getUrn().equals("portZ"));
-            }
-        }
-
-        log.info("test 'basicPceTest10' passed.");
-    }
-
-    @Test
-    public void basicPceTest11()
-    {
-        log.info("Initializing test: 'basicPceTest11'.");
-
-        RequestedBlueprintE requestedBlueprint;
-        ReservedBlueprintE reservedBlueprint = null;
-        ScheduleSpecificationE requestedSched;
-
-        Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
-        Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
-
-        String srcPort = "portA";
-        String srcDevice = "nodeP";
-        String dstPort = "portZ";
-        String dstDevice = "nodeR";
-        Integer azBW = 25;
-        Integer zaBW = 25;
-        Boolean palindrome = true;
-        String vlan = "any";
-
-        this.buildTopo11();
-        requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
-
-        log.info("Beginning test: 'basicPceTest11'.");
-
-        try
-        {
-            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
-        }
-        catch(PCEException | PSSException pceE){ log.error("", pceE); }
-
-        assert(reservedBlueprint != null);
-
-        ReservedVlanFlowE reservedFlow = reservedBlueprint.getVlanFlows().iterator().next();
-
-        Set<ReservedEthPipeE> allResPipes = reservedFlow.getPipes();
-        Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
-
-        assert(allResPipes.size() == 1);
-        assert(allResJunctions.size() == 0);
-
-        // Pipes
-        ReservedEthPipeE onlyPipe = allResPipes.iterator().next();
-
-        ReservedVlanJunctionE juncA = onlyPipe.getAJunction();
-        ReservedVlanJunctionE juncZ = onlyPipe.getZJunction();
-        ReservedVlanFixtureE fixA = juncA.getFixtures().iterator().next();
-        ReservedVlanFixtureE fixZ = juncZ.getFixtures().iterator().next();
-
-        assert(juncA.getDeviceUrn().getUrn().equals("nodeP"));
-        assert(juncZ.getDeviceUrn().getUrn().equals("nodeR"));
-        assert(fixA.getIfceUrn().getUrn().equals("portA"));
-        assert(fixZ.getIfceUrn().getUrn().equals("portZ"));
-
-        assert(fixA.getReservedBandwidth().getInBandwidth() == azBW);
-        assert(fixZ.getReservedBandwidth().getInBandwidth() == azBW);
-        assert(fixA.getReservedBandwidth().getEgBandwidth() == azBW);
-        assert(fixZ.getReservedBandwidth().getEgBandwidth() == azBW);
-
-        List<String> azERO = onlyPipe.getAzERO();
-        List<String> zaERO = onlyPipe.getZaERO();
-
-        String actualAzERO = "";
-        String actualZaERO = "";
-
-        for(String x : azERO)
-            actualAzERO = actualAzERO + x + "-";
-
-        for(String x : zaERO)
-            actualZaERO = actualZaERO + x + "-";
-
-        String expectedAzERO = "nodeP-nodeP:1-nodeQ:1-nodeQ-nodeQ:2-nodeR:1-nodeR-";
-        String expectedZaERO = "nodeR-nodeR:1-nodeQ:2-nodeQ-nodeQ:1-nodeP:1-nodeP-";
-
-        assert(actualAzERO.equals(expectedAzERO));
-        assert(actualZaERO.equals(expectedZaERO));
-
-        log.info("test 'basicPceTest11' passed.");
-    }
-
-    @Test
-    public void basicPceTest12()
-    {
-        log.info("Initializing test: 'basicPceTest12'.");
-
-        RequestedBlueprintE requestedBlueprint;
-        ReservedBlueprintE reservedBlueprint = null;
-        ScheduleSpecificationE requestedSched;
-
-        Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
-        Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
-
-        String srcPort = "portA";
-        String srcDevice = "nodeK";
-        String dstPort = "portZ";
-        String dstDevice = "nodeQ";
-        Integer azBW = 25;
-        Integer zaBW = 25;
-        Boolean palindrome = true;
-        String vlan = "any";
-
-        this.buildTopo12();
-        requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
-
-        log.info("Beginning test: 'basicPceTest12'.");
-
-        try
-        {
-            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
-        }
-        catch(PCEException | PSSException pceE){ log.error("", pceE); }
-
-        assert(reservedBlueprint != null);
-
-        ReservedVlanFlowE reservedFlow = reservedBlueprint.getVlanFlows().iterator().next();
-
-        Set<ReservedEthPipeE> allResPipes = reservedFlow.getPipes();
-        Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
-
-        assert(allResPipes.size() == 0);
-        assert(allResJunctions.size() == 3);
-
-        // Junctions
-        for(ReservedVlanJunctionE oneJunc : allResJunctions)
-        {
-            assert(oneJunc.getDeviceUrn().getUrn().equals("nodeK") || oneJunc.getDeviceUrn().getUrn().equals("nodeM") || oneJunc.getDeviceUrn().getUrn().equals("nodeQ"));
-
-            Iterator<ReservedVlanFixtureE> iterF = oneJunc.getFixtures().iterator();
-            ReservedVlanFixtureE fix1 = iterF.next();
-            ReservedVlanFixtureE fix2 = iterF.next();
-
-            assert(fix1.getReservedBandwidth().getInBandwidth() == azBW);
-            assert(fix2.getReservedBandwidth().getInBandwidth() == azBW);
-
-            if(oneJunc.getDeviceUrn().getUrn().equals("nodeK"))
-            {
-                assert(fix1.getIfceUrn().getUrn().equals("portA") || fix1.getIfceUrn().getUrn().equals("nodeK:2"));
-                assert(fix2.getIfceUrn().getUrn().equals("portA") || fix2.getIfceUrn().getUrn().equals("nodeK:2"));
-            }
-            else if(oneJunc.getDeviceUrn().getUrn().equals("nodeM"))
-            {
-                assert(fix1.getIfceUrn().getUrn().equals("nodeM:1") || fix1.getIfceUrn().getUrn().equals("nodeM:2"));
-                assert(fix2.getIfceUrn().getUrn().equals("nodeM:1") || fix2.getIfceUrn().getUrn().equals("nodeM:2"));
-            }
-            else
-            {
-                assert(fix1.getIfceUrn().getUrn().equals("nodeQ:2") || fix1.getIfceUrn().getUrn().equals("portZ"));
-                assert(fix2.getIfceUrn().getUrn().equals("nodeQ:2") || fix2.getIfceUrn().getUrn().equals("portZ"));
-            }
-        }
-
-        log.info("test 'basicPceTest12' passed.");
-    }
-
-
-    private void buildTopo1()
+    public void buildTopo1()
     {
         log.info("Building Test Topology 1");
-
-        urnRepo.deleteAll();
-        adjcyRepo.deleteAll();
 
         urnList = new ArrayList<>();
         adjcyList = new ArrayList<>();
@@ -1072,7 +65,7 @@ public class TopPceTest
         testBuilder.populateRepos(topoNodes, topoLinks, portDeviceMap);
     }
 
-    private void buildTopo2()
+    public void buildTopo2()
     {
         log.info("Building Test Topology 2");
 
@@ -1198,7 +191,7 @@ public class TopPceTest
         testBuilder.populateRepos(topoNodes, topoLinks, portDeviceMap);
     }
 
-    private void buildTopo3()
+    public void buildTopo3()
     {
         log.info("Building Test Topology 3");
 
@@ -1324,7 +317,7 @@ public class TopPceTest
         testBuilder.populateRepos(topoNodes, topoLinks, portDeviceMap);
     }
 
-    private void buildTopo4()
+    public void buildTopo4()
     {
         log.info("Building Test Topology 4");
 
@@ -1518,7 +511,7 @@ public class TopPceTest
         testBuilder.populateRepos(topoNodes, topoLinks, portDeviceMap);
     }
 
-    private void buildTopo5()
+    public void buildTopo5()
     {
         log.info("Building Test Topology 5");
 
@@ -1714,12 +707,9 @@ public class TopPceTest
     }
 
 
-    private void buildTopo6()
+    public void buildTopo6()
     {
         log.info("Building Test Topology 6");
-
-        urnRepo.deleteAll();
-        adjcyRepo.deleteAll();
 
         urnList = new ArrayList<>();
         adjcyList = new ArrayList<>();
@@ -1752,7 +742,7 @@ public class TopPceTest
         testBuilder.populateRepos(topoNodes, topoLinks, portDeviceMap);
     }
 
-    private void buildTopo7()
+    public void buildTopo7()
     {
         log.info("Building Test Topology 7");
 
@@ -1827,7 +817,7 @@ public class TopPceTest
         testBuilder.populateRepos(topoNodes, topoLinks, portDeviceMap);
     }
 
-    private void buildTopo8()
+    public void buildTopo8()
     {
         log.info("Building Test Topology 8");
 
@@ -1902,7 +892,7 @@ public class TopPceTest
         testBuilder.populateRepos(topoNodes, topoLinks, portDeviceMap);
     }
 
-    private void buildTopo9()
+    public void buildTopo9()
     {
         log.info("Building Test Topology 9");
 
@@ -1977,7 +967,7 @@ public class TopPceTest
         testBuilder.populateRepos(topoNodes, topoLinks, portDeviceMap);
     }
 
-    private void buildTopo10()
+    public void buildTopo10()
     {
         log.info("Building Test Topology 10");
 
@@ -2104,7 +1094,7 @@ public class TopPceTest
         testBuilder.populateRepos(topoNodes, topoLinks, portDeviceMap);
     }
 
-    private void buildTopo11()
+    public void buildTopo11()
     {
         log.info("Building Test Topology 11");
 
@@ -2231,7 +1221,7 @@ public class TopPceTest
         testBuilder.populateRepos(topoNodes, topoLinks, portDeviceMap);
     }
 
-    private void buildTopo12()
+    public void buildTopo12()
     {
         log.info("Building Test Topology 12");
 
@@ -2375,5 +1365,261 @@ public class TopPceTest
         }
 
         testBuilder.populateRepos(topoNodes, topoLinks, portDeviceMap);
+    }
+
+
+    public void buildSharedLinkTopo1()
+    {
+        log.info("Building Shared-Link Test Topology 1");
+
+        List<TopoVertex> topoNodes = new ArrayList<>();
+        List<TopoEdge> topoLinks = new ArrayList<>();
+        Map<TopoVertex, TopoVertex> portDeviceMap = new HashMap<>();
+
+        VertexType kType = VertexType.SWITCH;
+        VertexType lType = VertexType.SWITCH;
+        VertexType mType = VertexType.SWITCH;
+        VertexType nType = VertexType.SWITCH;
+
+        buildSharedLinkTopology(topoNodes, topoLinks, portDeviceMap, kType, lType, mType, nType);
+
+        testBuilder.populateRepos(topoNodes, topoLinks, portDeviceMap);
+    }
+
+    public void buildSharedLinkTopo2()
+    {
+        log.info("Building Shared-Link Test Topology 2");
+
+        List<TopoVertex> topoNodes = new ArrayList<>();
+        List<TopoEdge> topoLinks = new ArrayList<>();
+        Map<TopoVertex, TopoVertex> portDeviceMap = new HashMap<>();
+
+        VertexType kType = VertexType.ROUTER;
+        VertexType lType = VertexType.ROUTER;
+        VertexType mType = VertexType.ROUTER;
+        VertexType nType = VertexType.ROUTER;
+
+        buildSharedLinkTopology(topoNodes, topoLinks, portDeviceMap, kType, lType, mType, nType);
+
+        testBuilder.populateRepos(topoNodes, topoLinks, portDeviceMap);
+    }
+
+    public void buildSharedLinkTopo3()
+    {
+        log.info("Building Shared-Link Test Topology 3");
+
+        List<TopoVertex> topoNodes = new ArrayList<>();
+        List<TopoEdge> topoLinks = new ArrayList<>();
+        Map<TopoVertex, TopoVertex> portDeviceMap = new HashMap<>();
+
+        VertexType kType = VertexType.SWITCH;
+        VertexType lType = VertexType.ROUTER;
+        VertexType mType = VertexType.ROUTER;
+        VertexType nType = VertexType.SWITCH;
+
+        buildSharedLinkTopology(topoNodes, topoLinks, portDeviceMap, kType, lType, mType, nType);
+
+        testBuilder.populateRepos(topoNodes, topoLinks, portDeviceMap);
+    }
+
+    public void buildSharedLinkTopo4()
+    {
+        log.info("Building Shared-Link Test Topology 4");
+
+        List<TopoVertex> topoNodes = new ArrayList<>();
+        List<TopoEdge> topoLinks = new ArrayList<>();
+        Map<TopoVertex, TopoVertex> portDeviceMap = new HashMap<>();
+
+        VertexType kType = VertexType.ROUTER;
+        VertexType lType = VertexType.SWITCH;
+        VertexType mType = VertexType.SWITCH;
+        VertexType nType = VertexType.ROUTER;
+
+        buildSharedLinkTopology(topoNodes, topoLinks, portDeviceMap, kType, lType, mType, nType);
+
+        testBuilder.populateRepos(topoNodes, topoLinks, portDeviceMap);
+    }
+
+    private void buildSharedLinkTopology(List<TopoVertex> topoNodes, List<TopoEdge> topoLinks, Map<TopoVertex,TopoVertex> portDeviceMap, VertexType typeK, VertexType typeL, VertexType typeM, VertexType typeN)
+    {
+        class VertTypeTuple<V, T>
+        {
+            public final V v;
+            public final T t;
+
+            public VertTypeTuple(V vSpec, T tSpec)
+            {
+                v = vSpec;
+                t = tSpec;
+            }
+        }
+
+        List<VertTypeTuple<TopoVertex, VertexType>> networkPorts = new ArrayList<>();
+
+        // Devices //
+        TopoVertex nodeK = new TopoVertex("nodeK", typeK);
+        TopoVertex nodeL = new TopoVertex("nodeL", typeL);
+        TopoVertex nodeM = new TopoVertex("nodeM", typeM);
+        TopoVertex nodeN = new TopoVertex("nodeN", typeN);
+
+        // Ports //
+        TopoVertex portA = new TopoVertex("portA", VertexType.PORT);
+        TopoVertex portZ = new TopoVertex("portZ", VertexType.PORT);
+        TopoVertex portK1 = new TopoVertex("nodeK:1", VertexType.PORT);
+        TopoVertex portK2 = new TopoVertex("nodeK:2", VertexType.PORT);
+        TopoVertex portL1 = new TopoVertex("nodeL:1", VertexType.PORT);
+        TopoVertex portL2 = new TopoVertex("nodeL:2", VertexType.PORT);
+        TopoVertex portL3 = new TopoVertex("nodeL:3", VertexType.PORT);
+        TopoVertex portM1 = new TopoVertex("nodeM:1", VertexType.PORT);
+        TopoVertex portM2 = new TopoVertex("nodeM:2", VertexType.PORT);
+        TopoVertex portM3 = new TopoVertex("nodeM:3", VertexType.PORT);
+        TopoVertex portN1 = new TopoVertex("nodeN:1", VertexType.PORT);
+        TopoVertex portN2 = new TopoVertex("nodeN:2", VertexType.PORT);
+
+        networkPorts.add(new VertTypeTuple<>(portK1, nodeK.getVertexType()));
+        networkPorts.add(new VertTypeTuple<>(portK2, nodeK.getVertexType()));
+        networkPorts.add(new VertTypeTuple<>(portL1, nodeL.getVertexType()));
+        networkPorts.add(new VertTypeTuple<>(portL2, nodeL.getVertexType()));
+        networkPorts.add(new VertTypeTuple<>(portL3, nodeL.getVertexType()));
+        networkPorts.add(new VertTypeTuple<>(portM1, nodeM.getVertexType()));
+        networkPorts.add(new VertTypeTuple<>(portM2, nodeM.getVertexType()));
+        networkPorts.add(new VertTypeTuple<>(portM3, nodeM.getVertexType()));
+        networkPorts.add(new VertTypeTuple<>(portN1, nodeN.getVertexType()));
+        networkPorts.add(new VertTypeTuple<>(portN2, nodeN.getVertexType()));
+
+        // End-Port Links //
+        TopoEdge edgeInt_A_K = new TopoEdge(portA, nodeK, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_Z_N = new TopoEdge(portZ, nodeN, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_K_A = new TopoEdge(nodeK, portA, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_N_Z = new TopoEdge(nodeN, portZ, 0L, Layer.INTERNAL);
+
+        // Internal Links //
+        TopoEdge edgeInt_K1_K = new TopoEdge(portK1, nodeK, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_K2_K = new TopoEdge(portK2, nodeK, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_L1_L = new TopoEdge(portL1, nodeL, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_L2_L = new TopoEdge(portL2, nodeL, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_L3_L = new TopoEdge(portL3, nodeL, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_M1_M = new TopoEdge(portM1, nodeM, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_M2_M = new TopoEdge(portM2, nodeM, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_M3_M = new TopoEdge(portM3, nodeM, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_N1_N = new TopoEdge(portN1, nodeN, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_N2_N = new TopoEdge(portN2, nodeN, 0L, Layer.INTERNAL);
+
+        // Internal-Reverse Links //
+        TopoEdge edgeInt_K_K1 = new TopoEdge(nodeK, portK1, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_K_K2 = new TopoEdge(nodeK, portK2, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_L_L1 = new TopoEdge(nodeL, portL1, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_L_L2 = new TopoEdge(nodeL, portL2, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_L_L3 = new TopoEdge(nodeL, portL3, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_M_M1 = new TopoEdge(nodeM, portM1, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_M_M2 = new TopoEdge(nodeM, portM2, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_M_M3 = new TopoEdge(nodeM, portM3, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_N_N1 = new TopoEdge(nodeN, portN1, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_N_N2 = new TopoEdge(nodeN, portN2, 0L, Layer.INTERNAL);
+
+
+        // Network Links //
+        for(VertTypeTuple onePort : networkPorts)
+        {
+            TopoVertex oneVertex = (TopoVertex)onePort.v;
+            VertexType oneType = (VertexType)onePort.t;
+
+            for(VertTypeTuple anotherPort : networkPorts)
+            {
+                TopoVertex anotherVertex = (TopoVertex)anotherPort.v;
+                VertexType anotherType = (VertexType)anotherPort.t;
+
+                TopoEdge edgeNet;
+                Layer linkLayer = Layer.ETHERNET;
+                Long linkMetric = 1L;
+                if(oneVertex.getUrn().equals("nodeK:1") && anotherVertex.getUrn().equals("nodeL:1"))
+                    linkMetric = 50L;
+                else if(oneVertex.getUrn().equals("nodeK:2") && anotherVertex.getUrn().equals("nodeM:1"))
+                    linkMetric = 300L;
+                else if(oneVertex.getUrn().equals("nodeL:1") && anotherVertex.getUrn().equals("nodeK:1"))
+                    linkMetric = 200L;
+                else if(oneVertex.getUrn().equals("nodeL:2") && anotherVertex.getUrn().equals("nodeN:1"))
+                    linkMetric = 200L;
+                else if(oneVertex.getUrn().equals("nodeL:3") && anotherVertex.getUrn().equals("nodeM:2"))
+                    linkMetric = 50L;
+                else if(oneVertex.getUrn().equals("nodeM:1") && anotherVertex.getUrn().equals("nodeK:2"))
+                    linkMetric = 50L;
+                else if(oneVertex.getUrn().equals("nodeM:2") && anotherVertex.getUrn().equals("nodeL:3"))
+                    linkMetric = 100L;
+                else if(oneVertex.getUrn().equals("nodeM:3") && anotherVertex.getUrn().equals("nodeN:2"))
+                    linkMetric = 50L;
+                else if(oneVertex.getUrn().equals("nodeN:1") && anotherVertex.getUrn().equals("nodeL:2"))
+                    linkMetric = 50L;
+                else if(oneVertex.getUrn().equals("nodeN:2") && anotherVertex.getUrn().equals("nodeM:3"))
+                    linkMetric = 300L;
+                else
+                    continue;
+
+
+                if(oneType.equals(VertexType.ROUTER) && anotherType.equals(VertexType.ROUTER))
+                {
+                    linkLayer = Layer.MPLS;
+                }
+
+                edgeNet = new TopoEdge(oneVertex, anotherVertex, linkMetric, linkLayer);
+                topoLinks.add(edgeNet);
+            }
+        }
+
+        topoNodes.add(nodeK);
+        topoNodes.add(nodeL);
+        topoNodes.add(nodeM);
+        topoNodes.add(nodeN);
+
+        topoNodes.add(portA);
+        topoNodes.add(portZ);
+        topoNodes.add(portK1);
+        topoNodes.add(portK2);
+        topoNodes.add(portL1);
+        topoNodes.add(portL2);
+        topoNodes.add(portL3);
+        topoNodes.add(portM1);
+        topoNodes.add(portM2);
+        topoNodes.add(portM3);
+        topoNodes.add(portN1);
+        topoNodes.add(portN2);
+
+        topoLinks.add(edgeInt_A_K);
+        topoLinks.add(edgeInt_Z_N);
+        topoLinks.add(edgeInt_K1_K);
+        topoLinks.add(edgeInt_K2_K);
+        topoLinks.add(edgeInt_L1_L);
+        topoLinks.add(edgeInt_L2_L);
+        topoLinks.add(edgeInt_L3_L);
+        topoLinks.add(edgeInt_M1_M);
+        topoLinks.add(edgeInt_M2_M);
+        topoLinks.add(edgeInt_M3_M);
+        topoLinks.add(edgeInt_N1_N);
+        topoLinks.add(edgeInt_N2_N);
+
+        topoLinks.add(edgeInt_K_A);
+        topoLinks.add(edgeInt_N_Z);
+        topoLinks.add(edgeInt_K_K1);
+        topoLinks.add(edgeInt_K_K2);
+        topoLinks.add(edgeInt_L_L1);
+        topoLinks.add(edgeInt_L_L2);
+        topoLinks.add(edgeInt_L_L3);
+        topoLinks.add(edgeInt_M_M1);
+        topoLinks.add(edgeInt_M_M2);
+        topoLinks.add(edgeInt_M_M3);
+        topoLinks.add(edgeInt_N_N1);
+        topoLinks.add(edgeInt_N_N2);
+
+        // Map Ports to Devices for simplicity in utility class //
+        for(TopoEdge oneEdge : topoLinks)
+        {
+            if(oneEdge.getLayer().equals(Layer.INTERNAL))
+            {
+                if(oneEdge.getA().getVertexType().equals(VertexType.PORT))
+                {
+                    portDeviceMap.put(oneEdge.getA(), oneEdge.getZ());
+                }
+            }
+        }
     }
 }
