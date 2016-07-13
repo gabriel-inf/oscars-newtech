@@ -29,14 +29,11 @@ public class PCEAssistant {
      * Given a list of edges, convert that list to into a number of segments, based on layer.
      * An ETHERNET segment is made entirely of switches and their ports, while a MPLS segment consists
      * of routers and their ports.
-     * @param edges
-     * @return
+     * @param edges - The edges to be decomposed into segments.
+     * @return A list of <Layer, List<TopoVertex>> pairs (segments).
      */
     public static List<Map<Layer, List<TopoVertex>>> decompose(List<TopoEdge> edges) {
         List<Map<Layer, List<TopoVertex>>> result = new ArrayList<>();
-
-
-        log.info(edges.toString());
 
         // We have List of edges like this
         // Port -INTERNAL- Device -INTERNAL- Port -ETHERNET/MPLS- Port -INTERNAL- Device -INTERNAL- Port, etc
@@ -91,19 +88,31 @@ public class PCEAssistant {
             segmentVertices.add(nodeZ);
 
         }
-        log.info(result.toString());
         return result;
-
     }
 
 
+    /**
+     * Create a Junction and it's associated fixtures given the input parameters.
+     * @param device - The device vertex associated with the junction
+     * @param urnMap - A mapping of URN strings to URN objects
+     * @param deviceModels - A mapping of URN strings to Device Models
+     * @param requestedJunctions - A set of requested junctions - used to determine attributes of junction/fixtures
+     * @param vlanId - The assigned VLAN ID for the fixtures
+     * @param sched - The requested schedule
+     * @return A Reserved Vlan Junction with Reserved Fixtures (if contained in a matching requested junction)
+     * @throws PSSException
+     */
     public ReservedVlanJunctionE createJunctionAndFixtures(TopoVertex device, Map<String, UrnE> urnMap,
                                                             Map<String, DeviceModel> deviceModels,
                                                            Set<RequestedVlanJunctionE> requestedJunctions,
                                                            Integer vlanId, ScheduleSpecificationE sched) throws PSSException {
+        // Get this junction's URN, Device Model, and Typing for its Fixtures
         UrnE aUrn = urnMap.get(device.getUrn());
         DeviceModel model = deviceModels.get(aUrn.getUrn());
         EthFixtureType fixType = decideFixtureType(model);
+
+        // Create the set of Reserved Fixtures by filtering for requested junctions that match the URN
         Set<ReservedVlanFixtureE> reservedVlanFixtures = requestedJunctions
                 .stream()
                 .filter(reqJunction -> reqJunction.getDeviceUrn().equals(aUrn))
@@ -112,10 +121,22 @@ public class PCEAssistant {
                 .map(reqFix -> createFixtureAndResources(reqFix.getPortUrn(), fixType,
                         reqFix.getInMbps(), reqFix.getEgMbps(), vlanId, sched))
                 .collect(Collectors.toSet());
+
+        // Return the Reserved Junction (with the set of reserved VLAN fixtures).
         return createReservedJunction(aUrn, new HashSet<>(),
                 reservedVlanFixtures, decideJunctionType(model));
     }
 
+    /**
+     * Create a Reserved Fixtures and it's associated resources (VLAN and Bandwidth) using the input.
+     * @param portUrn - The URN of the desired fixture
+     * @param fixtureType - The typing of the desired fixture
+     * @param azMbps - The requested ingress bandwidth
+     * @param zaMbps - The requested egress bandwidth
+     * @param vlanId - The assigned VLAN ID
+     * @param sched - The requested schedule
+     * @return The reserved fixture, containing all of its reserved resources
+     */
     public ReservedVlanFixtureE createFixtureAndResources(UrnE portUrn, EthFixtureType fixtureType, Integer azMbps,
                                                            Integer zaMbps, Integer vlanId,
                                                            ScheduleSpecificationE sched){
@@ -128,6 +149,14 @@ public class PCEAssistant {
         return createReservedFixture(portUrn, new HashSet<>(), rsvVlan, rsvBw, fixtureType);
     }
 
+    /**
+     * Create a reserved junction given the input
+     * @param urn - The junction's URN
+     * @param pssResources - The junction's PSS Resources
+     * @param fixtures - The junction's fixtures
+     * @param junctionType - The junction's type
+     * @return The Reserved VLAN Junction
+     */
     public ReservedVlanJunctionE createReservedJunction(UrnE urn, Set<ReservedPssResourceE> pssResources,
                                                          Set<ReservedVlanFixtureE> fixtures, EthJunctionType junctionType){
         return ReservedVlanJunctionE.builder()
@@ -138,6 +167,15 @@ public class PCEAssistant {
                 .build();
     }
 
+    /**
+     * Create a reserved fixture, given the input parameters.
+     * @param urn - The fixture's URN
+     * @param pssResources - The fixture's PSS Resources
+     * @param rsvVlan - The fixture's assigned VLAN ID
+     * @param rsvBw - The fixture's assigned bandwidth
+     * @param fixtureType - The fixture's type
+     * @return The Reserved VLAN Fixture
+     */
     public ReservedVlanFixtureE createReservedFixture(UrnE urn, Set<ReservedPssResourceE> pssResources,
                                                        ReservedVlanE rsvVlan, ReservedBandwidthE rsvBw,
                                                        EthFixtureType fixtureType){
@@ -151,6 +189,14 @@ public class PCEAssistant {
     }
 
 
+    /**
+     * Create the reserved bandwidth given the input parameters.
+     * @param urn - The URN associated with this bandwidth
+     * @param inMbps - The ingress bandwidth
+     * @param egMbps - The egress bandwidth
+     * @param sched - The requested schedule
+     * @return A reserved bandwidth object
+     */
     public ReservedBandwidthE createReservedBandwidth(UrnE urn, Integer inMbps, Integer egMbps, ScheduleSpecificationE sched){
         return ReservedBandwidthE.builder()
                 .urn(urn)
@@ -161,6 +207,13 @@ public class PCEAssistant {
                 .build();
     }
 
+    /**
+     * Create the reserved VLAN ID given the input parameters.
+     * @param urn - The URN associated with this VLAN
+     * @param vlanId - The ID value for the VLAN tag
+     * @param sched - The requested schedule
+     * @return The reserved VLAN objct
+     */
     public ReservedVlanE createReservedVlan(UrnE urn, Integer vlanId, ScheduleSpecificationE sched){
         return ReservedVlanE.builder()
                 .urn(urn)
@@ -171,6 +224,12 @@ public class PCEAssistant {
     }
 
     // TODO: fix this
+    /**
+     * Determine what resources are needed for a reserved MPLS pipe
+     * @param vp - The reserved pipe
+     * @return A mapping of the needed resources
+     * @throws PSSException
+     */
     public Map<String, ResourceType> neededPipeResources(ReservedMplsPipeE vp) throws PSSException {
         Map<String, ResourceType> result = new HashMap<>();
         switch (vp.getPipeType()) {
@@ -187,6 +246,12 @@ public class PCEAssistant {
 
     }
 
+    /**
+     * Determine what resources are needed for provisioning this reserved junction.
+     * @param vj - The reserved junction
+     * @return A mapping of the needed resources
+     * @throws PSSException
+     */
     public Map<ResourceType, List<String>> neededJunctionResources(ReservedVlanJunctionE vj) throws PSSException {
         Map<ResourceType, List<String>> result = new HashMap<>();
 
@@ -220,6 +285,12 @@ public class PCEAssistant {
         throw new PSSException("Could not decide needed junction resources");
     }
 
+    /**
+     * Given a junction's device model, determine the junction's type
+     * @param model - The  device model
+     * @return The junction's type
+     * @throws PSSException
+     */
     public EthJunctionType decideJunctionType(DeviceModel model) throws PSSException {
         switch (model) {
             case ALCATEL_SR7750:
@@ -233,6 +304,12 @@ public class PCEAssistant {
 
     }
 
+    /**
+     * Given the device model of the associated device, determine the fixture's type
+     * @param model - The device's model
+     * @return The fixture's type
+     * @throws PSSException
+     */
     public EthFixtureType decideFixtureType(DeviceModel model) throws PSSException {
         switch (model) {
             case ALCATEL_SR7750:
@@ -246,6 +323,13 @@ public class PCEAssistant {
 
     }
 
+    /**
+     * Given the models of the starting/ending devices of a MPLS pipe, determine the pipe's type
+     * @param aModel - The A junction's device model
+     * @param zModel - The Z junction's device model
+     * @return The MPLS pipe's type
+     * @throws PSSException
+     */
     public MplsPipeType decideMplsPipeType(DeviceModel aModel, DeviceModel zModel) throws PSSException {
 
         switch (aModel) {
@@ -271,6 +355,13 @@ public class PCEAssistant {
     }
 
 
+    /**
+     * Given the models of the starting/ending devices of an Ethernet pipe, determine the pipe's type
+     * @param aModel - The A junction's model
+     * @param zModel - The Z junction's model
+     * @return The ethernet pipe's type
+     * @throws PSSException
+     */
     public EthPipeType decideEthPipeType(DeviceModel aModel, DeviceModel zModel) throws PSSException {
 
         switch (aModel) {
@@ -297,11 +388,21 @@ public class PCEAssistant {
         throw new PSSException("Could not determine Ethernet pipe type");
     }
 
+    /**
+     * Construct a mapping of Junction Pairs (two vertices) to the AZ/ZA listing of vertices (the pipe) between those
+     * two junctions. Updates the pased in junctionPairToPipeEROMap and the allJunctionPairs map to keep track
+     * of which junction pairs have been created.
+     * @param junctionPairToPipeEROMap - A mapping between junction pairs and pipe vertices.
+     * @param allJunctionPairs - A mapping between Junction pairs and layer (determines what kind of pipe to create)
+     * @param azSegments - The path segments in the AZ direction
+     * @param zaSegments - The path segments in the ZA direction
+     */
     public void constructJunctionPairToPipeEROMap(Map<List<TopoVertex>, Map<String, List<TopoVertex>>> junctionPairToPipeEROMap,
                                                   Map<List<TopoVertex>, Layer> allJunctionPairs,
                                                   List<Map<Layer, List<TopoVertex>>> azSegments,
                                                   List<Map<Layer, List<TopoVertex>>> zaSegments) {
 
+        // Containers for the junction pairs and pipes
         List<List<TopoVertex>> junctionPairs = new ArrayList<>();
         junctionPairs.add(new ArrayList<>());
         List<List<TopoVertex>> azEros = new ArrayList<>();
@@ -309,6 +410,7 @@ public class PCEAssistant {
         List<List<TopoVertex>> zaEros = new ArrayList<>();
         zaEros.add(new ArrayList<>());
 
+        // Containers for the junction pairs that connect two segments (ETHERNET -> MPLS, or MPLS -> ETHERNET)
         List<List<TopoVertex>> interJunctionPairs = new ArrayList<>();
         interJunctionPairs.add(new ArrayList<>());
         List<List<TopoVertex>> interAzEROs = new ArrayList<>();
@@ -316,6 +418,7 @@ public class PCEAssistant {
         List<List<TopoVertex>> interZaEROs = new ArrayList<>();
         interZaEROs.add(new ArrayList<>());
 
+        // The indices of the current junction pair / inter-segment junction pair
         Integer currJunctionPairIndex = 0;
         Integer currInterJunctionPairIndex = 0;
 
@@ -324,14 +427,13 @@ public class PCEAssistant {
             // Get az segment and za segment
             Map<Layer, List<TopoVertex>> azSegment = azSegments.get(i);
             Map<Layer, List<TopoVertex>> zaSegment = zaSegments.get(zaSegments.size() - i - 1);
-            log.info("AZ Segment: " + azSegment.toString());
-            log.info("ZA Segment: " + zaSegment.toString());
             assert (azSegment.keySet().equals(zaSegment.keySet()));
 
+            // Determine the segment's type
             Layer layer = azSegment.containsKey(Layer.ETHERNET) ? Layer.ETHERNET : Layer.MPLS;
 
+            // Get the vertices from the segments
             List<TopoVertex> azVertices = azSegment.get(layer);
-
             List<TopoVertex> zaVertices = zaSegment.get(layer);
 
 
@@ -344,6 +446,7 @@ public class PCEAssistant {
             zaVertices.remove(zaVertices.size() - 1);
 
 
+            // Store the first device and last device in the segment
             TopoVertex currentVertex = azVertices.get(0);
             TopoVertex lastDevice = azVertices.get(azVertices.size()-1);
 
@@ -435,6 +538,7 @@ public class PCEAssistant {
                 }
             }
 
+            // Clear out any leftover vertices put into the current vertex containers
             if(junctionPairs.get(currJunctionPairIndex).size() == 1){
                 junctionPairs.set(currJunctionPairIndex, new ArrayList<>());
                 azEros.set(currJunctionPairIndex, new ArrayList<>());
@@ -450,9 +554,9 @@ public class PCEAssistant {
             }
         }
 
+        // Store the pipes/junction pairs
         for(Integer jp = 0; jp < junctionPairs.size(); jp++){
             List<TopoVertex> junctionPair = junctionPairs.get(jp);
-            log.info("Junction Pair: " + junctionPair);
             if(junctionPair.size() == 2) {
                 List<TopoVertex> azERO = azEros.get(jp);
                 List<TopoVertex> zaEro = zaEros.get(jp);
@@ -460,9 +564,9 @@ public class PCEAssistant {
             }
         }
 
+        // Store the inter-segment pipes/junction pairs
         for(Integer jp = 0; jp < interJunctionPairs.size(); jp++){
             List<TopoVertex> junctionPair = interJunctionPairs.get(jp);
-            log.info("InterSegment Junction Pair: " + junctionPair);
             if(junctionPair.size() == 2) {
                 List<TopoVertex> azERO = interAzEROs.get(jp);
                 List<TopoVertex> zaEro = interZaEROs.get(jp);
@@ -472,6 +576,12 @@ public class PCEAssistant {
 
     }
 
+    /**
+     * Make a mapping to store the AZ and ZA Explicit Route Objects (ERO).
+     * @param azERO - The AZ path
+     * @param zaERO - The ZA path
+     * @return A mapping between "AZ" and "ZA" to the associated path
+     */
     private Map<String, List<TopoVertex>> makeDirectionalEROMap(List<TopoVertex> azERO, List<TopoVertex> zaERO) {
         Map<String, List<TopoVertex>> directionalEROMap = new HashMap<>();
         directionalEROMap.put("AZ", azERO);
@@ -480,14 +590,29 @@ public class PCEAssistant {
     }
 
 
+    /**
+     * Given two lists of EROS in the AZ and ZA direction, a map of URNs, a map of the requested bandwidth at each URN,
+     * and the requested schedule, return a combined set of reserved bandwidth objects for the AZ and ZA paths
+     * @param az - The AZ vertices
+     * @param za - The ZA vertices
+     * @param urnMap - A mapping of URN string to URN object
+     * @param requestedBandwidthMap - A mapping of Vertex objects to "Ingress"/"Egress" requested bandwidth
+     * @param sched - THe requested schedule
+     * @return A set of all reserved bandwidth for every port (across both paths)
+     */
     public Set<ReservedBandwidthE> createReservedBandwidthForEROs(List<TopoVertex> az, List<TopoVertex> za,
                                                                   Map<String, UrnE> urnMap,
                                                                   Map<TopoVertex, Map<String, Integer>> requestedBandwidthMap,
                                                                   ScheduleSpecificationE sched) {
+        // Combine the AZ and ZA EROs
         Set<TopoVertex> combined = new HashSet<>(az);
         combined.addAll(za);
 
+        // Store the reserved bandwidths
         Set<ReservedBandwidthE> reservedBandwidths = new HashSet<>();
+
+        // For each vertex in the combined set, retrieve the requested Ingress/Egress bandwidth, and create a reserved
+        // bandwidth object
         combined.stream().filter(requestedBandwidthMap::containsKey).forEach(vertex -> {
             UrnE urn = urnMap.get(vertex.getUrn());
             Integer reqInMbps = requestedBandwidthMap.get(vertex).get("Ingress");
@@ -497,6 +622,8 @@ public class PCEAssistant {
             reservedBandwidths.add(rsvBw);
 
         });
+
+        // Return the set
         return reservedBandwidths;
     }
 }

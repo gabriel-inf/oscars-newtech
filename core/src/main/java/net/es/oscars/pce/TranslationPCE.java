@@ -251,23 +251,19 @@ public class TranslationPCE {
 
         Map<TopoVertex, ReservedVlanJunctionE> junctionMap = new HashMap<>();
 
-        log.info("0: All Junction Pairs - " + allJunctionPairs.toString());
         for(List<TopoVertex> junctionPair : allJunctionPairs.keySet()){
-            log.info("0.5: Junction Pair - " + junctionPair);
             Layer thisLayer = allJunctionPairs.get(junctionPair);
-            log.info("1: Layer " + thisLayer);
+
             Map<String, List<TopoVertex>> pipeEroMap = junctionPairToPipeEROMap.get(junctionPair);
-            log.info("2: Pipe ERO Map " + pipeEroMap.toString());
+
             List<String> azPipeEro = pipeEroMap.get("AZ")
                     .stream()
                     .map(TopoVertex::getUrn)
                     .collect(Collectors.toList());
-            log.info("3: AZ ERO " + azPipeEro);
             List<String> zaPipeEro = pipeEroMap.get("ZA")
                     .stream()
                     .map(TopoVertex::getUrn)
                     .collect(Collectors.toList());
-            log.info("4: ZA ERO " + zaPipeEro);
 
             TopoVertex aVertex = junctionPair.get(0);
             TopoVertex zVertex = junctionPair.get(1);
@@ -284,7 +280,6 @@ public class TranslationPCE {
             else{
                 aJunction = junctionMap.get(aVertex);
             }
-            log.info("5: A Junction " + aJunction.toString());
             // Create Z Junction
             if(!junctionMap.containsKey(zVertex)){
                 zJunction = pceAssistant.createJunctionAndFixtures(zVertex, urnMap, deviceModels, reqPipeJunctions,
@@ -294,17 +289,12 @@ public class TranslationPCE {
             else{
                 zJunction = junctionMap.get(zVertex);
             }
-            log.info("6: Z Junction " + zJunction.toString());
 
             DeviceModel aModel = deviceModels.get(aJunction.getDeviceUrn().getUrn());
-            log.info("7: A Model " + aModel);
             DeviceModel zModel = deviceModels.get(zJunction.getDeviceUrn().getUrn());
-            log.info("8: Z Model " + zModel);
 
             Set<ReservedBandwidthE> pipeBandwidths = pceAssistant.createReservedBandwidthForEROs(pipeEroMap.get("AZ"),
                     pipeEroMap.get("ZA"), urnMap, requestedBandwidthMap, sched);
-
-            log.info("9: Pipe bandwidths" + pipeBandwidths.toString());
 
             if(thisLayer.equals(Layer.MPLS)){
                 ReservedMplsPipeE mplsPipe = ReservedMplsPipeE.builder()
@@ -316,7 +306,6 @@ public class TranslationPCE {
                         .reservedPssResources(new HashSet<>())
                         .pipeType(pceAssistant.decideMplsPipeType(aModel, zModel))
                         .build();
-                log.info("10-1: MPLS Pipe " + mplsPipe.toString());
                 reservedMplsPipes.add(mplsPipe);
             }
             // ETHERNET
@@ -331,7 +320,6 @@ public class TranslationPCE {
                         .reservedPssResources(new HashSet<>())
                         .pipeType(pceAssistant.decideEthPipeType(aModel, zModel))
                         .build();
-                log.info("10-2: Ethernet Pipe " + ethPipe.toString());
                 reservedEthPipes.add(ethPipe);
             }
         }
@@ -359,6 +347,15 @@ public class TranslationPCE {
         return availBwMap;
     }
 
+    /**
+     * Given a set of reserved junctions and reserved MPLS / ETHERNET pipes, extract the reserved bandwidth objects
+     * which fall within the requested schedule period and return them all together as a list
+     * @param reservedJunctions - Set of reserved ethernet junctions
+     * @param reservedMplsPipes - Set of reserved MPLS pipes
+     * @param reservedEthPipes - Set of reserved Ethernet pipes
+     * @param sched - The requested schedule (start and end date)
+     * @return List of all reserved bandwidth contained within reserved pipes and the reserved repository.
+     */
     public List<ReservedBandwidthE> createReservedBandwidthList(Set<ReservedVlanJunctionE> reservedJunctions,
                                                                  Set<ReservedMplsPipeE> reservedMplsPipes,
                                                                  Set<ReservedEthPipeE> reservedEthPipes,
@@ -372,6 +369,14 @@ public class TranslationPCE {
         return rsvBandwidths;
     }
 
+    /**
+     * Given a set of reserved junctions and reserved ethernet pipes, retrieve all reserved VLAN objects
+     * within the specified schedule period.
+     * @param reservedJunctions - Set of reserved junctions
+     * @param reservedEthPipes - Set of reserved ethernet pipes
+     * @param sched - Requested schedule
+     * @return
+     */
     public List<ReservedVlanE> createReservedVlanList(Set<ReservedVlanJunctionE> reservedJunctions,
                                                        Set<ReservedEthPipeE> reservedEthPipes,
                                                        ScheduleSpecificationE sched){
@@ -379,6 +384,7 @@ public class TranslationPCE {
         // Retrieve all VLAN IDs reserved so far from junctions & pipes
         List<ReservedVlanE> rsvVlans = retrieveReservedVlans(reservedJunctions);
         rsvVlans.addAll(retrieveReservedVlansFromEthPipes(reservedEthPipes));
+        rsvVlans.addAll(pruningService.getReservedVlans(sched.getNotBefore(), sched.getNotAfter()));
 
         return rsvVlans;
     }
@@ -809,7 +815,6 @@ public class TranslationPCE {
         // Find all valid IDs for the AZ path
         // Find all valid IDs for the ETHERNET segment
         Set<Integer> azValidIds = getValidIdsForPath(azERO, requestedVlanIds, urnMap, rsvVlanMap);
-        log.info("Valid AZ VLAN IDs: " + azValidIds.toString());
         // If that segment has no valid IDs return an empty set
         if(azValidIds.isEmpty()){
             return overlappingVlanIds;
@@ -818,7 +823,6 @@ public class TranslationPCE {
 
         // Find all valid IDs for the ZA segments
         Set<Integer> zaValidIds = getValidIdsForPath(zaERO, requestedVlanIds, urnMap, rsvVlanMap);
-        log.info("Valid ZA VLAN IDs: " + azValidIds.toString());
         // If that segment has no valid IDs return an empty set
         if(zaValidIds.isEmpty()){
             return overlappingVlanIds;
@@ -829,6 +833,7 @@ public class TranslationPCE {
         // Find the intersection between the AZ and ZA valid VLAN IDs
         overlappingVlanIds = pruningService.addToOverlap(overlappingVlanIds, azValidIds);
         overlappingVlanIds = pruningService.addToOverlap(overlappingVlanIds, zaValidIds);
+        log.info("Available VLAN IDs: " + overlappingVlanIds.toString());
         return overlappingVlanIds;
     }
 
