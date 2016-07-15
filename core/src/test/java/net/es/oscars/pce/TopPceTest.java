@@ -1,7 +1,12 @@
 package net.es.oscars.pce;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.CoreUnitTestConfiguration;
+import net.es.oscars.dto.spec.VlanFlow;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.topo.TopologyBuilder;
@@ -13,6 +18,7 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.Entity;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -1284,6 +1290,65 @@ public class TopPceTest
     {
         log.info("Initializing test: 'multiFixtureTest'.");
 
+        // Build Topology
+        topologyBuilder.buildTopo7MultiFix();
+
+        // Set requested parameters
+        Integer azBw = 25;
+        Integer zaBw = 25;
+        PalindromicType palindrome = PalindromicType.PALINDROME;
+        String vlan = "any";
+        String src = "nodeK";
+        String dst = "nodeL";
+        List<String> aPorts = Arrays.asList("portA", "portB", "portC");
+        List<String> zPorts = Arrays.asList("portX", "portY", "portZ");
+
+        // Set Expected Parameters - Per Expected Pipe
+        List<String> potentialAzEROsPipe1 = Collections.singletonList("nodeK-nodeK:1-nodeL:1-nodeL");
+        List<String> potentialZaEROsPipe1 = Collections.singletonList("nodeL-nodeL:1-nodeK:1-nodeK");
+        List<Integer> expectedAZInBandwidthsPipe1 = Arrays.asList(azBw, azBw);
+        List<Integer> expectedAZEgBandwidthsPipe1 = Arrays.asList(azBw, azBw);
+        List<Integer> expectedZAInBandwidthsPipe1 = Arrays.asList(zaBw, zaBw);
+        List<Integer> expectedZAEgBandwidthsPipe1 = Arrays.asList(zaBw, zaBw);
+
+        // Containers for requested junctions
+        List<Junction> reqJunctions = new ArrayList<>();
+        List<Pipe> reqPipes = new ArrayList<>();
+
+        // Containers for expected junctions/pipes
+        List<Junction> expectedJunctions = new ArrayList<>();
+        List<Pipe> expectedEthPipes = new ArrayList<>();
+        List<Pipe> expectedMplsPipes = new ArrayList<>();
+
+        // Set up Requested Junctions
+
+        // Set up Requested Pipes
+        Pipe pipeKL = testBuilder.makeRequestedPipe(src, dst, aPorts, zPorts, azBw, zaBw, vlan, palindrome);
+        reqPipes.add(pipeKL);
+
+        // Set up Expected Single Junctions
+
+        // Set up Expected Ethernet Pipes
+        Pipe expectedEthPipe1 = testBuilder.makeExpectedPipe(src, dst, aPorts, zPorts, azBw, zaBw, vlan, palindrome,
+                potentialAzEROsPipe1, potentialZaEROsPipe1,
+                expectedAZInBandwidthsPipe1, expectedAZEgBandwidthsPipe1,
+                expectedZAInBandwidthsPipe1, expectedZAEgBandwidthsPipe1);
+        expectedEthPipes.add(expectedEthPipe1);
+
+        // Set up Expected MPLS Pipes
+
+        // Run the test
+        log.info("Beginning test: 'multiFixtureTest'.");
+
+        pceTest(reqJunctions, reqPipes, expectedJunctions, expectedEthPipes, expectedMplsPipes);
+
+        log.info("test 'multiFixtureTest' passed.");
+    }
+
+
+    public void pceTest(List<Junction> junctions, List<Pipe> pipes, List<Junction> expectedJunctions,
+                        List<Pipe> expectedEthPipes, List<Pipe> expectedMplsPipes){
+
         RequestedBlueprintE requestedBlueprint;
         Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
         ScheduleSpecificationE requestedSched;
@@ -1291,20 +1356,28 @@ public class TopPceTest
         Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
         Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
 
-        List<String> srcPorts = Arrays.asList("portA", "portB", "portC");
-        List<String> dstPorts = Arrays.asList("portX", "portY", "portZ");
-        String srcDevice = "nodeK";
-        String dstDevice = "nodeL";
-        Integer azBW = 25;
-        Integer zaBW = 25;
-        PalindromicType palindrome = PalindromicType.PALINDROME;
-        String vlan = "any";
-
-        topologyBuilder.buildTopo7MultiFix();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, vlan);
 
-        log.info("Beginning test: 'multiFixtureTest'.");
+        Set<RequestedVlanJunctionE> reqJunctions = junctions
+                .stream()
+                .map(j -> testBuilder.convertToRequestedJunction(j))
+                .collect(Collectors.toSet());
+
+        Set<RequestedVlanPipeE> reqPipes = pipes
+                .stream()
+                .map(p -> testBuilder.convertToRequestedPipe(p))
+                .collect(Collectors.toSet());
+
+
+        RequestedVlanFlowE flow = RequestedVlanFlowE.builder()
+                .junctions(reqJunctions)
+                .pipes(reqPipes)
+                .build();
+
+        requestedBlueprint = RequestedBlueprintE.builder()
+                .layer3Flow(new Layer3FlowE())
+                .vlanFlow(flow)
+                .build();
 
         try
         {
@@ -1320,61 +1393,122 @@ public class TopPceTest
         Set<ReservedMplsPipeE> allResMplsPipes = reservedFlow.getMplsPipes();
         Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
 
-        assert(allResJunctions.size() == 0);
-        assert(allResEthPipes.size() == 1);
-        assert(allResMplsPipes.size() == 0);
+        assert(allResJunctions.size() == expectedJunctions.size());
+        assert(allResEthPipes.size() == expectedEthPipes.size());
+        assert(allResMplsPipes.size() == expectedMplsPipes.size());
+
+        // Junctions
+        expectedJunctions.stream().forEach(expectedJunction -> {
+                boolean match = false;
+                for(ReservedVlanJunctionE resJunction : allResJunctions) {
+                    if(resJunction.getDeviceUrn().getUrn().equals(expectedJunction.getUrn())) {
+                        matchJunction(resJunction, expectedJunction);
+                        match = true;
+                    }
+                }
+                assert(match);
+            }
+        );
 
         // Ethernet Pipes
-        for(ReservedEthPipeE ethPipe : allResEthPipes)
-        {
-            ReservedVlanJunctionE aJunc = ethPipe.getAJunction();
-            ReservedVlanJunctionE zJunc = ethPipe.getZJunction();
-            Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
-            Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
-            List<String> azERO = ethPipe.getAzERO();
-            List<String> zaERO = ethPipe.getZaERO();
-            String actualAzERO = aJunc.getDeviceUrn().getUrn() + "-";
-            String actualZaERO = zJunc.getDeviceUrn().getUrn() + "-";
+        expectedEthPipes.stream().forEach(expectPipe -> matchEthPipe(allResEthPipes, expectPipe));
 
-            for(String x : azERO)
-                actualAzERO = actualAzERO + x + "-";
+        // MPLS Pipes
+        expectedMplsPipes.stream().forEach(expectPipe -> matchMplsPipe(allResMplsPipes, expectPipe));
 
-            for(String x : zaERO)
-                actualZaERO = actualZaERO + x + "-";
+    }
 
-            actualAzERO = actualAzERO + zJunc.getDeviceUrn();
-            actualZaERO = actualZaERO + aJunc.getDeviceUrn();
-            String expectedAzERO = "nodeK-nodeK:1-nodeL:1-nodeL";
-            String expectedZaERO = "nodeL-nodeL:1-nodeK:1-nodeK";
+    public void matchEthPipe(Set<ReservedEthPipeE> resPipes, Pipe expectedPipe) {
+        for(ReservedEthPipeE p : resPipes){
+            ReservedVlanJunctionE aJunction = p.getAJunction();
+            ReservedVlanJunctionE zJunction = p.getZJunction();
 
-            assert (aJunc.getDeviceUrn().getUrn().equals("nodeK"));
-            assert (zJunc.getDeviceUrn().getUrn().equals("nodeL"));
-            assert (aFixes.size() == 3);
-            assert (zFixes.size() == 3);
+            List<String> azERO = p.getAzERO();
+            List<String> zaERO = p.getZaERO();
 
+            Set<ReservedBandwidthE> reservedBandwidths = p.getReservedBandwidths();
 
-            assert(aFixes
-                    .stream()
-                    .filter(f -> f.getIfceUrn().getUrn().equals("portA")
-                            || f.getIfceUrn().getUrn().equals("portB")
-                            || f.getIfceUrn().getUrn().equals("portC"))
-                    .filter(f -> f.getReservedBandwidth().getInBandwidth().equals(azBW))
-                    .filter(f -> f.getReservedBandwidth().getEgBandwidth().equals(zaBW))
-                    .count() == 3);
+            if(aJunction.getDeviceUrn().getUrn().equals(expectedPipe.aJunction.getUrn())
+                    && zJunction.getDeviceUrn().getUrn().equals(expectedPipe.zJunction.getUrn())){
 
-            assert(zFixes
-                    .stream()
-                    .filter(f -> f.getIfceUrn().getUrn().equals("portX")
-                            || f.getIfceUrn().getUrn().equals("portY")
-                            || f.getIfceUrn().getUrn().equals("portZ"))
-                    .filter(f -> f.getReservedBandwidth().getInBandwidth().equals(zaBW))
-                    .filter(f -> f.getReservedBandwidth().getEgBandwidth().equals(azBW))
-                    .count() == 3);
-
-            assert (actualAzERO.equals(expectedAzERO));
-            assert (actualZaERO.equals(expectedZaERO));
+                matchPipeFields(aJunction, zJunction, azERO, zaERO, reservedBandwidths, expectedPipe);
+            }
         }
+    }
 
-        log.info("test 'multiFixtureTest' passed.");
+    public void matchMplsPipe(Set<ReservedMplsPipeE> resPipes, Pipe expectedPipe) {
+        for(ReservedMplsPipeE p : resPipes){
+            ReservedVlanJunctionE aJunction = p.getAJunction();
+            ReservedVlanJunctionE zJunction = p.getZJunction();
+
+            List<String> azERO = p.getAzERO();
+            List<String> zaERO = p.getZaERO();
+
+            Set<ReservedBandwidthE> reservedBandwidths = p.getReservedBandwidths();
+
+            if(aJunction.getDeviceUrn().getUrn().equals(expectedPipe.aJunction.getUrn())
+                    && zJunction.getDeviceUrn().getUrn().equals(expectedPipe.zJunction.getUrn())){
+
+                matchPipeFields(aJunction, zJunction, azERO, zaERO, reservedBandwidths, expectedPipe);
+            }
+        }
+    }
+
+    private void matchPipeFields(ReservedVlanJunctionE aJunc, ReservedVlanJunctionE zJunc, List<String> azERO,
+                                      List<String> zaERO, Set<ReservedBandwidthE> reservedBandwidths, Pipe expectedPipe){
+        Junction expectedAJunction = expectedPipe.getAJunction();
+        Junction expectedZJunction = expectedPipe.getZJunction();
+
+        String actualAzERO = aJunc.getDeviceUrn().getUrn() + "-";
+        String actualZaERO = zJunc.getDeviceUrn().getUrn() + "-";
+
+        for(String x : azERO)
+            actualAzERO = actualAzERO + x + "-";
+
+        for(String x : zaERO)
+            actualZaERO = actualZaERO + x + "-";
+
+        actualAzERO = actualAzERO + zJunc.getDeviceUrn();
+        actualZaERO = actualZaERO + aJunc.getDeviceUrn();
+
+
+        matchJunction(aJunc, expectedAJunction);
+        matchJunction(zJunc, expectedZJunction);
+        expectedPipe.getPotentialAZEROs().contains(actualAzERO);
+        expectedPipe.getPotentialZAEROs().contains(actualZaERO);
+        matchBandwidths(reservedBandwidths, expectedPipe);
+    }
+
+    public void matchJunction(ReservedVlanJunctionE resJunction, Junction expectedJunction){
+        assert(resJunction.getDeviceUrn().getUrn().equals(expectedJunction.getUrn()));
+        matchFixtures(resJunction.getFixtures(), expectedJunction);
+    }
+
+    private void matchBandwidths(Set<ReservedBandwidthE> rsvBws, Pipe expectedPipe){
+        log.info(rsvBws.toString());
+        log.info(expectedPipe.toString());
+        assert(rsvBws
+                .stream()
+                .filter(bw -> expectedPipe.getPotentialAZEROs().stream().anyMatch(s -> s.contains(bw.getUrn().getUrn())))
+                .filter(bw -> expectedPipe.getExpectedAZInBandwidths().contains(bw.getInBandwidth()))
+                .filter(bw -> expectedPipe.getExpectedAZEgBandwidths().contains(bw.getEgBandwidth()))
+                .count() == expectedPipe.getExpectedAZInBandwidths().size());
+
+        assert(rsvBws
+                .stream()
+                .filter(bw -> expectedPipe.getPotentialZAEROs().stream().anyMatch(s -> s.contains(bw.getUrn().getUrn())))
+                .filter(bw -> expectedPipe.getExpectedZAInBandwidths().contains(bw.getInBandwidth()))
+                .filter(bw -> expectedPipe.getExpectedZAEgBandwidths().contains(bw.getEgBandwidth()))
+                .count() == expectedPipe.getExpectedZAInBandwidths().size());
+    }
+
+    private void matchFixtures(Set<ReservedVlanFixtureE> fixtures, Junction j){
+        assert(fixtures
+                .stream()
+                .filter(fix -> j.getIngressBWs().contains(fix.getReservedBandwidth().getInBandwidth()))
+                .filter(fix -> j.getEgressBWs().contains(fix.getReservedBandwidth().getEgBandwidth()))
+                .map(fix -> fix.getIfceUrn().getUrn())
+                .filter(urn -> j.getFixtures().contains(urn))
+                .count() == j.getFixtures().size());
     }
 }
