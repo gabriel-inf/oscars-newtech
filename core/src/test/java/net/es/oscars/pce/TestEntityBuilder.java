@@ -1,14 +1,9 @@
 package net.es.oscars.pce;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.pss.EthFixtureType;
 import net.es.oscars.dto.pss.EthJunctionType;
 import net.es.oscars.dto.pss.EthPipeType;
-import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.topo.beans.TopoEdge;
 import net.es.oscars.topo.beans.TopoVertex;
@@ -21,8 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -122,12 +115,8 @@ public class TestEntityBuilder {
         log.info("Z-A Mbps: " + zaMbps);
         log.info("VLAN Expression: " + vlanExp);
 
-
-        List<Integer> azMbpsList = fixtureNames.stream().map(s -> azMbps).collect(Collectors.toList());
-        List<Integer> zaMbpsList = fixtureNames.stream().map(s -> zaMbps).collect(Collectors.toList());
-
         Set<RequestedVlanJunctionE> junctions = new HashSet<>();
-        RequestedVlanJunctionE junction = buildRequestedJunction(deviceName, fixtureNames, azMbpsList, zaMbpsList, vlanExp, true);
+        RequestedVlanJunctionE junction = buildRequestedJunction(deviceName, fixtureNames, azMbps, zaMbps, vlanExp, true);
         junctions.add(junction);
 
 
@@ -140,23 +129,8 @@ public class TestEntityBuilder {
         log.info("Building RequestedBlueprintE");
 
 
-        List<Integer> azMbpsList = new ArrayList<>();
-        azMbpsList.add(azMbps);
-
-        List<Integer> zaMbpsList = new ArrayList<>();
-        zaMbpsList.add(zaMbps);
-
-        List<String> aPorts = new ArrayList<>();
-        aPorts.add(aPort);
-
-        List<String> zPorts = new ArrayList<>();
-        zPorts.add(zPort);
-
-        RequestedVlanJunctionE aJunction = buildRequestedJunction(aDevice, aPorts, azMbpsList, zaMbpsList, vlanExp, true);
-        RequestedVlanJunctionE zJunction = buildRequestedJunction(zDevice, zPorts, azMbpsList, zaMbpsList, vlanExp, false);
-
         Set<RequestedVlanPipeE> pipes = new HashSet<>();
-        RequestedVlanPipeE pipe = buildRequestedPipe(aJunction, zJunction, azMbps, zaMbps, palindromic);
+        RequestedVlanPipeE pipe = buildRequestedPipe(aPort, aDevice, zPort, zDevice, azMbps, zaMbps, palindromic, vlanExp);
         pipes.add(pipe);
 
         return buildRequestedBlueprint(buildRequestedFlow(new HashSet<>(), pipes), Layer3FlowE.builder().build());
@@ -168,19 +142,58 @@ public class TestEntityBuilder {
         log.info("Building RequestedBlueprintE");
 
 
-        List<Integer> azMbpsList = aPorts.stream().map(s -> azMbps).collect(Collectors.toList());
-        List<Integer> zaMbpsList = zPorts.stream().map(s -> zaMbps).collect(Collectors.toList());
-
-        RequestedVlanJunctionE aJunction = buildRequestedJunction(aDevice, aPorts, azMbpsList, zaMbpsList, vlanExp, true);
-        RequestedVlanJunctionE zJunction = buildRequestedJunction(zDevice, zPorts, azMbpsList, zaMbpsList, vlanExp, false);
         Set<RequestedVlanPipeE> pipes = new HashSet<>();
-        RequestedVlanPipeE pipe = buildRequestedPipe(aJunction, zJunction, azMbps, zaMbps, palindromic);
+        RequestedVlanPipeE pipe = buildRequestedPipe(aPorts, aDevice, zPorts, zDevice, azMbps, zaMbps, palindromic, vlanExp);
         pipes.add(pipe);
 
         return buildRequestedBlueprint(buildRequestedFlow(new HashSet<>(), pipes), Layer3FlowE.builder().build());
 
     }
 
+    public RequestedBlueprintE buildRequest(List<String> aPorts, List<String> aDevices, List<String> zPorts,
+                                            List<String> zDevices, List<Integer> azMbpsList, List<Integer> zaMbpsList,
+                                            List<PalindromicType> palindromicList, List<String> vlanExps){
+        Set<RequestedVlanPipeE> pipes = new HashSet<>();
+        for(int i = 0; i < aPorts.size(); i++){
+            RequestedVlanPipeE pipe = buildRequestedPipe(
+                    aPorts.get(i),
+                    aDevices.get(i),
+                    zPorts.get(i),
+                    zDevices.get(i),
+                    azMbpsList.get(i),
+                    zaMbpsList.get(i),
+                    palindromicList.get(i),
+                    vlanExps.get(i));
+            pipes.add(pipe);
+        }
+
+        return buildRequestedBlueprint(buildRequestedFlow(new HashSet<>(), pipes), Layer3FlowE.builder().build());
+    }
+
+    public RequestedBlueprintE buildRequest(List<String> deviceNames, List<List<String>> portNames,
+                                            List<Integer> azMbpsList, List<Integer> zaMbpsList, List<String> vlanExps){
+        Set<RequestedVlanJunctionE> junctions = new HashSet<>();
+        for(int i = 0; i < deviceNames.size(); i++)
+        {
+            boolean aJunction;
+
+            if(i == 0)
+                aJunction = true;
+            else
+                aJunction = false;
+
+            RequestedVlanJunctionE junction = buildRequestedJunction(
+                    deviceNames.get(i),
+                    portNames.get(i),
+                    azMbpsList.get(i),
+                    zaMbpsList.get(i),
+                    vlanExps.get(i),
+                    aJunction);
+            junctions.add(junction);
+        }
+
+        return buildRequestedBlueprint(buildRequestedFlow(junctions, new HashSet<>()), Layer3FlowE.builder().build());
+    }
 
     public RequestedBlueprintE buildRequestedBlueprint(RequestedVlanFlowE vlanFlow, Layer3FlowE l3Flow){
         return RequestedBlueprintE.builder()
@@ -339,12 +352,35 @@ public class TestEntityBuilder {
                 .build();
     }
 
-    public RequestedVlanPipeE buildRequestedPipe(RequestedVlanJunctionE aJunction, RequestedVlanJunctionE zJunction,
-                                                 Integer azMbps, Integer zaMbps, PalindromicType palindromic){
+
+    public RequestedVlanPipeE buildRequestedPipe(String aPort, String aDevice, String zPort, String zDevice,
+                                                 Integer azMbps, Integer zaMbps, PalindromicType palindromic, String vlanExp){
+
+        List<String> aFixNames = new ArrayList<>();
+        aFixNames.add(aPort);
+
+        List<String> zFixNames = new ArrayList<>();
+        zFixNames.add(zPort);
 
         return RequestedVlanPipeE.builder()
-                .aJunction(aJunction)
-                .zJunction(zJunction)
+                .aJunction(buildRequestedJunction(aDevice, aFixNames, azMbps, zaMbps, vlanExp, true))
+                .zJunction(buildRequestedJunction(zDevice, zFixNames, azMbps, zaMbps, vlanExp, false))
+                .pipeType(EthPipeType.REQUESTED)
+                .azERO(new ArrayList<>())
+                .zaERO(new ArrayList<>())
+                .azMbps(azMbps)
+                .zaMbps(zaMbps)
+                .eroPalindromic(palindromic)
+                .build();
+    }
+
+    public RequestedVlanPipeE buildRequestedPipe(List<String> aPorts, String aDevice, List<String> zPorts, String zDevice,
+                                                 Integer azMbps, Integer zaMbps, PalindromicType palindromic, String vlanExp){
+
+
+        return RequestedVlanPipeE.builder()
+                .aJunction(buildRequestedJunction(aDevice, aPorts, azMbps, zaMbps, vlanExp, true))
+                .zJunction(buildRequestedJunction(zDevice, zPorts, azMbps, zaMbps, vlanExp, false))
                 .pipeType(EthPipeType.REQUESTED)
                 .azERO(new ArrayList<>())
                 .zaERO(new ArrayList<>())
@@ -355,23 +391,21 @@ public class TestEntityBuilder {
     }
 
     public RequestedVlanJunctionE buildRequestedJunction(String deviceName, List<String> fixtureNames,
-                                                         List<Integer> azMbps, List<Integer> zaMbps, String vlanExp, boolean startJunc){
+                                                         Integer azMbps, Integer zaMbps, String vlanExp, boolean startJunc){
         log.info("Building requested junction");
 
-        log.info(deviceName);
         Optional<UrnE> optUrn = urnRepo.findByUrn(deviceName);
 
         Set<RequestedVlanFixtureE> fixtures = new HashSet<>();
 
         assert(fixtureNames.size() >= 1);
 
-        for(Integer i =0; i < fixtureNames.size(); i++){
-            String fixName = fixtureNames.get(i);
+        for(String fixName : fixtureNames){
             RequestedVlanFixtureE fix;
             if(startJunc)
-                fix = buildRequestedFixture(fixName, azMbps.get(i), zaMbps.get(i), vlanExp);
+                fix = buildRequestedFixture(fixName, azMbps, zaMbps, vlanExp);
             else
-                fix = buildRequestedFixture(fixName, zaMbps.get(i), azMbps.get(i), vlanExp);
+                fix = buildRequestedFixture(fixName, zaMbps, azMbps, vlanExp);
             fixtures.add(fix);
         }
 
@@ -495,71 +529,4 @@ public class TestEntityBuilder {
         }
         return null;
     }
-
-
-    public RequestedVlanPipeE convertToRequestedPipe(Pipe p){
-        return buildRequestedPipe(convertToRequestedJunction(p.aJunction),
-                convertToRequestedJunction(p.zJunction), p.azMbps, p.zaMbps, p.palindromic);
-    }
-
-    public RequestedVlanJunctionE convertToRequestedJunction(Junction j){
-        return buildRequestedJunction(j.urn, j.fixtures, j.ingressBWs, j.egressBWs, j.vlanExpression, j.firstJunction);
-    }
-
-    public Junction makeJunction(String name, List<String> fixtures, Integer inBW, Integer egBW, String vlanExpression,
-                                 boolean firstJunction){
-
-        List<Integer> ingressBWs = fixtures.stream().map(p -> inBW).collect(Collectors.toList());
-        List<Integer> egressBWs = fixtures.stream().map(p -> egBW).collect(Collectors.toList());
-
-        return Junction.builder()
-                .urn(name)
-                .fixtures(fixtures)
-                .ingressBWs(ingressBWs)
-                .egressBWs(egressBWs)
-                .vlanExpression(vlanExpression)
-                .firstJunction(firstJunction)
-                .build();
-    }
-
-    public Pipe makeRequestedPipe(String src, String dst, List<String> aPorts, List<String> zPorts, Integer azBw,
-                                  Integer zaBw, String vlan, PalindromicType palindrome){
-        Junction aJunction = makeJunction(src, aPorts, azBw, zaBw, vlan, true);
-        Junction zJunction = makeJunction(dst, zPorts, zaBw, azBw, vlan, false);
-
-        Pipe pipe = Pipe.builder()
-                .aJunction(aJunction)
-                .zJunction(zJunction)
-                .azMbps(azBw)
-                .zaMbps(zaBw)
-                .palindromic(palindrome)
-                .build();
-
-        return pipe;
-    }
-
-    public Pipe makeExpectedPipe(String a, String z, List<String> aPorts, List<String> zPorts, Integer azBw, Integer zaBw,
-                                 String vlan, PalindromicType palindrome, List<String> potentialAzEROs,
-                                 List<String> potentialZaEROs, List<Integer> expectedAZInBandwidths,
-                                 List<Integer> expectedAZEgBandwidths, List<Integer> expectedZAInBandwidths,
-                                 List<Integer> expectedZAEgBandwidths){
-
-        Junction aJunction = makeJunction(a, aPorts, azBw, zaBw, vlan, true);
-        Junction zJunction = makeJunction(z, zPorts, zaBw, azBw, vlan, false);
-
-        Pipe expectedPipe = Pipe.builder()
-                .aJunction(aJunction)
-                .zJunction(zJunction)
-                .palindromic(palindrome)
-                .potentialAZEROs(potentialAzEROs)
-                .potentialZAEROs(potentialZaEROs)
-                .expectedAZInBandwidths(expectedAZInBandwidths)
-                .expectedAZEgBandwidths(expectedAZEgBandwidths)
-                .expectedZAInBandwidths(expectedZAInBandwidths)
-                .expectedZAEgBandwidths(expectedZAEgBandwidths)
-                .build();
-
-        return expectedPipe;
-    }
-
 }
