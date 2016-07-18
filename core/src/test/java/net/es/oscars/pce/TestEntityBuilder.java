@@ -358,6 +358,7 @@ public class TestEntityBuilder {
                                                          List<Integer> azMbps, List<Integer> zaMbps, String vlanExp, boolean startJunc){
         log.info("Building requested junction");
 
+        log.info(deviceName);
         Optional<UrnE> optUrn = urnRepo.findByUrn(deviceName);
 
         Set<RequestedVlanFixtureE> fixtures = new HashSet<>();
