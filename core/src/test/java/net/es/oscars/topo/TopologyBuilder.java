@@ -4,8 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.pce.TestEntityBuilder;
 import net.es.oscars.topo.beans.TopoEdge;
 import net.es.oscars.topo.beans.TopoVertex;
-import net.es.oscars.topo.ent.UrnAdjcyE;
-import net.es.oscars.topo.ent.UrnE;
 import net.es.oscars.topo.enums.Layer;
 import net.es.oscars.topo.enums.VertexType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,15 +24,10 @@ public class TopologyBuilder
     @Autowired
     private TestEntityBuilder testBuilder;
 
-    List<UrnE> urnList;
-    List<UrnAdjcyE> adjcyList;
 
     public void buildTopo1()
     {
         log.info("Building Test Topology 1");
-
-        urnList = new ArrayList<>();
-        adjcyList = new ArrayList<>();
 
         TopoVertex nodeK = new TopoVertex("nodeK", VertexType.SWITCH);
         TopoVertex portA = new TopoVertex("portA", VertexType.PORT);
@@ -710,9 +703,6 @@ public class TopologyBuilder
     public void buildTopo6()
     {
         log.info("Building Test Topology 6");
-
-        urnList = new ArrayList<>();
-        adjcyList = new ArrayList<>();
 
         TopoVertex nodeP = new TopoVertex("nodeP", VertexType.ROUTER);
         TopoVertex portA = new TopoVertex("portA", VertexType.PORT);
@@ -1531,7 +1521,7 @@ public class TopologyBuilder
 
                 TopoEdge edgeNet;
                 Layer linkLayer = Layer.ETHERNET;
-                Long linkMetric = 1L;
+                Long linkMetric;
                 if(oneVertex.getUrn().equals("nodeK:1") && anotherVertex.getUrn().equals("nodeL:1"))
                     linkMetric = 50L;
                 else if(oneVertex.getUrn().equals("nodeK:2") && anotherVertex.getUrn().equals("nodeM:1"))

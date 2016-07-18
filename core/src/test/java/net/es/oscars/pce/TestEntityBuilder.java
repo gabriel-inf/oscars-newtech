@@ -170,6 +170,12 @@ public class TestEntityBuilder {
         return buildRequestedBlueprint(buildRequestedFlow(new HashSet<>(), pipes), Layer3FlowE.builder().build());
     }
 
+    // Added for multi-pipe request
+    public RequestedBlueprintE buildRequest(Set<RequestedVlanPipeE> requestedPipes)
+    {
+        return buildRequestedBlueprint(buildRequestedFlow(new HashSet<>(), requestedPipes), Layer3FlowE.builder().build());
+    }
+
     public RequestedBlueprintE buildRequest(List<String> deviceNames, List<List<String>> portNames,
                                             List<Integer> azMbpsList, List<Integer> zaMbpsList, List<String> vlanExps){
         Set<RequestedVlanJunctionE> junctions = new HashSet<>();
