@@ -121,6 +121,10 @@ public class TopPceTestMultipoint
             actualAzERO = actualAzERO + zJunc.getDeviceUrn();
             actualZaERO = actualZaERO + aJunc.getDeviceUrn();
 
+            // Check that all reserved vlans in the pipe use the same VLAN ID
+            Set<ReservedVlanE> rsvVlans = ethPipe.getReservedVlans();
+            assert(rsvVlans.stream().map(ReservedVlanE::getVlan).distinct().count()==1);
+
             assert (aJunc.getDeviceUrn().getUrn().equals("nodeP") || aJunc.getDeviceUrn().getUrn().equals("nodeL") || aJunc.getDeviceUrn().getUrn().equals("nodeN"));
             assert (zJunc.getDeviceUrn().getUrn().equals("nodeL") || zJunc.getDeviceUrn().getUrn().equals("nodeM"));
 
@@ -265,6 +269,10 @@ public class TopPceTestMultipoint
 
             actualAzERO = actualAzERO + zJunc.getDeviceUrn();
             actualZaERO = actualZaERO + aJunc.getDeviceUrn();
+
+            // Check that all reserved vlans in the pipe use the same VLAN ID
+            Set<ReservedVlanE> rsvVlans = ethPipe.getReservedVlans();
+            assert(rsvVlans.stream().map(ReservedVlanE::getVlan).distinct().count()==1);
 
             assert (aJunc.getDeviceUrn().getUrn().equals("nodeK") || aJunc.getDeviceUrn().getUrn().equals("nodeL") || aJunc.getDeviceUrn().getUrn().equals("nodeM"));
             assert (zJunc.getDeviceUrn().getUrn().equals("nodeL") || zJunc.getDeviceUrn().getUrn().equals("nodeM") || zJunc.getDeviceUrn().getUrn().equals("nodeP") || zJunc.getDeviceUrn().getUrn().equals("nodeR"));
@@ -441,6 +449,9 @@ public class TopPceTestMultipoint
         assert(allResEthPipes.size() == 5);
         assert(allResMplsPipes.size() == 0);
 
+        Integer vlanChosenPipePL1 = null;
+        Integer vlanChosenPipePL2 = null;
+
         // Ethernet Pipes
         for(ReservedEthPipeE ethPipe : allResEthPipes)
         {
@@ -452,6 +463,11 @@ public class TopPceTestMultipoint
             List<String> zaERO = ethPipe.getZaERO();
             String actualAzERO = aJunc.getDeviceUrn().getUrn() + "-";
             String actualZaERO = zJunc.getDeviceUrn().getUrn() + "-";
+
+
+            // Check that all reserved vlans in the pipe use the same VLAN ID
+            Set<ReservedVlanE> rsvVlans = ethPipe.getReservedVlans();
+            assert(rsvVlans.stream().map(ReservedVlanE::getVlan).distinct().count()==1);
 
             for(String x : azERO)
                 actualAzERO = actualAzERO + x + "-";
@@ -473,6 +489,17 @@ public class TopPceTestMultipoint
 
                 String expectedAzERO = "nodeP-nodeP:1-nodeL:1-nodeL";
                 String expectedZaERO = "nodeL-nodeL:1-nodeP:1-nodeP";
+
+                // Confirm that there two overlapping pipes do not share a VLAN ID
+                if(vlanChosenPipePL1 == null){
+                    vlanChosenPipePL1 = rsvVlans.iterator().next().getVlan();
+                }
+                else if(vlanChosenPipePL2 == null){
+                    vlanChosenPipePL2 = rsvVlans.iterator().next().getVlan();
+                    assert(!vlanChosenPipePL1.equals(vlanChosenPipePL2));
+                    log.info("VLAN ID For Pipe PL 1: " + vlanChosenPipePL1);
+                    log.info("VLAN ID For Pipe PL 2: " + vlanChosenPipePL2);
+                }
 
                 assert (zJunc.getDeviceUrn().getUrn().equals("nodeL"));
                 assert (theFix.getIfceUrn().getUrn().equals("portA"));
@@ -523,7 +550,7 @@ public class TopPceTestMultipoint
                 String expectedAzERO = "nodeN-nodeN:2-nodeM:2-nodeM";
                 String expectedZaERO = "nodeM-nodeM:2-nodeN:2-nodeN";
 
-                assert (zJunc.getDeviceUrn().getUrn().equals("nodeN"));
+                assert (zJunc.getDeviceUrn().getUrn().equals("nodeM"));
                 assert (aFix.getIfceUrn().getUrn().equals("portB"));
                 assert (aFix.getReservedBandwidth().getInBandwidth().equals(bzBW + baBW));
                 assert (aFix.getReservedBandwidth().getEgBandwidth().equals(zbBW + abBW));
@@ -625,6 +652,10 @@ public class TopPceTestMultipoint
 
             actualAzERO = actualAzERO + zJunc.getDeviceUrn();
             actualZaERO = actualZaERO + aJunc.getDeviceUrn();
+
+            // Check that all reserved vlans in the pipe use the same VLAN ID
+            Set<ReservedVlanE> rsvVlans = ethPipe.getReservedVlans();
+            assert(rsvVlans.stream().map(ReservedVlanE::getVlan).distinct().count()==1);
 
             assert (aJunc.getDeviceUrn().getUrn().equals("nodeL") || aJunc.getDeviceUrn().getUrn().equals("nodeN"));
             assert (zJunc.getDeviceUrn().getUrn().equals("nodeM") || zJunc.getDeviceUrn().getUrn().equals("nodeN"));
