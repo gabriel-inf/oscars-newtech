@@ -18,8 +18,11 @@ import java.util.NoSuchElementException;
 @Slf4j
 @Controller
 public class AcctController {
-
     @Autowired
+    public AcctController (CustService custService) {
+        this.custService = custService;
+    }
+
     private CustService custService;
 
     private ModelMapper modelMapper = new ModelMapper();

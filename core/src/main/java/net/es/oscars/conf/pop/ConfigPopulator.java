@@ -17,12 +17,15 @@ import java.util.Optional;
 @Slf4j
 @Component
 public class ConfigPopulator {
-    @Autowired
     private StartupConfigContainer startup;
 
-    @Autowired
     private ConfigRepository repository;
 
+    @Autowired
+    public ConfigPopulator(ConfigRepository repository, StartupConfigContainer startup) {
+        this.repository = repository;
+        this.startup = startup;
+    }
 
     @PostConstruct
     public void initDefaults() throws JsonProcessingException {
@@ -50,7 +53,7 @@ public class ConfigPopulator {
                 log.debug("Startup config for OSCARS module " + name + " already in db.");
 
             } else {
-                log.info("Startup config for OSCARS module " + name+ " missing from DB; saving a new one from defaults.");
+                log.info("Startup config for OSCARS module " + name + " missing from DB; saving a new one from defaults.");
                 ObjectMapper mapper = new ObjectMapper();
                 String jsonString = mapper.writeValueAsString(cfg);
 

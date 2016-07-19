@@ -12,8 +12,11 @@ import java.util.Optional;
 @Service
 @Transactional
 public class CustService {
-
     @Autowired
+    public CustService(CustomerRepository custRepo) {
+        this.custRepo = custRepo;
+    }
+
     private CustomerRepository custRepo;
 
     public void delete(CustomerE customer) {

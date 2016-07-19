@@ -15,11 +15,13 @@ import java.util.List;
 @Slf4j
 @Component
 public class AuthnzPopulator {
-
     @Autowired
+    public AuthnzPopulator(UserRepository userRepo, AuthnzProperties properties) {
+        this.userRepo = userRepo;
+        this.properties = properties;
+    }
     private UserRepository userRepo;
 
-    @Autowired
     private AuthnzProperties properties;
 
     @PostConstruct
