@@ -213,7 +213,7 @@ public class TranslationPCE {
 
 
         // Confirm that there is at least one VLAN ID that can support every segment (given what has been reserved so far)
-        Set<Integer> validVlanIds = selectVlanIds(urnMap, reqPipe, azERO, zaERO, reservedVlans);
+        Set<Integer> validVlanIds = selectVlanIds(urnMap, reqPipe, azERO, zaERO, reservedVlans, reservedEthPipes);
         if(validVlanIds.isEmpty()){
             throw new PCEException("Insufficient VLANs to meet requested pipe " +
                     reqPipe.toString() + " given previous reservations in flow");
@@ -296,6 +296,7 @@ public class TranslationPCE {
             Set<ReservedBandwidthE> pipeBandwidths = pceAssistant.createReservedBandwidthForEROs(pipeEroMap.get("AZ"),
                     pipeEroMap.get("ZA"), urnMap, requestedBandwidthMap, sched);
 
+
             if(thisLayer.equals(Layer.MPLS)){
                 ReservedMplsPipeE mplsPipe = ReservedMplsPipeE.builder()
                         .aJunction(aJunction)
@@ -310,13 +311,16 @@ public class TranslationPCE {
             }
             // ETHERNET
             else{
+                Set<ReservedVlanE> pipeVlans = pceAssistant.createReservedVlanForEROs(pipeEroMap.get("AZ"),
+                        pipeEroMap.get("ZA"), urnMap, vlanId, sched);
+
                 ReservedEthPipeE ethPipe = ReservedEthPipeE.builder()
                         .aJunction(aJunction)
                         .zJunction(zJunction)
                         .azERO(azPipeEro)
                         .zaERO(zaPipeEro)
                         .reservedBandwidths(pipeBandwidths)
-                        .reservedVlan(vlanId)
+                        .reservedVlans(pipeVlans)
                         .reservedPssResources(new HashSet<>())
                         .pipeType(pceAssistant.decideEthPipeType(aModel, zModel))
                         .build();
@@ -798,7 +802,8 @@ public class TranslationPCE {
      * @return A set of all viable VLAN IDs to meet the demand (set may be empty)
      */
     private Set<Integer> selectVlanIds(Map<String, UrnE> urnMap, RequestedVlanPipeE reqPipe, List<TopoEdge> azERO,
-                                       List<TopoEdge> zaERO, List<ReservedVlanE> rsvVlans) {
+                                       List<TopoEdge> zaERO, List<ReservedVlanE> rsvVlans,
+                                       Set<ReservedEthPipeE> reservedEthPipes) {
 
 
         Set<Integer> overlappingVlanIds = new HashSet<>();
@@ -1040,16 +1045,19 @@ public class TranslationPCE {
 
 
     /**
-     * Retrieve all Reserved VLAN IDs from a set of reserved pipes (retrieved from the junctions).
+     * Retrieve all Reserved VLAN IDs from a set of reserved pipes.
      * @param reservedPipes - Set of reserved pipes
      * @return A list of all reserved VLAN IDs within the set of reserved pipes.
      */
     public List<ReservedVlanE> retrieveReservedVlansFromEthPipes(Set<ReservedEthPipeE> reservedPipes) {
+        List<ReservedVlanE> reservedVlans = new ArrayList<>();
         Set<ReservedVlanJunctionE> junctions = new HashSet<>();
         for(ReservedEthPipeE pipe : reservedPipes){
             junctions.add(pipe.getAJunction());
             junctions.add(pipe.getZJunction());
+            reservedVlans.addAll(pipe.getReservedVlans());
         }
-        return retrieveReservedVlans(junctions);
+        reservedVlans.addAll(retrieveReservedVlans(junctions));
+        return reservedVlans;
     }
 }

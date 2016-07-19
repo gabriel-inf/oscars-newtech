@@ -626,4 +626,38 @@ public class PCEAssistant {
         // Return the set
         return reservedBandwidths;
     }
+
+    /**
+     * Given two lists of EROS in the AZ and ZA direction, a map of URNs, a chosen vlan ID,
+     * and the requested schedule, return a combined set of reserved VLAN objects for the AZ and ZA paths
+     * @param az - The AZ vertices
+     * @param za - The ZA vertices
+     * @param urnMap - A mapping of URN string to URN object
+     * @param vlanId - A specified VLAN ID
+     * @param sched - THe requested schedule
+     * @return A set of all reserved VLAN objects for every port (across both paths)
+     */
+    public Set<ReservedVlanE> createReservedVlanForEROs(List<TopoVertex> az, List<TopoVertex> za,
+                                                        Map<String, UrnE> urnMap, Integer vlanId,
+                                                        ScheduleSpecificationE sched) {
+        // Combine the AZ and ZA EROs
+        Set<TopoVertex> combined = new HashSet<>(az);
+        combined.addAll(za);
+
+        // Store the reserved bandwidths
+        Set<ReservedVlanE> reservedVlans = new HashSet<>();
+
+        // For each vertex in the combined set, retrieve the requested Ingress/Egress bandwidth, and create a reserved
+        // bandwidth object
+        combined.stream().filter(vertex -> vertex.getVertexType().equals(VertexType.PORT)).forEach(vertex -> {
+            UrnE urn = urnMap.get(vertex.getUrn());
+
+            ReservedVlanE rsvVlan = createReservedVlan(urn, vlanId, sched);
+            reservedVlans.add(rsvVlan);
+
+        });
+
+        // Return the set
+        return reservedVlans;
+    }
 }
