@@ -213,7 +213,7 @@ public class TranslationPCE {
 
 
         // Confirm that there is at least one VLAN ID that can support every segment (given what has been reserved so far)
-        Set<Integer> validVlanIds = selectVlanIds(urnMap, reqPipe, azERO, zaERO, reservedVlans, reservedEthPipes);
+        Set<Integer> validVlanIds = selectVlanIds(urnMap, reqPipe, azERO, zaERO, reservedVlans);
         if(validVlanIds.isEmpty()){
             throw new PCEException("Insufficient VLANs to meet requested pipe " +
                     reqPipe.toString() + " given previous reservations in flow");
@@ -802,11 +802,11 @@ public class TranslationPCE {
      * @return A set of all viable VLAN IDs to meet the demand (set may be empty)
      */
     private Set<Integer> selectVlanIds(Map<String, UrnE> urnMap, RequestedVlanPipeE reqPipe, List<TopoEdge> azERO,
-                                       List<TopoEdge> zaERO, List<ReservedVlanE> rsvVlans,
-                                       Set<ReservedEthPipeE> reservedEthPipes) {
+                                       List<TopoEdge> zaERO, List<ReservedVlanE> rsvVlans) {
 
 
         Set<Integer> overlappingVlanIds = new HashSet<>();
+        log.info("Reserved VLANs: " + rsvVlans);
         // Map of URN to associated list of reserved VLANs
         Map<UrnE, List<ReservedVlanE>> rsvVlanMap = pruningService.buildReservedVlanMap(rsvVlans);
 
@@ -816,10 +816,12 @@ public class TranslationPCE {
         Set<Integer> requestedVlanIds = pruningService
                 .getIntegersFromRanges(pruningService.getIntRangesFromString(vlanExpression));
 
+        log.info("Reserved VLAN ID Map: " + rsvVlanMap);
         log.info("Requested VLAN IDs: " + requestedVlanIds.toString());
         // Find all valid IDs for the AZ path
         // Find all valid IDs for the ETHERNET segment
         Set<Integer> azValidIds = getValidIdsForPath(azERO, requestedVlanIds, urnMap, rsvVlanMap);
+        log.info("Valid AZ IDs: " + azValidIds);
         // If that segment has no valid IDs return an empty set
         if(azValidIds.isEmpty()){
             return overlappingVlanIds;
@@ -828,6 +830,7 @@ public class TranslationPCE {
 
         // Find all valid IDs for the ZA segments
         Set<Integer> zaValidIds = getValidIdsForPath(zaERO, requestedVlanIds, urnMap, rsvVlanMap);
+        log.info("Valid ZA IDs: " + zaValidIds);
         // If that segment has no valid IDs return an empty set
         if(zaValidIds.isEmpty()){
             return overlappingVlanIds;

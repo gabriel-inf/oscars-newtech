@@ -138,13 +138,16 @@ public class TopPCE {
         // The number of requested pipes successfully reserved
         Integer numReserved = 0;
 
-        List<ReservedBandwidthE> rsvBandwidths = transPCE.createReservedBandwidthList(simpleJunctions, reservedMplsPipes,
-                reservedEthPipes, schedSpec);
-
-        List<ReservedVlanE> rsvVlans = transPCE.createReservedVlanList(simpleJunctions, reservedEthPipes, schedSpec);
-
         // Loop through all requested pipes
         for(RequestedVlanPipeE pipe: pipes){
+
+            // Update list of reserved bandwidths
+            List<ReservedBandwidthE> rsvBandwidths = transPCE.createReservedBandwidthList(simpleJunctions, reservedMplsPipes,
+                    reservedEthPipes, schedSpec);
+
+            // Update list of reserved VLAN IDs
+            List<ReservedVlanE> rsvVlans = transPCE.createReservedVlanList(simpleJunctions, reservedEthPipes, schedSpec);
+
             // Find the shortest path for the pipe, build a map for the AZ and ZA path
             Map<String, List<TopoEdge>> eroMapForPipe = findShortestConstrainedPath(pipe, schedSpec, simpleJunctions,
                     reservedMplsPipes, reservedEthPipes);
