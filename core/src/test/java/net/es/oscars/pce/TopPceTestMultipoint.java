@@ -144,7 +144,7 @@ public class TopPceTestMultipoint
             {
                 assert (aFixes.size() == 0);
                 assert (zFixes.size() == 1);
-                ReservedVlanFixtureE theFix = aFixes.iterator().next();
+                ReservedVlanFixtureE theFix = zFixes.iterator().next();
 
                 String expectedAzERO = "nodeL-nodeL:2-nodeM:1-nodeM";
                 String expectedZaERO = "nodeM-nodeM:1-nodeL:2-nodeL";
@@ -485,7 +485,7 @@ public class TopPceTestMultipoint
             {
                 assert (aFixes.size() == 0);
                 assert (zFixes.size() == 1);
-                ReservedVlanFixtureE theFix = aFixes.iterator().next();
+                ReservedVlanFixtureE theFix = zFixes.iterator().next();
 
                 String expectedAzERO;
                 String expectedZaERO;
