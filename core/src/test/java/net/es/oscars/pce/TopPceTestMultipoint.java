@@ -1306,18 +1306,92 @@ public class TopPceTestMultipoint
         }
         catch(PCEException | PSSException pceE){ log.error("", pceE); }
 
-        //assert(!reservedBlueprint.isPresent());
+        assert(!reservedBlueprint.isPresent());
+
+        log.info("test " + testName + " passed.");
+    }
+
+
+    @Test
+    public void multipointPceTestComplexNonPalindrome()
+    {
+        String testName = "\'multipointPceTestComplex - Non-Palindrome\'";
+        log.info("Initializing test: " + testName + ".");
+
+        RequestedBlueprintE requestedBlueprint;
+        Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
+        ScheduleSpecificationE requestedSched;
+
+        Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
+        Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
+
+        // Set requested parameters
+        String srcAB = "nodeP";
+        String dstAB = "nodeN";
+        String srcBZ = "nodeN";
+        String dstBZ = "nodeM";
+        List<String> aPorts = Collections.singletonList("portA");
+        List<String> bPorts = Collections.singletonList("portB");
+        List<String> zPorts = Collections.singletonList("portZ");
+        String vlan = "any";
+        Integer abBW = 100;
+        Integer baBW = 100;
+        Integer bzBW1 = 100;
+        Integer bzBW2 = 200;
+        Integer zbBW = 100;
+
+        PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        mpTopoBuilder.buildComplexMultipointTopo();
+        requestedSched = testBuilder.buildSchedule(startDate, endDate);
+
+        // Set up Requested Pipes
+        Set<RequestedVlanPipeE> reqPipes = new HashSet<>();
+        RequestedVlanPipeE pipeAB1 = testBuilder.buildRequestedPipe(aPorts, srcAB, bPorts, dstAB, abBW, baBW, palindrome, vlan);
+        RequestedVlanPipeE pipeAB2 = testBuilder.buildRequestedPipe(aPorts, srcAB, bPorts, dstAB, abBW, baBW, palindrome, vlan);
+        RequestedVlanPipeE pipeBZ1 = testBuilder.buildRequestedPipe(bPorts, srcBZ, zPorts, dstBZ, bzBW1, zbBW, palindrome, vlan);
+        RequestedVlanPipeE pipeBZ2 = testBuilder.buildRequestedPipe(bPorts, srcBZ, zPorts, dstBZ, bzBW2, zbBW, palindrome, vlan);
+
+        reqPipes.add(pipeAB1);
+        reqPipes.add(pipeAB2);
+        reqPipes.add(pipeBZ1);
+        reqPipes.add(pipeBZ2);
+
+        requestedBlueprint = testBuilder.buildRequest(reqPipes);
+
+        log.info("Beginning test: " + testName + ".");
+
+        try
+        {
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
+        }
+        catch(PCEException | PSSException pceE){ log.error("", pceE); }
+
+        assert(reservedBlueprint.isPresent());
 
         ReservedVlanFlowE reservedFlow = reservedBlueprint.get().getVlanFlow();
 
+        Set<ReservedEthPipeE> allResEthPipes = reservedFlow.getEthPipes();
         Set<ReservedMplsPipeE> allResMplsPipes = reservedFlow.getMplsPipes();
+        Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
 
-        // Ethernet Pipes
+        assert(allResJunctions.size() == 0);
+        assert(allResEthPipes.size() == 0);
+        assert(allResMplsPipes.size() == 4);
+
+        int totalBwIn_A = 0;
+        int totalBwEg_A = 0;
+        int totalBwIn_B = 0;
+        int totalBwEg_B = 0;
+        int totalBwIn_Z = 0;
+        int totalBwEg_Z = 0;
+
+        // Mpls Pipes
         for(ReservedMplsPipeE mplsPipe : allResMplsPipes)
         {
             ReservedVlanJunctionE aJunc = mplsPipe.getAJunction();
             ReservedVlanJunctionE zJunc = mplsPipe.getZJunction();
-
+            Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
+            Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
             List<String> azERO = mplsPipe.getAzERO();
             List<String> zaERO = mplsPipe.getZaERO();
             String actualAzERO = aJunc.getDeviceUrn().getUrn() + "-";
@@ -1332,11 +1406,66 @@ public class TopPceTestMultipoint
             actualAzERO = actualAzERO + zJunc.getDeviceUrn();
             actualZaERO = actualZaERO + aJunc.getDeviceUrn();
 
-            log.info("FWD ERO: " + actualAzERO);
-            //log.info("REV ERO: " + actualZaERO);
+            assert (aJunc.getDeviceUrn().getUrn().equals("nodeP") || aJunc.getDeviceUrn().getUrn().equals("nodeN"));
+            assert (zJunc.getDeviceUrn().getUrn().equals("nodeM") || zJunc.getDeviceUrn().getUrn().equals("nodeN"));
+
+            if(aJunc.getDeviceUrn().getUrn().equals("nodeP"))
+            {
+                assert (aFixes.size() == 1);
+                assert (zFixes.size() == 1);
+                ReservedVlanFixtureE aFix = aFixes.iterator().next();
+                ReservedVlanFixtureE zFix = zFixes.iterator().next();
+
+                String expectedAzERO1 = "nodeP-nodeP:1-nodeL:1-nodeL-nodeL:3-nodeN:1-nodeN";
+                String expectedAzERO2 = "nodeP-nodeP:2-nodeN:3-nodeN";
+                String expectedZaERO = "nodeN-nodeN:1-nodeL:3-nodeL-nodeL:1-nodeP:1-nodeP";
+
+                assert (aFix.getIfceUrn().getUrn().equals("portA"));
+                assert (aFix.getReservedBandwidth().getInBandwidth().equals(abBW));
+                assert (aFix.getReservedBandwidth().getEgBandwidth().equals(baBW));
+                totalBwIn_A += aFix.getReservedBandwidth().getInBandwidth();
+                totalBwEg_A += aFix.getReservedBandwidth().getEgBandwidth();
+                assert (zFix.getIfceUrn().getUrn().equals("portB"));
+                assert (zFix.getReservedBandwidth().getInBandwidth().equals(baBW));
+                assert (zFix.getReservedBandwidth().getEgBandwidth().equals(abBW));
+                totalBwIn_B += zFix.getReservedBandwidth().getInBandwidth();
+                totalBwEg_B += zFix.getReservedBandwidth().getEgBandwidth();
+                assert (actualAzERO.equals(expectedAzERO1) || actualAzERO.equals(expectedAzERO2));
+                assert (actualZaERO.equals(expectedZaERO));
+            }
+            else
+            {
+                assert (aFixes.size() == 1);
+                assert (zFixes.size() == 1);
+                ReservedVlanFixtureE aFix = aFixes.iterator().next();
+                ReservedVlanFixtureE zFix = zFixes.iterator().next();
+
+                String expectedAzERO = "nodeN-nodeN:2-nodeM:2-nodeM";
+                String expectedZaERO = "nodeM-nodeM:2-nodeN:2-nodeN";
+
+                assert (aFix.getIfceUrn().getUrn().equals("portB"));
+                assert (aFix.getReservedBandwidth().getInBandwidth().equals(bzBW1) || aFix.getReservedBandwidth().getInBandwidth().equals(bzBW2));
+                assert (aFix.getReservedBandwidth().getEgBandwidth().equals(zbBW));
+                totalBwIn_B += aFix.getReservedBandwidth().getInBandwidth();
+                totalBwEg_B += aFix.getReservedBandwidth().getEgBandwidth();
+                assert (zFix.getIfceUrn().getUrn().equals("portZ"));
+                assert (zFix.getReservedBandwidth().getInBandwidth().equals(zbBW));
+                assert (zFix.getReservedBandwidth().getEgBandwidth().equals(bzBW1) || zFix.getReservedBandwidth().getEgBandwidth().equals(bzBW2));
+                totalBwIn_Z += zFix.getReservedBandwidth().getInBandwidth();
+                totalBwEg_Z += zFix.getReservedBandwidth().getEgBandwidth();
+                assert (actualAzERO.equals(expectedAzERO));
+                assert (actualZaERO.equals(expectedZaERO));
+            }
         }
+
+        // Check bandwidth consumption at fixture-ports
+        assert(totalBwIn_A == abBW + abBW);
+        assert(totalBwEg_A == baBW + baBW);
+        assert(totalBwIn_B == baBW + baBW + bzBW1 + bzBW2);
+        assert(totalBwEg_B == abBW + abBW + zbBW + zbBW);
+        assert(totalBwIn_Z == zbBW + zbBW);
+        assert(totalBwEg_Z == bzBW1 + bzBW2);
 
         log.info("test " + testName + " passed.");
     }
-
 }

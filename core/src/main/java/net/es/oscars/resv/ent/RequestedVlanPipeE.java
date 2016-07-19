@@ -6,6 +6,7 @@ import net.es.oscars.topo.enums.PalindromicType;
 
 import javax.persistence.*;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @Entity
@@ -43,4 +44,7 @@ public class RequestedVlanPipeE {
 
     @NonNull
     private PalindromicType eroPalindromic;
+
+    @NonNull
+    private final String uniqueID = UUID.randomUUID().toString();
 }
