@@ -6,6 +6,7 @@ import net.es.oscars.dto.pss.EthPipeType;
 import javax.persistence.*;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 @Data
 @Entity
@@ -44,5 +45,6 @@ public class ReservedEthPipeE {
     @NonNull
     private EthPipeType pipeType;
 
-
+    @NonNull
+    private final String uniqueID = UUID.randomUUID().toString();
 }

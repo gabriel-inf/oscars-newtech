@@ -6,6 +6,7 @@ import net.es.oscars.dto.pss.MplsPipeType;
 import javax.persistence.*;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 @Data
 @Entity
@@ -39,4 +40,7 @@ public class ReservedMplsPipeE {
 
     @NonNull
     private MplsPipeType pipeType;
+
+    @NonNull
+    private final String uniqueID = UUID.randomUUID().toString();
 }
