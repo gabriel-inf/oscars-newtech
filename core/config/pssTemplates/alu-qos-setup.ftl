@@ -1,7 +1,7 @@
 <#-- @ftlvariable name="qosList" type="java.util.List" -->
 <#-- @ftlvariable name="qos" type="net.es.oscars.pss.cmd.AluQos" -->
-<#-- @ftlvariable name="protect" type="java.lang.Boolean" -->
-<#-- @ftlvariable name="apply" type="java.lang.Boolean" -->
+<#-- @ftlvariable name="protect" type="boolean" -->
+<#-- @ftlvariable name="apply" type="boolean" -->
 
 <#list qosList as qos>
 
