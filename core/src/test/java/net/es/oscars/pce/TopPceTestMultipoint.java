@@ -3,6 +3,7 @@ package net.es.oscars.pce;
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.CoreUnitTestConfiguration;
 import net.es.oscars.pss.PSSException;
+import net.es.oscars.resv.dao.ReservedBandwidthRepository;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.topo.MultipointTopologyBuilder;
 import net.es.oscars.topo.enums.PalindromicType;
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 /**
@@ -38,6 +40,9 @@ public class TopPceTestMultipoint
 
     @Autowired
     private MultipointTopologyBuilder mpTopoBuilder;
+
+    @Autowired
+    private ReservedBandwidthRepository bwRepo;
 
     @Test
     public void multipointPceTest1()
@@ -155,8 +160,8 @@ public class TopPceTestMultipoint
 
                 assert (zJunc.getDeviceUrn().getUrn().equals("nodeM"));
                 assert (theFix.getIfceUrn().getUrn().equals("portZ"));
-                assert (theFix.getReservedBandwidth().getInBandwidth().equals(azBW + bzBW));
-                assert (theFix.getReservedBandwidth().getEgBandwidth().equals(zaBW + zbBW));
+                assert (theFix.getReservedBandwidth().getInBandwidth().equals(zaBW));
+                assert (theFix.getReservedBandwidth().getEgBandwidth().equals(azBW));
                 assert (actualAzERO.equals(expectedAzERO));
                 assert (actualZaERO.equals(expectedZaERO));
             }
@@ -170,17 +175,43 @@ public class TopPceTestMultipoint
                 String expectedAzERO = "nodeN-nodeN:2-nodeM:2-nodeM";
                 String expectedZaERO = "nodeM-nodeM:2-nodeN:2-nodeN";
 
-                assert (zJunc.getDeviceUrn().getUrn().equals("nodeN"));
+                assert (zJunc.getDeviceUrn().getUrn().equals("nodeM"));
                 assert (aFix.getIfceUrn().getUrn().equals("portB"));
                 assert (aFix.getReservedBandwidth().getInBandwidth().equals(bzBW));
                 assert (aFix.getReservedBandwidth().getEgBandwidth().equals(zbBW));
                 assert (zFix.getIfceUrn().getUrn().equals("portZ"));
-                assert (zFix.getReservedBandwidth().getInBandwidth().equals(zbBW + zaBW));
-                assert (zFix.getReservedBandwidth().getEgBandwidth().equals(bzBW + azBW));
+                assert (zFix.getReservedBandwidth().getInBandwidth().equals(zbBW));
+                assert (zFix.getReservedBandwidth().getEgBandwidth().equals(bzBW));
                 assert (actualAzERO.equals(expectedAzERO));
                 assert (actualZaERO.equals(expectedZaERO));
             }
         }
+
+        // Check bandwidth consumption at fixture-ports
+        List<ReservedBandwidthE> allResBWs = bwRepo.findAll();
+        Optional<ReservedBandwidthE> resBwOptional;
+        ReservedBandwidthE resBwA = null;
+        ReservedBandwidthE resBwB = null;
+        ReservedBandwidthE resBwZ = null;
+
+        allResBWs = allResBWs.stream().filter(bw -> bw.getUrn().getUrn().contains("port")).collect(Collectors.toList());
+        log.info("SIZE = " + allResBWs.size());
+        assert(allResBWs.size() == 3);
+
+        resBwA = allResBWs.stream().filter(rbw -> rbw.getUrn().getUrn().equals("portA")).findAny().get();
+        resBwB = allResBWs.stream().filter(rbw -> rbw.getUrn().getUrn().equals("portB")).findAny().get();
+        resBwZ = allResBWs.stream().filter(rbw -> rbw.getUrn().getUrn().equals("portZ")).findAny().get();
+
+        assert(resBwA != null);
+        assert(resBwB != null);
+        assert(resBwZ != null);
+
+        assert(resBwA.getInBandwidth().equals(azBW));
+        assert(resBwA.getEgBandwidth().equals(zaBW));
+        assert(resBwB.getInBandwidth().equals(bzBW));
+        assert(resBwB.getEgBandwidth().equals(zbBW));
+        assert(resBwZ.getInBandwidth().equals(zaBW + zbBW));
+        assert(resBwZ.getEgBandwidth().equals(azBW + bzBW));
 
         log.info("test 'multipointPceTest1' passed.");
     }
