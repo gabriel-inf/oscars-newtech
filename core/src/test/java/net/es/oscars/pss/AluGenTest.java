@@ -55,7 +55,7 @@ public class AluGenTest {
 
         Map<String, Object> root = new HashMap<>();
         root.put("qosList", params.getQoses());
-        root.put("protect", params.getAluVpls().getProtectVcId().isPresent());
+        root.put("protect", params.getAluVpls().getProtectVcId());
         root.put("apply", params.getApplyQos());
         String qosConfig = stringifier.stringify(root, qosTpl);
         fragments.add(qosConfig);

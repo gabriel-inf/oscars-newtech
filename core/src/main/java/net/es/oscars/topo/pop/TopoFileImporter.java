@@ -24,15 +24,20 @@ import java.util.*;
 @Slf4j
 @Service
 public class TopoFileImporter implements TopoImporter {
-
-    @Autowired
     private UrnRepository urnRepo;
 
-    @Autowired
     private UrnAdjcyRepository adjcyRepo;
 
-    @Autowired
     private TopoProperties topoProperties;
+
+
+    @Autowired
+    public TopoFileImporter(UrnRepository urnRepo, UrnAdjcyRepository adjcyRepo, TopoProperties topoProperties) {
+        this.urnRepo = urnRepo;
+        this.adjcyRepo = adjcyRepo;
+        this.topoProperties = topoProperties;
+    }
+
 
     @PostConstruct
     public void startup() {

@@ -4,7 +4,6 @@ import net.es.oscars.pss.cmd.*;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.Optional;
 
 
 @Component
@@ -70,11 +69,9 @@ public class AluParamsBuilder {
         AluVpls vpls = AluVpls.builder()
                 .serviceName("es.net-1234")
                 .description("es.net-1234, to someplace")
-                .endpointName(Optional.of("es.net-1234_endpoint"))
-                .sdp(Optional.of(sdp))
+                .endpointName("es.net-1234_endpoint")
+                .sdp(sdp)
                 .vcId(6011)
-                .protectSdp(Optional.empty())
-                .protectVcId(Optional.empty())
                 .saps(new ArrayList<>())
                 .build();
 

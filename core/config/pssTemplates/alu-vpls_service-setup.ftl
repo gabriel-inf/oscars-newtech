@@ -3,8 +3,8 @@
 <#-- @ftlvariable name="sdp" type="java.util.Optional" -->
 
 <#assign endpointSnippet = "">
-<#if vpls.endpointName.isPresent()>
-    <#assign endpointName = vpls.endpointName.get()>
+<#if vpls.endpointName??>
+    <#assign endpointName = vpls.endpointName>
     <#assign endpointSnippet = "endpoint "+endpointName>
 </#if>
 
@@ -18,8 +18,8 @@
 /configure service vpls ${vcId} stp shutdown
 
 
-<#if vpls.endpointName.isPresent()>
-<#assign endpointName = vpls.endpointName.get()>
+<#if vpls.endpointName??>
+<#assign endpointName = vpls.endpointName>
 /configure service vpls ${vcId} endpoint "${endpointName}" create
 /configure service vpls ${vcId} endpoint "${endpointName}" revert-time 1
 /configure service vpls ${vcId} endpoint "${endpointName}" restrict-protected-src discard-frame
@@ -38,8 +38,8 @@
 /configure service vpls ${vcId} sap ${sapId} no shutdown
 </#list>
 
-<#if vpls.sdp.isPresent()>
-<#assign sdp = vpls.sdp.get()>
+<#if vpls.sdp??>
+<#assign sdp = vpls.sdp>
 /configure service vpls ${vcId} spoke-sdp ${sdp.sdpId}:${vcId} vc-type vlan ${endpointSnippet} create
 /configure service vpls ${vcId} spoke-sdp ${sdp.sdpId}:${vcId} restrict-protected-src discard-frame
 /configure service vpls ${vcId} spoke-sdp ${sdp.sdpId}:${vcId} precedence primary
@@ -47,9 +47,9 @@
 </#if>
 
 
-<#if vpls.protectSdp.isPresent()>
-<#assign sdp = vpls.protectSdp.get()>
-<#assign protectVcId = vpls.protectVcId.get()>
+<#if vpls.protectSdp??>
+<#assign sdp = vpls.protectSdp>
+<#assign protectVcId = vpls.protectVcId>
 /configure service vpls ${vcId} spoke-sdp ${sdp.sdpId}:${protectVcId} vc-type vlan ${endpointSnippet} create
 /configure service vpls ${vcId} spoke-sdp ${sdp.sdpId}:${protectVcId} egress qos 3 port-redirect-group "best-effort-vc" instance 1
 /configure service vpls ${vcId} spoke-sdp ${sdp.sdpId}:${protectVcId} restrict-protected-src discard-frame

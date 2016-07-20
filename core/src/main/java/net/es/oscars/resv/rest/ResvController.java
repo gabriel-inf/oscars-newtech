@@ -6,8 +6,6 @@ import net.es.oscars.dto.pss.EthJunctionType;
 import net.es.oscars.dto.pss.EthPipeType;
 import net.es.oscars.dto.resv.*;
 import net.es.oscars.dto.spec.*;
-import net.es.oscars.resv.dao.ConnectionRepository;
-import net.es.oscars.resv.dao.ReservedPssResourceRepository;
 import net.es.oscars.resv.ent.ConnectionE;
 import net.es.oscars.resv.svc.ResvService;
 import net.es.oscars.resv.ent.SpecificationE;
@@ -29,14 +27,11 @@ public class ResvController {
     private ModelMapper modelMapper = new ModelMapper();
 
     @Autowired
-    private ResvService service;
+    public ResvController(ResvService resvService) {
+        this.resvService = resvService;
+    }
 
-    @Autowired
-    private ReservedPssResourceRepository resRepo;
-
-
-    @Autowired
-    private ConnectionRepository connRepo;
+    private ResvService resvService;
 
 
     @ExceptionHandler(NoSuchElementException.class)
@@ -57,7 +52,7 @@ public class ResvController {
     public Connection getResv(@PathVariable("connectionId") String connectionId) {
         log.info("retrieving " + connectionId);
 
-        return convertConnToDto(service.findByConnectionId(connectionId).orElseThrow(NoSuchElementException::new));
+        return convertConnToDto(resvService.findByConnectionId(connectionId).orElseThrow(NoSuchElementException::new));
 
     }
 
@@ -69,7 +64,7 @@ public class ResvController {
         log.info("listing all resvs");
         List<Connection> dtoItems = new ArrayList<>();
 
-        for (ConnectionE eItem : service.findAll()) {
+        for (ConnectionE eItem : resvService.findAll()) {
             Connection dtoItem = convertConnToDto(eItem);
             dtoItems.add(dtoItem);
         }
@@ -88,9 +83,36 @@ public class ResvController {
         return makeConnectionFromBasic(dtoSpec);
     }
 
+    @RequestMapping(value = "/resv/commit/{connectionId}", method = RequestMethod.GET)
+    @ResponseBody
+    public Connection commit(@PathVariable("connectionId") String connectionId) {
+        log.info("attempting to commit " + connectionId);
+        ConnectionE connE = resvService.findByConnectionId(connectionId).orElseThrow(NoSuchElementException::new);
+        if (connE.getStates().getResv().equals(ResvState.HELD)) {
+            connE.getStates().setResv(ResvState.COMMITTING);
+            resvService.save(connE);
+        }
+
+        return this.convertConnToDto(connE);
+    }
+
+
+    @RequestMapping(value = "/resv/abort/{connectionId}", method = RequestMethod.GET)
+    @ResponseBody
+    public Connection abort(@PathVariable("connectionId") String connectionId) {
+        log.info("attempting to commit " + connectionId);
+        ConnectionE connE = resvService.findByConnectionId(connectionId).orElseThrow(NoSuchElementException::new);
+        if (connE.getStates().getResv().equals(ResvState.HELD)) {
+            connE.getStates().setResv(ResvState.ABORTING);
+            connE = resvService.save(connE);
+        }
+
+        return this.convertConnToDto(connE);
+
+    }
 
     private Connection makeConnectionFromBasic(BasicVlanSpecification dtoSpec) {
-        log.info("making a new connection with id "+dtoSpec.getConnectionId());
+        log.info("making a new connection with id " + dtoSpec.getConnectionId());
 
         Specification spec = basicVlanToFull(dtoSpec);
         SpecificationE specE = convertSpecToEnt(spec);
@@ -122,8 +144,8 @@ public class ResvController {
 
         ConnectionE connE = modelMapper.map(conn, ConnectionE.class);
         connE.setSpecification(specE);
-        connE = connRepo.save(connE);
-        log.info("saved connection, connectionId "+specE.getConnectionId());
+        connE = resvService.save(connE);
+        log.info("saved connection, connectionId " + specE.getConnectionId());
         log.info(connE.toString());
 
 
@@ -136,7 +158,6 @@ public class ResvController {
     }
 
     private Specification basicVlanToFull(BasicVlanSpecification bvs) {
-
 
 
         VlanFlow vf = VlanFlow.builder()
@@ -219,7 +240,6 @@ public class ResvController {
                 .build();
 
     }
-
 
 
     private SpecificationE convertSpecToEnt(Specification dtoSpec) {

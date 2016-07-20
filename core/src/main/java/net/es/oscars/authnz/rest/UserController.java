@@ -19,8 +19,13 @@ import java.util.NoSuchElementException;
 @Slf4j
 @Controller
 public class UserController {
+
     @Autowired
-    private UserRepository repository;
+    public UserController(UserRepository userRepo) {
+        this.userRepo = userRepo;
+    }
+
+    private UserRepository userRepo;
 
     private ModelMapper modelMapper = new ModelMapper();
 
@@ -44,12 +49,12 @@ public class UserController {
     public User add(@RequestBody User dtoUser) {
         String username = dtoUser.getUsername();
         log.info("adding "+ username);
-        if (repository.findByUsername(username).isPresent()) {
+        if (userRepo.findByUsername(username).isPresent()) {
             throw new DataIntegrityViolationException("User already exists.");
         }
 
         EUser eUser = convertToEnt(dtoUser);
-        repository.save(eUser);
+        userRepo.save(eUser);
         log.info("added "+ username);
         return dtoUser;
     }
@@ -58,14 +63,14 @@ public class UserController {
     @RequestMapping(value = "/users/update", method = RequestMethod.POST)
     @ResponseBody
     public User update(@RequestBody User dtoUser) {
-        EUser eUser = repository.findByUsername(dtoUser.getUsername()).orElseThrow(NoSuchElementException::new);
+        EUser eUser = userRepo.findByUsername(dtoUser.getUsername()).orElseThrow(NoSuchElementException::new);
 
         // save the internal id
         Long id = eUser.getId();
         eUser = convertToEnt(dtoUser);
         eUser.setId(id);
 
-        repository.save(eUser);
+        userRepo.save(eUser);
         return dtoUser;
     }
 
@@ -73,7 +78,7 @@ public class UserController {
     @ResponseBody
     public String delete(@PathVariable("username") String username) {
 
-        repository.delete(repository.findByUsername(username).orElseThrow(NoSuchElementException::new));
+        userRepo.delete(userRepo.findByUsername(username).orElseThrow(NoSuchElementException::new));
         return "User deleted.";
     }
 
@@ -81,7 +86,7 @@ public class UserController {
     @RequestMapping(value = "/users/", method = RequestMethod.GET)
     @ResponseBody
     public List<User> getAll() {
-        List<EUser> eUsers = repository.findAll();
+        List<EUser> eUsers = userRepo.findAll();
         List<User> result = new ArrayList<>();
 
         for (EUser eUser : eUsers) {
@@ -95,7 +100,7 @@ public class UserController {
     @RequestMapping(value = "/users/institutions", method = RequestMethod.GET)
     @ResponseBody
     public List<String> getInstitutions() {
-        List<EUser> eUsers = repository.findAll();
+        List<EUser> eUsers = userRepo.findAll();
         List<String> result = new ArrayList<>();
 
         for (EUser eUserUser : eUsers) {
@@ -111,7 +116,7 @@ public class UserController {
     @ResponseBody
     public User byCertSubject(@RequestBody String certSubject) {
 
-        return convertToDto(repository.findByCertSubject(certSubject).orElseThrow(NoSuchElementException::new));
+        return convertToDto(userRepo.findByCertSubject(certSubject).orElseThrow(NoSuchElementException::new));
 
     }
 
@@ -119,7 +124,7 @@ public class UserController {
     @RequestMapping(value = "/users/get/{username}", method = RequestMethod.GET)
     @ResponseBody
     public User byUsername(@PathVariable("username") String username) {
-        return convertToDto(repository.findByUsername(username).orElseThrow(NoSuchElementException::new));
+        return convertToDto(userRepo.findByUsername(username).orElseThrow(NoSuchElementException::new));
     }
 
     private EUser convertToEnt(User dtoUser) {

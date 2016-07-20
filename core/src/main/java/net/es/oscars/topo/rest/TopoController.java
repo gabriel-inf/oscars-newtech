@@ -15,8 +15,12 @@ import java.util.NoSuchElementException;
 @Slf4j
 @Controller
 public class TopoController {
+    private TopoService topoService;
+
     @Autowired
-    private TopoService svc;
+    public TopoController(TopoService topoService) {
+        this.topoService = topoService;
+    }
 
 
     @ExceptionHandler(NoSuchElementException.class)
@@ -37,14 +41,14 @@ public class TopoController {
     @ResponseBody
     public List<String> vlanEdges() {
         log.info("getting vlan edges");
-        return svc.edges(Layer.ETHERNET);
+        return topoService.edges(Layer.ETHERNET);
     }
 
     @RequestMapping(value = "/topo/devices", method = RequestMethod.GET)
     @ResponseBody
     public List<String> devices() {
         log.info("getting devices");
-        return svc.devices();
+        return topoService.devices();
     }
 
 

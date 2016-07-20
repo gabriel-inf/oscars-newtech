@@ -23,18 +23,23 @@ import java.util.stream.Collectors;
 @Service
 @Component
 public class TopoService {
-
-    @Autowired
     private UrnAdjcyRepository adjcyRepo;
 
-    @Autowired
     private UrnRepository urnRepo;
 
-    @Autowired
     private ReservableVlanRepository vlanRepo;
 
-    @Autowired
     private ReservableBandwidthRepository bwRepo;
+
+
+    @Autowired
+    public TopoService(UrnAdjcyRepository adjcyRepo, UrnRepository urnRepo,
+                       ReservableVlanRepository vlanRepo, ReservableBandwidthRepository bwRepo) {
+        this.adjcyRepo = adjcyRepo;
+        this.urnRepo = urnRepo;
+        this.vlanRepo = vlanRepo;
+        this.bwRepo = bwRepo;
+    }
 
     public Topology layer(Layer layer) throws NoSuchElementException {
 
@@ -48,11 +53,10 @@ public class TopoService {
                 .filter(u -> u.getCapabilities().contains(layer) || layer.equals(Layer.INTERNAL))
                 .forEach(u -> {
                     VertexType type = null;
-                    if(u.getDeviceType() == null && u.getIfceType() != null){
+                    if (u.getDeviceType() == null && u.getIfceType() != null) {
                         type = VertexType.PORT;
-                    }
-                    else{
-                        switch(u.getDeviceType()){
+                    } else {
+                        switch (u.getDeviceType()) {
                             case ROUTER:
                                 type = VertexType.ROUTER;
                                 break;
@@ -72,7 +76,7 @@ public class TopoService {
                     Optional<TopoVertex> a = topo.getVertexByUrn(adj.getA().getUrn());
                     Optional<TopoVertex> z = topo.getVertexByUrn(adj.getZ().getUrn());
 
-                    if(a.isPresent() && z.isPresent()){
+                    if (a.isPresent() && z.isPresent()) {
                         TopoEdge edge = TopoEdge.builder()
                                 .a(a.get())
                                 .z(z.get())
@@ -128,16 +132,14 @@ public class TopoService {
     }
 
     public List<String> edges(Layer layer) {
-        log.info("finding edges for "+layer);
+        log.info("finding edges for " + layer);
 
         return urnRepo.findAll().stream()
-                .filter( u -> u.getCapabilities().contains(layer) && u.getUrnType().equals(UrnType.IFCE))
+                .filter(u -> u.getCapabilities().contains(layer) && u.getUrnType().equals(UrnType.IFCE))
                 .map(UrnE::getUrn)
                 .collect(Collectors.toList());
 
     }
-
-
 
 
     public List<String> devices() {
@@ -150,9 +152,8 @@ public class TopoService {
     }
 
 
-    public VertexType getVertexTypeFromDeviceType(DeviceType deviceType)
-    {
-        if(deviceType.equals(DeviceType.SWITCH))
+    public VertexType getVertexTypeFromDeviceType(DeviceType deviceType) {
+        if (deviceType.equals(DeviceType.SWITCH))
             return VertexType.SWITCH;
         else
             return VertexType.ROUTER;

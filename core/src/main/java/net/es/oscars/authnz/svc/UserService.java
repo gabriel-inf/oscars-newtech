@@ -11,9 +11,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class UserService {
 
-    @Autowired
     private UserRepository userRepo;
 
+    @Autowired
+    public UserService(UserRepository userRepo) {
+        this.userRepo = userRepo;
+
+    }
 
     public EUser save(EUser user) {
         return userRepo.save(user);

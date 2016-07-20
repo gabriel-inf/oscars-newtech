@@ -1,36 +1,132 @@
 package net.es.oscars.resv.svc;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.pce.PCEException;
+import net.es.oscars.pce.TopPCE;
+import net.es.oscars.pss.PSSException;
+import net.es.oscars.pss.svc.PssResourceService;
 import net.es.oscars.resv.dao.ConnectionRepository;
 import net.es.oscars.resv.ent.ConnectionE;
+import net.es.oscars.resv.ent.RequestedBlueprintE;
+import net.es.oscars.resv.ent.ReservedBlueprintE;
+import net.es.oscars.resv.ent.ReservedVlanFlowE;
+import net.es.oscars.st.resv.ResvState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Service
 @Transactional
+@Slf4j
 public class ResvService {
 
     @Autowired
-    private ConnectionRepository resvRepo;
+    public ResvService(TopPCE topPCE, ConnectionRepository connRepo, PssResourceService pssResourceService) {
+        this.topPCE = topPCE;
+        this.connRepo = connRepo;
+        this.pssResourceService = pssResourceService;
+    }
+
+    private TopPCE topPCE;
+
+    private ConnectionRepository connRepo;
+
+    private PssResourceService pssResourceService;
+
+
+    // basically DB stuff
+
+    public ConnectionE save(ConnectionE resv) {
+        return connRepo.save(resv);
+    }
 
     public void delete(ConnectionE resv) {
-        resvRepo.delete(resv);
+        connRepo.delete(resv);
     }
 
     public List<ConnectionE> findAll() {
-        return resvRepo.findAll();
+        return connRepo.findAll();
     }
 
     public Optional<ConnectionE> findByConnectionId(String connectionId) {
-        return resvRepo.findByConnectionId(connectionId);
+        return connRepo.findByConnectionId(connectionId);
     }
 
+    public Stream<ConnectionE> ofResvState(ResvState resvState) {
+        return connRepo.findAll().stream().filter(c -> c.getStates().getResv().equals(resvState));
 
-    public ConnectionE save(ConnectionE resv) {
-        return resvRepo.save(resv);
+    }
+    public Stream<ConnectionE> ofHeldTimeout(Integer timeoutMs) {
+        return connRepo.findAll().stream()
+                .filter(c -> c.getStates().getResv().equals(ResvState.HELD))
+                .filter(c -> (c.getSchedule().getSubmitted().getTime() + timeoutMs < new Date().getTime()));
+
+    }
+
+    // business logic
+
+
+    public ConnectionE abort(ConnectionE c) {
+        this.deleteReserved(c);
+
+        pssResourceService.release(c);
+        c.getStates().setResv(ResvState.IDLE_WAIT);
+        return connRepo.save(c);
+    }
+
+    public ConnectionE timeout(ConnectionE c) {
+        this.deleteReserved(c);
+        pssResourceService.release(c);
+
+        c.getStates().setResv(ResvState.IDLE_WAIT);
+        return connRepo.save(c);
+    }
+
+    public ConnectionE commit(ConnectionE c) {
+        c.getStates().setResv(ResvState.IDLE_WAIT);
+        pssResourceService.reserve(c);
+
+        return connRepo.save(c);
+    }
+
+    public ConnectionE hold(ConnectionE c) throws PSSException, PCEException {
+
+        RequestedBlueprintE req = c.getSpecification().getRequested();
+
+        Optional<ReservedBlueprintE> res = topPCE.makeReserved(req, c.getSpecification().getScheduleSpec());
+
+        if (res.isPresent()) {
+            c.setReserved(res.get());
+            c.getStates().setResv(ResvState.HELD);
+            c = connRepo.save(c);
+
+            try {
+                String pretty = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(c);
+                log.info(pretty);
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+        } else {
+            log.error("Reservation Unsuccessful!");
+        }
+        return c;
+
+    }
+
+    // internal convenience
+
+    private ConnectionE deleteReserved(ConnectionE c) {
+        ReservedVlanFlowE emptyFlow = ReservedVlanFlowE.builder().build();
+        ReservedBlueprintE reserved = ReservedBlueprintE.builder().vlanFlow(emptyFlow).build();
+        c.setReserved(reserved);
+        return c;
     }
 
 }
