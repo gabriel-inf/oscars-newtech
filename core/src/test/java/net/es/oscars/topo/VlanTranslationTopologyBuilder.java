@@ -57,6 +57,78 @@ public class VlanTranslationTopologyBuilder {
         testBuilder.populateRepos(topo.getVertices(), topo.getEdges(), portDeviceMap, floorMap, ceilingMap);
     }
 
+    public void buildVlanTransTopo2()
+    {
+        log.info("Building Vlan Test Topology 1");
+
+        Topology topo = buildThreeSwitchTopology();
+
+
+        Map<String, TopoVertex> nameMap = buildNameVertexMap(topo.getVertices());
+
+        Map<TopoVertex, TopoVertex> portDeviceMap = buildThreeSwitchPortDeviceMap(nameMap);
+
+        Map<TopoVertex, List<Integer>> floorMap = new HashMap<>();
+        floorMap.put(nameMap.get("A:0"), Collections.singletonList(4));
+        floorMap.put(nameMap.get("A:1"), Collections.singletonList(4));
+        floorMap.put(nameMap.get("A:2"), Collections.singletonList(1));
+        floorMap.put(nameMap.get("B:0"), Collections.singletonList(4));
+        floorMap.put(nameMap.get("B:1"), Collections.singletonList(4));
+        floorMap.put(nameMap.get("B:2"), Collections.singletonList(4));
+        floorMap.put(nameMap.get("C:0"), Collections.singletonList(4));
+        floorMap.put(nameMap.get("C:1"), Collections.singletonList(4));
+        floorMap.put(nameMap.get("C:2"), Collections.singletonList(1));
+
+        Map<TopoVertex, List<Integer>> ceilingMap = new HashMap<>();
+        ceilingMap.put(nameMap.get("A:0"), Collections.singletonList(5));
+        ceilingMap.put(nameMap.get("A:1"), Collections.singletonList(5));
+        ceilingMap.put(nameMap.get("A:2"), Collections.singletonList(5));
+        ceilingMap.put(nameMap.get("B:0"), Collections.singletonList(5));
+        ceilingMap.put(nameMap.get("B:1"), Collections.singletonList(5));
+        ceilingMap.put(nameMap.get("B:2"), Collections.singletonList(5));
+        ceilingMap.put(nameMap.get("C:0"), Collections.singletonList(5));
+        ceilingMap.put(nameMap.get("C:1"), Collections.singletonList(5));
+        ceilingMap.put(nameMap.get("C:2"), Collections.singletonList(5));
+
+        testBuilder.populateRepos(topo.getVertices(), topo.getEdges(), portDeviceMap, floorMap, ceilingMap);
+    }
+
+    public void buildVlanTransTopo3()
+    {
+        log.info("Building Vlan Test Topology 1");
+
+        Topology topo = buildThreeSwitchTopology();
+
+
+        Map<String, TopoVertex> nameMap = buildNameVertexMap(topo.getVertices());
+
+        Map<TopoVertex, TopoVertex> portDeviceMap = buildThreeSwitchPortDeviceMap(nameMap);
+
+        Map<TopoVertex, List<Integer>> floorMap = new HashMap<>();
+        floorMap.put(nameMap.get("A:0"), Collections.singletonList(1));
+        floorMap.put(nameMap.get("A:1"), Collections.singletonList(1));
+        floorMap.put(nameMap.get("A:2"), Collections.singletonList(1));
+        floorMap.put(nameMap.get("B:0"), Collections.singletonList(1));
+        floorMap.put(nameMap.get("B:1"), Collections.singletonList(1));
+        floorMap.put(nameMap.get("B:2"), Collections.singletonList(1));
+        floorMap.put(nameMap.get("C:0"), Collections.singletonList(1));
+        floorMap.put(nameMap.get("C:1"), Collections.singletonList(1));
+        floorMap.put(nameMap.get("C:2"), Collections.singletonList(1));
+
+        Map<TopoVertex, List<Integer>> ceilingMap = new HashMap<>();
+        ceilingMap.put(nameMap.get("A:0"), Collections.singletonList(2));
+        ceilingMap.put(nameMap.get("A:1"), Collections.singletonList(2));
+        ceilingMap.put(nameMap.get("A:2"), Collections.singletonList(2));
+        ceilingMap.put(nameMap.get("B:0"), Collections.singletonList(2));
+        ceilingMap.put(nameMap.get("B:1"), Collections.singletonList(2));
+        ceilingMap.put(nameMap.get("B:2"), Collections.singletonList(2));
+        ceilingMap.put(nameMap.get("C:0"), Collections.singletonList(2));
+        ceilingMap.put(nameMap.get("C:1"), Collections.singletonList(2));
+        ceilingMap.put(nameMap.get("C:2"), Collections.singletonList(2));
+
+        testBuilder.populateRepos(topo.getVertices(), topo.getEdges(), portDeviceMap, floorMap, ceilingMap);
+    }
+
     private Map<TopoVertex,TopoVertex> buildThreeSwitchPortDeviceMap(Map<String, TopoVertex> nameMap) {
 
         Map<TopoVertex, TopoVertex> portDeviceMap = new HashMap<>();
