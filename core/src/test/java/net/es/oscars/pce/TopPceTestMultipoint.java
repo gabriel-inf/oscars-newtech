@@ -521,7 +521,7 @@ public class TopPceTestMultipoint
         int totalBwEg_Z = 0;
 
         Integer vlanChosenPipe_MR1 = null;
-        Integer vlanChosenPipe_MR2 = null;
+        Integer vlanChosenPipe_MR2;
 
         // Ethernet Pipes
         for(ReservedEthPipeE ethPipe : allResEthPipes)

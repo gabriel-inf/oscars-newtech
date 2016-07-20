@@ -2,8 +2,6 @@ package net.es.oscars.pce;
 
 
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.dto.IntRange;
-import net.es.oscars.dto.pss.EthFixtureType;
 import net.es.oscars.pss.PCEAssistant;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.dao.ReservedBandwidthRepository;
@@ -14,18 +12,15 @@ import net.es.oscars.topo.beans.TopoEdge;
 import net.es.oscars.topo.beans.TopoVertex;
 import net.es.oscars.topo.dao.UrnRepository;
 import net.es.oscars.topo.ent.IntRangeE;
-import net.es.oscars.topo.ent.ReservableBandwidthE;
 import net.es.oscars.topo.ent.UrnE;
 import net.es.oscars.topo.enums.DeviceModel;
 import net.es.oscars.topo.enums.Layer;
-import net.es.oscars.topo.enums.UrnType;
 import net.es.oscars.topo.enums.VertexType;
 import net.es.oscars.topo.svc.TopoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -368,7 +363,7 @@ public class TranslationPCE {
         List<ReservedBandwidthE> rsvBandwidths = retrieveReservedBandwidths(reservedJunctions);
         rsvBandwidths.addAll(retrieveReservedBandwidthsFromMplsPipes(reservedMplsPipes));
         rsvBandwidths.addAll(retrieveReservedBandwidthsFromEthPipes(reservedEthPipes));
-        rsvBandwidths.addAll(pruningService.getReservedBandwidth(sched.getNotBefore(), sched.getNotAfter()));
+        //rsvBandwidths.addAll(pruningService.getReservedBandwidth(sched.getNotBefore(), sched.getNotAfter()));
 
         return rsvBandwidths;
     }
@@ -388,7 +383,7 @@ public class TranslationPCE {
         // Retrieve all VLAN IDs reserved so far from junctions & pipes
         List<ReservedVlanE> rsvVlans = retrieveReservedVlans(reservedJunctions);
         rsvVlans.addAll(retrieveReservedVlansFromEthPipes(reservedEthPipes));
-        rsvVlans.addAll(pruningService.getReservedVlans(sched.getNotBefore(), sched.getNotAfter()));
+        //rsvVlans.addAll(pruningService.getReservedVlans(sched.getNotBefore(), sched.getNotAfter()));
 
         return rsvVlans;
     }

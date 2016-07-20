@@ -7,7 +7,6 @@ import net.es.oscars.dto.pss.EthPipeType;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.topo.beans.TopoEdge;
 import net.es.oscars.topo.beans.TopoVertex;
-import net.es.oscars.topo.beans.Topology;
 import net.es.oscars.topo.dao.UrnAdjcyRepository;
 import net.es.oscars.topo.dao.UrnRepository;
 import net.es.oscars.topo.ent.*;
@@ -17,7 +16,6 @@ import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -241,8 +239,8 @@ public class TestEntityBuilder {
         log.info("Populating request schedule");
 
         return ScheduleSpecificationE.builder()
-                .notAfter(start)
-                .notBefore(end)
+                .notBefore(start)
+                .notAfter(end)
                 .durationMinutes(Duration.between(start.toInstant(), end.toInstant()).toMinutes())
                 .build();
     }
@@ -582,5 +580,25 @@ public class TestEntityBuilder {
             return optVertex.get();
         }
         return null;
+    }
+
+    public ConnectionE buildConnection(RequestedBlueprintE blueprint, ScheduleSpecificationE schedule, String connectionID, String description)
+    {
+        SpecificationE requestSpec = SpecificationE.builder()
+                .connectionId(connectionID)
+                .description(description)
+                .version(1)
+                .username("TestUser")
+                .requested(blueprint)
+                .scheduleSpec(schedule)
+                .build();
+
+        ConnectionE theConnection = ConnectionE.builder()
+                .connectionId(connectionID)
+                .specification(requestSpec)
+                .states(new StatesE())
+                .build();
+
+        return theConnection;
     }
 }
