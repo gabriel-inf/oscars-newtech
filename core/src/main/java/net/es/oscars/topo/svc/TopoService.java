@@ -4,14 +4,17 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.topo.beans.TopoEdge;
-import net.es.oscars.topo.enums.*;
 import net.es.oscars.topo.beans.TopoVertex;
 import net.es.oscars.topo.beans.Topology;
 import net.es.oscars.topo.dao.ReservableBandwidthRepository;
 import net.es.oscars.topo.dao.ReservableVlanRepository;
 import net.es.oscars.topo.dao.UrnAdjcyRepository;
 import net.es.oscars.topo.dao.UrnRepository;
-import net.es.oscars.topo.ent.*;
+import net.es.oscars.topo.ent.ReservableBandwidthE;
+import net.es.oscars.topo.ent.ReservableVlanE;
+import net.es.oscars.topo.ent.UrnAdjcyE;
+import net.es.oscars.topo.ent.UrnE;
+import net.es.oscars.topo.enums.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
@@ -95,7 +98,7 @@ public class TopoService {
         }
 
 
-        log.info(pretty);
+        //log.info(pretty);     //commented for output readability
 
         return topo;
     }

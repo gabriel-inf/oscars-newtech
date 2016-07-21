@@ -239,11 +239,6 @@ public class SequentialResvTest
             assert(allResJunctions.size() == 0);
             assert(allResEthPipes.size() == 0);
             assert(allResMplsPipes.size() == 1);
-
-            log.info("BW Reserved: ");
-            bwRepo.findAll().stream()
-                    .filter(bw -> bw.getUrn().getUrn().contains("port"))
-                    .forEach(bw -> log.info("URN: " + bw.getUrn().getUrn() + ", In: " + bw.getInBandwidth() + "Mbps, Eg: " + bw.getEgBandwidth() + "Mbps"));
         }
 
         Set<ReservedBandwidthE> portBWs = bwRepo.findAll().stream()
@@ -279,6 +274,120 @@ public class SequentialResvTest
         assert(totalBwAEg == zaBW * 2);
         assert(totalBwZIn == zaBW * 2);
         assert(totalBwZEg == azBW * 2);
+
+        log.info("test \'" + testName + "\' passed.");
+    }
+
+    @Test
+    public void sequentialResvTest3()
+    {
+        String testName = "sequentialResvTest3";
+        log.info("Initializing test: \'" + testName + "\'.");
+
+        topologyBuilder.buildTopo7();
+        bwRepo.deleteAll();
+
+        RequestedBlueprintE requestedBlueprint;
+        ScheduleSpecificationE requestedSched;
+        Set<RequestedVlanPipeE> reqPipes = new HashSet<>();
+        ConnectionE connection;
+        List<ConnectionE> allConnections = new ArrayList<>();
+
+        Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
+        Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
+
+        String srcDevice = "nodeK";
+        String dstDevice = "nodeL";
+        List<String> srcPorts = Stream.of("portA").collect(Collectors.toList());
+        List<String> dstPorts = Stream.of("portZ").collect(Collectors.toList());
+        Integer azBW = 1;
+        Integer zaBW = 1;
+        String vlan = "any";
+        PalindromicType palindrome = PalindromicType.PALINDROME;
+
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, vlan);
+        reqPipes.add(pipeAZ);
+
+        requestedBlueprint = testBuilder.buildRequest(reqPipes);
+        requestedSched = testBuilder.buildSchedule(startDate, endDate);
+
+        int numConnections = 10; // Enough to run out of VLANS
+
+        for(int conn = 1; conn <= numConnections; conn++)
+        {
+            String connID = "conn" + conn;
+
+            connection = testBuilder.buildConnection(requestedBlueprint, requestedSched, connID, "A Connection");
+
+            allConnections.add(connection);
+        }
+
+        log.info("Beginning test: \'" + testName + "\'.");
+
+
+        for(ConnectionE oneConnection : allConnections)
+        {
+            log.info("Connection ID: " + oneConnection.getConnectionId());
+
+            try
+            {
+                oneConnection = resvService.hold(oneConnection);
+            }
+            catch(PCEException | PSSException pceE){ log.error("", pceE); }
+
+
+            ReservedBlueprintE reservedBlueprint = oneConnection.getReserved();
+
+            assert (reservedBlueprint != null);
+
+            ReservedVlanFlowE reservedFlow = reservedBlueprint.getVlanFlow();
+            assert(reservedFlow != null);
+
+            Set<ReservedEthPipeE> allResEthPipes = reservedFlow.getEthPipes();
+            Set<ReservedMplsPipeE> allResMplsPipes = reservedFlow.getMplsPipes();
+            Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
+
+            assert(allResJunctions.size() == 0);
+            assert(allResEthPipes.size() == 1);
+            assert(allResMplsPipes.size() == 0);
+
+            allResEthPipes.iterator().next().getReservedVlans().stream()
+                    .forEach(resVlan -> log.info("Urn: " + resVlan.getUrn().getUrn() + ", Vlan: " + resVlan.getVlan()));
+        }
+
+        Set<ReservedBandwidthE> portBWs = bwRepo.findAll().stream()
+                .filter(bw -> bw.getUrn().getUrn().contains("port"))
+                .collect(Collectors.toSet());
+
+        assert(portBWs.size() == 2 * numConnections);
+
+        int totalBwAIn = 0;
+        int totalBwAEg = 0;
+        int totalBwZIn = 0;
+        int totalBwZEg = 0;
+
+        for(ReservedBandwidthE oneBW : portBWs)
+        {
+            if(oneBW.getUrn().getUrn().equals("portA"))
+            {
+                assert(oneBW.getInBandwidth().equals(azBW));
+                assert(oneBW.getInBandwidth().equals(zaBW));
+                totalBwAIn += oneBW.getInBandwidth();
+                totalBwAEg += oneBW.getEgBandwidth();
+            }
+            else
+            {
+                assert(oneBW.getInBandwidth().equals(zaBW));
+                assert(oneBW.getInBandwidth().equals(azBW));
+                totalBwZIn += oneBW.getInBandwidth();
+                totalBwZEg += oneBW.getEgBandwidth();
+            }
+        }
+
+        assert(totalBwAIn == azBW * numConnections);
+        assert(totalBwAEg == zaBW * numConnections);
+        assert(totalBwZIn == zaBW * numConnections);
+        assert(totalBwZEg == azBW * numConnections);
 
         log.info("test \'" + testName + "\' passed.");
     }
