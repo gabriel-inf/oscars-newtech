@@ -103,6 +103,23 @@ public class TopoService {
         return topo;
     }
 
+    public Topology getMultilayerTopology(){
+        Topology multiLayerTopo = new Topology();
+
+        Topology ethTopo = layer(Layer.ETHERNET);
+        Topology intTopo = layer(Layer.INTERNAL);
+        Topology mplsTopo = layer(Layer.MPLS);
+
+        multiLayerTopo.getVertices().addAll(ethTopo.getVertices());
+        multiLayerTopo.getVertices().addAll(intTopo.getVertices());
+        multiLayerTopo.getVertices().addAll(mplsTopo.getVertices());
+        multiLayerTopo.getEdges().addAll(ethTopo.getEdges());
+        multiLayerTopo.getEdges().addAll(intTopo.getEdges());
+        multiLayerTopo.getEdges().addAll(mplsTopo.getEdges());
+
+        return multiLayerTopo;
+    }
+
     public Map<String, DeviceModel> deviceModels() {
         Map<String, DeviceModel> modelMap = new HashMap<>();
         urnRepo.findAll().stream().filter(u -> u.getUrnType().equals(UrnType.DEVICE)).forEach(u -> {
