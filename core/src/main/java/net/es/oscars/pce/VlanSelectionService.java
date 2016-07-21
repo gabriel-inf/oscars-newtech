@@ -2,9 +2,7 @@ package net.es.oscars.pce;
 
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.IntRange;
-import net.es.oscars.resv.ent.RequestedVlanFixtureE;
-import net.es.oscars.resv.ent.RequestedVlanPipeE;
-import net.es.oscars.resv.ent.ReservedVlanE;
+import net.es.oscars.resv.ent.*;
 import net.es.oscars.topo.beans.TopoEdge;
 import net.es.oscars.topo.beans.TopoVertex;
 import net.es.oscars.topo.ent.IntRangeE;
@@ -65,7 +63,8 @@ public class VlanSelectionService {
         availableEverywhere.retainAll(availableVlansAcrossPath);
         log.info("Available Vlans Everywhere: " + availableEverywhere.toString());
         if(!availableEverywhere.isEmpty()){
-            Integer chosenVlan = availableEverywhere.iterator().next();
+            List<Integer> options = availableEverywhere.stream().sorted().collect(Collectors.toList());
+            Integer chosenVlan = options.get(0);
             chosenVlanMap = pipeUrns.stream().collect(Collectors.toMap(u -> u, u -> chosenVlan));
         }
         // Otherwise, iterate through the valid vlans per fixture
@@ -86,14 +85,17 @@ public class VlanSelectionService {
                 if (!overlappingVlans.isEmpty() && !pipeVlansAssigned) {
                     pipeVlansAssigned = true;
                     // Choose VLAN ID
-                    Integer chosenVlan = overlappingVlans.iterator().next();
+                    List<Integer> options = overlappingVlans.stream().sorted().collect(Collectors.toList());
+                    Integer chosenVlan = options.get(0);
                     // Assign this VLAN to every URN in the pipe
                     for(UrnE pipeUrn : pipeUrns){
                         chosenVlanMap.put(pipeUrn, chosenVlan);
                     }
                 }
                 if(!validVlanMap.get(fixUrn).isEmpty()) {
-                    chosenVlanMap.put(fixUrn, validVlanMap.get(fixUrn).iterator().next());
+                    List<Integer> options = validVlanMap.get(fixUrn).stream().sorted().collect(Collectors.toList());
+                    Integer chosenVlan = options.get(0);
+                    chosenVlanMap.put(fixUrn, chosenVlan);
                 }
                 else{
                     chosenVlanMap.put(fixUrn, -1);
@@ -106,7 +108,8 @@ public class VlanSelectionService {
                 // If there's at least one VLAN ID available across the path
                 if(!availableVlansAcrossPath.isEmpty()){
                     // Choose VLAN ID
-                    Integer chosenVlan = availableVlansAcrossPath.iterator().next();
+                    List<Integer> options = availableVlansAcrossPath.stream().sorted().collect(Collectors.toList());
+                    Integer chosenVlan = options.get(0);
                     // Assign this VLAN to every URN in the pipe
                     for(UrnE pipeUrn : pipeUrns){
                         chosenVlanMap.put(pipeUrn, chosenVlan);
@@ -281,5 +284,81 @@ public class VlanSelectionService {
         String aUrnString = v.getUrn();
         UrnE urn = urnMap.getOrDefault(aUrnString, null);
         return availableVlanMap.getOrDefault(urn, new HashSet<>());
+    }
+
+    /**
+     * Select a VLAN ID for a junction. All fixtures on the junction must use the same VLAN tag.
+     * @param req_j - The requested junction.
+     * @param sched - The requested schedule.
+     * @param rsvJunctions - The set of reserved junctions.
+     * @return A valid VLAN iD for this junction.
+     */
+    public Map<RequestedVlanFixtureE, Integer> selectVLANsForJunction(RequestedVlanJunctionE req_j, ScheduleSpecificationE sched,
+                                                                      Set<ReservedVlanJunctionE> rsvJunctions, List<ReservedVlanE> rsvVlans){
+
+        // All requested fixtures
+        Set<RequestedVlanFixtureE> reqFixtures = req_j.getFixtures();
+
+        Map<RequestedVlanFixtureE, Integer> vlanIDPerFixture = new HashMap<>();
+
+        // For each requested fixture
+        for(RequestedVlanFixtureE reqFix : reqFixtures){
+            // Get the available VLAN IDs
+            Set<Integer> availableVlans = getAvailableVlanIds(reqFix, rsvVlans);
+
+            // Get the requested VLAN expression
+            String vlanExpression = reqFix.getVlanExpression();
+            if(vlanExpression == null){
+                vlanExpression = "any";
+            }
+            // Convert that expression into a set of requested IDs
+            Set<Integer> reqVlanIds = pruningService.getIntegersFromRanges(pruningService.getIntRangesFromString(vlanExpression));
+            // Find the overlap between available VLAN IDs and requested VLAN IDs
+            Set<Integer> validVlans = pruningService.addToOverlap(availableVlans, reqVlanIds);
+
+            // If there are no valid IDs, return -1 (indicating an error)
+            if(validVlans.isEmpty()){
+                log.error("Requested VLAN IDs " + reqVlanIds + " not available at " + reqFix.getPortUrn().toString());
+                vlanIDPerFixture.put(reqFix, -1);
+            }
+            else{
+                List<Integer> valid = validVlans.stream().sorted().collect(Collectors.toList());
+                vlanIDPerFixture.put(reqFix, valid.get(0));
+            }
+        }
+
+        return vlanIDPerFixture;
+    }
+
+    /**
+     * Get the VLAN IDs available at this fixture.
+     * @param reqFix - The requested VLAN fixture (used to retrieve the reservable set of VLANs).
+     * @param rsvVlans - The reserved VLAN IDs.
+     * @return The set of available VLAN IDs at this fixture (may be empty)
+     */
+    public Set<Integer> getAvailableVlanIds(RequestedVlanFixtureE reqFix, List<ReservedVlanE> rsvVlans){
+
+        // Build map from URNs to Reserved VLAN lists
+        Map<UrnE, List<ReservedVlanE>> rsvVlanMap = pruningService.buildReservedVlanMap(rsvVlans);
+
+        // Get the set of reserved VLAN IDs at this fixture
+        List<ReservedVlanE> rsvVlansAtFixture = rsvVlanMap.containsKey(reqFix.getPortUrn()) ?
+                rsvVlanMap.get(reqFix.getPortUrn()) : new ArrayList<>();
+        Set<Integer> reservedVlanIds = rsvVlansAtFixture.stream().map(ReservedVlanE::getVlan).collect(Collectors.toSet());
+
+        // Find all reservable VLAN IDs at this fixture
+        Set<Integer> reservableVlanIds = pruningService.getIntegersFromRanges(
+                reqFix.getPortUrn()
+                        .getReservableVlans()
+                        .getVlanRanges()
+                        .stream()
+                        .map(IntRangeE::toDtoIntRange)
+                        .collect(Collectors.toList()));
+
+        // Return all reservable VLAN Ids which are not reserved
+        return reservableVlanIds
+                .stream()
+                .filter(id -> !reservedVlanIds.contains(id))
+                .collect(Collectors.toSet());
     }
 }
