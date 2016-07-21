@@ -89,7 +89,7 @@ public class ResvController {
         return makeConnectionFromBasic(dtoSpec);
     }
 
-    @RequestMapping(value = "/resv/bwAvail/", method = RequestMethod.GET)
+    @RequestMapping(value = "/resv/bwAvail/", method = RequestMethod.POST)
     @ResponseBody
     public BandwidthAvailabilityResponse getBandwidthAvailability(@RequestBody BandwidthAvailabilityRequest request) {
         log.info("Retrieving Bandwidth Availability Map");
