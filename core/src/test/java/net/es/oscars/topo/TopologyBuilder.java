@@ -9,10 +9,7 @@ import net.es.oscars.topo.enums.VertexType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by Jeremy on 7/8/2016.
@@ -737,7 +734,8 @@ public class TopologyBuilder
         log.info("Building Test Topology 7");
 
         Map<TopoVertex, TopoVertex> portDeviceMap = new HashMap<>();
-
+        Map<TopoVertex, List<Integer>> floorMap = new HashMap<>();
+        Map<TopoVertex, List<Integer>> ceilingMap = new HashMap<>();
         // Devices //
         TopoVertex nodeK = new TopoVertex("nodeK", VertexType.SWITCH);
         TopoVertex nodeL = new TopoVertex("nodeL", VertexType.SWITCH);
@@ -769,6 +767,8 @@ public class TopologyBuilder
 
         List<TopoVertex> topoNodes = new ArrayList<>();
         List<TopoEdge> topoLinks = new ArrayList<>();
+        List<Integer> floors = Arrays.asList(1);
+        List<Integer> ceilings = Arrays.asList(5);
 
         topoNodes.add(nodeK);
         topoNodes.add(nodeL);
@@ -804,7 +804,16 @@ public class TopologyBuilder
             }
         }
 
-        testBuilder.populateRepos(topoNodes, topoLinks, portDeviceMap);
+        for(TopoVertex oneVert : topoNodes)
+        {
+            if(oneVert.getVertexType().equals(VertexType.PORT))
+            {
+                floorMap.put(oneVert, floors);
+                ceilingMap.put(oneVert, ceilings);
+            }
+        }
+
+        testBuilder.populateRepos(topoNodes, topoLinks, portDeviceMap, floorMap, ceilingMap);
     }
 
     public void buildTopo8()
@@ -812,6 +821,9 @@ public class TopologyBuilder
         log.info("Building Test Topology 8");
 
         Map<TopoVertex, TopoVertex> portDeviceMap = new HashMap<>();
+        Map<TopoVertex, List<Integer>> floorMap = new HashMap<>();
+        Map<TopoVertex, List<Integer>> ceilingMap = new HashMap<>();
+
 
         // Devices //
         TopoVertex nodeP = new TopoVertex("nodeP", VertexType.ROUTER);
@@ -844,6 +856,8 @@ public class TopologyBuilder
 
         List<TopoVertex> topoNodes = new ArrayList<>();
         List<TopoEdge> topoLinks = new ArrayList<>();
+        List<Integer> floors = Arrays.asList(1);
+        List<Integer> ceilings = Arrays.asList(5);
 
         topoNodes.add(nodeP);
         topoNodes.add(nodeQ);
@@ -879,7 +893,16 @@ public class TopologyBuilder
             }
         }
 
-        testBuilder.populateRepos(topoNodes, topoLinks, portDeviceMap);
+        for(TopoVertex oneVert : topoNodes)
+        {
+            if(oneVert.getVertexType().equals(VertexType.PORT))
+            {
+                floorMap.put(oneVert, floors);
+                ceilingMap.put(oneVert, ceilings);
+            }
+        }
+
+        testBuilder.populateRepos(topoNodes, topoLinks, portDeviceMap, floorMap, ceilingMap);
     }
 
     public void buildTopo9()
