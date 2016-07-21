@@ -109,7 +109,7 @@ public class ResvService {
 
             try {
                 String pretty = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(c);
-                log.info(pretty);
+                //log.info(pretty);     // commented for output readability
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
             }

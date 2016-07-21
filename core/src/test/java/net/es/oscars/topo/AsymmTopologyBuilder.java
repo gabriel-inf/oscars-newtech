@@ -923,4 +923,330 @@ public class AsymmTopologyBuilder
 
         testBuilder.populateRepos(topoNodes, topoLinks, portDeviceMap, portBWs);
     }
+
+    public void buildAsymmTopo13()
+    {
+        log.info("Building Asymmetric Test Topology 13");
+
+        Map<TopoVertex, TopoVertex> portDeviceMap = new HashMap<>();
+        Map<TopoVertex, List<Integer>> portBWs = new HashMap<>();
+        Map<TopoVertex, List<Integer>> floorMap = new HashMap<>();
+        Map<TopoVertex, List<Integer>> ceilingMap = new HashMap<>();
+
+        // Devices //
+        TopoVertex nodeP = new TopoVertex("nodeP", VertexType.ROUTER);
+        TopoVertex nodeQ = new TopoVertex("nodeQ", VertexType.ROUTER);
+        TopoVertex nodeR = new TopoVertex("nodeR", VertexType.ROUTER);
+        TopoVertex nodeS = new TopoVertex("nodeS", VertexType.ROUTER);
+
+        // Ports //
+        TopoVertex portA = new TopoVertex("portA", VertexType.PORT);
+        TopoVertex portZ = new TopoVertex("portZ", VertexType.PORT);
+        TopoVertex portP1 = new TopoVertex("nodeP:1", VertexType.PORT);
+        TopoVertex portP2 = new TopoVertex("nodeP:2", VertexType.PORT);
+        TopoVertex portQ1 = new TopoVertex("nodeQ:1", VertexType.PORT);
+        TopoVertex portQ2 = new TopoVertex("nodeQ:2", VertexType.PORT);
+        TopoVertex portR1 = new TopoVertex("nodeR:1", VertexType.PORT);
+        TopoVertex portR2 = new TopoVertex("nodeR:2", VertexType.PORT);
+        TopoVertex portS1 = new TopoVertex("nodeS:1", VertexType.PORT);
+        TopoVertex portS2 = new TopoVertex("nodeS:2", VertexType.PORT);
+
+        // Asymmetric Bandwidth Capacity  (Ingress - Egress) //
+        List<Integer> bwPortA = Arrays.asList(500, 500);
+        List<Integer> bwPortZ = Arrays.asList(500, 500);
+        List<Integer> bwPortP1 = Arrays.asList(100, 100);
+        List<Integer> bwPortP2 = Arrays.asList(100, 100);
+        List<Integer> bwPortQ1 = Arrays.asList(100, 100);
+        List<Integer> bwPortQ2 = Arrays.asList(100, 100);
+        List<Integer> bwPortR1 = Arrays.asList(100, 100);
+        List<Integer> bwPortR2 = Arrays.asList(100, 100);
+        List<Integer> bwPortS1 = Arrays.asList(100, 100);
+        List<Integer> bwPortS2 = Arrays.asList(100, 100);
+        portBWs.put(portA, bwPortA);
+        portBWs.put(portZ, bwPortZ);
+        portBWs.put(portP1, bwPortP1);
+        portBWs.put(portP2, bwPortP2);
+        portBWs.put(portQ1, bwPortQ1);
+        portBWs.put(portQ2, bwPortQ2);
+        portBWs.put(portR1, bwPortR1);
+        portBWs.put(portR2, bwPortR2);
+        portBWs.put(portS1, bwPortS1);
+        portBWs.put(portS2, bwPortS2);
+
+        // End-Port Links //
+        TopoEdge edgeInt_A_P = new TopoEdge(portA, nodeP, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_Z_R = new TopoEdge(portZ, nodeR, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_P_A = new TopoEdge(nodeP, portA, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_R_Z = new TopoEdge(nodeR, portZ, 0L, Layer.INTERNAL);
+
+        // Internal Links //
+        TopoEdge edgeInt_P1_P = new TopoEdge(portP1, nodeP, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_P2_P = new TopoEdge(portP2, nodeP, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_Q1_Q = new TopoEdge(portQ1, nodeQ, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_Q2_Q = new TopoEdge(portQ2, nodeQ, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_R1_R = new TopoEdge(portR1, nodeR, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_R2_R = new TopoEdge(portR2, nodeR, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_S1_S = new TopoEdge(portS1, nodeS, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_S2_S = new TopoEdge(portS2, nodeS, 0L, Layer.INTERNAL);
+
+        // Internal-Reverse Links //
+        TopoEdge edgeInt_P_P1 = new TopoEdge(nodeP, portP1, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_P_P2 = new TopoEdge(nodeP, portP2, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_Q_Q1 = new TopoEdge(nodeQ, portQ1, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_Q_Q2 = new TopoEdge(nodeQ, portQ2, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_R_R1 = new TopoEdge(nodeR, portR1, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_R_R2 = new TopoEdge(nodeR, portR2, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_S_S1 = new TopoEdge(nodeS, portS1, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_S_S2 = new TopoEdge(nodeS, portS2, 0L, Layer.INTERNAL);
+
+        // Network Links //
+        TopoEdge edgeMpls_P1_Q1 = new TopoEdge(portP1, portQ1, 100L, Layer.MPLS);
+        TopoEdge edgeMpls_P2_S1 = new TopoEdge(portP2, portS1, 100L, Layer.MPLS);
+        TopoEdge edgeMpls_Q1_P1 = new TopoEdge(portQ1, portP1, 100L, Layer.MPLS);
+        TopoEdge edgeMpls_Q2_R1 = new TopoEdge(portQ2, portR1, 100L, Layer.MPLS);
+        TopoEdge edgeMpls_R1_Q2 = new TopoEdge(portR1, portQ2, 100L, Layer.MPLS);
+        TopoEdge edgeMpls_R2_S2 = new TopoEdge(portR2, portS2, 100L, Layer.MPLS);
+        TopoEdge edgeMpls_S1_P2 = new TopoEdge(portS1, portP2, 100L, Layer.MPLS);
+        TopoEdge edgeMpls_S2_R2 = new TopoEdge(portS2, portR2, 100L, Layer.MPLS);
+
+
+        List<TopoVertex> topoNodes = new ArrayList<>();
+        List<TopoEdge> topoLinks = new ArrayList<>();
+        List<Integer> floors = Arrays.asList(1);
+        List<Integer> ceilings = Arrays.asList(5);
+
+        topoNodes.add(nodeP);
+        topoNodes.add(nodeQ);
+        topoNodes.add(nodeR);
+        topoNodes.add(nodeS);
+
+        topoNodes.add(portA);
+        topoNodes.add(portZ);
+        topoNodes.add(portP1);
+        topoNodes.add(portP2);
+        topoNodes.add(portQ1);
+        topoNodes.add(portQ2);
+        topoNodes.add(portR1);
+        topoNodes.add(portR2);
+        topoNodes.add(portS1);
+        topoNodes.add(portS2);
+
+        topoLinks.add(edgeInt_A_P);
+        topoLinks.add(edgeInt_Z_R);
+        topoLinks.add(edgeInt_P1_P);
+        topoLinks.add(edgeInt_P2_P);
+        topoLinks.add(edgeInt_Q1_Q);
+        topoLinks.add(edgeInt_Q2_Q);
+        topoLinks.add(edgeInt_R1_R);
+        topoLinks.add(edgeInt_R2_R);
+        topoLinks.add(edgeInt_S1_S);
+        topoLinks.add(edgeInt_S2_S);
+
+        topoLinks.add(edgeInt_P_A);
+        topoLinks.add(edgeInt_R_Z);
+        topoLinks.add(edgeInt_P_P1);
+        topoLinks.add(edgeInt_P_P2);
+        topoLinks.add(edgeInt_Q_Q1);
+        topoLinks.add(edgeInt_Q_Q2);
+        topoLinks.add(edgeInt_R_R1);
+        topoLinks.add(edgeInt_R_R2);
+        topoLinks.add(edgeInt_S_S1);
+        topoLinks.add(edgeInt_S_S2);
+
+        topoLinks.add(edgeMpls_P1_Q1);
+        topoLinks.add(edgeMpls_P2_S1);
+        topoLinks.add(edgeMpls_Q1_P1);
+        topoLinks.add(edgeMpls_Q2_R1);
+        topoLinks.add(edgeMpls_R1_Q2);
+        topoLinks.add(edgeMpls_R2_S2);
+        topoLinks.add(edgeMpls_S1_P2);
+        topoLinks.add(edgeMpls_S2_R2);
+
+
+        // Map Ports to Devices for simplicity in utility class //
+        for(TopoEdge oneEdge : topoLinks)
+        {
+            if(oneEdge.getLayer().equals(Layer.INTERNAL))
+            {
+                if(oneEdge.getA().getVertexType().equals(VertexType.PORT))
+                {
+                    portDeviceMap.put(oneEdge.getA(), oneEdge.getZ());
+                }
+            }
+        }
+
+        for(TopoVertex oneVert : topoNodes)
+        {
+            if(oneVert.getVertexType().equals(VertexType.PORT))
+            {
+                floorMap.put(oneVert, floors);
+                ceilingMap.put(oneVert, ceilings);
+            }
+        }
+
+        testBuilder.populateRepos(topoNodes, topoLinks, portDeviceMap, portBWs, floorMap, ceilingMap);
+    }
+
+    public void buildAsymmTopo13_2()
+    {
+        log.info("Building Asymmetric Test Topology 13.2");
+
+        Map<TopoVertex, TopoVertex> portDeviceMap = new HashMap<>();
+        Map<TopoVertex, List<Integer>> portBWs = new HashMap<>();
+        Map<TopoVertex, List<Integer>> floorMap = new HashMap<>();
+        Map<TopoVertex, List<Integer>> ceilingMap = new HashMap<>();
+
+        // Devices //
+        TopoVertex nodeP = new TopoVertex("nodeP", VertexType.ROUTER);
+        TopoVertex nodeQ = new TopoVertex("nodeQ", VertexType.ROUTER);
+        TopoVertex nodeR = new TopoVertex("nodeR", VertexType.ROUTER);
+        TopoVertex nodeS = new TopoVertex("nodeS", VertexType.ROUTER);
+
+        // Ports //
+        TopoVertex portA = new TopoVertex("portA", VertexType.PORT);
+        TopoVertex portZ = new TopoVertex("portZ", VertexType.PORT);
+        TopoVertex portP1 = new TopoVertex("nodeP:1", VertexType.PORT);
+        TopoVertex portP2 = new TopoVertex("nodeP:2", VertexType.PORT);
+        TopoVertex portQ1 = new TopoVertex("nodeQ:1", VertexType.PORT);
+        TopoVertex portQ2 = new TopoVertex("nodeQ:2", VertexType.PORT);
+        TopoVertex portR1 = new TopoVertex("nodeR:1", VertexType.PORT);
+        TopoVertex portR2 = new TopoVertex("nodeR:2", VertexType.PORT);
+        TopoVertex portS1 = new TopoVertex("nodeS:1", VertexType.PORT);
+        TopoVertex portS2 = new TopoVertex("nodeS:2", VertexType.PORT);
+
+        // Asymmetric Bandwidth Capacity  (Ingress - Egress) //
+        List<Integer> bwPortA = Arrays.asList(500, 500);
+        List<Integer> bwPortZ = Arrays.asList(500, 500);
+        List<Integer> bwPortP1 = Arrays.asList(100, 120);
+        List<Integer> bwPortP2 = Arrays.asList(50, 1);
+        List<Integer> bwPortQ1 = Arrays.asList(120, 100);
+        List<Integer> bwPortQ2 = Arrays.asList(100, 120);
+        List<Integer> bwPortR1 = Arrays.asList(120, 100);
+        List<Integer> bwPortR2 = Arrays.asList(1, 50);
+        List<Integer> bwPortS1 = Arrays.asList(1, 50);
+        List<Integer> bwPortS2 = Arrays.asList(50, 1);
+        portBWs.put(portA, bwPortA);
+        portBWs.put(portZ, bwPortZ);
+        portBWs.put(portP1, bwPortP1);
+        portBWs.put(portP2, bwPortP2);
+        portBWs.put(portQ1, bwPortQ1);
+        portBWs.put(portQ2, bwPortQ2);
+        portBWs.put(portR1, bwPortR1);
+        portBWs.put(portR2, bwPortR2);
+        portBWs.put(portS1, bwPortS1);
+        portBWs.put(portS2, bwPortS2);
+
+        // End-Port Links //
+        TopoEdge edgeInt_A_P = new TopoEdge(portA, nodeP, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_Z_R = new TopoEdge(portZ, nodeR, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_P_A = new TopoEdge(nodeP, portA, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_R_Z = new TopoEdge(nodeR, portZ, 0L, Layer.INTERNAL);
+
+        // Internal Links //
+        TopoEdge edgeInt_P1_P = new TopoEdge(portP1, nodeP, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_P2_P = new TopoEdge(portP2, nodeP, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_Q1_Q = new TopoEdge(portQ1, nodeQ, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_Q2_Q = new TopoEdge(portQ2, nodeQ, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_R1_R = new TopoEdge(portR1, nodeR, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_R2_R = new TopoEdge(portR2, nodeR, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_S1_S = new TopoEdge(portS1, nodeS, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_S2_S = new TopoEdge(portS2, nodeS, 0L, Layer.INTERNAL);
+
+        // Internal-Reverse Links //
+        TopoEdge edgeInt_P_P1 = new TopoEdge(nodeP, portP1, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_P_P2 = new TopoEdge(nodeP, portP2, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_Q_Q1 = new TopoEdge(nodeQ, portQ1, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_Q_Q2 = new TopoEdge(nodeQ, portQ2, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_R_R1 = new TopoEdge(nodeR, portR1, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_R_R2 = new TopoEdge(nodeR, portR2, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_S_S1 = new TopoEdge(nodeS, portS1, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_S_S2 = new TopoEdge(nodeS, portS2, 0L, Layer.INTERNAL);
+
+        // Network Links //
+        TopoEdge edgeMpls_P1_Q1 = new TopoEdge(portP1, portQ1, 100L, Layer.MPLS);
+        TopoEdge edgeMpls_P2_S1 = new TopoEdge(portP2, portS1, 100L, Layer.MPLS);
+        TopoEdge edgeMpls_Q1_P1 = new TopoEdge(portQ1, portP1, 100L, Layer.MPLS);
+        TopoEdge edgeMpls_Q2_R1 = new TopoEdge(portQ2, portR1, 100L, Layer.MPLS);
+        TopoEdge edgeMpls_R1_Q2 = new TopoEdge(portR1, portQ2, 100L, Layer.MPLS);
+        TopoEdge edgeMpls_R2_S2 = new TopoEdge(portR2, portS2, 100L, Layer.MPLS);
+        TopoEdge edgeMpls_S1_P2 = new TopoEdge(portS1, portP2, 100L, Layer.MPLS);
+        TopoEdge edgeMpls_S2_R2 = new TopoEdge(portS2, portR2, 100L, Layer.MPLS);
+
+
+        List<TopoVertex> topoNodes = new ArrayList<>();
+        List<TopoEdge> topoLinks = new ArrayList<>();
+        List<Integer> floors = Arrays.asList(1);
+        List<Integer> ceilings = Arrays.asList(5);
+
+        topoNodes.add(nodeP);
+        topoNodes.add(nodeQ);
+        topoNodes.add(nodeR);
+        topoNodes.add(nodeS);
+
+        topoNodes.add(portA);
+        topoNodes.add(portZ);
+        topoNodes.add(portP1);
+        topoNodes.add(portP2);
+        topoNodes.add(portQ1);
+        topoNodes.add(portQ2);
+        topoNodes.add(portR1);
+        topoNodes.add(portR2);
+        topoNodes.add(portS1);
+        topoNodes.add(portS2);
+
+        topoLinks.add(edgeInt_A_P);
+        topoLinks.add(edgeInt_Z_R);
+        topoLinks.add(edgeInt_P1_P);
+        topoLinks.add(edgeInt_P2_P);
+        topoLinks.add(edgeInt_Q1_Q);
+        topoLinks.add(edgeInt_Q2_Q);
+        topoLinks.add(edgeInt_R1_R);
+        topoLinks.add(edgeInt_R2_R);
+        topoLinks.add(edgeInt_S1_S);
+        topoLinks.add(edgeInt_S2_S);
+
+        topoLinks.add(edgeInt_P_A);
+        topoLinks.add(edgeInt_R_Z);
+        topoLinks.add(edgeInt_P_P1);
+        topoLinks.add(edgeInt_P_P2);
+        topoLinks.add(edgeInt_Q_Q1);
+        topoLinks.add(edgeInt_Q_Q2);
+        topoLinks.add(edgeInt_R_R1);
+        topoLinks.add(edgeInt_R_R2);
+        topoLinks.add(edgeInt_S_S1);
+        topoLinks.add(edgeInt_S_S2);
+
+        topoLinks.add(edgeMpls_P1_Q1);
+        topoLinks.add(edgeMpls_P2_S1);
+        topoLinks.add(edgeMpls_Q1_P1);
+        topoLinks.add(edgeMpls_Q2_R1);
+        topoLinks.add(edgeMpls_R1_Q2);
+        topoLinks.add(edgeMpls_R2_S2);
+        topoLinks.add(edgeMpls_S1_P2);
+        topoLinks.add(edgeMpls_S2_R2);
+
+
+        // Map Ports to Devices for simplicity in utility class //
+        for(TopoEdge oneEdge : topoLinks)
+        {
+            if(oneEdge.getLayer().equals(Layer.INTERNAL))
+            {
+                if(oneEdge.getA().getVertexType().equals(VertexType.PORT))
+                {
+                    portDeviceMap.put(oneEdge.getA(), oneEdge.getZ());
+                }
+            }
+        }
+
+        for(TopoVertex oneVert : topoNodes)
+        {
+            if(oneVert.getVertexType().equals(VertexType.PORT))
+            {
+                floorMap.put(oneVert, floors);
+                ceilingMap.put(oneVert, ceilings);
+            }
+        }
+
+        testBuilder.populateRepos(topoNodes, topoLinks, portDeviceMap, portBWs, floorMap, ceilingMap);
+    }
 }

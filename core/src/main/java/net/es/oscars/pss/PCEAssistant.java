@@ -98,7 +98,7 @@ public class PCEAssistant {
      * @param urnMap - A mapping of URN strings to URN objects
      * @param deviceModels - A mapping of URN strings to Device Models
      * @param requestedJunctions - A set of requested junctions - used to determine attributes of junction/fixtures
-     * @param vlanId - The assigned VLAN ID for the fixtures
+     * @param vlanMap - Map of assigned VLANs for each fixture
      * @param sched - The requested schedule
      * @return A Reserved Vlan Junction with Reserved Fixtures (if contained in a matching requested junction)
      * @throws PSSException
@@ -106,22 +106,25 @@ public class PCEAssistant {
     public ReservedVlanJunctionE createJunctionAndFixtures(TopoVertex device, Map<String, UrnE> urnMap,
                                                             Map<String, DeviceModel> deviceModels,
                                                            Set<RequestedVlanJunctionE> requestedJunctions,
-                                                           Integer vlanId, ScheduleSpecificationE sched) throws PSSException {
+                                                           Map<UrnE, Integer> vlanMap, ScheduleSpecificationE sched)
+            throws PSSException {
         // Get this junction's URN, Device Model, and Typing for its Fixtures
         UrnE aUrn = urnMap.get(device.getUrn());
         DeviceModel model = deviceModels.get(aUrn.getUrn());
         EthFixtureType fixType = decideFixtureType(model);
 
         // Create the set of Reserved Fixtures by filtering for requested junctions that match the URN
+        log.info(requestedJunctions.stream().filter(reqJunction -> reqJunction.getDeviceUrn().equals(aUrn)).collect(Collectors.toList()).toString());
         Set<ReservedVlanFixtureE> reservedVlanFixtures = requestedJunctions
                 .stream()
                 .filter(reqJunction -> reqJunction.getDeviceUrn().equals(aUrn))
                 .map(RequestedVlanJunctionE::getFixtures)
                 .flatMap(Collection::stream)
                 .map(reqFix -> createFixtureAndResources(reqFix.getPortUrn(), fixType,
-                        reqFix.getInMbps(), reqFix.getEgMbps(), vlanId, sched))
+                        reqFix.getInMbps(), reqFix.getEgMbps(), vlanMap.get(reqFix.getPortUrn()), sched))
                 .collect(Collectors.toSet());
 
+        log.info("Reserved Fixtures at " + aUrn + ": " + reservedVlanFixtures);
         // Return the Reserved Junction (with the set of reserved VLAN fixtures).
         return createReservedJunction(aUrn, new HashSet<>(),
                 reservedVlanFixtures, decideJunctionType(model));
@@ -625,5 +628,39 @@ public class PCEAssistant {
 
         // Return the set
         return reservedBandwidths;
+    }
+
+    /**
+     * Given two lists of EROS in the AZ and ZA direction, a map of URNs, a chosen vlan ID,
+     * and the requested schedule, return a combined set of reserved VLAN objects for the AZ and ZA paths
+     * @param az - The AZ vertices
+     * @param za - The ZA vertices
+     * @param urnMap - A mapping of URN string to URN object
+     * @param vlanMap - A mapping of URN object to assigned VLAN ID
+     * @param sched - THe requested schedule
+     * @return A set of all reserved VLAN objects for every port (across both paths)
+     */
+    public Set<ReservedVlanE> createReservedVlanForEROs(List<TopoVertex> az, List<TopoVertex> za,
+                                                        Map<String, UrnE> urnMap, Map<UrnE, Integer> vlanMap,
+                                                        ScheduleSpecificationE sched) {
+        // Combine the AZ and ZA EROs
+        Set<TopoVertex> combined = new HashSet<>(az);
+        combined.addAll(za);
+
+        // Store the reserved bandwidths
+        Set<ReservedVlanE> reservedVlans = new HashSet<>();
+
+        // For each vertex in the combined set, retrieve the requested Ingress/Egress bandwidth, and create a reserved
+        // bandwidth object
+        combined.stream().filter(vertex -> vertex.getVertexType().equals(VertexType.PORT)).forEach(vertex -> {
+            UrnE urn = urnMap.get(vertex.getUrn());
+
+            ReservedVlanE rsvVlan = createReservedVlan(urn, vlanMap.get(urn), sched);
+            reservedVlans.add(rsvVlan);
+
+        });
+
+        // Return the set
+        return reservedVlans;
     }
 }

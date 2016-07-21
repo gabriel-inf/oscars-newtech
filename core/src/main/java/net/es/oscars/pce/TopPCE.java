@@ -65,11 +65,15 @@ public class TopPCE {
         Set<ReservedVlanJunctionE> simpleJunctions = new HashSet<>();
         for(RequestedVlanJunctionE reqJunction : req_f.getJunctions())
         {
+            // Update list of reserved bandwidths
             List<ReservedBandwidthE> rsvBandwidths = transPCE.createReservedBandwidthList(simpleJunctions, reservedMplsPipes,
                     reservedEthPipes, schedSpec);
 
+            // Update list of reserved VLAN IDs
+            List<ReservedVlanE> rsvVlans = transPCE.createReservedVlanList(simpleJunctions, reservedEthPipes, schedSpec);
+
             ReservedVlanJunctionE junction = transPCE.reserveSimpleJunction(reqJunction, schedSpec, simpleJunctions,
-                    rsvBandwidths);
+                    rsvBandwidths, rsvVlans);
 
             if(junction != null){
                 simpleJunctions.add(junction);
@@ -138,16 +142,19 @@ public class TopPCE {
         // The number of requested pipes successfully reserved
         Integer numReserved = 0;
 
-        List<ReservedBandwidthE> rsvBandwidths = transPCE.createReservedBandwidthList(simpleJunctions, reservedMplsPipes,
-                reservedEthPipes, schedSpec);
-
-        List<ReservedVlanE> rsvVlans = transPCE.createReservedVlanList(simpleJunctions, reservedEthPipes, schedSpec);
-
         // Loop through all requested pipes
         for(RequestedVlanPipeE pipe: pipes){
+
+            // Update list of reserved bandwidths
+            List<ReservedBandwidthE> rsvBandwidths = transPCE.createReservedBandwidthList(simpleJunctions, reservedMplsPipes,
+                    reservedEthPipes, schedSpec);
+
+            // Update list of reserved VLAN IDs
+            List<ReservedVlanE> rsvVlans = transPCE.createReservedVlanList(simpleJunctions, reservedEthPipes, schedSpec);
+
             // Find the shortest path for the pipe, build a map for the AZ and ZA path
-            Map<String, List<TopoEdge>> eroMapForPipe = findShortestConstrainedPath(pipe, schedSpec, simpleJunctions,
-                    reservedMplsPipes, reservedEthPipes);
+            Map<String, List<TopoEdge>> eroMapForPipe = findShortestConstrainedPath(pipe, schedSpec, rsvBandwidths,
+                    rsvVlans);
             // If there paths are valid, attempt to reserve the resources
             if(verifyEros(eroMapForPipe)){
                 // Increment the number reserved
@@ -176,23 +183,17 @@ public class TopPCE {
      * so far.
      * @param pipe - The requested pipe.
      * @param schedSpec - The requested schedule
-     * @param simpleJunctions - A set of all discrete junctions reserved so far
-     * @param reservedMplsPipes - A set of all MPLS pipes reserved so far
-     * @param reservedEthPipes - A set of all Ethernet pipes reserved so far
+     * @param rsvBandwidths - A list of all reserved bandwidths (so far)
+     * @param rsvVlans - A list of all reserved VLANs (so far)
      * @return A map containing the AZ and ZA shortest paths
      */
     private Map<String,List<TopoEdge>> findShortestConstrainedPath(RequestedVlanPipeE pipe,
                                                                    ScheduleSpecificationE schedSpec,
-                                                                   Set<ReservedVlanJunctionE> simpleJunctions,
-                                                                   Set<ReservedMplsPipeE> reservedMplsPipes,
-                                                                   Set<ReservedEthPipeE> reservedEthPipes) {
+                                                                   List<ReservedBandwidthE> rsvBandwidths,
+                                                                   List<ReservedVlanE> rsvVlans) {
         log.info("Computing Shortest Constrained Path");
         Map<String, List<TopoEdge>> eroMap = null;
 
-        List<ReservedBandwidthE> rsvBandwidths = transPCE.createReservedBandwidthList(simpleJunctions, reservedMplsPipes,
-                reservedEthPipes, schedSpec);
-
-        List<ReservedVlanE> rsvVlans = transPCE.createReservedVlanList(simpleJunctions, reservedEthPipes, schedSpec);
 
         if(pipe.getEroPalindromic().equals(PalindromicType.PALINDROME))
         {
