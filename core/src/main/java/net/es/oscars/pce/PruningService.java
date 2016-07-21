@@ -184,17 +184,9 @@ public class PruningService {
         Date start = sched.getNotBefore();
         Date end = sched.getNotAfter();
 
-        // Combine the passed in list of Reserved Bandwidth with the Reserved Bandwidth in the Repository
-        List<ReservedBandwidthE> reservedBwSoFar = getReservedBandwidth(start, end);
-        reservedBwSoFar.addAll(rsvBwList);
-
-
-        // Combine the passed in list of Reserved VLANs with the Reserved Vlans in the Repository
-        List<ReservedVlanE> reservedVlansSoFar = getReservedVlans(start, end);
-        reservedVlansSoFar.addAll(rsvVlanList);
 
         return pruneWithPipe(topo, pipe, urnRepo.findAll(),
-                reservedBwSoFar, reservedVlansSoFar);
+                rsvBwList, rsvVlanList);
     }
 
     /**
@@ -212,16 +204,8 @@ public class PruningService {
         Date start = sched.getNotBefore();
         Date end = sched.getNotAfter();
 
-        // Combine the passed in list of Reserved Bandwidth with the Reserved Bandwidth in the Repository
-        List<ReservedBandwidthE> reservedBwSoFar = getReservedBandwidth(start, end);
-        reservedBwSoFar.addAll(rsvBwList);
 
-
-        // Combine the passed in list of Reserved VLANs with the Reserved Vlans in the Repository
-        List<ReservedVlanE> reservedVlansSoFar = getReservedVlans(start, end);
-        reservedVlansSoFar.addAll(rsvVlanList);
-
-        return pruneWithPipeAZ(topo, pipe, urnRepo.findAll(), reservedBwSoFar, reservedVlansSoFar);
+        return pruneWithPipeAZ(topo, pipe, urnRepo.findAll(), rsvBwList, rsvVlanList);
     }
 
     /**
@@ -239,16 +223,7 @@ public class PruningService {
         Date start = sched.getNotBefore();
         Date end = sched.getNotAfter();
 
-        // Combine the passed in list of Reserved Bandwidth with the Reserved Bandwidth in the Repository
-        List<ReservedBandwidthE> reservedBwSoFar = getReservedBandwidth(start, end);
-        reservedBwSoFar.addAll(rsvBwList);
-
-
-        // Combine the passed in list of Reserved VLANs with the Reserved Vlans in the Repository
-        List<ReservedVlanE> reservedVlansSoFar = getReservedVlans(start, end);
-        reservedVlansSoFar.addAll(rsvVlanList);
-
-        return pruneWithPipeZA(topo, pipe, urnRepo.findAll(), reservedBwSoFar, reservedVlansSoFar);
+        return pruneWithPipeZA(topo, pipe, urnRepo.findAll(), rsvBwList, rsvVlanList);
     }
 
     /**
@@ -345,16 +320,8 @@ public class PruningService {
         Date start = sched.getNotBefore();
         Date end = sched.getNotAfter();
 
-        // Combine the passed in list of Reserved Bandwidth with the Reserved Bandwidth in the Repository
-        List<ReservedBandwidthE> reservedBwSoFar = getReservedBandwidth(start, end);
-        reservedBwSoFar.addAll(rsvBwList);
 
-
-        // Combine the passed in list of Reserved VLANs with the Reserved Vlans in the Repository
-        List<ReservedVlanE> reservedVlansSoFar = getReservedVlans(start, end);
-        reservedVlansSoFar.addAll(rsvVlanList);
-
-        return pruneWithPipe(topo, pipe, urns, reservedBwSoFar, reservedVlansSoFar);
+        return pruneWithPipe(topo, pipe, urns, rsvBwList, rsvVlanList);
     }
 
     /**
@@ -372,16 +339,7 @@ public class PruningService {
         Date start = sched.getNotBefore();
         Date end = sched.getNotAfter();
 
-        // Combine the passed in list of Reserved Bandwidth with the Reserved Bandwidth in the Repository
-        List<ReservedBandwidthE> reservedBwSoFar = getReservedBandwidth(start, end);
-        reservedBwSoFar.addAll(rsvBwList);
-
-
-        // Combine the passed in list of Reserved VLANs with the Reserved Vlans in the Repository
-        List<ReservedVlanE> reservedVlansSoFar = getReservedVlans(start, end);
-        reservedVlansSoFar.addAll(rsvVlanList);
-
-        return pruneWithPipeAZ(topo, pipe, urns, reservedBwSoFar, reservedVlansSoFar);
+        return pruneWithPipeAZ(topo, pipe, urns, rsvBwList, rsvVlanList);
     }
 
     /**
@@ -399,16 +357,7 @@ public class PruningService {
         Date start = sched.getNotBefore();
         Date end = sched.getNotAfter();
 
-        // Combine the passed in list of Reserved Bandwidth with the Reserved Bandwidth in the Repository
-        List<ReservedBandwidthE> reservedBwSoFar = getReservedBandwidth(start, end);
-        reservedBwSoFar.addAll(rsvBwList);
-
-
-        // Combine the passed in list of Reserved VLANs with the Reserved Vlans in the Repository
-        List<ReservedVlanE> reservedVlansSoFar = getReservedVlans(start, end);
-        reservedVlansSoFar.addAll(rsvVlanList);
-
-        return pruneWithPipeZA(topo, pipe, urns, reservedBwSoFar, reservedVlansSoFar);
+        return pruneWithPipeZA(topo, pipe, urns, rsvBwList, rsvVlanList);
     }
 
     /**
