@@ -383,7 +383,7 @@ public class TranslationPCE {
         // Retrieve all VLAN IDs reserved so far from junctions & pipes
         List<ReservedVlanE> rsvVlans = retrieveReservedVlans(reservedJunctions);
         rsvVlans.addAll(retrieveReservedVlansFromEthPipes(reservedEthPipes));
-        //rsvVlans.addAll(pruningService.getReservedVlans(sched.getNotBefore(), sched.getNotAfter()));
+        rsvVlans.addAll(pruningService.getReservedVlans(sched.getNotBefore(), sched.getNotAfter()));
 
         return rsvVlans;
     }
