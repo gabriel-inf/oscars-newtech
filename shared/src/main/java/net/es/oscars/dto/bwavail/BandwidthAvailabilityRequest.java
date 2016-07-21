@@ -11,6 +11,9 @@ import java.util.Date;
 public class BandwidthAvailabilityRequest {
 
     @NonNull
+    private Long requestID;
+
+    @NonNull
     private Date startDate;
 
     @NonNull

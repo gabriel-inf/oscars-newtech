@@ -13,18 +13,29 @@ import java.util.Map;
 @AllArgsConstructor
 public class BandwidthAvailabilityResponse {
 
+    @NonNull
+    private Long requestID;
 
     @NonNull
-    private Date startTime;
+    private Date startDate;
 
     @NonNull
-    private Date endTime;
+    private Date endDate;
 
     @NonNull
-    private Integer minBandwidth;
+    private Integer minRequestedBandwidth;
 
     @NonNull
-    private Integer maxBandwidth;
+    private String source;
+
+    @NonNull
+    private String destination;
+
+    @NonNull
+    private Integer minAvailableBandwidth;
+
+    @NonNull
+    private Integer maxAvailableBandwidth;
 
     @NonNull
     private List<Map<Date, Integer>> bwAvailMap;
