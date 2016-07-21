@@ -1,6 +1,9 @@
 package net.es.oscars.resv.rest;
 
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.bwavail.BandwidthAvailabilityService;
+import net.es.oscars.dto.bwavail.BandwidthAvailabilityRequest;
+import net.es.oscars.dto.bwavail.BandwidthAvailabilityResponse;
 import net.es.oscars.dto.pss.EthFixtureType;
 import net.es.oscars.dto.pss.EthJunctionType;
 import net.es.oscars.dto.pss.EthPipeType;
@@ -32,6 +35,9 @@ public class ResvController {
     }
 
     private ResvService resvService;
+
+    @Autowired
+    private BandwidthAvailabilityService bwAvailService;
 
 
     @ExceptionHandler(NoSuchElementException.class)
@@ -81,6 +87,17 @@ public class ResvController {
 
 
         return makeConnectionFromBasic(dtoSpec);
+    }
+
+    @RequestMapping(value = "/resv/bwAvail/", method = RequestMethod.GET)
+    @ResponseBody
+    public BandwidthAvailabilityResponse getBandwidthAvailability(@RequestBody BandwidthAvailabilityRequest request) {
+        log.info("Retrieving Bandwidth Availability Map");
+        log.info("Request Details: " + request.toString());
+
+        BandwidthAvailabilityResponse response = bwAvailService.getBandwidthAvailabilityMap(request);
+        log.info("Resonse Details: " + response.toString());
+        return response;
     }
 
     @RequestMapping(value = "/resv/commit/{connectionId}", method = RequestMethod.GET)
