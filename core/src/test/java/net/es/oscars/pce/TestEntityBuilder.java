@@ -111,6 +111,33 @@ public class TestEntityBuilder {
         adjcyRepo.save(adjcyList);
     }
 
+    public void populateRepos(Collection<TopoVertex> vertices, Collection<TopoEdge> edges, Map<TopoVertex,TopoVertex> portToDeviceMap,
+                              Map<TopoVertex, List<Integer>> portBWs, Map<TopoVertex, List<Integer>> floorMap,
+                              Map<TopoVertex, List<Integer>> ceilingMap){
+        log.info("Populating URN Repo and Adjcy Repo");
+
+        urnRepo.deleteAll();
+        adjcyRepo.deleteAll();
+
+        List<UrnE> urnList = new ArrayList<>();
+        List<UrnAdjcyE> adjcyList = new ArrayList<>();
+        for(TopoEdge edge : edges){
+            TopoVertex a = edge.getA();
+
+            TopoVertex z = edge.getZ();
+
+
+            UrnE aUrn = addUrnToList(a, urnList, portToDeviceMap, portBWs, floorMap.get(a), ceilingMap.get(a));
+
+            UrnE zUrn = addUrnToList(z, urnList, portToDeviceMap, portBWs, floorMap.get(z), ceilingMap.get(z));
+
+            UrnAdjcyE adj = buildUrnAdjcy(edge, aUrn, zUrn);
+            adjcyList.add(adj);
+        }
+        urnRepo.save(urnList);
+        adjcyRepo.save(adjcyList);
+    }
+
 
     public RequestedBlueprintE buildRequest(String deviceName, List<String> fixtureNames,
                                             Integer azMbps, Integer zaMbps, String vlanExp){
