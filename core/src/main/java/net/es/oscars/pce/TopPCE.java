@@ -34,6 +34,12 @@ public class TopPCE {
     @Autowired
     private NonPalindromicalPCE nonPalindromicPCE;
 
+    @Autowired
+    private VlanService vlanService;
+
+    @Autowired
+    private BandwidthService bwService;
+
     /**
      * Given a requested Blueprint (made up of a VLAN or Layer3 Flow) and a Schedule Specification, attempt
      * to reserve available resources to meet the demand. If it is not possible, return an empty Optional<ReservedBlueprintE>
@@ -66,11 +72,11 @@ public class TopPCE {
         for(RequestedVlanJunctionE reqJunction : req_f.getJunctions())
         {
             // Update list of reserved bandwidths
-            List<ReservedBandwidthE> rsvBandwidths = transPCE.createReservedBandwidthList(simpleJunctions, reservedMplsPipes,
+            List<ReservedBandwidthE> rsvBandwidths = bwService.createReservedBandwidthList(simpleJunctions, reservedMplsPipes,
                     reservedEthPipes, schedSpec);
 
             // Update list of reserved VLAN IDs
-            List<ReservedVlanE> rsvVlans = transPCE.createReservedVlanList(simpleJunctions, reservedEthPipes, schedSpec);
+            List<ReservedVlanE> rsvVlans = vlanService.createReservedVlanList(simpleJunctions, reservedEthPipes, schedSpec);
 
             ReservedVlanJunctionE junction = transPCE.reserveSimpleJunction(reqJunction, schedSpec, simpleJunctions,
                     rsvBandwidths, rsvVlans);
@@ -146,11 +152,11 @@ public class TopPCE {
         for(RequestedVlanPipeE pipe: pipes){
 
             // Update list of reserved bandwidths
-            List<ReservedBandwidthE> rsvBandwidths = transPCE.createReservedBandwidthList(simpleJunctions, reservedMplsPipes,
+            List<ReservedBandwidthE> rsvBandwidths = bwService.createReservedBandwidthList(simpleJunctions, reservedMplsPipes,
                     reservedEthPipes, schedSpec);
 
             // Update list of reserved VLAN IDs
-            List<ReservedVlanE> rsvVlans = transPCE.createReservedVlanList(simpleJunctions, reservedEthPipes, schedSpec);
+            List<ReservedVlanE> rsvVlans = vlanService.createReservedVlanList(simpleJunctions, reservedEthPipes, schedSpec);
 
             // Find the shortest path for the pipe, build a map for the AZ and ZA path
             Map<String, List<TopoEdge>> eroMapForPipe = findShortestConstrainedPath(pipe, schedSpec, rsvBandwidths,
