@@ -2,6 +2,8 @@ package net.es.oscars.pce;
 
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.IntRange;
+import net.es.oscars.helpers.IntRangeParsing;
+import net.es.oscars.resv.dao.ReservedVlanRepository;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.topo.beans.TopoEdge;
 import net.es.oscars.topo.beans.TopoVertex;
@@ -20,10 +22,30 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @Component
-public class VlanSelectionService {
+public class VlanService {
 
     @Autowired
-    private PruningService pruningService;
+    private ReservedVlanRepository resvVlanRepo;
+
+    /**
+     * Given a set of reserved junctions and reserved ethernet pipes, retrieve all reserved VLAN objects
+     * within the specified schedule period.
+     * @param reservedJunctions - Set of reserved junctions
+     * @param reservedEthPipes - Set of reserved ethernet pipes
+     * @param sched - Requested schedule
+     * @return
+     */
+    public List<ReservedVlanE> createReservedVlanList(Set<ReservedVlanJunctionE> reservedJunctions,
+                                                      Set<ReservedEthPipeE> reservedEthPipes,
+                                                      ScheduleSpecificationE sched){
+
+        // Retrieve all VLAN IDs reserved so far from junctions & pipes
+        List<ReservedVlanE> rsvVlans = retrieveReservedVlans(reservedJunctions);
+        rsvVlans.addAll(retrieveReservedVlansFromEthPipes(reservedEthPipes));
+        rsvVlans.addAll(getReservedVlans(sched.getNotBefore(), sched.getNotAfter()));
+
+        return rsvVlans;
+    }
 
     public Map<UrnE, Integer> selectVlansForPipe(RequestedVlanPipeE reqPipe, Map<String, UrnE> urnMap, List<ReservedVlanE> reservedVlans,
                                                  List<TopoEdge> azERO, List<TopoEdge> zaERO){
@@ -167,7 +189,7 @@ public class VlanSelectionService {
         fixtures.addAll(reqPipe.getZJunction().getFixtures());
 
         for(RequestedVlanFixtureE fix : fixtures){
-            Set<Integer> requestedVlans = pruningService.getIntegersFromRanges(pruningService.getIntRangesFromString(fix.getVlanExpression()));
+            Set<Integer> requestedVlans = getIntegersFromRanges(getIntRangesFromString(fix.getVlanExpression()));
             if(requestedVlans.isEmpty()){
                 requestedVlanIdMap.put(fix.getPortUrn(), availableVlanMap.get(fix.getPortUrn()));
             }
@@ -206,7 +228,7 @@ public class VlanSelectionService {
 
         urnMap.values().stream().filter(urn -> urn.getUrnType().equals(UrnType.IFCE)).forEach(urn -> {
             List<IntRange> ranges = urn.getReservableVlans().getVlanRanges().stream().map(IntRangeE::toDtoIntRange).collect(Collectors.toList());
-            reservableVlanIdMap.put(urn, pruningService.getIntegersFromRanges(ranges));
+            reservableVlanIdMap.put(urn, getIntegersFromRanges(ranges));
         });
         return reservableVlanIdMap;
     }
@@ -312,9 +334,9 @@ public class VlanSelectionService {
                 vlanExpression = "any";
             }
             // Convert that expression into a set of requested IDs
-            Set<Integer> reqVlanIds = pruningService.getIntegersFromRanges(pruningService.getIntRangesFromString(vlanExpression));
+            Set<Integer> reqVlanIds = getIntegersFromRanges(getIntRangesFromString(vlanExpression));
             // Find the overlap between available VLAN IDs and requested VLAN IDs
-            Set<Integer> validVlans = pruningService.addToOverlap(availableVlans, reqVlanIds);
+            Set<Integer> validVlans = addToOverlap(availableVlans, reqVlanIds);
 
             // If there are no valid IDs, return -1 (indicating an error)
             if(validVlans.isEmpty()){
@@ -339,7 +361,7 @@ public class VlanSelectionService {
     public Set<Integer> getAvailableVlanIds(RequestedVlanFixtureE reqFix, List<ReservedVlanE> rsvVlans){
 
         // Build map from URNs to Reserved VLAN lists
-        Map<UrnE, List<ReservedVlanE>> rsvVlanMap = pruningService.buildReservedVlanMap(rsvVlans);
+        Map<UrnE, List<ReservedVlanE>> rsvVlanMap = buildReservedVlanMap(rsvVlans);
 
         // Get the set of reserved VLAN IDs at this fixture
         List<ReservedVlanE> rsvVlansAtFixture = rsvVlanMap.containsKey(reqFix.getPortUrn()) ?
@@ -347,7 +369,7 @@ public class VlanSelectionService {
         Set<Integer> reservedVlanIds = rsvVlansAtFixture.stream().map(ReservedVlanE::getVlan).collect(Collectors.toSet());
 
         // Find all reservable VLAN IDs at this fixture
-        Set<Integer> reservableVlanIds = pruningService.getIntegersFromRanges(
+        Set<Integer> reservableVlanIds = getIntegersFromRanges(
                 reqFix.getPortUrn()
                         .getReservableVlans()
                         .getVlanRanges()
@@ -360,5 +382,284 @@ public class VlanSelectionService {
                 .stream()
                 .filter(id -> !reservedVlanIds.contains(id))
                 .collect(Collectors.toSet());
+    }
+
+    /**
+     * Retrieve all reserved VLAN IDs from a set of reserved junctions
+     * @param junctions - Set of reserved junctions.
+     * @return A list of all VLAN IDs reserved at those junctions.
+     */
+    public List<ReservedVlanE> retrieveReservedVlans(Set<ReservedVlanJunctionE> junctions){
+        return junctions
+                .stream()
+                .map(ReservedVlanJunctionE::getFixtures)
+                .flatMap(Collection::stream)
+                .map(ReservedVlanFixtureE::getReservedVlan)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Retrieve all Reserved VLAN IDs from a set of reserved pipes.
+     * @param reservedPipes - Set of reserved pipes
+     * @return A list of all reserved VLAN IDs within the set of reserved pipes.
+     */
+    public List<ReservedVlanE> retrieveReservedVlansFromEthPipes(Set<ReservedEthPipeE> reservedPipes) {
+        List<ReservedVlanE> reservedVlans = new ArrayList<>();
+        Set<ReservedVlanJunctionE> junctions = new HashSet<>();
+        for(ReservedEthPipeE pipe : reservedPipes){
+            junctions.add(pipe.getAJunction());
+            junctions.add(pipe.getZJunction());
+            reservedVlans.addAll(pipe.getReservedVlans());
+        }
+        reservedVlans.addAll(retrieveReservedVlans(junctions));
+        return reservedVlans;
+    }
+
+    //////// FROM PRUNING SERVICE
+    /**
+     * Return a pruned set of edges where the nodes on either end of the edge support at least one of the specified VLANs.
+     * A map of URNs are used to retrive the reservable VLAN sets from nodes (where applicable). Builds a mapping from
+     * each available VLAN id to the set of edges that support that ID. Using this mapping, the largest set of edges
+     * that supports a requested VLAN id (or any VLAN id if none are specified) is returned.
+     * @param availableEdges - The set of currently available edges, which will be pruned further using VLAN tags.
+     * @param urnMap - Map of URN name to UrnE object.
+     * @param vlans - Requested VLAN ranges. Any VLAN ID within those ranges can be accepted.
+     * @param resvVlanMap - Map of UrnE objects to a List<> of Reserved VLAN tags.
+     * @return The input edges, pruned using the input set of VLAN tags.
+     */
+    public Set<TopoEdge> findEdgesWithAvailableVlans(Set<TopoEdge> availableEdges, Map<String, UrnE> urnMap,
+                                                     List<IntRange> vlans, Map<UrnE, List<ReservedVlanE>> resvVlanMap) {
+        // Find a set of matching edges for each available VLAN id
+        Map<Integer, Set<TopoEdge>> edgesPerId = findEdgesPerVlanId(availableEdges, urnMap, resvVlanMap);
+        // Get a set of the requested VLAN ids
+        Set<Integer> idsInRanges = getIntegersFromRanges(vlans);
+        // Find the largest set of TopoEdges that meet the request
+        Set<TopoEdge> bestSet = new HashSet<>();
+        for(Integer id : edgesPerId.keySet()){
+            // Ignore the set of edges where both terminating nodes do not have reservable VLAN fields
+            // Add them to the best set of edges after this loop
+            if(id == -1){
+                continue;
+            }
+            // If the currently considered ID matches the request (or there are no VLANs requested)
+            // and the set of edges supporting this ID are larger than the current best
+            // choose this set of edges
+            if((idsInRanges.contains(id) || idsInRanges.isEmpty()) && edgesPerId.get(id).size() > bestSet.size()){
+                bestSet = edgesPerId.get(id);
+            }
+        }
+        // Add all edges where neither terminating node has reservable VLAN attributes
+        bestSet.addAll(edgesPerId.get(-1));
+        return bestSet;
+    }
+
+    /**
+     * Return all of the VLAN ids contained within the list of VLAN ranges.
+     * @param vlans - Requested VLAN ranges. Any VLAN ID within those ranges can be accepted.
+     * @return The set of VLAN ids making up the input ranges.
+     */
+    public Set<Integer> getIntegersFromRanges(List<IntRange> vlans){
+        return vlans
+                .stream()
+                .map(this::getSetOfNumbersInRange)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toSet());
+    }
+
+    /**
+     * Traverse the set of edges, and create a map of VLAN ID to the edges where that ID is available
+     * @param edges - The set of edges.
+     * @param urnMap - Map of URN name to UrnE object.
+     * @return A (possibly empty) set of VLAN tags that are available across every edge.
+     */
+    public Map<Integer, Set<TopoEdge>> findEdgesPerVlanId(Set<TopoEdge> edges, Map<String, UrnE> urnMap,
+                                                          Map<UrnE, List<ReservedVlanE>> resvVlanMap){
+        // Overlap is used to track all VLAN tags that are available across every edge.
+        Map<Integer, Set<TopoEdge>> edgesPerId = new HashMap<>();
+        edgesPerId.put(-1, new HashSet<>());
+        for(TopoEdge edge : edges){
+            // Overlap is used to track all VLAN tags that are available across both endpoints of an edge
+            Set<Integer> overlap = new HashSet<>();
+            // Get all possible VLAN ranges reservable at the a and z ends of the edge
+            List<IntRange> aRanges = getVlanRangesFromUrn(urnMap, edge.getA().getUrn());
+            List<IntRange> zRanges = getVlanRangesFromUrn(urnMap, edge.getZ().getUrn());
+
+
+
+            // If neither edge has reservable VLAN fields, add the edge to the "-1" VLAN tag list.
+            // These edges do not need to be pruned, and will be added at the end to the best set of edges
+            if(aRanges.isEmpty() && zRanges.isEmpty() || edge.getLayer().equals(Layer.MPLS)){
+                edgesPerId.get(-1).add(edge);
+            }
+            // Otherwise, find the intersection between the VLAN ranges (if any), and add the edge to the list
+            // matching each overlapping VLAN ID.
+            else{
+                // Find what VLAN ids are actually available at A and Z
+                Set<Integer> aAvailableVlanIds = getAvailableVlanIds(urnMap, edge.getA().getUrn(), aRanges, resvVlanMap);
+                Set<Integer> zAvailableVlanIds = getAvailableVlanIds(urnMap, edge.getZ().getUrn(), zRanges, resvVlanMap);
+                // Find the intersection of those two set of VLAN ranges
+                overlap = addToOverlap(overlap, aAvailableVlanIds);
+                overlap = addToOverlap(overlap, zAvailableVlanIds);
+
+
+                // For overlapping IDs, put that edge into the map
+                for(Integer id: overlap){
+                    if(!edgesPerId.containsKey(id)){
+                        edgesPerId.put(id, new HashSet<>());
+                    }
+                    edgesPerId.get(id).add(edge);
+                }
+            }
+
+        }
+        return edgesPerId;
+    }
+
+    /**
+     * Get all VLAN IDs available at a URN based on the possible reservable ranges and the currently reserved IDs.
+     * @param urnMap - Mapping of URN string to UrnE objects
+     * @param urn - The currently considered URN string
+     * @param ranges - List of IntRanges, representing all ranges of VLAN IDs supported at this URN
+     * @param resvVlanMap - A mapping representing the Reserved VLANs at a URN
+     * @return Set of VLAN IDs that are both supported and not reserved at a URN
+     */
+    public Set<Integer> getAvailableVlanIds(Map<String, UrnE> urnMap, String urn, List<IntRange> ranges,
+                                            Map<UrnE, List<ReservedVlanE>> resvVlanMap) {
+        // Get the supported reservable VLAN IDs
+        Set<Integer> reservableVlanIds = getIntegersFromRanges(ranges);
+
+        UrnE aUrn = urnMap.get(urn);
+        // If this URN is in the reserved VLAN map
+        if(resvVlanMap.containsKey(aUrn)) {
+            // Get the reserved VLAN IDs
+            List<Integer> resvVlanIds = resvVlanMap
+                    .get(aUrn)
+                    .stream()
+                    .map(ReservedVlanE::getVlan)
+                    .collect(Collectors.toList());
+
+            // Return the supported IDs that are not reserved
+            return reservableVlanIds
+                    .stream()
+                    .filter(id -> !resvVlanIds.contains(id))
+                    .collect(Collectors.toSet());
+        }
+        else{
+            return reservableVlanIds;
+        }
+    }
+
+    /**
+     * Using the list of URNs and the URN string, find the matching UrnE object and retrieve all of its
+     * reservable IntRanges.
+     * @param urnMap - Map of URN name to UrnE object.
+     * @param matchingUrn - String representation of the desired URN.
+     * @return - All IntRanges supported at the URN.
+     */
+    public List<IntRange> getVlanRangesFromUrn(Map<String, UrnE> urnMap, String matchingUrn){
+        if(urnMap.get(matchingUrn) == null || urnMap.get(matchingUrn).getReservableVlans() == null)
+            return new ArrayList<>();
+        return urnMap.get(matchingUrn)
+                .getReservableVlans()
+                .getVlanRanges()
+                .stream()
+                .map(IntRangeE::toDtoIntRange)
+                .collect(Collectors.toList());
+    }
+
+
+    /**
+     * Iterate through the set of overlapping VLAN tags, keep the elements in that set which are also
+     * contained in every IntRange passed in.
+     * @param overlap - The set of overlapping VLAN tags.
+     * @param other - Another set of VLAN tags, to be overlapped with the current overlapping set.
+     * @return The (possibly reduced) set of overlapping VLAN tags.
+     */
+    public Set<Integer> addToOverlap(Set<Integer> overlap, Set<Integer> other){
+        // If there are no ranges available, just return the current overlap set
+        if(other.isEmpty()){
+            return overlap;
+        }
+        // If the overlap does not already have elements, add all of the tags retrieved from this range
+        if(overlap.isEmpty()){
+            overlap.addAll(other);
+        }else{
+            // Otherwise, find the intersection between the current overlap and the tags retrieved from this range
+            overlap.retainAll(other);
+        }
+        return overlap;
+    }
+
+    /**
+     * Retrieve a set of all Integers that fall within the specified IntRange.
+     * @param aRange - The specified IntRange
+     * @return The set of Integers contained within the range.
+     */
+    public Set<Integer> getSetOfNumbersInRange(IntRange aRange) {
+        Set<Integer> numbers = new HashSet<>();
+        for(Integer num = aRange.getFloor(); num <= aRange.getCeiling(); num++){
+            numbers.add(num);
+        }
+        return numbers;
+    }
+
+    /**
+     * Get the requested set of VLAN tags from a junction by streaming through the fixtures in the junction.
+     * @param junction - The requested VLAN junction.
+     * @return The set of VLAN tags (Integers) requested for fixtures at that junction.
+     */
+    public List<IntRange> getVlansFromJunction(RequestedVlanJunctionE junction){
+        // Stream through the junction's fixtures, map the requested VLAN expression to a set of Integers
+        return junction.getFixtures().stream()
+                .map(RequestedVlanFixtureE::getVlanExpression)
+                .map(this::getIntRangesFromString)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Given a list of strings, convert all valid strings into IntRanges.
+     * @param vlans - Requested VLAN ranges. Any VLAN ID within those ranges can be accepted.
+     * @return A list of IntRanges, each representing a range of VLAN ID values parsed from a string.
+     */
+    public List<IntRange> getIntRangesFromString(String vlans){
+        if(IntRangeParsing.isValidIntRangeInput(vlans)){
+            try {
+                return IntRangeParsing.retrieveIntRanges(vlans);
+            }catch(Exception e){
+                return new ArrayList<>();
+            }
+        }
+        return new ArrayList<>();
+    }
+
+    /**
+     * Get a list of all VLAN IDs reserved between a start and end date/time.
+     * @param start - The start of the time range
+     * @param end - The end of the time range
+     * @return A list of reserved VLAN IDs
+     */
+    public List<ReservedVlanE> getReservedVlans(Date start, Date end){
+        //Get all Reserved VLan between start and end
+        Optional<List<ReservedVlanE>> optResvVlan = resvVlanRepo.findOverlappingInterval(start.toInstant(), end.toInstant());
+        return optResvVlan.isPresent() ? optResvVlan.get() : new ArrayList<>();
+    }
+
+    /**
+     * Build a mapping of UrnE objects to ReservedVlanE objects.
+     * @param rsvVlanList - A list of all reserved VLAN IDs
+     * @return A map of UrnE to ReservedVlanE objects
+     */
+    public Map<UrnE, List<ReservedVlanE>> buildReservedVlanMap(List<ReservedVlanE> rsvVlanList) {
+
+        Map<UrnE, List<ReservedVlanE>> map = new HashMap<>();
+        for(ReservedVlanE resv : rsvVlanList){
+            UrnE resvUrn = resv.getUrn();
+            if(!map.containsKey(resvUrn)){
+                map.put(resvUrn, new ArrayList<>());
+            }
+            map.get(resvUrn).add(resv);
+        }
+        return map;
     }
 }
