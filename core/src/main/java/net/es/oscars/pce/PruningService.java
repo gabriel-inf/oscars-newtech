@@ -2,19 +2,12 @@ package net.es.oscars.pce;
 
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.IntRange;
-import net.es.oscars.dto.rsrc.ReservableBandwidth;
-import net.es.oscars.helpers.IntRangeParsing;
-import net.es.oscars.resv.dao.ReservedBandwidthRepository;
-import net.es.oscars.resv.dao.ReservedVlanRepository;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.topo.beans.TopoEdge;
 import net.es.oscars.topo.beans.Topology;
 import net.es.oscars.topo.dao.UrnRepository;
-import net.es.oscars.topo.ent.IntRangeE;
-import net.es.oscars.topo.ent.ReservableBandwidthE;
 import net.es.oscars.topo.ent.UrnE;
 import net.es.oscars.topo.enums.Layer;
-import net.es.oscars.topo.enums.VertexType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
@@ -68,7 +61,7 @@ public class PruningService {
      */
     public Topology pruneWithBwVlans(Topology topo, Integer Bw, String vlans, Date start, Date end){
         return pruneTopology(topo, Bw, Bw, vlanSvc.getIntRangesFromString(vlans), urnRepo.findAll(),
-                bwSvc.getReservedBandwidth(start, end), vlanSvc.getReservedVlans(start, end));
+                bwSvc.getReservedBandwidthFromRepo(start, end), vlanSvc.getReservedVlans(start, end));
     }
 
     /**
@@ -96,7 +89,7 @@ public class PruningService {
      */
     public Topology pruneWithAZBwVlans(Topology topo, Integer azBw, Integer zaBw, String vlans, Date start, Date end){
         return pruneTopology(topo, azBw, zaBw, vlanSvc.getIntRangesFromString(vlans), urnRepo.findAll(),
-                bwSvc.getReservedBandwidth(start, end), vlanSvc.getReservedVlans(start, end));
+                bwSvc.getReservedBandwidthFromRepo(start, end), vlanSvc.getReservedVlans(start, end));
     }
 
     /**
@@ -122,7 +115,7 @@ public class PruningService {
      */
     public Topology pruneWithBw(Topology topo, Integer Bw, Date start, Date end){
         return pruneTopology(topo, Bw, Bw, new ArrayList<>(), urnRepo.findAll(),
-                bwSvc.getReservedBandwidth(start, end), vlanSvc.getReservedVlans(start, end));
+                bwSvc.getReservedBandwidthFromRepo(start, end), vlanSvc.getReservedVlans(start, end));
     }
 
     /**
@@ -151,7 +144,7 @@ public class PruningService {
      */
     public Topology pruneWithAZBw(Topology topo, Integer azBw, Integer zaBw, Date start, Date end){
         return pruneTopology(topo, azBw, zaBw, new ArrayList<>(), urnRepo.findAll(),
-                bwSvc.getReservedBandwidth(start, end), vlanSvc.getReservedVlans(start, end));
+                bwSvc.getReservedBandwidthFromRepo(start, end), vlanSvc.getReservedVlans(start, end));
     }
 
 
@@ -166,7 +159,7 @@ public class PruningService {
         Date start = sched.getNotBefore();
         Date end = sched.getNotAfter();
         return pruneWithPipe(topo, pipe, urnRepo.findAll(),
-                bwSvc.getReservedBandwidth(start, end), vlanSvc.getReservedVlans(start, end));
+                bwSvc.getReservedBandwidthFromRepo(start, end), vlanSvc.getReservedVlans(start, end));
     }
 
     /**
@@ -302,7 +295,7 @@ public class PruningService {
         Date end = sched.getNotAfter();
 
         return pruneTopology(topo, azBw, zaBw, vlans, urns,
-                bwSvc.getReservedBandwidth(start, end), vlanSvc.getReservedVlans(start, end));
+                bwSvc.getReservedBandwidthFromRepo(start, end), vlanSvc.getReservedVlans(start, end));
     }
 
     /**
@@ -375,8 +368,8 @@ public class PruningService {
         //Build map of URN name to UrnE
         Map<String, UrnE> urnMap = buildUrnMap(urns);
 
-        // Build map of URN to resvBw
-        Map<UrnE, List<ReservedBandwidthE>> resvBwMap = bwSvc.buildReservedBandwidthMap(rsvBwList);
+        // Build map of URN to available bandwidth
+        Map<UrnE, Map<String, Integer>> availBwMap = bwSvc.buildBandwidthAvailabilityMapWithUrns(rsvBwList, urns);
 
         // Build map of URN to resvVlan
         Map<UrnE, List<ReservedVlanE>> resvVlanMap = vlanSvc.buildReservedVlanMap(rsvVlanList);
@@ -388,7 +381,7 @@ public class PruningService {
         // Filter out edges from the topology that do not have sufficient bandwidth available on both terminating nodes.
         // Also filters out all edges where either terminating node is not present in the URN map.
         Set<TopoEdge> availableEdges = topo.getEdges().stream()
-                .filter(e -> bwSvc.bwAvailable(e, azBw, zaBw, urnMap, resvBwMap))
+                .filter(e -> bwSvc.evaluateBandwidthEdge(e, azBw, zaBw, urnMap, availBwMap))
                 .collect(Collectors.toSet());
         // If this is an MPLS topology, or there are no edges left, just take the bandwidth-pruned set of edges.
         // Otherwise, find all the remaining edges that can support the requested VLAN(s).
@@ -414,8 +407,8 @@ public class PruningService {
         //Build map of URN name to UrnE
         Map<String, UrnE> urnMap = buildUrnMap(urns);
 
-        // Build map of URN to resvBw
-        Map<UrnE, List<ReservedBandwidthE>> resvBwMap = bwSvc.buildReservedBandwidthMap(rsvBwList);
+        // Build map of URN to available bandwidth
+        Map<UrnE, Map<String, Integer>> availBwMap = bwSvc.buildBandwidthAvailabilityMapWithUrns(rsvBwList, urns);
 
         // Build map of URN to resvVlan
         Map<UrnE, List<ReservedVlanE>> resvVlanMap = vlanSvc.buildReservedVlanMap(rsvVlanList);
@@ -427,7 +420,7 @@ public class PruningService {
         // Filter out edges from the topology that do not have sufficient bandwidth available on both terminating nodes.
         // Also filters out all edges where either terminating node is not present in the URN map.
         Set<TopoEdge> availableEdges = topo.getEdges().stream()
-                .filter(e -> bwSvc.bwAvailableUni(e, theBw, urnMap, resvBwMap))
+                .filter(e -> bwSvc.evaluateBandwidthEdgeUni(e, theBw, urnMap, availBwMap))
                 .collect(Collectors.toSet());
         // If this is an MPLS topology, or there are no edges left, just take the bandwidth-pruned set of edges.
         // Otherwise, find all the remaining edges that can support the requested VLAN(s).
