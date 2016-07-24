@@ -35,6 +35,9 @@ public class TopPCE {
     private NonPalindromicalPCE nonPalindromicPCE;
 
     @Autowired
+    private EroPCE eroPCE;
+
+    @Autowired
     private VlanService vlanService;
 
     @Autowired
@@ -143,13 +146,14 @@ public class TopPCE {
      */
     private Integer handleRequestedPipes(List<RequestedVlanPipeE> pipes, ScheduleSpecificationE schedSpec,
                                       Set<ReservedVlanJunctionE> simpleJunctions,  Set<ReservedMplsPipeE> reservedMplsPipes,
-                                         Set<ReservedEthPipeE> reservedEthPipes) {
-
+                                         Set<ReservedEthPipeE> reservedEthPipes)
+    {
         // The number of requested pipes successfully reserved
         Integer numReserved = 0;
 
         // Loop through all requested pipes
-        for(RequestedVlanPipeE pipe: pipes){
+        for(RequestedVlanPipeE pipe: pipes)
+        {
 
             // Update list of reserved bandwidths
             List<ReservedBandwidthE> rsvBandwidths = bwService.createReservedBandwidthList(simpleJunctions, reservedMplsPipes,
@@ -201,7 +205,19 @@ public class TopPCE {
         Map<String, List<TopoEdge>> eroMap = null;
 
 
-        if(pipe.getEroPalindromic().equals(PalindromicType.PALINDROME))
+        if(!pipe.getAzERO().isEmpty() || !pipe.getZaERO().isEmpty())
+        {
+            try
+            {
+                log.info("Attempting to reserve specified Explicit Route Object");
+                eroMap = eroPCE.computeSpecifiedERO(pipe, schedSpec, rsvBandwidths, rsvVlans);
+            }
+            catch(PCEException e)
+            {
+                log.error("PCE Unsuccessful", e);
+            }
+        }
+        else if(pipe.getEroPalindromic().equals(PalindromicType.PALINDROME))
         {
             try{
                 log.info("Entering Palindromical PCE");
