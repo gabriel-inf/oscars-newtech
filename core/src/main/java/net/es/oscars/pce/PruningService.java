@@ -61,7 +61,7 @@ public class PruningService {
      */
     public Topology pruneWithBwVlans(Topology topo, Integer Bw, String vlans, Date start, Date end){
         return pruneTopology(topo, Bw, Bw, vlanSvc.getIntRangesFromString(vlans), urnRepo.findAll(),
-                bwSvc.getReservedBandwidthFromRepo(start, end), vlanSvc.getReservedVlans(start, end));
+                bwSvc.getReservedBandwidthFromRepo(start, end), vlanSvc.getReservedVlansFromRepo(start, end));
     }
 
     /**
@@ -89,7 +89,7 @@ public class PruningService {
      */
     public Topology pruneWithAZBwVlans(Topology topo, Integer azBw, Integer zaBw, String vlans, Date start, Date end){
         return pruneTopology(topo, azBw, zaBw, vlanSvc.getIntRangesFromString(vlans), urnRepo.findAll(),
-                bwSvc.getReservedBandwidthFromRepo(start, end), vlanSvc.getReservedVlans(start, end));
+                bwSvc.getReservedBandwidthFromRepo(start, end), vlanSvc.getReservedVlansFromRepo(start, end));
     }
 
     /**
@@ -115,7 +115,7 @@ public class PruningService {
      */
     public Topology pruneWithBw(Topology topo, Integer Bw, Date start, Date end){
         return pruneTopology(topo, Bw, Bw, new ArrayList<>(), urnRepo.findAll(),
-                bwSvc.getReservedBandwidthFromRepo(start, end), vlanSvc.getReservedVlans(start, end));
+                bwSvc.getReservedBandwidthFromRepo(start, end), vlanSvc.getReservedVlansFromRepo(start, end));
     }
 
     /**
@@ -144,7 +144,7 @@ public class PruningService {
      */
     public Topology pruneWithAZBw(Topology topo, Integer azBw, Integer zaBw, Date start, Date end){
         return pruneTopology(topo, azBw, zaBw, new ArrayList<>(), urnRepo.findAll(),
-                bwSvc.getReservedBandwidthFromRepo(start, end), vlanSvc.getReservedVlans(start, end));
+                bwSvc.getReservedBandwidthFromRepo(start, end), vlanSvc.getReservedVlansFromRepo(start, end));
     }
 
 
@@ -159,7 +159,7 @@ public class PruningService {
         Date start = sched.getNotBefore();
         Date end = sched.getNotAfter();
         return pruneWithPipe(topo, pipe, urnRepo.findAll(),
-                bwSvc.getReservedBandwidthFromRepo(start, end), vlanSvc.getReservedVlans(start, end));
+                bwSvc.getReservedBandwidthFromRepo(start, end), vlanSvc.getReservedVlansFromRepo(start, end));
     }
 
     /**
@@ -295,7 +295,7 @@ public class PruningService {
         Date end = sched.getNotAfter();
 
         return pruneTopology(topo, azBw, zaBw, vlans, urns,
-                bwSvc.getReservedBandwidthFromRepo(start, end), vlanSvc.getReservedVlans(start, end));
+                bwSvc.getReservedBandwidthFromRepo(start, end), vlanSvc.getReservedVlansFromRepo(start, end));
     }
 
     /**
@@ -372,7 +372,7 @@ public class PruningService {
         Map<UrnE, Map<String, Integer>> availBwMap = bwSvc.buildBandwidthAvailabilityMapWithUrns(rsvBwList, urns);
 
         // Build map of URN to resvVlan
-        Map<UrnE, List<ReservedVlanE>> resvVlanMap = vlanSvc.buildReservedVlanMap(rsvVlanList);
+        Map<UrnE, Set<Integer>> availVlanMap = vlanSvc.buildAvailableVlanIdMap(urnMap, rsvVlanList);
 
         // Copy the original topology's layer and set of vertices.
         Topology pruned = new Topology();
@@ -388,7 +388,7 @@ public class PruningService {
         if(pruned.getLayer() == Layer.MPLS || pruned.getLayer() == null || availableEdges.isEmpty()){
             pruned.setEdges(availableEdges);
         }else {
-            pruned.setEdges(vlanSvc.findEdgesWithAvailableVlans(availableEdges, urnMap, vlans, resvVlanMap));
+            pruned.setEdges(vlanSvc.findMaxValidEdgeSet(availableEdges, urnMap, vlans, availVlanMap));
         }
         return pruned;
     }
@@ -411,7 +411,7 @@ public class PruningService {
         Map<UrnE, Map<String, Integer>> availBwMap = bwSvc.buildBandwidthAvailabilityMapWithUrns(rsvBwList, urns);
 
         // Build map of URN to resvVlan
-        Map<UrnE, List<ReservedVlanE>> resvVlanMap = vlanSvc.buildReservedVlanMap(rsvVlanList);
+        Map<UrnE, Set<Integer>> availVlanMap = vlanSvc.buildAvailableVlanIdMap(urnMap, rsvVlanList);
 
         // Copy the original topology's layer and set of vertices.
         Topology pruned = new Topology();
@@ -427,7 +427,7 @@ public class PruningService {
         if(pruned.getLayer() == Layer.MPLS || pruned.getLayer() == null || availableEdges.isEmpty()){
             pruned.setEdges(availableEdges);
         }else {
-            pruned.setEdges(vlanSvc.findEdgesWithAvailableVlans(availableEdges, urnMap, vlans, resvVlanMap));
+            pruned.setEdges(vlanSvc.findMaxValidEdgeSet(availableEdges, urnMap, vlans, availVlanMap));
         }
         return pruned;
     }

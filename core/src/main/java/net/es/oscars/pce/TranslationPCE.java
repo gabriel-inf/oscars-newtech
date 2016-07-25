@@ -72,7 +72,7 @@ public class TranslationPCE {
                 pceAssistant.decideJunctionType(urn.getDeviceModel()));
 
         // Select a VLAN ID for this junction
-        Map<RequestedVlanFixtureE, Integer> fixVlanMap = vlanService.selectVLANsForJunction(req_j, sched, simpleJunctions, reservedVlans);
+        Map<RequestedVlanFixtureE, Integer> fixVlanMap = vlanService.selectVLANsForJunction(req_j, reservedVlans);
         if(fixVlanMap.containsValue(-1)){
             return null;
         }
