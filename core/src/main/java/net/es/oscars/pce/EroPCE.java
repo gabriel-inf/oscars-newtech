@@ -77,7 +77,7 @@ public class EroPCE
         {
             if(badEdge.getA().getVertexType().equals(VertexType.SWITCH) || badEdge.getZ().getVertexType().equals(VertexType.SWITCH))
             {
-                if(!multiLayerTopoZaDirection.getVertices().contains(badEdge))
+                if(!multiLayerTopoZaDirection.getVertices().contains(badEdge.getA()) && !multiLayerTopoZaDirection.getVertices().contains(badEdge.getZ()))
                 {
                     throw new PCEException("All ETHERNET-layer devices and ports must be represented in both the forward-direction and reverse-direction EROs");
                 }
@@ -88,7 +88,7 @@ public class EroPCE
         {
             if(badEdge.getA().getVertexType().equals(VertexType.SWITCH) || badEdge.getZ().getVertexType().equals(VertexType.SWITCH))
             {
-                if(!multiLayerTopoAzDirection.getVertices().contains(badEdge))
+                if(!multiLayerTopoAzDirection.getVertices().contains(badEdge.getA()) && !multiLayerTopoAzDirection.getVertices().contains(badEdge.getZ()))
                 {
                     throw new PCEException("All ETHERNET-layer devices and ports must be represented in both the forward-direction and reverse-direction EROs");
                 }
