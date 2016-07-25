@@ -1,0 +1,224 @@
+package net.es.oscars.helpers;
+
+import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.resv.ent.*;
+import net.es.oscars.topo.dao.UrnRepository;
+import net.es.oscars.topo.ent.UrnE;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+@Slf4j
+@Component
+public class ReservedEntityDecomposer {
+
+    @Autowired
+    private UrnRepository urnRepo;
+
+    /*
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        Decomposing a Reserved Blueprint
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    */
+
+    /**
+     * Convert a reserved blueprint into a set of URNs. Retrieves URNs from repository.
+     * @param resBlueprint - The reserved blueprint
+     * @return Set of all URNs that make up the reserved pipes/junction/fixtures in the blueprint.
+     */
+    public Set<UrnE> decomposeReservedBlueprint(ReservedBlueprintE resBlueprint){
+        Map<String, UrnE> urnMap = buildUrnMap();
+        ReservedVlanFlowE flow = resBlueprint.getVlanFlow();
+        return decomposeFlowElements(flow.getEthPipes(), flow.getMplsPipes(), flow.getJunctions(), urnMap);
+    }
+
+    /**
+     * Convert a reserved blueprint into a set of URNs. Retrieves URNs from input list of URNs
+     * @param resBlueprint - The reserved blueprint
+     * @param urns - A list of URNs
+     * @return Set of all URNs that make up the reserved pipes/junction/fixtures in the blueprint.
+     */
+    public Set<UrnE> decomposeReservedBlueprint(ReservedBlueprintE resBlueprint, List<UrnE> urns){
+        Map<String, UrnE> urnMap = buildUrnMap(urns);
+        ReservedVlanFlowE flow = resBlueprint.getVlanFlow();
+        return decomposeFlowElements(flow.getEthPipes(), flow.getMplsPipes(), flow.getJunctions(), urnMap);
+    }
+
+    /**
+     * Convert a reserved blueprint into a set of URNs. Retrieves URNs from input URN map
+     * @param resBlueprint - The reserved blueprint
+     * @param urnMap - A map of URN strings to URN objects
+     * @return Set of all URNs that make up the reserved pipes/junction/fixtures in the blueprint.
+     */
+    public Set<UrnE> decomposeReservedBlueprint(ReservedBlueprintE resBlueprint, Map<String, UrnE> urnMap){
+        ReservedVlanFlowE flow = resBlueprint.getVlanFlow();
+        return decomposeFlowElements(flow.getEthPipes(), flow.getMplsPipes(), flow.getJunctions(), urnMap);
+    }
+
+    /*
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        Decomposing Reserved ETHERNET Pipe
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    */
+
+    /**
+     * Convert a reserved Ethernet pipe into a set of URNs. Retrieves URNs from URN repository.
+     * @param pipe - A reserved Ethernet pipe
+     * @return Set of all URNs that make up the reserved junctions, fixtures, AND az/za EROs in the pipe
+     */
+    public Set<UrnE> decomposeEthPipe(ReservedEthPipeE pipe){
+        Map<String, UrnE> urnMap = buildUrnMap();
+        return decomposePipeElements(pipe.getAJunction(), pipe.getZJunction(), pipe.getAzERO(), pipe.getZaERO(), urnMap);
+    }
+
+    /**
+     * Convert a reserved Ethernet pipe into a set of URNs. Retrieves URNs from input URN list.
+     * @param pipe - A reserved Ethernet pipe
+     * @param urns - A list of URN objects
+     * @return Set of all URNs that make up the reserved junctions, fixtures, AND az/za EROs in the pipe
+     */
+    public Set<UrnE> decomposeEthPipe(ReservedEthPipeE pipe, List<UrnE> urns){
+        Map<String, UrnE> urnMap = buildUrnMap(urns);
+        return decomposePipeElements(pipe.getAJunction(), pipe.getZJunction(), pipe.getAzERO(), pipe.getZaERO(), urnMap);
+    }
+
+    /**
+     * Convert a reserved Ethernet pipe into a set of URNs. Retrieves URNs from input URN map.
+     * @param pipe - A reserved Ethernet pipe
+     * @param urnMap - A map of URN strings to URN objects
+     * @return Set of all URNs that make up the reserved junctions, fixtures, AND az/za EROs in the pipe
+     */
+    public Set<UrnE> decomposeEthPipe(ReservedEthPipeE pipe, Map<String, UrnE> urnMap){
+        return decomposePipeElements(pipe.getAJunction(), pipe.getZJunction(), pipe.getAzERO(), pipe.getZaERO(), urnMap);
+    }
+
+    /*
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        Decomposing Reserved MPLS Pipe
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    */
+
+    /**
+     * Convert a reserved MPLS pipe into a set of URNs. Retrieves URNs from URN repository.
+     * @param pipe - A MPLS Ethernet pipe
+     * @return Set of all URNs that make up the reserved junctions, fixtures, AND az/za EROs in the pipe
+     */
+    public Set<UrnE> decomposeMplsPipe(ReservedMplsPipeE pipe){
+        Map<String, UrnE> urnMap = buildUrnMap();
+        return decomposePipeElements(pipe.getAJunction(), pipe.getZJunction(), pipe.getAzERO(), pipe.getZaERO(), urnMap);
+    }
+
+    /**
+     * Convert a reserved MPLS pipe into a set of URNs. Retrieves URNs from input URN list.
+     * @param pipe - A reserved MPLS pipe
+     * @param urns - A list of URN objects
+     * @return Set of all URNs that make up the reserved junctions, fixtures, AND az/za EROs in the pipe
+     */
+    public Set<UrnE> decomposeMplsPipe(ReservedMplsPipeE pipe, List<UrnE> urns){
+        Map<String, UrnE> urnMap = buildUrnMap(urns);
+        return decomposePipeElements(pipe.getAJunction(), pipe.getZJunction(), pipe.getAzERO(), pipe.getZaERO(), urnMap);
+    }
+
+    /**
+     * Convert a reserved MPLS pipe into a set of URNs. Retrieves URNs from input URN map.
+     * @param pipe - A reserved MPLS pipe
+     * @param urnMap - A map of URN strings to URN objects
+     * @return Set of all URNs that make up the reserved junctions, fixtures, AND az/za EROs in the pipe
+     */
+    public Set<UrnE> decomposeMplsPipe(ReservedMplsPipeE pipe, Map<String, UrnE> urnMap){
+        return decomposePipeElements(pipe.getAJunction(), pipe.getZJunction(), pipe.getAzERO(), pipe.getZaERO(), urnMap);
+    }
+
+    /*
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        Decomposing Reserved Junction
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    */
+
+    /**
+     * Convert a requested junction into a set of URNs. Retrieves URNs from junction and fixtures, no passed in URNs needed.
+     * @param junction - The reserved junction
+     * @return Set of all URNs making up the junction (device) and fixtures (ports)
+     */
+    public Set<UrnE> decomposeJunction(ReservedVlanJunctionE junction) {
+        Set<UrnE> urns = new HashSet<>();
+        urns.add(junction.getDeviceUrn());
+        urns.addAll(junction.getFixtures().stream().map(ReservedVlanFixtureE::getIfceUrn).collect(Collectors.toSet()));
+        return urns;
+    }
+
+    /*
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        Decompose Elements from a Flow
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    */
+
+    /**
+     * Taking the key elements from a Flow, convert the Ethernet and MPLS pipes, along with all single junctions,
+     * into one big set of URNs.
+     * @param ethPipes - The reserved Ethernet pipes
+     * @param mplsPipes - The reserved MPLS pipes
+     * @param junctions - The reserved junctions
+     * @param urnMap - The URN map
+     * @return Set of all URNs across all pipes/junctions.
+     */
+    private Set<UrnE> decomposeFlowElements(Set<ReservedEthPipeE> ethPipes, Set<ReservedMplsPipeE> mplsPipes,
+                                                 Set<ReservedVlanJunctionE> junctions, Map<String, UrnE> urnMap){
+        Set<UrnE> urns = new HashSet<>();
+        urns.addAll(ethPipes.stream().map(pipe -> decomposeEthPipe(pipe, urnMap)).flatMap(Collection::stream).collect(Collectors.toSet()));
+        urns.addAll(mplsPipes.stream().map(pipe -> decomposeMplsPipe(pipe, urnMap)).flatMap(Collection::stream).collect(Collectors.toSet()));
+        urns.addAll(junctions.stream().map(this::decomposeJunction).flatMap(Collection::stream).collect(Collectors.toSet()));
+        return urns;
+    }
+
+    /*
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        Decompose Elements from a Pipe
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    */
+
+    /**
+     * Take in the key elements from a pipe, convert them into set of URNs.
+     * @param aJunction - The "A" junction of the pipe
+     * @param zJunction - The "Z" junction of the pipe
+     * @param azERO - List of strings representing the AZ path taken by the pipe (excluding junctions)
+     * @param zaERO - List of strings representing the ZA path taken by the pipe (excluding junctions)
+     * @param urnMap - Map of URN strings to Urn Entities
+     * @return Union of all URNs used across the reserved pipe.
+     */
+    private Set<UrnE> decomposePipeElements(ReservedVlanJunctionE aJunction, ReservedVlanJunctionE zJunction,
+                                            List<String> azERO, List<String> zaERO, Map<String, UrnE> urnMap) {
+        Set<UrnE> urns = new HashSet<>();
+        urns.addAll(decomposeJunction(aJunction));
+        urns.addAll(decomposeJunction(zJunction));
+        urns.addAll(azERO.stream().filter(urnMap::containsKey).map(urnMap::get).collect(Collectors.toSet()));
+        urns.addAll(zaERO.stream().filter(urnMap::containsKey).map(urnMap::get).collect(Collectors.toSet()));
+        return urns;
+    }
+
+    /*
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        Building a URN map
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    */
+
+    /**
+     * Retrive URNs from the URN repository, build a map.
+     * @return Map of URN string to URN entity
+     */
+    private Map<String, UrnE> buildUrnMap(){
+        List<UrnE> allUrns = urnRepo.findAll();
+        return allUrns.stream().collect(Collectors.toMap(UrnE::getUrn, u -> u));
+    }
+
+    /**
+     * Given a list of URN entities, build a map.
+     * @param urns - List of URNs
+     * @return Map of URN string to URN entity
+     */
+    private Map<String, UrnE> buildUrnMap(List<UrnE> urns){
+        return urns.stream().collect(Collectors.toMap(UrnE::getUrn, u -> u));
+    }
+}
