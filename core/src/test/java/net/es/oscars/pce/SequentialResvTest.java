@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.CoreUnitTestConfiguration;
 import net.es.oscars.dto.spec.PalindromicType;
 import net.es.oscars.pss.PSSException;
-import net.es.oscars.resv.RequestedEntityBuilder;
+import net.es.oscars.helpers.RequestedEntityBuilder;
 import net.es.oscars.resv.dao.ReservedBandwidthRepository;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.resv.svc.ResvService;
