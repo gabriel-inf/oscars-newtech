@@ -43,11 +43,40 @@ public class EroPCE
      */
     public Map<String, List<TopoEdge>> computeSpecifiedERO(RequestedVlanPipeE requestPipe, ScheduleSpecificationE requestSched, List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList) throws PCEException
     {
+        log.info("Entering EroPCE.");
+
+        UrnE srcPortURN = requestPipe.getAJunction().getFixtures().iterator().next().getPortUrn();
+        UrnE dstPortURN = requestPipe.getZJunction().getFixtures().iterator().next().getPortUrn();
+        TopoVertex srcPort = new TopoVertex(srcPortURN.getUrn(), VertexType.PORT);
+        TopoVertex dstPort = new TopoVertex(dstPortURN.getUrn(), VertexType.PORT);
+        String srcPortName = srcPortURN.getUrn();
+        String dstPortName = dstPortURN.getUrn();
+
         Topology multiLayerTopoAzDirection = topoService.getMultilayerTopology();
         Topology multiLayerTopoZaDirection = topoService.getMultilayerTopology();   // Same as AZ initially
 
-        List<String> requestedAzERO = requestPipe.getAzERO();
-        List<String> requestedZaERO = requestPipe.getZaERO();
+        List<String> requestedAzERO = requestPipe.getAzERO().stream().collect(Collectors.toList());
+        List<String> requestedZaERO = requestPipe.getZaERO().stream().collect(Collectors.toList());
+
+        if(!requestedAzERO.get(0).equals(requestPipe.getAJunction().getDeviceUrn().getUrn()) || !requestedAzERO.get(requestedAzERO.size()-1).equals(requestPipe.getZJunction().getDeviceUrn().getUrn()))
+        {
+            throw new PCEException("Requested ERO must begin at source-device URN, and terminate at destination-device URN.");
+        }
+
+        if(!requestedZaERO.get(0).equals(requestPipe.getZJunction().getDeviceUrn().getUrn()) || !requestedZaERO.get(requestedZaERO.size()-1).equals(requestPipe.getAJunction().getDeviceUrn().getUrn()))
+        {
+            throw new PCEException("Requested ERO must begin at source-device URN, and terminate at destination-device URN.");
+        }
+
+        if(requestedAzERO == null || requestedZaERO == null)
+            throw new PCEException("Requested ERO may not be null.");
+        if(requestedAzERO.isEmpty() || requestedZaERO.isEmpty())
+            throw new PCEException("Requested ERO must include at least one URN.");
+
+        requestedAzERO.add(0, srcPortName);
+        requestedAzERO.add(dstPortName);
+        requestedZaERO.add(0, dstPortName);
+        requestedZaERO.add(srcPortName);
 
         Set<TopoVertex> azURNs = multiLayerTopoAzDirection.getVertices().stream()
                 .filter(v -> requestedAzERO.contains(v.getUrn()))
@@ -105,12 +134,6 @@ public class EroPCE
         if(!prunedTopoZA.equals(multiLayerTopoZaDirection))
             throw new PCEException("Requested ZA ERO unavailable; failed to complete Patch Computation");
 
-        UrnE srcPortURN = requestPipe.getAJunction().getFixtures().iterator().next().getPortUrn();
-        UrnE dstPortURN = requestPipe.getZJunction().getFixtures().iterator().next().getPortUrn();
-
-        TopoVertex srcPort = new TopoVertex(srcPortURN.getUrn(), VertexType.PORT);
-        TopoVertex dstPort = new TopoVertex(dstPortURN.getUrn(), VertexType.PORT);
-
         // Shortest path routing
         List<TopoEdge> azEroCalculated = dijkstraPCE.computeShortestPathEdges(prunedTopoAZ, srcPort, dstPort);
         List<TopoEdge> zaEroCalculated = dijkstraPCE.computeShortestPathEdges(prunedTopoZA, dstPort, srcPort);
@@ -124,6 +147,7 @@ public class EroPCE
         List<TopoVertex> zaEroVertices = dijkstraPCE.translatePathEdgesToVertices(zaEroCalculated);
         List<String> azEroStrings = dijkstraPCE.translatePathVerticesToStrings(azEroVertices);
         List<String> zaEroStrings = dijkstraPCE.translatePathVerticesToStrings(zaEroVertices);
+
 
         if(!azEroStrings.equals(requestedAzERO) || !zaEroStrings.equals(requestedZaERO))
         {
