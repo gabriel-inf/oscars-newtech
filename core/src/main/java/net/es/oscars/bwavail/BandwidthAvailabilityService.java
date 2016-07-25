@@ -96,7 +96,7 @@ public class BandwidthAvailabilityService {
 
                 // Filter reservations to those which effect the path.
                 pathRsvList = rsvList.stream().filter(rsv ->
-                        urnPath.contains(rsv.getUrn().toString()))
+                        urnPath.contains(rsv.getUrn().getUrn()))
                         .collect(Collectors.toList());
 
                 // Build a map of URNs to reservations.
@@ -141,10 +141,10 @@ public class BandwidthAvailabilityService {
                     urnE.getReservableBandwidth().getBandwidth() - rsvBw));
 
             // Add subsequent bandwidth events for URN.
-            for (BwEvent bwE : eventMap.get(urnE))
+            for (BwEvent bwEvent : eventMap.get(urnE))
             {
                 // Next event is after interval end time.
-                if (bwE.getTime().isAfter(request.getEndDate().toInstant()))
+                if (bwEvent.getTime().isAfter(request.getEndDate().toInstant()))
                 {
                     // Add final bandwidth event.
                     bwMap.get(urnE).add(new
@@ -156,8 +156,8 @@ public class BandwidthAvailabilityService {
                 }
 
                 // Calculate bandwidth at URN and add bandwidth event.
-                rsvBw += bwE.getBw();
-                bwMap.get(urnE).add(new BwEvent(bwE.getTime(),
+                rsvBw += bwEvent.getBw();
+                bwMap.get(urnE).add(new BwEvent(bwEvent.getTime(),
                         urnE.getReservableBandwidth().getBandwidth() - rsvBw));
             }
         }
