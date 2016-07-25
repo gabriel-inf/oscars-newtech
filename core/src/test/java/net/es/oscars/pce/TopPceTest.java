@@ -3,6 +3,7 @@ package net.es.oscars.pce;
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.CoreUnitTestConfiguration;
 import net.es.oscars.pss.PSSException;
+import net.es.oscars.resv.RequestedEntityBuilder;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.topo.TopologyBuilder;
 import net.es.oscars.dto.spec.PalindromicType;
@@ -34,10 +35,13 @@ public class TopPceTest {
     private TopPCE topPCE;
 
     @Autowired
-    private TestEntityBuilder testBuilder;
+    private RequestedEntityBuilder testBuilder;
 
     @Autowired
     private TopologyBuilder topologyBuilder;
+
+    @Autowired
+    private RequestedEntityBuilder requestBuilder;
 
 
     @Test

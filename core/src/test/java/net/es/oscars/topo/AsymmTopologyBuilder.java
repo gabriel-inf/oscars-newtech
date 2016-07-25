@@ -1,19 +1,15 @@
 package net.es.oscars.topo;
 
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.pce.TestEntityBuilder;
+import net.es.oscars.pce.RepoEntityBuilder;
 import net.es.oscars.topo.beans.TopoEdge;
 import net.es.oscars.topo.beans.TopoVertex;
-import net.es.oscars.topo.ent.UrnAdjcyE;
-import net.es.oscars.topo.ent.UrnE;
 import net.es.oscars.topo.enums.Layer;
 import net.es.oscars.topo.enums.VertexType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Created by Jeremy on 7/8/2016.
@@ -23,7 +19,7 @@ import java.util.stream.Stream;
 public class AsymmTopologyBuilder
 {
     @Autowired
-    private TestEntityBuilder testBuilder;
+    private RepoEntityBuilder testBuilder;
 
 
     public void buildAsymmTopo1()

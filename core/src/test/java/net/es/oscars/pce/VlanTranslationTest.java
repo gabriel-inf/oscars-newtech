@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.CoreUnitTestConfiguration;
 import net.es.oscars.dto.spec.PalindromicType;
 import net.es.oscars.pss.PSSException;
+import net.es.oscars.resv.RequestedEntityBuilder;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.topo.VlanTranslationTopologyBuilder;
 import net.es.oscars.topo.ent.UrnE;
@@ -28,7 +29,7 @@ public class VlanTranslationTest {
     private TopPCE topPCE;
 
     @Autowired
-    private TestEntityBuilder testBuilder;
+    private RequestedEntityBuilder testBuilder;
 
     @Autowired
     private VlanTranslationTopologyBuilder vlanTopologyBuilder;
