@@ -1,7 +1,7 @@
 package net.es.oscars.topo;
 
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.pce.TestEntityBuilder;
+import net.es.oscars.pce.RepoEntityBuilder;
 import net.es.oscars.topo.beans.TopoEdge;
 import net.es.oscars.topo.beans.TopoVertex;
 import net.es.oscars.topo.enums.Layer;
@@ -19,7 +19,7 @@ import java.util.*;
 public class TopologyBuilder
 {
     @Autowired
-    private TestEntityBuilder testBuilder;
+    private RepoEntityBuilder testBuilder;
 
 
     public void buildTopo1()
