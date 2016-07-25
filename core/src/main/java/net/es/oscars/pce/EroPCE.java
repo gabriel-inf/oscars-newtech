@@ -93,7 +93,7 @@ public class EroPCE
         // Bandwidth and Vlan pruning
         Topology prunedTopoAZ = pruningService.pruneWithPipeAZ(multiLayerTopoAzDirection, requestPipe, requestSched, rsvBwList, rsvVlanList);
         Topology prunedTopoZA = pruningService.pruneWithPipeZA(multiLayerTopoZaDirection, requestPipe, requestSched, rsvBwList, rsvVlanList);
-        //TODO: make sure the following line prunes based on the sum of both directions!!!!!
+        //TODO: make sure the following line prunes based on the combination of both directions!!!!!
         Topology prunedTopo = pruningService.pruneWithPipe(multiLayerTopo, requestPipe, requestSched, rsvBwList, rsvVlanList);
 
         if(!prunedTopoAZ.equals(multiLayerTopoAzDirection))
