@@ -144,26 +144,23 @@ public class BandwidthService {
     }
 
     /**
-     * Build a map of the requested bandwidth at each port TopoVertex contained within the az and za EROs.
-     * @param azERO - The path in the AZ direction
-     * @param zaERO - The path in the ZA direction
-     * @param azMbps - The requested bandwidth in the AZ direction
-     * @param zaMbps - The requested bandwidth in the ZA direction
+     * Build a map of the requested bandwidth at each port TopoVertex contained within the passed in EROs
+     * @param EROs - List of paths
+     * @param bandwidths - List of bandwidths
      * @return A mapping from TopoVertex (ports only) to requested "Ingress" and "Egress" bandwidth
      */
-    public Map<TopoVertex, Map<String, Integer>> buildRequestedBandwidthMap(List<TopoEdge> azERO, List<TopoEdge> zaERO,
-                                                                            Integer azMbps, Integer zaMbps){
+    public Map<TopoVertex, Map<String, Integer>> buildRequestedBandwidthMap(List<List<TopoEdge>> EROs,
+                                                                            List<Integer> bandwidths){
         // Map a port node to a map of "Ingress" and "Egress" requested bandwidth values
         Map<TopoVertex, Map<String, Integer>> requestedBandwidthMap = new HashMap<>();
 
         // Iterate through the AZ edges, update the map for each port node found in the path
-        for(TopoEdge azEdge : azERO){
-            updateRequestedBandwidthMap(azEdge, azMbps, requestedBandwidthMap);
-        }
-
-        // Iterate through the ZA edges, update the map for each port node in the path
-        for(TopoEdge zaEdge : zaERO){
-            updateRequestedBandwidthMap(zaEdge, zaMbps, requestedBandwidthMap);
+        for(Integer i = 0 ; i < EROs.size(); i++){
+            List<TopoEdge> edges = EROs.get(i);
+            Integer bandwidth = bandwidths.get(i);
+            for(TopoEdge edge: edges){
+                updateRequestedBandwidthMap(edge, bandwidth, requestedBandwidthMap);
+            }
         }
 
         return requestedBandwidthMap;

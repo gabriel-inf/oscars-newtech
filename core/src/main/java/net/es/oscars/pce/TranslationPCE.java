@@ -148,7 +148,9 @@ public class TranslationPCE {
 
         // Returns a mapping from topovertices (ports) to an "Ingress"/"Egress" map of the total Ingress/Egress
         // Requested bandwidth at that port across both the azERO and the zaERO
-        Map<TopoVertex, Map<String, Integer>> requestedBandwidthMap = bwService.buildRequestedBandwidthMap(azERO, zaERO, azMbps, zaMbps);
+        List<List<TopoEdge>> EROs = Arrays.asList(azERO, zaERO);
+        List<Integer> bandwidths = Arrays.asList(azMbps, zaMbps);
+        Map<TopoVertex, Map<String, Integer>> requestedBandwidthMap = bwService.buildRequestedBandwidthMap(EROs, bandwidths);
 
         // Confirm that there is sufficient bandwidth to meet the request (given what has been reserved so far)
         // Palindromic EROs -- evaluate both directions at each port - traffic flows both ways
