@@ -43,30 +43,19 @@ public class EroPCE
      */
     public Map<String, List<TopoEdge>> computeSpecifiedERO(RequestedVlanPipeE requestPipe, ScheduleSpecificationE requestSched, List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList) throws PCEException
     {
-        Topology multiLayerTopo = topoService.getMultilayerTopology();
         Topology multiLayerTopoAzDirection = topoService.getMultilayerTopology();
-        Topology multiLayerTopoZaDirection = topoService.getMultilayerTopology();
+        Topology multiLayerTopoZaDirection = topoService.getMultilayerTopology();   // Same as AZ initially
 
         List<String> requestedAzERO = requestPipe.getAzERO();
         List<String> requestedZaERO = requestPipe.getZaERO();
 
-        Set<TopoVertex> azURNs = multiLayerTopo.getVertices().stream()
+        Set<TopoVertex> azURNs = multiLayerTopoAzDirection.getVertices().stream()
                 .filter(v -> requestedAzERO.contains(v.getUrn()))
                 .collect(Collectors.toSet());
 
-        Set<TopoVertex> zaURNs = multiLayerTopo.getVertices().stream()
+        Set<TopoVertex> zaURNs = multiLayerTopoZaDirection.getVertices().stream()
                 .filter(v -> requestedZaERO.contains(v.getUrn()))
                 .collect(Collectors.toSet());
-
-        Set<TopoVertex> bidirectionalURNs = new HashSet<>();        // Only needed for bidirectional pruning
-
-        for(TopoVertex az : azURNs)
-        {
-            if(zaURNs.contains(az))
-            {
-                bidirectionalURNs.add(az);
-            }
-        }
 
         Set<TopoEdge> edgestoKeepAz = multiLayerTopoAzDirection.getEdges().stream()
                 .filter(e -> (azURNs.contains(e.getA()) && azURNs.contains(e.getZ())) || (azURNs.contains(e.getZ()) && azURNs.contains(e.getA())))
@@ -76,39 +65,51 @@ public class EroPCE
                 .filter(e -> (zaURNs.contains(e.getA()) && zaURNs.contains(e.getZ())) || (zaURNs.contains(e.getZ()) && zaURNs.contains(e.getA())))
                 .collect(Collectors.toSet());
 
-        Set<TopoEdge> edgestoKeepBidirectional = multiLayerTopo.getEdges().stream()
-                .filter(e -> (bidirectionalURNs.contains(e.getA()) && bidirectionalURNs.contains(e.getZ())) || (bidirectionalURNs.contains(e.getZ()) && bidirectionalURNs.contains(e.getA())))
-                .collect(Collectors.toSet());
-
         // Prune all URNs from topology not matching specified EROs
         multiLayerTopoAzDirection.getVertices().retainAll(azURNs);
         multiLayerTopoZaDirection.getVertices().retainAll(zaURNs);
-        multiLayerTopo.getVertices().retainAll(bidirectionalURNs);
 
         // Prune all Edges from topology not beginning/ending at specified ERO URNs
         multiLayerTopoAzDirection.getEdges().retainAll(edgestoKeepAz);
         multiLayerTopoZaDirection.getEdges().retainAll(edgestoKeepZa);
-        multiLayerTopo.getEdges().retainAll(edgestoKeepBidirectional);
+
+        for(TopoEdge badEdge : multiLayerTopoAzDirection.getEdges())
+        {
+            if(badEdge.getA().getVertexType().equals(VertexType.SWITCH) || badEdge.getZ().getVertexType().equals(VertexType.SWITCH))
+            {
+                if(!multiLayerTopoZaDirection.getVertices().contains(badEdge))
+                {
+                    throw new PCEException("All ETHERNET-layer devices and ports must be represented in both the forward-direction and reverse-direction EROs");
+                }
+            }
+        }
+
+        for(TopoEdge badEdge : multiLayerTopoZaDirection.getEdges())
+        {
+            if(badEdge.getA().getVertexType().equals(VertexType.SWITCH) || badEdge.getZ().getVertexType().equals(VertexType.SWITCH))
+            {
+                if(!multiLayerTopoAzDirection.getVertices().contains(badEdge))
+                {
+                    throw new PCEException("All ETHERNET-layer devices and ports must be represented in both the forward-direction and reverse-direction EROs");
+                }
+            }
+        }
 
         // Bandwidth and Vlan pruning
         Topology prunedTopoAZ = pruningService.pruneWithPipeAZ(multiLayerTopoAzDirection, requestPipe, requestSched, rsvBwList, rsvVlanList);
         Topology prunedTopoZA = pruningService.pruneWithPipeZA(multiLayerTopoZaDirection, requestPipe, requestSched, rsvBwList, rsvVlanList);
-        //TODO: make sure the following line prunes based on the combination of both directions!!!!!
-        Topology prunedTopo = pruningService.pruneWithPipe(multiLayerTopo, requestPipe, requestSched, rsvBwList, rsvVlanList);
+
 
         if(!prunedTopoAZ.equals(multiLayerTopoAzDirection))
             throw new PCEException("Requested AZ ERO unavailable; failed to complete Patch Computation");
         if(!prunedTopoZA.equals(multiLayerTopoZaDirection))
             throw new PCEException("Requested ZA ERO unavailable; failed to complete Patch Computation");
-        if(!prunedTopo.equals(multiLayerTopo))
-            throw new PCEException("Requested Bidirectionl ERO unavailable; failed to complete Patch Computation");
 
         UrnE srcPortURN = requestPipe.getAJunction().getFixtures().iterator().next().getPortUrn();
         UrnE dstPortURN = requestPipe.getZJunction().getFixtures().iterator().next().getPortUrn();
 
         TopoVertex srcPort = new TopoVertex(srcPortURN.getUrn(), VertexType.PORT);
         TopoVertex dstPort = new TopoVertex(dstPortURN.getUrn(), VertexType.PORT);
-
 
         // Shortest path routing
         List<TopoEdge> azEroCalculated = dijkstraPCE.computeShortestPathEdges(prunedTopoAZ, srcPort, dstPort);
