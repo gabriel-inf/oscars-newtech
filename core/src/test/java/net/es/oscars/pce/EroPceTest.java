@@ -2,6 +2,7 @@ package net.es.oscars.pce;
 
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.CoreUnitTestConfiguration;
+import net.es.oscars.helpers.RequestedEntityBuilder;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.dao.ReservedBandwidthRepository;
 import net.es.oscars.resv.ent.*;
@@ -42,7 +43,7 @@ public class EroPceTest
     private ResvService resvService;
 
     @Autowired
-    private TestEntityBuilder testBuilder;
+    private RequestedEntityBuilder testBuilder;
 
     @Autowired
     private TopologyBuilder topologyBuilder;
