@@ -9,6 +9,8 @@ import net.es.oscars.dto.pss.EthJunctionType;
 import net.es.oscars.dto.pss.EthPipeType;
 import net.es.oscars.dto.resv.*;
 import net.es.oscars.dto.spec.*;
+import net.es.oscars.pce.PCEException;
+import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.resv.svc.ResvService;
 import net.es.oscars.st.oper.OperState;
@@ -85,9 +87,10 @@ public class ResvController {
 
     @RequestMapping(value = "/resv/basic_vlan/add", method = RequestMethod.POST)
     @ResponseBody
-    public Connection basic_vlan_add(@RequestBody BasicVlanSpecification dtoSpec) {
+    public Connection basic_vlan_add(@RequestBody BasicVlanSpecification dtoSpec) throws PSSException, PCEException {
         log.info("saving a new basic spec");
         log.info(dtoSpec.toString());
+
 
 
         return makeConnectionFromBasic(dtoSpec);
@@ -125,14 +128,14 @@ public class ResvController {
         ConnectionE connE = resvService.findByConnectionId(connectionId).orElseThrow(NoSuchElementException::new);
         if (connE.getStates().getResv().equals(ResvState.HELD)) {
             connE.getStates().setResv(ResvState.ABORTING);
-            connE = resvService.save(connE);
+            resvService.save(connE);
         }
 
         return this.convertConnToDto(connE);
 
     }
 
-    private Connection makeConnectionFromBasic(BasicVlanSpecification dtoSpec) {
+    private Connection makeConnectionFromBasic(BasicVlanSpecification dtoSpec) throws PCEException, PSSException {
         log.info("making a new connection with id " + dtoSpec.getConnectionId());
 
         StatesE states = StatesE.builder()
@@ -156,7 +159,7 @@ public class ResvController {
                 .build();
 
         connE.setSpecification(specE);
-        connE = resvService.save(connE);
+        resvService.hold(connE);
 
         log.info("saved connection, connectionId " + specE.getConnectionId());
         log.info(connE.toString());
