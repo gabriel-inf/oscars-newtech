@@ -149,7 +149,7 @@ public class EroPCE
 
         if(!azEroStrings.equals(requestedAzERO) || !zaEroStrings.equals(requestedZaERO))
         {
-            throw new PCEException("Requested ERO unavailable; failed to complete Patch Computation");
+            throw new PCEException("Requested ERO unavailable; failed to complete Path Computation");
         }
 
         Map<String, List<TopoEdge>> theMap = new HashMap<>();
