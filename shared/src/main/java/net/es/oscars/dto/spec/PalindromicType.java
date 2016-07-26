@@ -1,4 +1,4 @@
-package net.es.oscars.topo.enums;
+package net.es.oscars.dto.spec;
 
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -8,7 +8,7 @@ import java.util.Optional;
 public enum PalindromicType
 {
     PALINDROME("PALINDROME"),
-    NON_PALINDROME("PALINDROME");
+    NON_PALINDROME("NON_PALINDROME");
 
     private String code;
 

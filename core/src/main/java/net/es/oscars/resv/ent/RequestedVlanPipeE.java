@@ -2,7 +2,7 @@ package net.es.oscars.resv.ent;
 
 import lombok.*;
 import net.es.oscars.dto.pss.EthPipeType;
-import net.es.oscars.topo.enums.PalindromicType;
+import net.es.oscars.dto.spec.PalindromicType;
 
 import javax.persistence.*;
 import java.util.List;

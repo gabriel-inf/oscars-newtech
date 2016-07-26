@@ -19,11 +19,11 @@ public class UrnAdjcyE {
     private Long id;
 
     @NonNull
-    @OneToOne (cascade = CascadeType.ALL)
+    @ManyToOne
     private UrnE a;
 
     @NonNull
-    @OneToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     private UrnE z;
 
     @ElementCollection

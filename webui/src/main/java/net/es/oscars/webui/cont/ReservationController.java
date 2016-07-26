@@ -41,6 +41,7 @@ public class ReservationController {
                 .zUrn("")
                 .zVlanExpression("")
                 .zaMbps(0)
+                .palindromic(PalindromicType.NON_PALINDROME)
                 .build();
 
         ScheduleSpecification ss = ScheduleSpecification.builder()

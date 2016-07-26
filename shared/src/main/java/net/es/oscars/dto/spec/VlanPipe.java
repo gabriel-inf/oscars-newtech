@@ -36,7 +36,7 @@ public class VlanPipe {
     private EthPipeType pipeType;
 
     @NonNull
-    private Boolean eroPalindromic;
+    private PalindromicType palindromic;
 
     private Set<String> resourceIds;
 

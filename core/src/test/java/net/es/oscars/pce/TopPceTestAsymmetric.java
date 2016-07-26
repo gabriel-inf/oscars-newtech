@@ -5,7 +5,7 @@ import net.es.oscars.CoreUnitTestConfiguration;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.topo.TopologyBuilder;
-import net.es.oscars.topo.enums.PalindromicType;
+import net.es.oscars.dto.spec.PalindromicType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

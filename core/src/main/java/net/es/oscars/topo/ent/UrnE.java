@@ -31,7 +31,6 @@ public class UrnE {
     private String urn;
 
 
-
     // TODO: validity periods? but this will do for now
     @NonNull
     private Boolean valid;
