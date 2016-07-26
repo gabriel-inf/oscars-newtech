@@ -64,9 +64,9 @@ public class EroPceTest
     private DijkstraPCE dijkstraPCE;
 
     @Test
-    public void eroPruningTestPalindrome()
+    public void eroPceTestPalindrome()
     {
-        String testName = "eroPruningTestPalindrome";
+        String testName = "eroPceTestPalindrome";
         log.info("Initializing test: \'" + testName + "\'.");
 
         topologyBuilder.buildTopo4();
@@ -145,9 +145,9 @@ public class EroPceTest
     }
 
     @Test
-    public void eroPruningTestNonPalindrome()
+    public void eroPceTestNonPalindrome()
     {
-        String testName = "eroPruningTestNonPalindrome";
+        String testName = "eroPceTestNonPalindrome";
         log.info("Initializing test: \'" + testName + "\'.");
 
         topologyBuilder.buildTopo4_2();
@@ -233,9 +233,9 @@ public class EroPceTest
     }
 
     @Test
-    public void eroPruningTestBadNonPalindrome1()
+    public void eroPceTestBadNonPalindrome1()
     {
-        String testName = "eroPruningTestBadNonPalindrome1";
+        String testName = "eroPceTestBadNonPalindrome1";
         log.info("Initializing test: \'" + testName + "\'.");
 
         topologyBuilder.buildTopo4();
@@ -305,9 +305,9 @@ public class EroPceTest
     }
 
     @Test
-    public void eroPruningTestBadNonPalindrome2()
+    public void eroPceTestBadNonPalindrome2()
     {
-        String testName = "eroPruningTestBadNonPalindrome2";
+        String testName = "eroPceTestBadNonPalindrome2";
         log.info("Initializing test: \'" + testName + "\'.");
 
         topologyBuilder.buildSharedLinkTopo1();
@@ -370,9 +370,9 @@ public class EroPceTest
     }
 
     @Test
-    public void eroPruningTestNonPalindrome2()
+    public void eroPceTestNonPalindrome2()
     {
-        String testName = "eroPruningTestNonPalindrome2";
+        String testName = "eroPceTestNonPalindrome2";
         log.info("Initializing test: \'" + testName + "\'.");
 
         topologyBuilder.buildSharedLinkTopo2();
@@ -451,9 +451,9 @@ public class EroPceTest
     }
 
     @Test
-    public void eroPruningTestSharedLink()
+    public void eroPceTestSharedLink()
     {
-        String testName = "eroPruningTestSharedLink";
+        String testName = "eroPceTestSharedLink";
         log.info("Initializing test: \'" + testName + "\'.");
         bwRepo.deleteAll();
 
@@ -536,9 +536,9 @@ public class EroPceTest
     }
 
     @Test
-    public void eroPruningTestSharedLinkSufficientBW()
+    public void eroSpecTestSharedLinkSufficientBW()
     {
-        String testName = "eroPruningTestSharedLinkSufficientBW";
+        String testName = "eroPceTestSharedLinkSufficientBW";
         log.info("Initializing test: \'" + testName + "\'.");
 
         topologyBuilder.buildSharedLinkTopo2();
@@ -646,9 +646,9 @@ public class EroPceTest
     }
 
     @Test
-    public void eroPruningTestSharedLinkInsufficientBW()
+    public void eroSpecTestSharedLinkInsufficientBW()
     {
-        String testName = "eroPruningTestSharedLinkInsufficientBW";
+        String testName = "eroPceTestSharedLinkInsufficientBW";
         log.info("Initializing test: \'" + testName + "\'.");
 
         topologyBuilder.buildSharedLinkTopo2();
@@ -735,6 +735,303 @@ public class EroPceTest
 
         assert(!connectionBig.getReserved().getVlanFlow().getMplsPipes().isEmpty());
         assert(connectionTest.getReserved() == null);
+
+        log.info("test \'" + testName + "\' passed.");
+    }
+
+    @Test
+    public void eroPceTestDuplicateNode1()
+    {
+        String testName = "eroPceTestDuplicateNode1";
+        log.info("Initializing test: \'" + testName + "\'.");
+
+        topologyBuilder.buildTopo4_2();
+
+        ScheduleSpecificationE requestedSched;
+
+        Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
+        Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
+
+        String srcDevice = "nodeK";
+        String dstDevice = "nodeQ";
+        List<String> srcPorts = Stream.of("portA").collect(Collectors.toList());
+        List<String> dstPorts = Stream.of("portZ").collect(Collectors.toList());
+        Integer azBW = 25;
+        Integer zaBW = 25;
+        String vlan = "any";
+        PalindromicType palindrome = PalindromicType.PALINDROME;
+        List<String> azERO = new ArrayList<>();
+        List<String> zaERO = new ArrayList<>();
+
+        azERO.add("nodeK");
+        azERO.add("nodeK:2");
+        azERO.add("nodeM:1");
+        azERO.add("nodeM");
+        azERO.add("nodeM:3");
+        azERO.add("nodeR:1");
+        azERO.add("nodeR");
+        azERO.add("nodeR:2");
+        azERO.add("nodeP:3");
+        azERO.add("nodeP");
+        azERO.add("nodeP");
+        azERO.add("nodeP:2");
+        azERO.add("nodeQ:1");
+        azERO.add("nodeQ");
+
+        zaERO.add("nodeQ");
+        zaERO.add("nodeQ:1");
+        zaERO.add("nodeP:2");
+        zaERO.add("nodeP");
+        zaERO.add("nodeP:1");
+        zaERO.add("nodeL:3");
+        zaERO.add("nodeL");
+        zaERO.add("nodeL:1");
+        zaERO.add("nodeK:1");
+        zaERO.add("nodeK");
+
+
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, vlan);
+        pipeAZ.setAzERO(azERO);
+        pipeAZ.setZaERO(zaERO);
+
+        requestedSched = testBuilder.buildSchedule(startDate, endDate);
+
+        log.info("Beginning test: \'" + testName + "\'.");
+
+        Map<String, List<TopoEdge>> computedPaths = null;
+
+        try
+        {
+            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, requestedSched, new ArrayList<>(), new ArrayList<>());
+        }
+        catch(PCEException pceE){ log.error("", pceE); }
+
+        assert(computedPaths == null);
+
+        log.info("test \'" + testName + "\' passed.");
+    }
+
+    @Test
+    public void eroPceTestDuplicateNode2()
+    {
+        String testName = "eroPceTestDuplicateNode2";
+        log.info("Initializing test: \'" + testName + "\'.");
+
+        topologyBuilder.buildTopo4_2();
+
+        ScheduleSpecificationE requestedSched;
+
+        Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
+        Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
+
+        String srcDevice = "nodeK";
+        String dstDevice = "nodeQ";
+        List<String> srcPorts = Stream.of("portA").collect(Collectors.toList());
+        List<String> dstPorts = Stream.of("portZ").collect(Collectors.toList());
+        Integer azBW = 25;
+        Integer zaBW = 25;
+        String vlan = "any";
+        PalindromicType palindrome = PalindromicType.PALINDROME;
+        List<String> azERO = new ArrayList<>();
+        List<String> zaERO = new ArrayList<>();
+
+        azERO.add("nodeK");
+        azERO.add("nodeK:2");
+        azERO.add("nodeM:1");
+        azERO.add("nodeM");
+        azERO.add("nodeM:3");
+        azERO.add("nodeR:1");
+        azERO.add("nodeR");
+        azERO.add("nodeR:2");
+        azERO.add("nodeP:3");
+        azERO.add("nodeP");
+        azERO.add("nodeP:2");
+        azERO.add("nodeQ:1");
+        azERO.add("nodeQ");
+
+        zaERO.add("nodeQ");
+        zaERO.add("nodeQ:1");
+        zaERO.add("nodeP:2");
+        zaERO.add("nodeP");
+        zaERO.add("nodeP:1");
+        zaERO.add("nodeL:3");
+        zaERO.add("nodeL");
+        zaERO.add("nodeL");
+        zaERO.add("nodeL:1");
+        zaERO.add("nodeK:1");
+        zaERO.add("nodeK");
+
+
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, vlan);
+        pipeAZ.setAzERO(azERO);
+        pipeAZ.setZaERO(zaERO);
+
+        requestedSched = testBuilder.buildSchedule(startDate, endDate);
+
+        log.info("Beginning test: \'" + testName + "\'.");
+
+        Map<String, List<TopoEdge>> computedPaths = null;
+
+        try
+        {
+            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, requestedSched, new ArrayList<>(), new ArrayList<>());
+        }
+        catch(PCEException pceE){ log.error("", pceE); }
+
+        assert(computedPaths == null);
+
+        log.info("test \'" + testName + "\' passed.");
+    }
+
+    @Test
+    public void eroSpecTestEmptyAZ()
+    {
+        String testName = "eroPceTestEmptyAZ";
+        log.info("Initializing test: \'" + testName + "\'.");
+
+        topologyBuilder.buildTopo4_2();
+
+        ScheduleSpecificationE requestedSched;
+        Set<RequestedVlanPipeE> pipes = new HashSet<>();
+        RequestedBlueprintE requestedBlueprint;
+        ReservedBlueprintE reservedBlueprint;
+        ConnectionE connection;
+
+        Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
+        Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
+        requestedSched = testBuilder.buildSchedule(startDate, endDate);
+
+        String srcDevice = "nodeK";
+        String dstDevice = "nodeQ";
+        List<String> srcPorts = Stream.of("portA").collect(Collectors.toList());
+        List<String> dstPorts = Stream.of("portZ").collect(Collectors.toList());
+        Integer azBW = 25;
+        Integer zaBW = 25;
+        String vlan = "any";
+        PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        List<String> azERO = new ArrayList<>();
+        List<String> zaERO = new ArrayList<>();
+
+        zaERO.add("nodeQ");
+        zaERO.add("nodeQ:1");
+        zaERO.add("nodeP:2");
+        zaERO.add("nodeP");
+        zaERO.add("nodeP:1");
+        zaERO.add("nodeL:3");
+        zaERO.add("nodeL");
+        zaERO.add("nodeL:2");
+        zaERO.add("nodeM:2");
+        zaERO.add("nodeM");
+        zaERO.add("nodeM:1");
+        zaERO.add("nodeK:2");
+        zaERO.add("nodeK");
+
+
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, vlan);
+        pipeAZ.setAzERO(azERO);
+        pipeAZ.setZaERO(zaERO);
+
+        pipes.add(pipeAZ);
+        requestedBlueprint = testBuilder.buildRequest(pipes);
+        connection = testBuilder.buildConnection(requestedBlueprint, requestedSched, "connBig", "Big Single-link Connection");
+
+        log.info("Beginning test: \'" + testName + "\'.");
+
+        Map<String, List<TopoEdge>> computedPaths = null;
+
+        try
+        {
+            connection = resvService.hold(connection);
+        }
+        catch(PCEException pceE){ log.error("", pceE); }
+        catch(PSSException pssE){ log.error("", pssE); }
+
+        reservedBlueprint = connection.getReserved();
+
+        assert(reservedBlueprint != null);
+        List<String> computedZaEro = reservedBlueprint.getVlanFlow().getMplsPipes().iterator().next().getZaERO();
+
+        // Each reserved pipe will have EROs not containing src/dst devices. Add those for comparison with requested EROs
+        computedZaEro.add(0, dstDevice);
+        computedZaEro.add(srcDevice);
+
+        assert(!zaERO.equals(computedZaEro));
+
+        log.info("test \'" + testName + "\' passed.");
+    }
+
+    @Test
+    public void eroSpecTestEmptyZA()
+    {
+        String testName = "eroPceTestEmptyZA";
+        log.info("Initializing test: \'" + testName + "\'.");
+
+        topologyBuilder.buildTopo4_2();
+
+        ScheduleSpecificationE requestedSched;
+        Set<RequestedVlanPipeE> pipes = new HashSet<>();
+        RequestedBlueprintE requestedBlueprint;
+        ReservedBlueprintE reservedBlueprint;
+        ConnectionE connection;
+
+        Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
+        Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
+        requestedSched = testBuilder.buildSchedule(startDate, endDate);
+
+        String srcDevice = "nodeK";
+        String dstDevice = "nodeQ";
+        List<String> srcPorts = Stream.of("portA").collect(Collectors.toList());
+        List<String> dstPorts = Stream.of("portZ").collect(Collectors.toList());
+        Integer azBW = 25;
+        Integer zaBW = 25;
+        String vlan = "any";
+        PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        List<String> azERO = new ArrayList<>();
+        List<String> zaERO = new ArrayList<>();
+
+        azERO.add("nodeK");
+        azERO.add("nodeK:2");
+        azERO.add("nodeM:1");
+        azERO.add("nodeM");
+        azERO.add("nodeM:3");
+        azERO.add("nodeR:1");
+        azERO.add("nodeR");
+        azERO.add("nodeR:2");
+        azERO.add("nodeP:3");
+        azERO.add("nodeP");
+        azERO.add("nodeP:2");
+        azERO.add("nodeQ:1");
+        azERO.add("nodeQ");
+
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, vlan);
+        pipeAZ.setAzERO(azERO);
+        pipeAZ.setZaERO(zaERO);
+
+        pipes.add(pipeAZ);
+        requestedBlueprint = testBuilder.buildRequest(pipes);
+        connection = testBuilder.buildConnection(requestedBlueprint, requestedSched, "connBig", "Big Single-link Connection");
+
+        log.info("Beginning test: \'" + testName + "\'.");
+
+        Map<String, List<TopoEdge>> computedPaths = null;
+
+        try
+        {
+            connection = resvService.hold(connection);
+        }
+        catch(PCEException pceE){ log.error("", pceE); }
+        catch(PSSException pssE){ log.error("", pssE); }
+
+        reservedBlueprint = connection.getReserved();
+
+        assert(reservedBlueprint != null);
+        List<String> computedAzEro = reservedBlueprint.getVlanFlow().getMplsPipes().iterator().next().getAzERO();
+
+        // Each reserved pipe will have EROs not containing src/dst devices. Add those for comparison with requested EROs
+        computedAzEro.add(0, srcDevice);
+        computedAzEro.add(dstDevice);
+
+        assert(!azERO.equals(computedAzEro));
 
         log.info("test \'" + testName + "\' passed.");
     }
