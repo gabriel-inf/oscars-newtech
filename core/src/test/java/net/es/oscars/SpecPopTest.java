@@ -1,8 +1,8 @@
 package net.es.oscars;
 
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.dto.spec.PalindromicType;
 import net.es.oscars.topo.dao.UrnRepository;
-import net.es.oscars.topo.enums.*;
 import net.es.oscars.pce.PCEException;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.dto.pss.EthFixtureType;
@@ -20,9 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
+import java.util.*;
 
 @Slf4j
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -35,6 +33,7 @@ public class SpecPopTest {
 
     @Autowired
     private UrnRepository urnRepo;
+
 
     @Test
     public void testSave() throws PCEException, PSSException {
@@ -50,58 +49,13 @@ public class SpecPopTest {
         }
     }
 
-
-
     public SpecificationE addEndpoints(SpecificationE spec) {
 
-        RequestedVlanFlowE flow = spec.getRequested().getVlanFlow();
+        UrnE startb1 = urnRepo.findByUrn("star-tb1").orElseThrow(NoSuchElementException::new);
+        UrnE nersctb1 = urnRepo.findByUrn("nersc-tb1").orElseThrow(NoSuchElementException::new);
 
-
-        UrnE startb1 = UrnE.builder()
-                .deviceModel(DeviceModel.JUNIPER_EX)
-                .capabilities(new HashSet<>())
-                .deviceType(DeviceType.SWITCH)
-                .urnType(UrnType.DEVICE)
-                .urn("star-tb1")
-                .valid(true)
-                .build();
-        startb1.getCapabilities().add(Layer.ETHERNET);
-
-        urnRepo.save(startb1);
-
-        UrnE nersctb1 = UrnE.builder()
-                .deviceModel(DeviceModel.JUNIPER_EX)
-                .capabilities(new HashSet<>())
-                .deviceType(DeviceType.SWITCH)
-                .urnType(UrnType.DEVICE)
-                .urn("nersc-tb1")
-                .valid(true)
-                .build();
-        nersctb1.getCapabilities().add(Layer.ETHERNET);
-
-        urnRepo.save(nersctb1);
-
-
-        UrnE nersctb1_3_1_1 = UrnE.builder()
-                .capabilities(new HashSet<>())
-                .urnType(UrnType.IFCE)
-                .urn("nersc-tb1:3/1/1")
-                .valid(true)
-                .build();
-        nersctb1_3_1_1.getCapabilities().add(Layer.ETHERNET);
-
-        urnRepo.save(nersctb1_3_1_1);
-
-
-        UrnE startb1_1_1_1 = UrnE.builder()
-                .capabilities(new HashSet<>())
-                .urnType(UrnType.IFCE)
-                .urn("star-tb1:1/1/1")
-                .valid(true)
-                .build();
-        startb1_1_1_1.getCapabilities().add(Layer.ETHERNET);
-
-        urnRepo.save(startb1_1_1_1);
+        UrnE nersctb1_3_1_1 = urnRepo.findByUrn("nersc-tb1:3/1/1").orElseThrow(NoSuchElementException::new);
+        UrnE startb1_1_1_1 = urnRepo.findByUrn("star-tb1:1/1/1").orElseThrow(NoSuchElementException::new);
 
 
         RequestedVlanJunctionE aj = RequestedVlanJunctionE.builder()
@@ -147,6 +101,8 @@ public class SpecPopTest {
                 .pipeType(EthPipeType.REQUESTED)
                 .build();
 
+        RequestedVlanFlowE flow = spec.getRequested().getVlanFlow();
+
         flow.getPipes().add(az_p);
         return spec;
     }
@@ -181,7 +137,6 @@ public class SpecPopTest {
                 .description("a description")
                 .username("some user")
                 .build();
-
 
 
         spec.setRequested(bp);

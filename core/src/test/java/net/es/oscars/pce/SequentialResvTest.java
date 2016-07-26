@@ -2,6 +2,7 @@ package net.es.oscars.pce;
 
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.CoreUnitTestConfiguration;
+import net.es.oscars.dto.spec.PalindromicType;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.helpers.RequestedEntityBuilder;
 import net.es.oscars.resv.dao.ReservedBandwidthRepository;
@@ -10,7 +11,6 @@ import net.es.oscars.resv.svc.ResvService;
 import net.es.oscars.topo.AsymmTopologyBuilder;
 import net.es.oscars.topo.TopologyBuilder;
 import net.es.oscars.topo.dao.UrnRepository;
-import net.es.oscars.topo.enums.PalindromicType;
 import net.es.oscars.topo.svc.TopoService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,7 +27,7 @@ import java.util.stream.Stream;
 
 /**
  * Created by jeremy on 7/20/16.
- *
+ * <p>
  * Tests End-to-End correctness of the PCE modules and reservation persistence through processing of sequential connections.
  */
 
@@ -35,8 +35,7 @@ import java.util.stream.Stream;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(CoreUnitTestConfiguration.class)
 @Transactional
-public class SequentialResvTest
-{
+public class SequentialResvTest {
     @Autowired
     private ResvService resvService;
 
@@ -63,8 +62,7 @@ public class SequentialResvTest
 
 
     @Test
-    public void sequentialResvTest1()
-    {
+    public void sequentialResvTest1() {
         String testName = "sequentialResvTest1";
         log.info("Initializing test: \'" + testName + "\'.");
 
@@ -107,70 +105,64 @@ public class SequentialResvTest
 
         log.info("Beginning test: \'" + testName + "\'.");
 
-        for(ConnectionE oneConnection : allConnections)
-        {
-            try
-            {
-                oneConnection = resvService.hold(oneConnection);
+        for (ConnectionE oneConnection : allConnections) {
+            try {
+                resvService.hold(oneConnection);
+            } catch (PCEException | PSSException pceE) {
+                log.error("", pceE);
             }
-            catch(PCEException | PSSException pceE){ log.error("", pceE); }
 
 
             ReservedBlueprintE reservedBlueprint = oneConnection.getReserved();
             assert (reservedBlueprint != null);
 
             ReservedVlanFlowE reservedFlow = reservedBlueprint.getVlanFlow();
-            assert(reservedFlow != null);
+            assert (reservedFlow != null);
 
             Set<ReservedEthPipeE> allResEthPipes = reservedFlow.getEthPipes();
             Set<ReservedMplsPipeE> allResMplsPipes = reservedFlow.getMplsPipes();
             Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
 
-            assert(allResJunctions.size() == 0);
-            assert(allResEthPipes.size() == 0);
-            assert(allResMplsPipes.size() == 1);
+            assert (allResJunctions.size() == 0);
+            assert (allResEthPipes.size() == 0);
+            assert (allResMplsPipes.size() == 1);
         }
 
         Set<ReservedBandwidthE> portBWs = bwRepo.findAll().stream()
                 .filter(bw -> bw.getUrn().getUrn().contains("port"))
                 .collect(Collectors.toSet());
 
-        assert(portBWs.size() == 6);
+        assert (portBWs.size() == 6);
 
         int totalBwAIn = 0;
         int totalBwAEg = 0;
         int totalBwZIn = 0;
         int totalBwZEg = 0;
 
-        for(ReservedBandwidthE oneBW : portBWs)
-        {
-            if(oneBW.getUrn().getUrn().equals("portA"))
-            {
-                assert(oneBW.getInBandwidth().equals(azBW));
-                assert(oneBW.getInBandwidth().equals(zaBW));
+        for (ReservedBandwidthE oneBW : portBWs) {
+            if (oneBW.getUrn().getUrn().equals("portA")) {
+                assert (oneBW.getInBandwidth().equals(azBW));
+                assert (oneBW.getInBandwidth().equals(zaBW));
                 totalBwAIn += oneBW.getInBandwidth();
                 totalBwAEg += oneBW.getEgBandwidth();
-            }
-            else
-            {
-                assert(oneBW.getInBandwidth().equals(zaBW));
-                assert(oneBW.getInBandwidth().equals(azBW));
+            } else {
+                assert (oneBW.getInBandwidth().equals(zaBW));
+                assert (oneBW.getInBandwidth().equals(azBW));
                 totalBwZIn += oneBW.getInBandwidth();
                 totalBwZEg += oneBW.getEgBandwidth();
             }
         }
 
-        assert(totalBwAIn == azBW * 3);
-        assert(totalBwAEg == zaBW * 3);
-        assert(totalBwZIn == zaBW * 3);
-        assert(totalBwZEg == azBW * 3);
+        assert (totalBwAIn == azBW * 3);
+        assert (totalBwAEg == zaBW * 3);
+        assert (totalBwZIn == zaBW * 3);
+        assert (totalBwZEg == azBW * 3);
 
         log.info("test \'" + testName + "\' passed.");
     }
 
     @Test
-    public void sequentialResvInsufficientBW()
-    {
+    public void sequentialResvInsufficientBW() {
         String testName = "sequentialResvInsufficientBW";
         log.info("Initializing test: \'" + testName + "\'.");
 
@@ -213,21 +205,19 @@ public class SequentialResvTest
 
         log.info("Beginning test: \'" + testName + "\'.");
 
-        for(ConnectionE oneConnection : allConnections)
-        {
+        for (ConnectionE oneConnection : allConnections) {
             log.info("Connection ID: " + oneConnection.getConnectionId());
 
-            try
-            {
-                oneConnection = resvService.hold(oneConnection);
+            try {
+                resvService.hold(oneConnection);
+            } catch (PCEException | PSSException pceE) {
+                log.error("", pceE);
             }
-            catch(PCEException | PSSException pceE){ log.error("", pceE); }
 
 
             ReservedBlueprintE reservedBlueprint = oneConnection.getReserved();
 
-            if(oneConnection.getConnectionId().equals("conn3"))
-            {
+            if (oneConnection.getConnectionId().equals("conn3")) {
                 assert (reservedBlueprint == null);
                 continue;
             }
@@ -235,57 +225,52 @@ public class SequentialResvTest
             assert (reservedBlueprint != null);
 
             ReservedVlanFlowE reservedFlow = reservedBlueprint.getVlanFlow();
-            assert(reservedFlow != null);
+            assert (reservedFlow != null);
 
             Set<ReservedEthPipeE> allResEthPipes = reservedFlow.getEthPipes();
             Set<ReservedMplsPipeE> allResMplsPipes = reservedFlow.getMplsPipes();
             Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
 
-            assert(allResJunctions.size() == 0);
-            assert(allResEthPipes.size() == 0);
-            assert(allResMplsPipes.size() == 1);
+            assert (allResJunctions.size() == 0);
+            assert (allResEthPipes.size() == 0);
+            assert (allResMplsPipes.size() == 1);
         }
 
         Set<ReservedBandwidthE> portBWs = bwRepo.findAll().stream()
                 .filter(bw -> bw.getUrn().getUrn().contains("port"))
                 .collect(Collectors.toSet());
 
-        assert(portBWs.size() == 4);
+        assert (portBWs.size() == 4);
 
         int totalBwAIn = 0;
         int totalBwAEg = 0;
         int totalBwZIn = 0;
         int totalBwZEg = 0;
 
-        for(ReservedBandwidthE oneBW : portBWs)
-        {
-            if(oneBW.getUrn().getUrn().equals("portA"))
-            {
-                assert(oneBW.getInBandwidth().equals(azBW));
-                assert(oneBW.getInBandwidth().equals(zaBW));
+        for (ReservedBandwidthE oneBW : portBWs) {
+            if (oneBW.getUrn().getUrn().equals("portA")) {
+                assert (oneBW.getInBandwidth().equals(azBW));
+                assert (oneBW.getInBandwidth().equals(zaBW));
                 totalBwAIn += oneBW.getInBandwidth();
                 totalBwAEg += oneBW.getEgBandwidth();
-            }
-            else
-            {
-                assert(oneBW.getInBandwidth().equals(zaBW));
-                assert(oneBW.getInBandwidth().equals(azBW));
+            } else {
+                assert (oneBW.getInBandwidth().equals(zaBW));
+                assert (oneBW.getInBandwidth().equals(azBW));
                 totalBwZIn += oneBW.getInBandwidth();
                 totalBwZEg += oneBW.getEgBandwidth();
             }
         }
 
-        assert(totalBwAIn == azBW * 2);
-        assert(totalBwAEg == zaBW * 2);
-        assert(totalBwZIn == zaBW * 2);
-        assert(totalBwZEg == azBW * 2);
+        assert (totalBwAIn == azBW * 2);
+        assert (totalBwAEg == zaBW * 2);
+        assert (totalBwZIn == zaBW * 2);
+        assert (totalBwZEg == azBW * 2);
 
         log.info("test \'" + testName + "\' passed.");
     }
 
     @Test
-    public void sequentialResvInsufficientVlan()
-    {
+    public void sequentialResvInsufficientVlan() {
         String testName = "sequentialResvInsufficientVlan";
         log.info("Initializing test: \'" + testName + "\'.");
 
@@ -318,8 +303,7 @@ public class SequentialResvTest
 
         int numConnections = 6; // Enough to run out of VLANS
 
-        for(int conn = 1; conn <= numConnections; conn++)
-        {
+        for (int conn = 1; conn <= numConnections; conn++) {
             String connID = "conn" + conn;
 
             connection = testBuilder.buildConnection(requestedBlueprint, requestedSched, connID, "A Connection");
@@ -333,21 +317,19 @@ public class SequentialResvTest
         List<Integer> usedVlanIDsA = new ArrayList<>();
         List<Integer> usedVlanIDsZ = new ArrayList<>();
 
-        for(ConnectionE oneConnection : allConnections)
-        {
+        for (ConnectionE oneConnection : allConnections) {
             log.info("Connection ID: " + oneConnection.getConnectionId());
 
-            try
-            {
-                oneConnection = resvService.hold(oneConnection);
+            try {
+                resvService.hold(oneConnection);
+            } catch (PCEException | PSSException pceE) {
+                log.error("", pceE);
             }
-            catch(PCEException | PSSException pceE){ log.error("", pceE); }
 
 
             ReservedBlueprintE reservedBlueprint = oneConnection.getReserved();
 
-            if(oneConnection.getConnectionId().equals("conn6"))
-            {
+            if (oneConnection.getConnectionId().equals("conn6")) {
                 assert (reservedBlueprint == null);
                 continue;
             }
@@ -355,23 +337,23 @@ public class SequentialResvTest
             assert (reservedBlueprint != null);
 
             ReservedVlanFlowE reservedFlow = reservedBlueprint.getVlanFlow();
-            assert(reservedFlow != null);
+            assert (reservedFlow != null);
 
             Set<ReservedEthPipeE> allResEthPipes = reservedFlow.getEthPipes();
             Set<ReservedMplsPipeE> allResMplsPipes = reservedFlow.getMplsPipes();
             Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
 
-            assert(allResJunctions.size() == 0);
-            assert(allResEthPipes.size() == 1);
-            assert(allResMplsPipes.size() == 0);
+            assert (allResJunctions.size() == 0);
+            assert (allResEthPipes.size() == 1);
+            assert (allResMplsPipes.size() == 0);
 
             ReservedVlanFixtureE portA = allResEthPipes.iterator().next().getAJunction().getFixtures().iterator().next();
             ReservedVlanFixtureE portZ = allResEthPipes.iterator().next().getZJunction().getFixtures().iterator().next();
             Integer vlanA = portA.getReservedVlan().getVlan();
             Integer vlanZ = portZ.getReservedVlan().getVlan();
 
-            assert(!usedVlanIDsA.contains(vlanA));
-            assert(!usedVlanIDsZ.contains(vlanZ));
+            assert (!usedVlanIDsA.contains(vlanA));
+            assert (!usedVlanIDsZ.contains(vlanZ));
 
             usedVlanIDsA.add(portA.getReservedVlan().getVlan());
             usedVlanIDsZ.add(portZ.getReservedVlan().getVlan());
@@ -381,42 +363,37 @@ public class SequentialResvTest
                 .filter(bw -> bw.getUrn().getUrn().contains("port"))
                 .collect(Collectors.toSet());
 
-        assert(portBWs.size() == 2 * (numConnections-1));
+        assert (portBWs.size() == 2 * (numConnections - 1));
 
         int totalBwAIn = 0;
         int totalBwAEg = 0;
         int totalBwZIn = 0;
         int totalBwZEg = 0;
 
-        for(ReservedBandwidthE oneBW : portBWs)
-        {
-            if(oneBW.getUrn().getUrn().equals("portA"))
-            {
-                assert(oneBW.getInBandwidth().equals(azBW));
-                assert(oneBW.getInBandwidth().equals(zaBW));
+        for (ReservedBandwidthE oneBW : portBWs) {
+            if (oneBW.getUrn().getUrn().equals("portA")) {
+                assert (oneBW.getInBandwidth().equals(azBW));
+                assert (oneBW.getInBandwidth().equals(zaBW));
                 totalBwAIn += oneBW.getInBandwidth();
                 totalBwAEg += oneBW.getEgBandwidth();
-            }
-            else
-            {
-                assert(oneBW.getInBandwidth().equals(zaBW));
-                assert(oneBW.getInBandwidth().equals(azBW));
+            } else {
+                assert (oneBW.getInBandwidth().equals(zaBW));
+                assert (oneBW.getInBandwidth().equals(azBW));
                 totalBwZIn += oneBW.getInBandwidth();
                 totalBwZEg += oneBW.getEgBandwidth();
             }
         }
 
-        assert(totalBwAIn == azBW * (numConnections-1));
-        assert(totalBwAEg == zaBW * (numConnections-1));
-        assert(totalBwZIn == zaBW * (numConnections-1));
-        assert(totalBwZEg == azBW * (numConnections-1));
+        assert (totalBwAIn == azBW * (numConnections - 1));
+        assert (totalBwAEg == zaBW * (numConnections - 1));
+        assert (totalBwZIn == zaBW * (numConnections - 1));
+        assert (totalBwZEg == azBW * (numConnections - 1));
 
         log.info("test \'" + testName + "\' passed.");
     }
 
     @Test
-    public void sequentialResvInsufficientVlan2()
-    {
+    public void sequentialResvInsufficientVlan2() {
         String testName = "sequentialResvInsufficientVlan2";
         log.info("Initializing test: \'" + testName + "\'.");
 
@@ -449,8 +426,7 @@ public class SequentialResvTest
 
         int numConnections = 6; // Enough to run out of VLANS
 
-        for(int conn = 1; conn <= numConnections; conn++)
-        {
+        for (int conn = 1; conn <= numConnections; conn++) {
             String connID = "conn" + conn;
 
             connection = testBuilder.buildConnection(requestedBlueprint, requestedSched, connID, "A Connection");
@@ -464,21 +440,19 @@ public class SequentialResvTest
         List<Integer> usedVlanIDsA = new ArrayList<>();
         List<Integer> usedVlanIDsZ = new ArrayList<>();
 
-        for(ConnectionE oneConnection : allConnections)
-        {
+        for (ConnectionE oneConnection : allConnections) {
             log.info("Connection ID: " + oneConnection.getConnectionId());
 
-            try
-            {
-                oneConnection = resvService.hold(oneConnection);
+            try {
+                resvService.hold(oneConnection);
+            } catch (PCEException | PSSException pceE) {
+                log.error("", pceE);
             }
-            catch(PCEException | PSSException pceE){ log.error("", pceE); }
 
 
             ReservedBlueprintE reservedBlueprint = oneConnection.getReserved();
 
-            if(oneConnection.getConnectionId().equals("conn6"))
-            {
+            if (oneConnection.getConnectionId().equals("conn6")) {
                 assert (reservedBlueprint == null);
                 continue;
             }
@@ -486,23 +460,23 @@ public class SequentialResvTest
             assert (reservedBlueprint != null);
 
             ReservedVlanFlowE reservedFlow = reservedBlueprint.getVlanFlow();
-            assert(reservedFlow != null);
+            assert (reservedFlow != null);
 
             Set<ReservedEthPipeE> allResEthPipes = reservedFlow.getEthPipes();
             Set<ReservedMplsPipeE> allResMplsPipes = reservedFlow.getMplsPipes();
             Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
 
-            assert(allResJunctions.size() == 0);
-            assert(allResEthPipes.size() == 0);
-            assert(allResMplsPipes.size() == 1);
+            assert (allResJunctions.size() == 0);
+            assert (allResEthPipes.size() == 0);
+            assert (allResMplsPipes.size() == 1);
 
             ReservedVlanFixtureE portA = allResMplsPipes.iterator().next().getAJunction().getFixtures().iterator().next();
             ReservedVlanFixtureE portZ = allResMplsPipes.iterator().next().getZJunction().getFixtures().iterator().next();
             Integer vlanA = portA.getReservedVlan().getVlan();
             Integer vlanZ = portZ.getReservedVlan().getVlan();
 
-            assert(!usedVlanIDsA.contains(vlanA));
-            assert(!usedVlanIDsZ.contains(vlanZ));
+            assert (!usedVlanIDsA.contains(vlanA));
+            assert (!usedVlanIDsZ.contains(vlanZ));
 
             usedVlanIDsA.add(portA.getReservedVlan().getVlan());
             usedVlanIDsZ.add(portZ.getReservedVlan().getVlan());
@@ -512,42 +486,37 @@ public class SequentialResvTest
                 .filter(bw -> bw.getUrn().getUrn().contains("port"))
                 .collect(Collectors.toSet());
 
-        assert(portBWs.size() == 2 * (numConnections-1));
+        assert (portBWs.size() == 2 * (numConnections - 1));
 
         int totalBwAIn = 0;
         int totalBwAEg = 0;
         int totalBwZIn = 0;
         int totalBwZEg = 0;
 
-        for(ReservedBandwidthE oneBW : portBWs)
-        {
-            if(oneBW.getUrn().getUrn().equals("portA"))
-            {
-                assert(oneBW.getInBandwidth().equals(azBW));
-                assert(oneBW.getInBandwidth().equals(zaBW));
+        for (ReservedBandwidthE oneBW : portBWs) {
+            if (oneBW.getUrn().getUrn().equals("portA")) {
+                assert (oneBW.getInBandwidth().equals(azBW));
+                assert (oneBW.getInBandwidth().equals(zaBW));
                 totalBwAIn += oneBW.getInBandwidth();
                 totalBwAEg += oneBW.getEgBandwidth();
-            }
-            else
-            {
-                assert(oneBW.getInBandwidth().equals(zaBW));
-                assert(oneBW.getInBandwidth().equals(azBW));
+            } else {
+                assert (oneBW.getInBandwidth().equals(zaBW));
+                assert (oneBW.getInBandwidth().equals(azBW));
                 totalBwZIn += oneBW.getInBandwidth();
                 totalBwZEg += oneBW.getEgBandwidth();
             }
         }
 
-        assert(totalBwAIn == azBW * (numConnections-1));
-        assert(totalBwAEg == zaBW * (numConnections-1));
-        assert(totalBwZIn == zaBW * (numConnections-1));
-        assert(totalBwZEg == azBW * (numConnections-1));
+        assert (totalBwAIn == azBW * (numConnections - 1));
+        assert (totalBwAEg == zaBW * (numConnections - 1));
+        assert (totalBwZIn == zaBW * (numConnections - 1));
+        assert (totalBwZEg == azBW * (numConnections - 1));
 
         log.info("test \'" + testName + "\' passed.");
     }
 
     @Test
-    public void sequentialResvAlternatePaths()
-    {
+    public void sequentialResvAlternatePaths() {
         String testName = "sequentialResvAlternatePaths";
         log.info("Initializing test: \'" + testName + "\'.");
 
@@ -596,21 +565,19 @@ public class SequentialResvTest
 
         log.info("Beginning test: \'" + testName + "\'.");
 
-        for(ConnectionE oneConnection : allConnections)
-        {
+        for (ConnectionE oneConnection : allConnections) {
             log.info("Connection ID: " + oneConnection.getConnectionId());
 
-            try
-            {
-                oneConnection = resvService.hold(oneConnection);
+            try {
+                resvService.hold(oneConnection);
+            } catch (PCEException | PSSException pceE) {
+                log.error("", pceE);
             }
-            catch(PCEException | PSSException pceE){ log.error("", pceE); }
 
 
             ReservedBlueprintE reservedBlueprint = oneConnection.getReserved();
 
-            if(oneConnection.getConnectionId().equals("conn5"))
-            {
+            if (oneConnection.getConnectionId().equals("conn5")) {
                 assert (reservedBlueprint == null);
                 continue;
             }
@@ -618,57 +585,52 @@ public class SequentialResvTest
             assert (reservedBlueprint != null);
 
             ReservedVlanFlowE reservedFlow = reservedBlueprint.getVlanFlow();
-            assert(reservedFlow != null);
+            assert (reservedFlow != null);
 
             Set<ReservedEthPipeE> allResEthPipes = reservedFlow.getEthPipes();
             Set<ReservedMplsPipeE> allResMplsPipes = reservedFlow.getMplsPipes();
             Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
 
-            assert(allResJunctions.size() == 0);
-            assert(allResEthPipes.size() == 0);
-            assert(allResMplsPipes.size() == 1);
+            assert (allResJunctions.size() == 0);
+            assert (allResEthPipes.size() == 0);
+            assert (allResMplsPipes.size() == 1);
         }
 
         Set<ReservedBandwidthE> portBWs = bwRepo.findAll().stream()
                 .filter(bw -> bw.getUrn().getUrn().contains("port"))
                 .collect(Collectors.toSet());
 
-        assert(portBWs.size() == 8);
+        assert (portBWs.size() == 8);
 
         int totalBwAIn = 0;
         int totalBwAEg = 0;
         int totalBwZIn = 0;
         int totalBwZEg = 0;
 
-        for(ReservedBandwidthE oneBW : portBWs)
-        {
-            if(oneBW.getUrn().getUrn().equals("portA"))
-            {
-                assert(oneBW.getInBandwidth().equals(azBW));
-                assert(oneBW.getInBandwidth().equals(zaBW));
+        for (ReservedBandwidthE oneBW : portBWs) {
+            if (oneBW.getUrn().getUrn().equals("portA")) {
+                assert (oneBW.getInBandwidth().equals(azBW));
+                assert (oneBW.getInBandwidth().equals(zaBW));
                 totalBwAIn += oneBW.getInBandwidth();
                 totalBwAEg += oneBW.getEgBandwidth();
-            }
-            else
-            {
-                assert(oneBW.getInBandwidth().equals(zaBW));
-                assert(oneBW.getInBandwidth().equals(azBW));
+            } else {
+                assert (oneBW.getInBandwidth().equals(zaBW));
+                assert (oneBW.getInBandwidth().equals(azBW));
                 totalBwZIn += oneBW.getInBandwidth();
                 totalBwZEg += oneBW.getEgBandwidth();
             }
         }
 
-        assert(totalBwAIn == azBW * 4);
-        assert(totalBwAEg == zaBW * 4);
-        assert(totalBwZIn == zaBW * 4);
-        assert(totalBwZEg == azBW * 4);
+        assert (totalBwAIn == azBW * 4);
+        assert (totalBwAEg == zaBW * 4);
+        assert (totalBwZIn == zaBW * 4);
+        assert (totalBwZEg == azBW * 4);
 
         log.info("test \'" + testName + "\' passed.");
     }
 
     @Test
-    public void sequentialResvNonPalindromicalPaths()
-    {
+    public void sequentialResvNonPalindromicalPaths() {
         String testName = "sequentialResvNonPalindromicalPaths";
         log.info("Initializing test: \'" + testName + "\'.");
 
@@ -714,21 +676,19 @@ public class SequentialResvTest
 
         log.info("Beginning test: \'" + testName + "\'.");
 
-        for(ConnectionE oneConnection : allConnections)
-        {
+        for (ConnectionE oneConnection : allConnections) {
             log.info("Connection ID: " + oneConnection.getConnectionId());
 
-            try
-            {
-                oneConnection = resvService.hold(oneConnection);
+            try {
+                resvService.hold(oneConnection);
+            } catch (PCEException | PSSException pceE) {
+                log.error("", pceE);
             }
-            catch(PCEException | PSSException pceE){ log.error("", pceE); }
 
 
             ReservedBlueprintE reservedBlueprint = oneConnection.getReserved();
 
-            if(oneConnection.getConnectionId().equals("conn4"))
-            {
+            if (oneConnection.getConnectionId().equals("conn4")) {
                 assert (reservedBlueprint == null);
                 continue;
             }
@@ -736,58 +696,53 @@ public class SequentialResvTest
             assert (reservedBlueprint != null);
 
             ReservedVlanFlowE reservedFlow = reservedBlueprint.getVlanFlow();
-            assert(reservedFlow != null);
+            assert (reservedFlow != null);
 
             Set<ReservedEthPipeE> allResEthPipes = reservedFlow.getEthPipes();
             Set<ReservedMplsPipeE> allResMplsPipes = reservedFlow.getMplsPipes();
             Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
 
-            assert(allResJunctions.size() == 0);
-            assert(allResEthPipes.size() == 0);
-            assert(allResMplsPipes.size() == 1);
+            assert (allResJunctions.size() == 0);
+            assert (allResEthPipes.size() == 0);
+            assert (allResMplsPipes.size() == 1);
         }
 
         Set<ReservedBandwidthE> portBWs = bwRepo.findAll().stream()
                 .filter(bw -> bw.getUrn().getUrn().contains("port"))
                 .collect(Collectors.toSet());
 
-        assert(portBWs.size() == 6);
+        assert (portBWs.size() == 6);
 
         int totalBwAIn = 0;
         int totalBwAEg = 0;
         int totalBwZIn = 0;
         int totalBwZEg = 0;
 
-        for(ReservedBandwidthE oneBW : portBWs)
-        {
-            if(oneBW.getUrn().getUrn().equals("portA"))
-            {
-                assert(oneBW.getInBandwidth().equals(azBW));
-                assert(oneBW.getInBandwidth().equals(zaBW));
+        for (ReservedBandwidthE oneBW : portBWs) {
+            if (oneBW.getUrn().getUrn().equals("portA")) {
+                assert (oneBW.getInBandwidth().equals(azBW));
+                assert (oneBW.getInBandwidth().equals(zaBW));
                 totalBwAIn += oneBW.getInBandwidth();
                 totalBwAEg += oneBW.getEgBandwidth();
-            }
-            else
-            {
-                assert(oneBW.getInBandwidth().equals(zaBW));
-                assert(oneBW.getInBandwidth().equals(azBW));
+            } else {
+                assert (oneBW.getInBandwidth().equals(zaBW));
+                assert (oneBW.getInBandwidth().equals(azBW));
                 totalBwZIn += oneBW.getInBandwidth();
                 totalBwZEg += oneBW.getEgBandwidth();
             }
         }
 
-        assert(totalBwAIn == azBW * 3);
-        assert(totalBwAEg == zaBW * 3);
-        assert(totalBwZIn == zaBW * 3);
-        assert(totalBwZEg == azBW * 3);
+        assert (totalBwAIn == azBW * 3);
+        assert (totalBwAEg == zaBW * 3);
+        assert (totalBwZIn == zaBW * 3);
+        assert (totalBwZEg == azBW * 3);
 
         log.info("test \'" + testName + "\' passed.");
     }
 
 
     @Test
-    public void sequentialResvIndependentSchedules1()
-    {
+    public void sequentialResvIndependentSchedules1() {
         String testName = "sequentialResvIndependentSchedules1";
         log.info("Initializing test: \'" + testName + "\'.");
 
@@ -835,15 +790,14 @@ public class SequentialResvTest
 
         log.info("Beginning test: \'" + testName + "\'.");
 
-        for(ConnectionE oneConnection : allConnections)
-        {
+        for (ConnectionE oneConnection : allConnections) {
             log.info("Connection ID: " + oneConnection.getConnectionId());
 
-            try
-            {
-                oneConnection = resvService.hold(oneConnection);
+            try {
+                resvService.hold(oneConnection);
+            } catch (PCEException | PSSException pceE) {
+                log.error("", pceE);
             }
-            catch(PCEException | PSSException pceE){ log.error("", pceE); }
 
 
             ReservedBlueprintE reservedBlueprint = oneConnection.getReserved();
@@ -851,57 +805,52 @@ public class SequentialResvTest
             assert (reservedBlueprint != null);
 
             ReservedVlanFlowE reservedFlow = reservedBlueprint.getVlanFlow();
-            assert(reservedFlow != null);
+            assert (reservedFlow != null);
 
             Set<ReservedEthPipeE> allResEthPipes = reservedFlow.getEthPipes();
             Set<ReservedMplsPipeE> allResMplsPipes = reservedFlow.getMplsPipes();
             Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
 
-            assert(allResJunctions.size() == 0);
-            assert(allResEthPipes.size() == 0);
-            assert(allResMplsPipes.size() == 1);
+            assert (allResJunctions.size() == 0);
+            assert (allResEthPipes.size() == 0);
+            assert (allResMplsPipes.size() == 1);
         }
 
         Set<ReservedBandwidthE> portBWs = bwRepo.findAll().stream()
                 .filter(bw -> bw.getUrn().getUrn().contains("port"))
                 .collect(Collectors.toSet());
 
-        assert(portBWs.size() == 6);
+        assert (portBWs.size() == 6);
 
         int totalBwAIn = 0;
         int totalBwAEg = 0;
         int totalBwZIn = 0;
         int totalBwZEg = 0;
 
-        for(ReservedBandwidthE oneBW : portBWs)
-        {
-            if(oneBW.getUrn().getUrn().equals("portA"))
-            {
-                assert(oneBW.getInBandwidth().equals(azBW));
-                assert(oneBW.getInBandwidth().equals(zaBW));
+        for (ReservedBandwidthE oneBW : portBWs) {
+            if (oneBW.getUrn().getUrn().equals("portA")) {
+                assert (oneBW.getInBandwidth().equals(azBW));
+                assert (oneBW.getInBandwidth().equals(zaBW));
                 totalBwAIn += oneBW.getInBandwidth();
                 totalBwAEg += oneBW.getEgBandwidth();
-            }
-            else
-            {
-                assert(oneBW.getInBandwidth().equals(zaBW));
-                assert(oneBW.getInBandwidth().equals(azBW));
+            } else {
+                assert (oneBW.getInBandwidth().equals(zaBW));
+                assert (oneBW.getInBandwidth().equals(azBW));
                 totalBwZIn += oneBW.getInBandwidth();
                 totalBwZEg += oneBW.getEgBandwidth();
             }
         }
 
-        assert(totalBwAIn == azBW * 3);
-        assert(totalBwAEg == zaBW * 3);
-        assert(totalBwZIn == zaBW * 3);
-        assert(totalBwZEg == azBW * 3);
+        assert (totalBwAIn == azBW * 3);
+        assert (totalBwAEg == zaBW * 3);
+        assert (totalBwZIn == zaBW * 3);
+        assert (totalBwZEg == azBW * 3);
 
         log.info("test \'" + testName + "\' passed.");
     }
 
     @Test
-    public void sequentialResvIndependentSchedules2()
-    {
+    public void sequentialResvIndependentSchedules2() {
         String testName = "sequentialResvIndependentSchedules2";
         log.info("Initializing test: \'" + testName + "\'.");
 
@@ -939,8 +888,7 @@ public class SequentialResvTest
 
         int numConnections = 12; // Enough to run out of VLANS in two different time-intervals
 
-        for(int conn = 1; conn <= numConnections/2; conn++)
-        {
+        for (int conn = 1; conn <= numConnections / 2; conn++) {
             String connID1 = "connT1-" + conn;
             String connID2 = "connT2-" + conn;
             connection1 = testBuilder.buildConnection(requestedBlueprint, requestedSched1, connID1, "T1 Connection");
@@ -957,21 +905,19 @@ public class SequentialResvTest
         List<Integer> usedVlanIDsA_T2 = new ArrayList<>();
         List<Integer> usedVlanIDsZ_T2 = new ArrayList<>();
 
-        for(ConnectionE oneConnection : allConnections)
-        {
+        for (ConnectionE oneConnection : allConnections) {
             log.info("Connection ID: " + oneConnection.getConnectionId());
 
-            try
-            {
-                oneConnection = resvService.hold(oneConnection);
+            try {
+                resvService.hold(oneConnection);
+            } catch (PCEException | PSSException pceE) {
+                log.error("", pceE);
             }
-            catch(PCEException | PSSException pceE){ log.error("", pceE); }
 
 
             ReservedBlueprintE reservedBlueprint = oneConnection.getReserved();
 
-            if(oneConnection.getConnectionId().equals("connT1-6") || oneConnection.getConnectionId().equals("connT2-6"))
-            {
+            if (oneConnection.getConnectionId().equals("connT1-6") || oneConnection.getConnectionId().equals("connT2-6")) {
                 assert (reservedBlueprint == null);
                 continue;
             }
@@ -981,31 +927,28 @@ public class SequentialResvTest
             Date connectionStartDate = oneConnection.getSpecification().getScheduleSpec().getNotBefore();
 
             ReservedVlanFlowE reservedFlow = reservedBlueprint.getVlanFlow();
-            assert(reservedFlow != null);
+            assert (reservedFlow != null);
 
             Set<ReservedEthPipeE> allResEthPipes = reservedFlow.getEthPipes();
             Set<ReservedMplsPipeE> allResMplsPipes = reservedFlow.getMplsPipes();
             Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
 
-            assert(allResJunctions.size() == 0);
-            assert(allResEthPipes.size() == 1);
-            assert(allResMplsPipes.size() == 0);
+            assert (allResJunctions.size() == 0);
+            assert (allResEthPipes.size() == 1);
+            assert (allResMplsPipes.size() == 0);
 
             ReservedVlanFixtureE portA = allResEthPipes.iterator().next().getAJunction().getFixtures().iterator().next();
             ReservedVlanFixtureE portZ = allResEthPipes.iterator().next().getZJunction().getFixtures().iterator().next();
             Integer vlanA = portA.getReservedVlan().getVlan();
             Integer vlanZ = portZ.getReservedVlan().getVlan();
 
-            if(connectionStartDate.equals(startDate1))
-            {
+            if (connectionStartDate.equals(startDate1)) {
                 assert (!usedVlanIDsA_T1.contains(vlanA));
                 assert (!usedVlanIDsZ_T1.contains(vlanZ));
 
                 usedVlanIDsA_T1.add(portA.getReservedVlan().getVlan());
                 usedVlanIDsZ_T1.add(portZ.getReservedVlan().getVlan());
-            }
-            else
-            {
+            } else {
                 assert (!usedVlanIDsA_T2.contains(vlanA));
                 assert (!usedVlanIDsZ_T2.contains(vlanZ));
 
@@ -1018,42 +961,37 @@ public class SequentialResvTest
                 .filter(bw -> bw.getUrn().getUrn().contains("port"))
                 .collect(Collectors.toSet());
 
-        assert(portBWs.size() == 2 * (numConnections-2));
+        assert (portBWs.size() == 2 * (numConnections - 2));
 
         int totalBwAIn = 0;
         int totalBwAEg = 0;
         int totalBwZIn = 0;
         int totalBwZEg = 0;
 
-        for(ReservedBandwidthE oneBW : portBWs)
-        {
-            if(oneBW.getUrn().getUrn().equals("portA"))
-            {
-                assert(oneBW.getInBandwidth().equals(azBW));
-                assert(oneBW.getInBandwidth().equals(zaBW));
+        for (ReservedBandwidthE oneBW : portBWs) {
+            if (oneBW.getUrn().getUrn().equals("portA")) {
+                assert (oneBW.getInBandwidth().equals(azBW));
+                assert (oneBW.getInBandwidth().equals(zaBW));
                 totalBwAIn += oneBW.getInBandwidth();
                 totalBwAEg += oneBW.getEgBandwidth();
-            }
-            else
-            {
-                assert(oneBW.getInBandwidth().equals(zaBW));
-                assert(oneBW.getInBandwidth().equals(azBW));
+            } else {
+                assert (oneBW.getInBandwidth().equals(zaBW));
+                assert (oneBW.getInBandwidth().equals(azBW));
                 totalBwZIn += oneBW.getInBandwidth();
                 totalBwZEg += oneBW.getEgBandwidth();
             }
         }
 
-        assert(totalBwAIn == azBW * (numConnections-2));
-        assert(totalBwAEg == zaBW * (numConnections-2));
-        assert(totalBwZIn == zaBW * (numConnections-2));
-        assert(totalBwZEg == azBW * (numConnections-2));
+        assert (totalBwAIn == azBW * (numConnections - 2));
+        assert (totalBwAEg == zaBW * (numConnections - 2));
+        assert (totalBwZIn == zaBW * (numConnections - 2));
+        assert (totalBwZEg == azBW * (numConnections - 2));
 
         log.info("test \'" + testName + "\' passed.");
     }
 
     @Test
-    public void sequentialResvSequentialPipes()
-    {
+    public void sequentialResvSequentialPipes() {
         String testName = "sequentialResvSequentialPipes";
         log.info("Initializing test: \'" + testName + "\'.");
 
@@ -1098,21 +1036,19 @@ public class SequentialResvTest
 
         log.info("Beginning test: \'" + testName + "\'.");
 
-        for(ConnectionE oneConnection : allConnections)
-        {
+        for (ConnectionE oneConnection : allConnections) {
             log.info("Connection ID: " + oneConnection.getConnectionId());
 
-            try
-            {
-                oneConnection = resvService.hold(oneConnection);
+            try {
+                resvService.hold(oneConnection);
+            } catch (PCEException | PSSException pceE) {
+                log.error("", pceE);
             }
-            catch(PCEException | PSSException pceE){ log.error("", pceE); }
 
 
             ReservedBlueprintE reservedBlueprint = oneConnection.getReserved();
 
-            if(oneConnection.getConnectionId().equals("conn3"))
-            {
+            if (oneConnection.getConnectionId().equals("conn3")) {
                 assert (reservedBlueprint == null);
                 continue;
             }
@@ -1120,50 +1056,46 @@ public class SequentialResvTest
             assert (reservedBlueprint != null);
 
             ReservedVlanFlowE reservedFlow = reservedBlueprint.getVlanFlow();
-            assert(reservedFlow != null);
+            assert (reservedFlow != null);
 
             Set<ReservedEthPipeE> allResEthPipes = reservedFlow.getEthPipes();
             Set<ReservedMplsPipeE> allResMplsPipes = reservedFlow.getMplsPipes();
             Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
 
-            assert(allResJunctions.size() == 0);
-            assert(allResEthPipes.size() == 0);
-            assert(allResMplsPipes.size() == 2);
+            assert (allResJunctions.size() == 0);
+            assert (allResEthPipes.size() == 0);
+            assert (allResMplsPipes.size() == 2);
         }
 
         Set<ReservedBandwidthE> portBWs = bwRepo.findAll().stream()
                 .filter(bw -> bw.getUrn().getUrn().contains("port"))
                 .collect(Collectors.toSet());
 
-        assert(portBWs.size() == 8);
+        assert (portBWs.size() == 8);
 
         int totalBwAIn = 0;
         int totalBwAEg = 0;
         int totalBwZIn = 0;
         int totalBwZEg = 0;
 
-        for(ReservedBandwidthE oneBW : portBWs)
-        {
-            if(oneBW.getUrn().getUrn().equals("portA"))
-            {
-                assert(oneBW.getInBandwidth().equals(azBW));
-                assert(oneBW.getInBandwidth().equals(zaBW));
+        for (ReservedBandwidthE oneBW : portBWs) {
+            if (oneBW.getUrn().getUrn().equals("portA")) {
+                assert (oneBW.getInBandwidth().equals(azBW));
+                assert (oneBW.getInBandwidth().equals(zaBW));
                 totalBwAIn += oneBW.getInBandwidth();
                 totalBwAEg += oneBW.getEgBandwidth();
-            }
-            else
-            {
-                assert(oneBW.getInBandwidth().equals(zaBW));
-                assert(oneBW.getInBandwidth().equals(azBW));
+            } else {
+                assert (oneBW.getInBandwidth().equals(zaBW));
+                assert (oneBW.getInBandwidth().equals(azBW));
                 totalBwZIn += oneBW.getInBandwidth();
                 totalBwZEg += oneBW.getEgBandwidth();
             }
         }
 
-        assert(totalBwAIn == azBW * 4);
-        assert(totalBwAEg == zaBW * 4);
-        assert(totalBwZIn == zaBW * 4);
-        assert(totalBwZEg == azBW * 4);
+        assert (totalBwAIn == azBW * 4);
+        assert (totalBwAEg == zaBW * 4);
+        assert (totalBwZIn == zaBW * 4);
+        assert (totalBwZEg == azBW * 4);
 
         log.info("test \'" + testName + "\' passed.");
     }

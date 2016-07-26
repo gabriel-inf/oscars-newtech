@@ -11,7 +11,7 @@ import net.es.oscars.topo.dao.UrnAdjcyRepository;
 import net.es.oscars.topo.dao.UrnRepository;
 import net.es.oscars.topo.ent.UrnE;
 import net.es.oscars.topo.enums.Layer;
-import net.es.oscars.topo.enums.PalindromicType;
+import net.es.oscars.dto.spec.PalindromicType;
 import net.es.oscars.topo.enums.UrnType;
 import org.junit.Test;
 import org.junit.runner.RunWith;

@@ -43,8 +43,8 @@ public class ResvService {
 
     // basically DB stuff
 
-    public ConnectionE save(ConnectionE resv) {
-        return connRepo.save(resv);
+    public void save(ConnectionE resv) {
+        connRepo.save(resv);
     }
 
     public void delete(ConnectionE resv) {
@@ -73,30 +73,30 @@ public class ResvService {
     // business logic
 
 
-    public ConnectionE abort(ConnectionE c) {
+    public void abort(ConnectionE c) {
         this.deleteReserved(c);
 
         pssResourceService.release(c);
         c.getStates().setResv(ResvState.IDLE_WAIT);
-        return connRepo.save(c);
+        connRepo.save(c);
     }
 
-    public ConnectionE timeout(ConnectionE c) {
+    public void timeout(ConnectionE c) {
         this.deleteReserved(c);
         pssResourceService.release(c);
 
         c.getStates().setResv(ResvState.IDLE_WAIT);
-        return connRepo.save(c);
+        connRepo.save(c);
     }
 
-    public ConnectionE commit(ConnectionE c) {
+    public void commit(ConnectionE c) {
         c.getStates().setResv(ResvState.IDLE_WAIT);
         pssResourceService.reserve(c);
 
-        return connRepo.save(c);
+        connRepo.save(c);
     }
 
-    public ConnectionE hold(ConnectionE c) throws PSSException, PCEException {
+    public void hold(ConnectionE c) throws PSSException, PCEException {
 
         RequestedBlueprintE req = c.getSpecification().getRequested();
 
@@ -116,7 +116,6 @@ public class ResvService {
         } else {
             log.error("Reservation Unsuccessful!");
         }
-        return c;
 
     }
 

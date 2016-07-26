@@ -75,18 +75,23 @@ public class TopoService {
         adjcies.stream()
                 .filter(adj -> adj.getMetrics().containsKey(layer))
                 .forEach(adj -> {
-                    Long metric = adj.getMetrics().get(layer);
-                    Optional<TopoVertex> a = topo.getVertexByUrn(adj.getA().getUrn());
-                    Optional<TopoVertex> z = topo.getVertexByUrn(adj.getZ().getUrn());
+                    if (adj.getA() == null || adj.getZ() == null) {
+                        log.error("error in adjacency!");
+                        log.error(adj.toString());
+                    } else {
+                        Long metric = adj.getMetrics().get(layer);
+                        Optional<TopoVertex> a = topo.getVertexByUrn(adj.getA().getUrn());
+                        Optional<TopoVertex> z = topo.getVertexByUrn(adj.getZ().getUrn());
 
-                    if (a.isPresent() && z.isPresent()) {
-                        TopoEdge edge = TopoEdge.builder()
-                                .a(a.get())
-                                .z(z.get())
-                                .metric(metric)
-                                .layer(layer)
-                                .build();
-                        topo.getEdges().add(edge);
+                        if (a.isPresent() && z.isPresent()) {
+                            TopoEdge edge = TopoEdge.builder()
+                                    .a(a.get())
+                                    .z(z.get())
+                                    .metric(metric)
+                                    .layer(layer)
+                                    .build();
+                            topo.getEdges().add(edge);
+                        }
                     }
                 });
 

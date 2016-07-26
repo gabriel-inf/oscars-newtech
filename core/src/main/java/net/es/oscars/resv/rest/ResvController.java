@@ -9,12 +9,15 @@ import net.es.oscars.dto.pss.EthJunctionType;
 import net.es.oscars.dto.pss.EthPipeType;
 import net.es.oscars.dto.resv.*;
 import net.es.oscars.dto.spec.*;
-import net.es.oscars.resv.ent.ConnectionE;
+import net.es.oscars.pce.PCEException;
+import net.es.oscars.pss.PSSException;
+import net.es.oscars.resv.ent.*;
 import net.es.oscars.resv.svc.ResvService;
-import net.es.oscars.resv.ent.SpecificationE;
 import net.es.oscars.st.oper.OperState;
 import net.es.oscars.st.prov.ProvState;
 import net.es.oscars.st.resv.ResvState;
+import net.es.oscars.topo.dao.UrnRepository;
+import net.es.oscars.topo.ent.UrnE;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -33,6 +36,9 @@ public class ResvController {
     public ResvController(ResvService resvService) {
         this.resvService = resvService;
     }
+
+    @Autowired
+    private UrnRepository urnRepo;
 
     private ResvService resvService;
 
@@ -81,9 +87,10 @@ public class ResvController {
 
     @RequestMapping(value = "/resv/basic_vlan/add", method = RequestMethod.POST)
     @ResponseBody
-    public Connection basic_vlan_add(@RequestBody BasicVlanSpecification dtoSpec) {
+    public Connection basic_vlan_add(@RequestBody BasicVlanSpecification dtoSpec) throws PSSException, PCEException {
         log.info("saving a new basic spec");
         log.info(dtoSpec.toString());
+
 
 
         return makeConnectionFromBasic(dtoSpec);
@@ -121,52 +128,44 @@ public class ResvController {
         ConnectionE connE = resvService.findByConnectionId(connectionId).orElseThrow(NoSuchElementException::new);
         if (connE.getStates().getResv().equals(ResvState.HELD)) {
             connE.getStates().setResv(ResvState.ABORTING);
-            connE = resvService.save(connE);
+            resvService.save(connE);
         }
 
         return this.convertConnToDto(connE);
 
     }
 
-    private Connection makeConnectionFromBasic(BasicVlanSpecification dtoSpec) {
+    private Connection makeConnectionFromBasic(BasicVlanSpecification dtoSpec) throws PCEException, PSSException {
         log.info("making a new connection with id " + dtoSpec.getConnectionId());
 
-        Specification spec = basicVlanToFull(dtoSpec);
-        SpecificationE specE = convertSpecToEnt(spec);
-
-        States states = States.builder()
+        StatesE states = StatesE.builder()
                 .oper(OperState.ADMIN_DOWN_OPER_DOWN)
                 .prov(ProvState.INITIAL)
                 .resv(ResvState.SUBMITTED)
                 .build();
 
-        Schedule sch = Schedule.builder()
+        ScheduleE sch = ScheduleE.builder()
                 .setup(new Date())
                 .submitted(new Date())
                 .teardown(new Date())
                 .build();
+        SpecificationE specE = this.basicVlanToFull(dtoSpec);
 
-        Blueprint reserved = Blueprint.builder()
-                .layer3Flows(new HashSet<>())
-                .vlanFlows(new HashSet<>())
-                .build();
-
-        Connection conn = Connection.builder()
-                .specification(spec)
+        ConnectionE connE = ConnectionE.builder()
+                .connectionId(specE.getConnectionId())
                 .schedule(sch)
+                .specification(specE)
                 .states(states)
-                .reserved(reserved)
-                .connectionId(spec.getConnectionId())
                 .build();
 
-        ConnectionE connE = modelMapper.map(conn, ConnectionE.class);
         connE.setSpecification(specE);
-        connE = resvService.save(connE);
+        resvService.hold(connE);
+
         log.info("saved connection, connectionId " + specE.getConnectionId());
         log.info(connE.toString());
 
 
-        conn = modelMapper.map(connE, Connection.class);
+        Connection conn = modelMapper.map(connE, Connection.class);
         log.info(conn.toString());
 
 
@@ -174,43 +173,47 @@ public class ResvController {
 
     }
 
-    private Specification basicVlanToFull(BasicVlanSpecification bvs) {
+    private SpecificationE basicVlanToFull(BasicVlanSpecification bvs) {
 
 
-        VlanFlow vf = VlanFlow.builder()
+        RequestedVlanFlowE vf = RequestedVlanFlowE.builder()
                 .junctions(new HashSet<>())
                 .pipes(new HashSet<>())
                 .build();
 
         BasicVlanFlow bvf = bvs.getBasicVlanFlow();
 
-        VlanFixture vfa = VlanFixture.builder()
+        UrnE aUrn = urnRepo.findByUrn(bvf.getAUrn()).orElseThrow(NoSuchElementException::new);
+        UrnE aDevUrn = urnRepo.findByUrn(bvf.getADeviceUrn()).orElseThrow(NoSuchElementException::new);
+        UrnE zUrn = urnRepo.findByUrn(bvf.getZUrn()).orElseThrow(NoSuchElementException::new);
+        UrnE zDevUrn = urnRepo.findByUrn(bvf.getZDeviceUrn()).orElseThrow(NoSuchElementException::new);
+
+
+        RequestedVlanFixtureE vfa = RequestedVlanFixtureE.builder()
                 .fixtureType(EthFixtureType.REQUESTED)
-                .portUrn(bvf.getAUrn())
+                .portUrn(aUrn)
                 .inMbps(bvf.getAzMbps())
                 .egMbps(bvf.getZaMbps())
                 .vlanExpression(bvf.getAVlanExpression())
                 .build();
 
-        VlanFixture vfz = VlanFixture.builder()
+        RequestedVlanFixtureE vfz = RequestedVlanFixtureE.builder()
                 .fixtureType(EthFixtureType.REQUESTED)
-                .portUrn(bvf.getZUrn())
+                .portUrn(zUrn)
                 .inMbps(bvf.getZaMbps())
                 .egMbps(bvf.getAzMbps())
                 .vlanExpression(bvf.getZVlanExpression())
                 .build();
 
-        VlanJunction vja = VlanJunction.builder()
-                .deviceUrn(bvf.getADeviceUrn())
+        RequestedVlanJunctionE vja = RequestedVlanJunctionE.builder()
+                .deviceUrn(aDevUrn)
                 .fixtures(new HashSet<>())
-                .resourceIds(new HashSet<>())
                 .junctionType(EthJunctionType.REQUESTED)
                 .build();
 
-        VlanJunction vjz = VlanJunction.builder()
-                .deviceUrn(bvf.getZDeviceUrn())
+        RequestedVlanJunctionE vjz = RequestedVlanJunctionE.builder()
+                .deviceUrn(zDevUrn)
                 .fixtures(new HashSet<>())
-                .resourceIds(new HashSet<>())
                 .junctionType(EthJunctionType.REQUESTED)
                 .build();
 
@@ -223,14 +226,14 @@ public class ResvController {
             vja.getFixtures().add(vfa);
             vjz.getFixtures().add(vfz);
 
-            VlanPipe vpaz = VlanPipe.builder()
+            RequestedVlanPipeE vpaz = RequestedVlanPipeE.builder()
                     .aJunction(vja)
                     .zJunction(vjz)
                     .azERO(new ArrayList<>())
                     .zaERO(new ArrayList<>())
                     .azMbps(bvf.getAzMbps())
                     .zaMbps(bvf.getZaMbps())
-                    .eroPalindromic(bvf.getEroPalindromic())
+                    .eroPalindromic(bvf.getPalindromic())
                     .pipeType(EthPipeType.REQUESTED)
                     .build();
 
@@ -238,20 +241,23 @@ public class ResvController {
         }
 
 
-        Blueprint requested = Blueprint.builder()
-                .layer3Flows(new HashSet<>())
-                .vlanFlows(new HashSet<>())
+
+        RequestedBlueprintE requested = RequestedBlueprintE.builder()
+                .vlanFlow(vf)
                 .build();
 
+        ScheduleSpecification ss = bvs.getScheduleSpec();
+        ScheduleSpecificationE sse = ScheduleSpecificationE.builder()
+                .durationMinutes(ss.getDurationMinutes())
+                .notAfter(ss.getNotAfter())
+                .notBefore(ss.getNotBefore())
+                .build();
 
-        requested.getVlanFlows().add(vf);
-
-
-        return Specification.builder()
+        return SpecificationE.builder()
                 .connectionId(bvs.getConnectionId())
                 .username(bvs.getUsername())
                 .description(bvs.getDescription())
-                .scheduleSpec(bvs.getScheduleSpec())
+                .scheduleSpec(sse)
                 .requested(requested)
                 .version(0)
                 .build();

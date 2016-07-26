@@ -3,6 +3,8 @@
       xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org">
 
+<!--/*--><!--@thymesVar id="basicSpec" type="net.es.oscars.dto.spec.BasicVlanSpecification"--><!--*/-->
+
 <head th:include="shared :: headerFragment (pageTitle='New specification')"/>
 
 <body>
@@ -139,12 +141,24 @@
         </div>
 
         <div class="form-group">
-            <label class="col-md-4 control-label" for="zaMbps">Guaranteed Mbps (Z -> Z)</label>
+            <label class="col-md-4 control-label" for="zaMbps">Guaranteed Mbps (Z -> A)</label>
             <div class="col-md-4">
                 <input id="zaMbps" placeholder="Guaranteed Mbps (Z -> A)"
                        th:field="*{basicVlanFlow.zaMbps}" class="form-control input-md" />
                 <span class="help-block">Guaranteed Mbps (Z -> A)</span>
             </div>
+        </div>
+
+
+
+        <div class="form-group">
+            <label class="col-md-4 control-label" for="palindromic">Palindromic ERO</label>
+            <select id="palindromic" class="selectpicker" th:field="*{basicVlanFlow.palindromic}">
+                <option th:each="palindromic: ${T(net.es.oscars.dto.spec.PalindromicType).values()}"
+                        th:value="${palindromic}" th:text="${palindromic}"></option>
+            </select>
+
+
         </div>
 
 

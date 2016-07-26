@@ -17,11 +17,9 @@ public class RequestedBlueprintE {
     private Long id;
 
     @OneToOne (cascade = CascadeType.ALL)
-    @NonNull
     private RequestedVlanFlowE vlanFlow;
 
     @OneToOne (cascade = CascadeType.ALL)
-    @NonNull
     private Layer3FlowE layer3Flow;
 
 
