@@ -68,8 +68,6 @@ public class EroPCE
             throw new PCEException("Requested ERO must begin at source-device URN, and terminate at destination-device URN.");
         }
 
-        if(requestedAzERO == null || requestedZaERO == null)
-            throw new PCEException("Requested ERO may not be null.");
         if(requestedAzERO.isEmpty() || requestedZaERO.isEmpty())
             throw new PCEException("Requested ERO must include at least one URN.");
 
