@@ -432,6 +432,27 @@ public class BandwidthService {
     }
 
     /**
+     * Given a specific URN, which is traversed in the same direction by the forward and reverse path, determine if there is enough bandwidth available to support the requested bandwidth
+     * @param urn - The URN
+     * @param availBwMap - Map of URNs to available Bandwidth
+     * @param inMbpsAZ - Requested ingress Mbps in the A->Z direction
+     * @param egMbpsAZ - Requested egress Mbps in the A->Z direction
+     * @param inMbpsZA - Requested ingress Mbps in the Z->A direction
+     * @param egMbpsZA - Requested egress Mbps in the Z->A direction
+     * @return True, if there is enough available bandwidth at the URN. False, otherwise
+     */
+    public boolean evaluateBandwidthSharedURN(UrnE urn, Map<UrnE, Map<String, Integer>> availBwMap, Integer inMbpsAZ, Integer egMbpsAZ, Integer inMbpsZA, Integer egMbpsZA)
+    {
+        Map<String, Integer> bwAvail = availBwMap.get(urn);
+        if((bwAvail.get("Ingress") < (inMbpsAZ + inMbpsZA)) || (bwAvail.get("Egress") < (egMbpsAZ + egMbpsZA)))
+        {
+            log.error("Insufficient Bandwidth at " + urn.toString() + ". Requested: " + (inMbpsAZ+inMbpsZA) + " In and " + (egMbpsAZ+egMbpsZA) + " Out. Available: " + bwAvail.get("Ingress") +  " In and " + bwAvail.get("Egress") + " Out.");
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * Given a specific URN, determine if there is enough bandwidth available to support the requested bandwidth in a specific (ingress/egress) direction
      * @param urn - The URN
      * @param availBwMap - Map of URNs to Available Bandwidth

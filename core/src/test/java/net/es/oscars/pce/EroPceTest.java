@@ -635,20 +635,10 @@ public class EroPceTest
         computedZAEro.add(0, dstDevice);
         computedZAEro.add(srcDevice);
 
-        assert(computedAZEro.size() == azERO.size());
-        assert(computedZAEro.size() == zaERO.size());
+        assert(azERO.equals(computedAZEro));
+        assert(zaERO.equals(computedZAEro));
 
-        for(int s = 0; s < azERO.size(); s++)
-        {
-            assert(azERO.get(s).equals(computedAZEro.get(s)));
-        }
-
-        for(int s = 0; s < zaERO.size(); s++)
-        {
-            assert(zaERO.get(s).equals(computedZAEro.get(s)));
-        }
-
-        // For some reason, these statements fail?!
+        // Why on Earth do these two statements fail?!
         //assert(computedAZEro.equals(azERO));
         //assert(computedZAEro.equals(zaERO));
 
