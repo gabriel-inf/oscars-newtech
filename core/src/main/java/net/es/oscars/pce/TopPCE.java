@@ -205,7 +205,7 @@ public class TopPCE {
         Map<String, List<TopoEdge>> eroMap = null;
 
 
-        if(!pipe.getAzERO().isEmpty() || !pipe.getZaERO().isEmpty())
+        if(!pipe.getAzERO().isEmpty() && !pipe.getZaERO().isEmpty())
         {
             try
             {
