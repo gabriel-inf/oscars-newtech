@@ -2,6 +2,7 @@ package net.es.oscars.pce;
 
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.CoreUnitTestConfiguration;
+import net.es.oscars.dto.spec.PalindromicType;
 import net.es.oscars.helpers.RequestedEntityBuilder;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.dao.ReservedBandwidthRepository;
@@ -12,7 +13,6 @@ import net.es.oscars.topo.TopologyBuilder;
 import net.es.oscars.topo.beans.TopoEdge;
 import net.es.oscars.topo.beans.TopoVertex;
 import net.es.oscars.topo.dao.UrnRepository;
-import net.es.oscars.topo.enums.PalindromicType;
 import net.es.oscars.topo.svc.TopoService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -617,8 +617,8 @@ public class EroPceTest
 
         try
         {
-            connectionBig = resvService.hold(connectionBig);
-            connectionTest = resvService.hold(connectionTest);
+            resvService.hold(connectionBig);
+            resvService.hold(connectionTest);
         }
         catch(PCEException pceE){ log.error("", pceE); }
         catch(PSSException pssE){ log.error("", pssE); }
@@ -727,8 +727,8 @@ public class EroPceTest
 
         try
         {
-            connectionBig = resvService.hold(connectionBig);
-            connectionTest = resvService.hold(connectionTest);
+            resvService.hold(connectionBig);
+            resvService.hold(connectionTest);
         }
         catch(PCEException pceE){ log.error("", pceE); }
         catch(PSSException pssE){ log.error("", pssE); }
@@ -941,7 +941,7 @@ public class EroPceTest
 
         try
         {
-            connection = resvService.hold(connection);
+            resvService.hold(connection);
         }
         catch(PCEException pceE){ log.error("", pceE); }
         catch(PSSException pssE){ log.error("", pssE); }
@@ -1017,7 +1017,7 @@ public class EroPceTest
 
         try
         {
-            connection = resvService.hold(connection);
+            resvService.hold(connection);
         }
         catch(PCEException pceE){ log.error("", pceE); }
         catch(PSSException pssE){ log.error("", pssE); }
