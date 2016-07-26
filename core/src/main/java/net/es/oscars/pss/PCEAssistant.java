@@ -93,134 +93,115 @@ public class PCEAssistant {
 
 
     /**
-     * Create a Junction and it's associated fixtures given the input parameters.
-     * @param device - The device vertex associated with the junction
-     * @param urnMap - A mapping of URN strings to URN objects
-     * @param deviceModels - A mapping of URN strings to Device Models
-     * @param requestedJunctions - A set of requested junctions - used to determine attributes of junction/fixtures
-     * @param vlanId - The assigned VLAN ID for the fixtures
-     * @param sched - The requested schedule
-     * @return A Reserved Vlan Junction with Reserved Fixtures (if contained in a matching requested junction)
-     * @throws PSSException
+     * Confirm that the two EROs are identical
+     * @param azERO - A path in one direction
+     * @param zaERO - A path in another direction
+     * @return True if they are identical, False otherwise.
      */
-    public ReservedVlanJunctionE createJunctionAndFixtures(TopoVertex device, Map<String, UrnE> urnMap,
-                                                            Map<String, DeviceModel> deviceModels,
-                                                           Set<RequestedVlanJunctionE> requestedJunctions,
-                                                           Integer vlanId, ScheduleSpecificationE sched) throws PSSException {
-        // Get this junction's URN, Device Model, and Typing for its Fixtures
-        UrnE aUrn = urnMap.get(device.getUrn());
-        DeviceModel model = deviceModels.get(aUrn.getUrn());
-        EthFixtureType fixType = decideFixtureType(model);
+    public boolean palindromicEros(List<TopoEdge> azERO, List<TopoEdge> zaERO)
+    {
+        Set<TopoVertex> azVertices = new HashSet<>();
+        Set<TopoVertex> zaVertices = new HashSet<>();
 
-        // Create the set of Reserved Fixtures by filtering for requested junctions that match the URN
-        Set<ReservedVlanFixtureE> reservedVlanFixtures = requestedJunctions
+        for(TopoEdge azEdge : azERO)
+        {
+            azVertices.add(azEdge.getA());
+            azVertices.add(azEdge.getZ());
+        }
+
+        for(TopoEdge zaEdge : zaERO)
+        {
+            zaVertices.add(zaEdge.getA());
+            zaVertices.add(zaEdge.getZ());
+        }
+
+        if(azVertices.size() != zaVertices.size())
+            return false;
+
+        for(TopoVertex oneVert : azVertices)
+        {
+            if(!zaVertices.contains(oneVert))
+                return false;
+        }
+
+        Set<TopoVertex> azPorts = azVertices
                 .stream()
-                .filter(reqJunction -> reqJunction.getDeviceUrn().equals(aUrn))
-                .map(RequestedVlanJunctionE::getFixtures)
-                .flatMap(Collection::stream)
-                .map(reqFix -> createFixtureAndResources(reqFix.getPortUrn(), fixType,
-                        reqFix.getInMbps(), reqFix.getEgMbps(), vlanId, sched))
+                .filter(v -> v.getVertexType().equals(VertexType.PORT))
+                .collect(Collectors.toSet());
+        Set<TopoVertex> zaPorts = zaVertices
+                .stream()
+                .filter(v -> v.getVertexType().equals(VertexType.PORT))
                 .collect(Collectors.toSet());
 
-        // Return the Reserved Junction (with the set of reserved VLAN fixtures).
-        return createReservedJunction(aUrn, new HashSet<>(),
-                reservedVlanFixtures, decideJunctionType(model));
-    }
+        if(azPorts.size() != zaPorts.size())
+            return false;
 
-    /**
-     * Create a Reserved Fixtures and it's associated resources (VLAN and Bandwidth) using the input.
-     * @param portUrn - The URN of the desired fixture
-     * @param fixtureType - The typing of the desired fixture
-     * @param azMbps - The requested ingress bandwidth
-     * @param zaMbps - The requested egress bandwidth
-     * @param vlanId - The assigned VLAN ID
-     * @param sched - The requested schedule
-     * @return The reserved fixture, containing all of its reserved resources
-     */
-    public ReservedVlanFixtureE createFixtureAndResources(UrnE portUrn, EthFixtureType fixtureType, Integer azMbps,
-                                                           Integer zaMbps, Integer vlanId,
-                                                           ScheduleSpecificationE sched){
+        // Now see if all ports are traversed in both the ingress and egress directions
+        Set<TopoVertex> ingressPorts = new HashSet<>();
+        Set<TopoVertex> egressPorts = new HashSet<>();
 
+        // Identify which ports are used as ingress vs the ones that are used as egress
+        for(TopoEdge azEdge : azERO)
+        {
+            TopoVertex nodeA = azEdge.getA();
+            TopoVertex nodeZ = azEdge.getZ();
 
-        // Create reserved resources for Fixture
-        ReservedBandwidthE rsvBw = createReservedBandwidth(portUrn, azMbps, zaMbps, sched);
-        ReservedVlanE rsvVlan = createReservedVlan(portUrn, vlanId, sched);
-        // Create Fixture
-        return createReservedFixture(portUrn, new HashSet<>(), rsvVlan, rsvBw, fixtureType);
-    }
+            // Case 1: portA -> portZ -- portA = egress, portZ = ingress
+            if(nodeA.getVertexType().equals(VertexType.PORT) && nodeZ.getVertexType().equals(VertexType.PORT))
+            {
+                egressPorts.add(nodeA);
+                ingressPorts.add(nodeZ);
+            }
+            // Case 2: portA -> deviceZ -- portA = ingress
+            else if(nodeA.getVertexType().equals(VertexType.PORT) && !nodeZ.getVertexType().equals(VertexType.PORT))
+            {
+                ingressPorts.add(nodeA);
+            }
+            // Case 3: deviceA -> portZ -- portZ = egress
+            else if(!nodeA.getVertexType().equals(VertexType.PORT) && nodeZ.getVertexType().equals(VertexType.PORT))
+            {
+                egressPorts.add(nodeZ);
+            }
+        }
 
-    /**
-     * Create a reserved junction given the input
-     * @param urn - The junction's URN
-     * @param pssResources - The junction's PSS Resources
-     * @param fixtures - The junction's fixtures
-     * @param junctionType - The junction's type
-     * @return The Reserved VLAN Junction
-     */
-    public ReservedVlanJunctionE createReservedJunction(UrnE urn, Set<ReservedPssResourceE> pssResources,
-                                                         Set<ReservedVlanFixtureE> fixtures, EthJunctionType junctionType){
-        return ReservedVlanJunctionE.builder()
-                .deviceUrn(urn)
-                .reservedPssResources(pssResources)
-                .fixtures(fixtures)
-                .junctionType(junctionType)
-                .build();
-    }
+        // repeat above for Z->A
+        for(TopoEdge zaEdge : zaERO)
+        {
+            TopoVertex nodeA = zaEdge.getA();
+            TopoVertex nodeZ = zaEdge.getZ();
 
-    /**
-     * Create a reserved fixture, given the input parameters.
-     * @param urn - The fixture's URN
-     * @param pssResources - The fixture's PSS Resources
-     * @param rsvVlan - The fixture's assigned VLAN ID
-     * @param rsvBw - The fixture's assigned bandwidth
-     * @param fixtureType - The fixture's type
-     * @return The Reserved VLAN Fixture
-     */
-    public ReservedVlanFixtureE createReservedFixture(UrnE urn, Set<ReservedPssResourceE> pssResources,
-                                                       ReservedVlanE rsvVlan, ReservedBandwidthE rsvBw,
-                                                       EthFixtureType fixtureType){
-        return ReservedVlanFixtureE.builder()
-                .ifceUrn(urn)
-                .reservedPssResources(pssResources)
-                .reservedVlan(rsvVlan)
-                .reservedBandwidth(rsvBw)
-                .fixtureType(fixtureType)
-                .build();
-    }
+            // Case 1: portA -> portZ -- portA = egress, portZ = ingress
+            if(nodeA.getVertexType().equals(VertexType.PORT) && nodeZ.getVertexType().equals(VertexType.PORT))
+            {
+                egressPorts.add(nodeA);
+                ingressPorts.add(nodeZ);
+            }
+            // Case 2: portA -> deviceZ -- portA = ingress
+            else if(nodeA.getVertexType().equals(VertexType.PORT) && !nodeZ.getVertexType().equals(VertexType.PORT))
+            {
+                ingressPorts.add(nodeA);
+            }
+            // Case 3: deviceA -> portZ -- portZ = egress
+            else if(!nodeA.getVertexType().equals(VertexType.PORT) && nodeZ.getVertexType().equals(VertexType.PORT))
+            {
+                egressPorts.add(nodeZ);
+            }
+        }
 
+        // Now check to see if all ports used are both ingress and egress -- if so, palindromic port usage!
+        if(ingressPorts.size() != egressPorts.size())
+            return false;
 
-    /**
-     * Create the reserved bandwidth given the input parameters.
-     * @param urn - The URN associated with this bandwidth
-     * @param inMbps - The ingress bandwidth
-     * @param egMbps - The egress bandwidth
-     * @param sched - The requested schedule
-     * @return A reserved bandwidth object
-     */
-    public ReservedBandwidthE createReservedBandwidth(UrnE urn, Integer inMbps, Integer egMbps, ScheduleSpecificationE sched){
-        return ReservedBandwidthE.builder()
-                .urn(urn)
-                .inBandwidth(inMbps)
-                .egBandwidth(egMbps)
-                .beginning(sched.getNotBefore().toInstant())
-                .ending(sched.getNotAfter().toInstant())
-                .build();
-    }
+        if(ingressPorts.size() != azPorts.size())
+            return false;
 
-    /**
-     * Create the reserved VLAN ID given the input parameters.
-     * @param urn - The URN associated with this VLAN
-     * @param vlanId - The ID value for the VLAN tag
-     * @param sched - The requested schedule
-     * @return The reserved VLAN objct
-     */
-    public ReservedVlanE createReservedVlan(UrnE urn, Integer vlanId, ScheduleSpecificationE sched){
-        return ReservedVlanE.builder()
-                .urn(urn)
-                .vlan(vlanId)
-                .beginning(sched.getNotBefore().toInstant())
-                .ending(sched.getNotAfter().toInstant())
-                .build();
+        for(TopoVertex onePort : azPorts)
+        {
+            if(!(zaPorts.contains(onePort) && ingressPorts.contains(onePort) && egressPorts.contains(onePort)))
+                return false;
+        }
+
+        return true;
     }
 
     // TODO: fix this
@@ -590,40 +571,5 @@ public class PCEAssistant {
     }
 
 
-    /**
-     * Given two lists of EROS in the AZ and ZA direction, a map of URNs, a map of the requested bandwidth at each URN,
-     * and the requested schedule, return a combined set of reserved bandwidth objects for the AZ and ZA paths
-     * @param az - The AZ vertices
-     * @param za - The ZA vertices
-     * @param urnMap - A mapping of URN string to URN object
-     * @param requestedBandwidthMap - A mapping of Vertex objects to "Ingress"/"Egress" requested bandwidth
-     * @param sched - THe requested schedule
-     * @return A set of all reserved bandwidth for every port (across both paths)
-     */
-    public Set<ReservedBandwidthE> createReservedBandwidthForEROs(List<TopoVertex> az, List<TopoVertex> za,
-                                                                  Map<String, UrnE> urnMap,
-                                                                  Map<TopoVertex, Map<String, Integer>> requestedBandwidthMap,
-                                                                  ScheduleSpecificationE sched) {
-        // Combine the AZ and ZA EROs
-        Set<TopoVertex> combined = new HashSet<>(az);
-        combined.addAll(za);
 
-        // Store the reserved bandwidths
-        Set<ReservedBandwidthE> reservedBandwidths = new HashSet<>();
-
-        // For each vertex in the combined set, retrieve the requested Ingress/Egress bandwidth, and create a reserved
-        // bandwidth object
-        combined.stream().filter(requestedBandwidthMap::containsKey).forEach(vertex -> {
-            UrnE urn = urnMap.get(vertex.getUrn());
-            Integer reqInMbps = requestedBandwidthMap.get(vertex).get("Ingress");
-            Integer reqEgMbps = requestedBandwidthMap.get(vertex).get("Egress");
-
-            ReservedBandwidthE rsvBw = createReservedBandwidth(urn, reqInMbps, reqEgMbps, sched);
-            reservedBandwidths.add(rsvBw);
-
-        });
-
-        // Return the set
-        return reservedBandwidths;
-    }
 }

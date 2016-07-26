@@ -8,7 +8,6 @@ import net.es.oscars.dto.spec.PalindromicType;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.topo.beans.TopoEdge;
 import net.es.oscars.topo.beans.TopoVertex;
-import net.es.oscars.topo.beans.Topology;
 import net.es.oscars.topo.dao.UrnAdjcyRepository;
 import net.es.oscars.topo.dao.UrnRepository;
 import net.es.oscars.topo.ent.*;
@@ -36,6 +35,9 @@ public class TestEntityBuilder {
         urnRepo.deleteAll();
         adjcyRepo.deleteAll();
 
+        List<Integer> floors = Arrays.asList(1, 10, 20, 30);
+        List<Integer> ceilings = Arrays.asList(9, 19, 29, 39);
+
         List<UrnE> urnList = new ArrayList<>();
         List<UrnAdjcyE> adjcyList = new ArrayList<>();
         for(TopoEdge edge : edges){
@@ -44,9 +46,9 @@ public class TestEntityBuilder {
             TopoVertex z = edge.getZ();
 
 
-            UrnE aUrn = addUrnToList(a, urnList, portToDeviceMap);
+            UrnE aUrn = addUrnToList(a, urnList, portToDeviceMap, floors, ceilings);
 
-            UrnE zUrn = addUrnToList(z, urnList, portToDeviceMap);
+            UrnE zUrn = addUrnToList(z, urnList, portToDeviceMap, floors, ceilings);
 
             UrnAdjcyE adj = buildUrnAdjcy(edge, aUrn, zUrn);
             adjcyList.add(adj);
@@ -55,7 +57,37 @@ public class TestEntityBuilder {
         adjcyRepo.save(adjcyList);
     }
 
-    public void populateRepos(Collection<TopoVertex> vertices, Collection<TopoEdge> edges, Map<TopoVertex,TopoVertex> portToDeviceMap,  Map<TopoVertex, List<Integer>> portBWs){
+    public void populateRepos(Collection<TopoVertex> vertices, Collection<TopoEdge> edges, Map<TopoVertex,TopoVertex> portToDeviceMap,
+                              Map<TopoVertex, List<Integer>> portBWs){
+        log.info("Populating URN Repo and Adjcy Repo");
+
+        urnRepo.deleteAll();
+        adjcyRepo.deleteAll();
+
+        List<Integer> floors = Arrays.asList(1, 10, 20, 30);
+        List<Integer> ceilings = Arrays.asList(9, 19, 29, 39);
+
+        List<UrnE> urnList = new ArrayList<>();
+        List<UrnAdjcyE> adjcyList = new ArrayList<>();
+        for(TopoEdge edge : edges){
+            TopoVertex a = edge.getA();
+
+            TopoVertex z = edge.getZ();
+
+
+            UrnE aUrn = addUrnToList(a, urnList, portToDeviceMap, portBWs, floors, ceilings);
+
+            UrnE zUrn = addUrnToList(z, urnList, portToDeviceMap, portBWs, floors, ceilings);
+
+            UrnAdjcyE adj = buildUrnAdjcy(edge, aUrn, zUrn);
+            adjcyList.add(adj);
+        }
+        urnRepo.save(urnList);
+        adjcyRepo.save(adjcyList);
+    }
+
+    public void populateRepos(Collection<TopoVertex> vertices, Collection<TopoEdge> edges, Map<TopoVertex,TopoVertex> portToDeviceMap,
+                              Map<TopoVertex, List<Integer>> floorMap, Map<TopoVertex, List<Integer>> ceilingMap){
         log.info("Populating URN Repo and Adjcy Repo");
 
         urnRepo.deleteAll();
@@ -69,9 +101,9 @@ public class TestEntityBuilder {
             TopoVertex z = edge.getZ();
 
 
-            UrnE aUrn = addUrnToList(a, urnList, portToDeviceMap, portBWs);
+            UrnE aUrn = addUrnToList(a, urnList, portToDeviceMap, floorMap.get(a), ceilingMap.get(a));
 
-            UrnE zUrn = addUrnToList(z, urnList, portToDeviceMap, portBWs);
+            UrnE zUrn = addUrnToList(z, urnList, portToDeviceMap, floorMap.get(z), ceilingMap.get(z));
 
             UrnAdjcyE adj = buildUrnAdjcy(edge, aUrn, zUrn);
             adjcyList.add(adj);
@@ -80,30 +112,33 @@ public class TestEntityBuilder {
         adjcyRepo.save(adjcyList);
     }
 
-    public Topology buildTopology(List<String> nodeNames, Map<String, VertexType> typeMap,
-                                  Map<String, List<String>> neighborMap, Layer layer, Long metric){
-        Topology topo = new Topology();
-        Set<TopoVertex> vertices = new HashSet<>();
-        Set<TopoEdge> edges = new HashSet<>();
-        for(String name : nodeNames){
-            List<String> neighbors = neighborMap.get(name);
-            TopoVertex thisVertex = buildTopoVertex(name, typeMap.get(name));
-            vertices.add(thisVertex);
-            for(String neighborName : neighbors){
-                TopoVertex neighborVertex = getFromSet(neighborName, vertices);
-                if(neighborVertex == null){
-                    neighborVertex = buildTopoVertex(neighborName, typeMap.get(neighborName));
-                    vertices.add(neighborVertex);
-                }
-                TopoEdge edge = buildTopoEdge(thisVertex, neighborVertex, layer, metric);
-                edges.add(edge);
-            }
+    public void populateRepos(Collection<TopoVertex> vertices, Collection<TopoEdge> edges, Map<TopoVertex,TopoVertex> portToDeviceMap,
+                              Map<TopoVertex, List<Integer>> portBWs, Map<TopoVertex, List<Integer>> floorMap,
+                              Map<TopoVertex, List<Integer>> ceilingMap){
+        log.info("Populating URN Repo and Adjcy Repo");
+
+        urnRepo.deleteAll();
+        adjcyRepo.deleteAll();
+
+        List<UrnE> urnList = new ArrayList<>();
+        List<UrnAdjcyE> adjcyList = new ArrayList<>();
+        for(TopoEdge edge : edges){
+            TopoVertex a = edge.getA();
+
+            TopoVertex z = edge.getZ();
+
+
+            UrnE aUrn = addUrnToList(a, urnList, portToDeviceMap, portBWs, floorMap.get(a), ceilingMap.get(a));
+
+            UrnE zUrn = addUrnToList(z, urnList, portToDeviceMap, portBWs, floorMap.get(z), ceilingMap.get(z));
+
+            UrnAdjcyE adj = buildUrnAdjcy(edge, aUrn, zUrn);
+            adjcyList.add(adj);
         }
-        topo.setLayer(layer);
-        topo.setVertices(vertices);
-        topo.setEdges(edges);
-        return topo;
+        urnRepo.save(urnList);
+        adjcyRepo.save(adjcyList);
     }
+
 
     public RequestedBlueprintE buildRequest(String deviceName, List<String> fixtureNames,
                                             Integer azMbps, Integer zaMbps, String vlanExp){
@@ -137,6 +172,32 @@ public class TestEntityBuilder {
 
     }
 
+    public RequestedBlueprintE buildRequest(String aPort, String aDevice, String zPort, String zDevice,
+                                            Integer azMbps, Integer zaMbps, PalindromicType palindromic, String aVlanExp, String zVlanExp){
+        log.info("Building RequestedBlueprintE");
+
+
+        Set<RequestedVlanPipeE> pipes = new HashSet<>();
+        RequestedVlanPipeE pipe = buildRequestedPipe(aPort, aDevice, zPort, zDevice, azMbps, zaMbps, palindromic, aVlanExp, zVlanExp);
+        pipes.add(pipe);
+
+        return buildRequestedBlueprint(buildRequestedFlow(new HashSet<>(), pipes), Layer3FlowE.builder().build());
+
+    }
+
+    public RequestedBlueprintE buildRequest(List<String> aPorts, String aDevice, List<String> zPorts, String zDevice,
+                                            Integer azMbps, Integer zaMbps, PalindromicType palindromic, String vlanExp){
+        log.info("Building RequestedBlueprintE");
+
+
+        Set<RequestedVlanPipeE> pipes = new HashSet<>();
+        RequestedVlanPipeE pipe = buildRequestedPipe(aPorts, aDevice, zPorts, zDevice, azMbps, zaMbps, palindromic, vlanExp);
+        pipes.add(pipe);
+
+        return buildRequestedBlueprint(buildRequestedFlow(new HashSet<>(), pipes), Layer3FlowE.builder().build());
+
+    }
+
     public RequestedBlueprintE buildRequest(List<String> aPorts, List<String> aDevices, List<String> zPorts,
                                             List<String> zDevices, List<Integer> azMbpsList, List<Integer> zaMbpsList,
                                             List<PalindromicType> palindromicList, List<String> vlanExps){
@@ -155,6 +216,12 @@ public class TestEntityBuilder {
         }
 
         return buildRequestedBlueprint(buildRequestedFlow(new HashSet<>(), pipes), Layer3FlowE.builder().build());
+    }
+
+    // Added for multi-pipe request
+    public RequestedBlueprintE buildRequest(Set<RequestedVlanPipeE> requestedPipes)
+    {
+        return buildRequestedBlueprint(buildRequestedFlow(new HashSet<>(), requestedPipes), Layer3FlowE.builder().build());
     }
 
     public RequestedBlueprintE buildRequest(List<String> deviceNames, List<List<String>> portNames,
@@ -200,13 +267,14 @@ public class TestEntityBuilder {
         log.info("Populating request schedule");
 
         return ScheduleSpecificationE.builder()
-                .notAfter(start)
-                .notBefore(end)
+                .notBefore(start)
+                .notAfter(end)
                 .durationMinutes(Duration.between(start.toInstant(), end.toInstant()).toMinutes())
                 .build();
     }
 
-    public UrnE addUrnToList(TopoVertex v, List<UrnE> urnList, Map<TopoVertex,TopoVertex> portToDeviceMap){
+    public UrnE addUrnToList(TopoVertex v, List<UrnE> urnList, Map<TopoVertex,TopoVertex> portToDeviceMap, List<Integer> floors,
+                             List<Integer> ceilings){
         UrnE urn = getFromUrnList(v.getUrn(), urnList);
         if(urn == null){
             Set<Layer> capabilities = new HashSet<>();
@@ -216,20 +284,20 @@ public class TestEntityBuilder {
             if (!v.getVertexType().equals(VertexType.PORT)) {
                 if(v.getVertexType().equals(VertexType.ROUTER)) {
                     capabilities.add(Layer.MPLS);
-                    urn = buildUrn(v, null, capabilities);
+                    urn = buildUrn(v, null, capabilities, floors, ceilings);
                 }
                 else {
-                    urn = buildUrn(v, null, capabilities);
+                    urn = buildUrn(v, null, capabilities, floors, ceilings);
                 }
             } else {
                 TopoVertex deviceVertex = portToDeviceMap.get(v);
                 VertexType deviceVertexType = deviceVertex.getVertexType();
                 if(deviceVertexType.equals(VertexType.ROUTER)) {
                     capabilities.add(Layer.MPLS);
-                    urn = buildUrn(v, determineDeviceModel(deviceVertexType), capabilities);
+                    urn = buildUrn(v, determineDeviceModel(deviceVertexType), capabilities, floors, ceilings);
                 }
                 else {
-                    urn = buildUrn(v, determineDeviceModel(deviceVertexType), capabilities);
+                    urn = buildUrn(v, determineDeviceModel(deviceVertexType), capabilities, floors, ceilings);
                 }
             }
             urnList.add(urn);
@@ -237,7 +305,8 @@ public class TestEntityBuilder {
         return urn;
     }
 
-    public UrnE addUrnToList(TopoVertex v, List<UrnE> urnList, Map<TopoVertex,TopoVertex> portToDeviceMap, Map<TopoVertex, List<Integer>> portBWs){
+    public UrnE addUrnToList(TopoVertex v, List<UrnE> urnList, Map<TopoVertex,TopoVertex> portToDeviceMap,
+                             Map<TopoVertex, List<Integer>> portBWs, List<Integer> floors, List<Integer> ceilings){
         UrnE urn = getFromUrnList(v.getUrn(), urnList);
         if(urn == null){
             Set<Layer> capabilities = new HashSet<>();
@@ -247,10 +316,10 @@ public class TestEntityBuilder {
             if (!v.getVertexType().equals(VertexType.PORT)) {
                 if(v.getVertexType().equals(VertexType.ROUTER)) {
                     capabilities.add(Layer.MPLS);
-                    urn = buildUrn(v, null, capabilities);
+                    urn = buildUrn(v, null, capabilities, floors, ceilings);
                 }
                 else {
-                    urn = buildUrn(v, null, capabilities);
+                    urn = buildUrn(v, null, capabilities, floors, ceilings);
                 }
             } else {
                 TopoVertex deviceVertex = portToDeviceMap.get(v);
@@ -258,10 +327,12 @@ public class TestEntityBuilder {
                 List<Integer> portInEgBw = portBWs.get(v);
                 if(deviceVertexType.equals(VertexType.ROUTER)) {
                     capabilities.add(Layer.MPLS);
-                    urn = buildUrn(v, determineDeviceModel(deviceVertexType), capabilities, portInEgBw.get(0), portInEgBw.get(1));
+                    urn = buildUrn(v, determineDeviceModel(deviceVertexType), capabilities, portInEgBw.get(0),
+                            portInEgBw.get(1), floors, ceilings);
                 }
                 else {
-                    urn = buildUrn(v, determineDeviceModel(deviceVertexType), capabilities, portInEgBw.get(0), portInEgBw.get(1));
+                    urn = buildUrn(v, determineDeviceModel(deviceVertexType), capabilities, portInEgBw.get(0),
+                            portInEgBw.get(1), floors, ceilings);
                 }
             }
             urnList.add(urn);
@@ -269,7 +340,8 @@ public class TestEntityBuilder {
         return urn;
     }
 
-    public UrnE buildUrn(TopoVertex vertex, DeviceModel parentModel, Set<Layer> capabilities){
+    public UrnE buildUrn(TopoVertex vertex, DeviceModel parentModel, Set<Layer> capabilities,
+                         List<Integer> floors, List<Integer> ceilings){
         VertexType vertexType = vertex.getVertexType();
         UrnType urnType = determineUrnType(vertexType);
         DeviceType deviceType = determineDeviceType(vertexType);
@@ -289,8 +361,6 @@ public class TestEntityBuilder {
 
         Integer ingressBw = 1000;
         Integer egressBw = 1000;
-        List<Integer> floors = Arrays.asList(1, 10, 20, 30);
-        List<Integer> ceilings = Arrays.asList(9, 19, 29, 39);
         if(vertexType.equals(VertexType.PORT)){
             ReservableBandwidthE resvBw = buildReservableBandwidth(ingressBw, egressBw);
             ReservableVlanE resvVlan = buildReservableVlan(buildIntRanges(floors, ceilings));
@@ -300,7 +370,8 @@ public class TestEntityBuilder {
         return urn;
     }
 
-    public UrnE buildUrn(TopoVertex vertex, DeviceModel parentModel, Set<Layer> capabilities, Integer inBW, Integer egBW){
+    public UrnE buildUrn(TopoVertex vertex, DeviceModel parentModel, Set<Layer> capabilities, Integer inBW, Integer egBW,
+                         List<Integer> floors, List<Integer> ceilings){
         VertexType vertexType = vertex.getVertexType();
         UrnType urnType = determineUrnType(vertexType);
         DeviceType deviceType = determineDeviceType(vertexType);
@@ -318,8 +389,6 @@ public class TestEntityBuilder {
                 .capabilities(capabilities)
                 .build();
 
-        List<Integer> floors = Arrays.asList(1, 10, 20, 30);
-        List<Integer> ceilings = Arrays.asList(9, 19, 29, 39);
         if(vertexType.equals(VertexType.PORT)){
             ReservableBandwidthE resvBw = buildReservableBandwidth(inBW, egBW);
             ReservableVlanE resvVlan = buildReservableVlan(buildIntRanges(floors, ceilings));
@@ -328,6 +397,8 @@ public class TestEntityBuilder {
         }
         return urn;
     }
+
+
 
     public UrnAdjcyE buildUrnAdjcy(TopoEdge edge, UrnE a, UrnE z){
         HashMap<Layer, Long> metrics = new HashMap<>();
@@ -361,6 +432,44 @@ public class TestEntityBuilder {
                 .build();
     }
 
+    public RequestedVlanPipeE buildRequestedPipe(String aPort, String aDevice, String zPort, String zDevice,
+                                                 Integer azMbps, Integer zaMbps, PalindromicType palindromic, String aVlanExp,
+                                                 String zVlanExp){
+
+        List<String> aFixNames = new ArrayList<>();
+        aFixNames.add(aPort);
+
+        List<String> zFixNames = new ArrayList<>();
+        zFixNames.add(zPort);
+
+        return RequestedVlanPipeE.builder()
+                .aJunction(buildRequestedJunction(aDevice, aFixNames, azMbps, zaMbps, aVlanExp, true))
+                .zJunction(buildRequestedJunction(zDevice, zFixNames, azMbps, zaMbps, zVlanExp, false))
+                .pipeType(EthPipeType.REQUESTED)
+                .azERO(new ArrayList<>())
+                .zaERO(new ArrayList<>())
+                .azMbps(azMbps)
+                .zaMbps(zaMbps)
+                .eroPalindromic(palindromic)
+                .build();
+    }
+
+    public RequestedVlanPipeE buildRequestedPipe(List<String> aPorts, String aDevice, List<String> zPorts, String zDevice,
+                                                 Integer azMbps, Integer zaMbps, PalindromicType palindromic, String vlanExp){
+
+
+        return RequestedVlanPipeE.builder()
+                .aJunction(buildRequestedJunction(aDevice, aPorts, azMbps, zaMbps, vlanExp, true))
+                .zJunction(buildRequestedJunction(zDevice, zPorts, azMbps, zaMbps, vlanExp, false))
+                .pipeType(EthPipeType.REQUESTED)
+                .azERO(new ArrayList<>())
+                .zaERO(new ArrayList<>())
+                .azMbps(azMbps)
+                .zaMbps(zaMbps)
+                .eroPalindromic(palindromic)
+                .build();
+    }
+
     public RequestedVlanJunctionE buildRequestedJunction(String deviceName, List<String> fixtureNames,
                                                          Integer azMbps, Integer zaMbps, String vlanExp, boolean startJunc){
         log.info("Building requested junction");
@@ -369,36 +478,16 @@ public class TestEntityBuilder {
 
         Set<RequestedVlanFixtureE> fixtures = new HashSet<>();
 
-        assert(fixtureNames.size() <= 2);
+        assert(fixtureNames.size() >= 1);
 
-        if(fixtureNames.size() == 2)
-        {
-            RequestedVlanFixtureE aFix = buildRequestedFixture(fixtureNames.get(0), azMbps, zaMbps, vlanExp);
-            RequestedVlanFixtureE zFix = buildRequestedFixture(fixtureNames.get(1), zaMbps, azMbps, vlanExp);
-
-            fixtures.add(aFix);
-            fixtures.add(zFix);
-        }
-        else if(fixtureNames.size() == 1)
-        {
-            RequestedVlanFixtureE theFix;
-
-            if(startJunc == true)
-            {
-                theFix = buildRequestedFixture(fixtureNames.get(0), azMbps, zaMbps, vlanExp);
-            }
+        for(String fixName : fixtureNames){
+            RequestedVlanFixtureE fix;
+            if(startJunc)
+                fix = buildRequestedFixture(fixName, azMbps, zaMbps, vlanExp);
             else
-            {
-                theFix = buildRequestedFixture(fixtureNames.get(0), zaMbps, azMbps, vlanExp);
-            }
-
-            fixtures.add(theFix);
+                fix = buildRequestedFixture(fixName, zaMbps, azMbps, vlanExp);
+            fixtures.add(fix);
         }
-
-        //Set<RequestedVlanFixtureE> fixtures = fixtureNames
-        //        .stream()
-        //        .map(fixName -> buildRequestedFixture(fixName, azMbps, zaMbps, vlanExp))
-        //        .collect(Collectors.toSet());
 
         return RequestedVlanJunctionE.builder()
                 .deviceUrn(optUrn.isPresent() ? optUrn.get() : null)
@@ -519,5 +608,25 @@ public class TestEntityBuilder {
             return optVertex.get();
         }
         return null;
+    }
+
+    public ConnectionE buildConnection(RequestedBlueprintE blueprint, ScheduleSpecificationE schedule, String connectionID, String description)
+    {
+        SpecificationE requestSpec = SpecificationE.builder()
+                .connectionId(connectionID)
+                .description(description)
+                .version(1)
+                .username("TestUser")
+                .requested(blueprint)
+                .scheduleSpec(schedule)
+                .build();
+
+        ConnectionE theConnection = ConnectionE.builder()
+                .connectionId(connectionID)
+                .specification(requestSpec)
+                .states(new StatesE())
+                .build();
+
+        return theConnection;
     }
 }
