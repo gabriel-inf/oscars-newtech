@@ -199,18 +199,18 @@ public class TopPCE {
                 List<TopoEdge> azSecondaryEro = eroMapForPipe.get("azSecondary");
                 List<TopoEdge> zaSecondaryEro = eroMapForPipe.get("zaSecondary");
 
-                List<List<TopoEdge>> primaryPair = new ArrayList<>();
-                List<List<TopoEdge>> secondaryPair = new ArrayList<>();
+                List<List<TopoEdge>> azEROs = new ArrayList<>();
+                List<List<TopoEdge>> zaEROs = new ArrayList<>();
 
-                primaryPair.add(azPrimaryEro);
-                primaryPair.add(zaPrimaryEro);
-                secondaryPair.add(azSecondaryEro);
-                secondaryPair.add(zaSecondaryEro);
+                azEROs.add(azPrimaryEro);
+                azEROs.add(azSecondaryEro);
+                zaEROs.add(zaPrimaryEro);
+                zaEROs.add(zaSecondaryEro);
 
                 // Try to get the reserved resources
                 try
                 {
-                    transPCE.reserveRequestedPipeWithPairs(pipe, schedSpec, primaryPair, secondaryPair, rsvBandwidths,
+                    transPCE.reserveRequestedPipeWithPairs(pipe, schedSpec, azEROs, zaEROs, rsvBandwidths,
                             rsvVlans, reservedMplsPipes, reservedEthPipes);
                 }
                 // If it failed, decrement the number reserved

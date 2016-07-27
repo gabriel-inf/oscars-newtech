@@ -128,32 +128,13 @@ public class TranslationPCE {
         Integer azMbps = reqPipe.getAzMbps();
         Integer zaMbps = reqPipe.getZaMbps();
 
-        // Retrieve a map of URN strings to device models
-        Map<String, DeviceModel> deviceModels = topoService.deviceModels();
-
         // Build a urn map
         Map<String , UrnE> urnMap = new HashMap<>();
         urnRepository.findAll().forEach(u -> {
             urnMap.put(u.getUrn(), u);
         });
 
-        // Retrieve requested junctions
-        Set<RequestedVlanJunctionE> reqPipeJunctions = new HashSet<>();
-        reqPipeJunctions.add(reqPipe.getAJunction());
-        reqPipeJunctions.add(reqPipe.getZJunction());
-
-        // Get map of "Ingress" and "Egress" bandwidth availability
-        Map<UrnE, Map<String, Integer>> availBwMap;
-        availBwMap = bwService.buildBandwidthAvailabilityMap(reservedBandwidths);
-
-        // Returns a mapping from topovertices (ports) to an "Ingress"/"Egress" map of the total Ingress/Egress
-        // Requested bandwidth at that port across both the azERO and the zaERO
-        List<List<TopoEdge>> EROs = Arrays.asList(azERO, zaERO);
-        List<Integer> bandwidths = Arrays.asList(azMbps, zaMbps);
-        Map<TopoVertex, Map<String, Integer>> requestedBandwidthMap = bwService.buildRequestedBandwidthMap(EROs, bandwidths);
-
-        testBandwidthRequirements(reqPipe, azERO, zaERO, urnMap, azMbps, zaMbps, availBwMap, requestedBandwidthMap, reservedBandwidths);
-
+        Map<TopoVertex, Map<String, Integer>> requestedBandwidthMap = evaluateRequestedBandwidth(reservedBandwidths, azERO, zaERO, reqPipe, urnMap);
 
         Map<UrnE, Integer> chosenVlanMap = vlanService.selectVlansForPipe(reqPipe, urnMap, reservedVlans, azERO, zaERO);
         log.info("Chosen VLAN Map: " + chosenVlanMap);
@@ -162,6 +143,83 @@ public class TranslationPCE {
                 throw new PCEException(("VLAN could not not be found for URN " + urn.toString()));
             }
         }
+        Map<TopoVertex, ReservedVlanJunctionE> junctionMap = new HashMap<>();
+        reserveEntities(reqPipe, azERO, zaERO, sched, urnMap, requestedBandwidthMap, chosenVlanMap, reservedEthPipes,
+                reservedMplsPipes, junctionMap);
+
+    }
+
+    public void reserveRequestedPipeWithPairs(RequestedVlanPipeE reqPipe, ScheduleSpecificationE sched, List<List<TopoEdge>> azEROs,
+                                     List<List<TopoEdge>> zaEROs, List<ReservedBandwidthE> reservedBandwidths,
+                                     List<ReservedVlanE> reservedVlans, Set<ReservedMplsPipeE> reservedMplsPipes,
+                                     Set<ReservedEthPipeE> reservedEthPipes) throws PSSException, PCEException {
+
+        List<TopoEdge> combinedAzERO = combineEROs(azEROs);
+        List<TopoEdge> combinedZaERO = combineEROs(zaEROs);
+
+        // Build a urn map
+        Map<String , UrnE> urnMap = new HashMap<>();
+        urnRepository.findAll().forEach(u -> {
+            urnMap.put(u.getUrn(), u);
+        });
+
+        Map<TopoVertex, Map<String, Integer>> requestedBandwidthMap = evaluateRequestedBandwidth(reservedBandwidths,
+                combinedAzERO, combinedZaERO, reqPipe, urnMap);
+
+
+        Map<UrnE, Integer> chosenVlanMap = vlanService.selectVlansForPipe(reqPipe, urnMap, reservedVlans, combinedAzERO, combinedZaERO);
+        log.info("Chosen VLAN Map: " + chosenVlanMap);
+        for(UrnE urn : chosenVlanMap.keySet()){
+            if(chosenVlanMap.get(urn).equals(-1)){
+                throw new PCEException(("VLAN could not not be found for URN " + urn.toString()));
+            }
+        }
+
+        Map<TopoVertex, ReservedVlanJunctionE> junctionMap = new HashMap<>();
+
+        for(Integer pairIndex = 0; pairIndex < azEROs.size(); pairIndex++){
+            List<TopoEdge> azERO = azEROs.get(pairIndex);
+            List<TopoEdge> zaERO = zaEROs.get(pairIndex);
+            reserveEntities(reqPipe, azERO, zaERO, sched, urnMap, requestedBandwidthMap, chosenVlanMap, reservedEthPipes,
+                    reservedMplsPipes, junctionMap);
+        }
+
+    }
+
+    private Map<TopoVertex, Map<String, Integer>> evaluateRequestedBandwidth(List<ReservedBandwidthE> reservedBandwidths,
+                                                                             List<TopoEdge> azERO, List<TopoEdge> zaERO,
+                                                                             RequestedVlanPipeE reqPipe,
+                                                                             Map<String, UrnE> urnMap) throws PCEException {
+        // Get map of "Ingress" and "Egress" bandwidth availability
+        Map<UrnE, Map<String, Integer>> availBwMap;
+        availBwMap = bwService.buildBandwidthAvailabilityMap(reservedBandwidths);
+
+        // Returns a mapping from topovertices (ports) to an "Ingress"/"Egress" map of the total Ingress/Egress
+        // Requested bandwidth at that port across both the azERO and the zaERO
+        List<List<TopoEdge>> EROs = Arrays.asList(azERO, zaERO);
+        List<Integer> bandwidths = Arrays.asList(reqPipe.getAzMbps(), reqPipe.getZaMbps());
+        Map<TopoVertex, Map<String, Integer>> requestedBandwidthMap = bwService.buildRequestedBandwidthMap(EROs, bandwidths);
+
+        testBandwidthRequirements(reqPipe, azERO, zaERO, urnMap, reqPipe.getAzMbps(), reqPipe.getZaMbps(), availBwMap,
+                requestedBandwidthMap, reservedBandwidths);
+
+        return requestedBandwidthMap;
+    }
+
+    private void reserveEntities(RequestedVlanPipeE reqPipe, List<TopoEdge> azERO, List<TopoEdge> zaERO,
+                                 ScheduleSpecificationE sched, Map<String, UrnE> urnMap,
+                                 Map<TopoVertex, Map<String, Integer>> requestedBandwidthMap,
+                                 Map<UrnE, Integer> chosenVlanMap, Set<ReservedEthPipeE> reservedEthPipes,
+                                 Set<ReservedMplsPipeE> reservedMplsPipes,
+                                 Map<TopoVertex, ReservedVlanJunctionE> junctionMap) throws PSSException {
+
+        // Retrieve a map of URN strings to device models
+        Map<String, DeviceModel> deviceModels = topoService.deviceModels();
+
+        // Retrieve requested junctions
+        Set<RequestedVlanJunctionE> reqPipeJunctions = new HashSet<>();
+        reqPipeJunctions.add(reqPipe.getAJunction());
+        reqPipeJunctions.add(reqPipe.getZJunction());
 
         // now, decompose the path
         List<Map<Layer, List<TopoVertex>>> azSegments = PCEAssistant.decompose(azERO);
@@ -187,8 +245,6 @@ public class TranslationPCE {
         // ETHERNET Pipe: needs bandwidth and VLANs
         // MPLS Pipe: needs bandwidth
         // All junctions: Add fixtures if requested
-
-        Map<TopoVertex, ReservedVlanJunctionE> junctionMap = new HashMap<>();
 
         for(List<TopoVertex> junctionPair : allJunctionPairs.keySet()){
             Layer thisLayer = allJunctionPairs.get(junctionPair);
@@ -266,23 +322,25 @@ public class TranslationPCE {
                 reservedEthPipes.add(ethPipe);
             }
         }
-
     }
 
-    public void reserveRequestedPipeWithPairs(RequestedVlanPipeE reqPipe, ScheduleSpecificationE sched, List<List<TopoEdge>> primaryPair,
-                                     List<List<TopoEdge>> secondaryPair, List<ReservedBandwidthE> reservedBandwidths,
-                                     List<ReservedVlanE> reservedVlans, Set<ReservedMplsPipeE> reservedMplsPipes,
-                                     Set<ReservedEthPipeE> reservedEthPipes) throws PSSException, PCEException {
-
-        List<TopoEdge> primaryAZ = primaryPair.get(0);
-        List<TopoEdge> primaryZA = primaryPair.get(1);
-
-        List<TopoEdge> secondaryAZ = primaryPair.get(0);
-        List<TopoEdge> secondaryZA = primaryPair.get(1);
-
-
+    private List<TopoEdge> combineEROs(List<List<TopoEdge>> EROs){
+        List<TopoEdge> combinedERO = new ArrayList<>();
+        TopoEdge firstEdge = null;
+        TopoEdge lastEdge = null;
+        for(List<TopoEdge> ero: EROs){
+            if(firstEdge == null){
+                firstEdge = ero.get(0);
+                combinedERO.add(firstEdge);
+            }
+            combinedERO.addAll(ero.subList(1, ero.size()-1));
+            if(lastEdge == null){
+                lastEdge = ero.get(ero.size()-1);
+            }
+        }
+        combinedERO.add(lastEdge);
+        return combinedERO;
     }
-
 
     /**
      * Given two lists of EROS in the AZ and ZA direction, a map of URNs, a map of the requested bandwidth at each URN,
