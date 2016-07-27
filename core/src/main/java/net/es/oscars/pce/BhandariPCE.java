@@ -20,9 +20,6 @@ public class BhandariPCE {
 
     public List<List<TopoEdge>> computePathPair(Topology topo, TopoVertex source, TopoVertex dest){
 
-        // Store the shortest path pair
-        List<List<TopoEdge>> shortestPathPair = new ArrayList<>();
-
         // Find the first shortest path
         List<TopoEdge> shortestPath = bellmanFordService.shortestPath(topo, source, dest);
         if(shortestPath.isEmpty()){
@@ -53,6 +50,17 @@ public class BhandariPCE {
         // Find the new shortest path
         List<TopoEdge> modShortestPath = bellmanFordService.shortestPath(modifiedTopo, source, dest);
 
+        return makePair(shortestPath, modShortestPath, modifiedTopo, reversedToOriginalMap, source, dest);
+
+    }
+
+    private List<List<TopoEdge>> makePair(List<TopoEdge> shortestPath, List<TopoEdge> modShortestPath,
+                                          Topology topo, Map<TopoEdge, TopoEdge> reversedToOriginalMap,
+                                          TopoVertex source, TopoVertex dest){
+
+        // Store the shortest path pair
+        List<List<TopoEdge>> shortestPathPair = new ArrayList<>();
+
         // Remove all inverse edges taken in new shortest path (along with mapped edge in original shortest path)
         Set<TopoEdge> combinedEdges = new HashSet<>();
         for(TopoEdge modSpEdge : modShortestPath){
@@ -67,26 +75,26 @@ public class BhandariPCE {
         combinedEdges.addAll(shortestPath);
 
         // Find the two shortest paths given these combined edges
-        modifiedTopo.setEdges(combinedEdges);
+        topo.setEdges(combinedEdges);
 
-        List<TopoEdge> firstShortestPath = bellmanFordService.shortestPath(modifiedTopo, source, dest);
-        if(firstShortestPath.isEmpty()){
+        List<TopoEdge> firstSp = bellmanFordService.shortestPath(topo, source, dest);
+        if(firstSp.isEmpty()){
             log.info("No first disjoint shortest path from " + source.getUrn() + " to " + dest.getUrn() + " found");
             return new ArrayList<>();
         }
-        combinedEdges.removeAll(firstShortestPath);
-        modifiedTopo.setEdges(combinedEdges);
+        combinedEdges.removeAll(firstSp);
+        topo.setEdges(combinedEdges);
 
-        List<TopoEdge> secondShortestPath = bellmanFordService.shortestPath(modifiedTopo, source, dest);
-        if(secondShortestPath.isEmpty()){
+        List<TopoEdge> secondSp = bellmanFordService.shortestPath(topo, source, dest);
+        if(secondSp.isEmpty()){
             log.info("First disjoint shortest path found: " +
-                    firstShortestPath.stream().map(e -> "(" + e.getA().getUrn() + ", " + e.getZ().getUrn() + ")").collect(Collectors.toList()));
+                    firstSp.stream().map(e -> "(" + e.getA().getUrn() + ", " + e.getZ().getUrn() + ")").collect(Collectors.toList()));
             log.info("but no other disjoint shortest path from " + source.getUrn() + " to " + dest.getUrn() + " found");
             return new ArrayList<>();
         }
 
-        shortestPathPair.add(firstShortestPath);
-        shortestPathPair.add(secondShortestPath);
+        shortestPathPair.add(firstSp);
+        shortestPathPair.add(secondSp);
 
 
         return shortestPathPair;
