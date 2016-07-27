@@ -35,6 +35,9 @@ public class BasicVlanFlow {
     @NonNull
     private PalindromicType palindromic;
 
+    @NonNull
+    private SurvivabilityType survivability;
+
 
 
 }

@@ -1,6 +1,7 @@
 package net.es.oscars.pce;
 
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.dto.spec.SurvivabilityType;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.topo.beans.TopoEdge;
@@ -36,6 +37,9 @@ public class TopPCE {
 
     @Autowired
     private EroPCE eroPCE;
+
+    @Autowired
+    private SurvivabilityPCE survivabilityPCE;
 
     @Autowired
     private VlanService vlanService;
@@ -163,9 +167,9 @@ public class TopPCE {
             List<ReservedVlanE> rsvVlans = vlanService.createReservedVlanList(simpleJunctions, reservedEthPipes, schedSpec);
 
             // Find the shortest path for the pipe, build a map for the AZ and ZA path
-            Map<String, List<TopoEdge>> eroMapForPipe = findShortestConstrainedPath(pipe, schedSpec, rsvBandwidths,
-                    rsvVlans);
-            // If there paths are valid, attempt to reserve the resources
+            Map<String, List<TopoEdge>> eroMapForPipe = findShortestConstrainedPath(pipe, schedSpec, rsvBandwidths, rsvVlans);
+
+            // If the paths are valid, attempt to reserve the resources
             if(verifyEros(eroMapForPipe)){
                 // Increment the number reserved
                 numReserved++;
@@ -180,6 +184,37 @@ public class TopPCE {
                 }
                 // If it failed, decrement the number reserved
                 catch(Exception e){
+                    log.info(e.toString());
+                    numReserved--;
+                }
+            }
+            // If the survivable paths are valid, attempt to reserve the resources
+            else if(verifySurvEros(eroMapForPipe)
+            {
+                // Increment the number reserved
+                numReserved++;
+                // Get the AZ and ZA paths
+                List<TopoEdge> azPrimaryEro = eroMapForPipe.get("azPrimary");
+                List<TopoEdge> zaPrimaryEro = eroMapForPipe.get("zaPrimary");
+                List<TopoEdge> azSecondaryEro = eroMapForPipe.get("azSecondary");
+                List<TopoEdge> zaSecondaryEro = eroMapForPipe.get("zaSecondary");
+
+                List<List<TopoEdge>> primaryPair = new ArrayList<>();
+                List<List<TopoEdge>> secondaryPair = new ArrayList<>();
+
+                primaryPair.add(azPrimaryEro);
+                primaryPair.add(zaPrimaryEro);
+                secondaryPair.add(azSecondaryEro);
+                secondaryPair.add(zaSecondaryEro);
+
+                // Try to get the reserved resources
+                try
+                {
+                    transPCE.reserveRequestedPipe(pipe, schedSpec, primaryPair, secondaryPair, rsvBandwidths, rsvVlans, reservedMplsPipes, reservedEthPipes);
+                }
+                // If it failed, decrement the number reserved
+                catch(Exception e)
+                {
                     log.info(e.toString());
                     numReserved--;
                 }
@@ -204,40 +239,37 @@ public class TopPCE {
         log.info("Computing Shortest Constrained Path");
         Map<String, List<TopoEdge>> eroMap = null;
 
-
-        if(!pipe.getAzERO().isEmpty() && !pipe.getZaERO().isEmpty())
+        try
         {
-            try
+            if(!pipe.getEroSurvivability().equals(SurvivabilityType.SURVIVABILITY_NONE))
+            {
+                log.info("Entering Survivability PCE");
+                eroMap = survivabilityPCE.computeSurvivableERO(pipe, schedSpec, rsvBandwidths, rsvVlans);
+                log.info("Exiting Survivability PCE");
+            }
+            else if(!pipe.getAzERO().isEmpty() && !pipe.getZaERO().isEmpty())
             {
                 log.info("Attempting to reserve specified Explicit Route Object");
                 eroMap = eroPCE.computeSpecifiedERO(pipe, schedSpec, rsvBandwidths, rsvVlans);
             }
-            catch(PCEException e)
+            else if(pipe.getEroPalindromic().equals(PalindromicType.PALINDROME))
             {
-                log.error("PCE Unsuccessful", e);
-            }
-        }
-        else if(pipe.getEroPalindromic().equals(PalindromicType.PALINDROME))
-        {
-            try{
                 log.info("Entering Palindromical PCE");
                 eroMap = palindromicalPCE.computePalindromicERO(pipe, schedSpec, rsvBandwidths, rsvVlans);       // A->Z ERO is palindrome of Z->A ERO
-                log.info("Exitting Palindromical PCE");
+                log.info("Exiting Palindromical PCE");
             }
-            catch(PCEException e){
-                log.error("PCE Unsuccessful", e);
-            }
-        }
-        else{
-            try{
+            else
+            {
                 log.info("Entering NON-Palindromical PCE");
                 eroMap = nonPalindromicPCE.computeNonPalindromicERO(pipe, schedSpec, rsvBandwidths, rsvVlans);       // A->Z ERO is NOT palindrome of Z->A ERO
                 log.info("Exiting NON-Palindromical PCE");
             }
-            catch(PCEException e){
-                log.error("PCE Unsuccessful", e);
-            }
         }
+        catch(PCEException e)
+        {
+            log.error("PCE Unsuccessful", e);
+        }
+
         return eroMap;
     }
 
@@ -252,6 +284,24 @@ public class TopPCE {
         if(eroMap != null)
         {
             if (eroMap.size() == 2)
+            {
+                return eroMap.values().stream().allMatch(l -> l.size() > 0);
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Verify that primary and secondary AZ and ZA paths were found given a map of shortest paths.
+     * @param eroMap The map containing the AZ and ZA shortest paths (keys: "azPrimary", "zaPrimary", "azSecondary", "zaSecondary")
+     * @return True if both paths found, False otherwise.
+     */
+    private boolean verifySurvEros(Map<String, List<TopoEdge>> eroMap)
+    {
+        if(eroMap != null)
+        {
+            if (eroMap.size() == 4)
             {
                 return eroMap.values().stream().allMatch(l -> l.size() > 0);
             }

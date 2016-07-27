@@ -234,6 +234,7 @@ public class ResvController {
                     .azMbps(bvf.getAzMbps())
                     .zaMbps(bvf.getZaMbps())
                     .eroPalindromic(bvf.getPalindromic())
+                    .eroSurvivability(bvf.getSurvivability())
                     .pipeType(EthPipeType.REQUESTED)
                     .build();
 
