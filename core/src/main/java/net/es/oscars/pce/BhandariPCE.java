@@ -80,7 +80,9 @@ public class BhandariPCE {
         List<TopoEdge> firstSp = bellmanFordService.shortestPath(topo, source, dest);
         if(firstSp.isEmpty()){
             log.info("No first disjoint shortest path from " + source.getUrn() + " to " + dest.getUrn() + " found");
-            return new ArrayList<>();
+            // Return the original shortest path
+            shortestPathPair.add(shortestPath);
+            return shortestPathPair;
         }
         combinedEdges.removeAll(firstSp);
         topo.setEdges(combinedEdges);
@@ -90,7 +92,9 @@ public class BhandariPCE {
             log.info("First disjoint shortest path found: " +
                     firstSp.stream().map(e -> "(" + e.getA().getUrn() + ", " + e.getZ().getUrn() + ")").collect(Collectors.toList()));
             log.info("but no other disjoint shortest path from " + source.getUrn() + " to " + dest.getUrn() + " found");
-            return new ArrayList<>();
+            // Return the original shortest path
+            shortestPathPair.add(shortestPath);
+            return shortestPathPair;
         }
 
         shortestPathPair.add(firstSp);
