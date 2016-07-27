@@ -3,6 +3,7 @@ package net.es.oscars.pce;
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.CoreUnitTestConfiguration;
 import net.es.oscars.dto.spec.PalindromicType;
+import net.es.oscars.dto.spec.SurvivabilityType;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.helpers.RequestedEntityBuilder;
 import net.es.oscars.resv.ent.*;
@@ -56,12 +57,13 @@ public class VlanTranslationTest {
         Integer azBW = 25;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String srcVlan = "3";
         String dstVlan = "3";
 
         vlanTopologyBuilder.buildVlanTransTopo1();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, srcVlan, dstVlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, srcVlan, dstVlan);
 
         log.info("Beginning test: 'vlanTransTest1'.");
 
@@ -144,12 +146,13 @@ public class VlanTranslationTest {
         Integer azBW = 25;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String srcVlan = "2";
         String dstVlan = "3";
 
         vlanTopologyBuilder.buildVlanTransTopo1();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, srcVlan, dstVlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, srcVlan, dstVlan);
 
         log.info("Beginning test: 'vlanTransTest2'.");
 
@@ -232,12 +235,13 @@ public class VlanTranslationTest {
         Integer azBW = 25;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String srcVlan = "3";
         String dstVlan = "2";
 
         vlanTopologyBuilder.buildVlanTransTopo1();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, srcVlan, dstVlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, srcVlan, dstVlan);
 
         log.info("Beginning test: 'vlanTransTest3'.");
 
@@ -320,12 +324,13 @@ public class VlanTranslationTest {
         Integer azBW = 25;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String srcVlan = "3";
         String dstVlan = "3";
 
         vlanTopologyBuilder.buildVlanTransTopo2();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, srcVlan, dstVlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, srcVlan, dstVlan);
 
         log.info("Beginning test: 'vlanTransTest4'.");
 
@@ -408,12 +413,13 @@ public class VlanTranslationTest {
         Integer azBW = 25;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String srcVlan = "3";
         String dstVlan = "3";
 
         vlanTopologyBuilder.buildVlanTransTopo3();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, srcVlan, dstVlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, srcVlan, dstVlan);
 
         log.info("Beginning test: 'vlanTransTest5'.");
 
@@ -450,12 +456,13 @@ public class VlanTranslationTest {
         Integer azBW = 25;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String srcVlan = "3";
         String dstVlan = "2";
 
         vlanTopologyBuilder.buildVlanTransTopo3();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, srcVlan, dstVlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, srcVlan, dstVlan);
 
         log.info("Beginning test: 'vlanTransTest6'.");
 
@@ -492,12 +499,13 @@ public class VlanTranslationTest {
         Integer azBW = 25;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String srcVlan = "2";
         String dstVlan = "3";
 
         vlanTopologyBuilder.buildVlanTransTopo3();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, srcVlan, dstVlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, srcVlan, dstVlan);
 
         log.info("Beginning test: 'vlanTransTest7'.");
 
@@ -535,12 +543,13 @@ public class VlanTranslationTest {
         Integer azBW = 25;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String srcVlan = "5";
         String dstVlan = "5";
 
         vlanTopologyBuilder.buildVlanTransTopo1();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, srcVlan, dstVlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, srcVlan, dstVlan);
 
         // Now add the junction
         RequestedVlanJunctionE reqJunction = testBuilder.buildRequestedJunction("B", Arrays.asList("B:0", "B:1", "B:2"), 25, 25, "5", true);
@@ -635,15 +644,16 @@ public class VlanTranslationTest {
         Integer azBW = 25;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String srcVlan = "3";
         String dstVlan = "4";
 
         vlanTopologyBuilder.buildVlanTransTopo1();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
 
-        RequestedVlanPipeE pipeA = testBuilder.buildRequestedPipe(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, srcVlan, dstVlan);
-        RequestedVlanPipeE pipeB = testBuilder.buildRequestedPipe(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, "5", "5");
-        RequestedVlanPipeE pipeC = testBuilder.buildRequestedPipe("B:0", "B", "C:1", "C", azBW, zaBW, palindrome, "2", "2");
+        RequestedVlanPipeE pipeA = testBuilder.buildRequestedPipe(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, srcVlan, dstVlan);
+        RequestedVlanPipeE pipeB = testBuilder.buildRequestedPipe(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, "5", "5");
+        RequestedVlanPipeE pipeC = testBuilder.buildRequestedPipe("B:0", "B", "C:1", "C", azBW, zaBW, palindrome, survivability, "2", "2");
 
         requestedBlueprint = testBuilder.buildRequest(new HashSet<>(Arrays.asList(pipeA, pipeB, pipeC)));
 

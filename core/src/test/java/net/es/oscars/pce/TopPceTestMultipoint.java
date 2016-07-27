@@ -3,6 +3,7 @@ package net.es.oscars.pce;
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.CoreUnitTestConfiguration;
 import net.es.oscars.dto.spec.PalindromicType;
+import net.es.oscars.dto.spec.SurvivabilityType;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.helpers.RequestedEntityBuilder;
 import net.es.oscars.resv.dao.ReservedBandwidthRepository;
@@ -317,13 +318,14 @@ public class TopPceTestMultipoint
         String vlan = "any";
 
         PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
 
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
 
         // Set up Requested Pipes
         Set<RequestedVlanPipeE> reqPipes = new HashSet<>();
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(aPorts, srcAZ, zPorts, dstAZ, azBW, zaBW, palindrome, vlan);
-        RequestedVlanPipeE pipeBZ = testBuilder.buildRequestedPipe(bPorts, srcBZ, zPorts, dstBZ, bzBW, zbBW, palindrome, vlan);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(aPorts, srcAZ, zPorts, dstAZ, azBW, zaBW, palindrome, survivability, vlan);
+        RequestedVlanPipeE pipeBZ = testBuilder.buildRequestedPipe(bPorts, srcBZ, zPorts, dstBZ, bzBW, zbBW, palindrome, survivability, vlan);
 
         reqPipes.add(pipeAZ);
         reqPipes.add(pipeBZ);
@@ -481,13 +483,14 @@ public class TopPceTestMultipoint
         String vlan = "any";
 
         PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
 
         // Set up Requested Pipes
         Set<RequestedVlanPipeE> reqPipes = new HashSet<>();
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(aPorts, srcAZ, zPorts, dstAZ, azBW, zaBW, palindrome, vlan);
-        RequestedVlanPipeE pipeBZ = testBuilder.buildRequestedPipe(bPorts, srcBZ, zPorts, dstBZ, bzBW, zbBW, palindrome, vlan);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(aPorts, srcAZ, zPorts, dstAZ, azBW, zaBW, palindrome, survivability, vlan);
+        RequestedVlanPipeE pipeBZ = testBuilder.buildRequestedPipe(bPorts, srcBZ, zPorts, dstBZ, bzBW, zbBW, palindrome, survivability, vlan);
 
         reqPipes.add(pipeAZ);
         reqPipes.add(pipeBZ);
@@ -718,13 +721,14 @@ public class TopPceTestMultipoint
         String vlan = "any";
 
         PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
 
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
 
         // Set up Requested Pipes
         Set<RequestedVlanPipeE> reqPipes = new HashSet<>();
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(aPorts, srcAZ, zPorts, dstAZ, azBW, zaBW, palindrome, vlan);
-        RequestedVlanPipeE pipeBZ = testBuilder.buildRequestedPipe(bPorts, srcBZ, zPorts, dstBZ, bzBW, zbBW, palindrome, vlan);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(aPorts, srcAZ, zPorts, dstAZ, azBW, zaBW, palindrome, survivability, vlan);
+        RequestedVlanPipeE pipeBZ = testBuilder.buildRequestedPipe(bPorts, srcBZ, zPorts, dstBZ, bzBW, zbBW, palindrome, survivability, vlan);
 
         reqPipes.add(pipeAZ);
         reqPipes.add(pipeBZ);
@@ -868,14 +872,15 @@ public class TopPceTestMultipoint
         String vlan = "any";
 
         PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
 
         // Set up Requested Pipes
         Set<RequestedVlanPipeE> reqPipes = new HashSet<>();
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(aPorts, srcAZ, zPorts, dstAZ, azBW, zaBW, palindrome, vlan);
-        RequestedVlanPipeE pipeAB = testBuilder.buildRequestedPipe(aPorts, srcAB, bPorts, dstAB, abBW, baBW, palindrome, vlan);
-        RequestedVlanPipeE pipeBZ = testBuilder.buildRequestedPipe(bPorts, srcBZ, zPorts, dstBZ, bzBW, zbBW, palindrome, vlan);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(aPorts, srcAZ, zPorts, dstAZ, azBW, zaBW, palindrome, survivability, vlan);
+        RequestedVlanPipeE pipeAB = testBuilder.buildRequestedPipe(aPorts, srcAB, bPorts, dstAB, abBW, baBW, palindrome, survivability, vlan);
+        RequestedVlanPipeE pipeBZ = testBuilder.buildRequestedPipe(bPorts, srcBZ, zPorts, dstBZ, bzBW, zbBW, palindrome, survivability, vlan);
 
         reqPipes.add(pipeAZ);
         reqPipes.add(pipeAB);
@@ -1069,14 +1074,15 @@ public class TopPceTestMultipoint
         String vlan = "any";
 
         PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
 
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
 
         // Set up Requested Pipes
         Set<RequestedVlanPipeE> reqPipes = new HashSet<>();
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(aPorts, srcAZ, zPorts, dstAZ, azBW, zaBW, palindrome, vlan);
-        RequestedVlanPipeE pipeAB = testBuilder.buildRequestedPipe(aPorts, srcAB, bPorts, dstAB, abBW, baBW, palindrome, vlan);
-        RequestedVlanPipeE pipeBZ = testBuilder.buildRequestedPipe(bPorts, srcBZ, zPorts, dstBZ, bzBW, zbBW, palindrome, vlan);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(aPorts, srcAZ, zPorts, dstAZ, azBW, zaBW, palindrome, survivability, vlan);
+        RequestedVlanPipeE pipeAB = testBuilder.buildRequestedPipe(aPorts, srcAB, bPorts, dstAB, abBW, baBW, palindrome, survivability, vlan);
+        RequestedVlanPipeE pipeBZ = testBuilder.buildRequestedPipe(bPorts, srcBZ, zPorts, dstBZ, bzBW, zbBW, palindrome, survivability, vlan);
 
         reqPipes.add(pipeAZ);
         reqPipes.add(pipeAB);
@@ -1282,15 +1288,17 @@ public class TopPceTestMultipoint
         Integer zbBW = 100;
 
         PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
+
         mpTopoBuilder.buildComplexMultipointTopo();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
 
         // Set up Requested Pipes
         Set<RequestedVlanPipeE> reqPipes = new HashSet<>();
-        RequestedVlanPipeE pipeAB1 = testBuilder.buildRequestedPipe(aPorts, srcAB, bPorts, dstAB, abBW, baBW, palindrome, vlan);
-        RequestedVlanPipeE pipeAB2 = testBuilder.buildRequestedPipe(aPorts, srcAB, bPorts, dstAB, abBW, baBW, palindrome, vlan);
-        RequestedVlanPipeE pipeBZ1 = testBuilder.buildRequestedPipe(bPorts, srcBZ, zPorts, dstBZ, bzBW1, zbBW, palindrome, vlan);
-        RequestedVlanPipeE pipeBZ2 = testBuilder.buildRequestedPipe(bPorts, srcBZ, zPorts, dstBZ, bzBW2, zbBW, palindrome, vlan);
+        RequestedVlanPipeE pipeAB1 = testBuilder.buildRequestedPipe(aPorts, srcAB, bPorts, dstAB, abBW, baBW, palindrome, survivability, vlan);
+        RequestedVlanPipeE pipeAB2 = testBuilder.buildRequestedPipe(aPorts, srcAB, bPorts, dstAB, abBW, baBW, palindrome, survivability, vlan);
+        RequestedVlanPipeE pipeBZ1 = testBuilder.buildRequestedPipe(bPorts, srcBZ, zPorts, dstBZ, bzBW1, zbBW, palindrome, survivability, vlan);
+        RequestedVlanPipeE pipeBZ2 = testBuilder.buildRequestedPipe(bPorts, srcBZ, zPorts, dstBZ, bzBW2, zbBW, palindrome, survivability, vlan);
 
         reqPipes.add(pipeAB1);
         reqPipes.add(pipeAB2);
@@ -1342,15 +1350,17 @@ public class TopPceTestMultipoint
         Integer zbBW = 100;
 
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
+
         mpTopoBuilder.buildComplexMultipointTopo();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
 
         // Set up Requested Pipes
         Set<RequestedVlanPipeE> reqPipes = new HashSet<>();
-        RequestedVlanPipeE pipeAB1 = testBuilder.buildRequestedPipe(aPorts, srcAB, bPorts, dstAB, abBW, baBW, palindrome, vlan);
-        RequestedVlanPipeE pipeAB2 = testBuilder.buildRequestedPipe(aPorts, srcAB, bPorts, dstAB, abBW, baBW, palindrome, vlan);
-        RequestedVlanPipeE pipeBZ1 = testBuilder.buildRequestedPipe(bPorts, srcBZ, zPorts, dstBZ, bzBW1, zbBW, palindrome, vlan);
-        RequestedVlanPipeE pipeBZ2 = testBuilder.buildRequestedPipe(bPorts, srcBZ, zPorts, dstBZ, bzBW2, zbBW, palindrome, vlan);
+        RequestedVlanPipeE pipeAB1 = testBuilder.buildRequestedPipe(aPorts, srcAB, bPorts, dstAB, abBW, baBW, palindrome, survivability, vlan);
+        RequestedVlanPipeE pipeAB2 = testBuilder.buildRequestedPipe(aPorts, srcAB, bPorts, dstAB, abBW, baBW, palindrome, survivability, vlan);
+        RequestedVlanPipeE pipeBZ1 = testBuilder.buildRequestedPipe(bPorts, srcBZ, zPorts, dstBZ, bzBW1, zbBW, palindrome, survivability, vlan);
+        RequestedVlanPipeE pipeBZ2 = testBuilder.buildRequestedPipe(bPorts, srcBZ, zPorts, dstBZ, bzBW2, zbBW, palindrome, survivability, vlan);
 
         reqPipes.add(pipeAB1);
         reqPipes.add(pipeAB2);

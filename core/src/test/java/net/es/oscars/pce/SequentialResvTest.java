@@ -3,6 +3,7 @@ package net.es.oscars.pce;
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.CoreUnitTestConfiguration;
 import net.es.oscars.dto.spec.PalindromicType;
+import net.es.oscars.dto.spec.SurvivabilityType;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.helpers.RequestedEntityBuilder;
 import net.es.oscars.resv.dao.ReservedBandwidthRepository;
@@ -88,8 +89,9 @@ public class SequentialResvTest {
         Integer zaBW = 25;
         String vlan = "any";
         PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
 
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, vlan);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
         reqPipes.add(pipeAZ);
 
         requestedBlueprint = testBuilder.buildRequest(reqPipes);
@@ -188,8 +190,9 @@ public class SequentialResvTest {
         Integer zaBW = 334;
         String vlan = "any";
         PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
 
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, vlan);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
         reqPipes.add(pipeAZ);
 
         requestedBlueprint = testBuilder.buildRequest(reqPipes);
@@ -294,8 +297,9 @@ public class SequentialResvTest {
         Integer zaBW = 1;
         String vlan = "any";
         PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
 
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, vlan);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
         reqPipes.add(pipeAZ);
 
         requestedBlueprint = testBuilder.buildRequest(reqPipes);
@@ -417,8 +421,9 @@ public class SequentialResvTest {
         Integer zaBW = 1;
         String vlan = "any";
         PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
 
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, vlan);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
         reqPipes.add(pipeAZ);
 
         requestedBlueprint = testBuilder.buildRequest(reqPipes);
@@ -544,8 +549,9 @@ public class SequentialResvTest {
         Integer zaBW = 34;
         String vlan = "any";
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
 
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, vlan);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
         reqPipes.add(pipeAZ);
 
         requestedBlueprint = testBuilder.buildRequest(reqPipes);
@@ -657,8 +663,9 @@ public class SequentialResvTest {
         Integer zaBW = 34;
         String vlan = "any";
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
 
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, vlan);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
         reqPipes.add(pipeAZ);
 
         requestedBlueprint = testBuilder.buildRequest(reqPipes);
@@ -772,8 +779,9 @@ public class SequentialResvTest {
         Integer zaBW = 334;
         String vlan = "any";
         PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
 
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, vlan);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
         reqPipes.add(pipeAZ);
 
         requestedBlueprint = testBuilder.buildRequest(reqPipes);
@@ -878,8 +886,9 @@ public class SequentialResvTest {
         Integer zaBW = 1;
         String vlan = "any";
         PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
 
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, vlan);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
         reqPipes.add(pipeAZ);
 
         requestedBlueprint = testBuilder.buildRequest(reqPipes);
@@ -1017,9 +1026,10 @@ public class SequentialResvTest {
         Integer zaBW = 167;
         String vlan = "any";
         PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
 
-        RequestedVlanPipeE pipeAZ1 = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, vlan);
-        RequestedVlanPipeE pipeAZ2 = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, vlan);
+        RequestedVlanPipeE pipeAZ1 = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        RequestedVlanPipeE pipeAZ2 = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
         reqPipes.add(pipeAZ1);
         reqPipes.add(pipeAZ2);
 

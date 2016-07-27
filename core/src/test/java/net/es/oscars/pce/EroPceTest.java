@@ -3,6 +3,7 @@ package net.es.oscars.pce;
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.CoreUnitTestConfiguration;
 import net.es.oscars.dto.spec.PalindromicType;
+import net.es.oscars.dto.spec.SurvivabilityType;
 import net.es.oscars.helpers.RequestedEntityBuilder;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.dao.ReservedBandwidthRepository;
@@ -84,6 +85,7 @@ public class EroPceTest
         Integer zaBW = 25;
         String vlan = "any";
         PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         List<String> azERO = new ArrayList<>();
         List<String> zaERO;
 
@@ -106,7 +108,7 @@ public class EroPceTest
 
         Collections.reverse(zaERO);
 
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, vlan);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
         pipeAZ.setAzERO(azERO);
         pipeAZ.setZaERO(zaERO);
 
@@ -165,6 +167,7 @@ public class EroPceTest
         Integer zaBW = 25;
         String vlan = "any";
         PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         List<String> azERO = new ArrayList<>();
         List<String> zaERO = new ArrayList<>();
 
@@ -194,7 +197,7 @@ public class EroPceTest
         zaERO.add("nodeK");
 
 
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, vlan);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
         pipeAZ.setAzERO(azERO);
         pipeAZ.setZaERO(zaERO);
 
@@ -253,6 +256,7 @@ public class EroPceTest
         Integer zaBW = 25;
         String vlan = "any";
         PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         List<String> azERO = new ArrayList<>();
         List<String> zaERO = new ArrayList<>();
 
@@ -283,7 +287,7 @@ public class EroPceTest
         zaERO.add("nodeK");
 
 
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, vlan);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
         pipeAZ.setAzERO(azERO);
         pipeAZ.setZaERO(zaERO);
 
@@ -325,6 +329,7 @@ public class EroPceTest
         Integer zaBW = 25;
         String vlan = "any";
         PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         List<String> azERO = new ArrayList<>();
         List<String> zaERO = new ArrayList<>();
 
@@ -348,7 +353,7 @@ public class EroPceTest
         zaERO.add("nodeK:2");
         zaERO.add("nodeK");
 
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, vlan);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
         pipeAZ.setAzERO(azERO);
         pipeAZ.setZaERO(zaERO);
 
@@ -390,6 +395,7 @@ public class EroPceTest
         Integer zaBW = 25;
         String vlan = "any";
         PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         List<String> azERO = new ArrayList<>();
         List<String> zaERO = new ArrayList<>();
 
@@ -412,7 +418,7 @@ public class EroPceTest
         zaERO.add("nodeK:2");
         zaERO.add("nodeK");
 
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, vlan);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
         pipeAZ.setAzERO(azERO);
         pipeAZ.setZaERO(zaERO);
 
@@ -472,6 +478,7 @@ public class EroPceTest
         Integer zaBW = 25;
         String vlan = "any";
         PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         List<String> azERO = new ArrayList<>();
         List<String> zaERO = new ArrayList<>();
 
@@ -497,7 +504,7 @@ public class EroPceTest
         zaERO.add("nodeK:2");
         zaERO.add("nodeK");
 
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, vlan);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
         pipeAZ.setAzERO(azERO);
         pipeAZ.setZaERO(zaERO);
 
@@ -562,6 +569,7 @@ public class EroPceTest
         Integer zaBW = 25;
         String vlan = "any";
         PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         List<String> azERO = new ArrayList<>();
         List<String> zaERO = new ArrayList<>();
 
@@ -587,7 +595,7 @@ public class EroPceTest
         zaERO.add("nodeK:2");
         zaERO.add("nodeK");
 
-        RequestedVlanPipeE pipeAZTest = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, vlan);
+        RequestedVlanPipeE pipeAZTest = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
         pipeAZTest.setAzERO(azERO);
         pipeAZTest.setZaERO(zaERO);
         pipesTest.add(pipeAZTest);
@@ -606,7 +614,7 @@ public class EroPceTest
         Integer azBWBig = 901;
         Integer zaBWBig = 901;
 
-        RequestedVlanPipeE pipeAZBig = testBuilder.buildRequestedPipe(srcPortsBig, srcDeviceBig, dstPortsBig, dstDeviceBig, azBWBig, zaBWBig, palindrome, vlan);
+        RequestedVlanPipeE pipeAZBig = testBuilder.buildRequestedPipe(srcPortsBig, srcDeviceBig, dstPortsBig, dstDeviceBig, azBWBig, zaBWBig, palindrome, survivability, vlan);
         pipesBig.add(pipeAZBig);
         blueprintBig = testBuilder.buildRequest(pipesBig);
         connectionBig = testBuilder.buildConnection(blueprintBig, requestedSched, "connBig", "Big Single-link Connection");
@@ -672,6 +680,7 @@ public class EroPceTest
         Integer zaBW = 50;  // Enough bandwidth for ZA, but not for (AZ + ZA) on shared link!
         String vlan = "any";
         PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         List<String> azERO = new ArrayList<>();
         List<String> zaERO = new ArrayList<>();
 
@@ -697,7 +706,7 @@ public class EroPceTest
         zaERO.add("nodeK:2");
         zaERO.add("nodeK");
 
-        RequestedVlanPipeE pipeAZTest = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, vlan);
+        RequestedVlanPipeE pipeAZTest = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
         pipeAZTest.setAzERO(azERO);
         pipeAZTest.setZaERO(zaERO);
         pipesTest.add(pipeAZTest);
@@ -716,7 +725,7 @@ public class EroPceTest
         Integer azBWBig = 901;
         Integer zaBWBig = 901;
 
-        RequestedVlanPipeE pipeAZBig = testBuilder.buildRequestedPipe(srcPortsBig, srcDeviceBig, dstPortsBig, dstDeviceBig, azBWBig, zaBWBig, palindrome, vlan);
+        RequestedVlanPipeE pipeAZBig = testBuilder.buildRequestedPipe(srcPortsBig, srcDeviceBig, dstPortsBig, dstDeviceBig, azBWBig, zaBWBig, palindrome, survivability, vlan);
         pipesBig.add(pipeAZBig);
         blueprintBig = testBuilder.buildRequest(pipesBig);
         connectionBig = testBuilder.buildConnection(blueprintBig, requestedSched, "connBig", "Big Single-link Connection");
@@ -760,6 +769,7 @@ public class EroPceTest
         Integer zaBW = 25;
         String vlan = "any";
         PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         List<String> azERO = new ArrayList<>();
         List<String> zaERO = new ArrayList<>();
 
@@ -790,7 +800,7 @@ public class EroPceTest
         zaERO.add("nodeK");
 
 
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, vlan);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
         pipeAZ.setAzERO(azERO);
         pipeAZ.setZaERO(zaERO);
 
@@ -832,6 +842,7 @@ public class EroPceTest
         Integer zaBW = 25;
         String vlan = "any";
         PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         List<String> azERO = new ArrayList<>();
         List<String> zaERO = new ArrayList<>();
 
@@ -862,7 +873,7 @@ public class EroPceTest
         zaERO.add("nodeK");
 
 
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, vlan);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
         pipeAZ.setAzERO(azERO);
         pipeAZ.setZaERO(zaERO);
 
@@ -909,6 +920,7 @@ public class EroPceTest
         Integer zaBW = 25;
         String vlan = "any";
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         List<String> azERO = new ArrayList<>();
         List<String> zaERO = new ArrayList<>();
 
@@ -927,7 +939,7 @@ public class EroPceTest
         zaERO.add("nodeK");
 
 
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, vlan);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
         pipeAZ.setAzERO(azERO);
         pipeAZ.setZaERO(zaERO);
 
@@ -986,6 +998,7 @@ public class EroPceTest
         Integer zaBW = 25;
         String vlan = "any";
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         List<String> azERO = new ArrayList<>();
         List<String> zaERO = new ArrayList<>();
 
@@ -1003,7 +1016,7 @@ public class EroPceTest
         azERO.add("nodeQ:1");
         azERO.add("nodeQ");
 
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, vlan);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
         pipeAZ.setAzERO(azERO);
         pipeAZ.setZaERO(zaERO);
 
