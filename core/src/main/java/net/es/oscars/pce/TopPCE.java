@@ -189,7 +189,7 @@ public class TopPCE {
                 }
             }
             // If the survivable paths are valid, attempt to reserve the resources
-            else if(verifySurvEros(eroMapForPipe)
+            else if(verifySurvEros(eroMapForPipe))
             {
                 // Increment the number reserved
                 numReserved++;
@@ -210,7 +210,8 @@ public class TopPCE {
                 // Try to get the reserved resources
                 try
                 {
-                    transPCE.reserveRequestedPipe(pipe, schedSpec, primaryPair, secondaryPair, rsvBandwidths, rsvVlans, reservedMplsPipes, reservedEthPipes);
+                    transPCE.reserveRequestedPipeWithPairs(pipe, schedSpec, primaryPair, secondaryPair, rsvBandwidths,
+                            rsvVlans, reservedMplsPipes, reservedEthPipes);
                 }
                 // If it failed, decrement the number reserved
                 catch(Exception e)
