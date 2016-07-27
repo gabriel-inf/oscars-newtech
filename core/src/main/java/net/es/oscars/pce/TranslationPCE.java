@@ -6,9 +6,6 @@ import net.es.oscars.dto.pss.EthFixtureType;
 import net.es.oscars.dto.pss.EthJunctionType;
 import net.es.oscars.pss.PCEAssistant;
 import net.es.oscars.pss.PSSException;
-import net.es.oscars.resv.dao.ReservedBandwidthRepository;
-import net.es.oscars.resv.dao.ReservedPssResourceRepository;
-import net.es.oscars.resv.dao.ReservedVlanRepository;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.topo.beans.TopoEdge;
 import net.es.oscars.topo.beans.TopoVertex;
@@ -75,13 +72,13 @@ public class TranslationPCE {
                 pceAssistant.decideJunctionType(urn.getDeviceModel()));
 
         // Select a VLAN ID for this junction
-        Map<RequestedVlanFixtureE, Integer> fixVlanMap = vlanService.selectVLANsForJunction(req_j, sched, simpleJunctions, reservedVlans);
+        Map<RequestedVlanFixtureE, Integer> fixVlanMap = vlanService.selectVLANsForJunction(req_j, reservedVlans);
         if(fixVlanMap.containsValue(-1)){
             return null;
         }
 
         // Confirm that there is sufficient available bandwidth
-        boolean sufficientBandwidth = bwService.confirmSufficientBandwidth(req_j, reservedBandwidths);
+        boolean sufficientBandwidth = bwService.evaluateBandwidthJunction(req_j, reservedBandwidths);
         if(!sufficientBandwidth){
             return null;
         }
@@ -147,26 +144,29 @@ public class TranslationPCE {
 
         // Get map of "Ingress" and "Egress" bandwidth availability
         Map<UrnE, Map<String, Integer>> availBwMap;
-        availBwMap = bwService.createBandwidthAvailabilityMap(reservedBandwidths);
+        availBwMap = bwService.buildBandwidthAvailabilityMap(reservedBandwidths);
 
         // Returns a mapping from topovertices (ports) to an "Ingress"/"Egress" map of the total Ingress/Egress
         // Requested bandwidth at that port across both the azERO and the zaERO
-        Map<TopoVertex, Map<String, Integer>> requestedBandwidthMap = bwService.createRequestedBandwidthMap(azERO, zaERO, azMbps, zaMbps);
+        List<List<TopoEdge>> EROs = Arrays.asList(azERO, zaERO);
+        List<Integer> bandwidths = Arrays.asList(azMbps, zaMbps);
+        Map<TopoVertex, Map<String, Integer>> requestedBandwidthMap = bwService.buildRequestedBandwidthMap(EROs, bandwidths);
 
         // Confirm that there is sufficient bandwidth to meet the request (given what has been reserved so far)
         // Palindromic EROs -- evaluate both directions at each port - traffic flows both ways
         if(pceAssistant.palindromicEros(azERO, zaERO)){
-            boolean sufficientBw = bwService.checkForSufficientBw(urnMap, azMbps, zaMbps, azERO, zaERO, availBwMap);
+            boolean sufficientBw = bwService.evaluateBandwidthEROBi(urnMap, azMbps, zaMbps, azERO, zaERO, availBwMap);
             if(!sufficientBw)
                 throw new PCEException("Insufficient Bandwidth to meet requested pipe" + reqPipe.toString() +
                         " given previous reservations in flow");
         }
         // Non-Palindromic EROs -- evaluate the ports in each ERO just for traffic in the AZ or ZA direction
-        else{
+        else
+        {
             // Consider A->Z ERO with bwAZ
-            boolean sufficientBwAZ = bwService.checkForSufficientBwUni(urnMap, azMbps, azERO, availBwMap);
+            boolean sufficientBwAZ = bwService.evaluateBandwidthEROUni(azERO, urnMap, availBwMap, azMbps);
             // Consider Z->A ERO with bwZA
-            boolean sufficientBwZA = bwService.checkForSufficientBwUni(urnMap, zaMbps, zaERO, availBwMap);
+            boolean sufficientBwZA = bwService.evaluateBandwidthEROUni(zaERO, urnMap, availBwMap, zaMbps);
             if(!sufficientBwAZ)
             {
                 throw new PCEException("Insufficient Bandwidth to meet requested A->Z pipe" + reqPipe.toString() +
@@ -179,7 +179,6 @@ public class TranslationPCE {
             }
 
             // Now consider those ports which are shared by both A->Z and Z->A -- they must be checked for both directions.
-
             List<TopoVertex> bidirectionalPorts = requestedBandwidthMap.keySet()
                     .stream()
                     .filter(v -> v.getVertexType().equals(VertexType.PORT))
@@ -195,13 +194,54 @@ public class TranslationPCE {
                 }
                 UrnE biUrn = urnMap.get(biPort.getUrn());
 
-                if(!bwService.sufficientBandwidthAtUrn(biUrn, availBwMap, azMbps, zaMbps)){
+                if(!bwService.evaluateBandwidthURN(biUrn, availBwMap, azMbps, zaMbps)){
                     throw new PCEException("Insufficient Bandwidth to meet requested pipe" + reqPipe.toString() +
                             " given previous reservations in flow");
                 }
             }
 
+            /* Support fringe case of identical link traversal in both A->Z and Z->A direction */
+            log.info("HERE!!!");
+            List<TopoEdge> sharedEdges = azERO.stream().collect(Collectors.toList());
+            sharedEdges.retainAll(zaERO);
 
+            if(!sharedEdges.isEmpty())
+            {
+                List<TopoVertex> sharedPorts = new ArrayList<>();
+                List<String> sharedPortNames = new ArrayList<>();
+                sharedPorts.add(sharedEdges.get(0).getA());
+                sharedPortNames.add(sharedEdges.get(0).getA().getUrn());
+                for(TopoEdge e : sharedEdges)
+                {
+                    sharedPorts.add(e.getZ());
+                    sharedPortNames.add(e.getZ().getUrn());
+                }
+
+                // Filter out devices
+                sharedPorts.removeIf(p -> !p.getVertexType().equals(VertexType.PORT));
+
+                List<ReservedBandwidthE> sharedBandwidths = reservedBandwidths.stream()
+                        .filter(sBW -> sharedPortNames.contains(sBW.getUrn().getUrn()))
+                        .collect(Collectors.toList());
+
+                Map<UrnE, Map<String, Integer>> sharedBwMap;
+                sharedBwMap = bwService.buildBandwidthAvailabilityMap(sharedBandwidths);
+
+                for(TopoVertex sharedPort : sharedPorts)
+                {
+                    if(!urnMap.containsKey(sharedPort.getUrn()))
+                    {
+                        assert false;
+                    }
+                    UrnE sharedUrn = urnMap.get(sharedPort.getUrn());
+
+                    if(!bwService.evaluateBandwidthSharedURN(sharedUrn, sharedBwMap, azMbps, azMbps, zaMbps, zaMbps))
+                    {
+                        throw new PCEException("Insufficient Bandwidth to meet requested pipe" + reqPipe.toString() + " given previous reservations in flow");
+                    }
+                }
+            }
+            /* * */
         }
 
         Map<UrnE, Integer> chosenVlanMap = vlanService.selectVlansForPipe(reqPipe, urnMap, reservedVlans, azERO, zaERO);

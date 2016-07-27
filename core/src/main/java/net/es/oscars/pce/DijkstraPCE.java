@@ -72,52 +72,35 @@ public class DijkstraPCE
 
 
     /**
-     * Computes Dijkstra's shortest path directed from srcVertex to dstVertex. Input topology is assumed to be pre-pruned based on bandwidth and vlan availability.
-     * @param topology - pruned topology
-     * @param srcVertex  - source URN
-     * @param dstVertex  - destination URN
+     * Translates a List of TopoEdges representing a path into its corresponding TopoVertices
+     * @param pathEdges - List of TopoEdges representing path
      * @return path as list of TopoVertex objects
      */
-    public List<TopoVertex> computeShortestPathVertices(Topology topology, TopoVertex srcVertex, TopoVertex dstVertex)
+    public List<TopoVertex> translatePathEdgesToVertices(List<TopoEdge> pathEdges)
     {
-        log.info("finding shortest path between " + srcVertex.getUrn() + " -- " + dstVertex.getUrn());
+        List<TopoVertex> pathVertices = new ArrayList<>();
 
-        Graph<TopoVertex, TopoEdge> graph = new DirectedSparseMultigraph<>();
-
-        Transformer<TopoEdge, Double> wtTransformer = edge -> edge.getMetric().doubleValue();
-
-        this.addToGraph(topology, graph);
-
-        String pretty = null;
-        try
+        pathVertices.add(pathEdges.get(0).getA());
+        for(TopoEdge oneEdge : pathEdges)
         {
-            pretty = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(graph);
-        }
-        catch (JsonProcessingException e) { e.printStackTrace(); }
-        //log.info(pretty);
-
-        DijkstraShortestPath<TopoVertex, TopoEdge> alg = new DijkstraShortestPath<>(graph, wtTransformer);
-
-        List<TopoEdge> path = alg.getPath(srcVertex, dstVertex);
-        List<TopoVertex> verticesInPath = new ArrayList<>();
-
-        log.info("calculated path: ");
-        if (path.isEmpty())
-        {
-            log.error("no path found");
+            pathVertices.add(oneEdge.getZ());
         }
 
-        path.stream()
-            .forEach(h -> {
-                log.info(h.getA().getUrn() + " -- " + h.getLayer() + " -- " + h.getZ().getUrn());
+        return pathVertices;
+    }
 
-                verticesInPath.add(h.getA());
-            }
-        );
+    /**
+     * Translates a List of TopoVertices representing a path into its corresponding String URNs
+     * @param pathVertices - List of TopoVertices representing path
+     * @return path as list of URN Strings
+     */
+    public List<String> translatePathVerticesToStrings(List<TopoVertex> pathVertices)
+    {
+        List<String> pathStrings = new ArrayList<>();
 
-        verticesInPath.add(path.get(path.size()-1).getA());
+        pathVertices.stream().forEach(l -> pathStrings.add(l.getUrn()));
 
-        return verticesInPath;
+        return pathStrings;
     }
 
     private void addToGraph(Topology topo, Graph<TopoVertex, TopoEdge> g)
