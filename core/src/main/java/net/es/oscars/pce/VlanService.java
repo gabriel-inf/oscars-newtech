@@ -101,7 +101,7 @@ public class VlanService {
         Map<UrnE, Set<Integer>> reservableVlanIdMap = buildReservableVlanIdMap(urnMap);
         log.info("Reservable VLAN ID Map: " + reservableVlanIdMap.toString());
 
-        urnMap.values().stream().filter(urn -> urn.getUrnType().equals(UrnType.IFCE)).forEach(urn -> {
+        urnMap.values().stream().filter(urn -> urn.getUrnType().equals(UrnType.IFCE)).filter(urn -> urn.getReservableVlans() != null).forEach(urn -> {
             Set<Integer> availableIds = reservableVlanIdMap.get(urn);
             availableIds.removeAll(reservedVlanIdMap.get(urn));
             availableVlanIdMap.put(urn, availableIds);
@@ -114,7 +114,7 @@ public class VlanService {
     private Map<UrnE,Set<Integer>> buildReservableVlanIdMap(Map<String, UrnE> urnMap) {
         Map<UrnE, Set<Integer>> reservableVlanIdMap = new HashMap<>();
 
-        urnMap.values().stream().filter(urn -> urn.getUrnType().equals(UrnType.IFCE)).forEach(urn -> {
+        urnMap.values().stream().filter(urn -> urn.getUrnType().equals(UrnType.IFCE)).filter(urn -> urn.getReservableVlans() != null).forEach(urn -> {
             List<IntRange> ranges = urn.getReservableVlans().getVlanRanges().stream().map(IntRangeE::toDtoIntRange).collect(Collectors.toList());
             reservableVlanIdMap.put(urn, getIntegersFromRanges(ranges));
         });
