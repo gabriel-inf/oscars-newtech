@@ -64,6 +64,14 @@ public class SurvivabilityPCE
                 .filter(v -> !v.equals(dstPort))
                 .collect(Collectors.toSet());
 
+        Set<TopoEdge> fixtureEdges = multiLayerTopo.getEdges().stream()
+                .filter(e -> e.getA().equals(srcPort) || e.getA().equals(dstPort) || e.getZ().equals(srcPort) || e.getZ().equals(dstPort))
+                .collect(Collectors.toSet());
+
+        multiLayerTopo.getVertices().retainAll(topoVertices);
+        multiLayerTopo.getEdges().removeAll(fixtureEdges);
+
+
         // Bandwidth and Vlan pruning
         Topology prunedTopo = pruningService.pruneWithPipeAZ(multiLayerTopo, requestPipe, requestSched, rsvBwList, rsvVlanList);
 
@@ -79,6 +87,24 @@ public class SurvivabilityPCE
             throw new PCEException("Secondary path could not be found in Survivability PCE");
         }
 
+        // Add the src/dst ports back to the routes to complete the EROs
+        for(TopoEdge fixEdge : fixtureEdges)
+        {
+            if(fixEdge.getA().equals(srcPort) && fixEdge.getZ().equals(srcDevice))
+            {
+                for(List<TopoEdge> azERO : azPathPairCalculated)
+                {
+                    azERO.add(0, fixEdge);
+                }
+            }
+            else if(fixEdge.getA().equals(dstDevice) && fixEdge.getZ().equals(dstPort))
+            {
+                for(List<TopoEdge> azERO : azPathPairCalculated)
+                {
+                    azERO.add(fixEdge);
+                }
+            }
+        }
 
         // Get palindromic paths in reverse-direction //
         List<List<TopoEdge>> zaPathPairCalculated = new ArrayList<>();
@@ -124,6 +150,11 @@ public class SurvivabilityPCE
         theMap.put("zaPrimary", zaPathPairCalculated.get(0));
         theMap.put("azSecondary", azPathPairCalculated.get(1));
         theMap.put("zaSecondary", zaPathPairCalculated.get(1));
+
+        log.info("AZ Primary: " + azPathPairCalculated.get(0).toString());
+        log.info("ZA Primary: " + zaPathPairCalculated.get(0).toString());
+        log.info("AZ Secondary: " + azPathPairCalculated.get(1).toString());
+        log.info("ZA Secondary: " + zaPathPairCalculated.get(1).toString());
 
         return theMap;
     }
