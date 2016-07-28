@@ -6,6 +6,7 @@ import net.es.oscars.dto.spec.Specification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -60,6 +61,18 @@ public class MainController {
         return vlan_edges;
     }
 
+
+    @RequestMapping(value = "/info/device/{device}/vlanEdges", method = RequestMethod.GET)
+    @ResponseBody
+    public List<String> vlanEdge_device_suggestions(@PathVariable("device") String device) {
+        log.info("giving vlanEdge suggestions for device " + device);
+        String restPath = "https://localhost:8000/topo/device/" + device + "/vlanEdges";
+
+        String[] all_vlan_edges = restTemplate.getForObject(restPath, String[].class);
+        List<String> vlan_edges = new ArrayList<>();
+        vlan_edges.addAll(Arrays.asList(all_vlan_edges));
+        return vlan_edges;
+    }
 
     @RequestMapping(value = "/info/devices", method = RequestMethod.GET)
     @ResponseBody

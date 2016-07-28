@@ -44,6 +44,15 @@ public class TopoController {
         return topoService.edges(Layer.ETHERNET);
     }
 
+
+    @RequestMapping(value = "/topo/device/{device}/vlanEdges", method = RequestMethod.GET)
+    @ResponseBody
+    public List<String> deviceVlanEdges(@PathVariable("device") String device) {
+        log.info("getting device vlan edges");
+        return topoService.deviceEdges(device, Layer.ETHERNET);
+    }
+
+
     @RequestMapping(value = "/topo/devices", method = RequestMethod.GET)
     @ResponseBody
     public List<String> devices() {

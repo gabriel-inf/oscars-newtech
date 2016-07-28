@@ -95,21 +95,67 @@ public class VlanService {
 
         // Get map of all reserved VLAN IDs per URN
         Map<UrnE, Set<Integer>> reservedVlanIdMap = buildReservedVlanIdMap(urnMap, reservedVlans);
-        log.info("Reserved VLAN ID Map: " + reservedVlanIdMap.toString());
+        String stringified = this.stringifyVlanMap(reservedVlanIdMap);
+
+        log.info("Reserved VLAN ID Map: " + stringified);
 
         // Get map of all reservable VLAN IDs per URN
         Map<UrnE, Set<Integer>> reservableVlanIdMap = buildReservableVlanIdMap(urnMap);
-        log.info("Reservable VLAN ID Map: " + reservableVlanIdMap.toString());
+        stringified = this.stringifyVlanMap(reservableVlanIdMap);
+
+        log.info("Reservable VLAN ID Map: " + stringified);
 
         urnMap.values().stream().filter(urn -> urn.getUrnType().equals(UrnType.IFCE)).filter(urn -> urn.getReservableVlans() != null).forEach(urn -> {
             Set<Integer> availableIds = reservableVlanIdMap.get(urn);
             availableIds.removeAll(reservedVlanIdMap.get(urn));
             availableVlanIdMap.put(urn, availableIds);
         });
-        log.info("Available VLAN ID Map: " + availableVlanIdMap.toString());
+
+        stringified = this.stringifyVlanMap(availableVlanIdMap);
+
+        log.info("Available VLAN ID Map: " + stringified);
 
         return availableVlanIdMap;
     }
+
+    private String stringifyVlanMap(Map<UrnE, Set<Integer>> input) {
+        Map<UrnE, String> output = new HashMap<>();
+        input.keySet().forEach(urn -> {
+            List<Integer> availVlans = new ArrayList<>();
+            availVlans.addAll(input.get(urn));
+            Collections.sort(availVlans);
+            Set<IntRange> ranges = new HashSet<>();
+
+            IntRange range = IntRange.builder().floor(0).ceiling(0).build();
+            for (Integer idx = 0; idx < availVlans.size(); idx++) {
+                Integer vlan = availVlans.get(idx);
+                if (range.getCeiling() == 0) {
+                    range.setFloor(vlan);
+                    range.setCeiling(vlan);
+                } else if (idx == availVlans.size() - 1) {
+                    range.setCeiling(vlan);
+                    ranges.add(range);
+                } else {
+                    if (range.getCeiling() +1 == vlan) {
+                        range.setCeiling(vlan);
+                    } else {
+                        ranges.add(range);
+                        range = IntRange.builder().floor(vlan).ceiling(vlan).build();
+                    }
+                }
+            }
+
+            String row = ranges.toString();
+
+
+            output.put(urn, row);
+        });
+
+
+        return output.toString();
+
+    }
+
 
     private Map<UrnE,Set<Integer>> buildReservableVlanIdMap(Map<String, UrnE> urnMap) {
         Map<UrnE, Set<Integer>> reservableVlanIdMap = new HashMap<>();

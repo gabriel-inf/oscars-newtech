@@ -136,8 +136,8 @@ public class TopoFileImporter implements TopoImporter {
                         .build();
 
                 UrnAdjcyE zaAdjcy = UrnAdjcyE.builder()
-                        .a(deviceUrn)
-                        .z(ifceUrn)
+                        .a(ifceUrn)
+                        .z(deviceUrn)
                         .metrics(new HashMap<>())
                         .build();
 
