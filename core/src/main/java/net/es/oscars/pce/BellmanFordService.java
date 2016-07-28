@@ -22,6 +22,10 @@ public class BellmanFordService {
         List<TopoEdge> path = new ArrayList<>();
         TopoVertex currentNode = dest;
         while(!currentNode.equals(source)){
+            if(!edgeMap.containsKey(currentNode)){
+                path = new ArrayList<>();
+                break;
+            }
             TopoEdge edge = edgeMap.get(currentNode);
             path.add(edge);
             currentNode = edge.getA();
@@ -45,6 +49,10 @@ public class BellmanFordService {
             List<TopoEdge> path = new ArrayList<>();
             TopoVertex currentNode = vertex;
             while(!currentNode.equals(source)){
+                if(!edgeMap.containsKey(currentNode)){
+                    path = new ArrayList<>();
+                    break;
+                }
                 TopoEdge edge = edgeMap.get(currentNode);
                 path.add(edge);
                 currentNode = edge.getA();
@@ -75,6 +83,12 @@ public class BellmanFordService {
             for(TopoEdge edge : edges){
                 TopoVertex a = edge.getA();
                 TopoVertex z = edge.getZ();
+                if(!distanceMap.containsKey(a) || !distanceMap.containsKey(z)){
+                    log.info("At least one vertex on an edge does not exist in topology");
+                    log.info("Edge: " + edge);
+                    log.info("A: " + a.getUrn() + "or Z: " + z.getUrn());
+                    return new HashMap<>();
+                }
                 Long weight = distanceMap.get(a) + edge.getMetric();
                 if(weight < distanceMap.get(z)){
                     distanceMap.put(z, weight);

@@ -48,6 +48,7 @@ public class BhandariPCE {
         modifiedTopo.setEdges(modifiedTopoEdges);
 
         // Find the new shortest path
+        log.info(modifiedTopo.getEdges().toString());
         List<TopoEdge> modShortestPath = bellmanFordService.shortestPath(modifiedTopo, source, dest);
 
         return makePair(shortestPath, modShortestPath, modifiedTopo, reversedToOriginalMap, source, dest);

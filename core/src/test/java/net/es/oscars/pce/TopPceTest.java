@@ -41,8 +41,6 @@ public class TopPceTest {
     @Autowired
     private TopologyBuilder topologyBuilder;
 
-    @Autowired
-    private RequestedEntityBuilder requestBuilder;
 
 
     @Test

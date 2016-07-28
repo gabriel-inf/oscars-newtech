@@ -58,18 +58,11 @@ public class SurvivabilityPCE
 
         Topology multiLayerTopo = topoService.getMultilayerTopology();
 
-        // Prune out src/dst ports for disjoint routing
-        Set<TopoVertex> topoVertices = multiLayerTopo.getVertices().stream()
-                .filter(v -> !v.equals(srcPort))
-                .filter(v -> !v.equals(dstPort))
-                .collect(Collectors.toSet());
+        // Identify src/dst ports for disjoint routing
 
         Set<TopoEdge> fixtureEdges = multiLayerTopo.getEdges().stream()
                 .filter(e -> e.getA().equals(srcPort) || e.getA().equals(dstPort) || e.getZ().equals(srcPort) || e.getZ().equals(dstPort))
                 .collect(Collectors.toSet());
-
-        multiLayerTopo.getVertices().retainAll(topoVertices);
-        multiLayerTopo.getEdges().removeAll(fixtureEdges);
 
 
         // Bandwidth and Vlan pruning
@@ -137,11 +130,13 @@ public class SurvivabilityPCE
         assert(azPathPairCalculated.size() == 2);
         assert(azPathPairCalculated.size() == zaPathPairCalculated.size());
 
+
         for(int p = 0; p < azPathPairCalculated.size(); p++)
         {
             List<TopoEdge> azERO = azPathPairCalculated.get(p);
             List<TopoEdge> zaERO = zaPathPairCalculated.get(p);
-
+            log.info("AZ: " + azERO.stream().map(e -> "(" + e.getA().getUrn() + ", " + e.getZ().getUrn() + ")").collect(Collectors.toList()).toString());
+            log.info("ZA: " + zaERO.stream().map(e -> "(" + e.getA().getUrn() + ", " + e.getZ().getUrn() + ")").collect(Collectors.toList()).toString());
             assert(azERO.size() == zaERO.size());
         }
 
