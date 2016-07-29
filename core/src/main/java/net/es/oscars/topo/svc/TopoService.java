@@ -108,7 +108,7 @@ public class TopoService {
         return topo;
     }
 
-    public Topology getMultilayerTopology(){
+    public Topology getMultilayerTopology() {
         Topology multiLayerTopo = new Topology();
 
         Topology ethTopo = layer(Layer.ETHERNET);
@@ -166,6 +166,16 @@ public class TopoService {
 
     }
 
+    public List<String> deviceEdges(String device, Layer layer) {
+        log.info("finding edges for device " + device + " at " + layer);
+        List<UrnAdjcyE> adjcies = adjcyRepo.findAll();
+
+        return adjcies.stream()
+                .filter(adj -> adj.getMetrics().containsKey(Layer.INTERNAL) && adj.getA().getUrn().equals(device))
+                .map(adj -> adj.getZ().getUrn())
+                .collect(Collectors.toList());
+
+    }
 
     public List<String> devices() {
         log.info("retrieving all devices");

@@ -11,8 +11,7 @@
       {
         "urn": "nersc-tb1:3/1/1",
         "capabilities": [
-          "ETHERNET",
-          "MPLS"
+          "ETHERNET"
         ],
         "reservableBw": 1000,
         "reservableVlans": [
@@ -47,8 +46,7 @@
       {
         "urn": "star-tb1:1/1/1",
         "capabilities": [
-          "ETHERNET",
-          "MPLS"
+          "ETHERNET"
         ],
         "reservableBw": 1000,
         "reservableVlans": [

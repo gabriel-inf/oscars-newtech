@@ -23,21 +23,20 @@ import java.util.List;
  */
 @Slf4j
 @Component
-public class DijkstraPCE
-{
+public class DijkstraPCE {
     @Autowired
     private TopoService topoService;
 
 
     /**
      * Computes Dijkstra's shortest path directed from srcVertex to dstVertex. Input topology is assumed to be pre-pruned based on bandwidth and vlan availability.
-     * @param topology - pruned topology
-     * @param srcVertex  - source URN
-     * @param dstVertex  - destination URN
+     *
+     * @param topology  - pruned topology
+     * @param srcVertex - source URN
+     * @param dstVertex - destination URN
      * @return path as List of TopoEdge objects
      */
-    public List<TopoEdge> computeShortestPathEdges(Topology topology, TopoVertex srcVertex, TopoVertex dstVertex)
-    {
+    public List<TopoEdge> computeShortestPathEdges(Topology topology, TopoVertex srcVertex, TopoVertex dstVertex) {
         log.info("finding shortest path between " + srcVertex.getUrn() + " -- " + dstVertex.getUrn());
 
         Graph<TopoVertex, TopoEdge> graph = new DirectedSparseMultigraph<>();
@@ -47,12 +46,12 @@ public class DijkstraPCE
         this.addToGraph(topology, graph);
 
         String pretty = null;
-        try
-        {
+        try {
             pretty = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(graph);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
         }
-        catch (JsonProcessingException e) { e.printStackTrace(); }
-        //log.info(pretty);
+        // log.info(pretty);
 
 
         DijkstraShortestPath<TopoVertex, TopoEdge> alg = new DijkstraShortestPath<>(graph, wtTransformer);
@@ -60,8 +59,7 @@ public class DijkstraPCE
         List<TopoEdge> path = alg.getPath(srcVertex, dstVertex);
 
         log.info("calculated path: ");
-        if (path.isEmpty())
-        {
+        if (path.isEmpty()) {
             log.error("no path found");
         }
 
@@ -73,16 +71,15 @@ public class DijkstraPCE
 
     /**
      * Translates a List of TopoEdges representing a path into its corresponding TopoVertices
+     *
      * @param pathEdges - List of TopoEdges representing path
      * @return path as list of TopoVertex objects
      */
-    public List<TopoVertex> translatePathEdgesToVertices(List<TopoEdge> pathEdges)
-    {
+    public List<TopoVertex> translatePathEdgesToVertices(List<TopoEdge> pathEdges) {
         List<TopoVertex> pathVertices = new ArrayList<>();
 
         pathVertices.add(pathEdges.get(0).getA());
-        for(TopoEdge oneEdge : pathEdges)
-        {
+        for (TopoEdge oneEdge : pathEdges) {
             pathVertices.add(oneEdge.getZ());
         }
 
@@ -91,11 +88,11 @@ public class DijkstraPCE
 
     /**
      * Translates a List of TopoVertices representing a path into its corresponding String URNs
+     *
      * @param pathVertices - List of TopoVertices representing path
      * @return path as list of URN Strings
      */
-    public List<String> translatePathVerticesToStrings(List<TopoVertex> pathVertices)
-    {
+    public List<String> translatePathVerticesToStrings(List<TopoVertex> pathVertices) {
         List<String> pathStrings = new ArrayList<>();
 
         pathVertices.stream().forEach(l -> pathStrings.add(l.getUrn()));
@@ -103,27 +100,26 @@ public class DijkstraPCE
         return pathStrings;
     }
 
-    private void addToGraph(Topology topo, Graph<TopoVertex, TopoEdge> g)
-    {
+    private void addToGraph(Topology topo, Graph<TopoVertex, TopoEdge> g) {
         topo.getVertices().stream()
-            .forEach(v -> {
-                //log.info("adding vertex to Dijkstra graph: " + v.getUrn());
-                g.addVertex(v);
-            }
-        );
+                .forEach(v -> {
+                            //log.info("adding vertex to Dijkstra graph: " + v.getUrn());
+                            g.addVertex(v);
+                        }
+                );
 
         topo.getEdges().stream()
-            .forEach(e -> {
-                TopoVertex nodeA = new TopoVertex(e.getA().getUrn(), e.getA().getVertexType());
-                TopoVertex nodeZ = new TopoVertex(e.getZ().getUrn(), e.getZ().getVertexType());
-                TopoEdge az = TopoEdge.builder().a(nodeA).z(nodeZ).build();
+                .forEach(e -> {
+                            TopoVertex nodeA = new TopoVertex(e.getA().getUrn(), e.getA().getVertexType());
+                            TopoVertex nodeZ = new TopoVertex(e.getZ().getUrn(), e.getZ().getVertexType());
+                            TopoEdge az = TopoEdge.builder().a(nodeA).z(nodeZ).build();
 
-                az.setMetric(e.getMetric());
-                az.setLayer(e.getLayer());
-                //log.info("adding edge to Dijkstra graph: (" + e.getA().getUrn() + "," + e.getZ().getUrn() + ")");
+                            az.setMetric(e.getMetric());
+                            az.setLayer(e.getLayer());
+                            //log.info("adding edge to Dijkstra graph: (" + e.getA().getUrn() + "," + e.getZ().getUrn() + ")");
 
-                g.addEdge(az, nodeA, nodeZ, EdgeType.DIRECTED);
-            }
-        );
+                            g.addEdge(az, nodeA, nodeZ, EdgeType.DIRECTED);
+                        }
+                );
     }
 }

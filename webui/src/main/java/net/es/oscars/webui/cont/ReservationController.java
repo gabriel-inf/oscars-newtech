@@ -3,18 +3,23 @@ package net.es.oscars.webui.cont;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.dto.pss.EthFixtureType;
+import net.es.oscars.dto.pss.EthJunctionType;
 import net.es.oscars.dto.resv.Connection;
 import net.es.oscars.dto.spec.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.client.RestTemplate;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
+import java.util.HashSet;
 
 @Slf4j
 @Controller
@@ -94,7 +99,45 @@ public class ReservationController {
 
         model.addAttribute("connection", pretty);
         return "resv_view";
-
-
     }
+
+    @RequestMapping(value="/resv_adv_new", params={"addJunction"})
+    public String addRow(final VlanFlow vflow, final BindingResult bindingResult) {
+        VlanJunction vj = VlanJunction.builder()
+                .deviceUrn("choose a device")
+                .fixtures(new HashSet<>())
+                .junctionType(EthJunctionType.REQUESTED)
+                .build();
+
+        vflow.getJunctions().add(vj);
+
+        return "resv_adv_new";
+    }
+
+    @RequestMapping(value="/resv_adv_new", params={"removeFixture"})
+    public String removeRow(final VlanFlow vflow, final BindingResult bindingResult,
+            final HttpServletRequest req) {
+
+        final String fixtureUrn = req.getParameter("removeFixture");
+
+        VlanFixture removeThis = null;
+        VlanJunction fromThis = null;
+
+        for (VlanJunction vj : vflow.getJunctions()) {
+            for (VlanFixture vf : vj.getFixtures()) {
+                if (vf.getPortUrn().equals(fixtureUrn)) {
+                    removeThis = vf;
+                    fromThis = vj;
+                }
+            }
+        }
+        if (fromThis != null && removeThis != null){
+            fromThis.getFixtures().remove(removeThis);
+        }
+
+
+        return "resv_adv_new";
+    }
+
+
 }
