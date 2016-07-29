@@ -2,8 +2,8 @@ package net.es.oscars.resv.rest;
 
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.bwavail.BandwidthAvailabilityService;
-import net.es.oscars.dto.bwavail.BandwidthAvailabilityRequest;
-import net.es.oscars.dto.bwavail.BandwidthAvailabilityResponse;
+import net.es.oscars.bwavail.enums.BandwidthAvailabilityRequest;
+import net.es.oscars.bwavail.enums.BandwidthAvailabilityResponse;
 import net.es.oscars.dto.pss.EthFixtureType;
 import net.es.oscars.dto.pss.EthJunctionType;
 import net.es.oscars.dto.pss.EthPipeType;
