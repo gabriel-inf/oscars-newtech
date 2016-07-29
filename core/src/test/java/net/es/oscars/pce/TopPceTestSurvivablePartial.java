@@ -176,6 +176,9 @@ public class TopPceTestSurvivablePartial
         assert (allResEthPipes.size() == 1);
         assert (allResMplsPipes.size() == 2);
 
+        boolean usedEro1 = false;
+        boolean usedEro2 = false;
+
         // Ethernet Pipes
         for(ReservedEthPipeE ethPipe : allResEthPipes)
         {
@@ -260,7 +263,21 @@ public class TopPceTestSurvivablePartial
             assert (theFix.getReservedBandwidth().getEgBandwidth().equals(azBW));
             assert (actualAzERO.equals(expectedAzPrimaryERO) || actualAzERO.equals(expectedAzSecondaryERO));
             assert (actualZaERO.equals(expectedZaPrimaryERO) || actualZaERO.equals(expectedZaSecondaryERO));
+
+            if(actualAzERO.equals(expectedAzPrimaryERO))
+            {
+                assert(actualZaERO.equals(expectedZaPrimaryERO));
+                usedEro1 = true;
+            }
+
+            if(actualAzERO.equals(expectedAzSecondaryERO))
+            {
+                assert(actualZaERO.equals(expectedZaSecondaryERO));
+                usedEro2 = true;
+            }
         }
+
+        assert(usedEro1 && usedEro2);
 
         log.info("test 'survivablePceTest3' passed.");
     }
@@ -313,6 +330,9 @@ public class TopPceTestSurvivablePartial
         assert (allResJunctions.size() == 0);
         assert (allResEthPipes.size() == 2);
         assert (allResMplsPipes.size() == 2);
+
+        boolean usedEro1 = false;
+        boolean usedEro2 = false;
 
         // Ethernet Pipes
         for(ReservedEthPipeE ethPipe : allResEthPipes)
@@ -431,6 +451,18 @@ public class TopPceTestSurvivablePartial
 
                 assert (actualAzERO.equals(expectedAzPrimaryERO) || actualAzERO.equals(expectedAzSecondaryERO));
                 assert (actualZaERO.equals(expectedZaPrimaryERO) || actualZaERO.equals(expectedZaSecondaryERO));
+
+                if(actualAzERO.equals(expectedAzPrimaryERO))
+                {
+                    assert(actualZaERO.equals(expectedZaPrimaryERO));
+                    usedEro1 = true;
+                }
+
+                if(actualAzERO.equals(expectedAzSecondaryERO))
+                {
+                    assert(actualZaERO.equals(expectedZaSecondaryERO));
+                    usedEro2 = true;
+                }
             }
             else
             {
@@ -441,8 +473,22 @@ public class TopPceTestSurvivablePartial
 
                 assert (actualAzERO.equals(expectedAzPrimaryERO) || actualAzERO.equals(expectedAzSecondaryERO));
                 assert (actualZaERO.equals(expectedZaPrimaryERO) || actualZaERO.equals(expectedZaSecondaryERO));
+
+                if(actualAzERO.equals(expectedAzPrimaryERO))
+                {
+                    assert(actualZaERO.equals(expectedZaPrimaryERO));
+                    usedEro1 = true;
+                }
+
+                if(actualAzERO.equals(expectedAzSecondaryERO))
+                {
+                    assert(actualZaERO.equals(expectedZaSecondaryERO));
+                    usedEro2 = true;
+                }
             }
         }
+
+        assert(usedEro1 && usedEro2);
 
         log.info("test 'survivablePceTest4' passed.");
     }
@@ -496,6 +542,9 @@ public class TopPceTestSurvivablePartial
         assert (allResEthPipes.size() == 0);
         assert (allResMplsPipes.size() == 2);
 
+        boolean usedEro1 = false;
+        boolean usedEro2 = false;
+
         String expectedAzERO1 = "nodeK-nodeK:1-nodeL:1-nodeL-nodeL:3-nodeP:1-nodeP-nodeP:2-nodeQ:1-nodeQ";
         String expectedZaERO1 = "nodeQ-nodeQ:1-nodeP:2-nodeP-nodeP:1-nodeL:3-nodeL-nodeL:1-nodeK:1-nodeK";
         String expectedAzERO2 = "nodeK-nodeK:2-nodeM:1-nodeM-nodeM:3-nodeR:1-nodeR-nodeR:3-nodeQ:2-nodeQ";
@@ -541,7 +590,21 @@ public class TopPceTestSurvivablePartial
             assert (zFix.getReservedBandwidth().getEgBandwidth().equals(azBW));
             assert (actualAzERO.equals(expectedAzERO1) || actualAzERO.equals(expectedAzERO2));
             assert (actualZaERO.equals(expectedZaERO1) || actualZaERO.equals(expectedZaERO2));
+
+            if(actualAzERO.equals(expectedAzERO1))
+            {
+                assert(actualZaERO.equals(expectedZaERO1));
+                usedEro1 = true;
+            }
+
+            if(actualAzERO.equals(expectedAzERO2))
+            {
+                assert(actualZaERO.equals(expectedZaERO2));
+                usedEro2 = true;
+            }
         }
+
+        assert(usedEro1 && usedEro2);
 
         log.info("test 'survivablePceTest4_2' passed.");
     }
@@ -594,6 +657,9 @@ public class TopPceTestSurvivablePartial
         assert (allResJunctions.size() == 0);
         assert (allResEthPipes.size() == 2);
         assert (allResMplsPipes.size() == 2);
+
+        boolean usedEro1 = false;
+        boolean usedEro2 = false;
 
         // Ethernet Pipes
         for(ReservedEthPipeE ethPipe : allResEthPipes)
@@ -697,7 +763,21 @@ public class TopPceTestSurvivablePartial
 
             assert (actualAzERO.equals(expectedAzPrimaryERO) || actualAzERO.equals(expectedAzSecondaryERO));
             assert (actualZaERO.equals(expectedZaPrimaryERO) || actualZaERO.equals(expectedZaSecondaryERO));
+
+            if(actualAzERO.equals(expectedAzPrimaryERO))
+            {
+                assert(actualZaERO.equals(expectedZaPrimaryERO));
+                usedEro1 = true;
+            }
+
+            if(actualAzERO.equals(expectedAzSecondaryERO))
+            {
+                assert(actualZaERO.equals(expectedZaSecondaryERO));
+                usedEro2 = true;
+            }
         }
+
+        assert(usedEro1 && usedEro2);
 
         log.info("test 'survivablePceTest5' passed.");
     }
@@ -1175,6 +1255,8 @@ public class TopPceTestSurvivablePartial
         assert (allResEthPipes.size() == 0);
         assert (allResMplsPipes.size() == 2);
 
+        boolean usedEro1 = false;
+        boolean usedEro2 = false;
 
         // Mpls Pipes
         for(ReservedMplsPipeE mplsPipe : allResMplsPipes)
@@ -1223,7 +1305,21 @@ public class TopPceTestSurvivablePartial
 
             assert (actualAzERO.equals(expectedAzERO1) || actualAzERO.equals(expectedAzERO2));
             assert (actualZaERO.equals(expectedZaERO1) || actualZaERO.equals(expectedZaERO2));
+
+            if(actualAzERO.equals(expectedAzERO1))
+            {
+                assert(actualZaERO.equals(expectedZaERO1));
+                usedEro1 = true;
+            }
+
+            if(actualAzERO.equals(expectedAzERO2))
+            {
+                assert(actualZaERO.equals(expectedZaERO2));
+                usedEro2 = true;
+            }
         }
+
+        assert(usedEro1 && usedEro2);
 
         log.info("test 'survivablePceTest13' passed.");
     }
