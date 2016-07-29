@@ -144,7 +144,11 @@ public class TranslationPCE {
             }
         }
         Map<TopoVertex, ReservedVlanJunctionE> junctionMap = new HashMap<>();
-        reserveEntities(reqPipe, azERO, zaERO, sched, urnMap, requestedBandwidthMap, chosenVlanMap, reservedEthPipes,
+
+        List<Map<Layer, List<TopoVertex>>> azSegments = PCEAssistant.decompose(azERO);
+        List<Map<Layer, List<TopoVertex>>> zaSegments = PCEAssistant.decompose(zaERO);
+
+        reserveEntities(reqPipe, azSegments, zaSegments, sched, urnMap, requestedBandwidthMap, chosenVlanMap, reservedEthPipes,
                 reservedMplsPipes, junctionMap);
 
     }
@@ -176,11 +180,23 @@ public class TranslationPCE {
         }
 
         Map<TopoVertex, ReservedVlanJunctionE> junctionMap = new HashMap<>();
+        List<List<Map<Layer, List<TopoVertex>>>> allAzSegments = new ArrayList<>();
+        for(List<TopoEdge> ero : azEROs){
+            List<Map<Layer, List<TopoVertex>>> segments = PCEAssistant.decompose(ero);
+            allAzSegments.add(segments.stream().distinct().collect(Collectors.toList()));
+        }
+        List<List<Map<Layer, List<TopoVertex>>>> allZaSegments = new ArrayList<>();
+        for(List<TopoEdge> ero : zaEROs){
+            List<Map<Layer, List<TopoVertex>>> segments = PCEAssistant.decompose(ero);
+            allZaSegments.add(segments.stream().distinct().collect(Collectors.toList()));
+        }
 
         for(Integer pairIndex = 0; pairIndex < azEROs.size(); pairIndex++){
-            List<TopoEdge> azERO = azEROs.get(pairIndex);
-            List<TopoEdge> zaERO = zaEROs.get(pairIndex);
-            reserveEntities(reqPipe, azERO, zaERO, sched, urnMap, requestedBandwidthMap, chosenVlanMap, reservedEthPipes,
+
+            List<Map<Layer, List<TopoVertex>>> azSegments = allAzSegments.get(pairIndex);
+            List<Map<Layer, List<TopoVertex>>> zaSegments = allZaSegments.get(pairIndex);
+            reserveEntities(reqPipe, azSegments, zaSegments, sched, urnMap, requestedBandwidthMap,
+                    chosenVlanMap, reservedEthPipes,
                     reservedMplsPipes, junctionMap);
         }
 
@@ -206,9 +222,9 @@ public class TranslationPCE {
         return requestedBandwidthMap;
     }
 
-    private void reserveEntities(RequestedVlanPipeE reqPipe, List<TopoEdge> azERO, List<TopoEdge> zaERO,
-                                 ScheduleSpecificationE sched, Map<String, UrnE> urnMap,
-                                 Map<TopoVertex, Map<String, Integer>> requestedBandwidthMap,
+    private void reserveEntities(RequestedVlanPipeE reqPipe, List<Map<Layer, List<TopoVertex>>> azSegments,
+                                 List<Map<Layer, List<TopoVertex>>> zaSegments, ScheduleSpecificationE sched,
+                                 Map<String, UrnE> urnMap, Map<TopoVertex, Map<String, Integer>> requestedBandwidthMap,
                                  Map<UrnE, Integer> chosenVlanMap, Set<ReservedEthPipeE> reservedEthPipes,
                                  Set<ReservedMplsPipeE> reservedMplsPipes,
                                  Map<TopoVertex, ReservedVlanJunctionE> junctionMap) throws PSSException {
@@ -222,8 +238,6 @@ public class TranslationPCE {
         reqPipeJunctions.add(reqPipe.getZJunction());
 
         // now, decompose the path
-        List<Map<Layer, List<TopoVertex>>> azSegments = PCEAssistant.decompose(azERO);
-        List<Map<Layer, List<TopoVertex>>> zaSegments = PCEAssistant.decompose(zaERO);
         assert(azSegments.size() == zaSegments.size());
 
         // for each segment:
@@ -333,7 +347,7 @@ public class TranslationPCE {
                 firstEdge = ero.get(0);
                 combinedERO.add(firstEdge);
             }
-            combinedERO.addAll(ero.subList(1, ero.size()-1));
+            combinedERO.addAll(ero.subList(1, ero.size()-1).stream().distinct().collect(Collectors.toList()));
             if(lastEdge == null){
                 lastEdge = ero.get(ero.size()-1);
             }
