@@ -180,24 +180,49 @@ public class TranslationPCE {
         }
 
         Map<TopoVertex, ReservedVlanJunctionE> junctionMap = new HashMap<>();
-        List<List<Map<Layer, List<TopoVertex>>>> allAzSegments = new ArrayList<>();
-        for(List<TopoEdge> ero : azEROs){
-            List<Map<Layer, List<TopoVertex>>> segments = PCEAssistant.decompose(ero);
-            allAzSegments.add(segments.stream().distinct().collect(Collectors.toList()));
+
+        List<List<Map<Layer, List<TopoVertex>>>> allAzSegmentLists = new ArrayList<>();
+        List<List<Map<Layer, List<TopoVertex>>>> allZaSegmentLists = new ArrayList<>();
+        for(Integer pairIndex = 0; pairIndex < azEROs.size(); pairIndex++){
+            List<TopoEdge> azEro = azEROs.get(pairIndex);
+            List<TopoEdge> zaEro = zaEROs.get(pairIndex);
+
+            List<Map<Layer, List<TopoVertex>>> azSegments = PCEAssistant.decompose(azEro);
+            List<Map<Layer, List<TopoVertex>>> zaSegments = PCEAssistant.decompose(zaEro);
+
+            List<Map<Layer, List<TopoVertex>>> azSegmentsToKeep = new ArrayList<>();
+            List<Map<Layer, List<TopoVertex>>> zaSegmentsToKeep = new ArrayList<>();
+
+            for(Integer segmentIndex = 0; segmentIndex < azSegments.size(); segmentIndex++){
+                Map<Layer, List<TopoVertex>> azSegment = azSegments.get(segmentIndex);
+                Map<Layer, List<TopoVertex>> zaSegment = zaSegments.get(zaSegments.size()-segmentIndex-1);
+                boolean unique = true;
+                for(List<Map<Layer, List<TopoVertex>>> storedAzSegmentList : allAzSegmentLists){
+                    if(storedAzSegmentList.contains(azSegment)){
+                        unique = false;
+                    }
+                }
+                if(unique){
+                    azSegmentsToKeep.add(azSegment);
+                    zaSegmentsToKeep.add(zaSegment);
+                }
+            }
+            Collections.reverse(zaSegmentsToKeep);
+            allAzSegmentLists.add(azSegmentsToKeep);
+            allZaSegmentLists.add(zaSegmentsToKeep);
         }
-        List<List<Map<Layer, List<TopoVertex>>>> allZaSegments = new ArrayList<>();
-        for(List<TopoEdge> ero : zaEROs){
-            List<Map<Layer, List<TopoVertex>>> segments = PCEAssistant.decompose(ero);
-            allZaSegments.add(segments.stream().distinct().collect(Collectors.toList()));
-        }
+
+        log.info(allAzSegmentLists.toString());
+        log.info(allZaSegmentLists.toString());
 
         for(Integer pairIndex = 0; pairIndex < azEROs.size(); pairIndex++){
-
-            List<Map<Layer, List<TopoVertex>>> azSegments = allAzSegments.get(pairIndex);
-            List<Map<Layer, List<TopoVertex>>> zaSegments = allZaSegments.get(pairIndex);
-            reserveEntities(reqPipe, azSegments, zaSegments, sched, urnMap, requestedBandwidthMap,
-                    chosenVlanMap, reservedEthPipes,
-                    reservedMplsPipes, junctionMap);
+            List<Map<Layer, List<TopoVertex>>> azSegments = allAzSegmentLists.get(pairIndex);
+            List<Map<Layer, List<TopoVertex>>> zaSegments = allZaSegmentLists.get(pairIndex);
+            if(azSegments.size() > 0 && zaSegments.size() > 0){
+                reserveEntities(reqPipe, azSegments, zaSegments, sched, urnMap, requestedBandwidthMap,
+                        chosenVlanMap, reservedEthPipes,
+                        reservedMplsPipes, junctionMap);
+            }
         }
 
     }
@@ -449,7 +474,6 @@ public class TranslationPCE {
         EthFixtureType fixType = pceAssistant.decideFixtureType(model);
 
         // Create the set of Reserved Fixtures by filtering for requested junctions that match the URN
-        log.info(requestedJunctions.stream().filter(reqJunction -> reqJunction.getDeviceUrn().equals(aUrn)).collect(Collectors.toList()).toString());
         Set<ReservedVlanFixtureE> reservedVlanFixtures = requestedJunctions
                 .stream()
                 .filter(reqJunction -> reqJunction.getDeviceUrn().equals(aUrn))
@@ -459,7 +483,6 @@ public class TranslationPCE {
                         reqFix.getInMbps(), reqFix.getEgMbps(), vlanMap.get(reqFix.getPortUrn()), sched))
                 .collect(Collectors.toSet());
 
-        log.info("Reserved Fixtures at " + aUrn + ": " + reservedVlanFixtures);
         // Return the Reserved Junction (with the set of reserved VLAN fixtures).
         return createReservedJunction(aUrn, new HashSet<>(),
                 reservedVlanFixtures, pceAssistant.decideJunctionType(model));
@@ -616,7 +639,6 @@ public class TranslationPCE {
             }
 
             /* Support fringe case of identical link traversal in both A->Z and Z->A direction */
-            log.info("HERE!!!");
             List<TopoEdge> sharedEdges = azERO.stream().collect(Collectors.toList());
             sharedEdges.retainAll(zaERO);
 

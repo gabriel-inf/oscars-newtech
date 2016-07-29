@@ -95,18 +95,15 @@ public class VlanService {
 
         // Get map of all reserved VLAN IDs per URN
         Map<UrnE, Set<Integer>> reservedVlanIdMap = buildReservedVlanIdMap(urnMap, reservedVlans);
-        log.info("Reserved VLAN ID Map: " + reservedVlanIdMap.toString());
 
         // Get map of all reservable VLAN IDs per URN
         Map<UrnE, Set<Integer>> reservableVlanIdMap = buildReservableVlanIdMap(urnMap);
-        log.info("Reservable VLAN ID Map: " + reservableVlanIdMap.toString());
 
         urnMap.values().stream().filter(urn -> urn.getUrnType().equals(UrnType.IFCE)).filter(urn -> urn.getReservableVlans() != null).forEach(urn -> {
             Set<Integer> availableIds = reservableVlanIdMap.get(urn);
             availableIds.removeAll(reservedVlanIdMap.get(urn));
             availableVlanIdMap.put(urn, availableIds);
         });
-        log.info("Available VLAN ID Map: " + availableVlanIdMap.toString());
 
         return availableVlanIdMap;
     }
@@ -390,15 +387,12 @@ public class VlanService {
 
         // Get the VLANs available across the AZ/ZA path
         Set<Integer> availableVlansAcrossPath = findAvailableVlansBidirectional(azERO, zaERO, availableVlanMap, urnMap);
-        log.info("Available Vlans Across Path: " + availableVlansAcrossPath.toString());
         // Get the valid VLANs across the fixtures
         Set<Integer> availableVlansAcrossFixtures = getVlanOverlapAcrossMap(validVlanMap);
-        log.info("Available Vlans Across Fixtures: " + availableVlansAcrossFixtures.toString());
 
         // If there is any overlap between these two sets, use this ID for everything
         Set<Integer> availableEverywhere = new HashSet<>(availableVlansAcrossFixtures);
         availableEverywhere.retainAll(availableVlansAcrossPath);
-        log.info("Available Vlans Everywhere: " + availableEverywhere.toString());
         if(!availableEverywhere.isEmpty()){
             List<Integer> options = availableEverywhere.stream().sorted().collect(Collectors.toList());
             Integer chosenVlan = options.get(0);
@@ -417,7 +411,6 @@ public class VlanService {
             for (UrnE fixUrn : validVlanMap.keySet()) {
                 Set<Integer> overlappingVlans = new HashSet<>(validVlanMap.get(fixUrn));
                 overlappingVlans.retainAll(availableVlansAcrossPath);
-                log.info("Overlapping VLANs for Path and Fixture " + fixUrn + ": " + overlappingVlans.toString());
                 // If there is at least one VLAN ID in common between this fixture and the other ports in the path
                 if (!overlappingVlans.isEmpty() && !pipeVlansAssigned) {
                     pipeVlansAssigned = true;
