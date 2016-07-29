@@ -8,8 +8,8 @@ import java.util.Optional;
 public enum SurvivabilityType
 {
     SURVIVABILITY_NONE("NONE"),
-    SURVIVABILITY_PARTIAL("PARTIAL"),
-    SURVIVABILITY_TOTAL("TOTAL");
+    SURVIVABILITY_PARTIAL("PARTIAL"),       // Current implementation: MPLS-Segment survivability
+    SURVIVABILITY_TOTAL("TOTAL");           // Current implementation: End-to-End Path survivability
 
     private String code;
 

@@ -27,7 +27,8 @@ import java.util.stream.Stream;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(CoreUnitTestConfiguration.class)
 @Transactional
-public class TopPceTestSurvivable {
+public class TopPceTestSurvivableTotal
+{
 
     @Autowired
     private TopPCE topPCE;
@@ -993,4 +994,87 @@ public class TopPceTestSurvivable {
         log.info("test 'survivablePceTest13' passed.");
     }
 
+    @Test
+    public void survivablePceTest14()
+    {
+        log.info("Initializing test: 'survivablePceTest14'.");
+
+        RequestedBlueprintE requestedBlueprint;
+        Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
+        ScheduleSpecificationE requestedSched;
+
+        Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
+        Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
+
+        String srcPort = "portA";
+        String srcDevice = "nodeK";
+        String dstPort = "portZ";
+        String dstDevice = "nodeS";
+        Integer azBW = 25;
+        Integer zaBW = 25;
+        PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_TOTAL;
+        String vlan = "any";
+
+        topologyBuilder.buildMultiMplsTopo1();
+        requestedSched = testBuilder.buildSchedule(startDate, endDate);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+
+        log.info("Beginning test: 'survivablePceTest14'.");
+
+        try
+        {
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
+        }
+        catch(PCEException | PSSException pceE)
+        {
+            log.error("", pceE);
+        }
+
+        assert(!reservedBlueprint.isPresent());
+
+        log.info("test 'survivablePceTest14' passed.");
+    }
+
+    @Test
+    public void survivablePceTest15()
+    {
+        log.info("Initializing test: 'survivablePceTest15'.");
+
+        RequestedBlueprintE requestedBlueprint;
+        Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
+        ScheduleSpecificationE requestedSched;
+
+        Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
+        Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
+
+        String srcPort = "portA";
+        String srcDevice = "nodeK";
+        String dstPort = "portZ";
+        String dstDevice = "nodeT";
+        Integer azBW = 25;
+        Integer zaBW = 25;
+        PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_TOTAL;
+        String vlan = "any";
+
+        topologyBuilder.buildMultiMplsTopo2();
+        requestedSched = testBuilder.buildSchedule(startDate, endDate);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+
+        log.info("Beginning test: 'survivablePceTest15'.");
+
+        try
+        {
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
+        }
+        catch(PCEException | PSSException pceE)
+        {
+            log.error("", pceE);
+        }
+
+        assert (!reservedBlueprint.isPresent());
+
+        log.info("test 'survivablePceTest15' passed.");
+    }
 }
