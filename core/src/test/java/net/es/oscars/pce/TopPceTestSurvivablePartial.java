@@ -253,10 +253,10 @@ public class TopPceTestSurvivablePartial
             assert (zFixes.size() == 1);
             ReservedVlanFixtureE theFix = zFixes.iterator().next();
 
-            String expectedAzPrimaryERO = "nodeP-nodeP:3-nodeQ:1-nodeQ";
-            String expectedZaPrimaryERO = "nodeQ-nodeQ:1-nodeP:3-nodeP";
-            String expectedAzSecondaryERO = "nodeP-nodeP:2-nodeR:1-nodeR-nodeR:2-nodeQ:2-nodeQ";
-            String expectedZaSecondaryERO = "nodeQ-nodeQ:2-nodeR:2-nodeR-nodeR:1-nodeP:2-nodeP";
+            String expectedAzPrimaryERO = "nodeP-nodeP:2-nodeQ:1-nodeQ";
+            String expectedZaPrimaryERO = "nodeQ-nodeQ:1-nodeP:2-nodeP";
+            String expectedAzSecondaryERO = "nodeP-nodeP:3-nodeR:1-nodeR-nodeR:2-nodeQ:2-nodeQ";
+            String expectedZaSecondaryERO = "nodeQ-nodeQ:2-nodeR:2-nodeR-nodeR:1-nodeP:3-nodeP";
 
             assert (theFix.getIfceUrn().getUrn().equals("portZ"));
             assert (theFix.getReservedBandwidth().getInBandwidth().equals(zaBW));
