@@ -319,6 +319,20 @@ public class SurvivabilityPCE
         List<TopoEdge> azEROPrimary = serviceLayerTopology.getActualPrimaryERO(azServiceLayerERO);
         List<TopoEdge> azEROSecondary = serviceLayerTopology.getActualSecondaryERO(azServiceLayerERO);
 
+        // No logical edges were used in this path - Only a single non-survivable Ethernet-only ERO will be returned
+        if(azEROPrimary.equals(azEROSecondary))
+        {
+            assert(azEROPrimary.equals(azServiceLayerERO));
+
+            theMap.put("az", azServiceLayerERO);
+            theMap.put("za", zaServiceLayerERO);
+
+            log.info("AZ ERO: " + azServiceLayerERO.toString());
+            log.info("ZA ERO: " + zaServiceLayerERO.toString());
+
+            return theMap;
+        }
+
         // Get palindromic Physical-Layer path in reverse-direction
         List<TopoEdge> zaEROPrimary = new LinkedList<>();
         List<TopoEdge> zaEROSecondary = new LinkedList<>();

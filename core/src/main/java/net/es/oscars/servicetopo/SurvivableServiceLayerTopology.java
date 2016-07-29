@@ -215,6 +215,9 @@ public class SurvivableServiceLayerTopology
                 SurvivableLogicalEdge azLogicalEdge = new SurvivableLogicalEdge(nonAdjacentA,nonAdjacentZ, 0L, 0L, Layer.LOGICAL, new ArrayList<>(), new ArrayList<>());
                 SurvivableLogicalEdge zaLogicalEdge = new SurvivableLogicalEdge(nonAdjacentZ,nonAdjacentA, 0L, 0L, Layer.LOGICAL, new ArrayList<>(), new ArrayList<>());
 
+                azLogicalEdge.setMetric(0L);
+                zaLogicalEdge.setMetric(0L);
+
                 logicalLinks.add(azLogicalEdge);
                 logicalLinks.add(zaLogicalEdge);
             }
@@ -320,25 +323,28 @@ public class SurvivableServiceLayerTopology
             mplsSrcPort = physEdgeAtoMpls.getZ();
             mplsDstPort = physEdgeMplstoZ.getA();
 
-            for(TopoEdge oneSLLink : serviceLayerLinks)
+            for(TopoEdge oneMplsLink : mplsLayerLinks)
             {
-                if(oneSLLink.getA().equals(mplsSrcPort))
+                if(oneMplsLink.getA().equals(mplsSrcPort))
                 {
-                    if(oneSLLink.getZ().getVertexType().equals(VertexType.ROUTER))
+                    if(oneMplsLink.getZ().getVertexType().equals(VertexType.ROUTER))
                     {
-                        mplsSrcDevice = oneSLLink.getZ();
-                        physEdgeMplsSrcPortToDevice = oneSLLink;
+                        mplsSrcDevice = oneMplsLink.getZ();
+                        physEdgeMplsSrcPortToDevice = oneMplsLink;
                     }
                 }
-                else if(oneSLLink.getZ().equals(mplsDstPort))
+                else if(oneMplsLink.getZ().equals(mplsDstPort))
                 {
-                    if(oneSLLink.getA().getVertexType().equals(VertexType.ROUTER))
+                    if(oneMplsLink.getA().getVertexType().equals(VertexType.ROUTER))
                     {
-                        mplsDstDevice = oneSLLink.getA();
-                        physEdgeMplsDstDeviceToPort = oneSLLink;
+                        mplsDstDevice = oneMplsLink.getA();
+                        physEdgeMplsDstDeviceToPort = oneMplsLink;
                     }
                 }
             }
+
+            assert(mplsSrcDevice != null);
+            assert(mplsDstDevice != null);
 
             // Step 2: Prune the adaptation (Ethernet-MPLS) edges and ports to ensure this logical link is worth building.
             log.info("step 2: pruning adaptation (Ethernet-MPLS) edges and ports to ensure logical link is worth building.");
@@ -379,6 +385,7 @@ public class SurvivableServiceLayerTopology
                 log.info("step 3 FAILED.");
                 log.info("removing logical link from Service-Layer topology.");
                 logicalLinksToRemoveFromServiceLayer.add(oneLogicalLink);
+                log.info("HERE MAN!");
                 continue;
             }
             else if(pathPair.size() != 2)
@@ -429,6 +436,8 @@ public class SurvivableServiceLayerTopology
 
             oneLogicalLink.setMetricSecondary(weightMetricSecondary);
 
+            oneLogicalLink.setMetric(weightMetricPrimary);   // The calling function expects metric to be set. Pathfinding is done based on shortest primary path, so we use that value here
+
             log.info("step 4 COMPLETE.");
 
             // Step 5: Store the physical route corresponding to this logical link
@@ -458,6 +467,8 @@ public class SurvivableServiceLayerTopology
                     ll.getCorrespondingPrimaryTopoEdges().clear();
                     ll.getCorrespondingSecondaryTopoEdges().clear();
                     ll.setMetric(0L);
+                    ll.setMetricPrimary(0L);
+                    ll.setMetricSecondary(0L);
                 });
 
         logicalLinks.clear();
