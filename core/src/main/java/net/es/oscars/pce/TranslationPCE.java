@@ -181,50 +181,26 @@ public class TranslationPCE {
 
         Map<TopoVertex, ReservedVlanJunctionE> junctionMap = new HashMap<>();
 
-        List<List<Map<Layer, List<TopoVertex>>>> allAzSegmentLists = new ArrayList<>();
-        List<List<Map<Layer, List<TopoVertex>>>> allZaSegmentLists = new ArrayList<>();
+        Set<ReservedEthPipeE> tempEthPipes = new HashSet<>();
+        Set<ReservedMplsPipeE> tempMplsPipes = new HashSet<>();
         for(Integer pairIndex = 0; pairIndex < azEROs.size(); pairIndex++){
-            List<TopoEdge> azEro = azEROs.get(pairIndex);
-            List<TopoEdge> zaEro = zaEROs.get(pairIndex);
+            List<TopoEdge> azERO = azEROs.get(pairIndex);
+            List<TopoEdge> zaERO = zaEROs.get(pairIndex);
 
-            List<Map<Layer, List<TopoVertex>>> azSegments = PCEAssistant.decompose(azEro);
-            List<Map<Layer, List<TopoVertex>>> zaSegments = PCEAssistant.decompose(zaEro);
-
-            List<Map<Layer, List<TopoVertex>>> azSegmentsToKeep = new ArrayList<>();
-            List<Map<Layer, List<TopoVertex>>> zaSegmentsToKeep = new ArrayList<>();
-
-            for(Integer segmentIndex = 0; segmentIndex < azSegments.size(); segmentIndex++){
-                Map<Layer, List<TopoVertex>> azSegment = azSegments.get(segmentIndex);
-                Map<Layer, List<TopoVertex>> zaSegment = zaSegments.get(zaSegments.size()-segmentIndex-1);
-                boolean unique = true;
-                for(List<Map<Layer, List<TopoVertex>>> storedAzSegmentList : allAzSegmentLists){
-                    if(storedAzSegmentList.contains(azSegment)){
-                        unique = false;
-                    }
-                }
-                if(unique){
-                    azSegmentsToKeep.add(azSegment);
-                    zaSegmentsToKeep.add(zaSegment);
-                }
-            }
-            Collections.reverse(zaSegmentsToKeep);
-            allAzSegmentLists.add(azSegmentsToKeep);
-            allZaSegmentLists.add(zaSegmentsToKeep);
-        }
-
-        log.info(allAzSegmentLists.toString());
-        log.info(allZaSegmentLists.toString());
-
-        for(Integer pairIndex = 0; pairIndex < azEROs.size(); pairIndex++){
-            List<Map<Layer, List<TopoVertex>>> azSegments = allAzSegmentLists.get(pairIndex);
-            List<Map<Layer, List<TopoVertex>>> zaSegments = allZaSegmentLists.get(pairIndex);
+            List<Map<Layer, List<TopoVertex>>> azSegments = PCEAssistant.decompose(azERO);
+            List<Map<Layer, List<TopoVertex>>> zaSegments = PCEAssistant.decompose(zaERO);
             if(azSegments.size() > 0 && zaSegments.size() > 0){
                 reserveEntities(reqPipe, azSegments, zaSegments, sched, urnMap, requestedBandwidthMap,
-                        chosenVlanMap, reservedEthPipes,
-                        reservedMplsPipes, junctionMap);
+                        chosenVlanMap, tempEthPipes,
+                        tempMplsPipes, junctionMap);
             }
         }
 
+        Set<ReservedEthPipeE> filteredEthPipes = pceAssistant.filterEthPipeSet(tempEthPipes);
+        Set<ReservedMplsPipeE> filteredMplsPipes = pceAssistant.filterMplsPipeSet(tempMplsPipes);
+
+        reservedEthPipes.addAll(filteredEthPipes);
+        reservedMplsPipes.addAll(filteredMplsPipes);
     }
 
     private Map<TopoVertex, Map<String, Integer>> evaluateRequestedBandwidth(List<ReservedBandwidthE> reservedBandwidths,
@@ -298,6 +274,7 @@ public class TranslationPCE {
                     .stream()
                     .map(TopoVertex::getUrn)
                     .collect(Collectors.toList());
+
 
             TopoVertex aVertex = junctionPair.get(0);
             TopoVertex zVertex = junctionPair.get(1);

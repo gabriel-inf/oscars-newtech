@@ -1414,6 +1414,7 @@ public class TopPceTestSurvivablePartial
         Set<ReservedMplsPipeE> allResMplsPipes = reservedFlow.getMplsPipes();
         Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
 
+
         assert (allResJunctions.size() == 0);
         assert (allResEthPipes.size() == 3);
         assert (allResMplsPipes.size() == 4);

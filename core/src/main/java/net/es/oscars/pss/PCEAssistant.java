@@ -571,5 +571,59 @@ public class PCEAssistant {
     }
 
 
+    public Set<ReservedEthPipeE> filterEthPipeSet(Set<ReservedEthPipeE> pipes){
+        if(pipes.size()==1)
+            return pipes;
+        Set<ReservedEthPipeE> filteredSet = new HashSet<>();
+        Map<ReservedEthPipeE, Boolean> uniqueMap = pipes.stream().collect(Collectors.toMap(p -> p, p -> true));
+        for(ReservedEthPipeE pipe1: pipes){
+            for(ReservedEthPipeE pipe2: pipes){
+                if(compareEthPipes(pipe1, pipe2) && !pipe1.equals(pipe2)){
+                    if(uniqueMap.get(pipe1) && uniqueMap.get(pipe2)){
+                        uniqueMap.put(pipe1, false);
+                    }
+                }
+            }
+            if(uniqueMap.get(pipe1)){
+                filteredSet.add(pipe1);
+            }
+        }
+        return filteredSet;
+    }
+
+    public Set<ReservedMplsPipeE> filterMplsPipeSet(Set<ReservedMplsPipeE> pipes){
+        if(pipes.size()==1)
+            return pipes;
+        Set<ReservedMplsPipeE> filteredSet = new HashSet<>();
+        Map<ReservedMplsPipeE, Boolean> uniqueMap = pipes.stream().collect(Collectors.toMap(p -> p, p -> true));
+        for(ReservedMplsPipeE pipe1: pipes){
+            for(ReservedMplsPipeE pipe2: pipes){
+                if(compareMplsPipes(pipe1, pipe2) && !pipe1.equals(pipe2)){
+                    if(uniqueMap.get(pipe1) && uniqueMap.get(pipe2)){
+                        uniqueMap.put(pipe1, false);
+                    }
+                }
+            }
+            if(uniqueMap.get(pipe1)){
+                filteredSet.add(pipe1);
+            }
+        }
+        return filteredSet;
+    }
+
+    public boolean compareEthPipes(ReservedEthPipeE pipe1, ReservedEthPipeE pipe2){
+        return pipe1.getAJunction().equals(pipe2.getAJunction()) && pipe1.getZJunction().equals(pipe2.getZJunction())
+                && pipe1.getAzERO().equals(pipe2.getAzERO()) && pipe1.getZaERO().equals(pipe2.getZaERO())
+                && pipe1.getReservedBandwidths().equals(pipe2.getReservedBandwidths())
+                && pipe1.getReservedVlans().equals(pipe2.getReservedVlans())
+                && pipe1.getReservedPssResources().equals(pipe2.getReservedPssResources());
+    }
+
+    public boolean compareMplsPipes(ReservedMplsPipeE pipe1, ReservedMplsPipeE pipe2){
+        return pipe1.getAJunction().equals(pipe2.getAJunction()) && pipe1.getZJunction().equals(pipe2.getZJunction())
+                && pipe1.getAzERO().equals(pipe2.getAzERO()) && pipe1.getZaERO().equals(pipe2.getZaERO())
+                && pipe1.getReservedBandwidths().equals(pipe2.getReservedBandwidths())
+                && pipe1.getReservedPssResources().equals(pipe2.getReservedPssResources());
+    }
 
 }
