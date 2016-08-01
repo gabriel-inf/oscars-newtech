@@ -2,6 +2,7 @@ package net.es.oscars.pce;
 
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.CoreUnitTestConfiguration;
+import net.es.oscars.dto.spec.SurvivabilityType;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.helpers.RequestedEntityBuilder;
 import net.es.oscars.resv.ent.*;
@@ -76,11 +77,12 @@ public class TopPceTestNonPalindromic
         Integer azBW = 30;
         Integer zaBW = 30;
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         asymmTopologyBuilder.buildAsymmTopo1();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         log.info("Beginning test: 'nonPalPceSymmTest1'.");
 
@@ -114,11 +116,12 @@ public class TopPceTestNonPalindromic
         Integer azBW = 30;
         Integer zaBW = 30;
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         asymmTopologyBuilder.buildAsymmTopo2();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         log.info("Beginning test: 'nonPalPceSymmTest2'.");
 
@@ -152,11 +155,12 @@ public class TopPceTestNonPalindromic
         Integer azBW = 30;
         Integer zaBW = 30;
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         asymmTopologyBuilder.buildAsymmTopo3();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         // Update URN in/eg bandwidths for this test
         urnRepo.findAll().stream()
@@ -200,11 +204,12 @@ public class TopPceTestNonPalindromic
         Integer azBW = 30;
         Integer zaBW = 30;
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         asymmTopologyBuilder.buildAsymmTopo4();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         // Update URN in/eg bandwidths for this test
         urnRepo.findAll().stream()
@@ -248,11 +253,12 @@ public class TopPceTestNonPalindromic
         Integer azBW = 30;
         Integer zaBW = 30;
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         asymmTopologyBuilder.buildAsymmTopo5();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         // Update URN in/eg bandwidths for this test
         urnRepo.findAll().stream()
@@ -347,11 +353,12 @@ public class TopPceTestNonPalindromic
         Integer azBW = 30;
         Integer zaBW = 30;
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         asymmTopologyBuilder.buildAsymmTopo6();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         // Update URN in/eg bandwidths for this test
         urnRepo.findAll().stream()
@@ -480,11 +487,12 @@ public class TopPceTestNonPalindromic
         Integer azBW = 50;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         asymmTopologyBuilder.buildAsymmTopo1();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         log.info("Beginning test: 'nonPalPceAsymmTest1'.");
 
@@ -518,11 +526,12 @@ public class TopPceTestNonPalindromic
         Integer azBW = 50;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         asymmTopologyBuilder.buildAsymmTopo2();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         log.info("Beginning test: 'nonPalPceAsymmTest2'.");
 
@@ -556,11 +565,12 @@ public class TopPceTestNonPalindromic
         Integer azBW = 50;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         asymmTopologyBuilder.buildAsymmTopo3();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         log.info("Beginning test: 'nonPalPceAsymmTest3'.");
 
@@ -594,11 +604,12 @@ public class TopPceTestNonPalindromic
         Integer azBW = 50;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         asymmTopologyBuilder.buildAsymmTopo4();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         log.info("Beginning test: 'nonPalPceAsymmTest4'.");
 
@@ -632,11 +643,12 @@ public class TopPceTestNonPalindromic
         Integer azBW = 50;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         asymmTopologyBuilder.buildAsymmTopo5();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         log.info("Beginning test: 'nonPalPceAsymmTest5'.");
 
@@ -721,11 +733,12 @@ public class TopPceTestNonPalindromic
         Integer azBW = 50;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         asymmTopologyBuilder.buildAsymmTopo6();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         log.info("Beginning test: 'nonPalPceAsymmTest6'.");
 
@@ -845,11 +858,12 @@ public class TopPceTestNonPalindromic
         Integer azBW = 25;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         topologyBuilder.buildTopo2();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         log.info("Beginning test: 'basicPceTest2'.");
 
@@ -951,11 +965,12 @@ public class TopPceTestNonPalindromic
         Integer azBW = 25;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         topologyBuilder.buildTopo3();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         log.info("Beginning test: 'basicPceTest3'.");
 
@@ -1074,11 +1089,12 @@ public class TopPceTestNonPalindromic
         Integer azBW = 25;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         topologyBuilder.buildTopo4();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         log.info("Beginning test: 'basicPceTest4'.");
 
@@ -1248,11 +1264,12 @@ public class TopPceTestNonPalindromic
         Integer azBW = 25;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         topologyBuilder.buildTopo5();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         log.info("Beginning test: 'basicPceTest5'.");
 
@@ -1386,11 +1403,12 @@ public class TopPceTestNonPalindromic
         Integer azBW = 25;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         topologyBuilder.buildTopo7();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         log.info("Beginning test: 'basicPceTest7'.");
 
@@ -1475,11 +1493,12 @@ public class TopPceTestNonPalindromic
         Integer azBW = 25;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         topologyBuilder.buildTopo8();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         log.info("Beginning test: 'basicPceTest8'.");
 
@@ -1564,11 +1583,12 @@ public class TopPceTestNonPalindromic
         Integer azBW = 25;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         topologyBuilder.buildTopo9();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         log.info("Beginning test: 'basicPceTest9'.");
 
@@ -1653,11 +1673,12 @@ public class TopPceTestNonPalindromic
         Integer azBW = 25;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         topologyBuilder.buildTopo10();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         log.info("Beginning test: 'basicPceTest10'.");
 
@@ -1762,11 +1783,12 @@ public class TopPceTestNonPalindromic
         Integer azBW = 25;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         topologyBuilder.buildTopo11();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         log.info("Beginning test: 'basicPceTest11'.");
 
@@ -1851,11 +1873,12 @@ public class TopPceTestNonPalindromic
         Integer azBW = 25;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         topologyBuilder.buildTopo12();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         log.info("Beginning test: 'basicPceTest12'.");
 
@@ -1961,11 +1984,12 @@ public class TopPceTestNonPalindromic
         Integer azBW = 50;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         topologyBuilder.buildTopo2();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         log.info("Beginning test: 'asymmPceTest2'.");
 
@@ -2067,11 +2091,12 @@ public class TopPceTestNonPalindromic
         Integer azBW = 50;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         topologyBuilder.buildTopo3();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         log.info("Beginning test: 'asymmPceTest3'.");
 
@@ -2190,11 +2215,12 @@ public class TopPceTestNonPalindromic
         Integer azBW = 50;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         topologyBuilder.buildTopo4();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         log.info("Beginning test: 'asymmPceTest4'.");
 
@@ -2364,11 +2390,12 @@ public class TopPceTestNonPalindromic
         Integer azBW = 50;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         topologyBuilder.buildTopo5();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         log.info("Beginning test: 'asymmPceTest5'.");
 
@@ -2502,11 +2529,12 @@ public class TopPceTestNonPalindromic
         Integer azBW = 50;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         topologyBuilder.buildTopo7();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         log.info("Beginning test: 'asymmPceTest7'.");
 
@@ -2591,11 +2619,12 @@ public class TopPceTestNonPalindromic
         Integer azBW = 50;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         topologyBuilder.buildTopo8();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         log.info("Beginning test: 'asymmPceTest8'.");
 
@@ -2680,11 +2709,12 @@ public class TopPceTestNonPalindromic
         Integer azBW = 50;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         topologyBuilder.buildTopo9();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         log.info("Beginning test: 'asymmPceTest9'.");
 
@@ -2769,11 +2799,12 @@ public class TopPceTestNonPalindromic
         Integer azBW = 50;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         topologyBuilder.buildTopo10();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         log.info("Beginning test: 'asymmPceTest10'.");
 
@@ -2876,11 +2907,12 @@ public class TopPceTestNonPalindromic
         Integer azBW = 50;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         topologyBuilder.buildTopo11();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         log.info("Beginning test: 'asymmPceTest11'.");
 
@@ -2965,11 +2997,12 @@ public class TopPceTestNonPalindromic
         Integer azBW = 50;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         topologyBuilder.buildTopo12();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         log.info("Beginning test: 'asymmPceTest12'.");
 
@@ -3074,11 +3107,12 @@ public class TopPceTestNonPalindromic
         Integer azBW = 25;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         topologyBuilder.buildTopo2();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         // Modify link weights to *potentially* force NonPalindromical ERO computations //
         String linkSrc1 = "nodeM:1";
@@ -3200,11 +3234,12 @@ public class TopPceTestNonPalindromic
         Integer azBW = 25;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         topologyBuilder.buildTopo3();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         // Modify link weights to *potentially* force NonPalindromical ERO computations //
         String linkSrc1 = "nodeQ:1";
@@ -3342,11 +3377,12 @@ public class TopPceTestNonPalindromic
         Integer azBW = 25;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         topologyBuilder.buildTopo5();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         // Modify link weights to *potentially* force NonPalindromical ERO computations //
         String linkSrc1 = "nodeQ:1";
@@ -3499,11 +3535,12 @@ public class TopPceTestNonPalindromic
         Integer azBW = 25;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         topologyBuilder.buildTopo10();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         // Modify link weights to *potentially* force NonPalindromical ERO computations //
         String linkSrc1 = "nodeM:1";
@@ -3625,11 +3662,12 @@ public class TopPceTestNonPalindromic
         Integer azBW = 25;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         topologyBuilder.buildTopo11();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         // Modify link weights to *potentially* force NonPalindromical ERO computations //
         String linkSrc1 = "nodeR:1";
@@ -3734,11 +3772,12 @@ public class TopPceTestNonPalindromic
         Integer azBW = 50;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         topologyBuilder.buildSharedLinkTopo1();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         log.info("Beginning test: 'sharedLinkPceTest1'.");
 
@@ -3870,11 +3909,12 @@ public class TopPceTestNonPalindromic
         Integer azBW = 50;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         topologyBuilder.buildSharedLinkTopo2();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         log.info("Beginning test: 'sharedLinkPceTest2'.");
 
@@ -3977,11 +4017,12 @@ public class TopPceTestNonPalindromic
         Integer azBW = 50;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         topologyBuilder.buildSharedLinkTopo3();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         log.info("Beginning test: 'sharedLinkPceTest3'.");
 
@@ -4132,11 +4173,12 @@ public class TopPceTestNonPalindromic
         Integer azBW = 50;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         topologyBuilder.buildSharedLinkTopo4();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         log.info("Beginning test: 'sharedLinkPceTest4'.");
 
@@ -4268,11 +4310,12 @@ public class TopPceTestNonPalindromic
         Integer azBW = 50;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         topologyBuilder.buildTopo7MultiFix();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         log.info("Beginning test: 'multiFixtureTest'.");
 
@@ -4346,5 +4389,520 @@ public class TopPceTestNonPalindromic
         }
 
         log.info("test 'multiFixtureTest' passed.");
+    }
+
+    @Test
+    public void multiMplsPipeTestPal()
+    {
+        log.info("Initializing test: 'multiMplsPipeTestPal'.");
+
+        RequestedBlueprintE requestedBlueprint;
+        Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
+        ScheduleSpecificationE requestedSched;
+
+        Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
+        Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
+
+        List<String> srcPorts = Arrays.asList("portA");
+        List<String> dstPorts = Arrays.asList("portZ");
+        String srcDevice = "nodeK";
+        String dstDevice = "nodeT";
+        Integer azBW = 25;
+        Integer zaBW = 25;
+        PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
+        String vlan = "any";
+
+        topologyBuilder.buildMultiMplsTopo2();
+        requestedSched = testBuilder.buildSchedule(startDate, endDate);
+        requestedBlueprint = testBuilder.buildRequest(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+
+        log.info("Beginning test: 'multiMplsPipeTestPal'.");
+
+        try
+        {
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
+        }
+        catch(PCEException | PSSException pceE)
+        {
+            log.error("", pceE);
+        }
+
+        assert (reservedBlueprint.isPresent());
+
+        ReservedVlanFlowE reservedFlow = reservedBlueprint.get().getVlanFlow();
+
+        Set<ReservedEthPipeE> allResEthPipes = reservedFlow.getEthPipes();
+        Set<ReservedMplsPipeE> allResMplsPipes = reservedFlow.getMplsPipes();
+        Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
+
+        assert (allResJunctions.size() == 0);
+        assert (allResEthPipes.size() == 3);
+        assert (allResMplsPipes.size() == 2);
+
+        // Ethernet Pipes
+        for(ReservedEthPipeE ethPipe : allResEthPipes)
+        {
+            log.info("Eth Pipe: " + ethPipe.getAJunction().getDeviceUrn().getUrn() + "----" + ethPipe.getZJunction().getDeviceUrn().getUrn());
+
+            ReservedVlanJunctionE aJunc = ethPipe.getAJunction();
+            ReservedVlanJunctionE zJunc = ethPipe.getZJunction();
+            Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
+            Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
+            List<String> azERO = ethPipe.getAzERO();
+            List<String> zaERO = ethPipe.getZaERO();
+            String actualAzERO = aJunc.getDeviceUrn().getUrn() + "-";
+            String actualZaERO = zJunc.getDeviceUrn().getUrn() + "-";
+
+            for(String x : azERO)
+            {
+                actualAzERO = actualAzERO + x + "-";
+            }
+
+            for(String x : zaERO)
+            {
+                actualZaERO = actualZaERO + x + "-";
+            }
+
+            actualAzERO = actualAzERO + zJunc.getDeviceUrn();
+            actualZaERO = actualZaERO + aJunc.getDeviceUrn();
+
+            assert (aJunc.getDeviceUrn().getUrn().equals("nodeL") || aJunc.getDeviceUrn().getUrn().equals("nodeP") || aJunc.getDeviceUrn().getUrn().equals("nodeQ"));
+            assert (zJunc.getDeviceUrn().getUrn().equals("nodeP") || zJunc.getDeviceUrn().getUrn().equals("nodeQ") || zJunc.getDeviceUrn().getUrn().equals("nodeS"));
+
+            assert (aFixes.size() == 0);
+            assert (zFixes.size() == 0);
+
+            String expectedAzERO;
+            String expectedZaERO;
+
+            if(aJunc.getDeviceUrn().getUrn().equals("nodeL"))
+            {
+                assert(zJunc.getDeviceUrn().getUrn().equals("nodeP"));
+                expectedAzERO = "nodeL-nodeL:3-nodeP:1-nodeP";
+                expectedZaERO = "nodeP-nodeP:1-nodeL:3-nodeL";
+            }
+            else if(aJunc.getDeviceUrn().getUrn().equals("nodeP"))
+            {
+                assert(zJunc.getDeviceUrn().getUrn().equals("nodeQ"));
+                expectedAzERO = "nodeP-nodeP:2-nodeQ:1-nodeQ";
+                expectedZaERO = "nodeQ-nodeQ:1-nodeP:2-nodeP";
+            }
+            else
+            {
+                assert(zJunc.getDeviceUrn().getUrn().equals("nodeS"));
+                expectedAzERO = "nodeQ-nodeQ:3-nodeS:1-nodeS";
+                expectedZaERO = "nodeS-nodeS:1-nodeQ:3-nodeQ";
+            }
+
+            assert (actualAzERO.equals(expectedAzERO));
+            assert (actualZaERO.equals(expectedZaERO));
+        }
+
+        // Mpls Pipes
+        for(ReservedMplsPipeE mplsPipe : allResMplsPipes)
+        {
+            ReservedVlanJunctionE aJunc = mplsPipe.getAJunction();
+            ReservedVlanJunctionE zJunc = mplsPipe.getZJunction();
+            Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
+            Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
+            List<String> azERO = mplsPipe.getAzERO();
+            List<String> zaERO = mplsPipe.getZaERO();
+            String actualAzERO = aJunc.getDeviceUrn().getUrn() + "-";
+            String actualZaERO = zJunc.getDeviceUrn().getUrn() + "-";
+
+            for(String x : azERO)
+            {
+                actualAzERO = actualAzERO + x + "-";
+            }
+
+            for(String x : zaERO)
+            {
+                actualZaERO = actualZaERO + x + "-";
+            }
+
+            actualAzERO = actualAzERO + zJunc.getDeviceUrn();
+            actualZaERO = actualZaERO + aJunc.getDeviceUrn();
+
+            assert ((aJunc.getDeviceUrn().getUrn().equals("nodeK") && zJunc.getDeviceUrn().getUrn().equals("nodeL"))
+                    || (aJunc.getDeviceUrn().getUrn().equals("nodeS") && zJunc.getDeviceUrn().getUrn().equals("nodeT")));
+
+            if(aJunc.getDeviceUrn().getUrn().equals("nodeK"))
+            {
+                assert (aFixes.size() == 1);
+                assert (zFixes.size() == 0);
+                ReservedVlanFixtureE theFix = aFixes.iterator().next();
+
+                assert (theFix.getIfceUrn().getUrn().equals("portA"));
+                assert (theFix.getReservedBandwidth().getInBandwidth().equals(azBW));
+                assert (theFix.getReservedBandwidth().getEgBandwidth().equals(zaBW));
+
+                String expectedAzERO = "nodeK-nodeK:1-nodeL:1-nodeL";
+                String expectedZaERO = "nodeL-nodeL:1-nodeK:1-nodeK";
+
+                assert (actualAzERO.equals(expectedAzERO));
+                assert (actualZaERO.equals(expectedZaERO));
+            }
+            else
+            {
+                assert (aFixes.size() == 0);
+                assert (zFixes.size() == 1);
+                ReservedVlanFixtureE theFix = zFixes.iterator().next();
+
+                assert (theFix.getIfceUrn().getUrn().equals("portZ"));
+                assert (theFix.getReservedBandwidth().getInBandwidth().equals(zaBW));
+                assert (theFix.getReservedBandwidth().getEgBandwidth().equals(azBW));
+
+                String expectedAzERO = "nodeS-nodeS:2-nodeT:1-nodeT";
+                String expectedZaERO = "nodeT-nodeT:1-nodeS:2-nodeS";
+
+                assert (actualAzERO.equals(expectedAzERO));
+                assert (actualZaERO.equals(expectedZaERO));
+            }
+        }
+
+        log.info("test 'multiMplsPipeTestPal' passed.");
+    }
+
+    @Test
+    public void multiMplsPipeTestPalHighBW()
+    {
+        log.info("Initializing test: 'multiMplsPipeTestPalHighBW'.");
+
+        RequestedBlueprintE requestedBlueprint;
+        Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
+        ScheduleSpecificationE requestedSched;
+
+        Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
+        Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
+
+        List<String> srcPorts = Arrays.asList("portA");
+        List<String> dstPorts = Arrays.asList("portZ");
+        String srcDevice = "nodeK";
+        String dstDevice = "nodeT";
+        Integer azBW = 25;
+        Integer zaBW = 25;
+        PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
+        String vlan = "any";
+
+        asymmTopologyBuilder.buildMultiMplsTopo2();
+        requestedSched = testBuilder.buildSchedule(startDate, endDate);
+        requestedBlueprint = testBuilder.buildRequest(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+
+        log.info("Beginning test: 'multiMplsPipeTestPalHighBW'.");
+
+        try
+        {
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
+        }
+        catch(PCEException | PSSException pceE)
+        {
+            log.error("", pceE);
+        }
+
+        assert (reservedBlueprint.isPresent());
+
+        ReservedVlanFlowE reservedFlow = reservedBlueprint.get().getVlanFlow();
+
+        Set<ReservedEthPipeE> allResEthPipes = reservedFlow.getEthPipes();
+        Set<ReservedMplsPipeE> allResMplsPipes = reservedFlow.getMplsPipes();
+        Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
+
+        assert (allResJunctions.size() == 0);
+        assert (allResEthPipes.size() == 3);
+        assert (allResMplsPipes.size() == 2);
+
+        // Ethernet Pipes
+        for(ReservedEthPipeE ethPipe : allResEthPipes)
+        {
+            ReservedVlanJunctionE aJunc = ethPipe.getAJunction();
+            ReservedVlanJunctionE zJunc = ethPipe.getZJunction();
+            Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
+            Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
+            List<String> azERO = ethPipe.getAzERO();
+            List<String> zaERO = ethPipe.getZaERO();
+            String actualAzERO = aJunc.getDeviceUrn().getUrn() + "-";
+            String actualZaERO = zJunc.getDeviceUrn().getUrn() + "-";
+
+            for(String x : azERO)
+            {
+                actualAzERO = actualAzERO + x + "-";
+            }
+
+            for(String x : zaERO)
+            {
+                actualZaERO = actualZaERO + x + "-";
+            }
+
+            actualAzERO = actualAzERO + zJunc.getDeviceUrn();
+            actualZaERO = actualZaERO + aJunc.getDeviceUrn();
+
+            assert (aJunc.getDeviceUrn().getUrn().equals("nodeL") || aJunc.getDeviceUrn().getUrn().equals("nodeP") || aJunc.getDeviceUrn().getUrn().equals("nodeQ"));
+            assert (zJunc.getDeviceUrn().getUrn().equals("nodeP") || zJunc.getDeviceUrn().getUrn().equals("nodeQ") || zJunc.getDeviceUrn().getUrn().equals("nodeS"));
+
+            assert (aFixes.size() == 0);
+            assert (zFixes.size() == 0);
+
+            String expectedAzERO;
+            String expectedZaERO;
+
+            if(aJunc.getDeviceUrn().getUrn().equals("nodeL"))
+            {
+                assert(zJunc.getDeviceUrn().getUrn().equals("nodeP"));
+                expectedAzERO = "nodeL-nodeL:3-nodeP:1-nodeP";
+                expectedZaERO = "nodeP-nodeP:1-nodeL:3-nodeL";
+            }
+            else if(aJunc.getDeviceUrn().getUrn().equals("nodeP"))
+            {
+                assert(zJunc.getDeviceUrn().getUrn().equals("nodeQ"));
+                expectedAzERO = "nodeP-nodeP:2-nodeQ:1-nodeQ";
+                expectedZaERO = "nodeQ-nodeQ:1-nodeP:2-nodeP";
+            }
+            else
+            {
+                assert(zJunc.getDeviceUrn().getUrn().equals("nodeS"));
+                expectedAzERO = "nodeQ-nodeQ:3-nodeS:1-nodeS";
+                expectedZaERO = "nodeS-nodeS:1-nodeQ:3-nodeQ";
+            }
+
+            assert (actualAzERO.equals(expectedAzERO));
+            assert (actualZaERO.equals(expectedZaERO));
+        }
+
+        // Mpls Pipes
+        for(ReservedMplsPipeE mplsPipe : allResMplsPipes)
+        {
+            ReservedVlanJunctionE aJunc = mplsPipe.getAJunction();
+            ReservedVlanJunctionE zJunc = mplsPipe.getZJunction();
+            Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
+            Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
+            List<String> azERO = mplsPipe.getAzERO();
+            List<String> zaERO = mplsPipe.getZaERO();
+            String actualAzERO = aJunc.getDeviceUrn().getUrn() + "-";
+            String actualZaERO = zJunc.getDeviceUrn().getUrn() + "-";
+
+            for(String x : azERO)
+            {
+                actualAzERO = actualAzERO + x + "-";
+            }
+
+            for(String x : zaERO)
+            {
+                actualZaERO = actualZaERO + x + "-";
+            }
+
+            actualAzERO = actualAzERO + zJunc.getDeviceUrn();
+            actualZaERO = actualZaERO + aJunc.getDeviceUrn();
+
+            assert ((aJunc.getDeviceUrn().getUrn().equals("nodeK") && zJunc.getDeviceUrn().getUrn().equals("nodeL"))
+                    || (aJunc.getDeviceUrn().getUrn().equals("nodeS") && zJunc.getDeviceUrn().getUrn().equals("nodeT")));
+
+            if(aJunc.getDeviceUrn().getUrn().equals("nodeK"))
+            {
+                assert (aFixes.size() == 1);
+                assert (zFixes.size() == 0);
+                ReservedVlanFixtureE theFix = aFixes.iterator().next();
+
+                assert (theFix.getIfceUrn().getUrn().equals("portA"));
+                assert (theFix.getReservedBandwidth().getInBandwidth().equals(azBW));
+                assert (theFix.getReservedBandwidth().getEgBandwidth().equals(zaBW));
+
+                String expectedAzERO = "nodeK-nodeK:2-nodeM:1-nodeM-nodeM:2-nodeL:2-nodeL";
+                String expectedZaERO = "nodeL-nodeL:2-nodeM:2-nodeM-nodeM:1-nodeK:2-nodeK";
+
+                assert (actualAzERO.equals(expectedAzERO));
+                assert (actualZaERO.equals(expectedZaERO));
+            }
+            else
+            {
+                assert (aFixes.size() == 0);
+                assert (zFixes.size() == 1);
+                ReservedVlanFixtureE theFix = zFixes.iterator().next();
+
+                assert (theFix.getIfceUrn().getUrn().equals("portZ"));
+                assert (theFix.getReservedBandwidth().getInBandwidth().equals(zaBW));
+                assert (theFix.getReservedBandwidth().getEgBandwidth().equals(azBW));
+
+                String expectedAzERO = "nodeS-nodeS:3-nodeU:1-nodeU-nodeU:2-nodeT:2-nodeT";
+                String expectedZaERO = "nodeT-nodeT:2-nodeU:2-nodeU-nodeU:1-nodeS:3-nodeS";
+
+                assert (actualAzERO.equals(expectedAzERO));
+                assert (actualZaERO.equals(expectedZaERO));
+            }
+        }
+
+        log.info("test 'multiMplsPipeTestPalHighBW' passed.");
+    }
+
+    @Test
+    public void multiMplsPipeTestNonPal()
+    {
+        log.info("Initializing test: 'multiMplsPipeTestNonPal'.");
+
+        RequestedBlueprintE requestedBlueprint;
+        Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
+        ScheduleSpecificationE requestedSched;
+
+        Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
+        Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
+
+        List<String> srcPorts = Arrays.asList("portA");
+        List<String> dstPorts = Arrays.asList("portZ");
+        String srcDevice = "nodeK";
+        String dstDevice = "nodeT";
+        Integer azBW = 25;
+        Integer zaBW = 25;
+        PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
+        String vlan = "any";
+
+        asymmTopologyBuilder.buildMultiMplsTopo2();
+        requestedSched = testBuilder.buildSchedule(startDate, endDate);
+        requestedBlueprint = testBuilder.buildRequest(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+
+        log.info("Beginning test: 'multiMplsPipeTestNonPal'.");
+
+        try
+        {
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
+        }
+        catch(PCEException | PSSException pceE)
+        {
+            log.error("", pceE);
+        }
+
+        assert (reservedBlueprint.isPresent());
+
+        ReservedVlanFlowE reservedFlow = reservedBlueprint.get().getVlanFlow();
+
+        Set<ReservedEthPipeE> allResEthPipes = reservedFlow.getEthPipes();
+        Set<ReservedMplsPipeE> allResMplsPipes = reservedFlow.getMplsPipes();
+        Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
+
+        assert (allResJunctions.size() == 0);
+        assert (allResEthPipes.size() == 3);
+        assert (allResMplsPipes.size() == 2);
+
+        // Ethernet Pipes
+        for(ReservedEthPipeE ethPipe : allResEthPipes)
+        {
+            ReservedVlanJunctionE aJunc = ethPipe.getAJunction();
+            ReservedVlanJunctionE zJunc = ethPipe.getZJunction();
+            Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
+            Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
+            List<String> azERO = ethPipe.getAzERO();
+            List<String> zaERO = ethPipe.getZaERO();
+            String actualAzERO = aJunc.getDeviceUrn().getUrn() + "-";
+            String actualZaERO = zJunc.getDeviceUrn().getUrn() + "-";
+
+            for(String x : azERO)
+            {
+                actualAzERO = actualAzERO + x + "-";
+            }
+
+            for(String x : zaERO)
+            {
+                actualZaERO = actualZaERO + x + "-";
+            }
+
+            actualAzERO = actualAzERO + zJunc.getDeviceUrn();
+            actualZaERO = actualZaERO + aJunc.getDeviceUrn();
+
+            assert (aJunc.getDeviceUrn().getUrn().equals("nodeL") || aJunc.getDeviceUrn().getUrn().equals("nodeP") || aJunc.getDeviceUrn().getUrn().equals("nodeQ"));
+            assert (zJunc.getDeviceUrn().getUrn().equals("nodeP") || zJunc.getDeviceUrn().getUrn().equals("nodeQ") || zJunc.getDeviceUrn().getUrn().equals("nodeS"));
+
+            assert (aFixes.size() == 0);
+            assert (zFixes.size() == 0);
+
+            String expectedAzERO;
+            String expectedZaERO;
+
+            if(aJunc.getDeviceUrn().getUrn().equals("nodeL"))
+            {
+                assert(zJunc.getDeviceUrn().getUrn().equals("nodeP"));
+                expectedAzERO = "nodeL-nodeL:3-nodeP:1-nodeP";
+                expectedZaERO = "nodeP-nodeP:1-nodeL:3-nodeL";
+            }
+            else if(aJunc.getDeviceUrn().getUrn().equals("nodeP"))
+            {
+                assert(zJunc.getDeviceUrn().getUrn().equals("nodeQ"));
+                expectedAzERO = "nodeP-nodeP:2-nodeQ:1-nodeQ";
+                expectedZaERO = "nodeQ-nodeQ:1-nodeP:2-nodeP";
+            }
+            else
+            {
+                assert(zJunc.getDeviceUrn().getUrn().equals("nodeS"));
+                expectedAzERO = "nodeQ-nodeQ:3-nodeS:1-nodeS";
+                expectedZaERO = "nodeS-nodeS:1-nodeQ:3-nodeQ";
+            }
+
+            assert (actualAzERO.equals(expectedAzERO));
+            assert (actualZaERO.equals(expectedZaERO));
+        }
+
+        // Mpls Pipes
+        for(ReservedMplsPipeE mplsPipe : allResMplsPipes)
+        {
+            ReservedVlanJunctionE aJunc = mplsPipe.getAJunction();
+            ReservedVlanJunctionE zJunc = mplsPipe.getZJunction();
+            Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
+            Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
+            List<String> azERO = mplsPipe.getAzERO();
+            List<String> zaERO = mplsPipe.getZaERO();
+            String actualAzERO = aJunc.getDeviceUrn().getUrn() + "-";
+            String actualZaERO = zJunc.getDeviceUrn().getUrn() + "-";
+
+            for(String x : azERO)
+            {
+                actualAzERO = actualAzERO + x + "-";
+            }
+
+            for(String x : zaERO)
+            {
+                actualZaERO = actualZaERO + x + "-";
+            }
+
+            actualAzERO = actualAzERO + zJunc.getDeviceUrn();
+            actualZaERO = actualZaERO + aJunc.getDeviceUrn();
+
+            assert ((aJunc.getDeviceUrn().getUrn().equals("nodeK") && zJunc.getDeviceUrn().getUrn().equals("nodeL"))
+                    || (aJunc.getDeviceUrn().getUrn().equals("nodeS") && zJunc.getDeviceUrn().getUrn().equals("nodeT")));
+
+            if(aJunc.getDeviceUrn().getUrn().equals("nodeK"))
+            {
+                assert (aFixes.size() == 1);
+                assert (zFixes.size() == 0);
+                ReservedVlanFixtureE theFix = aFixes.iterator().next();
+
+                assert (theFix.getIfceUrn().getUrn().equals("portA"));
+                assert (theFix.getReservedBandwidth().getInBandwidth().equals(azBW));
+                assert (theFix.getReservedBandwidth().getEgBandwidth().equals(zaBW));
+
+                String expectedAzERO = "nodeK-nodeK:1-nodeL:1-nodeL";
+                String expectedZaERO = "nodeL-nodeL:2-nodeM:2-nodeM-nodeM:1-nodeK:2-nodeK";
+
+                assert (actualAzERO.equals(expectedAzERO));
+                assert (actualZaERO.equals(expectedZaERO));
+            }
+            else
+            {
+                assert (aFixes.size() == 0);
+                assert (zFixes.size() == 1);
+                ReservedVlanFixtureE theFix = zFixes.iterator().next();
+
+                assert (theFix.getIfceUrn().getUrn().equals("portZ"));
+                assert (theFix.getReservedBandwidth().getInBandwidth().equals(zaBW));
+                assert (theFix.getReservedBandwidth().getEgBandwidth().equals(azBW));
+
+                String expectedAzERO = "nodeS-nodeS:2-nodeT:1-nodeT";
+                String expectedZaERO = "nodeT-nodeT:2-nodeU:2-nodeU-nodeU:1-nodeS:3-nodeS";
+
+                assert (actualAzERO.equals(expectedAzERO));
+                assert (actualZaERO.equals(expectedZaERO));
+            }
+        }
+
+        log.info("test 'multiMplsPipeTestNonPal' passed.");
     }
 }

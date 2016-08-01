@@ -1,8 +1,9 @@
-package net.es.oscars.dto.bwavail;
+package net.es.oscars.bwavail.enums;
 
 
 import lombok.*;
 
+import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +39,5 @@ public class BandwidthAvailabilityResponse {
     private Integer maxAvailableBandwidth;
 
     @NonNull
-    private List<Map<Date, Integer>> bwAvailMap;
-
-
+    private Map<String, Map<Instant, Integer>> bwAvailMaps;
 }

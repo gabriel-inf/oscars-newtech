@@ -94,6 +94,42 @@ public class ReservedEntityDecomposer {
         return decomposePipeElements(pipe.getAJunction(), pipe.getZJunction(), pipe.getAzERO(), pipe.getZaERO(), urnMap);
     }
 
+    public List<UrnE> decomposeEthPipeIntoAzEROList(ReservedEthPipeE pipe){
+        List<UrnE> urns = urnRepo.findAll();
+        Map<String, UrnE> urnMap = buildUrnMap(urns);
+        return pipe.getAzERO().stream().filter(urnMap::containsKey).map(urnMap::get).collect(Collectors.toList());
+    }
+
+    // Only retrieve the EROs
+
+    public List<UrnE> decomposeEthPipeIntoAzEROList(ReservedMplsPipeE pipe){
+        List<UrnE> urns = urnRepo.findAll();
+        return decomposeEthPipeIntoAzEROList(pipe, urns);
+    }
+
+    public List<UrnE> decomposeEthPipeIntoZaEROList(ReservedMplsPipeE pipe){
+        List<UrnE> urns = urnRepo.findAll();
+        return decomposeEthPipeIntoZaEROList(pipe, urns);
+    }
+
+    public List<UrnE> decomposeEthPipeIntoAzEROList(ReservedMplsPipeE pipe, List<UrnE> urns){
+        Map<String, UrnE> urnMap = buildUrnMap(urns);
+        return decomposeEthPipeIntoAzEROList(pipe, urnMap);
+    }
+
+    public List<UrnE> decomposeEthPipeIntoZaEROList(ReservedMplsPipeE pipe, List<UrnE> urns){
+        Map<String, UrnE> urnMap = buildUrnMap(urns);
+        return decomposeEthPipeIntoZaEROList(pipe, urnMap);
+    }
+
+    public List<UrnE> decomposeEthPipeIntoAzEROList(ReservedMplsPipeE pipe, Map<String, UrnE> urnMap){
+        return pipe.getAzERO().stream().filter(urnMap::containsKey).map(urnMap::get).collect(Collectors.toList());
+    }
+
+    public List<UrnE> decomposeEthPipeIntoZaEROList(ReservedMplsPipeE pipe, Map<String, UrnE> urnMap){
+        return pipe.getZaERO().stream().filter(urnMap::containsKey).map(urnMap::get).collect(Collectors.toList());
+    }
+
     /*
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         Decomposing Reserved MPLS Pipe
@@ -129,6 +165,35 @@ public class ReservedEntityDecomposer {
      */
     public Set<UrnE> decomposeMplsPipe(ReservedMplsPipeE pipe, Map<String, UrnE> urnMap){
         return decomposePipeElements(pipe.getAJunction(), pipe.getZJunction(), pipe.getAzERO(), pipe.getZaERO(), urnMap);
+    }
+
+    // Only retrieve the EROs
+    public List<UrnE> decomposeMplsPipeIntoAzEROList(ReservedMplsPipeE pipe){
+        List<UrnE> urns = urnRepo.findAll();
+        return decomposeMplsPipeIntoAzEROList(pipe, urns);
+    }
+
+    public List<UrnE> decomposeMplsPipeIntoZaEROList(ReservedMplsPipeE pipe){
+        List<UrnE> urns = urnRepo.findAll();
+        return decomposeMplsPipeIntoZaEROList(pipe, urns);
+    }
+
+    public List<UrnE> decomposeMplsPipeIntoAzEROList(ReservedMplsPipeE pipe, List<UrnE> urns){
+        Map<String, UrnE> urnMap = buildUrnMap(urns);
+        return decomposeMplsPipeIntoAzEROList(pipe, urnMap);
+    }
+
+    public List<UrnE> decomposeMplsPipeIntoZaEROList(ReservedMplsPipeE pipe, List<UrnE> urns){
+        Map<String, UrnE> urnMap = buildUrnMap(urns);
+        return decomposeMplsPipeIntoZaEROList(pipe, urnMap);
+    }
+
+    public List<UrnE> decomposeMplsPipeIntoAzEROList(ReservedMplsPipeE pipe, Map<String, UrnE> urnMap){
+        return pipe.getAzERO().stream().filter(urnMap::containsKey).map(urnMap::get).collect(Collectors.toList());
+    }
+
+    public List<UrnE> decomposeMplsPipeIntoZaEROList(ReservedMplsPipeE pipe, Map<String, UrnE> urnMap){
+        return pipe.getZaERO().stream().filter(urnMap::containsKey).map(urnMap::get).collect(Collectors.toList());
     }
 
     /*

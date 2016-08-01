@@ -139,7 +139,6 @@ public class BandwidthService {
             availBw.put("Ingress", Math.max(bandwidth.getIngressBw() - sumIngress, 0));
             availBw.put("Egress", Math.max(bandwidth.getEgressBw() - sumEgress, 0));
         }
-        log.info("Available Bandwidth: " + availBw.toString());
         return availBw;
     }
 

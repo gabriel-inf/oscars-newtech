@@ -2,6 +2,7 @@ package net.es.oscars;
 
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.spec.PalindromicType;
+import net.es.oscars.dto.spec.SurvivabilityType;
 import net.es.oscars.topo.dao.UrnRepository;
 import net.es.oscars.pce.PCEException;
 import net.es.oscars.pss.PSSException;
@@ -98,6 +99,7 @@ public class SpecPopTest {
                 .azMbps(1000)
                 .zaMbps(1000)
                 .eroPalindromic(PalindromicType.PALINDROME)
+                .eroSurvivability(SurvivabilityType.SURVIVABILITY_NONE)
                 .pipeType(EthPipeType.REQUESTED)
                 .build();
 

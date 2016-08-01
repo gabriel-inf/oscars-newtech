@@ -1,15 +1,18 @@
 package net.es.oscars.pce;
 
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.resv.ent.*;
-import net.es.oscars.servicetopo.LogicalEdge;
+import net.es.oscars.resv.ent.RequestedVlanPipeE;
+import net.es.oscars.resv.ent.ReservedBandwidthE;
+import net.es.oscars.resv.ent.ReservedVlanE;
+import net.es.oscars.resv.ent.ScheduleSpecificationE;
 import net.es.oscars.servicetopo.ServiceLayerTopology;
 import net.es.oscars.topo.beans.TopoEdge;
 import net.es.oscars.topo.beans.TopoVertex;
 import net.es.oscars.topo.beans.Topology;
 import net.es.oscars.topo.dao.UrnRepository;
 import net.es.oscars.topo.ent.UrnE;
-import net.es.oscars.topo.enums.*;
+import net.es.oscars.topo.enums.Layer;
+import net.es.oscars.topo.enums.VertexType;
 import net.es.oscars.topo.svc.TopoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -153,15 +156,8 @@ public class NonPalindromicalPCE
             throw new PCEException("Empty path NonPalindromic PCE");
         }
 
-        // Get symmetric Service-Layer path in reverse-direction
+        // Get palindromic Service-Layer path in reverse-direction
         List<TopoEdge> zaServiceLayerERO = new LinkedList<>();
-
-        serviceLayerTopology.getLogicalLinks().stream()
-                .filter(l -> l.getA().getUrn().equals("nodeM:2") || l.getA().getUrn().equals("nodeL:2"))
-                .filter(l -> l.getZ().getUrn().equals("nodeM:2") || l.getZ().getUrn().equals("nodeL:2"))
-                .forEach(l -> { log.info("Link (" + l.getA().getUrn() + "," + l.getZ().getUrn() + "):");
-                    l.getCorrespondingAZTopoEdges().stream().forEach(ll -> log.info(ll.getA().getUrn() + "-->" + ll.getZ().getUrn() + "metric=" + ll.getMetric()));
-                });
 
         // 1. Reverse the links
         for(TopoEdge azEdge : azServiceLayerERO)
@@ -191,18 +187,6 @@ public class NonPalindromicalPCE
         // Obtain physical ERO from Service-Layer EROs
         azERO = serviceLayerTopology.getActualEROAZ(azServiceLayerERO);
         zaERO = serviceLayerTopology.getActualEROZA(zaServiceLayerERO);
-
-        String loggingAZ = "azERO: ";
-        for(TopoEdge oneURN : azERO)
-            loggingAZ = loggingAZ + oneURN.getA().getUrn() + "-";
-        loggingAZ = loggingAZ + azERO.get(azERO.size()-1).getZ().getUrn();
-        log.info(loggingAZ);
-
-        String loggingZA = "zaERO: ";
-        for(TopoEdge oneURN : zaERO)
-            loggingZA = loggingZA + oneURN.getA().getUrn() + "-";
-        loggingZA = loggingZA + zaERO.get(zaERO.size()-1).getZ().getUrn();
-        log.info(loggingZA);
 
         theMap.put("az", azERO);
         theMap.put("za", zaERO);

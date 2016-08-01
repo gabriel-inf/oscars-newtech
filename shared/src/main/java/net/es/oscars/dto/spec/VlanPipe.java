@@ -38,6 +38,9 @@ public class VlanPipe {
     @NonNull
     private PalindromicType palindromic;
 
+    @NonNull
+    private SurvivabilityType survivability;
+
     private Set<String> resourceIds;
 
 }

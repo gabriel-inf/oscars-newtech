@@ -3,6 +3,7 @@ package net.es.oscars.resv.ent;
 import lombok.*;
 import net.es.oscars.dto.pss.EthPipeType;
 import net.es.oscars.dto.spec.PalindromicType;
+import net.es.oscars.dto.spec.SurvivabilityType;
 
 import javax.persistence.*;
 import java.util.List;
@@ -44,6 +45,9 @@ public class RequestedVlanPipeE {
 
     @NonNull
     private PalindromicType eroPalindromic;
+
+    @NonNull
+    private SurvivabilityType eroSurvivability;
 
     @NonNull
     private final String uniqueID = UUID.randomUUID().toString();

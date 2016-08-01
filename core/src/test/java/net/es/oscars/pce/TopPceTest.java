@@ -2,6 +2,7 @@ package net.es.oscars.pce;
 
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.CoreUnitTestConfiguration;
+import net.es.oscars.dto.spec.SurvivabilityType;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.helpers.RequestedEntityBuilder;
 import net.es.oscars.resv.ent.*;
@@ -30,7 +31,8 @@ import java.util.stream.Stream;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(CoreUnitTestConfiguration.class)
 @Transactional
-public class TopPceTest {
+public class TopPceTest
+{
     @Autowired
     private TopPCE topPCE;
 
@@ -40,12 +42,10 @@ public class TopPceTest {
     @Autowired
     private TopologyBuilder topologyBuilder;
 
-    @Autowired
-    private RequestedEntityBuilder requestBuilder;
-
 
     @Test
-    public void basicPceTest1() {
+    public void basicPceTest1()
+    {
         log.info("Initializing test: 'basicPceTest1'.");
 
         RequestedBlueprintE requestedBlueprint;
@@ -67,9 +67,12 @@ public class TopPceTest {
 
         log.info("Beginning test: 'basicPceTest1'.");
 
-        try {
+        try
+        {
             reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
-        } catch (PCEException | PSSException pceE) {
+        }
+        catch(PCEException | PSSException pceE)
+        {
             log.error("", pceE);
         }
 
@@ -86,7 +89,8 @@ public class TopPceTest {
         assert (allResMplsPipes.size() == 0);
 
         // Junctions
-        for (ReservedVlanJunctionE oneJunc : allResJunctions) {
+        for(ReservedVlanJunctionE oneJunc : allResJunctions)
+        {
             assert (oneJunc.getDeviceUrn().getUrn().equals("nodeK"));
 
             Iterator<ReservedVlanFixtureE> iterF = oneJunc.getFixtures().iterator();
@@ -105,7 +109,8 @@ public class TopPceTest {
     }
 
     @Test
-    public void basicPceTest2() {
+    public void basicPceTest2()
+    {
         log.info("Initializing test: 'basicPceTest2'.");
 
         RequestedBlueprintE requestedBlueprint;
@@ -122,17 +127,21 @@ public class TopPceTest {
         Integer azBW = 25;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         topologyBuilder.buildTopo2();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         log.info("Beginning test: 'basicPceTest2'.");
 
-        try {
+        try
+        {
             reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
-        } catch (PCEException | PSSException pceE) {
+        }
+        catch(PCEException | PSSException pceE)
+        {
             log.error("", pceE);
         }
 
@@ -149,7 +158,8 @@ public class TopPceTest {
         assert (allResMplsPipes.size() == 0);
 
         // Ethernet Pipes
-        for (ReservedEthPipeE ethPipe : allResEthPipes) {
+        for(ReservedEthPipeE ethPipe : allResEthPipes)
+        {
             ReservedVlanJunctionE aJunc = ethPipe.getAJunction();
             ReservedVlanJunctionE zJunc = ethPipe.getZJunction();
             Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
@@ -159,11 +169,15 @@ public class TopPceTest {
             String actualAzERO = aJunc.getDeviceUrn().getUrn() + "-";
             String actualZaERO = zJunc.getDeviceUrn().getUrn() + "-";
 
-            for (String x : azERO)
+            for(String x : azERO)
+            {
                 actualAzERO = actualAzERO + x + "-";
+            }
 
-            for (String x : zaERO)
+            for(String x : zaERO)
+            {
                 actualZaERO = actualZaERO + x + "-";
+            }
 
             actualAzERO = actualAzERO + zJunc.getDeviceUrn();
             actualZaERO = actualZaERO + aJunc.getDeviceUrn();
@@ -171,7 +185,8 @@ public class TopPceTest {
             assert (aJunc.getDeviceUrn().getUrn().equals("nodeP") || aJunc.getDeviceUrn().getUrn().equals("nodeL"));
             assert (zJunc.getDeviceUrn().getUrn().equals("nodeL") || zJunc.getDeviceUrn().getUrn().equals("nodeM"));
 
-            if (aJunc.getDeviceUrn().getUrn().equals("nodeP")) {
+            if(aJunc.getDeviceUrn().getUrn().equals("nodeP"))
+            {
                 assert (aFixes.size() == 1);
                 assert (zFixes.size() == 0);
                 ReservedVlanFixtureE theFix = aFixes.iterator().next();
@@ -185,7 +200,9 @@ public class TopPceTest {
                 assert (theFix.getReservedBandwidth().getEgBandwidth().equals(zaBW));
                 assert (actualAzERO.equals(expectedAzERO));
                 assert (actualZaERO.equals(expectedZaERO));
-            } else {
+            }
+            else
+            {
                 assert (aFixes.size() == 0);
                 assert (zFixes.size() == 1);
                 ReservedVlanFixtureE theFix = zFixes.iterator().next();
@@ -206,7 +223,8 @@ public class TopPceTest {
     }
 
     @Test
-    public void basicPceTest3() {
+    public void basicPceTest3()
+    {
         log.info("Initializing test: 'basicPceTest3'.");
 
         RequestedBlueprintE requestedBlueprint;
@@ -223,17 +241,21 @@ public class TopPceTest {
         Integer azBW = 25;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         topologyBuilder.buildTopo3();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         log.info("Beginning test: 'basicPceTest3'.");
 
-        try {
+        try
+        {
             reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
-        } catch (PCEException | PSSException pceE) {
+        }
+        catch(PCEException | PSSException pceE)
+        {
             log.error("", pceE);
         }
 
@@ -250,7 +272,8 @@ public class TopPceTest {
         assert (allResMplsPipes.size() == 1);
 
         // Ethernet Pipes
-        for (ReservedEthPipeE ethPipe : allResEthPipes) {
+        for(ReservedEthPipeE ethPipe : allResEthPipes)
+        {
             ReservedVlanJunctionE aJunc = ethPipe.getAJunction();
             ReservedVlanJunctionE zJunc = ethPipe.getZJunction();
             Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
@@ -260,11 +283,15 @@ public class TopPceTest {
             String actualAzERO = aJunc.getDeviceUrn().getUrn() + "-";
             String actualZaERO = zJunc.getDeviceUrn().getUrn() + "-";
 
-            for (String x : azERO)
+            for(String x : azERO)
+            {
                 actualAzERO = actualAzERO + x + "-";
+            }
 
-            for (String x : zaERO)
+            for(String x : zaERO)
+            {
                 actualZaERO = actualZaERO + x + "-";
+            }
 
             actualAzERO = actualAzERO + zJunc.getDeviceUrn();
             actualZaERO = actualZaERO + aJunc.getDeviceUrn();
@@ -286,7 +313,8 @@ public class TopPceTest {
         }
 
         // Mpls Pipes
-        for (ReservedMplsPipeE mplsPipe : allResMplsPipes) {
+        for(ReservedMplsPipeE mplsPipe : allResMplsPipes)
+        {
             ReservedVlanJunctionE aJunc = mplsPipe.getAJunction();
             ReservedVlanJunctionE zJunc = mplsPipe.getZJunction();
             Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
@@ -296,11 +324,15 @@ public class TopPceTest {
             String actualAzERO = aJunc.getDeviceUrn().getUrn() + "-";
             String actualZaERO = zJunc.getDeviceUrn().getUrn() + "-";
 
-            for (String x : azERO)
+            for(String x : azERO)
+            {
                 actualAzERO = actualAzERO + x + "-";
+            }
 
-            for (String x : zaERO)
+            for(String x : zaERO)
+            {
                 actualZaERO = actualZaERO + x + "-";
+            }
 
             actualAzERO = actualAzERO + zJunc.getDeviceUrn();
             actualZaERO = actualZaERO + aJunc.getDeviceUrn();
@@ -325,7 +357,8 @@ public class TopPceTest {
     }
 
     @Test
-    public void basicPceTest4() {
+    public void basicPceTest4()
+    {
         // Two possible shortest routes here!
         log.info("Initializing test: 'basicPceTest4'.");
 
@@ -343,17 +376,21 @@ public class TopPceTest {
         Integer azBW = 25;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         topologyBuilder.buildTopo4();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         log.info("Beginning test: 'basicPceTest4'.");
 
-        try {
+        try
+        {
             reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
-        } catch (PCEException | PSSException pceE) {
+        }
+        catch(PCEException | PSSException pceE)
+        {
             log.error("", pceE);
         }
 
@@ -370,7 +407,8 @@ public class TopPceTest {
         assert (allResMplsPipes.size() == 1);
 
         // Ethernet Pipes
-        for (ReservedEthPipeE ethPipe : allResEthPipes) {
+        for(ReservedEthPipeE ethPipe : allResEthPipes)
+        {
             ReservedVlanJunctionE aJunc = ethPipe.getAJunction();
             ReservedVlanJunctionE zJunc = ethPipe.getZJunction();
             Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
@@ -380,11 +418,15 @@ public class TopPceTest {
             String actualAzERO = aJunc.getDeviceUrn().getUrn() + "-";
             String actualZaERO = zJunc.getDeviceUrn().getUrn() + "-";
 
-            for (String x : azERO)
+            for(String x : azERO)
+            {
                 actualAzERO = actualAzERO + x + "-";
+            }
 
-            for (String x : zaERO)
+            for(String x : zaERO)
+            {
                 actualZaERO = actualZaERO + x + "-";
+            }
 
             actualAzERO = actualAzERO + zJunc.getDeviceUrn();
             actualZaERO = actualZaERO + aJunc.getDeviceUrn();
@@ -392,7 +434,8 @@ public class TopPceTest {
             assert (aJunc.getDeviceUrn().getUrn().equals("nodeK") || aJunc.getDeviceUrn().getUrn().equals("nodeL") || aJunc.getDeviceUrn().getUrn().equals("nodeM"));
             assert (zJunc.getDeviceUrn().getUrn().equals("nodeL") || zJunc.getDeviceUrn().getUrn().equals("nodeM") || zJunc.getDeviceUrn().getUrn().equals("nodeP") || zJunc.getDeviceUrn().getUrn().equals("nodeR"));
 
-            if (aJunc.getDeviceUrn().getUrn().equals("nodeK")) {
+            if(aJunc.getDeviceUrn().getUrn().equals("nodeK"))
+            {
                 assert (aFixes.size() == 1);
                 assert (zFixes.size() == 0);
                 ReservedVlanFixtureE theFix = aFixes.iterator().next();
@@ -408,7 +451,9 @@ public class TopPceTest {
                 assert (theFix.getReservedBandwidth().getEgBandwidth().equals(zaBW));
                 assert (actualAzERO.equals(expectedAzERO1) || actualAzERO.equals(expectedAzERO2));
                 assert (actualZaERO.equals(expectedZaERO1) || actualZaERO.equals(expectedZaERO2));
-            } else if (aJunc.getDeviceUrn().getUrn().equals("nodeL")) {
+            }
+            else if(aJunc.getDeviceUrn().getUrn().equals("nodeL"))
+            {
                 assert (aFixes.size() == 0);
                 assert (zFixes.size() == 0);
 
@@ -418,7 +463,9 @@ public class TopPceTest {
                 assert (zJunc.getDeviceUrn().getUrn().equals("nodeP"));
                 assert (actualAzERO.equals(expectedAzERO));
                 assert (actualZaERO.equals(expectedZaERO));
-            } else {
+            }
+            else
+            {
                 assert (aFixes.size() == 0);
                 assert (zFixes.size() == 0);
 
@@ -432,7 +479,8 @@ public class TopPceTest {
         }
 
         // Mpls Pipes
-        for (ReservedMplsPipeE mplsPipe : allResMplsPipes) {
+        for(ReservedMplsPipeE mplsPipe : allResMplsPipes)
+        {
             ReservedVlanJunctionE aJunc = mplsPipe.getAJunction();
             ReservedVlanJunctionE zJunc = mplsPipe.getZJunction();
             Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
@@ -442,11 +490,15 @@ public class TopPceTest {
             String actualAzERO = aJunc.getDeviceUrn().getUrn() + "-";
             String actualZaERO = zJunc.getDeviceUrn().getUrn() + "-";
 
-            for (String x : azERO)
+            for(String x : azERO)
+            {
                 actualAzERO = actualAzERO + x + "-";
+            }
 
-            for (String x : zaERO)
+            for(String x : zaERO)
+            {
                 actualZaERO = actualZaERO + x + "-";
+            }
 
             actualAzERO = actualAzERO + zJunc.getDeviceUrn();
             actualZaERO = actualZaERO + aJunc.getDeviceUrn();
@@ -454,7 +506,8 @@ public class TopPceTest {
             assert (aJunc.getDeviceUrn().getUrn().equals("nodeP") || aJunc.getDeviceUrn().getUrn().equals("nodeR"));
             assert (zJunc.getDeviceUrn().getUrn().equals("nodeQ"));
 
-            if (aJunc.getDeviceUrn().getUrn().equals("nodeP")) {
+            if(aJunc.getDeviceUrn().getUrn().equals("nodeP"))
+            {
                 assert (aFixes.size() == 0);
                 assert (zFixes.size() == 1);
                 ReservedVlanFixtureE theFix = zFixes.iterator().next();
@@ -468,7 +521,9 @@ public class TopPceTest {
                 assert (theFix.getReservedBandwidth().getEgBandwidth().equals(azBW));
                 assert (actualAzERO.equals(expectedAzERO));
                 assert (actualZaERO.equals(expectedZaERO));
-            } else {
+            }
+            else
+            {
                 assert (aFixes.size() == 0);
                 assert (zFixes.size() == 1);
                 ReservedVlanFixtureE theFix = zFixes.iterator().next();
@@ -489,7 +544,8 @@ public class TopPceTest {
     }
 
     @Test
-    public void basicPceTest5() {
+    public void basicPceTest5()
+    {
         log.info("Initializing test: 'basicPceTest5'.");
 
         RequestedBlueprintE requestedBlueprint;
@@ -506,17 +562,21 @@ public class TopPceTest {
         Integer azBW = 25;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         topologyBuilder.buildTopo5();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         log.info("Beginning test: 'basicPceTest5'.");
 
-        try {
+        try
+        {
             reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
-        } catch (PCEException | PSSException pceE) {
+        }
+        catch(PCEException | PSSException pceE)
+        {
             log.error("", pceE);
         }
 
@@ -533,7 +593,8 @@ public class TopPceTest {
         assert (allResMplsPipes.size() == 1);
 
         // Ethernet Pipes
-        for (ReservedEthPipeE ethPipe : allResEthPipes) {
+        for(ReservedEthPipeE ethPipe : allResEthPipes)
+        {
             ReservedVlanJunctionE aJunc = ethPipe.getAJunction();
             ReservedVlanJunctionE zJunc = ethPipe.getZJunction();
             Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
@@ -543,11 +604,15 @@ public class TopPceTest {
             String actualAzERO = aJunc.getDeviceUrn().getUrn() + "-";
             String actualZaERO = zJunc.getDeviceUrn().getUrn() + "-";
 
-            for (String x : azERO)
+            for(String x : azERO)
+            {
                 actualAzERO = actualAzERO + x + "-";
+            }
 
-            for (String x : zaERO)
+            for(String x : zaERO)
+            {
                 actualZaERO = actualZaERO + x + "-";
+            }
 
             actualAzERO = actualAzERO + zJunc.getDeviceUrn();
             actualZaERO = actualZaERO + aJunc.getDeviceUrn();
@@ -556,7 +621,8 @@ public class TopPceTest {
             assert (aJunc.getDeviceUrn().getUrn().equals("nodeK") || aJunc.getDeviceUrn().getUrn().equals("nodeQ"));
             assert (zJunc.getDeviceUrn().getUrn().equals("nodeP") || zJunc.getDeviceUrn().getUrn().equals("nodeS"));
 
-            if (aJunc.getDeviceUrn().getUrn().equals("nodeK")) {
+            if(aJunc.getDeviceUrn().getUrn().equals("nodeK"))
+            {
                 assert (aFixes.size() == 1);
                 assert (zFixes.size() == 0);
                 ReservedVlanFixtureE theFix = aFixes.iterator().next();
@@ -570,7 +636,9 @@ public class TopPceTest {
                 assert (theFix.getReservedBandwidth().getEgBandwidth().equals(zaBW));
                 assert (actualAzERO.equals(expectedAzERO));
                 assert (actualZaERO.equals(expectedZaERO));
-            } else {
+            }
+            else
+            {
                 assert (aFixes.size() == 0);
                 assert (zFixes.size() == 1);
                 ReservedVlanFixtureE theFix = zFixes.iterator().next();
@@ -588,7 +656,8 @@ public class TopPceTest {
         }
 
         // Mpls Pipes
-        for (ReservedMplsPipeE mplsPipe : allResMplsPipes) {
+        for(ReservedMplsPipeE mplsPipe : allResMplsPipes)
+        {
             ReservedVlanJunctionE aJunc = mplsPipe.getAJunction();
             ReservedVlanJunctionE zJunc = mplsPipe.getZJunction();
             Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
@@ -598,11 +667,15 @@ public class TopPceTest {
             String actualAzERO = aJunc.getDeviceUrn().getUrn() + "-";
             String actualZaERO = zJunc.getDeviceUrn().getUrn() + "-";
 
-            for (String x : azERO)
+            for(String x : azERO)
+            {
                 actualAzERO = actualAzERO + x + "-";
+            }
 
-            for (String x : zaERO)
+            for(String x : zaERO)
+            {
                 actualZaERO = actualZaERO + x + "-";
+            }
 
             actualAzERO = actualAzERO + zJunc.getDeviceUrn();
             actualZaERO = actualZaERO + aJunc.getDeviceUrn();
@@ -621,7 +694,8 @@ public class TopPceTest {
     }
 
     @Test
-    public void basicPceTest6() {
+    public void basicPceTest6()
+    {
         log.info("Initializing test: 'basicPceTest6'.");
 
         RequestedBlueprintE requestedBlueprint;
@@ -643,9 +717,12 @@ public class TopPceTest {
 
         log.info("Beginning test: 'basicPceTest6'.");
 
-        try {
+        try
+        {
             reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
-        } catch (PCEException | PSSException pceE) {
+        }
+        catch(PCEException | PSSException pceE)
+        {
             log.error("", pceE);
         }
 
@@ -662,7 +739,8 @@ public class TopPceTest {
         assert (allResMplsPipes.size() == 0);
 
         // Junctions
-        for (ReservedVlanJunctionE oneJunc : allResJunctions) {
+        for(ReservedVlanJunctionE oneJunc : allResJunctions)
+        {
             assert (oneJunc.getDeviceUrn().getUrn().equals("nodeP"));
 
             Iterator<ReservedVlanFixtureE> iterF = oneJunc.getFixtures().iterator();
@@ -680,7 +758,8 @@ public class TopPceTest {
     }
 
     @Test
-    public void basicPceTest7() {
+    public void basicPceTest7()
+    {
         log.info("Initializing test: 'basicPceTest7'.");
 
         RequestedBlueprintE requestedBlueprint;
@@ -697,17 +776,21 @@ public class TopPceTest {
         Integer azBW = 25;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         topologyBuilder.buildTopo7();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         log.info("Beginning test: 'basicPceTest7'.");
 
-        try {
+        try
+        {
             reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
-        } catch (PCEException | PSSException pceE) {
+        }
+        catch(PCEException | PSSException pceE)
+        {
             log.error("", pceE);
         }
 
@@ -724,7 +807,8 @@ public class TopPceTest {
         assert (allResMplsPipes.size() == 0);
 
         // Ethernet Pipes
-        for (ReservedEthPipeE ethPipe : allResEthPipes) {
+        for(ReservedEthPipeE ethPipe : allResEthPipes)
+        {
             ReservedVlanJunctionE aJunc = ethPipe.getAJunction();
             ReservedVlanJunctionE zJunc = ethPipe.getZJunction();
             Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
@@ -734,11 +818,15 @@ public class TopPceTest {
             String actualAzERO = aJunc.getDeviceUrn().getUrn() + "-";
             String actualZaERO = zJunc.getDeviceUrn().getUrn() + "-";
 
-            for (String x : azERO)
+            for(String x : azERO)
+            {
                 actualAzERO = actualAzERO + x + "-";
+            }
 
-            for (String x : zaERO)
+            for(String x : zaERO)
+            {
                 actualZaERO = actualZaERO + x + "-";
+            }
 
             actualAzERO = actualAzERO + zJunc.getDeviceUrn();
             actualZaERO = actualZaERO + aJunc.getDeviceUrn();
@@ -767,7 +855,8 @@ public class TopPceTest {
     }
 
     @Test
-    public void basicPceTest8() {
+    public void basicPceTest8()
+    {
         log.info("Initializing test: 'basicPceTest8'.");
 
         RequestedBlueprintE requestedBlueprint;
@@ -784,17 +873,21 @@ public class TopPceTest {
         Integer azBW = 25;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         topologyBuilder.buildTopo8();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         log.info("Beginning test: 'basicPceTest8'.");
 
-        try {
+        try
+        {
             reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
-        } catch (PCEException | PSSException pceE) {
+        }
+        catch(PCEException | PSSException pceE)
+        {
             log.error("", pceE);
         }
 
@@ -811,7 +904,8 @@ public class TopPceTest {
         assert (allResMplsPipes.size() == 1);
 
         // Mpls Pipes
-        for (ReservedMplsPipeE mplsPipe : allResMplsPipes) {
+        for(ReservedMplsPipeE mplsPipe : allResMplsPipes)
+        {
             ReservedVlanJunctionE aJunc = mplsPipe.getAJunction();
             ReservedVlanJunctionE zJunc = mplsPipe.getZJunction();
             Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
@@ -821,11 +915,15 @@ public class TopPceTest {
             String actualAzERO = aJunc.getDeviceUrn().getUrn() + "-";
             String actualZaERO = zJunc.getDeviceUrn().getUrn() + "-";
 
-            for (String x : azERO)
+            for(String x : azERO)
+            {
                 actualAzERO = actualAzERO + x + "-";
+            }
 
-            for (String x : zaERO)
+            for(String x : zaERO)
+            {
                 actualZaERO = actualZaERO + x + "-";
+            }
 
             actualAzERO = actualAzERO + zJunc.getDeviceUrn();
             actualZaERO = actualZaERO + aJunc.getDeviceUrn();
@@ -854,7 +952,8 @@ public class TopPceTest {
     }
 
     @Test
-    public void basicPceTest9() {
+    public void basicPceTest9()
+    {
         log.info("Initializing test: 'basicPceTest9'.");
 
         RequestedBlueprintE requestedBlueprint;
@@ -871,17 +970,21 @@ public class TopPceTest {
         Integer azBW = 25;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         topologyBuilder.buildTopo9();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         log.info("Beginning test: 'basicPceTest9'.");
 
-        try {
+        try
+        {
             reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
-        } catch (PCEException | PSSException pceE) {
+        }
+        catch(PCEException | PSSException pceE)
+        {
             log.error("", pceE);
         }
 
@@ -898,7 +1001,8 @@ public class TopPceTest {
         assert (allResMplsPipes.size() == 0);
 
         // Ethernet Pipes
-        for (ReservedEthPipeE ethPipe : allResEthPipes) {
+        for(ReservedEthPipeE ethPipe : allResEthPipes)
+        {
             ReservedVlanJunctionE aJunc = ethPipe.getAJunction();
             ReservedVlanJunctionE zJunc = ethPipe.getZJunction();
             Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
@@ -908,11 +1012,15 @@ public class TopPceTest {
             String actualAzERO = aJunc.getDeviceUrn().getUrn() + "-";
             String actualZaERO = zJunc.getDeviceUrn().getUrn() + "-";
 
-            for (String x : azERO)
+            for(String x : azERO)
+            {
                 actualAzERO = actualAzERO + x + "-";
+            }
 
-            for (String x : zaERO)
+            for(String x : zaERO)
+            {
                 actualZaERO = actualZaERO + x + "-";
+            }
 
             actualAzERO = actualAzERO + zJunc.getDeviceUrn();
             actualZaERO = actualZaERO + aJunc.getDeviceUrn();
@@ -941,7 +1049,8 @@ public class TopPceTest {
     }
 
     @Test
-    public void basicPceTest10() {
+    public void basicPceTest10()
+    {
         log.info("Initializing test: 'basicPceTest10'.");
 
         RequestedBlueprintE requestedBlueprint;
@@ -958,17 +1067,21 @@ public class TopPceTest {
         Integer azBW = 25;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         topologyBuilder.buildTopo10();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         log.info("Beginning test: 'basicPceTest10'.");
 
-        try {
+        try
+        {
             reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
-        } catch (PCEException | PSSException pceE) {
+        }
+        catch(PCEException | PSSException pceE)
+        {
             log.error("", pceE);
         }
 
@@ -985,7 +1098,8 @@ public class TopPceTest {
         assert (allResMplsPipes.size() == 0);
 
         // Ethernet Pipes
-        for (ReservedEthPipeE ethPipe : allResEthPipes) {
+        for(ReservedEthPipeE ethPipe : allResEthPipes)
+        {
             ReservedVlanJunctionE aJunc = ethPipe.getAJunction();
             ReservedVlanJunctionE zJunc = ethPipe.getZJunction();
             Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
@@ -995,11 +1109,15 @@ public class TopPceTest {
             String actualAzERO = aJunc.getDeviceUrn().getUrn() + "-";
             String actualZaERO = zJunc.getDeviceUrn().getUrn() + "-";
 
-            for (String x : azERO)
+            for(String x : azERO)
+            {
                 actualAzERO = actualAzERO + x + "-";
+            }
 
-            for (String x : zaERO)
+            for(String x : zaERO)
+            {
                 actualZaERO = actualZaERO + x + "-";
+            }
 
             actualAzERO = actualAzERO + zJunc.getDeviceUrn();
             actualZaERO = actualZaERO + aJunc.getDeviceUrn();
@@ -1010,7 +1128,8 @@ public class TopPceTest {
             assert (aJunc.getDeviceUrn().getUrn().equals("nodeK") || aJunc.getDeviceUrn().getUrn().equals("nodeL"));
             assert (zJunc.getDeviceUrn().getUrn().equals("nodeL") || zJunc.getDeviceUrn().getUrn().equals("nodeM"));
 
-            if (aJunc.getDeviceUrn().getUrn().equals("nodeK")) {
+            if(aJunc.getDeviceUrn().getUrn().equals("nodeK"))
+            {
                 assert (aFixes.size() == 1);
                 assert (zFixes.size() == 0);
                 ReservedVlanFixtureE theFix = aFixes.iterator().next();
@@ -1024,7 +1143,9 @@ public class TopPceTest {
                 assert (theFix.getReservedBandwidth().getEgBandwidth().equals(zaBW));
                 assert (actualAzERO.equals(expectedAzERO));
                 assert (actualZaERO.equals(expectedZaERO));
-            } else {
+            }
+            else
+            {
                 assert (aFixes.size() == 0);
                 assert (zFixes.size() == 1);
                 ReservedVlanFixtureE theFix = zFixes.iterator().next();
@@ -1045,7 +1166,8 @@ public class TopPceTest {
     }
 
     @Test
-    public void basicPceTest11() {
+    public void basicPceTest11()
+    {
         log.info("Initializing test: 'basicPceTest11'.");
 
         RequestedBlueprintE requestedBlueprint;
@@ -1062,17 +1184,21 @@ public class TopPceTest {
         Integer azBW = 25;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         topologyBuilder.buildTopo11();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         log.info("Beginning test: 'basicPceTest11'.");
 
-        try {
+        try
+        {
             reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
-        } catch (PCEException | PSSException pceE) {
+        }
+        catch(PCEException | PSSException pceE)
+        {
             log.error("", pceE);
         }
 
@@ -1089,7 +1215,8 @@ public class TopPceTest {
         assert (allResMplsPipes.size() == 1);
 
         // Mpls Pipes
-        for (ReservedMplsPipeE mplsPipe : allResMplsPipes) {
+        for(ReservedMplsPipeE mplsPipe : allResMplsPipes)
+        {
             ReservedVlanJunctionE aJunc = mplsPipe.getAJunction();
             ReservedVlanJunctionE zJunc = mplsPipe.getZJunction();
             Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
@@ -1099,11 +1226,15 @@ public class TopPceTest {
             String actualAzERO = aJunc.getDeviceUrn().getUrn() + "-";
             String actualZaERO = zJunc.getDeviceUrn().getUrn() + "-";
 
-            for (String x : azERO)
+            for(String x : azERO)
+            {
                 actualAzERO = actualAzERO + x + "-";
+            }
 
-            for (String x : zaERO)
+            for(String x : zaERO)
+            {
                 actualZaERO = actualZaERO + x + "-";
+            }
 
             actualAzERO = actualAzERO + zJunc.getDeviceUrn();
             actualZaERO = actualZaERO + aJunc.getDeviceUrn();
@@ -1132,7 +1263,8 @@ public class TopPceTest {
     }
 
     @Test
-    public void basicPceTest12() {
+    public void basicPceTest12()
+    {
         log.info("Initializing test: 'basicPceTest12'.");
 
         RequestedBlueprintE requestedBlueprint;
@@ -1149,17 +1281,21 @@ public class TopPceTest {
         Integer azBW = 25;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         topologyBuilder.buildTopo12();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         log.info("Beginning test: 'basicPceTest12'.");
 
-        try {
+        try
+        {
             reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
-        } catch (PCEException | PSSException pceE) {
+        }
+        catch(PCEException | PSSException pceE)
+        {
             log.error("", pceE);
         }
 
@@ -1178,7 +1314,8 @@ public class TopPceTest {
         assert (allResMplsPipes.size() == 0);
 
         // Ethernet Pipes
-        for (ReservedEthPipeE ethPipe : allResEthPipes) {
+        for(ReservedEthPipeE ethPipe : allResEthPipes)
+        {
             ReservedVlanJunctionE aJunc = ethPipe.getAJunction();
             ReservedVlanJunctionE zJunc = ethPipe.getZJunction();
             Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
@@ -1188,11 +1325,15 @@ public class TopPceTest {
             String actualAzERO = aJunc.getDeviceUrn().getUrn() + "-";
             String actualZaERO = zJunc.getDeviceUrn().getUrn() + "-";
 
-            for (String x : azERO)
+            for(String x : azERO)
+            {
                 actualAzERO = actualAzERO + x + "-";
+            }
 
-            for (String x : zaERO)
+            for(String x : zaERO)
+            {
                 actualZaERO = actualZaERO + x + "-";
+            }
 
             actualAzERO = actualAzERO + zJunc.getDeviceUrn();
             actualZaERO = actualZaERO + aJunc.getDeviceUrn();
@@ -1201,7 +1342,8 @@ public class TopPceTest {
             assert (aJunc.getDeviceUrn().getUrn().equals("nodeK") || aJunc.getDeviceUrn().getUrn().equals("nodeM"));
             assert (zJunc.getDeviceUrn().getUrn().equals("nodeM") || zJunc.getDeviceUrn().getUrn().equals("nodeQ"));
 
-            if (aJunc.getDeviceUrn().getUrn().equals("nodeK")) {
+            if(aJunc.getDeviceUrn().getUrn().equals("nodeK"))
+            {
                 assert (aFixes.size() == 1);
                 assert (zFixes.size() == 0);
                 ReservedVlanFixtureE theFix = aFixes.iterator().next();
@@ -1215,7 +1357,9 @@ public class TopPceTest {
                 assert (theFix.getReservedBandwidth().getEgBandwidth().equals(zaBW));
                 assert (actualAzERO.equals(expectedAzERO));
                 assert (actualZaERO.equals(expectedZaERO));
-            } else {
+            }
+            else
+            {
                 assert (aFixes.size() == 0);
                 assert (zFixes.size() == 1);
                 ReservedVlanFixtureE theFix = zFixes.iterator().next();
@@ -1254,11 +1398,12 @@ public class TopPceTest {
         Integer azBW = 25;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
         topologyBuilder.buildTopo7MultiFix();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
 
         log.info("Beginning test: 'multiFixtureTest'.");
 
@@ -1266,9 +1411,12 @@ public class TopPceTest {
         {
             reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
         }
-        catch(PCEException | PSSException pceE){ log.error("", pceE); }
+        catch(PCEException | PSSException pceE)
+        {
+            log.error("", pceE);
+        }
 
-        assert(reservedBlueprint.isPresent());
+        assert (reservedBlueprint.isPresent());
 
         ReservedVlanFlowE reservedFlow = reservedBlueprint.get().getVlanFlow();
 
@@ -1276,9 +1424,9 @@ public class TopPceTest {
         Set<ReservedMplsPipeE> allResMplsPipes = reservedFlow.getMplsPipes();
         Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
 
-        assert(allResJunctions.size() == 0);
-        assert(allResEthPipes.size() == 1);
-        assert(allResMplsPipes.size() == 0);
+        assert (allResJunctions.size() == 0);
+        assert (allResEthPipes.size() == 1);
+        assert (allResMplsPipes.size() == 0);
 
         // Ethernet Pipes
         for(ReservedEthPipeE ethPipe : allResEthPipes)
@@ -1293,10 +1441,14 @@ public class TopPceTest {
             String actualZaERO = zJunc.getDeviceUrn().getUrn() + "-";
 
             for(String x : azERO)
+            {
                 actualAzERO = actualAzERO + x + "-";
+            }
 
             for(String x : zaERO)
+            {
                 actualZaERO = actualZaERO + x + "-";
+            }
 
             actualAzERO = actualAzERO + zJunc.getDeviceUrn();
             actualZaERO = actualZaERO + aJunc.getDeviceUrn();
@@ -1309,7 +1461,7 @@ public class TopPceTest {
             assert (zFixes.size() == 3);
 
 
-            assert(aFixes
+            assert (aFixes
                     .stream()
                     .filter(f -> f.getIfceUrn().getUrn().equals("portA")
                             || f.getIfceUrn().getUrn().equals("portB")
@@ -1318,7 +1470,7 @@ public class TopPceTest {
                     .filter(f -> f.getReservedBandwidth().getEgBandwidth().equals(zaBW))
                     .count() == 3);
 
-            assert(zFixes
+            assert (zFixes
                     .stream()
                     .filter(f -> f.getIfceUrn().getUrn().equals("portX")
                             || f.getIfceUrn().getUrn().equals("portY")
@@ -1332,5 +1484,178 @@ public class TopPceTest {
         }
 
         log.info("test 'multiFixtureTest' passed.");
+    }
+
+    @Test
+    public void multiMplsPipeTest()
+    {
+        log.info("Initializing test: 'multiMplsPipeTest'.");
+
+        RequestedBlueprintE requestedBlueprint;
+        Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
+        ScheduleSpecificationE requestedSched;
+
+        Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
+        Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
+
+        List<String> srcPorts = Arrays.asList("portA");
+        List<String> dstPorts = Arrays.asList("portZ");
+        String srcDevice = "nodeK";
+        String dstDevice = "nodeT";
+        Integer azBW = 25;
+        Integer zaBW = 25;
+        PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
+        String vlan = "any";
+
+        topologyBuilder.buildMultiMplsTopo2();
+        requestedSched = testBuilder.buildSchedule(startDate, endDate);
+        requestedBlueprint = testBuilder.buildRequest(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+
+        log.info("Beginning test: 'multiMplsPipeTest'.");
+
+        try
+        {
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
+        }
+        catch(PCEException | PSSException pceE)
+        {
+            log.error("", pceE);
+        }
+
+        assert (reservedBlueprint.isPresent());
+
+        ReservedVlanFlowE reservedFlow = reservedBlueprint.get().getVlanFlow();
+
+        Set<ReservedEthPipeE> allResEthPipes = reservedFlow.getEthPipes();
+        Set<ReservedMplsPipeE> allResMplsPipes = reservedFlow.getMplsPipes();
+        Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
+
+        assert (allResJunctions.size() == 0);
+        assert (allResEthPipes.size() == 3);
+        assert (allResMplsPipes.size() == 2);
+
+        // Ethernet Pipes
+        for(ReservedEthPipeE ethPipe : allResEthPipes)
+        {
+            log.info("Eth Pipe: " + ethPipe.getAJunction().getDeviceUrn().getUrn() + "----" + ethPipe.getZJunction().getDeviceUrn().getUrn());
+
+            ReservedVlanJunctionE aJunc = ethPipe.getAJunction();
+            ReservedVlanJunctionE zJunc = ethPipe.getZJunction();
+            Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
+            Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
+            List<String> azERO = ethPipe.getAzERO();
+            List<String> zaERO = ethPipe.getZaERO();
+            String actualAzERO = aJunc.getDeviceUrn().getUrn() + "-";
+            String actualZaERO = zJunc.getDeviceUrn().getUrn() + "-";
+
+            for(String x : azERO)
+            {
+                actualAzERO = actualAzERO + x + "-";
+            }
+
+            for(String x : zaERO)
+            {
+                actualZaERO = actualZaERO + x + "-";
+            }
+
+            actualAzERO = actualAzERO + zJunc.getDeviceUrn();
+            actualZaERO = actualZaERO + aJunc.getDeviceUrn();
+
+            assert (aJunc.getDeviceUrn().getUrn().equals("nodeL") || aJunc.getDeviceUrn().getUrn().equals("nodeP") || aJunc.getDeviceUrn().getUrn().equals("nodeQ"));
+            assert (zJunc.getDeviceUrn().getUrn().equals("nodeP") || zJunc.getDeviceUrn().getUrn().equals("nodeQ") || zJunc.getDeviceUrn().getUrn().equals("nodeS"));
+
+            assert (aFixes.size() == 0);
+            assert (zFixes.size() == 0);
+
+            String expectedAzERO;
+            String expectedZaERO;
+
+            if(aJunc.getDeviceUrn().getUrn().equals("nodeL"))
+            {
+                assert(zJunc.getDeviceUrn().getUrn().equals("nodeP"));
+                expectedAzERO = "nodeL-nodeL:3-nodeP:1-nodeP";
+                expectedZaERO = "nodeP-nodeP:1-nodeL:3-nodeL";
+            }
+            else if(aJunc.getDeviceUrn().getUrn().equals("nodeP"))
+            {
+                assert(zJunc.getDeviceUrn().getUrn().equals("nodeQ"));
+                expectedAzERO = "nodeP-nodeP:2-nodeQ:1-nodeQ";
+                expectedZaERO = "nodeQ-nodeQ:1-nodeP:2-nodeP";
+            }
+            else
+            {
+                assert(zJunc.getDeviceUrn().getUrn().equals("nodeS"));
+                expectedAzERO = "nodeQ-nodeQ:3-nodeS:1-nodeS";
+                expectedZaERO = "nodeS-nodeS:1-nodeQ:3-nodeQ";
+            }
+
+            assert (actualAzERO.equals(expectedAzERO));
+            assert (actualZaERO.equals(expectedZaERO));
+        }
+
+        // Mpls Pipes
+        for(ReservedMplsPipeE mplsPipe : allResMplsPipes)
+        {
+            ReservedVlanJunctionE aJunc = mplsPipe.getAJunction();
+            ReservedVlanJunctionE zJunc = mplsPipe.getZJunction();
+            Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
+            Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
+            List<String> azERO = mplsPipe.getAzERO();
+            List<String> zaERO = mplsPipe.getZaERO();
+            String actualAzERO = aJunc.getDeviceUrn().getUrn() + "-";
+            String actualZaERO = zJunc.getDeviceUrn().getUrn() + "-";
+
+            for(String x : azERO)
+            {
+                actualAzERO = actualAzERO + x + "-";
+            }
+
+            for(String x : zaERO)
+            {
+                actualZaERO = actualZaERO + x + "-";
+            }
+
+            actualAzERO = actualAzERO + zJunc.getDeviceUrn();
+            actualZaERO = actualZaERO + aJunc.getDeviceUrn();
+
+            assert ((aJunc.getDeviceUrn().getUrn().equals("nodeK") && zJunc.getDeviceUrn().getUrn().equals("nodeL"))
+                    || (aJunc.getDeviceUrn().getUrn().equals("nodeS") && zJunc.getDeviceUrn().getUrn().equals("nodeT")));
+
+            if(aJunc.getDeviceUrn().getUrn().equals("nodeK"))
+            {
+                assert (aFixes.size() == 1);
+                assert (zFixes.size() == 0);
+                ReservedVlanFixtureE theFix = aFixes.iterator().next();
+
+                assert (theFix.getIfceUrn().getUrn().equals("portA"));
+                assert (theFix.getReservedBandwidth().getInBandwidth().equals(azBW));
+                assert (theFix.getReservedBandwidth().getEgBandwidth().equals(zaBW));
+
+                String expectedAzERO = "nodeK-nodeK:1-nodeL:1-nodeL";
+                String expectedZaERO = "nodeL-nodeL:1-nodeK:1-nodeK";
+
+                assert (actualAzERO.equals(expectedAzERO));
+                assert (actualZaERO.equals(expectedZaERO));
+            }
+            else
+            {
+                assert (aFixes.size() == 0);
+                assert (zFixes.size() == 1);
+                ReservedVlanFixtureE theFix = zFixes.iterator().next();
+
+                assert (theFix.getIfceUrn().getUrn().equals("portZ"));
+                assert (theFix.getReservedBandwidth().getInBandwidth().equals(zaBW));
+                assert (theFix.getReservedBandwidth().getEgBandwidth().equals(azBW));
+
+                String expectedAzERO = "nodeS-nodeS:2-nodeT:1-nodeT";
+                String expectedZaERO = "nodeT-nodeT:1-nodeS:2-nodeS";
+
+                assert (actualAzERO.equals(expectedAzERO));
+                assert (actualZaERO.equals(expectedZaERO));
+            }
+        }
+
+        log.info("test 'multiMplsPipeTest' passed.");
     }
 }
