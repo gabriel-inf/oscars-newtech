@@ -67,7 +67,6 @@ public class BhandariPceTest {
 
     @Test
     public void bhandariTest2(){
-
         topologyBuilder.buildTopoFourPaths();
         Topology topo = topoService.getMultilayerTopology();
 
