@@ -66,6 +66,38 @@ public class BhandariPceTest {
     }
 
     @Test
+    public void bhandariTest2(){
+
+        topologyBuilder.buildTopoFourPaths();
+        Topology topo = topoService.getMultilayerTopology();
+
+        String sourceName = "nodeK";
+        String destName = "nodeQ";
+
+        Optional<TopoVertex> source = topo.getVertexByUrn(sourceName);
+        Optional<TopoVertex> dest = topo.getVertexByUrn(destName);
+
+        if(source.isPresent() && dest.isPresent()){
+            List<List<TopoEdge>> paths = bhandariPCE.computeKDisjointPaths(topo, source.get(), dest.get(), 1);
+            testPaths(paths, source.get(), dest.get(), 1);
+            logPaths(paths);
+            paths = bhandariPCE.computeKDisjointPaths(topo, source.get(), dest.get(), 2);
+            testPaths(paths, source.get(), dest.get(), 2);
+            logPaths(paths);
+            paths = bhandariPCE.computeKDisjointPaths(topo, source.get(), dest.get(), 3);
+            testPaths(paths, source.get(), dest.get(), 3);
+            logPaths(paths);
+            paths = bhandariPCE.computeKDisjointPaths(topo, source.get(), dest.get(), 4);
+            testPaths(paths, source.get(), dest.get(), 4);
+            logPaths(paths);
+            // 5 paths should not be possible, only 4 should return
+            paths = bhandariPCE.computeKDisjointPaths(topo, source.get(), dest.get(), 5);
+            testPaths(paths, source.get(), dest.get(), 4);
+            logPaths(paths);
+        }
+    }
+
+    @Test
     public void bellmanFordTest(){
 
         topologyBuilder.buildTopo4();
@@ -108,5 +140,21 @@ public class BhandariPceTest {
             }
         }
 
+    }
+
+    private void logPath(List<TopoEdge> path){
+        log.info(path.stream().map(e -> "(" + e.getA().getUrn() + ", " + e.getZ().getUrn() + ")").collect(Collectors.toList()).toString());
+    }
+
+    private void logPaths(List<List<TopoEdge>> paths){
+        paths.forEach(this::logPath);
+    }
+
+    private void testPaths(List<List<TopoEdge>> paths, TopoVertex source, TopoVertex dest, Integer expectedNumber){
+        assert(paths.size() == expectedNumber);
+        assert(paths.stream().allMatch(path -> path.size() > 0));
+        assert(paths.stream().flatMap(Collection::stream).distinct().count() == paths.stream().flatMap(Collection::stream).count());
+        assert(paths.stream().flatMap(Collection::stream).noneMatch(e -> e.getMetric() < 0));
+        assert(paths.stream().allMatch(path -> path.get(0).getA().equals(source) && path.get(path.size()-1).getZ().equals(dest)));
     }
 }

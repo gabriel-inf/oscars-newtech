@@ -101,6 +101,7 @@ public class BellmanFordService {
             }
         }
 
+        /*
         for(TopoEdge edge : edges){
             TopoVertex a = edge.getA();
             TopoVertex z = edge.getZ();
@@ -108,7 +109,7 @@ public class BellmanFordService {
                 log.info("Graph has a negative cycle, impossible to find shortest paths");
                 return new HashMap<>();
             }
-        }
+        }*/
 
         return edgeMap;
     }

@@ -55,6 +55,7 @@ public class BhandariPCE {
 
     }
 
+
     private List<List<TopoEdge>> makePair(List<TopoEdge> shortestPath, List<TopoEdge> modShortestPath,
                                           Topology topo, Map<TopoEdge, TopoEdge> reversedToOriginalMap,
                                           TopoVertex source, TopoVertex dest){
@@ -103,6 +104,94 @@ public class BhandariPCE {
 
 
         return shortestPathPair;
+    }
+
+    public List<List<TopoEdge>> computeKDisjointPaths(Topology topo, TopoVertex source, TopoVertex dest, Integer k){
+        if(k == 0){
+            return new ArrayList<>();
+        }
+
+
+        List<List<TopoEdge>> paths = new ArrayList<>();
+
+        // Find the first shortest path
+        List<TopoEdge> shortestPath = bellmanFordService.shortestPath(topo, source, dest);
+        if(shortestPath.isEmpty()){
+            log.info("No shortest path from " + source.getUrn() + " to " + dest.getUrn() + " found");
+            return new ArrayList<>();
+        }
+        paths.add(shortestPath);
+        if(k == 1){
+            return paths;
+        }
+
+        List<List<TopoEdge>> tempPaths = new ArrayList<>(paths);
+        Map<TopoEdge, TopoEdge> reversedToOriginalMap = new HashMap<>();
+
+        // Modify the topology
+        Topology modifiedTopo = new Topology();
+        modifiedTopo.setLayer(topo.getLayer());
+        modifiedTopo.setVertices(topo.getVertices());
+        modifiedTopo.setEdges(new HashSet<>(topo.getEdges()));
+        for(Integer pIndex = 1; pIndex < k; pIndex++){
+
+            // Get the previous shortest path
+            List<TopoEdge> prevPath = tempPaths.get(pIndex-1);
+
+            // Reverse and give negative weight to edges in shortest path
+            for(TopoEdge pathEdge : prevPath){
+                Long reversedMetric = -1 * pathEdge.getMetric();
+                TopoEdge reversedEdge = new TopoEdge(pathEdge.getZ(), pathEdge.getA(), reversedMetric, pathEdge.getLayer());
+                reversedToOriginalMap.put(reversedEdge, pathEdge);
+                modifiedTopo.getEdges().remove(pathEdge);
+                modifiedTopo.getEdges().add(reversedEdge);
+            }
+
+           // Find the new shortest path
+            List<TopoEdge> modShortestPath = bellmanFordService.shortestPath(modifiedTopo, source, dest);
+            tempPaths.add(modShortestPath);
+        }
+        return combine(shortestPath, tempPaths, reversedToOriginalMap, modifiedTopo, source, dest, k);
+    }
+
+    private List<List<TopoEdge>> combine(List<TopoEdge> shortestPath, List<List<TopoEdge>> tempPaths,
+                                         Map<TopoEdge, TopoEdge> reversedToOriginalMap, Topology topo,
+                                         TopoVertex source, TopoVertex dest, Integer k) {
+
+        List<List<TopoEdge>> paths = new ArrayList<>();
+
+        // Remove all inverse edges taken in new shortest path (along with mapped edge in original shortest path)
+        Set<TopoEdge> combinedEdges = new HashSet<>();
+        for (List<TopoEdge> tempPath : tempPaths) {
+            for (TopoEdge modSpEdge : tempPath) {
+                if (reversedToOriginalMap.containsKey(modSpEdge)) {
+                    TopoEdge origSpEdge = reversedToOriginalMap.get(modSpEdge);
+                    shortestPath.remove(origSpEdge);
+                } else {
+                    combinedEdges.add(modSpEdge);
+                }
+            }
+        }
+        combinedEdges.addAll(shortestPath);
+
+        // Find the shortest paths given these combined edges
+        log.info(combinedEdges.toString());
+        topo.setEdges(combinedEdges);
+
+        for(Integer pIndex = 0; pIndex < k; pIndex++){
+            List<TopoEdge> sp = bellmanFordService.shortestPath(topo, source, dest);
+            if(sp.isEmpty()){
+                Integer pathNum = pIndex+1;
+                log.info("Couldn't find disjoint path " + pathNum + " from " + source.getUrn() + " to " + dest.getUrn());
+                log.info("Returning all found paths");
+                return paths;
+            }
+            paths.add(sp);
+            combinedEdges.removeAll(sp);
+            topo.setEdges(combinedEdges);
+        }
+
+        return paths;
     }
 
 }
