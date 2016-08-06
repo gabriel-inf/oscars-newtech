@@ -40,7 +40,7 @@ public class BhandariPceTest {
     private BellmanFordPCE bellmanFordPCE;
 
     @Test
-    public void bhandariTest1(){
+    public void bhandariTestPathPair(){
         topologyBuilder.buildTopo4();
         Topology topo = topoService.getMultilayerTopology();
 
@@ -55,18 +55,14 @@ public class BhandariPceTest {
                 assert(pathPair.isEmpty());
             }
             else{
-                assert(pathPair.size() == 2);
-                assert(!pathPair.get(0).equals(pathPair.get(1)));
-                assert(pathPair.stream().flatMap(Collection::stream).distinct().count() == pathPair.get(0).size() + pathPair.get(1).size());
-                for(List<TopoEdge> path : pathPair){
-                    log.info(path.stream().map(e -> "(" + e.getA().getUrn() + ", " + e.getZ().getUrn() + ")").collect(Collectors.toList()).toString());
-                }
+                logPaths(pathPair);
+                testPaths(pathPair, optSource.get(), optDest.get(), 2);
             }
         }
     }
 
     @Test
-    public void bhandariTest2(){
+    public void bhandariTestKPaths(){
         topologyBuilder.buildTopoFourPaths();
         Topology topo = topoService.getMultilayerTopology();
 
@@ -78,21 +74,25 @@ public class BhandariPceTest {
 
         if(source.isPresent() && dest.isPresent()){
             List<List<TopoEdge>> paths = bhandariPCE.computeKDisjointPaths(topo, source.get(), dest.get(), 1);
+            logPaths(paths);
             testPaths(paths, source.get(), dest.get(), 1);
-            logPaths(paths);
+
             paths = bhandariPCE.computeKDisjointPaths(topo, source.get(), dest.get(), 2);
+            logPaths(paths);
             testPaths(paths, source.get(), dest.get(), 2);
-            logPaths(paths);
+
             paths = bhandariPCE.computeKDisjointPaths(topo, source.get(), dest.get(), 3);
+            logPaths(paths);
             testPaths(paths, source.get(), dest.get(), 3);
-            logPaths(paths);
+
             paths = bhandariPCE.computeKDisjointPaths(topo, source.get(), dest.get(), 4);
-            testPaths(paths, source.get(), dest.get(), 4);
             logPaths(paths);
+            testPaths(paths, source.get(), dest.get(), 4);
+
             // 5 paths should not be possible, only 4 should return
             paths = bhandariPCE.computeKDisjointPaths(topo, source.get(), dest.get(), 5);
-            testPaths(paths, source.get(), dest.get(), 4);
             logPaths(paths);
+            testPaths(paths, source.get(), dest.get(), 4);
         }
     }
 
