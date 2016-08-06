@@ -37,7 +37,7 @@ public class BhandariPceTest {
     private BhandariPCE bhandariPCE;
 
     @Autowired
-    private BellmanFordService bellmanFordService;
+    private BellmanFordPCE bellmanFordPCE;
 
     @Test
     public void bhandariTest1(){
@@ -110,7 +110,7 @@ public class BhandariPceTest {
         Optional<TopoVertex> optSource = topo.getVertexByUrn(sourceName);
         Optional<TopoVertex> optDest = topo.getVertexByUrn(destName);
         if(optSource.isPresent() && optDest.isPresent()){
-            List<TopoEdge> path = bellmanFordService.shortestPath(topo, optSource.get(), optDest.get());
+            List<TopoEdge> path = bellmanFordPCE.shortestPath(topo, optSource.get(), optDest.get());
             if(optSource.get().equals(optDest.get())){
                 assert(path.isEmpty());
             }
@@ -123,7 +123,7 @@ public class BhandariPceTest {
 
         // Test all shortest paths from each source
         for(TopoVertex source : topo.getVertices()){
-            Map<TopoVertex, List<TopoEdge>> allShortestPaths = bellmanFordService.allShortestPaths(topo, source);
+            Map<TopoVertex, List<TopoEdge>> allShortestPaths = bellmanFordPCE.allShortestPaths(topo, source);
             //log.info("~~~~~~~~~~~~~~");
             //log.info("Source: " + source.getUrn());
             for(TopoVertex dest : allShortestPaths.keySet()) {

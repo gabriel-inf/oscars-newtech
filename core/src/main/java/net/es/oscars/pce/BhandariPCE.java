@@ -9,14 +9,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
 public class BhandariPCE {
 
     @Autowired
-    private BellmanFordService bellmanFordService;
+    private BellmanFordPCE bellmanFordPCE;
 
     public List<List<TopoEdge>> computePathPair(Topology topo, TopoVertex source, TopoVertex dest) {
 
@@ -74,7 +73,7 @@ public class BhandariPCE {
     private List<List<TopoEdge>> computePaths(Topology topo, List<TopoVertex> sources, List<TopoVertex> destinations){
 
         // Find the first shortest path
-        List<TopoEdge> shortestPath = bellmanFordService.shortestPath(topo, sources.get(0), destinations.get(0));
+        List<TopoEdge> shortestPath = bellmanFordPCE.shortestPath(topo, sources.get(0), destinations.get(0));
         if(shortestPath.isEmpty()){
             log.info("No shortest path from " + sources.get(0).getUrn() + " to " + destinations.get(0).getUrn() + " found");
             return new ArrayList<>();
@@ -114,7 +113,7 @@ public class BhandariPCE {
             }
 
             // Find the new shortest path
-            List<TopoEdge> modShortestPath = bellmanFordService.shortestPath(modifiedTopo, s, d);
+            List<TopoEdge> modShortestPath = bellmanFordPCE.shortestPath(modifiedTopo, s, d);
             tempPaths.add(modShortestPath);
         }
         return combine(shortestPath, tempPaths, reversedToOriginalMap, modifiedTopo, sources, destinations);
@@ -149,7 +148,7 @@ public class BhandariPCE {
         for(Integer pIndex = 0; pIndex < sources.size(); pIndex++){
             TopoVertex source = sources.get(pIndex);
             TopoVertex dest = destinations.get(pIndex);
-            List<TopoEdge> sp = bellmanFordService.shortestPath(topo, source, dest);
+            List<TopoEdge> sp = bellmanFordPCE.shortestPath(topo, source, dest);
             if(sp.isEmpty()){
                 Integer pathNum = pIndex+1;
                 log.info("Couldn't find disjoint path " + pathNum + " from " + source.getUrn() + " to " + dest.getUrn());

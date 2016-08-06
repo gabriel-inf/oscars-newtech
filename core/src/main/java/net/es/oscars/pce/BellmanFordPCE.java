@@ -10,7 +10,7 @@ import java.util.*;
 
 @Slf4j
 @Component
-public class BellmanFordService {
+public class BellmanFordPCE {
 
     public List<TopoEdge> shortestPath(Topology topo, TopoVertex source, TopoVertex dest){
 
