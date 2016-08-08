@@ -7,6 +7,7 @@ import net.es.oscars.topo.beans.Topology;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -70,7 +71,11 @@ public class BellmanFordPCE {
         Map<TopoVertex, TopoEdge> edgeMap = new HashMap<>();
 
         Set<TopoVertex> vertices = topo.getVertices();
-        Set<TopoEdge> edges = topo.getEdges();
+        List<TopoEdge> edges = topo
+                .getEdges()
+                .stream()
+                .sorted((a,z) -> a.getA().getUrn().compareToIgnoreCase(z.getA().getUrn()))
+                .collect(Collectors.toList());
 
         for(TopoVertex vertex : vertices){
             distanceMap.put(vertex, 999999999L);
