@@ -377,7 +377,7 @@ public class SurvivableServiceLayerTopology
             // Step 3: Perform routing on MPLS layer to construct physical routes corresponding to the logical link.
             log.info("step 3: performing MPLS-Layer routing.");
 
-            List<List<TopoEdge>> pathPair = bhandariPCE.computePathPair(prunedMPLSTopo, mplsSrcDevice, mplsDstDevice);
+            List<List<TopoEdge>> pathPair = bhandariPCE.computeDisjointPaths(prunedMPLSTopo, mplsSrcDevice, mplsDstDevice, 2);
 
             if(pathPair.isEmpty())
             {

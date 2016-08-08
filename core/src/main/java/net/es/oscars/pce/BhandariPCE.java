@@ -17,20 +17,8 @@ public class BhandariPCE {
     @Autowired
     private BellmanFordPCE bellmanFordPCE;
 
-    public List<List<TopoEdge>> computePathPair(Topology topo, TopoVertex source, TopoVertex dest) {
 
-        List<TopoVertex> sources = new ArrayList<>();
-        List<TopoVertex> destinations = new ArrayList<>();
-
-        for(Integer pIndex = 0; pIndex < 2; pIndex++){
-            sources.add(source);
-            destinations.add(dest);
-        }
-
-        return computePaths(topo, sources, destinations);
-    }
-
-    public List<List<TopoEdge>> computeKDisjointPaths(Topology topo, TopoVertex source, TopoVertex dest, Integer k){
+    public List<List<TopoEdge>> computeDisjointPaths(Topology topo, TopoVertex source, TopoVertex dest, Integer k){
         if(k == 0){
             return new ArrayList<>();
         }
@@ -46,10 +34,10 @@ public class BhandariPCE {
         return computePaths(topo, sources, destinations);
     }
 
-    public List<List<TopoEdge>> computeDisjointPathsBetweenPairs(Topology topo, List<List<TopoVertex>> pairs){
+    public List<List<TopoEdge>> computeDisjointPaths(Topology topo, List<List<TopoVertex>> sourceDestPairs){
         List<TopoVertex> sources = new ArrayList<>();
         List<TopoVertex> destinations = new ArrayList<>();
-        for(List<TopoVertex> pair : pairs){
+        for(List<TopoVertex> pair : sourceDestPairs){
             sources.add(pair.get(0));
             destinations.add(pair.get(1));
         }
@@ -57,11 +45,11 @@ public class BhandariPCE {
         return computePaths(topo, sources, destinations);
     }
 
-    public List<List<TopoEdge>> computeMultipleDisjointPathsBetweenPairs(Topology topo, Map<List<TopoVertex>, Integer> pairMap){
+    public List<List<TopoEdge>> computeDisjointPaths(Topology topo, Map<List<TopoVertex>, Integer> sourceDestPairMap){
         List<TopoVertex> sources = new ArrayList<>();
         List<TopoVertex> destinations = new ArrayList<>();
-        for(List<TopoVertex> pair : pairMap.keySet()){
-            for(Integer pIndex = 0; pIndex < pairMap.get(pair); pIndex++){
+        for(List<TopoVertex> pair : sourceDestPairMap.keySet()){
+            for(Integer pIndex = 0; pIndex < sourceDestPairMap.get(pair); pIndex++){
                 sources.add(pair.get(0));
                 destinations.add(pair.get(1));
             }

@@ -15,10 +15,7 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -40,28 +37,6 @@ public class BhandariPceTest {
     private BellmanFordPCE bellmanFordPCE;
 
     @Test
-    public void bhandariTestPathPair(){
-        topologyBuilder.buildTopo4();
-        Topology topo = topoService.getMultilayerTopology();
-
-        String sourceName = "nodeK";
-        String destName = "nodeQ";
-
-        Optional<TopoVertex> optSource = topo.getVertexByUrn(sourceName);
-        Optional<TopoVertex> optDest = topo.getVertexByUrn(destName);
-        if(optSource.isPresent() && optDest.isPresent()){
-            List<List<TopoEdge>> pathPair = bhandariPCE.computePathPair(topo, optSource.get(), optDest.get());
-            if(optSource.get().equals(optDest.get())){
-                assert(pathPair.isEmpty());
-            }
-            else{
-                logPaths(pathPair);
-                testPaths(pathPair, optSource.get(), optDest.get(), 2);
-            }
-        }
-    }
-
-    @Test
     public void bhandariTestKPaths(){
         topologyBuilder.buildTopoFourPaths();
         Topology topo = topoService.getMultilayerTopology();
@@ -73,28 +48,53 @@ public class BhandariPceTest {
         Optional<TopoVertex> dest = topo.getVertexByUrn(destName);
 
         if(source.isPresent() && dest.isPresent()){
-            List<List<TopoEdge>> paths = bhandariPCE.computeKDisjointPaths(topo, source.get(), dest.get(), 1);
+            List<List<TopoEdge>> paths = bhandariPCE.computeDisjointPaths(topo, source.get(), dest.get(), 1);
             logPaths(paths);
-            testPaths(paths, source.get(), dest.get(), 1);
+            testPaths(paths, Collections.singletonList(source.get()), Collections.singletonList(dest.get()), 1);
 
-            paths = bhandariPCE.computeKDisjointPaths(topo, source.get(), dest.get(), 2);
+            paths = bhandariPCE.computeDisjointPaths(topo, source.get(), dest.get(), 2);
             logPaths(paths);
-            testPaths(paths, source.get(), dest.get(), 2);
+            testPaths(paths, Collections.singletonList(source.get()), Collections.singletonList(dest.get()), 2);
 
-            paths = bhandariPCE.computeKDisjointPaths(topo, source.get(), dest.get(), 3);
+            paths = bhandariPCE.computeDisjointPaths(topo, source.get(), dest.get(), 3);
             logPaths(paths);
-            testPaths(paths, source.get(), dest.get(), 3);
+            testPaths(paths, Collections.singletonList(source.get()), Collections.singletonList(dest.get()), 3);
 
-            paths = bhandariPCE.computeKDisjointPaths(topo, source.get(), dest.get(), 4);
+            paths = bhandariPCE.computeDisjointPaths(topo, source.get(), dest.get(), 4);
             logPaths(paths);
-            testPaths(paths, source.get(), dest.get(), 4);
+            testPaths(paths, Collections.singletonList(source.get()), Collections.singletonList(dest.get()), 4);
 
             // 5 paths should not be possible, only 4 should return
-            paths = bhandariPCE.computeKDisjointPaths(topo, source.get(), dest.get(), 5);
+            paths = bhandariPCE.computeDisjointPaths(topo, source.get(), dest.get(), 5);
             logPaths(paths);
-            testPaths(paths, source.get(), dest.get(), 4);
+            testPaths(paths, Collections.singletonList(source.get()), Collections.singletonList(dest.get()), 4);
         }
     }
+
+    @Test
+    public void bhandariTestMultiplePairs(){
+        topologyBuilder.buildTopoMultipleDisjointPaths();
+        Topology topo = topoService.getMultilayerTopology();
+
+        // Test 3 Paths from (2, 8)
+        List<String> sourceNames = Arrays.asList("2", "2", "2");
+        List<String> destNames = Arrays.asList("8", "8", "8");
+
+        List<TopoVertex> sources = sourceNames.stream().map(topo::getVertexByUrn).filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
+        List<TopoVertex> dests = destNames.stream().map(topo::getVertexByUrn).filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
+
+        if(sources.size() == dests.size()){
+            List<List<TopoVertex>> pairs = makePairs(sources, dests);
+            List<List<TopoEdge>> paths = bhandariPCE.computeDisjointPaths(topo, pairs);
+            logPaths(paths);
+            testPaths(paths, sources, dests, sources.size());
+        }
+    }
+
 
     @Test
     public void bellmanFordTest(){
@@ -149,11 +149,24 @@ public class BhandariPceTest {
         paths.forEach(this::logPath);
     }
 
-    private void testPaths(List<List<TopoEdge>> paths, TopoVertex source, TopoVertex dest, Integer expectedNumber){
+    private void testPaths(List<List<TopoEdge>> paths, List<TopoVertex> sources, List<TopoVertex> dests, Integer expectedNumber){
         assert(paths.size() == expectedNumber);
         assert(paths.stream().allMatch(path -> path.size() > 0));
         assert(paths.stream().flatMap(Collection::stream).distinct().count() == paths.stream().flatMap(Collection::stream).count());
         assert(paths.stream().flatMap(Collection::stream).noneMatch(e -> e.getMetric() < 0));
-        assert(paths.stream().allMatch(path -> path.get(0).getA().equals(source) && path.get(path.size()-1).getZ().equals(dest)));
+        for(Integer pIndex = 0; pIndex < sources.size(); pIndex++){
+            TopoVertex source = sources.get(pIndex);
+            TopoVertex dest = dests.get(pIndex);
+            assert(paths.stream().allMatch(path -> path.get(0).getA().equals(source) && path.get(path.size()-1).getZ().equals(dest)));
+        }
+    }
+
+
+    private List<List<TopoVertex>> makePairs(List<TopoVertex> sources, List<TopoVertex> dests) {
+        List<List<TopoVertex>> pairs = new ArrayList<>();
+        for(Integer index = 0; index < sources.size(); index++){
+            pairs.add(Arrays.asList(sources.get(index), dests.get(index)));
+        }
+        return pairs;
     }
 }

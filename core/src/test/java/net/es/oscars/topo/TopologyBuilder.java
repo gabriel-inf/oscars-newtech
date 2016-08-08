@@ -2376,7 +2376,7 @@ public class TopologyBuilder
 
     public void buildTopoFourPaths()
     {
-        log.info("Building Test Topology 4");
+        log.info("Building Test Topology Four Paths");
 
         Map<TopoVertex, TopoVertex> portDeviceMap = new HashMap<>();
 
@@ -2663,5 +2663,69 @@ public class TopologyBuilder
         }
 
         testBuilder.populateRepos(topoNodes, topoLinks, portDeviceMap);
+    }
+
+    public void buildTopoMultipleDisjointPaths() {
+        log.info("Building Test Topology Multiple Disjoint Paths");
+        Map<TopoVertex, TopoVertex> portToDeviceMap = new HashMap<>();
+
+        TopoVertex nodeOne = new TopoVertex("1", VertexType.ROUTER);
+        TopoVertex nodeTwo = new TopoVertex("2", VertexType.ROUTER);
+        TopoVertex nodeThree = new TopoVertex("3", VertexType.ROUTER);
+        TopoVertex nodeFour = new TopoVertex("4", VertexType.ROUTER);
+        TopoVertex nodeFive = new TopoVertex("5", VertexType.ROUTER);
+        TopoVertex nodeSix = new TopoVertex("6", VertexType.ROUTER);
+        TopoVertex nodeSeven = new TopoVertex("7", VertexType.ROUTER);
+        TopoVertex nodeEight = new TopoVertex("8", VertexType.ROUTER);
+        TopoVertex nodeNine = new TopoVertex("9", VertexType.ROUTER);
+
+        Set<TopoVertex> topoNodes = new HashSet<>(Arrays.asList(nodeOne, nodeTwo, nodeThree, nodeFour, nodeFive,
+                nodeSix, nodeSeven, nodeEight, nodeNine));
+
+        Set<TopoEdge> topoLinks = new HashSet<>();
+
+        topoLinks.add(new TopoEdge(nodeOne, nodeTwo, 100L, Layer.MPLS));
+        topoLinks.add(new TopoEdge(nodeOne, nodeFour, 100L, Layer.MPLS));
+
+        topoLinks.add(new TopoEdge(nodeTwo, nodeOne, 100L, Layer.MPLS));
+        topoLinks.add(new TopoEdge(nodeTwo, nodeThree, 100L, Layer.MPLS));
+        topoLinks.add(new TopoEdge(nodeTwo, nodeFour, 100L, Layer.MPLS));
+        topoLinks.add(new TopoEdge(nodeTwo, nodeFive, 100L, Layer.MPLS));
+
+        topoLinks.add(new TopoEdge(nodeThree, nodeTwo, 100L, Layer.MPLS));
+        topoLinks.add(new TopoEdge(nodeThree, nodeFive, 100L, Layer.MPLS));
+        topoLinks.add(new TopoEdge(nodeThree, nodeSix, 100L, Layer.MPLS));
+
+        topoLinks.add(new TopoEdge(nodeFour, nodeOne, 100L, Layer.MPLS));
+        topoLinks.add(new TopoEdge(nodeFour, nodeTwo, 100L, Layer.MPLS));
+        topoLinks.add(new TopoEdge(nodeFour, nodeFive, 100L, Layer.MPLS));
+        topoLinks.add(new TopoEdge(nodeFour, nodeSeven, 100L, Layer.MPLS));
+
+        topoLinks.add(new TopoEdge(nodeFive, nodeTwo, 100L, Layer.MPLS));
+        topoLinks.add(new TopoEdge(nodeFive, nodeThree, 100L, Layer.MPLS));
+        topoLinks.add(new TopoEdge(nodeFive, nodeFour, 100L, Layer.MPLS));
+        topoLinks.add(new TopoEdge(nodeFive, nodeSix, 100L, Layer.MPLS));
+        topoLinks.add(new TopoEdge(nodeFive, nodeSeven, 100L, Layer.MPLS));
+        topoLinks.add(new TopoEdge(nodeFive, nodeEight, 100L, Layer.MPLS));
+
+        topoLinks.add(new TopoEdge(nodeSix, nodeThree, 100L, Layer.MPLS));
+        topoLinks.add(new TopoEdge(nodeSix, nodeFive, 100L, Layer.MPLS));
+        topoLinks.add(new TopoEdge(nodeSix, nodeEight, 100L, Layer.MPLS));
+        topoLinks.add(new TopoEdge(nodeSix, nodeNine, 100L, Layer.MPLS));
+
+        topoLinks.add(new TopoEdge(nodeSeven, nodeFour, 100L, Layer.MPLS));
+        topoLinks.add(new TopoEdge(nodeSeven, nodeFive, 100L, Layer.MPLS));
+        topoLinks.add(new TopoEdge(nodeSeven, nodeEight, 100L, Layer.MPLS));
+
+        topoLinks.add(new TopoEdge(nodeEight, nodeFive, 100L, Layer.MPLS));
+        topoLinks.add(new TopoEdge(nodeEight, nodeSix, 100L, Layer.MPLS));
+        topoLinks.add(new TopoEdge(nodeEight, nodeSeven, 100L, Layer.MPLS));
+        topoLinks.add(new TopoEdge(nodeEight, nodeNine, 100L, Layer.MPLS));
+
+        topoLinks.add(new TopoEdge(nodeNine, nodeSix, 100L, Layer.MPLS));
+        topoLinks.add(new TopoEdge(nodeNine, nodeEight, 100L, Layer.MPLS));
+
+
+        testBuilder.populateRepos(topoNodes, topoLinks, portToDeviceMap);
     }
 }

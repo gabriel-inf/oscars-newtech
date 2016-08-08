@@ -99,7 +99,7 @@ public class SurvivabilityPCE
         Topology prunedTopo = pruningService.pruneWithPipeAZ(multiLayerTopo, requestPipe, requestSched, rsvBwList, rsvVlanList);
 
         // Disjoint shortest-path routing
-        List<List<TopoEdge>> azPathPairCalculated = bhandariPCE.computePathPair(prunedTopo, srcDevice, dstDevice);
+        List<List<TopoEdge>> azPathPairCalculated = bhandariPCE.computeDisjointPaths(prunedTopo, srcDevice, dstDevice, 2);
 
         if(azPathPairCalculated.isEmpty())
         {
