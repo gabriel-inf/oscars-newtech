@@ -1,5 +1,6 @@
 package net.es.oscars.pce;
 
+import edu.uci.ics.jung.algorithms.shortestpath.BFSDistanceLabeler;
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.resv.ent.RequestedVlanPipeE;
 import net.es.oscars.resv.ent.ReservedBandwidthE;
@@ -76,25 +77,25 @@ public class EroPCE
         requestedZaERO.add(0, dstPortName);
         requestedZaERO.add(srcPortName);
 
-        Set<TopoVertex> azURNs = multiLayerTopoAzDirection.getVertices().stream()
+        Set<TopoVertex> azNodes = multiLayerTopoAzDirection.getVertices().stream()
                 .filter(v -> requestedAzERO.contains(v.getUrn()))
                 .collect(Collectors.toSet());
 
-        Set<TopoVertex> zaURNs = multiLayerTopoZaDirection.getVertices().stream()
+        Set<TopoVertex> zaNodes = multiLayerTopoZaDirection.getVertices().stream()
                 .filter(v -> requestedZaERO.contains(v.getUrn()))
                 .collect(Collectors.toSet());
 
         Set<TopoEdge> edgestoKeepAz = multiLayerTopoAzDirection.getEdges().stream()
-                .filter(e -> (azURNs.contains(e.getA()) && azURNs.contains(e.getZ())) || (azURNs.contains(e.getZ()) && azURNs.contains(e.getA())))
+                .filter(e -> (azNodes.contains(e.getA()) && azNodes.contains(e.getZ())) || (azNodes.contains(e.getZ()) && azNodes.contains(e.getA())))
                 .collect(Collectors.toSet());
 
         Set<TopoEdge> edgestoKeepZa = multiLayerTopoZaDirection.getEdges().stream()
-                .filter(e -> (zaURNs.contains(e.getA()) && zaURNs.contains(e.getZ())) || (zaURNs.contains(e.getZ()) && zaURNs.contains(e.getA())))
+                .filter(e -> (zaNodes.contains(e.getA()) && zaNodes.contains(e.getZ())) || (zaNodes.contains(e.getZ()) && zaNodes.contains(e.getA())))
                 .collect(Collectors.toSet());
 
         // Prune all URNs from topology not matching specified EROs
-        multiLayerTopoAzDirection.getVertices().retainAll(azURNs);
-        multiLayerTopoZaDirection.getVertices().retainAll(zaURNs);
+        multiLayerTopoAzDirection.getVertices().retainAll(azNodes);
+        multiLayerTopoZaDirection.getVertices().retainAll(zaNodes);
 
         // Prune all Edges from topology not beginning/ending at specified ERO URNs
         multiLayerTopoAzDirection.getEdges().retainAll(edgestoKeepAz);
@@ -120,6 +121,12 @@ public class EroPCE
                     throw new PCEException("All ETHERNET-layer devices and ports must be represented in both the forward-direction and reverse-direction EROs");
                 }
             }
+        }
+
+        // Check if the destination is reachable from the source
+        // If not, then only a partial ERO has been passed in
+        if(!checkForReachability(multiLayerTopoAzDirection, srcPort, dstPort) || !checkForReachability(multiLayerTopoAzDirection, srcPort, dstPort) ){
+            return handlePartialERO(topoService.getMultilayerTopology(), requestPipe, requestSched, rsvBwList, rsvVlanList, requestedAzERO, requestedZaERO);
         }
 
         // Bandwidth and Vlan pruning
@@ -157,5 +164,76 @@ public class EroPCE
         theMap.put("za", zaEroCalculated);
 
         return theMap;
+    }
+
+    private Map<String,List<TopoEdge>> handlePartialERO(Topology topo, RequestedVlanPipeE reqPipe, ScheduleSpecificationE sched,
+                                                        List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList,
+                                                        List<String> azERO, List<String> zaERO) throws PCEException {
+
+        // Find the shortest AZ path from the source to each intermediate "destination" before reaching the final
+        // destination. Repeat this process for the ZA path
+        List<TopoVertex> azNodes = azERO.stream().map(topo::getVertexByUrn).filter(Optional::isPresent).map(Optional::get)
+                .collect(Collectors.toList());
+        List<TopoVertex> zaNodes = zaERO.stream().map(topo::getVertexByUrn).filter(Optional::isPresent).map(Optional::get)
+                .collect(Collectors.toList());
+
+        Topology prunedTopo = pruningService.pruneWithPipe(topo, reqPipe, sched, rsvBwList, rsvVlanList);
+
+        List<TopoEdge> azPath = new ArrayList<>();
+        for(Integer index = 0; index < azNodes.size()-1; index++){
+            TopoVertex src = azNodes.get(index);
+            TopoVertex dst = azNodes.get(index+1);
+
+            List<TopoEdge> path = dijkstraPCE.computeShortestPathEdges(prunedTopo, src, dst);
+            if(path.isEmpty()){
+                throw new PCEException("AZ Path could not be found to connect Requested Nodes " + src.getUrn() + " and " + dst.getUrn());
+            }
+            azPath.addAll(path);
+        }
+
+        List<TopoEdge> zaPath = new ArrayList<>();
+        for(Integer index = 0; index < zaNodes.size()-1; index++){
+            TopoVertex src = zaNodes.get(index);
+            TopoVertex dst = zaNodes.get(index+1);
+
+            List<TopoEdge> path = dijkstraPCE.computeShortestPathEdges(prunedTopo, src, dst);
+            if(path.isEmpty()){
+                throw new PCEException("ZA Path could not be found to connect Requested Nodes " + src.getUrn() + " and " + dst.getUrn());
+            }
+            zaPath.addAll(path);
+        }
+
+        if(azPath.isEmpty() || zaPath.isEmpty()){
+            throw new PCEException("Either the requested AZ or ZA path could not be found");
+        }
+
+        Map<String, List<TopoEdge>> theMap = new HashMap<>();
+        theMap.put("az", azPath);
+        theMap.put("za", zaPath);
+
+        return theMap;
+    }
+
+    private boolean checkForReachability(Topology topo, TopoVertex src, TopoVertex dst) {
+        Map<TopoVertex, Boolean> discoveredMap = new HashMap<>();
+        Map<TopoVertex, List<TopoEdge>> outgoingMap = buildOutgoingEdgeMap(topo);
+        depthFirstSearch(topo, src, discoveredMap, outgoingMap);
+        return discoveredMap.getOrDefault(dst, false);
+    }
+
+    private Map<TopoVertex,List<TopoEdge>> buildOutgoingEdgeMap(Topology topo) {
+        return topo.getVertices()
+                .stream()
+                .collect(Collectors.toMap(v -> v, v  -> topo.getEdges().stream().filter(e -> e.getA().equals(v)).collect(Collectors.toList())));
+    }
+
+    private void depthFirstSearch(Topology topo, TopoVertex vertex, Map<TopoVertex, Boolean> discoveredMap,
+                                  Map<TopoVertex, List<TopoEdge>> outgoingEdgeMap){
+        discoveredMap.put(vertex, true);
+        for(TopoEdge outgoingEdge : outgoingEdgeMap.getOrDefault(vertex, new ArrayList<>())){
+            if(!discoveredMap.getOrDefault(outgoingEdge.getZ(), false)){
+                depthFirstSearch(topo, outgoingEdge.getZ(), discoveredMap, outgoingEdgeMap);
+            }
+        }
     }
 }
