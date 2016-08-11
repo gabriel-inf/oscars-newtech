@@ -203,8 +203,11 @@ public class EroPCE
             zaPath.addAll(path);
         }
 
-        if(azPath.isEmpty() || zaPath.isEmpty()){
-            throw new PCEException("Either the requested AZ or ZA path could not be found");
+        if(!confirmValidPath(azPath, azNodes)){
+            throw new PCEException("The requested AZ path could not be found, " + azPath.toString() + " found instead");
+        }
+        if(!confirmValidPath(zaPath, zaNodes)){
+            throw new PCEException("The requested ZA path could not be found, " + zaPath.toString() + " found instead");
         }
 
         Map<String, List<TopoEdge>> theMap = new HashMap<>();
@@ -212,6 +215,11 @@ public class EroPCE
         theMap.put("za", zaPath);
 
         return theMap;
+    }
+
+    private boolean confirmValidPath(List<TopoEdge> path, List<TopoVertex> expectedNodes) {
+        boolean allNodes = expectedNodes.stream().allMatch(v -> path.stream().anyMatch(edge -> edge.getA().equals(v) || edge.getZ().equals(v)));
+        return allNodes && !path.isEmpty();
     }
 
     private boolean checkForReachability(Topology topo, TopoVertex src, TopoVertex dst) {

@@ -1271,4 +1271,234 @@ public class EroPceTest
 
         log.info("test 'multiMplsPipeTestNonPal' passed.");
     }
+
+    @Test
+    public void partialEroOneIntermediateTest(){
+        String testName = "partialEroOneIntermediateTest";
+        log.info("Initializing test: \'" + testName + "\'.");
+
+        topologyBuilder.buildTopo4_2();
+
+        ScheduleSpecificationE requestedSched;
+
+        Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
+        Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
+
+        String srcDevice = "nodeK";
+        String dstDevice = "nodeQ";
+        List<String> srcPorts = Stream.of("portA").collect(Collectors.toList());
+        List<String> dstPorts = Stream.of("portZ").collect(Collectors.toList());
+        Integer azBW = 25;
+        Integer zaBW = 25;
+        String vlan = "any";
+        PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
+        List<String> azERO = new ArrayList<>();
+        List<String> zaERO = new ArrayList<>();
+
+        azERO.add("nodeK");
+        azERO.add("nodeR");
+        azERO.add("nodeQ");
+
+        zaERO.add("nodeQ");
+        zaERO.add("nodeP");
+        zaERO.add("nodeK");
+
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        pipeAZ.setAzERO(azERO);
+        pipeAZ.setZaERO(zaERO);
+
+        requestedSched = testBuilder.buildSchedule(startDate, endDate);
+
+        log.info("Beginning test: \'" + testName + "\'.");
+
+        Map<String, List<TopoEdge>> computedPaths = null;
+
+        try
+        {
+            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, requestedSched, new ArrayList<>(), new ArrayList<>());
+        }
+        catch(PCEException pceE){ log.error("", pceE); }
+
+        assert(computedPaths != null);
+
+        List<TopoEdge> computedAzEro = computedPaths.get("az");
+        List<TopoEdge> computedZaEro = computedPaths.get("za");
+
+        List<TopoVertex> azVerts = dijkstraPCE.translatePathEdgesToVertices(computedAzEro);
+        List<TopoVertex> zaVerts = dijkstraPCE.translatePathEdgesToVertices(computedZaEro);
+        List<String> azString = dijkstraPCE.translatePathVerticesToStrings(azVerts);
+        List<String> zaString = dijkstraPCE.translatePathVerticesToStrings(zaVerts);
+
+        // Computed EROs also include port URNs. Add those to requested EROs from comparison.
+        azERO.add(0, srcPorts.get(0));
+        azERO.add(dstPorts.get(0));
+        zaERO.add(0, dstPorts.get(0));
+        zaERO.add(srcPorts.get(0));
+
+        log.info("Requested AZ ERO: " + azERO);
+        log.info("Actual AZ ERO: " + azString);
+        log.info("Requested ZA ERO: " + zaERO);
+        log.info("Actual ZA ERO: " + zaString);
+        assert(azERO.stream().allMatch(eroString -> azString.stream().anyMatch(vString -> vString.equals(eroString))));
+        assert(zaERO.stream().allMatch(eroString -> zaString.stream().anyMatch(vString -> vString.equals(eroString))));
+
+        log.info("test \'" + testName + "\' passed.");
+    }
+
+    @Test
+    public void partialEroTwoIntermediateTest(){
+        String testName = "partialEroTwoIntermediateTest";
+        log.info("Initializing test: \'" + testName + "\'.");
+
+        topologyBuilder.buildTopo4_2();
+
+        ScheduleSpecificationE requestedSched;
+
+        Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
+        Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
+
+        String srcDevice = "nodeK";
+        String dstDevice = "nodeQ";
+        List<String> srcPorts = Stream.of("portA").collect(Collectors.toList());
+        List<String> dstPorts = Stream.of("portZ").collect(Collectors.toList());
+        Integer azBW = 25;
+        Integer zaBW = 25;
+        String vlan = "any";
+        PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
+        List<String> azERO = new ArrayList<>();
+        List<String> zaERO = new ArrayList<>();
+
+        azERO.add("nodeK");
+        azERO.add("nodeM");
+        azERO.add("nodeR");
+        azERO.add("nodeQ");
+
+        zaERO.add("nodeQ");
+        zaERO.add("nodeP");
+        zaERO.add("nodeL");
+        zaERO.add("nodeK");
+
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        pipeAZ.setAzERO(azERO);
+        pipeAZ.setZaERO(zaERO);
+
+        requestedSched = testBuilder.buildSchedule(startDate, endDate);
+
+        log.info("Beginning test: \'" + testName + "\'.");
+
+        Map<String, List<TopoEdge>> computedPaths = null;
+
+        try
+        {
+            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, requestedSched, new ArrayList<>(), new ArrayList<>());
+        }
+        catch(PCEException pceE){ log.error("", pceE); }
+
+        assert(computedPaths != null);
+
+        List<TopoEdge> computedAzEro = computedPaths.get("az");
+        List<TopoEdge> computedZaEro = computedPaths.get("za");
+
+        List<TopoVertex> azVerts = dijkstraPCE.translatePathEdgesToVertices(computedAzEro);
+        List<TopoVertex> zaVerts = dijkstraPCE.translatePathEdgesToVertices(computedZaEro);
+        List<String> azString = dijkstraPCE.translatePathVerticesToStrings(azVerts);
+        List<String> zaString = dijkstraPCE.translatePathVerticesToStrings(zaVerts);
+
+        // Computed EROs also include port URNs. Add those to requested EROs from comparison.
+        azERO.add(0, srcPorts.get(0));
+        azERO.add(dstPorts.get(0));
+        zaERO.add(0, dstPorts.get(0));
+        zaERO.add(srcPorts.get(0));
+
+        log.info("Requested AZ ERO: " + azERO);
+        log.info("Actual AZ ERO: " + azString);
+        log.info("Requested ZA ERO: " + zaERO);
+        log.info("Actual ZA ERO: " + zaString);
+        assert(azERO.stream().allMatch(eroString -> azString.stream().anyMatch(vString -> vString.equals(eroString))));
+        assert(zaERO.stream().allMatch(eroString -> zaString.stream().anyMatch(vString -> vString.equals(eroString))));
+
+        log.info("test \'" + testName + "\' passed.");
+    }
+
+    @Test
+    public void partialEroMultiIntermediateTest(){
+        String testName = "partialEroMultiIntermediateTest";
+        log.info("Initializing test: \'" + testName + "\'.");
+
+        topologyBuilder.buildTopo4_2();
+
+        ScheduleSpecificationE requestedSched;
+
+        Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
+        Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
+
+        String srcDevice = "nodeK";
+        String dstDevice = "nodeQ";
+        List<String> srcPorts = Stream.of("portA").collect(Collectors.toList());
+        List<String> dstPorts = Stream.of("portZ").collect(Collectors.toList());
+        Integer azBW = 25;
+        Integer zaBW = 25;
+        String vlan = "any";
+        PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
+        List<String> azERO = new ArrayList<>();
+        List<String> zaERO = new ArrayList<>();
+
+        azERO.add("nodeK");
+        azERO.add("nodeL");
+        azERO.add("nodeM");
+        azERO.add("nodeR");
+        azERO.add("nodeP");
+        azERO.add("nodeQ");
+
+        zaERO.add("nodeQ");
+        zaERO.add("nodeP");
+        zaERO.add("nodeR");
+        zaERO.add("nodeM");
+        zaERO.add("nodeL");
+        zaERO.add("nodeK");
+
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        pipeAZ.setAzERO(azERO);
+        pipeAZ.setZaERO(zaERO);
+
+        requestedSched = testBuilder.buildSchedule(startDate, endDate);
+
+        log.info("Beginning test: \'" + testName + "\'.");
+
+        Map<String, List<TopoEdge>> computedPaths = null;
+
+        try
+        {
+            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, requestedSched, new ArrayList<>(), new ArrayList<>());
+        }
+        catch(PCEException pceE){ log.error("", pceE); }
+
+        assert(computedPaths != null);
+
+        List<TopoEdge> computedAzEro = computedPaths.get("az");
+        List<TopoEdge> computedZaEro = computedPaths.get("za");
+
+        List<TopoVertex> azVerts = dijkstraPCE.translatePathEdgesToVertices(computedAzEro);
+        List<TopoVertex> zaVerts = dijkstraPCE.translatePathEdgesToVertices(computedZaEro);
+        List<String> azString = dijkstraPCE.translatePathVerticesToStrings(azVerts);
+        List<String> zaString = dijkstraPCE.translatePathVerticesToStrings(zaVerts);
+
+        // Computed EROs also include port URNs. Add those to requested EROs from comparison.
+        azERO.add(0, srcPorts.get(0));
+        azERO.add(dstPorts.get(0));
+        zaERO.add(0, dstPorts.get(0));
+        zaERO.add(srcPorts.get(0));
+
+        log.info("Requested AZ ERO: " + azERO);
+        log.info("Actual AZ ERO: " + azString);
+        log.info("Requested ZA ERO: " + zaERO);
+        log.info("Actual ZA ERO: " + zaString);
+        assert(azERO.stream().allMatch(eroString -> azString.stream().anyMatch(vString -> vString.equals(eroString))));
+        assert(zaERO.stream().allMatch(eroString -> zaString.stream().anyMatch(vString -> vString.equals(eroString))));
+
+        log.info("test \'" + testName + "\' passed.");
+    }
 }
