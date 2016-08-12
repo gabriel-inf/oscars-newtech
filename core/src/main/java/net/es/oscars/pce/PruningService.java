@@ -291,24 +291,18 @@ public class PruningService {
                 .collect(Collectors.toSet());
         // If this is an MPLS topology, or there are no edges left, just take the bandwidth-pruned set of edges.
         // Otherwise, find all the remaining edges that can support the requested VLAN(s).
-        if(pruned.getLayer() == Layer.MPLS || pruned.getLayer() == null || availableEdges.isEmpty())
-        {
-            pruned.setEdges(availableEdges);
-        }
-        else
-        {
-            pruned.setEdges(vlanSvc.findMaxValidEdgeSet(availableEdges, urnMap, vlans, availVlanMap));
+        if(pruned.getLayer() != Layer.MPLS && pruned.getLayer() != null && !availableEdges.isEmpty()){
+            availableEdges = vlanSvc.findMaxValidEdgeSet(availableEdges, urnMap, vlans, availVlanMap);
         }
 
         // Prune out blacklisted edges
-        if(urnBlacklist != null)
+        if(urnBlacklist != null && !urnBlacklist.isEmpty() && !availableEdges.isEmpty())
         {
-            if(!urnBlacklist.isEmpty())
-            {
-                Set<TopoEdge> blacklistedEdges = pruneBlacklist(topo, urnBlacklist);
-                pruned.getEdges().removeAll(blacklistedEdges);
-            }
+            Set<TopoEdge> blacklistedEdges = pruneBlacklist(topo, urnBlacklist);
+            availableEdges.removeAll(blacklistedEdges);
         }
+
+        pruned.setEdges(availableEdges);
 
         return pruned;
     }
