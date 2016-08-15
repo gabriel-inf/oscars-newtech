@@ -177,6 +177,14 @@ public class EroPCE
         List<TopoVertex> zaNodes = zaERO.stream().map(topo::getVertexByUrn).filter(Optional::isPresent).map(Optional::get)
                 .collect(Collectors.toList());
 
+        Set<TopoVertex> allNodes = new HashSet<>(azNodes);
+        allNodes.addAll(zaNodes);
+        if(allNodes.size() != azNodes.size() || allNodes.size() != zaNodes.size()){
+            log.info("AZ partial ERO: " + azERO);
+            log.info("ZA partial ERO: " + zaERO);
+            throw new PCEException("Routing failed as the AZ or ZA partial EROs are not palindromic.");
+        }
+
         Topology prunedTopo = pruningService.pruneWithPipe(topo, reqPipe, sched, rsvBwList, rsvVlanList);
 
         List<TopoEdge> azPath = new ArrayList<>();
@@ -191,6 +199,21 @@ public class EroPCE
             azPath.addAll(path);
         }
 
+        /**
+         * Enforces using the reverse AZ path for the ZA path.
+         * If not enforcing this, comment out this code block, and uncomment the code block below this one
+         */
+        List<TopoEdge> zaPath = azPath
+                .stream()
+                .map(e -> prunedTopo.getEdges()
+                        .stream()
+                        .filter(e2 -> e2.getA().equals(e.getZ()) && e2.getZ().equals(e.getA()) && e2.getLayer().equals(e.getLayer()))
+                        .findFirst()
+                        .orElse(null))
+                .collect(Collectors.toList());
+        Collections.reverse(zaPath);
+
+        /*
         List<TopoEdge> zaPath = new ArrayList<>();
         for(Integer index = 0; index < zaNodes.size()-1; index++){
             TopoVertex src = zaNodes.get(index);
@@ -202,6 +225,7 @@ public class EroPCE
             }
             zaPath.addAll(path);
         }
+        */
 
         if(!confirmValidPath(azPath, azNodes)){
             throw new PCEException("The requested AZ path could not be found, " + azPath.toString() + " found instead");
@@ -219,7 +243,7 @@ public class EroPCE
 
     private boolean confirmValidPath(List<TopoEdge> path, List<TopoVertex> expectedNodes) {
         boolean allNodes = expectedNodes.stream().allMatch(v -> path.stream().anyMatch(edge -> edge.getA().equals(v) || edge.getZ().equals(v)));
-        return allNodes && !path.isEmpty();
+        return allNodes && !path.isEmpty() && !path.contains(null);
     }
 
     private boolean checkForReachability(Topology topo, TopoVertex src, TopoVertex dst) {

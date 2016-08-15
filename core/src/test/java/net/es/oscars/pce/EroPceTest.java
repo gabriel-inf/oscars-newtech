@@ -1301,7 +1301,7 @@ public class EroPceTest
         azERO.add("nodeQ");
 
         zaERO.add("nodeQ");
-        zaERO.add("nodeP");
+        zaERO.add("nodeR");
         zaERO.add("nodeK");
 
         RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
@@ -1371,8 +1371,8 @@ public class EroPceTest
         List<String> zaERO = new ArrayList<>();
 
         azERO.add("nodeK");
-        azERO.add("nodeM");
-        azERO.add("nodeR");
+        azERO.add("nodeL");
+        azERO.add("nodeP");
         azERO.add("nodeQ");
 
         zaERO.add("nodeQ");
