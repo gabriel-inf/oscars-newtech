@@ -26,7 +26,7 @@ public class BandwidthAvailabilityRequest {
     private Integer minAzBandwidth;
 
     @NonNull
-    private Integer minZabandwidth;
+    private Integer minZaBandwidth;
 
     @NonNull
     private PalindromicType pathType;

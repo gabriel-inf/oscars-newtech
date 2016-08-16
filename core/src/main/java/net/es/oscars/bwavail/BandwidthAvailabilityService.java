@@ -69,7 +69,7 @@ public class BandwidthAvailabilityService {
         
         ScheduleSpecificationE reqSchSpec = entityBuilder.buildSchedule(request.getStartDate(), request.getEndDate());
         RequestedBlueprintE reqBlueprint = entityBuilder.buildRequest(request.getSrcPort(), request.getSrcDevice(),
-                request.getDstPort(), request.getDstDevice(), request.getMinAzBandwidth(), request.getMinZabandwidth(),
+                request.getDstPort(), request.getDstDevice(), request.getMinAzBandwidth(), request.getMinZaBandwidth(),
                 request.getPathType(), request.getSurvivabilityType(), "any");
 
         try
@@ -81,8 +81,7 @@ public class BandwidthAvailabilityService {
                 urns.addAll(entityDecomposer.decomposeReservedBlueprint(rsvBlueprint));
             }
         }
-        catch (PCEException pceEx) { log.info(pceEx.getMessage()); }
-        catch (PSSException pssEx) { log.info(pssEx.getMessage()); }
+        catch (PCEException | PSSException exception) { log.info(exception.getMessage()); }
 
         Optional<List<ReservedBandwidthE>> optRsvList = bwRepo.findOverlappingInterval(
                 request.getStartDate().toInstant(), request.getEndDate().toInstant());
@@ -95,9 +94,22 @@ public class BandwidthAvailabilityService {
 
         bwMaps = BuildMaps(rsvMap, request.getStartDate().toInstant(), request.getEndDate().toInstant(), rsvBlueprint);
 
+        Map<String, Integer> minsAndMaxes = getMinimumsAndMaximums(bwMaps);
+
         return BandwidthAvailabilityResponse.builder()
+                .requestID(request.getRequestID())
+                .srcDevice(request.getSrcDevice())
+                .srcPort(request.getSrcPort())
+                .dstDevice(request.getDstDevice())
+                .dstPort(request.getDstPort())
                 .startDate(request.getStartDate())
                 .endDate(request.getEndDate())
+                .minRequestedAzBandwidth(request.getMinAzBandwidth())
+                .minRequestedZaBandwidth(request.getMinZaBandwidth())
+                .minAvailableAzBandwidth(minsAndMaxes.get("minAZ"))
+                .minAvailableZaBandwidth(minsAndMaxes.get("minZA"))
+                .maxAvailableAzBandwidth(minsAndMaxes.get("maxAZ"))
+                .maxAvailableZaBandwidth(minsAndMaxes.get("maxZA"))
                 .bwAvailMaps(bwMaps)
                 .build();
     }
@@ -352,6 +364,47 @@ public class BandwidthAvailabilityService {
         eventList.sort((t1, t2) -> t1.getTime().compareTo(t2.getTime()));
 
         return eventList;
+    }
+
+    /**
+     * Pull out the maximum and minimum bandwidth values from the AZ and ZA directions of the input
+     * bandwidth maps.
+     * @param bwMaps - A mapping from "AZ" or "ZA" to a Map of time Instants and the bandwdith available at those times
+     * @return A map from "minAZ", "maxAZ", "minZA", and "MaxAZ" to corresponding integer bandwidth values.
+     */
+    private Map<String,Integer> getMinimumsAndMaximums(Map<String, Map<Instant, Integer>> bwMaps) {
+        Map<Instant, Integer> azEvents = bwMaps.get(AZ);
+        Map<Instant, Integer> zaEvents = bwMaps.get(ZA);
+
+        Integer minAZ = Integer.MAX_VALUE;
+        Integer minZA = Integer.MAX_VALUE;
+        Integer maxAZ = 0;
+        Integer maxZA = 0;
+
+        for(Integer azBw : azEvents.values()){
+            if(azBw < minAZ){
+                minAZ = azBw;
+            }
+            if(azBw > maxAZ){
+                maxAZ = azBw;
+            }
+        }
+        for(Integer zaBw : zaEvents.values()){
+            if(zaBw < minAZ){
+                minZA = zaBw;
+            }
+            if(zaBw > maxAZ){
+                maxZA = zaBw;
+            }
+        }
+
+        Map<String, Integer> minMaxMap = new HashMap<>();
+        minMaxMap.put("minAZ", minAZ);
+        minMaxMap.put("minZA", minZA);
+        minMaxMap.put("maxAZ", maxAZ);
+        minMaxMap.put("maxZA", maxZA);
+
+        return minMaxMap;
     }
 
     @Data

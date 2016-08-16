@@ -24,19 +24,34 @@ public class BandwidthAvailabilityResponse {
     private Date endDate;
 
     @NonNull
-    private Integer minRequestedBandwidth;
+    private Integer minRequestedAzBandwidth;
 
     @NonNull
-    private String source;
+    private Integer minRequestedZaBandwidth;
 
     @NonNull
-    private String destination;
+    private String srcDevice;
 
     @NonNull
-    private Integer minAvailableBandwidth;
+    private String srcPort;
 
     @NonNull
-    private Integer maxAvailableBandwidth;
+    private String dstDevice;
+
+    @NonNull
+    private String dstPort;
+
+    @NonNull
+    private Integer minAvailableAzBandwidth;
+
+    @NonNull
+    private Integer maxAvailableAzBandwidth;
+
+    @NonNull
+    private Integer minAvailableZaBandwidth;
+
+    @NonNull
+    private Integer maxAvailableZaBandwidth;
 
     @NonNull
     private Map<String, Map<Instant, Integer>> bwAvailMaps;
