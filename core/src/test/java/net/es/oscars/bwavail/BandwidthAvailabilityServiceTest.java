@@ -7,6 +7,9 @@ import net.es.oscars.bwavail.enums.BandwidthAvailabilityResponse;
 import net.es.oscars.dto.spec.PalindromicType;
 import net.es.oscars.dto.spec.SurvivabilityType;
 import net.es.oscars.topo.TopologyBuilder;
+import net.es.oscars.topo.dao.UrnRepository;
+import net.es.oscars.topo.ent.ReservableBandwidthE;
+import net.es.oscars.topo.ent.UrnE;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +20,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -30,6 +37,8 @@ public class BandwidthAvailabilityServiceTest {
     @Autowired
     private TopologyBuilder topologyBuilder;
 
+    @Autowired
+    private UrnRepository urnRepo;
 
     @Test
     public void noReservationsTest(){
@@ -50,6 +59,28 @@ public class BandwidthAvailabilityServiceTest {
                 .survivabilityType(SurvivabilityType.SURVIVABILITY_NONE)
                 .build();
         BandwidthAvailabilityResponse response = bwAvailService.getBandwidthAvailabilityMap(request);
-        log.info(response.toString());
+
+        List<UrnE> urns = urnRepo.findAll();
+        List<ReservableBandwidthE> reservableBandwidths = urns
+                .stream()
+                .filter(u -> u.getReservableBandwidth() != null)
+                .map(UrnE::getReservableBandwidth)
+                .collect(Collectors.toList());
+        List<Integer> inReservableBws = reservableBandwidths.stream().map(ReservableBandwidthE::getIngressBw).collect(Collectors.toList());
+        List<Integer> egReservableBws = reservableBandwidths.stream().map(ReservableBandwidthE::getEgressBw).collect(Collectors.toList());
+
+        Map<Instant, Integer> azBwMap = response.getAzBwAvailMap();
+        Map<Instant, Integer> zaBwMap = response.getZaBwAvailMap();
+        Integer minAzBw = response.getMinAvailableAzBandwidth();
+        Integer maxAzBw = response.getMaxAvailableAzBandwidth();
+        Integer minZaBw = response.getMinAvailableZaBandwidth();
+        Integer maxZaBw = response.getMaxAvailableZaBandwidth();
+        assert(minAzBw.equals(maxAzBw));
+        assert(maxAzBw.equals(minZaBw));
+        assert(minZaBw.equals(maxZaBw));
+        assert(azBwMap.values().stream().allMatch(inReservableBws::contains));
+        assert(zaBwMap.values().stream().allMatch(inReservableBws::contains));
+        assert(azBwMap.values().stream().allMatch(egReservableBws::contains));
+        assert(zaBwMap.values().stream().allMatch(egReservableBws::contains));
     }
 }
