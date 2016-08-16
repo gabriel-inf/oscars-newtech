@@ -46,7 +46,7 @@ public class BandwidthAvailabilityServiceTest {
                 .endDate(new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond()))
                 .minAzBandwidth(10)
                 .minZaBandwidth(10)
-                .pathType(PalindromicType.PALINDROME)
+                .palindromicType(PalindromicType.PALINDROME)
                 .survivabilityType(SurvivabilityType.SURVIVABILITY_NONE)
                 .build();
         BandwidthAvailabilityResponse response = bwAvailService.getBandwidthAvailabilityMap(request);

@@ -18,7 +18,6 @@ import net.es.oscars.topo.svc.TopoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.criteria.CriteriaBuilder;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -70,7 +69,7 @@ public class BandwidthAvailabilityService {
         ScheduleSpecificationE reqSchSpec = entityBuilder.buildSchedule(request.getStartDate(), request.getEndDate());
         RequestedBlueprintE reqBlueprint = entityBuilder.buildRequest(request.getSrcPort(), request.getSrcDevice(),
                 request.getDstPort(), request.getDstDevice(), request.getMinAzBandwidth(), request.getMinZaBandwidth(),
-                request.getPathType(), request.getSurvivabilityType(), "any");
+                request.getPalindromicType(), request.getSurvivabilityType(), "any");
 
         try
         {
@@ -78,7 +77,10 @@ public class BandwidthAvailabilityService {
             if (optRsvBlueprint.isPresent())
             {
                 rsvBlueprint = optRsvBlueprint.get();
-                urns.addAll(entityDecomposer.decomposeReservedBlueprint(rsvBlueprint));
+                urns.addAll(entityDecomposer.decomposeReservedBlueprint(rsvBlueprint)
+                        .stream()
+                        .filter(urn -> urn.getReservableBandwidth() != null)
+                        .collect(Collectors.toList()));
             }
         }
         catch (PCEException | PSSException exception) { log.info(exception.getMessage()); }
@@ -91,8 +93,7 @@ public class BandwidthAvailabilityService {
         rsvList = rsvList.stream().filter(rsv -> urns.contains(rsv.getUrn())).collect(Collectors.toList());
 
         rsvMap = bwService.buildReservedBandwidthMap(rsvList);
-
-        bwMaps = BuildMaps(rsvMap, request.getStartDate().toInstant(), request.getEndDate().toInstant(), rsvBlueprint);
+        bwMaps = buildMaps(rsvMap, request.getStartDate().toInstant(), request.getEndDate().toInstant(), rsvBlueprint);
 
         Map<String, Integer> minsAndMaxes = getMinimumsAndMaximums(bwMaps);
 
@@ -110,9 +111,11 @@ public class BandwidthAvailabilityService {
                 .minAvailableZaBandwidth(minsAndMaxes.get("minZA"))
                 .maxAvailableAzBandwidth(minsAndMaxes.get("maxAZ"))
                 .maxAvailableZaBandwidth(minsAndMaxes.get("maxZA"))
-                .bwAvailMaps(bwMaps)
+                .azBwAvailMap(bwMaps.get(AZ))
+                .zaBwAvailMap(bwMaps.get(ZA))
                 .build();
     }
+
 
     /**
      * Builds maps of the available bandwidth.
@@ -122,7 +125,7 @@ public class BandwidthAvailabilityService {
      * @param blueprint Reserved blueprint.
      * @return Maps of available bandwidth.
      */
-    private Map<String, Map<Instant, Integer>> BuildMaps(Map<UrnE, List<ReservedBandwidthE>> rsvMap,
+    private Map<String, Map<Instant, Integer>> buildMaps(Map<UrnE, List<ReservedBandwidthE>> rsvMap,
                                                          Instant start, Instant end, ReservedBlueprintE blueprint)
     {
         List<String> INGRESS_EGRESS = new ArrayList<>();                // Simplifies conditionals.
@@ -138,16 +141,36 @@ public class BandwidthAvailabilityService {
         bwMaps.put(ZA, new HashMap<>());
 
         // Map of path direction -> urns -> Ingress and/or Egress.
-        Map<String, Map<UrnE, List<String>>> urnTables = BuildUrnTables(blueprint);
+        Map<String, Map<UrnE, List<String>>> urnTables = buildUrnTables(blueprint);
+
+        Set<UrnE> urns = urnTables.values().stream().map(Map::keySet).flatMap(Collection::stream).collect(Collectors.toSet());
 
         // Sorted list of bandwidth events.
-        List<BwEvent> bwEvents = AbstractEvents(rsvMap);
+        List<BwEvent> bwEvents = abstractEvents(rsvMap);
         
-        for (UrnE urn : rsvMap.keySet())
+        for (UrnE urn : urns)
         {
             // Initialize each urns available bandwidth to max supported.
             curUrnBw.get(INGRESS).put(urn, urn.getReservableBandwidth().getIngressBw());
             curUrnBw.get(EGRESS).put(urn, urn.getReservableBandwidth().getEgressBw());
+        }
+
+        if(bwEvents.isEmpty()){
+            for (String path : bwMaps.keySet()) {
+                Integer minBw = Integer.MAX_VALUE;
+                for(UrnE urn: urns) {
+                    Integer urnBw = 0;
+                    if (urnTables.get(path).get(urn).containsAll(INGRESS_EGRESS)) {
+                        urnBw = Math.min(curUrnBw.get(INGRESS).get(urn), curUrnBw.get(EGRESS).get(urn));
+                    } else if (urnTables.get(path).get(urn).contains(INGRESS)) {
+                        urnBw = curUrnBw.get(INGRESS).get(urn);
+                    } else if (urnTables.get(path).get(urn).contains(EGRESS)) {
+                        urnBw = curUrnBw.get(EGRESS).get(urn);
+                    }
+                    minBw = urnBw < minBw ? urnBw : minBw;
+                }
+                bwMaps.get(path).put(start, minBw);
+            }
         }
 
         // Loop through bandwidth events.
@@ -168,11 +191,11 @@ public class BandwidthAvailabilityService {
                 for (String path : bwMaps.keySet()) {
                     if (bwMaps.get(path).isEmpty()) {
                         if (urnTables.get(path).get(bwEvent.getUrn()).containsAll(INGRESS_EGRESS)) {
-                            bwMaps.get(path).put(start, FindMin(FindMin(curUrnBw.get(INGRESS)), FindMin(curUrnBw.get(EGRESS))));
+                            bwMaps.get(path).put(start, findMin(findMin(curUrnBw.get(INGRESS)), findMin(curUrnBw.get(EGRESS))));
                         } else if (urnTables.get(path).get(bwEvent.getUrn()).contains(INGRESS)) {
-                            bwMaps.get(path).put(start, FindMin(curUrnBw.get(INGRESS)));
+                            bwMaps.get(path).put(start, findMin(curUrnBw.get(INGRESS)));
                         } else if (urnTables.get(path).get(bwEvent.getUrn()).contains(EGRESS)) {
-                            bwMaps.get(path).put(start, FindMin(curUrnBw.get(EGRESS)));
+                            bwMaps.get(path).put(start, findMin(curUrnBw.get(EGRESS)));
                         }
                     }
                 }
@@ -185,20 +208,20 @@ public class BandwidthAvailabilityService {
                 for (String path : bwMaps.keySet()) {
                     if (bwMaps.get(path).containsKey(bwEvent.getTime())) {
                         if (urnTables.get(path).get(bwEvent.getUrn()).containsAll(INGRESS_EGRESS)) {
-                            bwMaps.get(path).replace(start, FindMin(FindMin(curUrnBw.get(INGRESS)), FindMin(curUrnBw.get(EGRESS))));
+                            bwMaps.get(path).replace(start, findMin(findMin(curUrnBw.get(INGRESS)), findMin(curUrnBw.get(EGRESS))));
                         } else if (urnTables.get(path).get(bwEvent.getUrn()).contains(INGRESS)) {
-                            bwMaps.get(path).replace(start, FindMin(curUrnBw.get(INGRESS)));
+                            bwMaps.get(path).replace(start, findMin(curUrnBw.get(INGRESS)));
                         } else if (urnTables.get(path).get(bwEvent.getUrn()).contains(EGRESS)) {
-                            bwMaps.get(path).replace(start, FindMin(curUrnBw.get(EGRESS)));
+                            bwMaps.get(path).replace(start, findMin(curUrnBw.get(EGRESS)));
                         }
                     }
                     else{
                         if (urnTables.get(path).get(bwEvent.getUrn()).containsAll(INGRESS_EGRESS)) {
-                            bwMaps.get(path).put(start, FindMin(FindMin(curUrnBw.get(INGRESS)), FindMin(curUrnBw.get(EGRESS))));
+                            bwMaps.get(path).put(start, findMin(findMin(curUrnBw.get(INGRESS)), findMin(curUrnBw.get(EGRESS))));
                         } else if (urnTables.get(path).get(bwEvent.getUrn()).contains(INGRESS)) {
-                            bwMaps.get(path).put(start, FindMin(curUrnBw.get(INGRESS)));
+                            bwMaps.get(path).put(start, findMin(curUrnBw.get(INGRESS)));
                         } else if (urnTables.get(path).get(bwEvent.getUrn()).contains(EGRESS)) {
-                            bwMaps.get(path).put(start, FindMin(curUrnBw.get(EGRESS)));
+                            bwMaps.get(path).put(start, findMin(curUrnBw.get(EGRESS)));
                         }
                     }
                 }
@@ -210,11 +233,11 @@ public class BandwidthAvailabilityService {
                 // Add ending points and break.
                 for (String path : bwMaps.keySet()) {
                     if (urnTables.get(path).get(bwEvent.getUrn()).containsAll(INGRESS_EGRESS)) {
-                        bwMaps.get(path).put(start, FindMin(FindMin(curUrnBw.get(INGRESS)), FindMin(curUrnBw.get(EGRESS))));
+                        bwMaps.get(path).put(start, findMin(findMin(curUrnBw.get(INGRESS)), findMin(curUrnBw.get(EGRESS))));
                     } else if (urnTables.get(path).get(bwEvent.getUrn()).contains(INGRESS)) {
-                        bwMaps.get(path).put(start, FindMin(curUrnBw.get(INGRESS)));
+                        bwMaps.get(path).put(start, findMin(curUrnBw.get(INGRESS)));
                     } else if (urnTables.get(path).get(bwEvent.getUrn()).contains(EGRESS)) {
-                        bwMaps.get(path).put(start, FindMin(curUrnBw.get(EGRESS)));
+                        bwMaps.get(path).put(start, findMin(curUrnBw.get(EGRESS)));
                     }
                 }
                 break;
@@ -229,7 +252,7 @@ public class BandwidthAvailabilityService {
      * @param i2 Integer to be compared.
      * @return Minimum of i1 & i2.
      */
-    private Integer FindMin(Integer i1, Integer i2)
+    private Integer findMin(Integer i1, Integer i2)
     {
         if (i1 < i2)
             return i1;
@@ -241,7 +264,7 @@ public class BandwidthAvailabilityService {
      * @param inMap Map of URNs to Integers.
      * @return Minimum integer in inMap.
      */
-    private Integer FindMin(Map<UrnE, Integer> inMap)
+    private Integer findMin(Map<UrnE, Integer> inMap)
     {
         assert (!inMap.isEmpty());
 
@@ -261,7 +284,7 @@ public class BandwidthAvailabilityService {
      * @param blueprint Reserved Blueprint.
      * @return Map of URNs used for each path.
      */
-    private Map<String, Map<UrnE , List<String>>> BuildUrnTables(ReservedBlueprintE blueprint)
+    private Map<String, Map<UrnE , List<String>>> buildUrnTables(ReservedBlueprintE blueprint)
     {
         boolean isIngress;
         Map<String, Map<UrnE, List<String>>> urnTables = new HashMap<>();
@@ -274,7 +297,7 @@ public class BandwidthAvailabilityService {
             // A->Z starts with egress.
             isIngress = false;
 
-            for (UrnE urn : entityDecomposer.decomposeMplsPipeIntoAzEROList(pipe))
+            for (UrnE urn : entityDecomposer.decomposeMplsPipeIntoAzEROList(pipe).stream().filter(u -> u.getReservableBandwidth() != null).collect(Collectors.toList()))
             {
                 urnTables.get(AZ).putIfAbsent(urn, new ArrayList<>());
                 
@@ -290,7 +313,7 @@ public class BandwidthAvailabilityService {
             // Z-A starts with ingress.
             isIngress = true;
             
-            for (UrnE urn : entityDecomposer.decomposeMplsPipeIntoZaEROList(pipe))
+            for (UrnE urn : entityDecomposer.decomposeMplsPipeIntoZaEROList(pipe).stream().filter(u -> u.getReservableBandwidth() != null).collect(Collectors.toList()))
             {
                 urnTables.get(ZA).putIfAbsent(urn, new ArrayList<>());
 
@@ -348,7 +371,7 @@ public class BandwidthAvailabilityService {
      * @param rsvMap Map of URNs to Reserved Bandwidths.
      * @return List of bandwidth events sorted chronologically.
      */
-    private List<BwEvent> AbstractEvents(Map<UrnE, List<ReservedBandwidthE>> rsvMap)
+    private List<BwEvent> abstractEvents(Map<UrnE, List<ReservedBandwidthE>> rsvMap)
     {
         List<BwEvent> eventList = new ArrayList<>();
 
@@ -390,10 +413,10 @@ public class BandwidthAvailabilityService {
             }
         }
         for(Integer zaBw : zaEvents.values()){
-            if(zaBw < minAZ){
+            if(zaBw < minZA){
                 minZA = zaBw;
             }
-            if(zaBw > maxAZ){
+            if(zaBw > maxZA){
                 maxZA = zaBw;
             }
         }

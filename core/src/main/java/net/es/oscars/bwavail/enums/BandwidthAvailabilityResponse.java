@@ -54,5 +54,8 @@ public class BandwidthAvailabilityResponse {
     private Integer maxAvailableZaBandwidth;
 
     @NonNull
-    private Map<String, Map<Instant, Integer>> bwAvailMaps;
+    private Map<Instant, Integer> azBwAvailMap;
+
+    @NonNull
+    private Map<Instant, Integer> zaBwAvailMap;
 }

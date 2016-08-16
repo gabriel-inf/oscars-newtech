@@ -29,7 +29,7 @@ public class BandwidthAvailabilityRequest {
     private Integer minZaBandwidth;
 
     @NonNull
-    private PalindromicType pathType;
+    private PalindromicType palindromicType;
 
     @NonNull
     private SurvivabilityType survivabilityType;
