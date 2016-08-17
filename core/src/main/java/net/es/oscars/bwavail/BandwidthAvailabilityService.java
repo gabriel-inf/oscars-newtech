@@ -294,6 +294,21 @@ public class BandwidthAvailabilityService {
         // Handle MPLS pipes first.
         for (ReservedMplsPipeE pipe : blueprint.getVlanFlow().getMplsPipes())
         {
+            // Handle fixtures
+            for(ReservedVlanFixtureE fix : pipe.getAJunction().getFixtures()){
+                UrnE urn = fix.getIfceUrn();
+                urnTables.get(AZ).putIfAbsent(urn, new ArrayList<>());
+                urnTables.get(AZ).get(urn).add(INGRESS);
+                urnTables.get(ZA).putIfAbsent(urn, new ArrayList<>());
+                urnTables.get(ZA).get(urn).add(EGRESS);
+            }
+            for(ReservedVlanFixtureE fix : pipe.getZJunction().getFixtures()){
+                UrnE urn = fix.getIfceUrn();
+                urnTables.get(AZ).putIfAbsent(urn, new ArrayList<>());
+                urnTables.get(AZ).get(urn).add(EGRESS);
+                urnTables.get(ZA).putIfAbsent(urn, new ArrayList<>());
+                urnTables.get(ZA).get(urn).add(INGRESS);
+            }
             // A->Z starts with egress.
             isIngress = false;
 
@@ -310,8 +325,8 @@ public class BandwidthAvailabilityService {
                 isIngress = Boolean.logicalXor(isIngress, true);
             }
 
-            // Z-A starts with ingress.
-            isIngress = true;
+            // Z-A starts with egress.
+            isIngress = false;
             
             for (UrnE urn : entityDecomposer.decomposeMplsPipeIntoZaEROList(pipe).stream().filter(u -> u.getReservableBandwidth() != null).collect(Collectors.toList()))
             {
@@ -330,6 +345,22 @@ public class BandwidthAvailabilityService {
         // Handle ethernet pipes.
         for (ReservedEthPipeE pipe : blueprint.getVlanFlow().getEthPipes())
         {
+            // Handle fixtures
+            for(ReservedVlanFixtureE fix : pipe.getAJunction().getFixtures()){
+                UrnE urn = fix.getIfceUrn();
+                urnTables.get(AZ).putIfAbsent(urn, new ArrayList<>());
+                urnTables.get(AZ).get(urn).add(INGRESS);
+                urnTables.get(ZA).putIfAbsent(urn, new ArrayList<>());
+                urnTables.get(ZA).get(urn).add(EGRESS);
+            }
+            for(ReservedVlanFixtureE fix : pipe.getZJunction().getFixtures()){
+                UrnE urn = fix.getIfceUrn();
+                urnTables.get(AZ).putIfAbsent(urn, new ArrayList<>());
+                urnTables.get(AZ).get(urn).add(EGRESS);
+                urnTables.get(ZA).putIfAbsent(urn, new ArrayList<>());
+                urnTables.get(ZA).get(urn).add(INGRESS);
+            }
+
             // A->Z starts with egress.
             isIngress = false;
 
