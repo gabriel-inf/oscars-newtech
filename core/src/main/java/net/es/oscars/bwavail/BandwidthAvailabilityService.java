@@ -12,6 +12,8 @@ import net.es.oscars.pce.*;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.dao.ReservedBandwidthRepository;
 import net.es.oscars.resv.ent.*;
+import net.es.oscars.topo.beans.TopoVertex;
+import net.es.oscars.topo.beans.Topology;
 import net.es.oscars.topo.dao.UrnRepository;
 import net.es.oscars.topo.ent.UrnE;
 import net.es.oscars.topo.svc.TopoService;
@@ -59,6 +61,26 @@ public class BandwidthAvailabilityService {
     private final static String ZA = "ZA";
 
     public BandwidthAvailabilityResponse getBandwidthAvailabilityMap(BandwidthAvailabilityRequest request) {
+
+        if(!validateRequest(request)){
+            return BandwidthAvailabilityResponse.builder()
+                    .requestID(request.getRequestID())
+                    .srcDevice(request.getSrcDevice())
+                    .srcPort(request.getSrcPort())
+                    .dstDevice(request.getDstDevice())
+                    .dstPort(request.getDstPort())
+                    .startDate(request.getStartDate())
+                    .endDate(request.getEndDate())
+                    .minRequestedAzBandwidth(request.getMinAzBandwidth())
+                    .minRequestedZaBandwidth(request.getMinZaBandwidth())
+                    .minAvailableAzBandwidth(-1)
+                    .minAvailableZaBandwidth(-1)
+                    .maxAvailableAzBandwidth(-1)
+                    .maxAvailableZaBandwidth(-1)
+                    .azBwAvailMap(new HashMap<>())
+                    .zaBwAvailMap(new HashMap<>())
+                    .build();
+        }
 
         Set<UrnE> urns = new HashSet<>();
         List<ReservedBandwidthE> rsvList = new ArrayList<>();
@@ -114,6 +136,18 @@ public class BandwidthAvailabilityService {
                 .azBwAvailMap(bwMaps.get(AZ))
                 .zaBwAvailMap(bwMaps.get(ZA))
                 .build();
+    }
+
+    private boolean validateRequest(BandwidthAvailabilityRequest request){
+        // Confirm that src/dest devices/ports are actually in the topology
+        Topology topo = topoService.getMultilayerTopology();
+
+        Optional<TopoVertex> srcDevice = topo.getVertexByUrn(request.getSrcDevice());
+        Optional<TopoVertex> srcPort = topo.getVertexByUrn(request.getSrcPort());
+        Optional<TopoVertex> dstDevice = topo.getVertexByUrn(request.getDstDevice());
+        Optional<TopoVertex> dstPort = topo.getVertexByUrn(request.getDstPort());
+
+        return srcDevice.isPresent() && srcPort.isPresent() && dstDevice.isPresent() && dstPort.isPresent();
     }
 
     /**
