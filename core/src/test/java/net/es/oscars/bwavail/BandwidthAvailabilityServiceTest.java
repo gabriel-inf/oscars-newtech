@@ -291,4 +291,91 @@ public class BandwidthAvailabilityServiceTest {
             }
         }
     }
+
+    @Test
+    public void reservationsOnPathStartBeforeEndDuring(){
+
+        reservedBandwidthRepo.deleteAll();
+        topologyBuilder.buildTopoFourPaths();
+        List<UrnE> urns = urnRepo.findAll();
+        Map<String, UrnE> urnMap = urns.stream().collect(Collectors.toMap(UrnE::getUrn, urn -> urn));
+        Instant now = Instant.now();
+
+        List<String> reservedPortNames = Arrays.asList("portA", "nodeW:2");
+        List<Instant> reservedStartTimes = Arrays.asList(
+                now.minus(100L, ChronoUnit.DAYS),
+                now.minus(100L, ChronoUnit.DAYS));
+        List<Instant> reservedEndTimes = Arrays.asList(
+                now.plus(1L, ChronoUnit.HOURS),
+                now.plus(1L, ChronoUnit.HOURS));
+        List<Integer> inBandwidths = Arrays.asList(100, 100);
+        List<Integer> egBandwidths = Arrays.asList(100, 100);
+
+        Integer expectedMinAzBw = 900;
+        Integer expectedMaxAzBw = 1000;
+        Integer expectedMinZaBw = 900;
+        Integer expectedMaxZaBw = 1000;
+
+        List<String> chosenPortNames = Arrays.asList("portA", "nodeK:3", "nodeW:1", "nodeW:2", "nodeQ:3", "portZ");
+
+        Instant requestStartTime = now.plus(15L, ChronoUnit.MINUTES);
+        Instant requestEndTime = now.plus(1L, ChronoUnit.DAYS);
+
+        Map<Instant, Integer> azGoalMap = new HashMap<>();
+        azGoalMap.put(requestStartTime, expectedMinAzBw);
+        azGoalMap.put(reservedEndTimes.get(0), expectedMaxAzBw);
+        Map<Instant, Integer> zaGoalMap = new HashMap<>();
+        zaGoalMap.put(requestStartTime, expectedMinZaBw);
+        zaGoalMap.put(reservedEndTimes.get(0), expectedMaxZaBw);
+
+        //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        List<ReservedBandwidthE> reservedBandwidths = new ArrayList<>();
+        for(Integer index = 0; index < reservedPortNames.size(); index++){
+            reservedBandwidths.add(ReservedBandwidthE.builder()
+                    .urn(urnMap.get(reservedPortNames.get(index)))
+                    .beginning(reservedStartTimes.get(index))
+                    .ending(reservedEndTimes.get(index))
+                    .inBandwidth(inBandwidths.get(index))
+                    .egBandwidth(egBandwidths.get(index))
+                    .build());
+        }
+        Map<String, ReservedBandwidthE> resBWMap = reservedBandwidths.stream()
+                .collect(Collectors.toMap(rsv -> rsv.getUrn().getUrn(), rsv -> rsv));
+        reservedBandwidthRepo.save(reservedBandwidths);
+
+        //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        BandwidthAvailabilityRequest request = BandwidthAvailabilityRequest.builder()
+                .requestID(1L)
+                .srcPort("portA")
+                .srcDevice("nodeK")
+                .dstPort("portZ")
+                .dstDevice("nodeQ")
+                .startDate(new Date(requestStartTime.toEpochMilli()))
+                .endDate(new Date(requestEndTime.toEpochMilli()))
+                .minAzBandwidth(10)
+                .minZaBandwidth(10)
+                .palindromicType(PalindromicType.PALINDROME)
+                .survivabilityType(SurvivabilityType.SURVIVABILITY_NONE)
+                .build();
+        BandwidthAvailabilityResponse response = bwAvailService.getBandwidthAvailabilityMap(request);
+
+        List<UrnE> portPath = urns.stream().filter(u -> chosenPortNames.contains(u.getUrn())).collect(Collectors.toList());
+
+        Integer minAzBw = response.getMinAvailableAzBandwidth();
+        Integer maxAzBw = response.getMaxAvailableAzBandwidth();
+        Integer minZaBw = response.getMinAvailableZaBandwidth();
+        Integer maxZaBw = response.getMaxAvailableZaBandwidth();
+        assert(minAzBw.equals(expectedMinAzBw));
+        assert(maxAzBw.equals(expectedMaxAzBw));
+        assert(minZaBw.equals(expectedMinZaBw));
+        assert(maxZaBw.equals(expectedMaxZaBw));
+
+        Map<Instant, Integer> azBwMap = response.getAzBwAvailMap();
+        Map<Instant, Integer> zaBwMap = response.getZaBwAvailMap();
+
+        log.info(azBwMap.toString());
+        log.info(azGoalMap.toString());
+        assert(azBwMap.equals(azGoalMap));
+        assert(zaBwMap.equals(zaGoalMap));
+    }
 }
