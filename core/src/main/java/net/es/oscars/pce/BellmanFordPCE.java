@@ -7,10 +7,11 @@ import net.es.oscars.topo.beans.Topology;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
-public class BellmanFordService {
+public class BellmanFordPCE {
 
     public List<TopoEdge> shortestPath(Topology topo, TopoVertex source, TopoVertex dest){
 
@@ -70,7 +71,11 @@ public class BellmanFordService {
         Map<TopoVertex, TopoEdge> edgeMap = new HashMap<>();
 
         Set<TopoVertex> vertices = topo.getVertices();
-        Set<TopoEdge> edges = topo.getEdges();
+        List<TopoEdge> edges = topo
+                .getEdges()
+                .stream()
+                .sorted((a,z) -> a.getA().getUrn().compareToIgnoreCase(z.getA().getUrn()))
+                .collect(Collectors.toList());
 
         for(TopoVertex vertex : vertices){
             distanceMap.put(vertex, 999999999L);
@@ -101,6 +106,7 @@ public class BellmanFordService {
             }
         }
 
+        /*
         for(TopoEdge edge : edges){
             TopoVertex a = edge.getA();
             TopoVertex z = edge.getZ();
@@ -108,7 +114,7 @@ public class BellmanFordService {
                 log.info("Graph has a negative cycle, impossible to find shortest paths");
                 return new HashMap<>();
             }
-        }
+        }*/
 
         return edgeMap;
     }

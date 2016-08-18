@@ -103,7 +103,7 @@ public class ResvController {
         log.info("Request Details: " + request.toString());
 
         BandwidthAvailabilityResponse response = bwAvailService.getBandwidthAvailabilityMap(request);
-        log.info("Resonse Details: " + response.toString());
+        log.info("Response Details: " + response.toString());
         return response;
     }
 

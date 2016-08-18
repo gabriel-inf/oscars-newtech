@@ -7,6 +7,7 @@ import net.es.oscars.dto.spec.SurvivabilityType;
 
 import javax.persistence.*;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Data
@@ -39,6 +40,9 @@ public class RequestedVlanPipeE {
     @NonNull
     @ElementCollection
     private List<String> zaERO;
+
+    @ElementCollection
+    private Set<String> urnBlacklist;
 
     @NonNull
     private EthPipeType pipeType;

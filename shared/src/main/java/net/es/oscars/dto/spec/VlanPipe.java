@@ -33,6 +33,9 @@ public class VlanPipe {
     private List<String> zaERO;
 
     @NonNull
+    private Set<String> urnBlacklist;
+
+    @NonNull
     private EthPipeType pipeType;
 
     @NonNull

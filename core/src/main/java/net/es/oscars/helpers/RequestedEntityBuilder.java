@@ -55,6 +55,20 @@ public class RequestedEntityBuilder {
     }
 
     public RequestedBlueprintE buildRequest(String aPort, String aDevice, String zPort, String zDevice,
+                                            Integer azMbps, Integer zaMbps, PalindromicType palindromic,
+                                            SurvivabilityType survivable, String vlanExp, Set<String> blacklist){
+        log.info("Building RequestedBlueprintE");
+
+
+        Set<RequestedVlanPipeE> pipes = new HashSet<>();
+        RequestedVlanPipeE pipe = buildRequestedPipe(aPort, aDevice, zPort, zDevice, azMbps, zaMbps, palindromic, survivable, vlanExp, blacklist);
+        pipes.add(pipe);
+
+        return buildRequestedBlueprint(buildRequestedFlow(new HashSet<>(), pipes), Layer3FlowE.builder().build());
+
+    }
+
+    public RequestedBlueprintE buildRequest(String aPort, String aDevice, String zPort, String zDevice,
                                             Integer azMbps, Integer zaMbps, PalindromicType palindromic, SurvivabilityType survivable, String aVlanExp, String zVlanExp){
         log.info("Building RequestedBlueprintE");
 
@@ -199,6 +213,30 @@ public class RequestedEntityBuilder {
                 .zaMbps(zaMbps)
                 .eroPalindromic(palindromic)
                 .eroSurvivability(survivable)
+                .build();
+    }
+
+    public RequestedVlanPipeE buildRequestedPipe(String aPort, String aDevice, String zPort, String zDevice,
+                                                 Integer azMbps, Integer zaMbps, PalindromicType palindromic,
+                                                 SurvivabilityType survivable, String vlanExp, Set<String> blacklist){
+
+        List<String> aFixNames = new ArrayList<>();
+        aFixNames.add(aPort);
+
+        List<String> zFixNames = new ArrayList<>();
+        zFixNames.add(zPort);
+
+        return RequestedVlanPipeE.builder()
+                .aJunction(buildRequestedJunction(aDevice, aFixNames, azMbps, zaMbps, vlanExp, true))
+                .zJunction(buildRequestedJunction(zDevice, zFixNames, azMbps, zaMbps, vlanExp, false))
+                .pipeType(EthPipeType.REQUESTED)
+                .azERO(new ArrayList<>())
+                .zaERO(new ArrayList<>())
+                .azMbps(azMbps)
+                .zaMbps(zaMbps)
+                .eroPalindromic(palindromic)
+                .eroSurvivability(survivable)
+                .urnBlacklist(blacklist)
                 .build();
     }
 

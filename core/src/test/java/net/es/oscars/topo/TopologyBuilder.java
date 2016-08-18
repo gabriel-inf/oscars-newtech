@@ -2373,4 +2373,359 @@ public class TopologyBuilder
 
         testBuilder.populateRepos(topoNodes, topoLinks, portDeviceMap);
     }
+
+    public void buildTopoFourPaths()
+    {
+        log.info("Building Test Topology Four Paths");
+
+        Map<TopoVertex, TopoVertex> portDeviceMap = new HashMap<>();
+
+        // Devices //
+        TopoVertex nodeK = new TopoVertex("nodeK", VertexType.SWITCH);
+        TopoVertex nodeL = new TopoVertex("nodeL", VertexType.SWITCH);
+        TopoVertex nodeM = new TopoVertex("nodeM", VertexType.SWITCH);
+        TopoVertex nodeP = new TopoVertex("nodeP", VertexType.ROUTER);
+        TopoVertex nodeQ = new TopoVertex("nodeQ", VertexType.ROUTER);
+        TopoVertex nodeR = new TopoVertex("nodeR", VertexType.ROUTER);
+
+        TopoVertex nodeW = new TopoVertex("nodeW", VertexType.ROUTER);
+        TopoVertex nodeX = new TopoVertex("nodeX", VertexType.ROUTER);
+        TopoVertex nodeY = new TopoVertex("nodeY", VertexType.SWITCH);
+
+        // Ports //
+        TopoVertex portA = new TopoVertex("portA", VertexType.PORT);
+        TopoVertex portZ = new TopoVertex("portZ", VertexType.PORT);
+        TopoVertex portK1 = new TopoVertex("nodeK:1", VertexType.PORT);
+        TopoVertex portK2 = new TopoVertex("nodeK:2", VertexType.PORT);
+        TopoVertex portL1 = new TopoVertex("nodeL:1", VertexType.PORT);
+        TopoVertex portL2 = new TopoVertex("nodeL:2", VertexType.PORT);
+        TopoVertex portL3 = new TopoVertex("nodeL:3", VertexType.PORT);
+        TopoVertex portM1 = new TopoVertex("nodeM:1", VertexType.PORT);
+        TopoVertex portM2 = new TopoVertex("nodeM:2", VertexType.PORT);
+        TopoVertex portM3 = new TopoVertex("nodeM:3", VertexType.PORT);
+        TopoVertex portP1 = new TopoVertex("nodeP:1", VertexType.PORT);
+        TopoVertex portP2 = new TopoVertex("nodeP:2", VertexType.PORT);
+        TopoVertex portP3 = new TopoVertex("nodeP:3", VertexType.PORT);
+        TopoVertex portQ1 = new TopoVertex("nodeQ:1", VertexType.PORT);
+        TopoVertex portQ2 = new TopoVertex("nodeQ:2", VertexType.PORT);
+        TopoVertex portR1 = new TopoVertex("nodeR:1", VertexType.PORT);
+        TopoVertex portR2 = new TopoVertex("nodeR:2", VertexType.PORT);
+        TopoVertex portR3 = new TopoVertex("nodeR:3", VertexType.PORT);
+
+        TopoVertex portW1 = new TopoVertex("nodeW:1", VertexType.PORT);
+        TopoVertex portW2 = new TopoVertex("nodeW:2", VertexType.PORT);
+        TopoVertex portX1 = new TopoVertex("nodeX:1", VertexType.PORT);
+        TopoVertex portX2 = new TopoVertex("nodeX:2", VertexType.PORT);
+        TopoVertex portY1 = new TopoVertex("nodeY:1", VertexType.PORT);
+        TopoVertex portY2 = new TopoVertex("nodeY:2", VertexType.PORT);
+
+        TopoVertex portK3 = new TopoVertex("nodeK:3", VertexType.PORT);
+        TopoVertex portK4 = new TopoVertex("nodeK:4", VertexType.PORT);
+
+        TopoVertex portQ3 = new TopoVertex("nodeQ:3", VertexType.PORT);
+        TopoVertex portQ4 = new TopoVertex("nodeQ:4", VertexType.PORT);
+
+        // End-Port Links //
+        TopoEdge edgeInt_A_K = new TopoEdge(portA, nodeK, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_Z_Q = new TopoEdge(portZ, nodeQ, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_K_A = new TopoEdge(nodeK, portA, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_Q_Z = new TopoEdge(nodeQ, portZ, 0L, Layer.INTERNAL);
+
+        // Internal Links //
+        TopoEdge edgeInt_K1_K = new TopoEdge(portK1, nodeK, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_K2_K = new TopoEdge(portK2, nodeK, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_L1_L = new TopoEdge(portL1, nodeL, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_L2_L = new TopoEdge(portL2, nodeL, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_L3_L = new TopoEdge(portL3, nodeL, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_M1_M = new TopoEdge(portM1, nodeM, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_M2_M = new TopoEdge(portM2, nodeM, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_M3_M = new TopoEdge(portM3, nodeM, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_P1_P = new TopoEdge(portP1, nodeP, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_P2_P = new TopoEdge(portP2, nodeP, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_P3_P = new TopoEdge(portP3, nodeP, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_Q1_Q = new TopoEdge(portQ1, nodeQ, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_Q2_Q = new TopoEdge(portQ2, nodeQ, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_R1_R = new TopoEdge(portR1, nodeR, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_R2_R = new TopoEdge(portR2, nodeR, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_R3_R = new TopoEdge(portR3, nodeR, 0L, Layer.INTERNAL);
+
+        TopoEdge edgeInt_W1_W = new TopoEdge(portW1, nodeW, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_W2_W = new TopoEdge(portW2, nodeW, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_X1_X = new TopoEdge(portX1, nodeX, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_X2_X = new TopoEdge(portX2, nodeX, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_Y1_Y = new TopoEdge(portY1, nodeY, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_Y2_Y = new TopoEdge(portY2, nodeY, 0L, Layer.INTERNAL);
+
+        TopoEdge edgeInt_K3_K = new TopoEdge(portK3, nodeK, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_K4_K = new TopoEdge(portK4, nodeK, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_Q3_Q = new TopoEdge(portQ3, nodeQ, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_Q4_Q = new TopoEdge(portQ4, nodeQ, 0L, Layer.INTERNAL);
+
+
+        // Internal-Reverse Links //
+        TopoEdge edgeInt_K_K1 = new TopoEdge(nodeK, portK1, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_K_K2 = new TopoEdge(nodeK, portK2, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_L_L1 = new TopoEdge(nodeL, portL1, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_L_L2 = new TopoEdge(nodeL, portL2, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_L_L3 = new TopoEdge(nodeL, portL3, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_M_M1 = new TopoEdge(nodeM, portM1, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_M_M2 = new TopoEdge(nodeM, portM2, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_M_M3 = new TopoEdge(nodeM, portM3, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_P_P1 = new TopoEdge(nodeP, portP1, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_P_P2 = new TopoEdge(nodeP, portP2, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_P_P3 = new TopoEdge(nodeP, portP3, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_Q_Q1 = new TopoEdge(nodeQ, portQ1, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_Q_Q2 = new TopoEdge(nodeQ, portQ2, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_R_R1 = new TopoEdge(nodeR, portR1, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_R_R2 = new TopoEdge(nodeR, portR2, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_R_R3 = new TopoEdge(nodeR, portR3, 0L, Layer.INTERNAL);
+
+        TopoEdge edgeInt_W_W1 = new TopoEdge(nodeW, portW1, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_W_W2 = new TopoEdge(nodeW, portW2, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_X_X1 = new TopoEdge(nodeX, portX1, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_X_X2 = new TopoEdge(nodeX, portX2, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_Y_Y1 = new TopoEdge(nodeY, portY1, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_Y_Y2 = new TopoEdge(nodeY, portY2, 0L, Layer.INTERNAL);
+
+        TopoEdge edgeInt_K_K3 = new TopoEdge(nodeK, portK3, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_K_K4 = new TopoEdge(nodeK, portK4, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_Q_Q3 = new TopoEdge(nodeQ, portQ3, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_Q_Q4 = new TopoEdge(nodeQ, portQ4, 0L, Layer.INTERNAL);
+
+        // Network Links //
+        TopoEdge edgeEth_K1_L1 = new TopoEdge(portK1, portL1, 100L, Layer.ETHERNET);
+        TopoEdge edgeEth_K2_M1 = new TopoEdge(portK2, portM1, 100L, Layer.ETHERNET);
+        TopoEdge edgeEth_L1_K1 = new TopoEdge(portL1, portK1, 100L, Layer.ETHERNET);
+        TopoEdge edgeEth_L2_M2 = new TopoEdge(portL2, portM2, 100L, Layer.ETHERNET);
+        TopoEdge edgeEth_L3_P1 = new TopoEdge(portL3, portP1, 100L, Layer.ETHERNET);
+        TopoEdge edgeEth_M1_K2 = new TopoEdge(portM1, portK2, 100L, Layer.ETHERNET);
+        TopoEdge edgeEth_M2_L2 = new TopoEdge(portM2, portL2, 100L, Layer.ETHERNET);
+        TopoEdge edgeEth_M3_R1 = new TopoEdge(portM3, portR1, 100L, Layer.ETHERNET);
+        TopoEdge edgeEth_P1_L3 = new TopoEdge(portP1, portL3, 100L, Layer.ETHERNET);
+        TopoEdge edgeMpls_P2_Q1 = new TopoEdge(portP2, portQ1, 100L, Layer.MPLS);
+        TopoEdge edgeMpls_P3_R2 = new TopoEdge(portP3, portR2, 100L, Layer.MPLS);
+        TopoEdge edgeMpls_Q1_P2 = new TopoEdge(portQ1, portP2, 100L, Layer.MPLS);
+        TopoEdge edgeMpls_Q2_R3 = new TopoEdge(portQ2, portR3, 100L, Layer.MPLS);
+        TopoEdge edgeEth_R1_M3 = new TopoEdge(portR1, portM3, 100L, Layer.ETHERNET);
+        TopoEdge edgeMpls_R2_P3 = new TopoEdge(portR2, portP3, 100L, Layer.MPLS);
+        TopoEdge edgeMpls_R3_Q2 = new TopoEdge(portR3, portQ2, 100L, Layer.MPLS);
+
+        TopoEdge edgeEth_K3_W1 = new TopoEdge(portK3, portW1, 100L, Layer.ETHERNET);
+        TopoEdge edgeEth_K4_X1 = new TopoEdge(portK4, portX1, 100L, Layer.ETHERNET);
+        TopoEdge edgeEthW1_K3 = new TopoEdge(portW1, portK3, 100L, Layer.ETHERNET);
+        TopoEdge edgeEthX1_K4 = new TopoEdge(portX1, portK4, 100L, Layer.ETHERNET);
+
+        TopoEdge edgeEthX2_Y1 = new TopoEdge(portX2, portY1, 100L, Layer.ETHERNET);
+        TopoEdge edgeEthY1_X2 = new TopoEdge(portY1, portX2, 100L, Layer.ETHERNET);
+
+        TopoEdge edgeEthW2_Q3 = new TopoEdge(portW2, portQ3, 100L, Layer.ETHERNET);
+        TopoEdge edgeEthY2_Q4 = new TopoEdge(portY2, portQ4, 100L, Layer.ETHERNET);
+        TopoEdge edgeEthQ3_W2 = new TopoEdge(portQ3, portW2, 100L, Layer.ETHERNET);
+        TopoEdge edgeEthQ4_Y2 = new TopoEdge(portQ4, portY2, 100L, Layer.ETHERNET);
+
+
+        List<TopoVertex> topoNodes = new ArrayList<>();
+        List<TopoEdge> topoLinks = new ArrayList<>();
+
+        topoNodes.add(nodeK);
+        topoNodes.add(nodeL);
+        topoNodes.add(nodeM);
+        topoNodes.add(nodeP);
+        topoNodes.add(nodeQ);
+        topoNodes.add(nodeR);
+        topoNodes.add(nodeW);
+        topoNodes.add(nodeX);
+        topoNodes.add(nodeY);
+
+        topoNodes.add(portA);
+        topoNodes.add(portZ);
+        topoNodes.add(portK1);
+        topoNodes.add(portK2);
+        topoNodes.add(portL1);
+        topoNodes.add(portL2);
+        topoNodes.add(portL3);
+        topoNodes.add(portM1);
+        topoNodes.add(portM2);
+        topoNodes.add(portM3);
+        topoNodes.add(portP1);
+        topoNodes.add(portP2);
+        topoNodes.add(portP3);
+        topoNodes.add(portQ1);
+        topoNodes.add(portQ2);
+        topoNodes.add(portR1);
+        topoNodes.add(portR2);
+        topoNodes.add(portR3);
+        topoNodes.add(portW1);
+        topoNodes.add(portW2);
+        topoNodes.add(portX1);
+        topoNodes.add(portX2);
+        topoNodes.add(portY1);
+        topoNodes.add(portY2);
+
+        topoLinks.add(edgeInt_A_K);
+        topoLinks.add(edgeInt_Z_Q);
+        topoLinks.add(edgeInt_K1_K);
+        topoLinks.add(edgeInt_K2_K);
+        topoLinks.add(edgeInt_L1_L);
+        topoLinks.add(edgeInt_L2_L);
+        topoLinks.add(edgeInt_L3_L);
+        topoLinks.add(edgeInt_M1_M);
+        topoLinks.add(edgeInt_M2_M);
+        topoLinks.add(edgeInt_M3_M);
+        topoLinks.add(edgeInt_P1_P);
+        topoLinks.add(edgeInt_P2_P);
+        topoLinks.add(edgeInt_P3_P);
+        topoLinks.add(edgeInt_Q1_Q);
+        topoLinks.add(edgeInt_Q2_Q);
+        topoLinks.add(edgeInt_R1_R);
+        topoLinks.add(edgeInt_R2_R);
+        topoLinks.add(edgeInt_R3_R);
+
+        topoLinks.add(edgeInt_K3_K);
+        topoLinks.add(edgeInt_K4_K);
+        topoLinks.add(edgeInt_Q3_Q);
+        topoLinks.add(edgeInt_Q4_Q);
+        topoLinks.add(edgeInt_W1_W);
+        topoLinks.add(edgeInt_W2_W);
+        topoLinks.add(edgeInt_X1_X);
+        topoLinks.add(edgeInt_X2_X);
+        topoLinks.add(edgeInt_Y1_Y);
+        topoLinks.add(edgeInt_Y2_Y);
+
+        topoLinks.add(edgeInt_K_A);
+        topoLinks.add(edgeInt_Q_Z);
+        topoLinks.add(edgeInt_K_K1);
+        topoLinks.add(edgeInt_K_K2);
+        topoLinks.add(edgeInt_L_L1);
+        topoLinks.add(edgeInt_L_L2);
+        topoLinks.add(edgeInt_L_L3);
+        topoLinks.add(edgeInt_M_M1);
+        topoLinks.add(edgeInt_M_M2);
+        topoLinks.add(edgeInt_M_M3);
+        topoLinks.add(edgeInt_P_P1);
+        topoLinks.add(edgeInt_P_P2);
+        topoLinks.add(edgeInt_P_P3);
+        topoLinks.add(edgeInt_Q_Q1);
+        topoLinks.add(edgeInt_Q_Q2);
+        topoLinks.add(edgeInt_R_R1);
+        topoLinks.add(edgeInt_R_R2);
+        topoLinks.add(edgeInt_R_R3);
+
+        topoLinks.add(edgeInt_K_K3);
+        topoLinks.add(edgeInt_K_K4);
+        topoLinks.add(edgeInt_Q_Q3);
+        topoLinks.add(edgeInt_Q_Q4);
+        topoLinks.add(edgeInt_W_W1);
+        topoLinks.add(edgeInt_W_W2);
+        topoLinks.add(edgeInt_X_X1);
+        topoLinks.add(edgeInt_X_X2);
+        topoLinks.add(edgeInt_Y_Y1);
+        topoLinks.add(edgeInt_Y_Y2);
+
+        topoLinks.add(edgeEth_K1_L1);
+        topoLinks.add(edgeEth_K2_M1);
+        topoLinks.add(edgeEth_L1_K1);
+        topoLinks.add(edgeEth_L2_M2);
+        topoLinks.add(edgeEth_L3_P1);
+        topoLinks.add(edgeEth_M1_K2);
+        topoLinks.add(edgeEth_M2_L2);
+        topoLinks.add(edgeEth_M3_R1);
+        topoLinks.add(edgeEth_P1_L3);
+        topoLinks.add(edgeMpls_P2_Q1);
+        topoLinks.add(edgeMpls_P3_R2);
+        topoLinks.add(edgeMpls_Q1_P2);
+        topoLinks.add(edgeMpls_Q2_R3);
+        topoLinks.add(edgeEth_R1_M3);
+        topoLinks.add(edgeMpls_R2_P3);
+        topoLinks.add(edgeMpls_R3_Q2);
+
+        topoLinks.add(edgeEth_K3_W1);
+        topoLinks.add(edgeEth_K4_X1);
+        topoLinks.add(edgeEthW1_K3);
+        topoLinks.add(edgeEthX1_K4);
+        topoLinks.add(edgeEthX2_Y1);
+        topoLinks.add(edgeEthY1_X2);
+        topoLinks.add(edgeEthW2_Q3);
+        topoLinks.add(edgeEthY2_Q4);
+        topoLinks.add(edgeEthQ3_W2);
+        topoLinks.add(edgeEthQ4_Y2);
+
+        // Map Ports to Devices for simplicity in utility class //
+        for(TopoEdge oneEdge : topoLinks)
+        {
+            if(oneEdge.getLayer().equals(Layer.INTERNAL))
+            {
+                if(oneEdge.getA().getVertexType().equals(VertexType.PORT))
+                {
+                    portDeviceMap.put(oneEdge.getA(), oneEdge.getZ());
+                }
+            }
+        }
+
+        testBuilder.populateRepos(topoNodes, topoLinks, portDeviceMap);
+    }
+
+    public void buildTopoMultipleDisjointPaths() {
+        log.info("Building Test Topology Multiple Disjoint Paths");
+        Map<TopoVertex, TopoVertex> portToDeviceMap = new HashMap<>();
+
+        TopoVertex nodeOne = new TopoVertex("1", VertexType.ROUTER);
+        TopoVertex nodeTwo = new TopoVertex("2", VertexType.ROUTER);
+        TopoVertex nodeThree = new TopoVertex("3", VertexType.ROUTER);
+        TopoVertex nodeFour = new TopoVertex("4", VertexType.ROUTER);
+        TopoVertex nodeFive = new TopoVertex("5", VertexType.ROUTER);
+        TopoVertex nodeSix = new TopoVertex("6", VertexType.ROUTER);
+        TopoVertex nodeSeven = new TopoVertex("7", VertexType.ROUTER);
+        TopoVertex nodeEight = new TopoVertex("8", VertexType.ROUTER);
+        TopoVertex nodeNine = new TopoVertex("9", VertexType.ROUTER);
+
+        Set<TopoVertex> topoNodes = new HashSet<>(Arrays.asList(nodeOne, nodeTwo, nodeThree, nodeFour, nodeFive,
+                nodeSix, nodeSeven, nodeEight, nodeNine));
+
+        Set<TopoEdge> topoLinks = new HashSet<>();
+
+        topoLinks.add(new TopoEdge(nodeOne, nodeTwo, 100L, Layer.MPLS));
+        topoLinks.add(new TopoEdge(nodeOne, nodeFour, 100L, Layer.MPLS));
+
+        topoLinks.add(new TopoEdge(nodeTwo, nodeOne, 100L, Layer.MPLS));
+        topoLinks.add(new TopoEdge(nodeTwo, nodeThree, 100L, Layer.MPLS));
+        topoLinks.add(new TopoEdge(nodeTwo, nodeFour, 100L, Layer.MPLS));
+        topoLinks.add(new TopoEdge(nodeTwo, nodeFive, 100L, Layer.MPLS));
+
+        topoLinks.add(new TopoEdge(nodeThree, nodeTwo, 100L, Layer.MPLS));
+        topoLinks.add(new TopoEdge(nodeThree, nodeFive, 100L, Layer.MPLS));
+        topoLinks.add(new TopoEdge(nodeThree, nodeSix, 100L, Layer.MPLS));
+
+        topoLinks.add(new TopoEdge(nodeFour, nodeOne, 100L, Layer.MPLS));
+        topoLinks.add(new TopoEdge(nodeFour, nodeTwo, 100L, Layer.MPLS));
+        topoLinks.add(new TopoEdge(nodeFour, nodeFive, 100L, Layer.MPLS));
+        topoLinks.add(new TopoEdge(nodeFour, nodeSeven, 100L, Layer.MPLS));
+
+        topoLinks.add(new TopoEdge(nodeFive, nodeTwo, 100L, Layer.MPLS));
+        topoLinks.add(new TopoEdge(nodeFive, nodeThree, 100L, Layer.MPLS));
+        topoLinks.add(new TopoEdge(nodeFive, nodeFour, 100L, Layer.MPLS));
+        topoLinks.add(new TopoEdge(nodeFive, nodeSix, 100L, Layer.MPLS));
+        topoLinks.add(new TopoEdge(nodeFive, nodeSeven, 100L, Layer.MPLS));
+        topoLinks.add(new TopoEdge(nodeFive, nodeEight, 100L, Layer.MPLS));
+
+        topoLinks.add(new TopoEdge(nodeSix, nodeThree, 100L, Layer.MPLS));
+        topoLinks.add(new TopoEdge(nodeSix, nodeFive, 100L, Layer.MPLS));
+        topoLinks.add(new TopoEdge(nodeSix, nodeEight, 100L, Layer.MPLS));
+        topoLinks.add(new TopoEdge(nodeSix, nodeNine, 100L, Layer.MPLS));
+
+        topoLinks.add(new TopoEdge(nodeSeven, nodeFour, 100L, Layer.MPLS));
+        topoLinks.add(new TopoEdge(nodeSeven, nodeFive, 100L, Layer.MPLS));
+        topoLinks.add(new TopoEdge(nodeSeven, nodeEight, 100L, Layer.MPLS));
+
+        topoLinks.add(new TopoEdge(nodeEight, nodeFive, 100L, Layer.MPLS));
+        topoLinks.add(new TopoEdge(nodeEight, nodeSix, 100L, Layer.MPLS));
+        topoLinks.add(new TopoEdge(nodeEight, nodeSeven, 100L, Layer.MPLS));
+        topoLinks.add(new TopoEdge(nodeEight, nodeNine, 100L, Layer.MPLS));
+
+        topoLinks.add(new TopoEdge(nodeNine, nodeSix, 100L, Layer.MPLS));
+        topoLinks.add(new TopoEdge(nodeNine, nodeEight, 100L, Layer.MPLS));
+
+
+        testBuilder.populateRepos(topoNodes, topoLinks, portToDeviceMap);
+    }
 }
