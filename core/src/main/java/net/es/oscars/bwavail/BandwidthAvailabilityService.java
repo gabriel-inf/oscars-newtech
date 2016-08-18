@@ -185,7 +185,8 @@ public class BandwidthAvailabilityService {
         }
 
         // Handle case with no bandwidth events.
-        if(bwEvents.isEmpty()){
+        log.info("BW Events: " + bwEvents);
+        if(bwEvents.isEmpty() || bwEvents.stream().anyMatch(bwEvent -> bwEvent.getTime().equals(start))){
             for (String path : bwMaps.keySet()) {
                 Integer minBw = Integer.MAX_VALUE;
                 for(UrnE urn: urns) {
