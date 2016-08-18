@@ -161,6 +161,12 @@ public class BandwidthAvailabilityService {
     private Map<String, Map<Instant, Integer>> buildMaps(Map<UrnE, List<ReservedBandwidthE>> rsvMap,
                                                          Instant start, Instant end, ReservedBlueprintE blueprint)
     {
+        Integer curMin;                                     // Store current min for a path.
+
+        Map<String, Integer> prevMin = new HashMap<>();     // Track previous min for each path.
+        prevMin.put(AZ, 0);
+        prevMin.put(ZA, 0);
+
         Map<String, Map<UrnE, Integer>> curUrnBw = new HashMap<>();     // Available ingress and egress at urn.
         curUrnBw.put(INGRESS, new HashMap<>());
         curUrnBw.put(EGRESS, new HashMap<>());
@@ -214,7 +220,10 @@ public class BandwidthAvailabilityService {
                 // Add start point for each direction if not done already.
                 for (String path : bwMaps.keySet()) {
                     if (bwMaps.get(path).isEmpty()) {
-                        bwMaps.get(path).put(start, findMinBw(bwEvent.getUrn(), curUrnBw, urnTables.get(path).get(bwEvent.getUrn())));
+
+                        curMin = findMinBw(bwEvent.getUrn(), curUrnBw, urnTables.get(path).get(bwEvent.getUrn()));
+                        bwMaps.get(path).put(start, curMin);
+                        prevMin.replace(path, curMin);
                     }
                 }
 
@@ -224,9 +233,16 @@ public class BandwidthAvailabilityService {
 
                 // For each direction, update point for current event.
                 for (String path : bwMaps.keySet()) {
-                    bwMaps.get(path).putIfAbsent(bwEvent.getTime(), 0);
-                    bwMaps.get(path).replace(bwEvent.getTime(), findMinBw(bwEvent.getUrn(), curUrnBw,
-                            urnTables.get(path).get(bwEvent.getUrn())));
+
+                    curMin = findMinBw(bwEvent.getUrn(), curUrnBw, urnTables.get(path).get(bwEvent.getUrn()));
+
+                    // Check that a new point is necessary.
+                    if (!curMin.equals(prevMin.get(path)))
+                    {
+                        bwMaps.get(path).putIfAbsent(bwEvent.getTime(), 0);
+                        bwMaps.get(path).replace(bwEvent.getTime(), curMin);
+                        prevMin.replace(path, curMin);
+                    }
                 }
             }
 
