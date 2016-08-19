@@ -107,10 +107,14 @@ public class BandwidthAvailabilityService {
         }
         catch (PCEException | PSSException exception) { log.info(exception.getMessage()); }
 
+
         Optional<List<ReservedBandwidthE>> optRsvList = bwRepo.findOverlappingInterval(
                 request.getStartDate().toInstant(), request.getEndDate().toInstant());
         if (optRsvList.isPresent())
             rsvList.addAll(optRsvList.get());
+
+
+        //rsvList = bwRepo.findAll();
 
         rsvList = rsvList.stream().filter(rsv -> urns.contains(rsv.getUrn())).collect(Collectors.toList());
 
@@ -161,7 +165,7 @@ public class BandwidthAvailabilityService {
     private Map<String, Map<Instant, Integer>> buildMaps(Map<UrnE, List<ReservedBandwidthE>> rsvMap,
                                                          Instant start, Instant end, ReservedBlueprintE blueprint)
     {
-        Integer curMin;                                     // Store current min for a path.
+        Integer curMin = Integer.MAX_VALUE;                                     // Store current min for a path.
 
         Map<String, Integer> prevMin = new HashMap<>();     // Track previous min for each path.
         prevMin.put(AZ, 0);
@@ -192,82 +196,106 @@ public class BandwidthAvailabilityService {
 
         // Handle case with no bandwidth events.
         log.info("BW Events: " + bwEvents);
-        if(bwEvents.isEmpty() || bwEvents.stream().anyMatch(bwEvent -> bwEvent.getTime().equals(start))){
+        if(bwEvents.isEmpty()){
             for (String path : bwMaps.keySet()) {
-                Integer minBw = Integer.MAX_VALUE;
-                for(UrnE urn: urns) {
-                    Integer urnBw = findMinBw(urn, curUrnBw, urnTables.get(path).get(urn));
-                    minBw = urnBw < minBw ? urnBw : minBw;
-                }
-                bwMaps.get(path).put(start, minBw);
+                Integer min = findMin(urns, curUrnBw, urnTables, path);
+                bwMaps.get(path).put(start, min);
+                bwMaps.get(path).put(end, min);
             }
         }
 
+        Instant previousTime = null;
         // Loop through bandwidth events.
-        for (BwEvent bwEvent : bwEvents)
+        for (Integer eventIndex = 0; eventIndex < bwEvents.size(); eventIndex++)
         {
+            BwEvent bwEvent = bwEvents.get(eventIndex);
+            Instant currentTime = bwEvent.getTime();
             // Event is before start of interval.
-            if (!bwEvent.getTime().isAfter(start))
+            if (!currentTime.isAfter(start))
             {
-                // Only update available bandwidths.
-                curUrnBw.get(INGRESS).replace(bwEvent.getUrn(), curUrnBw.get(INGRESS).get(bwEvent.getUrn()) + bwEvent.getInBw());
-                curUrnBw.get(EGRESS).replace(bwEvent.getUrn(), curUrnBw.get(EGRESS).get(bwEvent.getUrn()) + bwEvent.getEgBw());
+                // Update available bandwidths.
+                updateAvailableBw(curUrnBw, bwEvent);
+                // If this is the last event, or if the next event is after the start time, update the bandwidth map
+                if(eventIndex == bwEvents.size()-1 || bwEvents.get(eventIndex+1).getTime().isAfter(start)){
+                    for (String path : bwMaps.keySet()) {
+                        Integer min = findMin(urns, curUrnBw, urnTables, path);
+                        bwMaps.get(path).put(start, min);
+                        // If this is the last event, add a point for the end
+                        if(eventIndex == bwEvents.size()-1){
+                            bwMaps.get(path).put(end, min);
+                        }
+                    }
+                }
             }
 
             // Event is in interval of interest.
-            else if (bwEvent.getTime().isAfter(start) && !bwEvent.getTime().isAfter(end))
+            else if (currentTime.isAfter(start) && !currentTime.isAfter(end))
             {
-                // Add start point for each direction if not done already.
-                for (String path : bwMaps.keySet()) {
-                    if (bwMaps.get(path).isEmpty()) {
-
-                        curMin = findMinBw(bwEvent.getUrn(), curUrnBw, urnTables.get(path).get(bwEvent.getUrn()));
-                        bwMaps.get(path).put(start, curMin);
-                        prevMin.replace(path, curMin);
+                // If this is the first event, then create a starting point
+                if(eventIndex == 0){
+                    for (String path : bwMaps.keySet()) {
+                        Integer min = findMin(urns, curUrnBw, urnTables, path);
+                        bwMaps.get(path).put(start, min);
                     }
                 }
-
                 // Update available bandwidths.
-                curUrnBw.get(INGRESS).replace(bwEvent.getUrn(), curUrnBw.get(INGRESS).get(bwEvent.getUrn()) + bwEvent.getInBw());
-                curUrnBw.get(EGRESS).replace(bwEvent.getUrn(), curUrnBw.get(EGRESS).get(bwEvent.getUrn()) + bwEvent.getEgBw());
-
-                // For each direction, update point for current event.
-                for (String path : bwMaps.keySet()) {
-
-                    curMin = findMinBw(bwEvent.getUrn(), curUrnBw, urnTables.get(path).get(bwEvent.getUrn()));
-
-                    // Check that a new point is necessary.
-                    if (!curMin.equals(prevMin.get(path)))
-                    {
-                        bwMaps.get(path).putIfAbsent(bwEvent.getTime(), 0);
-                        bwMaps.get(path).replace(bwEvent.getTime(), curMin);
-                        prevMin.replace(path, curMin);
+                updateAvailableBw(curUrnBw, bwEvent);
+                // If this is the last event, or if the next event is after the current time, update the bandwidth map
+                if(eventIndex == bwEvents.size()-1 || bwEvents.get(eventIndex+1).getTime().isAfter(currentTime)){
+                    for (String path : bwMaps.keySet()) {
+                        Integer min = findMin(urns, curUrnBw, urnTables, path);
+                        bwMaps.get(path).put(currentTime, min);
+                        // If this is the last event, add a point for the end
+                        if(eventIndex == bwEvents.size()-1 && currentTime.isBefore(end)){
+                            bwMaps.get(path).put(end, min);
+                        }
                     }
                 }
             }
-
             // Event is after interval of interest.
             else
             {
-                // Add ending points and break.
-                for (String path : bwMaps.keySet()) {
-                    bwMaps.get(path).put(end, findMinBw(bwEvent.getUrn(), curUrnBw,
-                            urnTables.get(path).get(bwEvent.getUrn())));
+                if(previousTime == null){
+                    previousTime = start;
+                }
+                if(previousTime.isBefore(end)) {
+                    // Add ending points and break.
+                    for (String path : bwMaps.keySet()) {
+                        Integer min = findMin(urns, curUrnBw, urnTables, path);
+                        bwMaps.get(path).put(end, min);
+                    }
                 }
                 break;
             }
+            previousTime = currentTime;
         }
         return bwMaps;
     }
 
+    private void updateAvailableBw(Map<String, Map<UrnE, Integer>> curUrnBw, BwEvent bwEvent) {
+        curUrnBw.get(INGRESS).put(bwEvent.getUrn(), curUrnBw.get(INGRESS).get(bwEvent.getUrn()) + bwEvent.getInBw());
+        curUrnBw.get(EGRESS).put(bwEvent.getUrn(), curUrnBw.get(EGRESS).get(bwEvent.getUrn()) + bwEvent.getEgBw());
+    }
+
+    private Integer findMin(Set<UrnE> urns, Map<String, Map<UrnE, Integer>> curUrnBw,
+                            Map<String, Map<UrnE, List<String>>> urnTables, String path) {
+        Integer min = Integer.MAX_VALUE;
+        for (UrnE urn : urns) {
+            Integer urnBw = findBw(urn, curUrnBw, urnTables.get(path).get(urn));
+            min = urnBw < min ? urnBw : min;
+        }
+        return min;
+    }
+
+
     /**
-     * Returns the minimum bandwidth available at URN.
+     * Returns the bandwidth available at URN.
      * @param urn URN of interest.
      * @param curBw Map of ingress/egress -> urn -> available bandwidth.
      * @param usedBWs List specifying whether the path uses the URNs ingress, egress, or both.
-     * @return The minimum bandwidth available at URN.
+     * @return The bandwidth available at URN.
      */
-    private Integer findMinBw(UrnE urn, Map<String, Map<UrnE, Integer>> curBw, List<String> usedBWs)
+    private Integer findBw(UrnE urn, Map<String, Map<UrnE, Integer>> curBw, List<String> usedBWs)
     {
         if (usedBWs.contains(INGRESS) && usedBWs.contains(EGRESS))
             return Math.min(curBw.get(INGRESS).get(urn), curBw.get(EGRESS).get(urn));
