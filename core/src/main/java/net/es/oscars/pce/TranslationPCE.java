@@ -210,6 +210,7 @@ public class TranslationPCE {
         // Get map of "Ingress" and "Egress" bandwidth availability
         Map<UrnE, Map<String, Integer>> availBwMap;
         availBwMap = bwService.buildBandwidthAvailabilityMap(reservedBandwidths);
+        log.info("Available bandwidth: " + availBwMap.toString());
 
         // Returns a mapping from topovertices (ports) to an "Ingress"/"Egress" map of the total Ingress/Egress
         // Requested bandwidth at that port across both the azERO and the zaERO

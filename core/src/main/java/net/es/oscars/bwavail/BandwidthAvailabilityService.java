@@ -71,6 +71,7 @@ public class BandwidthAvailabilityService {
 
         // Confirm that the request involves nodes in the topology
         if(!validateRequest(request)){
+            log.info("Topology: " + topoService.getMultilayerTopology());
             return buildResponse(request, -1, -1, -1, -1, new HashMap<>(), new HashMap<>());
         }
 
@@ -85,7 +86,7 @@ public class BandwidthAvailabilityService {
         // Create the request blueprint
         RequestedBlueprintE reqBlueprint = entityBuilder.buildRequest(request.getSrcPort(), request.getSrcDevice(),
                 request.getDstPort(), request.getDstDevice(), request.getMinAzBandwidth(), request.getMinZaBandwidth(),
-                request.getPalindromicType(), request.getSurvivabilityType(), "any");
+                request.getPalindromicType(), request.getSurvivabilityType(), "any", "any");
 
         // Try to find a path using the PCE and the requested blueprint & schedule
         try

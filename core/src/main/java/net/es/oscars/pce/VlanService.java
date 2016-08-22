@@ -77,10 +77,11 @@ public class VlanService {
         Set<RequestedVlanFixtureE> fixtures = new HashSet<>(reqPipe.getAJunction().getFixtures());
         fixtures.addAll(reqPipe.getZJunction().getFixtures());
 
+
         for(RequestedVlanFixtureE fix : fixtures){
             Set<Integer> requestedVlans = getIntegersFromRanges(getIntRangesFromString(fix.getVlanExpression()));
             if(requestedVlans.isEmpty()){
-                requestedVlanIdMap.put(fix.getPortUrn(), availableVlanMap.get(fix.getPortUrn()));
+                requestedVlanIdMap.put(fix.getPortUrn(), availableVlanMap.getOrDefault(fix.getPortUrn(), new HashSet<>()));
             }
             else {
                 requestedVlanIdMap.put(fix.getPortUrn(), requestedVlans);
@@ -106,10 +107,15 @@ public class VlanService {
 
         log.info("Reservable VLAN ID Map: " + stringified);
 
-        urnMap.values().stream().filter(urn -> urn.getUrnType().equals(UrnType.IFCE)).filter(urn -> urn.getReservableVlans() != null).forEach(urn -> {
-            Set<Integer> availableIds = reservableVlanIdMap.get(urn);
-            availableIds.removeAll(reservedVlanIdMap.get(urn));
-            availableVlanIdMap.put(urn, availableIds);
+        urnMap.values().stream().filter(urn -> urn.getUrnType().equals(UrnType.IFCE)).filter(urn -> urn.getUrnType().equals(UrnType.IFCE)).forEach(urn -> {
+            if(urn.getReservableVlans() == null){
+                availableVlanIdMap.put(urn, new HashSet<>());
+            }
+            else{
+                Set<Integer> availableIds = reservableVlanIdMap.get(urn);
+                availableIds.removeAll(reservedVlanIdMap.get(urn));
+                availableVlanIdMap.put(urn, availableIds);
+            }
         });
 
         stringified = this.stringifyVlanMap(availableVlanIdMap);
@@ -187,8 +193,9 @@ public class VlanService {
             Set<Integer> requestedVlans = requestedVlanMap.get(urn);
             Set<Integer> availableVlans = availableVlanMap.get(urn);
 
-            availableVlans.retainAll(requestedVlans);
-            validVlanIdMap.put(urn, availableVlans);
+            Set<Integer> validVlans = new HashSet<>(requestedVlans);
+            validVlans.retainAll(availableVlans);
+            validVlanIdMap.put(urn, validVlans);
         }
         return validVlanIdMap;
     }
@@ -406,6 +413,7 @@ public class VlanService {
         Map<UrnE, Set<Integer>> availableVlanMap = buildAvailableVlanIdMap(urnMap, reservedVlans);
         // Get the requested VLANs per Fixture URN
         Map<UrnE, Set<Integer>> requestedVlanMap = buildRequestedVlanIdMap(reqPipe, availableVlanMap);
+        log.info("Requested Vlan Map: " + requestedVlanMap);
         // Get the "valid" VLANs per Fixture URN
         Map<UrnE, Set<Integer>> validVlanMap = buildValidVlanIdMap(requestedVlanMap, availableVlanMap);
         // Create a map of URNs to chosen VLAN IDs
