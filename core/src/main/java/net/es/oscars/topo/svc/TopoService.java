@@ -193,4 +193,48 @@ public class TopoService {
         else
             return VertexType.ROUTER;
     }
+
+    public Map<String, Set<String>> buildDeviceToPortMap() {
+        Topology topo = getMultilayerTopology();
+        Map<String, Set<String>> deviceToPortMap = new HashMap<>();
+        Map<TopoVertex, Boolean> checkedMap = topo.getVertices().stream().collect(Collectors.toMap(v -> v, v -> false));
+        for(TopoEdge edge : topo.getEdges()){
+            TopoVertex a = edge.getA();
+            TopoVertex z = edge.getZ();
+            // If either a or z is a device
+            if(!a.getVertexType().equals(VertexType.PORT) || !z.getVertexType().equals(VertexType.PORT)){
+                // and if either a or z has not been checked
+                if(!checkedMap.get(a) || !checkedMap.get(z)){
+                    // Add A (if it is a device) to the map if it has not been already
+                    if(!a.getVertexType().equals(VertexType.PORT)){
+                        deviceToPortMap.putIfAbsent(a.getUrn(), new HashSet<>());
+                        // If the other node (port) has not been checked, add it to the device's set of ports
+                        if(!checkedMap.get(z) && z.getVertexType().equals(VertexType.PORT)){
+                            deviceToPortMap.get(a.getUrn()).add(z.getUrn());
+                        }
+                    }
+                    // Add Z (if it is a device) to the map if it has not been already
+                    if(!z.getVertexType().equals(VertexType.PORT)){
+                        deviceToPortMap.putIfAbsent(z.getUrn(), new HashSet<>());
+                        // If the other node (port) has not been checked, add it to the device's set of ports
+                        if(!checkedMap.get(a) && a.getVertexType().equals(VertexType.PORT)){
+                            deviceToPortMap.get(z.getUrn()).add(a.getUrn());
+                        }
+                    }
+                    // Mark both as checked
+                    checkedMap.put(a, true);
+                    checkedMap.put(z, true);
+                }
+            }
+        }
+        return deviceToPortMap;
+    }
+
+    public Map<String, String> buildPortToDeviceMap(Map<String, Set<String>> deviceToPortMap){
+        Map<String, String> portToDeviceMap = new HashMap<>();
+        for(String device : deviceToPortMap.keySet()){
+            deviceToPortMap.get(device).forEach(port -> portToDeviceMap.put(port, device));
+        }
+        return portToDeviceMap;
+    }
 }

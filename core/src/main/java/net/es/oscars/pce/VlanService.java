@@ -90,6 +90,22 @@ public class VlanService {
         return requestedVlanIdMap;
     }
 
+    private Map<UrnE,Set<Integer>> buildRequestedVlanIdMap(Set<RequestedVlanFixtureE> fixtures,
+                                                           Map<UrnE, Set<Integer>> availableVlanMap) {
+        Map<UrnE, Set<Integer>> requestedVlanIdMap = new HashMap<>();
+
+        for(RequestedVlanFixtureE fix : fixtures){
+            Set<Integer> requestedVlans = getIntegersFromRanges(getIntRangesFromString(fix.getVlanExpression()));
+            if(requestedVlans.isEmpty()){
+                requestedVlanIdMap.put(fix.getPortUrn(), availableVlanMap.get(fix.getPortUrn()));
+            }
+            else {
+                requestedVlanIdMap.put(fix.getPortUrn(), requestedVlans);
+            }
+        }
+        return requestedVlanIdMap;
+    }
+
     public Map<UrnE, Set<Integer>> buildAvailableVlanIdMap(Map<String, UrnE> urnMap, List<ReservedVlanE> reservedVlans) {
         // Build empty map of available VLAN IDs per URN
         Map<UrnE, Set<Integer>> availableVlanIdMap = new HashMap<>();
@@ -229,7 +245,8 @@ public class VlanService {
                 .stream()
                 .map(ReservedVlanJunctionE::getFixtures)
                 .flatMap(Collection::stream)
-                .map(ReservedVlanFixtureE::getReservedVlan)
+                .map(ReservedVlanFixtureE::getReservedVlans)
+                .flatMap(Collection::stream)
                 .collect(Collectors.toList());
     }
 
@@ -285,35 +302,35 @@ public class VlanService {
 
     /**
      * Get all VLAN IDs available at a URN based on the possible reservable ranges and the currently reserved IDs.
-     * @param urnMap - Mapping of URN string to UrnE objects
      * @param urn - The currently considered URN string
-     * @param ranges - List of IntRanges, representing all ranges of VLAN IDs supported at this URN
      * @param resvVlanMap - A mapping representing the Reserved VLANs at a URN
      * @return Set of VLAN IDs that are both supported and not reserved at a URN
      */
-    public Set<Integer> getAvailableVlanIds(Map<String, UrnE> urnMap, String urn, List<IntRange> ranges,
-                                            Map<UrnE, List<ReservedVlanE>> resvVlanMap) {
+    public Set<Integer> getAvailableVlanIds(UrnE urn, Map<UrnE, Set<ReservedVlanE>> resvVlanMap,
+                                            Map<String, Set<String>> deviceToPortMap, Map<String, UrnE> urnMap) {
         // Get the supported reservable VLAN IDs
-        Set<Integer> reservableVlanIds = getIntegersFromRanges(ranges);
+        Set<Integer> reservableVlanIds = new HashSet<>();
+        if(urn.getReservableVlans() != null) {
+            reservableVlanIds = getIntegersFromRanges(urn.getReservableVlans().getVlanRanges().stream().map(IntRangeE::toDtoIntRange).collect(Collectors.toList()));
+        }
 
-        UrnE aUrn = urnMap.get(urn);
-        // If this URN is in the reserved VLAN map
-        if(resvVlanMap.containsKey(aUrn)) {
-            // Get the reserved VLAN IDs
-            List<Integer> resvVlanIds = resvVlanMap
-                    .get(aUrn)
-                    .stream()
-                    .map(ReservedVlanE::getVlan)
-                    .collect(Collectors.toList());
-
-            // Return the supported IDs that are not reserved
+        // Get reserved VLANs (if any) from URN
+        Set<ReservedVlanE> reservedVlans = resvVlanMap.getOrDefault(urn, new HashSet<>());
+        // Get reserved VLANs (if any) from URN's ports (if they exist)
+        deviceToPortMap.getOrDefault(urn.getUrn(), new HashSet<>()).stream().filter(urnMap::containsKey).forEach(portName -> {
+            reservedVlans.addAll(resvVlanMap.getOrDefault(urnMap.get(portName), new HashSet<>()));
+        });
+        // If nothing's reserved, return reservable
+        if(reservedVlans.isEmpty()){
+            return reservableVlanIds;
+        }
+        // Otherwise, return the reservable IDs that are not reserved
+        else{
+            Set<Integer> reservedVlanIds = reservedVlans.stream().map(ReservedVlanE::getVlan).collect(Collectors.toSet());
             return reservableVlanIds
                     .stream()
-                    .filter(id -> !resvVlanIds.contains(id))
+                    .filter(id -> !reservedVlanIds.contains(id))
                     .collect(Collectors.toSet());
-        }
-        else{
-            return reservableVlanIds;
         }
     }
 
@@ -357,42 +374,139 @@ public class VlanService {
     /**
      * Select a VLAN ID for a junction. All fixtures on the junction must use their requested VLAN tag.
      * @param req_j - The requested junction.
-     * @return A valid VLAN iD for each fixture on this junction.
+     * @param deviceToPortMap
+     *@param portToDeviceMap @return A valid VLAN iD for each URN on this junction.
      */
-    public Map<RequestedVlanFixtureE, Integer> selectVLANsForJunction(RequestedVlanJunctionE req_j, List<ReservedVlanE> rsvVlans){
+    public Map<UrnE, Set<Integer>> selectVLANsForJunction(RequestedVlanJunctionE req_j, List<ReservedVlanE> rsvVlans,
+                                                     Map<String, Set<String>> deviceToPortMap, Map<String, String> portToDeviceMap,
+                                                     Map<String, UrnE> urnMap){
 
-        // All requested fixtures
+        //GOAL - Pick the minimum set of VLANs (V) that can satisfy the following requirements:
+        // (1) Each fixture has one of the VLAN IDs it requested
+        // (2) If switch, then all VLANs in V must be available on all ports (check the switch)
+        // (3) If router, then VLAN assigned to port must be available on that port
+
+        Map<UrnE, Set<ReservedVlanE>> rsvVlanMap = new HashMap<>();
+        for(ReservedVlanE rsvVlan : rsvVlans){
+            rsvVlanMap.putIfAbsent(rsvVlan.getUrn(), new HashSet<>());
+            rsvVlanMap.get(rsvVlan.getUrn()).add(rsvVlan);
+        }
+
+        // All requested fixtures/ports
         Set<RequestedVlanFixtureE> reqFixtures = req_j.getFixtures();
+        Map<UrnE, Set<Integer>> reqVlanMap = new HashMap<>();
 
-        Map<RequestedVlanFixtureE, Integer> vlanIDPerFixture = new HashMap<>();
+        Map<UrnE, Set<Integer>> validVlanMap = new HashMap<>();
 
-        // For each requested fixture
-        for(RequestedVlanFixtureE reqFix : reqFixtures){
-            // Get the available VLAN IDs
-            Set<Integer> availableVlans = getAvailableVlanIdsFromFixture(reqFix, rsvVlans);
 
-            // Get the requested VLAN expression
-            String vlanExpression = reqFix.getVlanExpression();
-            if(vlanExpression == null){
-                vlanExpression = "any";
+        // Use the device's available VLANs
+        if(req_j.getDeviceUrn().getReservableVlans() != null){
+            UrnE deviceUrn = req_j.getDeviceUrn();
+            Set<UrnE> devicePortUrns = deviceToPortMap.get(req_j.getDeviceUrn().getUrn()).stream().map(urnMap::get).collect(Collectors.toSet());
+
+            Set<Integer> availableVlans = getAvailableVlanIds(deviceUrn, rsvVlanMap, deviceToPortMap, urnMap);
+            Map<UrnE, Set<Integer>> availableVlanMap = devicePortUrns.stream().collect(Collectors.toMap(urn -> urn, urn -> availableVlans));
+
+            reqVlanMap = buildRequestedVlanIdMap(reqFixtures, availableVlanMap);
+
+            for(UrnE devicePortUrn : devicePortUrns){
+                reqVlanMap.putIfAbsent(devicePortUrn, new HashSet<>());
             }
-            // Convert that expression into a set of requested IDs
-            Set<Integer> reqVlanIds = getIntegersFromRanges(getIntRangesFromString(vlanExpression));
-            // Find the overlap between available VLAN IDs and requested VLAN IDs
-            Set<Integer> validVlans = addToSetOverlap(availableVlans, reqVlanIds);
 
-            // If there are no valid IDs, return -1 (indicating an error)
-            if(validVlans.isEmpty()){
-                log.error("Requested VLAN IDs " + reqVlanIds + " not available at " + reqFix.getPortUrn().toString());
-                vlanIDPerFixture.put(reqFix, -1);
+            // Get all of the requested VLANs per URN that are available
+            for(UrnE urn : reqVlanMap.keySet()){
+                Set<Integer> validVlans = reqVlanMap.get(urn);
+                if(validVlans.isEmpty()){
+                    validVlans = availableVlans;
+                }
+                else {
+                    validVlans.retainAll(availableVlans);
+                }
+                validVlanMap.put(urn, validVlans);
             }
-            else{
-                List<Integer> valid = validVlans.stream().sorted().collect(Collectors.toList());
-                vlanIDPerFixture.put(reqFix, valid.get(0));
+            // First: Check if any URN does not have any valid VLANs - return an invalid map
+            if(validVlanMap.values().stream().anyMatch(Set::isEmpty)){
+                return devicePortUrns.stream().collect(Collectors.toMap(urn -> urn, urn -> new HashSet<>()));
+            }
+            Set<Integer> chosenVlans = findSetCover(validVlanMap);
+            return devicePortUrns.stream().collect(Collectors.toMap(urn -> urn, urn -> chosenVlans));
+        }
+        // Use the ports' available vlans
+        else{
+            Map<UrnE, Set<Integer>> vlanIdPerPort = new HashMap<>();
+            Map<UrnE, Set<Integer>> availableVlanMap = reqFixtures.stream()
+                    .map(RequestedVlanFixtureE::getPortUrn)
+                    .collect(Collectors.toMap(urn -> urn, urn -> getAvailableVlanIds(urn, rsvVlanMap, deviceToPortMap, urnMap)));
+            reqVlanMap = buildRequestedVlanIdMap(reqFixtures, availableVlanMap);
+            // Get all of the requested VLANs per URN that are available
+            for(UrnE urn : reqVlanMap.keySet()){
+                Set<Integer> validVlans = reqVlanMap.get(urn);
+                // There are no requested VLANs
+                if(validVlans.isEmpty()){
+                    validVlans = availableVlanMap.get(urn);
+                    // If there are none available, then fail
+                    if(validVlans.isEmpty()){
+                        return reqVlanMap.keySet().stream().collect(Collectors.toMap(u -> u, u -> new HashSet<>()));
+                    }
+                }
+                else {
+                    validVlans.retainAll(availableVlanMap.get(urn));
+                }
+                validVlanMap.put(urn, validVlans);
+            }
+
+            // Choose the minimum set of VLANs that can cover all of the fixture URNs
+            Set<Integer> chosenVlans = findSetCover(validVlanMap);
+            for(Integer vlan: chosenVlans){
+                for(UrnE urn : reqVlanMap.keySet()){
+                    vlanIdPerPort.putIfAbsent(urn, new HashSet<>());
+                    if(reqVlanMap.get(urn).contains(vlan) && vlanIdPerPort.get(urn).isEmpty()){
+                        vlanIdPerPort.get(urn).add(vlan);
+                    }
+                }
+            }
+
+            return vlanIdPerPort;
+        }
+
+    }
+
+    public Set<Integer> findSetCover(Map<UrnE, Set<Integer>> validVlanMap){
+        // Build a map from each VLAN ID to the set of URNs that it covers
+        Map<Integer, Set<UrnE>> coverMap = new HashMap<>();
+        for(UrnE urn : validVlanMap.keySet()){
+            Set<Integer> vlans = validVlanMap.get(urn);
+            for(Integer vlan : vlans){
+                coverMap.putIfAbsent(vlan, new HashSet<>());
+                coverMap.get(vlan).add(urn);
             }
         }
 
-        return vlanIDPerFixture;
+        Long numCovered = 0L;
+        Map<UrnE, Boolean> isCoveredMap = validVlanMap.keySet().stream().collect(Collectors.toMap(urn -> urn, urn -> false));
+        Set<Integer> chosenVlans = new HashSet<>();
+        while(numCovered < validVlanMap.keySet().size()){
+            Integer bestVlan = -1;
+            Long largestNewCovers = 0L;
+            for(Integer vlan : coverMap.keySet()){
+                Set<UrnE> thisVlanUrns = coverMap.get(vlan);
+                Long numUncovered = thisVlanUrns.stream().filter(urn -> !isCoveredMap.get(urn)).count();
+                if(numUncovered > largestNewCovers){
+                    bestVlan = vlan;
+                    largestNewCovers = numUncovered;
+                }
+            }
+            // No VLAN chosen, there was no way to increase the number of covered URNs
+            if(bestVlan == -1){
+                return new HashSet<>();
+            }
+            else{
+                chosenVlans.add(bestVlan);
+                numCovered += largestNewCovers;
+            }
+        }
+
+        return chosenVlans;
     }
 
     /**
@@ -405,7 +519,7 @@ public class VlanService {
      * @param zaERO - The ZA edges
      * @return Map from URN entity to VLAN ID chosen for that entity.
      */
-    public Map<UrnE, Integer> selectVlansForPipe(RequestedVlanPipeE reqPipe, Map<String, UrnE> urnMap, List<ReservedVlanE> reservedVlans,
+    public Map<UrnE, Set<Integer>> selectVlansForPipe(RequestedVlanPipeE reqPipe, Map<String, UrnE> urnMap, List<ReservedVlanE> reservedVlans,
                                                  List<TopoEdge> azERO, List<TopoEdge> zaERO){
 
         // Confirm that there is at least one VLAN ID that can support every segment (given what has been reserved so far)
@@ -433,10 +547,10 @@ public class VlanService {
      * @param validVlanMap - A map of fixture URN entity to requested & available VLANs
      * @return A map containing the VLAN chosen for each URN (-1 if none possible)
      */
-    private Map<UrnE,Integer> selectVlansForPath(List<TopoEdge> azERO, List<TopoEdge> zaERO, Map<String, UrnE> urnMap,
+    private Map<UrnE, Set<Integer>> selectVlansForPath(List<TopoEdge> azERO, List<TopoEdge> zaERO, Map<String, UrnE> urnMap,
                                                  Map<UrnE, Set<Integer>> availableVlanMap,
                                                  Map<UrnE, Set<Integer>> validVlanMap) {
-        Map<UrnE, Integer> chosenVlanMap = new HashMap<>();
+        Map<UrnE, Set<Integer>> chosenVlanMap = new HashMap<>();
 
         // Retrive port URNs for pipe from the AZ and ZA EROs
         Set<UrnE> pipeUrns = getUrnsFromListOfEdges(azERO, urnMap);
@@ -454,7 +568,7 @@ public class VlanService {
         if(!availableEverywhere.isEmpty()){
             List<Integer> options = availableEverywhere.stream().sorted().collect(Collectors.toList());
             Integer chosenVlan = options.get(0);
-            chosenVlanMap = pipeUrns.stream().collect(Collectors.toMap(u -> u, u -> chosenVlan));
+            chosenVlanMap = pipeUrns.stream().collect(Collectors.toMap(u -> u, u -> Collections.singleton(chosenVlan)));
         }
         // Otherwise, iterate through the valid vlans per fixture
         // For each valid VLAN, see if it is available across the path
@@ -477,16 +591,16 @@ public class VlanService {
                     Integer chosenVlan = options.get(0);
                     // Assign this VLAN to every URN in the pipe
                     for(UrnE pipeUrn : pipeUrns){
-                        chosenVlanMap.put(pipeUrn, chosenVlan);
+                        chosenVlanMap.put(pipeUrn, Collections.singleton(chosenVlan));
                     }
                 }
                 if(!validVlanMap.get(fixUrn).isEmpty()) {
                     List<Integer> options = validVlanMap.get(fixUrn).stream().sorted().collect(Collectors.toList());
                     Integer chosenVlan = options.get(0);
-                    chosenVlanMap.put(fixUrn, chosenVlan);
+                    chosenVlanMap.put(fixUrn, Collections.singleton(chosenVlan));
                 }
                 else{
-                    chosenVlanMap.put(fixUrn, -1);
+                    chosenVlanMap.put(fixUrn, new HashSet<>());
                 }
             }
 
@@ -500,12 +614,12 @@ public class VlanService {
                     Integer chosenVlan = options.get(0);
                     // Assign this VLAN to every URN in the pipe
                     for(UrnE pipeUrn : pipeUrns){
-                        chosenVlanMap.put(pipeUrn, chosenVlan);
+                        chosenVlanMap.put(pipeUrn, Collections.singleton(chosenVlan));
                     }
                 }
                 else{
                     for(UrnE pipeUrn : pipeUrns){
-                        chosenVlanMap.put(pipeUrn, -1);
+                        chosenVlanMap.put(pipeUrn, new HashSet<>());
                     }
                 }
             }
