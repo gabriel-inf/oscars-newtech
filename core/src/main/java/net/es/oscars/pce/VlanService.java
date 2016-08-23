@@ -540,6 +540,8 @@ public class VlanService {
      * Given an AZ and ZA path, determine which VLAN IDs will work for those paths. Also needs a URN String -> Entity map,
      * a URN Entity -> Set of available VLANs map, and a URN Entity -> Set of valid VLANs map (available and requested per
      * fixture).
+     *
+     * @param reqPipe
      * @param azERO - The AZ path (edges)
      * @param zaERO - The ZA path (edges)
      * @param urnMap - A map of URN String to Entity
@@ -548,8 +550,8 @@ public class VlanService {
      * @return A map containing the VLAN chosen for each URN (-1 if none possible)
      */
     private Map<UrnE, Set<Integer>> selectVlansForPath(List<TopoEdge> azERO, List<TopoEdge> zaERO, Map<String, UrnE> urnMap,
-                                                 Map<UrnE, Set<Integer>> availableVlanMap,
-                                                 Map<UrnE, Set<Integer>> validVlanMap) {
+                                                       Map<UrnE, Set<Integer>> availableVlanMap,
+                                                       Map<UrnE, Set<Integer>> validVlanMap) {
         Map<UrnE, Set<Integer>> chosenVlanMap = new HashMap<>();
 
         // Retrive port URNs for pipe from the AZ and ZA EROs
@@ -557,6 +559,7 @@ public class VlanService {
         pipeUrns.addAll(getUrnsFromListOfEdges(zaERO, urnMap));
         pipeUrns = pipeUrns.stream().filter(u -> u.getUrnType().equals(UrnType.IFCE)).collect(Collectors.toSet());
 
+;
         // Get the VLANs available across the AZ/ZA path
         Set<Integer> availableVlansAcrossPath = findAvailableVlansBidirectional(azERO, zaERO, availableVlanMap, urnMap);
         // Get the valid VLANs across the fixtures
@@ -569,6 +572,9 @@ public class VlanService {
             List<Integer> options = availableEverywhere.stream().sorted().collect(Collectors.toList());
             Integer chosenVlan = options.get(0);
             chosenVlanMap = pipeUrns.stream().collect(Collectors.toMap(u -> u, u -> Collections.singleton(chosenVlan)));
+            for(UrnE fixUrn: validVlanMap.keySet()){
+                chosenVlanMap.putIfAbsent(fixUrn, Collections.singleton(chosenVlan));
+            }
         }
         // Otherwise, iterate through the valid vlans per fixture
         // For each valid VLAN, see if it is available across the path
