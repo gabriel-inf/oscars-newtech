@@ -152,7 +152,7 @@ public class TranslationPCE {
                 zaERO, deviceToPortMap, portToDeviceMap);
         log.info("Chosen VLAN Map: " + chosenVlanMap);
         for(UrnE urn : chosenVlanMap.keySet()){
-            if(chosenVlanMap.get(urn).isEmpty()){
+            if(chosenVlanMap.get(urn).isEmpty() && urn.getReservableVlans() != null){
                 throw new PCEException(("VLAN could not not be found for URN " + urn.toString()));
             }
         }
@@ -190,7 +190,7 @@ public class TranslationPCE {
                 combinedAzERO, combinedZaERO, deviceToPortMap, portToDeviceMap);
         log.info("Chosen VLAN Map: " + chosenVlanMap);
         for(UrnE urn : chosenVlanMap.keySet()){
-            if(chosenVlanMap.get(urn).isEmpty()){
+            if(chosenVlanMap.get(urn).isEmpty()  && urn.getReservableVlans() != null){
                 throw new PCEException(("VLAN could not not be found for URN " + urn.toString()));
             }
         }
@@ -431,7 +431,7 @@ public class TranslationPCE {
         // Combine the AZ and ZA EROs
         Set<UrnE> combined = new HashSet<>(az.stream().map(TopoVertex::getUrn).filter(urnMap::containsKey).map(urnMap::get).collect(Collectors.toSet()));
         combined.addAll(za.stream().map(TopoVertex::getUrn).filter(urnMap::containsKey).map(urnMap::get).collect(Collectors.toSet()));
-
+        combined = combined.stream().filter(urn -> urn.getReservableVlans() != null).collect(Collectors.toSet());
 
         // Store the reserved vlans
         Set<ReservedVlanE> reservedVlans = new HashSet<>();
