@@ -571,11 +571,12 @@ public class VlanService {
         Map<UrnE, Set<Integer>> chosenVlanMap = new HashMap<>();
 
         // Retrive port URNs for pipe from the AZ and ZA EROs
-        // AND - If there are any switches, add their ports as well
 
+        UrnE aJunctionUrn = reqPipe.getAJunction().getDeviceUrn();
+        UrnE zJunctionUrn = reqPipe.getZJunction().getDeviceUrn();
+        // AND - If there are any switches, add their ports as well
         Set<UrnE> pipeUrns = getUrnsFromListOfEdges(azERO, urnMap, deviceToPortMap);
         pipeUrns.addAll(getUrnsFromListOfEdges(zaERO, urnMap, deviceToPortMap));
-        pipeUrns = pipeUrns.stream().filter(u -> u.getUrnType().equals(UrnType.IFCE)).collect(Collectors.toSet());
 
         //Set<UrnE> nonFixAJunctionPortUrns =
 
@@ -910,7 +911,8 @@ public class VlanService {
 
         Set<UrnE> urns = new HashSet<>();
 
-        for(TopoEdge edge : edges){
+        List<TopoEdge> interEdges = edges.subList(2, edges.size()-2);
+        for(TopoEdge edge : interEdges){
             String aUrnString = edge.getA().getUrn();
             UrnE aUrn = urnMap.getOrDefault(aUrnString, null);
 
@@ -918,18 +920,22 @@ public class VlanService {
             UrnE zUrn = urnMap.getOrDefault(zUrnString, null);
 
             if(aUrn != null){
-                urns.add(aUrn);
-                /*if(aUrn.getUrnType().equals(UrnType.DEVICE) && aUrn.getDeviceType().equals(DeviceType.SWITCH)){
-                    Set<String> portNames = deviceToPortMap.get(aUrn.getUrn());
-                    urns.addAll(portNames.stream().filter(urnMap::containsKey).map(urnMap::get).collect(Collectors.toSet()));
-                }*/
+                if(aUrn.getUrnType().equals(UrnType.DEVICE) && aUrn.getDeviceType().equals(DeviceType.SWITCH)){
+                    Set<String> ports = deviceToPortMap.get(aUrn.getUrn());
+                    urns.addAll(ports.stream().filter(urnMap::containsKey).map(urnMap::get).collect(Collectors.toSet()));
+                }
+                else if(aUrn.getUrnType().equals(UrnType.IFCE) && aUrn.getReservableBandwidth() != null){
+                    urns.add(aUrn);
+                }
             }
             if(zUrn != null){
-                urns.add(zUrn);
-                /*if(zUrn.getUrnType().equals(UrnType.DEVICE) && zUrn.getDeviceType().equals(DeviceType.SWITCH)){
-                    Set<String> portNames = deviceToPortMap.get(zUrn.getUrn());
-                    urns.addAll(portNames.stream().filter(urnMap::containsKey).map(urnMap::get).collect(Collectors.toSet()));
-                }*/
+                if(zUrn.getUrnType().equals(UrnType.DEVICE) && zUrn.getDeviceType().equals(DeviceType.SWITCH)){
+                    Set<String> ports = deviceToPortMap.get(zUrn.getUrn());
+                    urns.addAll(ports.stream().filter(urnMap::containsKey).map(urnMap::get).collect(Collectors.toSet()));
+                }
+                else if(zUrn.getUrnType().equals(UrnType.IFCE) && zUrn.getReservableBandwidth() != null){
+                    urns.add(zUrn);
+                }
             }
         }
         return urns;
