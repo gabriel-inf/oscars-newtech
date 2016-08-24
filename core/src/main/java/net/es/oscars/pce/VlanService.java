@@ -9,6 +9,7 @@ import net.es.oscars.topo.beans.TopoEdge;
 import net.es.oscars.topo.beans.TopoVertex;
 import net.es.oscars.topo.ent.IntRangeE;
 import net.es.oscars.topo.ent.UrnE;
+import net.es.oscars.topo.enums.DeviceType;
 import net.es.oscars.topo.enums.Layer;
 import net.es.oscars.topo.enums.UrnType;
 import net.es.oscars.topo.enums.VertexType;
@@ -27,9 +28,9 @@ public class VlanService {
     @Autowired
     private ReservedVlanRepository resvVlanRepo;
 
-    /**~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     * BUILD RESERVED/AVAILABLE/REQUESTED VLAN COLLECTIONS/MAPS
-     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      BUILD RESERVED/AVAILABLE/REQUESTED VLAN COLLECTIONS/MAPS
+      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      */
 
     /**
@@ -106,7 +107,8 @@ public class VlanService {
         return requestedVlanIdMap;
     }
 
-    public Map<UrnE, Set<Integer>> buildAvailableVlanIdMap(Map<String, UrnE> urnMap, List<ReservedVlanE> reservedVlans) {
+    public Map<UrnE, Set<Integer>> buildAvailableVlanIdMap(Map<String, UrnE> urnMap, List<ReservedVlanE> reservedVlans,
+                                                           Map<String, String> portToDeviceMap) {
         // Build empty map of available VLAN IDs per URN
         Map<UrnE, Set<Integer>> availableVlanIdMap = new HashMap<>();
 
@@ -125,7 +127,15 @@ public class VlanService {
 
         urnMap.values().stream().filter(urn -> urn.getUrnType().equals(UrnType.IFCE)).filter(urn -> urn.getUrnType().equals(UrnType.IFCE)).forEach(urn -> {
             if(urn.getReservableVlans() == null){
-                availableVlanIdMap.put(urn, new HashSet<>());
+                UrnE deviceUrn = urnMap.get(portToDeviceMap.get(urn.getUrn()));
+                if(deviceUrn.getReservableVlans() == null) {
+                    availableVlanIdMap.put(urn, new HashSet<>());
+                }
+                else{
+                    Set<Integer> availableIds = reservableVlanIdMap.get(deviceUrn);
+                    availableIds.removeAll(reservedVlanIdMap.get(urn));
+                    availableVlanIdMap.put(urn, availableIds);
+                }
             }
             else{
                 Set<Integer> availableIds = reservableVlanIdMap.get(urn);
@@ -183,7 +193,7 @@ public class VlanService {
     private Map<UrnE,Set<Integer>> buildReservableVlanIdMap(Map<String, UrnE> urnMap) {
         Map<UrnE, Set<Integer>> reservableVlanIdMap = new HashMap<>();
 
-        urnMap.values().stream().filter(urn -> urn.getUrnType().equals(UrnType.IFCE)).filter(urn -> urn.getReservableVlans() != null).forEach(urn -> {
+        urnMap.values().stream().filter(urn -> urn.getReservableVlans() != null).forEach(urn -> {
             List<IntRange> ranges = urn.getReservableVlans().getVlanRanges().stream().map(IntRangeE::toDtoIntRange).collect(Collectors.toList());
             reservableVlanIdMap.put(urn, getIntegersFromRanges(ranges));
         });
@@ -517,21 +527,23 @@ public class VlanService {
      * @param reservedVlans - List of all reserved VLANs
      * @param azERO - The AZ edges
      * @param zaERO - The ZA edges
-     * @return Map from URN entity to VLAN ID chosen for that entity.
+     * @param deviceToPortMap
+     *@param portToDeviceMap @return Map from URN entity to VLAN ID chosen for that entity.
      */
     public Map<UrnE, Set<Integer>> selectVlansForPipe(RequestedVlanPipeE reqPipe, Map<String, UrnE> urnMap, List<ReservedVlanE> reservedVlans,
-                                                 List<TopoEdge> azERO, List<TopoEdge> zaERO){
+                                                      List<TopoEdge> azERO, List<TopoEdge> zaERO,
+                                                      Map<String, Set<String>> deviceToPortMap, Map<String, String> portToDeviceMap){
 
         // Confirm that there is at least one VLAN ID that can support every segment (given what has been reserved so far)
         // Get the available VLANs at all URNs
-        Map<UrnE, Set<Integer>> availableVlanMap = buildAvailableVlanIdMap(urnMap, reservedVlans);
-        // Get the requested VLANs per Fixture URN
+        Map<UrnE, Set<Integer>> availableVlanMap = buildAvailableVlanIdMap(urnMap, reservedVlans, portToDeviceMap);
+        // Get the requested VLANs per Fixture URN & Any Ports at Individual URNs
         Map<UrnE, Set<Integer>> requestedVlanMap = buildRequestedVlanIdMap(reqPipe, availableVlanMap);
         log.info("Requested Vlan Map: " + requestedVlanMap);
         // Get the "valid" VLANs per Fixture URN
         Map<UrnE, Set<Integer>> validVlanMap = buildValidVlanIdMap(requestedVlanMap, availableVlanMap);
         // Create a map of URNs to chosen VLAN IDs
-        return selectVlansForPath(azERO, zaERO, urnMap, availableVlanMap, validVlanMap);
+        return selectVlansForPath(azERO, zaERO, urnMap, availableVlanMap, validVlanMap, deviceToPortMap, portToDeviceMap, reqPipe);
 
     }
 
@@ -541,27 +553,35 @@ public class VlanService {
      * a URN Entity -> Set of available VLANs map, and a URN Entity -> Set of valid VLANs map (available and requested per
      * fixture).
      *
-     * @param reqPipe
      * @param azERO - The AZ path (edges)
      * @param zaERO - The ZA path (edges)
      * @param urnMap - A map of URN String to Entity
      * @param availableVlanMap - A map of URN entity to available VLANs
      * @param validVlanMap - A map of fixture URN entity to requested & available VLANs
+     * @param deviceToPortMap
+     * @param portToDeviceMap
      * @return A map containing the VLAN chosen for each URN (-1 if none possible)
      */
     private Map<UrnE, Set<Integer>> selectVlansForPath(List<TopoEdge> azERO, List<TopoEdge> zaERO, Map<String, UrnE> urnMap,
                                                        Map<UrnE, Set<Integer>> availableVlanMap,
-                                                       Map<UrnE, Set<Integer>> validVlanMap) {
+                                                       Map<UrnE, Set<Integer>> validVlanMap,
+                                                       Map<String, Set<String>> deviceToPortMap,
+                                                       Map<String, String> portToDeviceMap,
+                                                       RequestedVlanPipeE reqPipe) {
         Map<UrnE, Set<Integer>> chosenVlanMap = new HashMap<>();
 
         // Retrive port URNs for pipe from the AZ and ZA EROs
-        Set<UrnE> pipeUrns = getUrnsFromListOfEdges(azERO, urnMap);
-        pipeUrns.addAll(getUrnsFromListOfEdges(zaERO, urnMap));
+        // AND - If there are any switches, add their ports as well
+
+        Set<UrnE> pipeUrns = getUrnsFromListOfEdges(azERO, urnMap, deviceToPortMap);
+        pipeUrns.addAll(getUrnsFromListOfEdges(zaERO, urnMap, deviceToPortMap));
         pipeUrns = pipeUrns.stream().filter(u -> u.getUrnType().equals(UrnType.IFCE)).collect(Collectors.toSet());
 
-;
+        //Set<UrnE> nonFixAJunctionPortUrns =
+
         // Get the VLANs available across the AZ/ZA path
         Set<Integer> availableVlansAcrossPath = findAvailableVlansBidirectional(azERO, zaERO, availableVlanMap, urnMap);
+
         // Get the valid VLANs across the fixtures
         Set<Integer> availableVlansAcrossFixtures = getVlanOverlapAcrossMap(validVlanMap);
 
@@ -651,15 +671,16 @@ public class VlanService {
 
         // Get a list of all non-fixture to device edges
 
-        List<TopoEdge> combinedEdges = azERO.subList(1, azERO.size()-1)
+        List<TopoEdge> combinedEdges = azERO
+                .subList(1, azERO.size()-1)
                 .stream()
                 .filter(e -> !e.getLayer().equals(Layer.MPLS))
                 .collect(Collectors.toList());
-        combinedEdges.addAll(
-                zaERO.subList(1, zaERO.size()-1)
-                        .stream()
-                        .filter(e -> !e.getLayer().equals(Layer.MPLS))
-                        .collect(Collectors.toList()));
+        combinedEdges.addAll(zaERO
+                .subList(1, zaERO.size()-1)
+                .stream()
+                .filter(e -> !e.getLayer().equals(Layer.MPLS))
+                .collect(Collectors.toList()));
 
         // Loop through all edges in the AZ / ZA combined path
         // Ignore MPLS edges
@@ -881,10 +902,14 @@ public class VlanService {
      * Given a list of edges and a URN map, get a list of all URNs in that list.
      * @param edges - The list of edges
      * @param urnMap - A map of URN strings to URN entities
+     * @param deviceToPortMap
      * @return Set of all URNs across the list of edges
      */
-    private Set<UrnE> getUrnsFromListOfEdges(List<TopoEdge> edges, Map<String, UrnE> urnMap){
+    private Set<UrnE> getUrnsFromListOfEdges(List<TopoEdge> edges, Map<String, UrnE> urnMap,
+                                             Map<String, Set<String>> deviceToPortMap){
+
         Set<UrnE> urns = new HashSet<>();
+
         for(TopoEdge edge : edges){
             String aUrnString = edge.getA().getUrn();
             UrnE aUrn = urnMap.getOrDefault(aUrnString, null);
@@ -894,9 +919,17 @@ public class VlanService {
 
             if(aUrn != null){
                 urns.add(aUrn);
+                /*if(aUrn.getUrnType().equals(UrnType.DEVICE) && aUrn.getDeviceType().equals(DeviceType.SWITCH)){
+                    Set<String> portNames = deviceToPortMap.get(aUrn.getUrn());
+                    urns.addAll(portNames.stream().filter(urnMap::containsKey).map(urnMap::get).collect(Collectors.toSet()));
+                }*/
             }
             if(zUrn != null){
                 urns.add(zUrn);
+                /*if(zUrn.getUrnType().equals(UrnType.DEVICE) && zUrn.getDeviceType().equals(DeviceType.SWITCH)){
+                    Set<String> portNames = deviceToPortMap.get(zUrn.getUrn());
+                    urns.addAll(portNames.stream().filter(urnMap::containsKey).map(urnMap::get).collect(Collectors.toSet()));
+                }*/
             }
         }
         return urns;

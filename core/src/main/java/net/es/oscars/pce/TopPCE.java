@@ -185,11 +185,12 @@ public class TopPCE {
                 // Try to get the reserved resources
                 try {
                     transPCE.reserveRequestedPipe(pipe, schedSpec, azEros, zaEros, rsvBandwidths, rsvVlans,
-                            reservedMplsPipes, reservedEthPipes);
+                            reservedMplsPipes, reservedEthPipes, deviceToPortMap, portToDeviceMap);
                 }
                 // If it failed, decrement the number reserved
                 catch(Exception e){
                     log.info(e.toString());
+                    e.printStackTrace();
                     numReserved--;
                 }
             }
@@ -216,7 +217,7 @@ public class TopPCE {
                 try
                 {
                     transPCE.reserveRequestedPipeWithPairs(pipe, schedSpec, azEROs, zaEROs, rsvBandwidths,
-                            rsvVlans, reservedMplsPipes, reservedEthPipes);
+                            rsvVlans, reservedMplsPipes, reservedEthPipes, deviceToPortMap, portToDeviceMap);
                 }
                 // If it failed, decrement the number reserved
                 catch(Exception e)
