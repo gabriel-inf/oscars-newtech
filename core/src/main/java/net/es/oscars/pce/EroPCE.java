@@ -135,9 +135,9 @@ public class EroPCE
 
 
         if(!prunedTopoAZ.equals(multiLayerTopoAzDirection))
-            throw new PCEException("Requested AZ ERO unavailable; failed to complete Patch Computation");
+            throw new PCEException("Requested AZ ERO unavailable; failed to complete Path Computation");
         if(!prunedTopoZA.equals(multiLayerTopoZaDirection))
-            throw new PCEException("Requested ZA ERO unavailable; failed to complete Patch Computation");
+            throw new PCEException("Requested ZA ERO unavailable; failed to complete Path Computation");
 
         // Shortest path routing
         List<TopoEdge> azEroCalculated = dijkstraPCE.computeShortestPathEdges(prunedTopoAZ, srcPort, dstPort);

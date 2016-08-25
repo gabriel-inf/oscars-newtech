@@ -32,13 +32,16 @@ public class ReservedVlanJunctionE {
     @OneToMany(cascade = CascadeType.ALL)
     private Set<ReservedPssResourceE> reservedPssResources;
 
+    @OneToMany(cascade = CascadeType.ALL)
+    private Set<ReservedVlanE> reservedVlans;
+
     public static ReservedVlanJunctionE copyFrom(ReservedVlanJunctionE junction) {
         Set<ReservedVlanFixtureE> fixtures = new HashSet<>();
 
-        junction.getFixtures().stream().forEach(f -> {
+        junction.getFixtures().forEach(f -> {
             ReservedVlanFixtureE copy = ReservedVlanFixtureE.builder()
                     .reservedBandwidth(f.getReservedBandwidth())
-                    .reservedVlan(f.getReservedVlan())
+                    .reservedVlans(f.getReservedVlans())
                     .reservedPssResources(f.getReservedPssResources())
                     .fixtureType(f.getFixtureType())
                     .ifceUrn(f.getIfceUrn())
@@ -52,6 +55,7 @@ public class ReservedVlanJunctionE {
                 .junctionType(junction.getJunctionType())
                 .fixtures(fixtures)
                 .reservedPssResources(junction.getReservedPssResources())
+                .reservedVlans(junction.getReservedVlans())
                 .build();
 
 

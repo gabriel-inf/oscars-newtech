@@ -353,14 +353,14 @@ public class SequentialResvTest {
 
             ReservedVlanFixtureE portA = allResEthPipes.iterator().next().getAJunction().getFixtures().iterator().next();
             ReservedVlanFixtureE portZ = allResEthPipes.iterator().next().getZJunction().getFixtures().iterator().next();
-            Integer vlanA = portA.getReservedVlan().getVlan();
-            Integer vlanZ = portZ.getReservedVlan().getVlan();
+            Set<Integer> vlansA = portA.getReservedVlans().stream().map(ReservedVlanE::getVlan).collect(Collectors.toSet());
+            Set<Integer> vlansZ = portZ.getReservedVlans().stream().map(ReservedVlanE::getVlan).collect(Collectors.toSet());
 
-            assert (!usedVlanIDsA.contains(vlanA));
-            assert (!usedVlanIDsZ.contains(vlanZ));
+            assert (!usedVlanIDsA.containsAll(vlansA));
+            assert (!usedVlanIDsZ.containsAll(vlansZ));
 
-            usedVlanIDsA.add(portA.getReservedVlan().getVlan());
-            usedVlanIDsZ.add(portZ.getReservedVlan().getVlan());
+            usedVlanIDsA.addAll(vlansA);
+            usedVlanIDsZ.addAll(vlansZ);
         }
 
         Set<ReservedBandwidthE> portBWs = bwRepo.findAll().stream()
@@ -477,14 +477,14 @@ public class SequentialResvTest {
 
             ReservedVlanFixtureE portA = allResMplsPipes.iterator().next().getAJunction().getFixtures().iterator().next();
             ReservedVlanFixtureE portZ = allResMplsPipes.iterator().next().getZJunction().getFixtures().iterator().next();
-            Integer vlanA = portA.getReservedVlan().getVlan();
-            Integer vlanZ = portZ.getReservedVlan().getVlan();
+            Set<Integer> vlansA = portA.getReservedVlans().stream().map(ReservedVlanE::getVlan).collect(Collectors.toSet());
+            Set<Integer> vlansZ = portZ.getReservedVlans().stream().map(ReservedVlanE::getVlan).collect(Collectors.toSet());
 
-            assert (!usedVlanIDsA.contains(vlanA));
-            assert (!usedVlanIDsZ.contains(vlanZ));
+            assert (!usedVlanIDsA.containsAll(vlansA));
+            assert (!usedVlanIDsZ.containsAll(vlansZ));
 
-            usedVlanIDsA.add(portA.getReservedVlan().getVlan());
-            usedVlanIDsZ.add(portZ.getReservedVlan().getVlan());
+            usedVlanIDsA.addAll(vlansA);
+            usedVlanIDsZ.addAll(vlansZ);
         }
 
         Set<ReservedBandwidthE> portBWs = bwRepo.findAll().stream()
@@ -948,21 +948,22 @@ public class SequentialResvTest {
 
             ReservedVlanFixtureE portA = allResEthPipes.iterator().next().getAJunction().getFixtures().iterator().next();
             ReservedVlanFixtureE portZ = allResEthPipes.iterator().next().getZJunction().getFixtures().iterator().next();
-            Integer vlanA = portA.getReservedVlan().getVlan();
-            Integer vlanZ = portZ.getReservedVlan().getVlan();
+            Set<Integer> vlansA = portA.getReservedVlans().stream().map(ReservedVlanE::getVlan).collect(Collectors.toSet());
+            Set<Integer> vlansZ = portZ.getReservedVlans().stream().map(ReservedVlanE::getVlan).collect(Collectors.toSet());
+
 
             if (connectionStartDate.equals(startDate1)) {
-                assert (!usedVlanIDsA_T1.contains(vlanA));
-                assert (!usedVlanIDsZ_T1.contains(vlanZ));
+                assert (!usedVlanIDsA_T1.containsAll(vlansA));
+                assert (!usedVlanIDsZ_T1.containsAll(vlansZ));
 
-                usedVlanIDsA_T1.add(portA.getReservedVlan().getVlan());
-                usedVlanIDsZ_T1.add(portZ.getReservedVlan().getVlan());
+                usedVlanIDsA_T1.addAll(vlansA);
+                usedVlanIDsZ_T1.addAll(vlansZ);
             } else {
-                assert (!usedVlanIDsA_T2.contains(vlanA));
-                assert (!usedVlanIDsZ_T2.contains(vlanZ));
+                assert (!usedVlanIDsA_T2.containsAll(vlansA));
+                assert (!usedVlanIDsZ_T2.containsAll(vlansZ));
 
-                usedVlanIDsA_T2.add(portA.getReservedVlan().getVlan());
-                usedVlanIDsZ_T2.add(portZ.getReservedVlan().getVlan());
+                usedVlanIDsA_T2.addAll(vlansA);
+                usedVlanIDsZ_T2.addAll(vlansZ);
             }
         }
 

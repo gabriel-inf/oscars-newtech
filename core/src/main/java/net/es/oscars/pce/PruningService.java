@@ -10,6 +10,7 @@ import net.es.oscars.topo.dao.UrnRepository;
 import net.es.oscars.topo.ent.UrnE;
 import net.es.oscars.topo.enums.Layer;
 import net.es.oscars.topo.enums.VertexType;
+import net.es.oscars.topo.svc.TopoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
@@ -38,6 +39,8 @@ public class PruningService {
     @Autowired
     private BandwidthService bwSvc;
 
+    @Autowired
+    private TopoService topoService;
 
 
     /**
@@ -277,8 +280,12 @@ public class PruningService {
         // Build map of URN to available bandwidth
         Map<UrnE, Map<String, Integer>> availBwMap = bwSvc.buildBandwidthAvailabilityMapWithUrns(rsvBwList, urns);
 
+        // Get map of parent device vertex -> set of port vertices
+        Map<String, Set<String>> deviceToPortMap = topoService.buildDeviceToPortMap();
+        Map<String, String> portToDeviceMap = topoService.buildPortToDeviceMap(deviceToPortMap);
+
         // Build map of URN to resvVlan
-        Map<UrnE, Set<Integer>> availVlanMap = vlanSvc.buildAvailableVlanIdMap(urnMap, rsvVlanList);
+        Map<UrnE, Set<Integer>> availVlanMap = vlanSvc.buildAvailableVlanIdMap(urnMap, rsvVlanList, portToDeviceMap);
 
         // Copy the original topology's layer and set of vertices.
         Topology pruned = new Topology();
@@ -327,8 +334,12 @@ public class PruningService {
         // Build map of URN to available bandwidth
         Map<UrnE, Map<String, Integer>> availBwMap = bwSvc.buildBandwidthAvailabilityMapWithUrns(rsvBwList, urns);
 
+        // Get map of parent device vertex -> set of port vertices
+        Map<String, Set<String>> deviceToPortMap = topoService.buildDeviceToPortMap();
+        Map<String, String> portToDeviceMap = topoService.buildPortToDeviceMap(deviceToPortMap);
+
         // Build map of URN to resvVlan
-        Map<UrnE, Set<Integer>> availVlanMap = vlanSvc.buildAvailableVlanIdMap(urnMap, rsvVlanList);
+        Map<UrnE, Set<Integer>> availVlanMap = vlanSvc.buildAvailableVlanIdMap(urnMap, rsvVlanList, portToDeviceMap);
 
         // Copy the original topology's layer and set of vertices.
         Topology pruned = new Topology();

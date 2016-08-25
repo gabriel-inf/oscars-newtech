@@ -73,6 +73,10 @@ public class TopPCE {
         Set<ReservedEthPipeE> reservedEthPipes = new HashSet<>();
         Set<ReservedVlanJunctionE> reservedEthJunctions = new HashSet<>();
 
+        // Get map of parent device vertex -> set of port vertices
+        Map<String, Set<String>> deviceToPortMap = topoService.buildDeviceToPortMap();
+        Map<String, String> portToDeviceMap = topoService.buildPortToDeviceMap(deviceToPortMap);
+
         // Attempt to reserve simple junctions
         log.info("Handling Simple Junctions");
         Set<ReservedVlanJunctionE> simpleJunctions = new HashSet<>();
@@ -86,7 +90,7 @@ public class TopPCE {
             List<ReservedVlanE> rsvVlans = vlanService.createReservedVlanList(simpleJunctions, reservedEthPipes, schedSpec);
 
             ReservedVlanJunctionE junction = transPCE.reserveSimpleJunction(reqJunction, schedSpec, simpleJunctions,
-                    rsvBandwidths, rsvVlans);
+                    rsvBandwidths, rsvVlans, deviceToPortMap, portToDeviceMap);
 
             if(junction != null){
                 simpleJunctions.add(junction);
@@ -105,7 +109,7 @@ public class TopPCE {
         // Attempt to reserve all requested pipes
         log.info("Starting to handle pipes");
         Integer numReserved = handleRequestedPipes(pipes, schedSpec, simpleJunctions, reservedMplsPipes,
-                reservedEthPipes);
+                reservedEthPipes, deviceToPortMap, portToDeviceMap);
 
         // If pipes were not able to be reserved in the original order, try reversing the order pipes are attempted
         if((numReserved != pipes.size()) && (pipes.size() > 1)){
@@ -114,7 +118,7 @@ public class TopPCE {
             reservedMplsPipes = new HashSet<>();
             reservedEthJunctions = new HashSet<>();
             numReserved = handleRequestedPipes(pipes, schedSpec, simpleJunctions, reservedMplsPipes,
-                    reservedEthPipes);
+                    reservedEthPipes, deviceToPortMap, portToDeviceMap);
         }
 
         // If the pipes still cannot be reserved, return the blank Reserved Vlan Flow
@@ -146,11 +150,12 @@ public class TopPCE {
      * @param simpleJunctions - The currently reserved independent junctions
      * @param reservedMplsPipes - The currently reserved MPLS pipes
      * @param reservedEthPipes - The currently reserved Ethernet pipes
-     * @return The number of requested pipes which were able to be reserved
+     * @param deviceToPortMap
+     *@param portToDeviceMap @return The number of requested pipes which were able to be reserved
      */
     private Integer handleRequestedPipes(List<RequestedVlanPipeE> pipes, ScheduleSpecificationE schedSpec,
-                                      Set<ReservedVlanJunctionE> simpleJunctions,  Set<ReservedMplsPipeE> reservedMplsPipes,
-                                         Set<ReservedEthPipeE> reservedEthPipes)
+                                         Set<ReservedVlanJunctionE> simpleJunctions, Set<ReservedMplsPipeE> reservedMplsPipes,
+                                         Set<ReservedEthPipeE> reservedEthPipes, Map<String, Set<String>> deviceToPortMap, Map<String, String> portToDeviceMap)
     {
         // The number of requested pipes successfully reserved
         Integer numReserved = 0;
@@ -180,11 +185,12 @@ public class TopPCE {
                 // Try to get the reserved resources
                 try {
                     transPCE.reserveRequestedPipe(pipe, schedSpec, azEros, zaEros, rsvBandwidths, rsvVlans,
-                            reservedMplsPipes, reservedEthPipes);
+                            reservedMplsPipes, reservedEthPipes, deviceToPortMap, portToDeviceMap);
                 }
                 // If it failed, decrement the number reserved
                 catch(Exception e){
                     log.info(e.toString());
+                    e.printStackTrace();
                     numReserved--;
                 }
             }
@@ -211,7 +217,7 @@ public class TopPCE {
                 try
                 {
                     transPCE.reserveRequestedPipeWithPairs(pipe, schedSpec, azEROs, zaEROs, rsvBandwidths,
-                            rsvVlans, reservedMplsPipes, reservedEthPipes);
+                            rsvVlans, reservedMplsPipes, reservedEthPipes, deviceToPortMap, portToDeviceMap);
                 }
                 // If it failed, decrement the number reserved
                 catch(Exception e)

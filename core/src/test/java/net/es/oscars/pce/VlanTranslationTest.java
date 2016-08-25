@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -85,7 +86,7 @@ public class VlanTranslationTest {
         assert(junctions.size() == 0);
 
         Map<String, UrnE> urnMap = new HashMap<>();
-        Map<UrnE, Integer> reservedVlanMap = new HashMap<>();
+        Map<UrnE, Set<Integer>> reservedVlanMap = new HashMap<>();
         buildUrnAndReservedVlanMap(urnMap, reservedVlanMap, ethPipes);
 
         UrnE a0 = urnMap.getOrDefault("A:0", null);
@@ -99,23 +100,23 @@ public class VlanTranslationTest {
         UrnE c2 = urnMap.getOrDefault("C:2", null);
 
         // Unused
-        assert(a0 == null);
+        assert(reservedVlanMap.get(a0).contains(3));
         // Intermediate
-        assert(reservedVlanMap.get(a1) == 3);
+        assert(reservedVlanMap.get(a1).contains(3));
         // Src Fixture
-        assert(reservedVlanMap.get(a2) == 3);
+        assert(reservedVlanMap.get(a2).contains(3));
         // Intermediate
-        assert(reservedVlanMap.get(b0) == 3);
+        assert(reservedVlanMap.get(b0).contains(3));
         // Intermediate
-        assert(reservedVlanMap.get(b1) == 3);
+        assert(reservedVlanMap.get(b1).contains(3));
         // Unused
-        assert(b2 == null);
+        assert(reservedVlanMap.get(b2).contains(3));
         // Intermediate
-        assert(reservedVlanMap.get(c0) == 3);
+        assert(reservedVlanMap.get(c0).contains(3));
         // Unused
-        assert(c1 == null);
+        assert(reservedVlanMap.get(c1).contains(3));
         // Src Fixture
-        assert(reservedVlanMap.get(c2) == 3);
+        assert(reservedVlanMap.get(c2).contains(3));
 
         assert(reservedVlanMap.get(a1).equals(reservedVlanMap.get(b0)));
         assert(reservedVlanMap.get(b0).equals(reservedVlanMap.get(b1)));
@@ -174,7 +175,7 @@ public class VlanTranslationTest {
         assert(junctions.size() == 0);
 
         Map<String, UrnE> urnMap = new HashMap<>();
-        Map<UrnE, Integer> reservedVlanMap = new HashMap<>();
+        Map<UrnE, Set<Integer>> reservedVlanMap = new HashMap<>();
         buildUrnAndReservedVlanMap(urnMap, reservedVlanMap, ethPipes);
 
         UrnE a0 = urnMap.getOrDefault("A:0", null);
@@ -188,27 +189,26 @@ public class VlanTranslationTest {
         UrnE c2 = urnMap.getOrDefault("C:2", null);
 
         // Unused
-        assert(a0 == null);
+        assert(reservedVlanMap.get(a0).contains(2));
         // Intermediate
-        assert(reservedVlanMap.get(a1) == 2 || reservedVlanMap.get(a1) == 3);
+        assert(reservedVlanMap.get(a1).contains(2) || reservedVlanMap.get(a1).contains(3));
         // Src Fixture
-        assert(reservedVlanMap.get(a2) == 2);
+        assert(reservedVlanMap.get(a2).contains(2));
         // Intermediate
-        assert(reservedVlanMap.get(b0) == 2 || reservedVlanMap.get(b0) == 3);
+        assert(reservedVlanMap.get(b0).contains(2) || reservedVlanMap.get(b0).contains(3));
         // Intermediate
-        assert(reservedVlanMap.get(b1) == 2 || reservedVlanMap.get(b1) == 3);
+        assert(reservedVlanMap.get(b1).contains(2) || reservedVlanMap.get(b1).contains(3));
         // Unused
-        assert(b2 == null);
+        assert(reservedVlanMap.get(b2).contains(2));
         // Intermediate
-        assert(reservedVlanMap.get(c0) == 2 || reservedVlanMap.get(c0) == 3);
+        assert(reservedVlanMap.get(c0).contains(2) || reservedVlanMap.get(c0).contains(3));
         // Unused
-        assert(c1 == null);
+        assert(reservedVlanMap.get(a1).contains(2));
         // Dst Fixture
-        assert(reservedVlanMap.get(c2) == 3);
+        assert(reservedVlanMap.get(c2).contains(2) || reservedVlanMap.get(c2).contains(3));
 
-        assert(reservedVlanMap.get(a1).equals(reservedVlanMap.get(b0)));
-        assert(reservedVlanMap.get(b0).equals(reservedVlanMap.get(b1)));
-        assert(reservedVlanMap.get(b1).equals(reservedVlanMap.get(c0)));
+        assert((reservedVlanMap.get(a1).contains(2) && reservedVlanMap.get(a1).contains(3)) ||
+                (reservedVlanMap.get(c0).contains(2) && reservedVlanMap.get(c0).contains(3)));
 
         log.info("Finished test: vlanTransTest2");
     }
@@ -263,7 +263,7 @@ public class VlanTranslationTest {
         assert(junctions.size() == 0);
 
         Map<String, UrnE> urnMap = new HashMap<>();
-        Map<UrnE, Integer> reservedVlanMap = new HashMap<>();
+        Map<UrnE, Set<Integer>> reservedVlanMap = new HashMap<>();
         buildUrnAndReservedVlanMap(urnMap, reservedVlanMap, ethPipes);
 
         UrnE a0 = urnMap.getOrDefault("A:0", null);
@@ -277,34 +277,33 @@ public class VlanTranslationTest {
         UrnE c2 = urnMap.getOrDefault("C:2", null);
 
         // Unused
-        assert(a0 == null);
+        assert(reservedVlanMap.get(a0).contains(3));
         // Intermediate
-        assert(reservedVlanMap.get(a1) == 2 || reservedVlanMap.get(a1) == 3);
+        assert(reservedVlanMap.get(a1).contains(2) || reservedVlanMap.get(a1).contains(3));
         // Src Fixture
-        assert(reservedVlanMap.get(a2) == 3);
+        assert(reservedVlanMap.get(a2).contains(3));
         // Intermediate
-        assert(reservedVlanMap.get(b0) == 2 || reservedVlanMap.get(b0) == 3);
+        assert(reservedVlanMap.get(b0).contains(2) || reservedVlanMap.get(b0).contains(3));
         // Intermediate
-        assert(reservedVlanMap.get(b1) == 2 || reservedVlanMap.get(b1) == 3);
+        assert(reservedVlanMap.get(b1).contains(2) || reservedVlanMap.get(b1).contains(3));
         // Unused
-        assert(b2 == null);
+        assert(reservedVlanMap.get(b2).contains(3));
         // Intermediate
-        assert(reservedVlanMap.get(c0) == 2 || reservedVlanMap.get(c0) == 3);
+        assert(reservedVlanMap.get(c0).contains(2) || reservedVlanMap.get(c0).contains(3));
         // Unused
-        assert(c1 == null);
+        assert(reservedVlanMap.get(c1).contains(2));
         // Dst Fixture
-        assert(reservedVlanMap.get(c2) == 2);
+        assert(reservedVlanMap.get(c2).contains(2));
 
-        assert(reservedVlanMap.get(a1).equals(reservedVlanMap.get(b0)));
-        assert(reservedVlanMap.get(b0).equals(reservedVlanMap.get(b1)));
-        assert(reservedVlanMap.get(b1).equals(reservedVlanMap.get(c0)));
+        assert((reservedVlanMap.get(a1).contains(2) && reservedVlanMap.get(a1).contains(3)) ||
+                (reservedVlanMap.get(c0).contains(2) && reservedVlanMap.get(c0).contains(3)));
 
         log.info("Finished test: vlanTransTest3");
     }
 
     @Test
     /**
-     * Request VLAN 3 on src and dest, VLANs 4 or 5 taken in between
+     * Request VLAN 3 on src and dest, only 4 and 5 available in-between. Fail due to junctions being switches.
      */
     public void vlanTransTest4(){
 
@@ -340,53 +339,7 @@ public class VlanTranslationTest {
         }
         catch(PCEException | PSSException pceE){ log.error("", pceE); }
 
-        assert(reservedBlueprint.isPresent());
-
-        ReservedBlueprintE resBlueprint  = reservedBlueprint.get();
-        Set<ReservedEthPipeE> ethPipes = resBlueprint.getVlanFlow().getEthPipes();
-        Set<ReservedMplsPipeE> mplsPipes = resBlueprint.getVlanFlow().getMplsPipes();
-        Set<ReservedVlanJunctionE> junctions = resBlueprint.getVlanFlow().getJunctions();
-
-        assert(ethPipes.size() == 2);
-        assert(mplsPipes.size() == 0);
-        assert(junctions.size() == 0);
-
-        Map<String, UrnE> urnMap = new HashMap<>();
-        Map<UrnE, Integer> reservedVlanMap = new HashMap<>();
-        buildUrnAndReservedVlanMap(urnMap, reservedVlanMap, ethPipes);
-
-        UrnE a0 = urnMap.getOrDefault("A:0", null);
-        UrnE a1 = urnMap.getOrDefault("A:1", null);
-        UrnE a2 = urnMap.getOrDefault("A:2", null);
-        UrnE b0 = urnMap.getOrDefault("B:0", null);
-        UrnE b1 = urnMap.getOrDefault("B:1", null);
-        UrnE b2 = urnMap.getOrDefault("B:2", null);
-        UrnE c0 = urnMap.getOrDefault("C:0", null);
-        UrnE c1 = urnMap.getOrDefault("C:1", null);
-        UrnE c2 = urnMap.getOrDefault("C:2", null);
-
-        // Unused
-        assert(a0 == null);
-        // Intermediate
-        assert(reservedVlanMap.get(a1) == 4 || reservedVlanMap.get(a1) == 5);
-        // Src Fixture
-        assert(reservedVlanMap.get(a2) == 3);
-        // Intermediate
-        assert(reservedVlanMap.get(b0) == 4 || reservedVlanMap.get(b0) == 5);
-        // Intermediate
-        assert(reservedVlanMap.get(b1) == 4 || reservedVlanMap.get(b1) == 5);
-        // Unused
-        assert(b2 == null);
-        // Intermediate
-        assert(reservedVlanMap.get(c0) == 4 || reservedVlanMap.get(c0) == 5);
-        // Unused
-        assert(c1 == null);
-        // Dst Fixture
-        assert(reservedVlanMap.get(c2) == 3);
-
-        assert(reservedVlanMap.get(a1).equals(reservedVlanMap.get(b0)));
-        assert(reservedVlanMap.get(b0).equals(reservedVlanMap.get(b1)));
-        assert(reservedVlanMap.get(b1).equals(reservedVlanMap.get(c0)));
+        assert(!reservedBlueprint.isPresent());
 
         log.info("Finished test: vlanTransTest4");
     }
@@ -577,8 +530,8 @@ public class VlanTranslationTest {
         assert(junctions.size() == 1);
 
         Map<String, UrnE> urnMap = new HashMap<>();
-        Map<UrnE, Integer> reservedVlanMap = new HashMap<>();
-        buildUrnAndReservedVlanMap(urnMap, reservedVlanMap, ethPipes);
+        Map<UrnE, Set<Integer>> reservedVlanMap = new HashMap<>();
+        buildUrnAndReservedVlanMap(urnMap, reservedVlanMap, ethPipes, junctions);
 
         UrnE a0 = urnMap.getOrDefault("A:0", null);
         UrnE a1 = urnMap.getOrDefault("A:1", null);
@@ -591,32 +544,29 @@ public class VlanTranslationTest {
         UrnE c2 = urnMap.getOrDefault("C:2", null);
 
         // Unused
-        assert(a0 == null);
+        assert(reservedVlanMap.get(a0).contains(1) && reservedVlanMap.get(a0).contains(5));
         // Intermediate
-        assert(reservedVlanMap.get(a1) != 5);
+        assert(reservedVlanMap.get(a1).contains(5) && reservedVlanMap.get(a1).contains(1));
         // Src Fixture
-        assert(reservedVlanMap.get(a2) == 5);
+        assert(reservedVlanMap.get(a2).contains(5) && reservedVlanMap.get(a2).contains(1));
         // Intermediate
-        assert(reservedVlanMap.get(b0) != 5);
+        assert(reservedVlanMap.get(b0).contains(1) && reservedVlanMap.get(b0).contains(5));
         // Intermediate
-        assert(reservedVlanMap.get(b1) != 5);
+        assert(reservedVlanMap.get(b1).contains(1) && reservedVlanMap.get(b1).contains(5));
         // Unused
-        assert(b2 == null);
+        assert(reservedVlanMap.get(b2).contains(1) && reservedVlanMap.get(b2).contains(5));
         // Intermediate
-        assert(reservedVlanMap.get(c0) != 5);
+        assert(reservedVlanMap.get(c0).contains(5) && reservedVlanMap.get(c0).contains(1));
         // Unused
-        assert(c1 == null);
+        assert(reservedVlanMap.get(c1).contains(5) && reservedVlanMap.get(c1).contains(1));
         // Dst Fixture
-        assert(reservedVlanMap.get(c2) == 5);
+        assert(reservedVlanMap.get(c2).contains(5) && reservedVlanMap.get(c2).contains(1));
 
-        assert(reservedVlanMap.get(a1).equals(reservedVlanMap.get(b0)));
-        assert(reservedVlanMap.get(b0).equals(reservedVlanMap.get(b1)));
-        assert(reservedVlanMap.get(b1).equals(reservedVlanMap.get(c0)));
 
         // Test the junction
         ReservedVlanJunctionE resJunction = junctions.iterator().next();
         Set<ReservedVlanFixtureE> resJunctionFixtures = resJunction.getFixtures();
-        assert(resJunctionFixtures.stream().map(ReservedVlanFixtureE::getReservedVlan).map(ReservedVlanE::getVlan).allMatch(v -> v == 5));
+        assert(resJunctionFixtures.stream().map(ReservedVlanFixtureE::getReservedVlans).flatMap(Collection::stream).map(ReservedVlanE::getVlan).allMatch(v -> v == 5));
 
         log.info("Finished test: vlanTransTest8");
     }
@@ -677,8 +627,8 @@ public class VlanTranslationTest {
         assert(junctions.size() == 0);
 
         Map<String, UrnE> urnMap = new HashMap<>();
-        Map<UrnE, List<Integer>> reservedVlanMap = new HashMap<>();
-        buildUrnAndReservedVlansMap(urnMap, reservedVlanMap, ethPipes);
+        Map<UrnE, Set<Integer>> reservedVlanMap = new HashMap<>();
+        buildUrnAndReservedVlanMap(urnMap, reservedVlanMap, ethPipes);
 
         UrnE a0 = urnMap.getOrDefault("A:0", null);
         UrnE a1 = urnMap.getOrDefault("A:1", null);
@@ -694,9 +644,9 @@ public class VlanTranslationTest {
         * 2 on src (B:1), 2 on dst (C:1).
         * */
         // Unused
-        assert(a0 == null);
+        assert(reservedVlanMap.get(a0).contains(3) && reservedVlanMap.get(a0).contains(5));
         // Intermediate
-        assert((reservedVlanMap.get(a1).contains(3) || reservedVlanMap.get(a1).contains(4)) && reservedVlanMap.get(a1).contains(5));
+        assert(reservedVlanMap.get(a1).contains(3) && reservedVlanMap.get(a1).contains(5));
         // Src Fixture
         assert(reservedVlanMap.get(a2).contains(3) && reservedVlanMap.get(a2).contains(5));
         // Intermediate
@@ -704,67 +654,52 @@ public class VlanTranslationTest {
         // Intermediate
         assert((reservedVlanMap.get(b1).contains(3) || reservedVlanMap.get(b1).contains(4)) && reservedVlanMap.get(b1).contains(2) && reservedVlanMap.get(b1).contains(5));
         // Unused
-        assert(b2 == null);
+        assert(reservedVlanMap.get(b2).contains(2) && reservedVlanMap.get(b2).contains(3) && reservedVlanMap.get(b2).contains(5));
         // Intermediate
-        assert((reservedVlanMap.get(c0).contains(3) || reservedVlanMap.get(c0).contains(4)) && reservedVlanMap.get(c0).contains(2) && reservedVlanMap.get(c0).contains(5));
+        assert((reservedVlanMap.get(c0).contains(3) && reservedVlanMap.get(c0).contains(4)) && reservedVlanMap.get(c0).contains(2) && reservedVlanMap.get(c0).contains(5));
         // Unused
-        assert(reservedVlanMap.get(c1).contains(2));
+        assert(reservedVlanMap.get(c1).contains(2) && reservedVlanMap.get(c1).contains(4) && reservedVlanMap.get(c1).contains(5));
         // Dst Fixture
-        assert(reservedVlanMap.get(c2).contains(4) && reservedVlanMap.get(c2).contains(5));
+        assert(reservedVlanMap.get(c2).contains(2) && reservedVlanMap.get(c2).contains(4) && reservedVlanMap.get(c2).contains(5));
 
         log.info("Finished test: vlanTransTest8");
     }
 
-    private void buildUrnAndReservedVlanMap(Map<String, UrnE> urnMap, Map<UrnE, Integer> reservedVlanMap,
+    private void buildUrnAndReservedVlanMap(Map<String, UrnE> urnMap, Map<UrnE, Set<Integer>> reservedVlanMap,
                                             Set<ReservedEthPipeE> ethPipes){
         for(ReservedEthPipeE pipe : ethPipes){
-            assert(pipe.getReservedVlans().stream().map(ReservedVlanE::getVlan).distinct().count() == 1);
+            //assert(pipe.getReservedVlans().stream().map(ReservedVlanE::getVlan).distinct().count() == 1);
 
             ReservedVlanJunctionE aJunction = pipe.getAJunction();
             ReservedVlanJunctionE zJunction = pipe.getZJunction();
 
-            for(ReservedVlanFixtureE fix: aJunction.getFixtures()){
-                urnMap.putIfAbsent(fix.getIfceUrn().getUrn(), fix.getIfceUrn());
-                reservedVlanMap.putIfAbsent(fix.getIfceUrn(), fix.getReservedVlan().getVlan());
-            }
-
-            for(ReservedVlanFixtureE fix: zJunction.getFixtures()){
-                urnMap.putIfAbsent(fix.getIfceUrn().getUrn(), fix.getIfceUrn());
-                reservedVlanMap.putIfAbsent(fix.getIfceUrn(), fix.getReservedVlan().getVlan());
-            }
-
-            Set<ReservedVlanE> reservedVlans = pipe.getReservedVlans();
-            for(ReservedVlanE resVlan : reservedVlans){
+            for(ReservedVlanE resVlan :  pipe.getReservedVlans()){
                 urnMap.putIfAbsent(resVlan.getUrn().getUrn(), resVlan.getUrn());
-                reservedVlanMap.putIfAbsent(resVlan.getUrn(), resVlan.getVlan());
+                reservedVlanMap.putIfAbsent(resVlan.getUrn(), new HashSet<>());
+                reservedVlanMap.get(resVlan.getUrn()).add(resVlan.getVlan());
+            }
+
+            for(ReservedVlanE resVlan : aJunction.getReservedVlans()){
+                urnMap.putIfAbsent(resVlan.getUrn().getUrn(), resVlan.getUrn());
+                reservedVlanMap.putIfAbsent(resVlan.getUrn(), new HashSet<>());
+                reservedVlanMap.get(resVlan.getUrn()).add(resVlan.getVlan());
+            }
+
+            for(ReservedVlanE resVlan : zJunction.getReservedVlans()){
+                urnMap.putIfAbsent(resVlan.getUrn().getUrn(), resVlan.getUrn());
+                reservedVlanMap.putIfAbsent(resVlan.getUrn(), new HashSet<>());
+                reservedVlanMap.get(resVlan.getUrn()).add(resVlan.getVlan());
             }
         }
     }
 
-    private void buildUrnAndReservedVlansMap(Map<String, UrnE> urnMap, Map<UrnE, List<Integer>> reservedVlanMap,
-                                            Set<ReservedEthPipeE> ethPipes){
-        for(ReservedEthPipeE pipe : ethPipes){
-            assert(pipe.getReservedVlans().stream().map(ReservedVlanE::getVlan).distinct().count() == 1);
-
-            ReservedVlanJunctionE aJunction = pipe.getAJunction();
-            ReservedVlanJunctionE zJunction = pipe.getZJunction();
-
-            for(ReservedVlanFixtureE fix: aJunction.getFixtures()){
-                urnMap.putIfAbsent(fix.getIfceUrn().getUrn(), fix.getIfceUrn());
-                reservedVlanMap.putIfAbsent(fix.getIfceUrn(), new ArrayList<>());
-                reservedVlanMap.get(fix.getIfceUrn()).add(fix.getReservedVlan().getVlan());
-            }
-
-            for(ReservedVlanFixtureE fix: zJunction.getFixtures()){
-                urnMap.putIfAbsent(fix.getIfceUrn().getUrn(), fix.getIfceUrn());
-                reservedVlanMap.putIfAbsent(fix.getIfceUrn(), new ArrayList<>());
-                reservedVlanMap.get(fix.getIfceUrn()).add(fix.getReservedVlan().getVlan());
-            }
-
-            Set<ReservedVlanE> reservedVlans = pipe.getReservedVlans();
-            for(ReservedVlanE resVlan : reservedVlans){
+    private void buildUrnAndReservedVlanMap(Map<String, UrnE> urnMap, Map<UrnE, Set<Integer>> reservedVlanMap,
+                                            Set<ReservedEthPipeE> ethPipes, Set<ReservedVlanJunctionE> resJunctions){
+        buildUrnAndReservedVlanMap(urnMap, reservedVlanMap, ethPipes);
+        for(ReservedVlanJunctionE resJunction: resJunctions){
+            for(ReservedVlanE resVlan : resJunction.getReservedVlans()){
                 urnMap.putIfAbsent(resVlan.getUrn().getUrn(), resVlan.getUrn());
-                reservedVlanMap.putIfAbsent(resVlan.getUrn(), new ArrayList<>());
+                reservedVlanMap.putIfAbsent(resVlan.getUrn(), new HashSet<>());
                 reservedVlanMap.get(resVlan.getUrn()).add(resVlan.getVlan());
             }
         }

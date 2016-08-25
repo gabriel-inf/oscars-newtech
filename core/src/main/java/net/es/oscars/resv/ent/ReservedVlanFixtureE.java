@@ -23,8 +23,8 @@ public class ReservedVlanFixtureE {
     @OneToOne(cascade = CascadeType.ALL)
     private UrnE ifceUrn;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    private ReservedVlanE reservedVlan;
+    @OneToMany(cascade = CascadeType.ALL)
+    private Set<ReservedVlanE> reservedVlans;
 
     @OneToOne(cascade = CascadeType.ALL)
     private ReservedBandwidthE reservedBandwidth;
