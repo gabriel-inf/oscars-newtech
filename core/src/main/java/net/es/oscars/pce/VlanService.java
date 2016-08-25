@@ -579,18 +579,42 @@ public class VlanService {
         Set<UrnE> pipeUrns = getUrnsFromListOfEdges(azERO, urnMap, deviceToPortMap);
         pipeUrns.addAll(getUrnsFromListOfEdges(zaERO, urnMap, deviceToPortMap));
 
-        log.info("Intermediate Port URNs: " + pipeUrns);
-        //Set<UrnE> nonFixAJunctionPortUrns =
-
         // Get the VLANs available across the AZ/ZA path
         Set<Integer> availableVlansAcrossPath = findAvailableVlansBidirectional(pipeUrns, availableVlanMap);
 
         // Get the valid VLANs across the fixtures
         Set<Integer> availableVlansAcrossFixtures = getVlanOverlapAcrossMap(validVlanMap);
 
-        // If there is any overlap between these two sets, use this ID for everything
+        // Get the VLANs available across non-fixture ports at both junctions
+        Set<UrnE> aNonFixJunctionPortUrns = deviceToPortMap.get(aJunctionUrn.getUrn())
+                .stream()
+                .filter(urnMap::containsKey)
+                .map(urnMap::get)
+                .filter(urn -> !validVlanMap.containsKey(urn))
+                .filter(urn -> !pipeUrns.contains(urn))
+                .collect(Collectors.toSet());
+
+        Set<UrnE> zNonFixJunctionPortUrns = deviceToPortMap.get(zJunctionUrn.getUrn())
+                .stream()
+                .filter(urnMap::containsKey)
+                .map(urnMap::get)
+                .filter(urn -> !validVlanMap.containsKey(urn))
+                .filter(urn -> !pipeUrns.contains(urn))
+                .collect(Collectors.toSet());
+        Set<Integer> zAvailableVlansNonFix = findAvailableVlansBidirectional(zNonFixJunctionPortUrns, availableVlanMap);
+        Set<Integer> aAvailableVlansNonFix = findAvailableVlansBidirectional(aNonFixJunctionPortUrns, availableVlanMap);
+
+        // If there is any overlap between these sets, use this ID for everything
         Set<Integer> availableEverywhere = new HashSet<>(availableVlansAcrossFixtures);
         availableEverywhere.retainAll(availableVlansAcrossPath);
+        if(aJunctionUrn.getDeviceType().equals(DeviceType.SWITCH)) {
+            availableEverywhere.retainAll(aAvailableVlansNonFix);
+        }
+        if(zJunctionUrn.getDeviceType().equals(DeviceType.SWITCH)){
+            availableEverywhere.retainAll(zAvailableVlansNonFix);
+        }
+
+
         if(!availableEverywhere.isEmpty()){
             List<Integer> options = availableEverywhere.stream().sorted().collect(Collectors.toList());
             Integer chosenVlan = options.get(0);
@@ -598,14 +622,25 @@ public class VlanService {
             for(UrnE fixUrn: validVlanMap.keySet()){
                 chosenVlanMap.putIfAbsent(fixUrn, Collections.singleton(chosenVlan));
             }
+            // Reserve VLANs at the other ports if Junction A is a switch
+            if(aJunctionUrn.getDeviceType().equals(DeviceType.SWITCH)) {
+                for (UrnE aNonFixUrn : aNonFixJunctionPortUrns) {
+                    chosenVlanMap.putIfAbsent(aNonFixUrn, Collections.singleton(chosenVlan));
+                }
+            }
+            // Reserve VLANs at the other ports if Junction Z is a switch
+            if (zJunctionUrn.getDeviceType().equals(DeviceType.SWITCH)) {
+                for(UrnE zNonFixUrn: zNonFixJunctionPortUrns){
+                    chosenVlanMap.putIfAbsent(zNonFixUrn, Collections.singleton(chosenVlan));
+                }
+
+            }
         }
         // Otherwise, iterate through the valid vlans per fixture
         // For each valid VLAN, see if it is available across the path
         // If so, use that for the path
         // Either way, choose an arbitrary VLAN for the fixture
         else {
-            // Remove all fixtures from the set of pipe URNs
-            pipeUrns = pipeUrns.stream().filter(urn -> !validVlanMap.containsKey(urn)).collect(Collectors.toSet());
             boolean pipeVlansAssigned = false;
 
             // For each fixture, find if there are any overlapping VLANs between the path and the fixture
