@@ -53,24 +53,6 @@ public class VlanService {
         return rsvVlans;
     }
 
-    /**
-     * Build a mapping of UrnE objects to ReservedVlanE objects.
-     * @param rsvVlanList - A list of all reserved VLAN IDs
-     * @return A map of UrnE to ReservedVlanE objects
-     */
-    public Map<UrnE, List<ReservedVlanE>> buildReservedVlanMap(List<ReservedVlanE> rsvVlanList) {
-
-        Map<UrnE, List<ReservedVlanE>> map = new HashMap<>();
-        for(ReservedVlanE resv : rsvVlanList){
-            UrnE resvUrn = resv.getUrn();
-            if(!map.containsKey(resvUrn)){
-                map.put(resvUrn, new ArrayList<>());
-            }
-            map.get(resvUrn).add(resv);
-        }
-        return map;
-    }
-
     private Map<UrnE,Set<Integer>> buildRequestedVlanIdMap(RequestedVlanPipeE reqPipe,
                                                            Map<UrnE, Set<Integer>> availableVlanMap) {
         Map<UrnE, Set<Integer>> requestedVlanIdMap = new HashMap<>();
@@ -115,15 +97,13 @@ public class VlanService {
         // Get map of all reserved VLAN IDs per URN
         Map<UrnE, Set<Integer>> reservedVlanIdMap = buildReservedVlanIdMap(urnMap, reservedVlans);
 
-        String stringified = this.stringifyVlanMap(reservedVlanIdMap);
 
-        log.info("Reserved VLAN ID Map: " + stringified);
+        log.info("Reserved VLAN ID Map: " + reservedVlanIdMap);
 
         // Get map of all reservable VLAN IDs per URN
         Map<UrnE, Set<Integer>> reservableVlanIdMap = buildReservableVlanIdMap(urnMap);
-        stringified = this.stringifyVlanMap(reservableVlanIdMap);
 
-        log.info("Reservable VLAN ID Map: " + stringified);
+        log.info("Reservable VLAN ID Map: " + reservableVlanIdMap);
 
         urnMap.values().stream().filter(urn -> urn.getUrnType().equals(UrnType.IFCE)).filter(urn -> urn.getUrnType().equals(UrnType.IFCE)).forEach(urn -> {
             if(urn.getReservableVlans() == null){
@@ -144,9 +124,7 @@ public class VlanService {
             }
         });
 
-        stringified = this.stringifyVlanMap(availableVlanIdMap);
-
-        log.info("Available VLAN ID Map: " + stringified);
+        log.info("Available VLAN ID Map: " + availableVlanIdMap);
 
         return availableVlanIdMap;
     }
@@ -202,7 +180,9 @@ public class VlanService {
 
     private Map<UrnE, Set<Integer>> buildReservedVlanIdMap(Map<String, UrnE> urnMap, List<ReservedVlanE> reservedVlans){
         Map<UrnE, Set<Integer>> reservedVlanIdMap = new HashMap<>();
-        urnMap.values().stream().filter(urn -> urn.getUrnType().equals(UrnType.IFCE)).forEach(urn -> reservedVlanIdMap.put(urn, new HashSet<>()));
+        urnMap.values().stream()
+                .filter(urn -> urn.getUrnType().equals(UrnType.IFCE))
+                .forEach(urn -> reservedVlanIdMap.put(urn, new HashSet<>()));
 
         for(ReservedVlanE rsvVlan : reservedVlans){
             Integer vlanId = rsvVlan.getVlan();
@@ -275,38 +255,6 @@ public class VlanService {
         }
         reservedVlans.addAll(getReservedVlansFromJunctions(junctions));
         return reservedVlans;
-    }
-
-    /**
-     * Get the VLAN IDs available at this fixture.
-     * @param reqFix - The requested VLAN fixture (used to retrieve the reservable set of VLANs).
-     * @param rsvVlans - The reserved VLAN IDs.
-     * @return The set of available VLAN IDs at this fixture (may be empty)
-     */
-    public Set<Integer> getAvailableVlanIdsFromFixture(RequestedVlanFixtureE reqFix, List<ReservedVlanE> rsvVlans){
-
-        // Build map from URNs to Reserved VLAN lists
-        Map<UrnE, List<ReservedVlanE>> rsvVlanMap = buildReservedVlanMap(rsvVlans);
-
-        // Get the set of reserved VLAN IDs at this fixture
-        List<ReservedVlanE> rsvVlansAtFixture = rsvVlanMap.containsKey(reqFix.getPortUrn()) ?
-                rsvVlanMap.get(reqFix.getPortUrn()) : new ArrayList<>();
-        Set<Integer> reservedVlanIds = rsvVlansAtFixture.stream().map(ReservedVlanE::getVlan).collect(Collectors.toSet());
-
-        // Find all reservable VLAN IDs at this fixture
-        Set<Integer> reservableVlanIds = getIntegersFromRanges(
-                reqFix.getPortUrn()
-                        .getReservableVlans()
-                        .getVlanRanges()
-                        .stream()
-                        .map(IntRangeE::toDtoIntRange)
-                        .collect(Collectors.toList()));
-
-        // Return all reservable VLAN Ids which are not reserved
-        return reservableVlanIds
-                .stream()
-                .filter(id -> !reservedVlanIds.contains(id))
-                .collect(Collectors.toSet());
     }
 
 
@@ -643,7 +591,7 @@ public class VlanService {
                 Set<Integer> overlappingVlans = new HashSet<>(validVlanMap.get(fixUrn));
                 overlappingVlans.retainAll(availableVlansAcrossPath);
                 // If the parent device is a switch, add the available VLANs for that device to the overlap
-                if(parentDeviceUrn.getDeviceType().equals(DeviceType.SWITCH)){
+                if(isSwitch(parentDeviceUrn)){
                         overlappingVlans.retainAll(nonFixPortVlansMap.get(parentDeviceUrn));
                 }
                 // If there is at least one VLAN ID in common between this fixture and the other ports in the path
@@ -659,7 +607,7 @@ public class VlanService {
                         chosenVlanMap.get(pipeUrn).add(chosenVlan);
                     }
                     // Assign this VLAN to other ports on the switch (if junction is a switch)
-                    if(parentDeviceUrn.getDeviceType().equals(DeviceType.SWITCH)) {
+                    if(isSwitch(parentDeviceUrn)) {
                         vlansAssignedJunctionMap.get(parentDeviceUrn).add(chosenVlan);
                         for (UrnE portUrn : nonFixPortUrnMap.get(parentDeviceUrn)) {
                             chosenVlanMap.putIfAbsent(portUrn, new HashSet<>());
@@ -672,13 +620,13 @@ public class VlanService {
                 if(!validVlanMap.get(fixUrn).isEmpty()) {
                     List<Integer> options = validVlanMap.get(fixUrn).stream().sorted().collect(Collectors.toList());
                     // Retain only the VLANs that are also available at other ports on the device (if it is a switch)
-                    if(parentDeviceUrn.getDeviceType().equals(DeviceType.SWITCH)) {
+                    if(isSwitch(parentDeviceUrn)) {
                         options.retainAll(nonFixPortVlansMap.get(parentDeviceUrn));
                     }
                     // If there are no options for VLAN assignment, assign empty sets
                     if(options.isEmpty()){
                         chosenVlanMap.put(fixUrn, new HashSet<>());
-                        if(parentDeviceUrn.getDeviceType().equals(DeviceType.SWITCH)) {
+                        if(isSwitch(parentDeviceUrn)) {
                             for(UrnE portUrn: nonFixPortUrnMap.get(parentDeviceUrn)){
                                 chosenVlanMap.putIfAbsent(portUrn, new HashSet<>());
                             }
@@ -689,7 +637,7 @@ public class VlanService {
                         Integer chosenVlan = options.get(0);
                         chosenVlanMap.putIfAbsent(fixUrn, new HashSet<>());
                         chosenVlanMap.get(fixUrn).add(chosenVlan);
-                        if(parentDeviceUrn.getDeviceType().equals(DeviceType.SWITCH)) {
+                        if(isSwitch(parentDeviceUrn)) {
                             vlansAssignedJunctionMap.get(parentDeviceUrn).add(chosenVlan);
                             for(UrnE portUrn: nonFixPortUrnMap.get(parentDeviceUrn)){
                                 chosenVlanMap.putIfAbsent(portUrn, new HashSet<>());
@@ -714,7 +662,24 @@ public class VlanService {
                     Integer chosenVlan = options.get(0);
                     // Assign this VLAN to every URN in the pipe
                     for(UrnE pipeUrn : pipeUrns){
-                        chosenVlanMap.put(pipeUrn, Collections.singleton(chosenVlan));
+                        // Assign this VLAN to other ports on the switch (if this URN is on switch junction A)
+                        if(nonFixPortUrnMap.get(aJunctionUrn).contains(pipeUrn) && isSwitch(aJunctionUrn)){
+                            vlansAssignedJunctionMap.get(aJunctionUrn).add(chosenVlan);
+                            for(UrnE portUrn: nonFixPortUrnMap.get(aJunctionUrn)){
+                                chosenVlanMap.putIfAbsent(portUrn, new HashSet<>());
+                                chosenVlanMap.get(portUrn).add(chosenVlan);
+                            }
+                        }
+                        // Assign this VLAN to other ports on the switch (if this URN is on switch junction Z)
+                        if(nonFixPortUrnMap.get(zJunctionUrn).contains(pipeUrn) && isSwitch(zJunctionUrn)){
+                            vlansAssignedJunctionMap.get(zJunctionUrn).add(chosenVlan);
+                            for(UrnE portUrn: nonFixPortUrnMap.get(zJunctionUrn)){
+                                chosenVlanMap.putIfAbsent(portUrn, new HashSet<>());
+                                chosenVlanMap.get(portUrn).add(chosenVlan);
+                            }
+                        }
+                        chosenVlanMap.putIfAbsent(pipeUrn, new HashSet<>());
+                        chosenVlanMap.get(pipeUrn).add(chosenVlan);
                     }
                 }
                 else{
@@ -723,11 +688,21 @@ public class VlanService {
                     }
                 }
             }
+
+            for(UrnE fixUrn: sortedFixtureUrns){
+                UrnE parentDeviceUrn = urnMap.get(portToDeviceMap.get(fixUrn.getUrn()));
+                if(!chosenVlanMap.get(fixUrn).isEmpty() && isSwitch(parentDeviceUrn)){
+                    chosenVlanMap.put(fixUrn, vlansAssignedJunctionMap.get(parentDeviceUrn));
+                }
+            }
         }
 
-        //TODO: Add any VLANs reserved at non-fixture ports to fixtures at switch junctions
 
         return chosenVlanMap;
+    }
+
+    private boolean isSwitch(UrnE urn){
+        return urn.getUrnType().equals(UrnType.DEVICE) && urn.getDeviceType().equals(DeviceType.SWITCH);
     }
 
     private void populateVlanMapsAtDevice(Map<String, Set<String>> deviceToPortMap, UrnE aJunctionUrn, UrnE zJunctionUrn,

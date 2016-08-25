@@ -79,6 +79,7 @@ public class TranslationPCE {
         if(urnVlanMap.keySet().stream().anyMatch(urn -> urnVlanMap.get(urn).isEmpty())){
             return null;
         }
+        log.info("Chosen VLAN Map: " + urnVlanMap);
 
         // Confirm that there is sufficient available bandwidth
         boolean sufficientBandwidth = bwService.evaluateBandwidthJunction(req_j, reservedBandwidths);
@@ -109,6 +110,8 @@ public class TranslationPCE {
             rsv_j.getFixtures().add(rsvFix);
         }
 
+        rsv_j.getReservedVlans().addAll(urnToRsvVlanMap.values().stream().flatMap(Collection::stream).collect(Collectors.toSet()));
+
         return rsv_j;
     }
 
@@ -135,10 +138,6 @@ public class TranslationPCE {
                                      Set<ReservedEthPipeE> reservedEthPipes,
                                      Map<String, Set<String>> deviceToPortMap, Map<String, String> portToDeviceMap)
     throws PCEException, PSSException{
-
-        // Get requested bandwidth
-        Integer azMbps = reqPipe.getAzMbps();
-        Integer zaMbps = reqPipe.getZaMbps();
 
         // Build a urn map
         Map<String , UrnE> urnMap = new HashMap<>();
@@ -488,12 +487,9 @@ public class TranslationPCE {
         Set<UrnE> fixtureUrns = reservedVlanFixtures.stream().map(ReservedVlanFixtureE::getIfceUrn).collect(Collectors.toSet());
         for(UrnE portUrn : vlanMap.keySet()){
             if(!fixtureUrns.contains(portUrn) && portToDeviceMap.get(portUrn.getUrn()).equals(device.getUrn())){
-                // Ports that are in the AZ or ZA ERO are handled when reserving VLANs for the pipe EROs
-                if(!azERO.contains(portUrn.getUrn()) && !zaERO.contains(portUrn.getUrn())) {
                     reservedVlans.addAll(vlanMap.get(portUrn).stream()
                             .map(id -> createReservedVlan(portUrn, id, sched))
                             .collect(Collectors.toSet()));
-                }
             }
         }
 
