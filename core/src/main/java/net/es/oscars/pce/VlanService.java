@@ -96,14 +96,13 @@ public class VlanService {
 
         // Get map of all reserved VLAN IDs per URN
         Map<UrnE, Set<Integer>> reservedVlanIdMap = buildReservedVlanIdMap(urnMap, reservedVlans);
-
-
-        log.info("Reserved VLAN ID Map: " + reservedVlanIdMap);
+        String stringifyVlanMap = stringifyVlanMap(reservedVlanIdMap);
+        log.info("Reserved VLAN ID Map: " + stringifyVlanMap);
 
         // Get map of all reservable VLAN IDs per URN
         Map<UrnE, Set<Integer>> reservableVlanIdMap = buildReservableVlanIdMap(urnMap);
-
-        log.info("Reservable VLAN ID Map: " + reservableVlanIdMap);
+        stringifyVlanMap = stringifyVlanMap(reservedVlanIdMap);
+        log.info("Reservable VLAN ID Map: " + stringifyVlanMap);
 
         urnMap.values().stream().filter(urn -> urn.getUrnType().equals(UrnType.IFCE)).filter(urn -> urn.getUrnType().equals(UrnType.IFCE)).forEach(urn -> {
             if(urn.getReservableVlans() == null){
@@ -124,7 +123,8 @@ public class VlanService {
             }
         });
 
-        log.info("Available VLAN ID Map: " + availableVlanIdMap);
+        stringifyVlanMap = stringifyVlanMap(availableVlanIdMap);
+        log.info("Available VLAN ID Map: " + stringifyVlanMap);
 
         return availableVlanIdMap;
     }
@@ -143,10 +143,12 @@ public class VlanService {
                 if (range.getCeiling() == 0) {
                     range.setFloor(vlan);
                     range.setCeiling(vlan);
-                } else if (idx == availVlans.size() - 1) {
+                }
+                if (idx == availVlans.size() - 1) {
                     range.setCeiling(vlan);
                     ranges.add(range);
-                } else {
+                }
+                else {
                     if (range.getCeiling() +1 == vlan) {
                         range.setCeiling(vlan);
                     } else {
@@ -935,19 +937,6 @@ public class VlanService {
         return overlappingVlans;
     }
 
-    /**
-     * Given a particular Vertex, a VLAN map, and a URN map, return the set of Integers at the vertex's URN.
-     * @param v - The vertex
-     * @param vlanMap - The VLAN map
-     * @param urnMap - The URN map
-     * @return A set of VLAN IDs from the vertex's corresponding entry in the VLAN map
-     */
-    private Set<Integer> getVertexVlansFromMap(TopoVertex v, Map<UrnE, Set<Integer>> vlanMap,
-                                               Map<String, UrnE> urnMap){
-        String aUrnString = v.getUrn();
-        UrnE urn = urnMap.getOrDefault(aUrnString, null);
-        return vlanMap.getOrDefault(urn, new HashSet<>());
-    }
 
     /**
      * Given a list of edges and a URN map, get a list of all URNs in that list.
