@@ -129,7 +129,7 @@ public class VlanService {
         return availableVlanIdMap;
     }
 
-    private String stringifyVlanMap(Map<UrnE, Set<Integer>> input) {
+    public String stringifyVlanMap(Map<UrnE, Set<Integer>> input) {
         Map<UrnE, String> output = new HashMap<>();
         input.keySet().forEach(urn -> {
             List<Integer> availVlans = new ArrayList<>();
@@ -489,10 +489,10 @@ public class VlanService {
         Map<UrnE, Set<Integer>> availableVlanMap = buildAvailableVlanIdMap(urnMap, reservedVlans, portToDeviceMap);
         // Get the requested VLANs per Fixture URN & Any Ports at Individual URNs
         Map<UrnE, Set<Integer>> requestedVlanMap = buildRequestedVlanIdMap(reqPipe, availableVlanMap);
-        log.info("Requested Vlan Map: " + requestedVlanMap);
+        log.info("Requested Vlan Map: " + stringifyVlanMap(requestedVlanMap));
         // Get the "valid" VLANs per Fixture URN
         Map<UrnE, Set<Integer>> validVlanMap = buildValidVlanIdMap(requestedVlanMap, availableVlanMap);
-        log.info("Valid Vlan Map: " + validVlanMap);
+        log.info("Valid Vlan Map: " + stringifyVlanMap(validVlanMap));
         // Create a map of URNs to chosen VLAN IDs
         return selectVlansForPath(azERO, zaERO, urnMap, availableVlanMap, validVlanMap, deviceToPortMap, portToDeviceMap, reqPipe);
 

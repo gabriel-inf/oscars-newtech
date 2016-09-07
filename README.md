@@ -56,12 +56,14 @@ Integration tests.
 ### core
 The main application. Handles reservation requests, determines which path (if any) is available to satisfy the request, and reserves the network resources. Key modules include:
 * **acct** - Maintains list of customers and handles storing, editing, and retrieving account information.
+* **bwavail** - Calculates the minimum amount of bandwidth available between a given source and destination within a given time duration. Returns a series of time points and corresponding changes in bandwidth availability, based on reservations in the system. 
 * **authnz** - Tracks permissions/authorization associated with user accounts. 
 * **conf** - Retrieves configurations, specified in "oscars-newtech/core/config", for each OSCARS module on startup.
 * **helpers** - Functions useful for dealing with Instants and VLAN expression parsing.
 * **pce** - The Path Computation Engine. It takes a requested reservation's parameters, evaluates the current topology, determines the (shortest) path, if any, and decides which network resources must be reserved.
 * **pss** - Sets up, tears down, modifies and verifies network paths. Handles templates for network devices.
 * **resv** - Tracks reservations, and receives user parameters for reservation requests.
+* **servicetopo** - Abstracts the network topology to create unique "Service Level" views of the topology for a given request.
 * **tasks** - Services which run in the background and perform tasks at certain intervals (e.g. Select a submitted request to begin the reservation process).
 * **topo** - Maintain topology information.
 
