@@ -1,7 +1,7 @@
 package net.es.oscars.dto.resv;
 
 import lombok.*;
-import net.es.oscars.dto.spec.Blueprint;
+import net.es.oscars.dto.spec.ReservedBlueprint;
 import net.es.oscars.dto.spec.Specification;
 
 
@@ -17,15 +17,16 @@ public class Connection {
     private String connectionId;
 
     @NonNull
-    private Specification specification;
+    private States states;
 
     @NonNull
     private Schedule schedule;
 
     @NonNull
-    private Blueprint reserved;
+    private Specification specification;
 
     @NonNull
-    private States states;
+    private ReservedBlueprint reserved;
+
 
 }

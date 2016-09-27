@@ -2,6 +2,7 @@ package net.es.oscars.dto.spec;
 
 import lombok.*;
 import net.es.oscars.dto.pss.EthJunctionType;
+import net.es.oscars.dto.topo.Urn;
 
 import java.util.Set;
 
@@ -9,18 +10,20 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class VlanJunction {
+public class ReservedVlanJunction {
 
     private Long id;
 
     @NonNull
-    private String deviceUrn;
+    private Urn deviceUrn;
 
     @NonNull
     private EthJunctionType junctionType;
 
-    private Set<VlanFixture> fixtures;
+    private Set<ReservedVlanFixture> fixtures;
 
-    private Set<String> resourceIds;
+    private Set<ReservedPssResource> reservedPssResources;
+
+    private Set<ReservedVlan> reservedVlans;
 
 }

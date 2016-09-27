@@ -2,17 +2,18 @@ package net.es.oscars.dto.spec;
 
 import lombok.*;
 import net.es.oscars.dto.pss.EthFixtureType;
+import net.es.oscars.dto.topo.Urn;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class VlanFixture {
+public class RequestedVlanFixture {
     private Long id;
 
 
     @NonNull
-    private String portUrn;
+    private Urn portUrn;
 
     private Integer vlanId;
 
