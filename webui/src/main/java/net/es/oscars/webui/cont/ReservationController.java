@@ -3,10 +3,10 @@ package net.es.oscars.webui.cont;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.dto.pss.EthFixtureType;
 import net.es.oscars.dto.pss.EthJunctionType;
 import net.es.oscars.dto.resv.Connection;
 import net.es.oscars.dto.spec.*;
+import net.es.oscars.dto.topo.Urn;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -102,9 +102,10 @@ public class ReservationController {
     }
 
     @RequestMapping(value="/resv_adv_new", params={"addJunction"})
-    public String addRow(final VlanFlow vflow, final BindingResult bindingResult) {
-        VlanJunction vj = VlanJunction.builder()
-                .deviceUrn("choose a device")
+    public String addRow(final ReservedVlanFlow vflow, final BindingResult bindingResult) {
+        Urn prompt_urn = Urn.builder().urn("choose a device").build();
+        ReservedVlanJunction vj = ReservedVlanJunction.builder()
+                .deviceUrn(prompt_urn)
                 .fixtures(new HashSet<>())
                 .junctionType(EthJunctionType.REQUESTED)
                 .build();
@@ -115,17 +116,17 @@ public class ReservationController {
     }
 
     @RequestMapping(value="/resv_adv_new", params={"removeFixture"})
-    public String removeRow(final VlanFlow vflow, final BindingResult bindingResult,
-            final HttpServletRequest req) {
+    public String removeRow(final ReservedVlanFlow vflow, final BindingResult bindingResult,
+                            final HttpServletRequest req) {
 
         final String fixtureUrn = req.getParameter("removeFixture");
 
-        VlanFixture removeThis = null;
-        VlanJunction fromThis = null;
+        ReservedVlanFixture removeThis = null;
+        ReservedVlanJunction fromThis = null;
 
-        for (VlanJunction vj : vflow.getJunctions()) {
-            for (VlanFixture vf : vj.getFixtures()) {
-                if (vf.getPortUrn().equals(fixtureUrn)) {
+        for (ReservedVlanJunction vj : vflow.getJunctions()) {
+            for (ReservedVlanFixture vf : vj.getFixtures()) {
+                if (vf.getIfceUrn().getUrn().equals(fixtureUrn)) {
                     removeThis = vf;
                     fromThis = vj;
                 }

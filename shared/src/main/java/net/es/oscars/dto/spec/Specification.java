@@ -16,19 +16,19 @@ public class Specification {
     private Integer version;
 
     @NonNull
+    private String username;
+
+    @NonNull
     private String description;
 
     @NonNull
     private String connectionId;
 
     @NonNull
-    private String username;
-
-    @NonNull
     private ScheduleSpecification scheduleSpec;
 
     @NonNull
-    private Blueprint requested;
+    private RequestedBlueprint requested;
 
 
 }

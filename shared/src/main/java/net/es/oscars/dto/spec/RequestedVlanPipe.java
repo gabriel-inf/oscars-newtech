@@ -10,15 +10,15 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class VlanPipe {
+public class RequestedVlanPipe {
 
     private Long id;
 
     @NonNull
-    private VlanJunction aJunction;
+    private RequestedVlanJunction aJunction;
 
     @NonNull
-    private VlanJunction zJunction;
+    private RequestedVlanJunction zJunction;
 
     @NonNull
     private Integer azMbps;
@@ -39,11 +39,10 @@ public class VlanPipe {
     private EthPipeType pipeType;
 
     @NonNull
-    private PalindromicType palindromic;
+    private PalindromicType eroPalindromic;
 
     @NonNull
-    private SurvivabilityType survivability;
+    private SurvivabilityType eroSurvivability;
 
-    private Set<String> resourceIds;
 
 }

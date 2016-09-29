@@ -8,13 +8,10 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class VlanFlow {
+public class ReservedBlueprint {
+
     private Long id;
 
-
-    private Set<VlanJunction> junctions;
-
-    private Set<VlanPipe> pipes;
-
-
+    @NonNull
+    private ReservedVlanFlow vlanFlow;
 }

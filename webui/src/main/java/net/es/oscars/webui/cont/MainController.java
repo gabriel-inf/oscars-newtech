@@ -1,8 +1,6 @@
 package net.es.oscars.webui.cont;
 
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.dto.spec.Blueprint;
-import net.es.oscars.dto.spec.Specification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,7 +12,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 @Slf4j
