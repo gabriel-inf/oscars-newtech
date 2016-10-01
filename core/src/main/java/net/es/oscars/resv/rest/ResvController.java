@@ -236,6 +236,7 @@ public class ResvController {
                     .eroPalindromic(bvf.getPalindromic())
                     .eroSurvivability(bvf.getSurvivability())
                     .pipeType(EthPipeType.REQUESTED)
+                    .urnBlacklist(new HashSet<>())
                     .build();
 
             vf.getPipes().add(vpaz);
@@ -243,8 +244,10 @@ public class ResvController {
 
 
 
+        Layer3FlowE l3f = Layer3FlowE.builder().build();
         RequestedBlueprintE requested = RequestedBlueprintE.builder()
                 .vlanFlow(vf)
+                .layer3Flow(l3f)
                 .build();
 
         ScheduleSpecification ss = bvs.getScheduleSpec();
