@@ -2,15 +2,15 @@ package net.es.oscars.topo.pop;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.topo.enums.Layer;
+import net.es.oscars.dto.topo.enums.Layer;
 import net.es.oscars.topo.dao.UrnAdjcyRepository;
 import net.es.oscars.topo.dao.UrnRepository;
 import net.es.oscars.topo.ent.ReservableBandwidthE;
 import net.es.oscars.topo.ent.ReservableVlanE;
 import net.es.oscars.topo.ent.UrnAdjcyE;
 import net.es.oscars.topo.ent.UrnE;
-import net.es.oscars.topo.enums.IfceType;
-import net.es.oscars.topo.enums.UrnType;
+import net.es.oscars.dto.topo.enums.IfceType;
+import net.es.oscars.dto.topo.enums.UrnType;
 import net.es.oscars.topo.prop.TopoProperties;
 import net.es.oscars.topo.serialization.UrnAdjcy;
 import org.springframework.beans.factory.annotation.Autowired;

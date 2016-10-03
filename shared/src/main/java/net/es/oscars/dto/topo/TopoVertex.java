@@ -1,10 +1,10 @@
-package net.es.oscars.topo.beans;
+package net.es.oscars.dto.topo;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import net.es.oscars.topo.enums.VertexType;
+import net.es.oscars.dto.topo.VertexType;
 
 @Data
 @Builder

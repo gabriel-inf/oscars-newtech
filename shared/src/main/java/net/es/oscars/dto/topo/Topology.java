@@ -1,7 +1,7 @@
-package net.es.oscars.topo.beans;
+package net.es.oscars.dto.topo;
 
 import lombok.Data;
-import net.es.oscars.topo.enums.Layer;
+import net.es.oscars.dto.topo.enums.Layer;
 
 import java.util.HashSet;
 import java.util.Optional;

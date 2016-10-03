@@ -1,4 +1,4 @@
-package net.es.oscars.topo.enums;
+package net.es.oscars.dto.topo.enums;
 
 
 import java.util.EnumSet;
@@ -6,13 +6,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public enum UrnType {
-    DEVICE("DEVICE"),
-    IFCE("IFCE");
+public enum IfceType {
+    PORT("PORT");
 
     private String code;
 
-    UrnType(String code) {
+    IfceType(String code) {
         this.code = code;
     }
 
@@ -21,15 +20,15 @@ public enum UrnType {
     }
 
 
-    private static final Map<String, UrnType> lookup = new HashMap<String, UrnType>();
+    private static final Map<String, IfceType> lookup = new HashMap<String, IfceType>();
 
     static {
-        for (UrnType pc : EnumSet.allOf(UrnType.class)) {
+        for (IfceType pc : EnumSet.allOf(IfceType.class)) {
             lookup.put(pc.getCode(), pc);
         }
     }
 
-    public static Optional<UrnType> get(String code) {
+    public static Optional<IfceType> get(String code) {
         if (lookup.containsKey(code)) {
             return Optional.of(lookup.get(code));
         } else {

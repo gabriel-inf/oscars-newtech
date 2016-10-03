@@ -2,12 +2,12 @@ package net.es.oscars.acct;
 
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.resv.ent.*;
-import net.es.oscars.topo.enums.Layer;
+import net.es.oscars.dto.topo.enums.Layer;
 import net.es.oscars.dto.pss.EthJunctionType;
 import net.es.oscars.topo.ent.UrnE;
-import net.es.oscars.topo.enums.DeviceModel;
-import net.es.oscars.topo.enums.DeviceType;
-import net.es.oscars.topo.enums.UrnType;
+import net.es.oscars.dto.topo.enums.DeviceModel;
+import net.es.oscars.dto.topo.enums.DeviceType;
+import net.es.oscars.dto.topo.enums.UrnType;
 
 import java.util.HashSet;
 

@@ -1,9 +1,9 @@
 package net.es.oscars.topo.pop;
 
 import lombok.*;
-import net.es.oscars.topo.enums.Layer;
+import net.es.oscars.dto.topo.enums.Layer;
 import net.es.oscars.topo.ent.IntRangeE;
-import net.es.oscars.topo.enums.IfceType;
+import net.es.oscars.dto.topo.enums.IfceType;
 
 import javax.persistence.*;
 import java.util.HashSet;

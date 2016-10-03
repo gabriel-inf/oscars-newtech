@@ -1,11 +1,11 @@
 package net.es.oscars.topo.ent;
 
 import lombok.*;
-import net.es.oscars.topo.enums.Layer;
-import net.es.oscars.topo.enums.DeviceModel;
-import net.es.oscars.topo.enums.DeviceType;
-import net.es.oscars.topo.enums.IfceType;
-import net.es.oscars.topo.enums.UrnType;
+import net.es.oscars.dto.topo.enums.Layer;
+import net.es.oscars.dto.topo.enums.DeviceModel;
+import net.es.oscars.dto.topo.enums.DeviceType;
+import net.es.oscars.dto.topo.enums.IfceType;
+import net.es.oscars.dto.topo.enums.UrnType;
 
 import javax.persistence.*;
 import java.util.HashSet;

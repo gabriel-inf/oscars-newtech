@@ -1,18 +1,18 @@
-package net.es.oscars.topo.enums;
+package net.es.oscars.dto.topo.enums;
+
 
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public enum DeviceModel {
-    ALCATEL_SR7750("Alcatel SR-7750"),
-    JUNIPER_MX("Juniper MX"),
-    JUNIPER_EX("Juniper EX");
+public enum UrnType {
+    DEVICE("DEVICE"),
+    IFCE("IFCE");
 
     private String code;
 
-    DeviceModel(String code) {
+    UrnType(String code) {
         this.code = code;
     }
 
@@ -21,20 +21,21 @@ public enum DeviceModel {
     }
 
 
-    private static final Map<String, DeviceModel> lookup = new HashMap<String, DeviceModel>();
+    private static final Map<String, UrnType> lookup = new HashMap<String, UrnType>();
 
     static {
-        for (DeviceModel pc : EnumSet.allOf(DeviceModel.class)) {
+        for (UrnType pc : EnumSet.allOf(UrnType.class)) {
             lookup.put(pc.getCode(), pc);
         }
     }
 
-    public static Optional<DeviceModel> get(String code) {
-        Optional<DeviceModel> result;
+    public static Optional<UrnType> get(String code) {
         if (lookup.containsKey(code)) {
             return Optional.of(lookup.get(code));
         } else {
             return Optional.empty();
         }
     }
+
+
 }
