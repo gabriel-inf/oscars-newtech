@@ -73,6 +73,11 @@ public class TopPCE {
         Set<ReservedEthPipeE> reservedEthPipes = new HashSet<>();
         Set<ReservedVlanJunctionE> reservedEthJunctions = new HashSet<>();
 
+        // Store the min/max number of pipes needed
+        // TODO: Actually use these values to reserve a number of pipes
+        Integer minPipes = req_f.getMinPipes();
+        Integer maxPipes = req_f.getMaxPipes();
+
         // Get map of parent device vertex -> set of port vertices
         Map<String, Set<String>> deviceToPortMap = topoService.buildDeviceToPortMap();
         Map<String, String> portToDeviceMap = topoService.buildPortToDeviceMap(deviceToPortMap);
@@ -200,18 +205,15 @@ public class TopPCE {
                 // Increment the number reserved
                 numReserved++;
                 // Get the AZ and ZA paths
-                List<TopoEdge> azPrimaryEro = eroMapForPipe.get("azPrimary");
-                List<TopoEdge> zaPrimaryEro = eroMapForPipe.get("zaPrimary");
-                List<TopoEdge> azSecondaryEro = eroMapForPipe.get("azSecondary");
-                List<TopoEdge> zaSecondaryEro = eroMapForPipe.get("zaSecondary");
 
                 List<List<TopoEdge>> azEROs = new ArrayList<>();
                 List<List<TopoEdge>> zaEROs = new ArrayList<>();
 
-                azEROs.add(azPrimaryEro);
-                azEROs.add(azSecondaryEro);
-                zaEROs.add(zaPrimaryEro);
-                zaEROs.add(zaSecondaryEro);
+                for(Integer i = 1; i < eroMapForPipe.size() / 2 + 1; i++){
+
+                    azEROs.add(eroMapForPipe.get("az" + i));
+                    zaEROs.add(eroMapForPipe.get("za" + i));
+                }
 
                 // Try to get the reserved resources
                 try
@@ -248,7 +250,7 @@ public class TopPCE {
 
         try
         {
-            if(!pipe.getEroSurvivability().equals(SurvivabilityType.SURVIVABILITY_NONE))
+            if(!pipe.getEroSurvivability().equals(SurvivabilityType.SURVIVABILITY_NONE) && pipe.getNumDisjoint() > 1)
             {
                 log.info("Entering Survivability PCE");
                 eroMap = survivabilityPCE.computeSurvivableERO(pipe, schedSpec, rsvBandwidths, rsvVlans);

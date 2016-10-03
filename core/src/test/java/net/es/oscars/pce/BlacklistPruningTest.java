@@ -247,7 +247,7 @@ public class BlacklistPruningTest {
         PalindromicType palindrome = PalindromicType.PALINDROME;
         SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
-        return testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, blacklist);
+        return testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, blacklist, 1, 1, 1);
     }
 
     public void pruneTest(RequestedBlueprintE requestedBlueprint, Topology topo, ScheduleSpecificationE requestedSched,

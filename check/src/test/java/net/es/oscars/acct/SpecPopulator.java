@@ -18,6 +18,8 @@ public class SpecPopulator {
         RequestedVlanFlowE fl = RequestedVlanFlowE.builder()
                 .junctions(new HashSet<>())
                 .pipes(new HashSet<>())
+                .minPipes(0)
+                .maxPipes(0)
                 .build();
 
         RequestedBlueprintE bp = RequestedBlueprintE.builder()

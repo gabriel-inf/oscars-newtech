@@ -1159,6 +1159,7 @@ public class BandwidthAvailabilityServiceTest {
                 .minZaBandwidth(10)
                 .palindromicType(PalindromicType.PALINDROME)
                 .survivabilityType(SurvivabilityType.SURVIVABILITY_NONE)
+                .numDisjoint(1)
                 .build();
         return bwAvailService.getBandwidthAvailabilityMap(request);
     }

@@ -45,4 +45,7 @@ public class BandwidthAvailabilityRequest {
 
     @NonNull
     private String dstPort;
+
+    @NonNull
+    private Integer numDisjoint;
 }

@@ -324,13 +324,15 @@ public class TopPceTestMultipoint
 
         // Set up Requested Pipes
         Set<RequestedVlanPipeE> reqPipes = new HashSet<>();
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(aPorts, srcAZ, zPorts, dstAZ, azBW, zaBW, palindrome, survivability, vlan);
-        RequestedVlanPipeE pipeBZ = testBuilder.buildRequestedPipe(bPorts, srcBZ, zPorts, dstBZ, bzBW, zbBW, palindrome, survivability, vlan);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(aPorts, srcAZ, zPorts, dstAZ, azBW, zaBW, palindrome,
+                survivability, vlan, 1);
+        RequestedVlanPipeE pipeBZ = testBuilder.buildRequestedPipe(bPorts, srcBZ, zPorts, dstBZ, bzBW, zbBW, palindrome,
+                survivability, vlan, 1);
 
         reqPipes.add(pipeAZ);
         reqPipes.add(pipeBZ);
 
-        requestedBlueprint = testBuilder.buildRequest(reqPipes);
+        requestedBlueprint = testBuilder.buildRequest(reqPipes, 2, 2);
 
         log.info("Beginning test: " + testName + ".");
 
@@ -489,13 +491,15 @@ public class TopPceTestMultipoint
 
         // Set up Requested Pipes
         Set<RequestedVlanPipeE> reqPipes = new HashSet<>();
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(aPorts, srcAZ, zPorts, dstAZ, azBW, zaBW, palindrome, survivability, vlan);
-        RequestedVlanPipeE pipeBZ = testBuilder.buildRequestedPipe(bPorts, srcBZ, zPorts, dstBZ, bzBW, zbBW, palindrome, survivability, vlan);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(aPorts, srcAZ, zPorts, dstAZ, azBW, zaBW, palindrome,
+                survivability, vlan, 1);
+        RequestedVlanPipeE pipeBZ = testBuilder.buildRequestedPipe(bPorts, srcBZ, zPorts, dstBZ, bzBW, zbBW, palindrome,
+                survivability, vlan, 1);
 
         reqPipes.add(pipeAZ);
         reqPipes.add(pipeBZ);
 
-        requestedBlueprint = testBuilder.buildRequest(reqPipes);
+        requestedBlueprint = testBuilder.buildRequest(reqPipes, 2, 2);
 
         log.info("Beginning test: " + testName + ".");
 
@@ -727,13 +731,15 @@ public class TopPceTestMultipoint
 
         // Set up Requested Pipes
         Set<RequestedVlanPipeE> reqPipes = new HashSet<>();
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(aPorts, srcAZ, zPorts, dstAZ, azBW, zaBW, palindrome, survivability, vlan);
-        RequestedVlanPipeE pipeBZ = testBuilder.buildRequestedPipe(bPorts, srcBZ, zPorts, dstBZ, bzBW, zbBW, palindrome, survivability, vlan);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(aPorts, srcAZ, zPorts, dstAZ, azBW, zaBW, palindrome,
+                survivability, vlan, 1);
+        RequestedVlanPipeE pipeBZ = testBuilder.buildRequestedPipe(bPorts, srcBZ, zPorts, dstBZ, bzBW, zbBW, palindrome,
+                survivability, vlan, 1);
 
         reqPipes.add(pipeAZ);
         reqPipes.add(pipeBZ);
 
-        requestedBlueprint = testBuilder.buildRequest(reqPipes);
+        requestedBlueprint = testBuilder.buildRequest(reqPipes, 2, 2);
 
         log.info("Beginning test: " + testName + ".");
 
@@ -878,15 +884,18 @@ public class TopPceTestMultipoint
 
         // Set up Requested Pipes
         Set<RequestedVlanPipeE> reqPipes = new HashSet<>();
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(aPorts, srcAZ, zPorts, dstAZ, azBW, zaBW, palindrome, survivability, vlan);
-        RequestedVlanPipeE pipeAB = testBuilder.buildRequestedPipe(aPorts, srcAB, bPorts, dstAB, abBW, baBW, palindrome, survivability, vlan);
-        RequestedVlanPipeE pipeBZ = testBuilder.buildRequestedPipe(bPorts, srcBZ, zPorts, dstBZ, bzBW, zbBW, palindrome, survivability, vlan);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(aPorts, srcAZ, zPorts, dstAZ, azBW, zaBW, palindrome,
+                survivability, vlan, 1);
+        RequestedVlanPipeE pipeAB = testBuilder.buildRequestedPipe(aPorts, srcAB, bPorts, dstAB, abBW, baBW, palindrome,
+                survivability, vlan, 1);
+        RequestedVlanPipeE pipeBZ = testBuilder.buildRequestedPipe(bPorts, srcBZ, zPorts, dstBZ, bzBW, zbBW, palindrome,
+                survivability, vlan, 1);
 
         reqPipes.add(pipeAZ);
         reqPipes.add(pipeAB);
         reqPipes.add(pipeBZ);
 
-        requestedBlueprint = testBuilder.buildRequest(reqPipes);
+        requestedBlueprint = testBuilder.buildRequest(reqPipes, 3, 3);
 
         log.info("Beginning test: " + testName + ".");
 
@@ -1080,15 +1089,18 @@ public class TopPceTestMultipoint
 
         // Set up Requested Pipes
         Set<RequestedVlanPipeE> reqPipes = new HashSet<>();
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(aPorts, srcAZ, zPorts, dstAZ, azBW, zaBW, palindrome, survivability, vlan);
-        RequestedVlanPipeE pipeAB = testBuilder.buildRequestedPipe(aPorts, srcAB, bPorts, dstAB, abBW, baBW, palindrome, survivability, vlan);
-        RequestedVlanPipeE pipeBZ = testBuilder.buildRequestedPipe(bPorts, srcBZ, zPorts, dstBZ, bzBW, zbBW, palindrome, survivability, vlan);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(aPorts, srcAZ, zPorts, dstAZ, azBW, zaBW, palindrome,
+                survivability, vlan, 1);
+        RequestedVlanPipeE pipeAB = testBuilder.buildRequestedPipe(aPorts, srcAB, bPorts, dstAB, abBW, baBW, palindrome,
+                survivability, vlan, 1);
+        RequestedVlanPipeE pipeBZ = testBuilder.buildRequestedPipe(bPorts, srcBZ, zPorts, dstBZ, bzBW, zbBW, palindrome,
+                survivability, vlan, 1);
 
         reqPipes.add(pipeAZ);
         reqPipes.add(pipeAB);
         reqPipes.add(pipeBZ);
 
-        requestedBlueprint = testBuilder.buildRequest(reqPipes);
+        requestedBlueprint = testBuilder.buildRequest(reqPipes, 3, 3);
 
         log.info("Beginning test: " + testName + ".");
 
@@ -1295,17 +1307,21 @@ public class TopPceTestMultipoint
 
         // Set up Requested Pipes
         Set<RequestedVlanPipeE> reqPipes = new HashSet<>();
-        RequestedVlanPipeE pipeAB1 = testBuilder.buildRequestedPipe(aPorts, srcAB, bPorts, dstAB, abBW, baBW, palindrome, survivability, vlan);
-        RequestedVlanPipeE pipeAB2 = testBuilder.buildRequestedPipe(aPorts, srcAB, bPorts, dstAB, abBW, baBW, palindrome, survivability, vlan);
-        RequestedVlanPipeE pipeBZ1 = testBuilder.buildRequestedPipe(bPorts, srcBZ, zPorts, dstBZ, bzBW1, zbBW, palindrome, survivability, vlan);
-        RequestedVlanPipeE pipeBZ2 = testBuilder.buildRequestedPipe(bPorts, srcBZ, zPorts, dstBZ, bzBW2, zbBW, palindrome, survivability, vlan);
+        RequestedVlanPipeE pipeAB1 = testBuilder.buildRequestedPipe(aPorts, srcAB, bPorts, dstAB, abBW, baBW, palindrome,
+                survivability, vlan, 1);
+        RequestedVlanPipeE pipeAB2 = testBuilder.buildRequestedPipe(aPorts, srcAB, bPorts, dstAB, abBW, baBW, palindrome,
+                survivability, vlan, 1);
+        RequestedVlanPipeE pipeBZ1 = testBuilder.buildRequestedPipe(bPorts, srcBZ, zPorts, dstBZ, bzBW1, zbBW, palindrome,
+                survivability, vlan, 1);
+        RequestedVlanPipeE pipeBZ2 = testBuilder.buildRequestedPipe(bPorts, srcBZ, zPorts, dstBZ, bzBW2, zbBW, palindrome,
+                survivability, vlan, 1);
 
         reqPipes.add(pipeAB1);
         reqPipes.add(pipeAB2);
         reqPipes.add(pipeBZ1);
         reqPipes.add(pipeBZ2);
 
-        requestedBlueprint = testBuilder.buildRequest(reqPipes);
+        requestedBlueprint = testBuilder.buildRequest(reqPipes, 4, 4);
 
         log.info("Beginning test: " + testName + ".");
 
@@ -1357,17 +1373,21 @@ public class TopPceTestMultipoint
 
         // Set up Requested Pipes
         Set<RequestedVlanPipeE> reqPipes = new HashSet<>();
-        RequestedVlanPipeE pipeAB1 = testBuilder.buildRequestedPipe(aPorts, srcAB, bPorts, dstAB, abBW, baBW, palindrome, survivability, vlan);
-        RequestedVlanPipeE pipeAB2 = testBuilder.buildRequestedPipe(aPorts, srcAB, bPorts, dstAB, abBW, baBW, palindrome, survivability, vlan);
-        RequestedVlanPipeE pipeBZ1 = testBuilder.buildRequestedPipe(bPorts, srcBZ, zPorts, dstBZ, bzBW1, zbBW, palindrome, survivability, vlan);
-        RequestedVlanPipeE pipeBZ2 = testBuilder.buildRequestedPipe(bPorts, srcBZ, zPorts, dstBZ, bzBW2, zbBW, palindrome, survivability, vlan);
+        RequestedVlanPipeE pipeAB1 = testBuilder.buildRequestedPipe(aPorts, srcAB, bPorts, dstAB, abBW, baBW, palindrome,
+                survivability, vlan, 1);
+        RequestedVlanPipeE pipeAB2 = testBuilder.buildRequestedPipe(aPorts, srcAB, bPorts, dstAB, abBW, baBW, palindrome,
+                survivability, vlan, 1);
+        RequestedVlanPipeE pipeBZ1 = testBuilder.buildRequestedPipe(bPorts, srcBZ, zPorts, dstBZ, bzBW1, zbBW, palindrome,
+                survivability, vlan, 1);
+        RequestedVlanPipeE pipeBZ2 = testBuilder.buildRequestedPipe(bPorts, srcBZ, zPorts, dstBZ, bzBW2, zbBW, palindrome,
+                survivability, vlan, 1);
 
         reqPipes.add(pipeAB1);
         reqPipes.add(pipeAB2);
         reqPipes.add(pipeBZ1);
         reqPipes.add(pipeBZ2);
 
-        requestedBlueprint = testBuilder.buildRequest(reqPipes);
+        requestedBlueprint = testBuilder.buildRequest(reqPipes, 4, 4);
 
         log.info("Beginning test: " + testName + ".");
 

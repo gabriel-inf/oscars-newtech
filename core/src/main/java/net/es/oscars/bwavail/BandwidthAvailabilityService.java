@@ -86,7 +86,7 @@ public class BandwidthAvailabilityService {
         // Create the request blueprint
         RequestedBlueprintE reqBlueprint = entityBuilder.buildRequest(request.getSrcPort(), request.getSrcDevice(),
                 request.getDstPort(), request.getDstDevice(), request.getMinAzBandwidth(), request.getMinZaBandwidth(),
-                request.getPalindromicType(), request.getSurvivabilityType(), "any", "any");
+                request.getPalindromicType(), request.getSurvivabilityType(), "any", "any", request.getNumDisjoint(), 1, 1);
 
         // Try to find a path using the PCE and the requested blueprint & schedule
         try

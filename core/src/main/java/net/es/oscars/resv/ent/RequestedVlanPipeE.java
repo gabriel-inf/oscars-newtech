@@ -54,5 +54,8 @@ public class RequestedVlanPipeE {
     private SurvivabilityType eroSurvivability;
 
     @NonNull
+    private Integer numDisjoint;
+
+    @NonNull
     private final String uniqueID = UUID.randomUUID().toString();
 }
