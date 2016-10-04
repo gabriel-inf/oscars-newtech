@@ -2,8 +2,8 @@ package net.es.oscars.bwavail;
 
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.CoreUnitTestConfiguration;
-import net.es.oscars.bwavail.enums.BandwidthAvailabilityRequest;
-import net.es.oscars.bwavail.enums.BandwidthAvailabilityResponse;
+import net.es.oscars.dto.bwavail.BandwidthAvailabilityRequest;
+import net.es.oscars.dto.bwavail.BandwidthAvailabilityResponse;
 import net.es.oscars.dto.spec.PalindromicType;
 import net.es.oscars.dto.spec.SurvivabilityType;
 import net.es.oscars.resv.dao.ReservedBandwidthRepository;
@@ -1157,7 +1157,6 @@ public class BandwidthAvailabilityServiceTest {
                 .minZaBandwidth(10)
                 .palindromicType(PalindromicType.PALINDROME)
                 .survivabilityType(SurvivabilityType.SURVIVABILITY_NONE)
-                .numDisjoint(1)
                 .build();
         return bwAvailService.getBandwidthAvailabilityMap(request);
     }

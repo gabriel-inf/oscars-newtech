@@ -4,8 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.bwavail.enums.BandwidthAvailabilityRequest;
-import net.es.oscars.bwavail.enums.BandwidthAvailabilityResponse;
+import net.es.oscars.dto.bwavail.BandwidthAvailabilityRequest;
+import net.es.oscars.dto.bwavail.BandwidthAvailabilityResponse;
 import net.es.oscars.helpers.RequestedEntityBuilder;
 import net.es.oscars.helpers.ReservedEntityDecomposer;
 import net.es.oscars.pce.*;
@@ -86,7 +86,7 @@ public class BandwidthAvailabilityService {
         // Create the request blueprint
         RequestedBlueprintE reqBlueprint = entityBuilder.buildRequest(request.getSrcPort(), request.getSrcDevice(),
                 request.getDstPort(), request.getDstDevice(), request.getMinAzBandwidth(), request.getMinZaBandwidth(),
-                request.getPalindromicType(), request.getSurvivabilityType(), "any", "any", request.getNumDisjoint(), 1, 1);
+                request.getPalindromicType(), request.getSurvivabilityType(), "any", "any", 1, 1, 1);
 
         // Try to find a path using the PCE and the requested blueprint & schedule
         try
