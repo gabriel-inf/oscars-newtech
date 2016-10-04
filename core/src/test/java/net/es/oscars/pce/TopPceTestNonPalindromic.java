@@ -11,9 +11,9 @@ import net.es.oscars.topo.TopologyBuilder;
 import net.es.oscars.topo.dao.UrnAdjcyRepository;
 import net.es.oscars.topo.dao.UrnRepository;
 import net.es.oscars.topo.ent.UrnE;
-import net.es.oscars.topo.enums.Layer;
+import net.es.oscars.dto.topo.enums.Layer;
 import net.es.oscars.dto.spec.PalindromicType;
-import net.es.oscars.topo.enums.UrnType;
+import net.es.oscars.dto.topo.enums.UrnType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,7 +82,7 @@ public class TopPceTestNonPalindromic
 
         asymmTopologyBuilder.buildAsymmTopo1();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1, 1, 1);
 
         log.info("Beginning test: 'nonPalPceSymmTest1'.");
 
@@ -121,7 +121,7 @@ public class TopPceTestNonPalindromic
 
         asymmTopologyBuilder.buildAsymmTopo2();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1, 1, 1);
 
         log.info("Beginning test: 'nonPalPceSymmTest2'.");
 
@@ -160,7 +160,7 @@ public class TopPceTestNonPalindromic
 
         asymmTopologyBuilder.buildAsymmTopo3();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1, 1, 1);
 
         // Update URN in/eg bandwidths for this test
         urnRepo.findAll().stream()
@@ -209,7 +209,7 @@ public class TopPceTestNonPalindromic
 
         asymmTopologyBuilder.buildAsymmTopo4();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1, 1, 1);
 
         // Update URN in/eg bandwidths for this test
         urnRepo.findAll().stream()
@@ -258,7 +258,7 @@ public class TopPceTestNonPalindromic
 
         asymmTopologyBuilder.buildAsymmTopo5();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1, 1, 1);
 
         // Update URN in/eg bandwidths for this test
         urnRepo.findAll().stream()
@@ -358,7 +358,7 @@ public class TopPceTestNonPalindromic
 
         asymmTopologyBuilder.buildAsymmTopo6();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1, 1, 1);
 
         // Update URN in/eg bandwidths for this test
         urnRepo.findAll().stream()
@@ -492,7 +492,7 @@ public class TopPceTestNonPalindromic
 
         asymmTopologyBuilder.buildAsymmTopo1();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1, 1, 1);
 
         log.info("Beginning test: 'nonPalPceAsymmTest1'.");
 
@@ -531,7 +531,7 @@ public class TopPceTestNonPalindromic
 
         asymmTopologyBuilder.buildAsymmTopo2();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1, 1, 1);
 
         log.info("Beginning test: 'nonPalPceAsymmTest2'.");
 
@@ -570,7 +570,7 @@ public class TopPceTestNonPalindromic
 
         asymmTopologyBuilder.buildAsymmTopo3();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1, 1, 1);
 
         log.info("Beginning test: 'nonPalPceAsymmTest3'.");
 
@@ -609,7 +609,7 @@ public class TopPceTestNonPalindromic
 
         asymmTopologyBuilder.buildAsymmTopo4();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1, 1, 1);
 
         log.info("Beginning test: 'nonPalPceAsymmTest4'.");
 
@@ -648,7 +648,7 @@ public class TopPceTestNonPalindromic
 
         asymmTopologyBuilder.buildAsymmTopo5();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1, 1, 1);
 
         log.info("Beginning test: 'nonPalPceAsymmTest5'.");
 
@@ -738,7 +738,7 @@ public class TopPceTestNonPalindromic
 
         asymmTopologyBuilder.buildAsymmTopo6();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1, 1, 1);
 
         log.info("Beginning test: 'nonPalPceAsymmTest6'.");
 
@@ -863,7 +863,7 @@ public class TopPceTestNonPalindromic
 
         topologyBuilder.buildTopo2();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1, 1, 1);
 
         log.info("Beginning test: 'basicPceTest2'.");
 
@@ -970,7 +970,7 @@ public class TopPceTestNonPalindromic
 
         topologyBuilder.buildTopo3();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1, 1, 1);
 
         log.info("Beginning test: 'basicPceTest3'.");
 
@@ -1094,7 +1094,7 @@ public class TopPceTestNonPalindromic
 
         topologyBuilder.buildTopo4();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1, 1, 1);
 
         log.info("Beginning test: 'basicPceTest4'.");
 
@@ -1269,7 +1269,7 @@ public class TopPceTestNonPalindromic
 
         topologyBuilder.buildTopo5();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1, 1, 1);
 
         log.info("Beginning test: 'basicPceTest5'.");
 
@@ -1408,7 +1408,7 @@ public class TopPceTestNonPalindromic
 
         topologyBuilder.buildTopo7();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1, 1, 1);
 
         log.info("Beginning test: 'basicPceTest7'.");
 
@@ -1498,7 +1498,7 @@ public class TopPceTestNonPalindromic
 
         topologyBuilder.buildTopo8();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1, 1, 1);
 
         log.info("Beginning test: 'basicPceTest8'.");
 
@@ -1588,7 +1588,7 @@ public class TopPceTestNonPalindromic
 
         topologyBuilder.buildTopo9();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1, 1, 1);
 
         log.info("Beginning test: 'basicPceTest9'.");
 
@@ -1678,7 +1678,7 @@ public class TopPceTestNonPalindromic
 
         topologyBuilder.buildTopo10();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1, 1, 1);
 
         log.info("Beginning test: 'basicPceTest10'.");
 
@@ -1788,7 +1788,7 @@ public class TopPceTestNonPalindromic
 
         topologyBuilder.buildTopo11();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1, 1, 1);
 
         log.info("Beginning test: 'basicPceTest11'.");
 
@@ -1878,7 +1878,7 @@ public class TopPceTestNonPalindromic
 
         topologyBuilder.buildTopo12();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1, 1, 1);
 
         log.info("Beginning test: 'basicPceTest12'.");
 
@@ -1989,7 +1989,7 @@ public class TopPceTestNonPalindromic
 
         topologyBuilder.buildTopo2();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1, 1, 1);
 
         log.info("Beginning test: 'asymmPceTest2'.");
 
@@ -2096,7 +2096,7 @@ public class TopPceTestNonPalindromic
 
         topologyBuilder.buildTopo3();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1, 1, 1);
 
         log.info("Beginning test: 'asymmPceTest3'.");
 
@@ -2220,7 +2220,7 @@ public class TopPceTestNonPalindromic
 
         topologyBuilder.buildTopo4();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1, 1, 1);
 
         log.info("Beginning test: 'asymmPceTest4'.");
 
@@ -2395,7 +2395,7 @@ public class TopPceTestNonPalindromic
 
         topologyBuilder.buildTopo5();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1, 1, 1);
 
         log.info("Beginning test: 'asymmPceTest5'.");
 
@@ -2534,7 +2534,7 @@ public class TopPceTestNonPalindromic
 
         topologyBuilder.buildTopo7();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1, 1, 1);
 
         log.info("Beginning test: 'asymmPceTest7'.");
 
@@ -2624,7 +2624,7 @@ public class TopPceTestNonPalindromic
 
         topologyBuilder.buildTopo8();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1, 1, 1);
 
         log.info("Beginning test: 'asymmPceTest8'.");
 
@@ -2714,7 +2714,7 @@ public class TopPceTestNonPalindromic
 
         topologyBuilder.buildTopo9();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1, 1, 1);
 
         log.info("Beginning test: 'asymmPceTest9'.");
 
@@ -2804,7 +2804,7 @@ public class TopPceTestNonPalindromic
 
         topologyBuilder.buildTopo10();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1, 1, 1);
 
         log.info("Beginning test: 'asymmPceTest10'.");
 
@@ -2912,7 +2912,7 @@ public class TopPceTestNonPalindromic
 
         topologyBuilder.buildTopo11();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1, 1, 1);
 
         log.info("Beginning test: 'asymmPceTest11'.");
 
@@ -3002,7 +3002,7 @@ public class TopPceTestNonPalindromic
 
         topologyBuilder.buildTopo12();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1, 1, 1);
 
         log.info("Beginning test: 'asymmPceTest12'.");
 
@@ -3112,7 +3112,7 @@ public class TopPceTestNonPalindromic
 
         topologyBuilder.buildTopo2();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1, 1, 1);
 
         // Modify link weights to *potentially* force NonPalindromical ERO computations //
         String linkSrc1 = "nodeM:1";
@@ -3239,7 +3239,7 @@ public class TopPceTestNonPalindromic
 
         topologyBuilder.buildTopo3();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1, 1, 1);
 
         // Modify link weights to *potentially* force NonPalindromical ERO computations //
         String linkSrc1 = "nodeQ:1";
@@ -3382,7 +3382,7 @@ public class TopPceTestNonPalindromic
 
         topologyBuilder.buildTopo5();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1, 1, 1);
 
         // Modify link weights to *potentially* force NonPalindromical ERO computations //
         String linkSrc1 = "nodeQ:1";
@@ -3540,7 +3540,7 @@ public class TopPceTestNonPalindromic
 
         topologyBuilder.buildTopo10();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1, 1, 1);
 
         // Modify link weights to *potentially* force NonPalindromical ERO computations //
         String linkSrc1 = "nodeM:1";
@@ -3667,7 +3667,7 @@ public class TopPceTestNonPalindromic
 
         topologyBuilder.buildTopo11();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1, 1, 1);
 
         // Modify link weights to *potentially* force NonPalindromical ERO computations //
         String linkSrc1 = "nodeR:1";
@@ -3777,7 +3777,7 @@ public class TopPceTestNonPalindromic
 
         topologyBuilder.buildSharedLinkTopo1();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1, 1, 1);
 
         log.info("Beginning test: 'sharedLinkPceTest1'.");
 
@@ -3914,7 +3914,7 @@ public class TopPceTestNonPalindromic
 
         topologyBuilder.buildSharedLinkTopo2();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1, 1, 1);
 
         log.info("Beginning test: 'sharedLinkPceTest2'.");
 
@@ -4022,7 +4022,7 @@ public class TopPceTestNonPalindromic
 
         topologyBuilder.buildSharedLinkTopo3();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1, 1, 1);
 
         log.info("Beginning test: 'sharedLinkPceTest3'.");
 
@@ -4178,7 +4178,7 @@ public class TopPceTestNonPalindromic
 
         topologyBuilder.buildSharedLinkTopo4();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1, 1, 1);
 
         log.info("Beginning test: 'sharedLinkPceTest4'.");
 
@@ -4315,7 +4315,7 @@ public class TopPceTestNonPalindromic
 
         topologyBuilder.buildTopo7MultiFix();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1, 1, 1);
 
         log.info("Beginning test: 'multiFixtureTest'.");
 
@@ -4415,7 +4415,7 @@ public class TopPceTestNonPalindromic
 
         topologyBuilder.buildMultiMplsTopo2();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1, 1, 1);
 
         log.info("Beginning test: 'multiMplsPipeTestPal'.");
 
@@ -4588,7 +4588,7 @@ public class TopPceTestNonPalindromic
 
         asymmTopologyBuilder.buildMultiMplsTopo2();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1, 1, 1);
 
         log.info("Beginning test: 'multiMplsPipeTestPalHighBW'.");
 
@@ -4759,7 +4759,7 @@ public class TopPceTestNonPalindromic
 
         asymmTopologyBuilder.buildMultiMplsTopo2();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1, 1, 1);
 
         log.info("Beginning test: 'multiMplsPipeTestNonPal'.");
 

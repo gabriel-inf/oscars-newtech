@@ -1,16 +1,15 @@
 package net.es.oscars.pce;
 
-import edu.uci.ics.jung.algorithms.shortestpath.BFSDistanceLabeler;
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.resv.ent.RequestedVlanPipeE;
 import net.es.oscars.resv.ent.ReservedBandwidthE;
 import net.es.oscars.resv.ent.ReservedVlanE;
 import net.es.oscars.resv.ent.ScheduleSpecificationE;
-import net.es.oscars.topo.beans.TopoEdge;
-import net.es.oscars.topo.beans.TopoVertex;
-import net.es.oscars.topo.beans.Topology;
+import net.es.oscars.dto.topo.TopoEdge;
+import net.es.oscars.dto.topo.TopoVertex;
+import net.es.oscars.dto.topo.Topology;
 import net.es.oscars.topo.ent.UrnE;
-import net.es.oscars.topo.enums.VertexType;
+import net.es.oscars.dto.topo.VertexType;
 import net.es.oscars.topo.svc.TopoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

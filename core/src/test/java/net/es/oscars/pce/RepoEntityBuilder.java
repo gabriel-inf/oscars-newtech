@@ -1,21 +1,16 @@
 package net.es.oscars.pce;
 
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.dto.pss.EthFixtureType;
-import net.es.oscars.dto.pss.EthJunctionType;
-import net.es.oscars.dto.pss.EthPipeType;
-import net.es.oscars.dto.spec.PalindromicType;
-import net.es.oscars.resv.ent.*;
-import net.es.oscars.topo.beans.TopoEdge;
-import net.es.oscars.topo.beans.TopoVertex;
+import net.es.oscars.dto.topo.TopoEdge;
+import net.es.oscars.dto.topo.TopoVertex;
+import net.es.oscars.dto.topo.VertexType;
+import net.es.oscars.dto.topo.enums.*;
 import net.es.oscars.topo.dao.UrnAdjcyRepository;
 import net.es.oscars.topo.dao.UrnRepository;
 import net.es.oscars.topo.ent.*;
-import net.es.oscars.topo.enums.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.time.Duration;
 import java.util.*;
 
 @Slf4j

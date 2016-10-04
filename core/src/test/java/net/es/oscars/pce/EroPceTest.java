@@ -9,11 +9,9 @@ import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.dao.ReservedBandwidthRepository;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.resv.svc.ResvService;
-import net.es.oscars.topo.AsymmTopologyBuilder;
 import net.es.oscars.topo.TopologyBuilder;
-import net.es.oscars.topo.beans.TopoEdge;
-import net.es.oscars.topo.beans.TopoVertex;
-import net.es.oscars.topo.dao.UrnRepository;
+import net.es.oscars.dto.topo.TopoEdge;
+import net.es.oscars.dto.topo.TopoVertex;
 import net.es.oscars.topo.svc.TopoService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -111,7 +109,7 @@ public class EroPceTest
 
         Collections.reverse(zaERO);
 
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1);
         pipeAZ.setAzERO(azERO);
         pipeAZ.setZaERO(zaERO);
 
@@ -200,7 +198,7 @@ public class EroPceTest
         zaERO.add("nodeK");
 
 
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1);
         pipeAZ.setAzERO(azERO);
         pipeAZ.setZaERO(zaERO);
 
@@ -290,7 +288,7 @@ public class EroPceTest
         zaERO.add("nodeK");
 
 
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1);
         pipeAZ.setAzERO(azERO);
         pipeAZ.setZaERO(zaERO);
 
@@ -356,7 +354,7 @@ public class EroPceTest
         zaERO.add("nodeK:2");
         zaERO.add("nodeK");
 
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1);
         pipeAZ.setAzERO(azERO);
         pipeAZ.setZaERO(zaERO);
 
@@ -421,7 +419,7 @@ public class EroPceTest
         zaERO.add("nodeK:2");
         zaERO.add("nodeK");
 
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1);
         pipeAZ.setAzERO(azERO);
         pipeAZ.setZaERO(zaERO);
 
@@ -507,7 +505,7 @@ public class EroPceTest
         zaERO.add("nodeK:2");
         zaERO.add("nodeK");
 
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1);
         pipeAZ.setAzERO(azERO);
         pipeAZ.setZaERO(zaERO);
 
@@ -598,11 +596,12 @@ public class EroPceTest
         zaERO.add("nodeK:2");
         zaERO.add("nodeK");
 
-        RequestedVlanPipeE pipeAZTest = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        RequestedVlanPipeE pipeAZTest = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW,
+                zaBW, palindrome, survivability, vlan, 1);
         pipeAZTest.setAzERO(azERO);
         pipeAZTest.setZaERO(zaERO);
         pipesTest.add(pipeAZTest);
-        blueprintTest = testBuilder.buildRequest(pipesTest);
+        blueprintTest = testBuilder.buildRequest(pipesTest, 2, 2);
         connectionTest = testBuilder.buildConnection(blueprintTest, requestedSched, "connTest", "End-to-End Connection");
 
         // Initial request which allows us to avoid altering BandwidthRepo -- Reserves a bunch of critical B/W
@@ -617,9 +616,10 @@ public class EroPceTest
         Integer azBWBig = 901;
         Integer zaBWBig = 901;
 
-        RequestedVlanPipeE pipeAZBig = testBuilder.buildRequestedPipe(srcPortsBig, srcDeviceBig, dstPortsBig, dstDeviceBig, azBWBig, zaBWBig, palindrome, survivability, vlan);
+        RequestedVlanPipeE pipeAZBig = testBuilder.buildRequestedPipe(srcPortsBig, srcDeviceBig, dstPortsBig, dstDeviceBig,
+                azBWBig, zaBWBig, palindrome, survivability, vlan, 1);
         pipesBig.add(pipeAZBig);
-        blueprintBig = testBuilder.buildRequest(pipesBig);
+        blueprintBig = testBuilder.buildRequest(pipesBig, 1, 1);
         connectionBig = testBuilder.buildConnection(blueprintBig, requestedSched, "connBig", "Big Single-link Connection");
 
 
@@ -709,11 +709,12 @@ public class EroPceTest
         zaERO.add("nodeK:2");
         zaERO.add("nodeK");
 
-        RequestedVlanPipeE pipeAZTest = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        RequestedVlanPipeE pipeAZTest = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW,
+                zaBW, palindrome, survivability, vlan, 1);
         pipeAZTest.setAzERO(azERO);
         pipeAZTest.setZaERO(zaERO);
         pipesTest.add(pipeAZTest);
-        blueprintTest = testBuilder.buildRequest(pipesTest);
+        blueprintTest = testBuilder.buildRequest(pipesTest, 1, 1);
         connectionTest = testBuilder.buildConnection(blueprintTest, requestedSched, "connTest", "End-to-End Connection");
 
         // Initial request which allows us to avoid altering BandwidthRepo -- Reserves a bunch of critical B/W
@@ -728,9 +729,10 @@ public class EroPceTest
         Integer azBWBig = 901;
         Integer zaBWBig = 901;
 
-        RequestedVlanPipeE pipeAZBig = testBuilder.buildRequestedPipe(srcPortsBig, srcDeviceBig, dstPortsBig, dstDeviceBig, azBWBig, zaBWBig, palindrome, survivability, vlan);
+        RequestedVlanPipeE pipeAZBig = testBuilder.buildRequestedPipe(srcPortsBig, srcDeviceBig, dstPortsBig, dstDeviceBig,
+                azBWBig, zaBWBig, palindrome, survivability, vlan, 1);
         pipesBig.add(pipeAZBig);
-        blueprintBig = testBuilder.buildRequest(pipesBig);
+        blueprintBig = testBuilder.buildRequest(pipesBig, 1, 1);
         connectionBig = testBuilder.buildConnection(blueprintBig, requestedSched, "connBig", "Big Single-link Connection");
 
 
@@ -803,7 +805,8 @@ public class EroPceTest
         zaERO.add("nodeK");
 
 
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW,
+                palindrome, survivability, vlan, 1);
         pipeAZ.setAzERO(azERO);
         pipeAZ.setZaERO(zaERO);
 
@@ -876,7 +879,8 @@ public class EroPceTest
         zaERO.add("nodeK");
 
 
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW,
+                palindrome, survivability, vlan, 1);
         pipeAZ.setAzERO(azERO);
         pipeAZ.setZaERO(zaERO);
 
@@ -942,12 +946,13 @@ public class EroPceTest
         zaERO.add("nodeK");
 
 
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW,
+                palindrome, survivability, vlan, 1);
         pipeAZ.setAzERO(azERO);
         pipeAZ.setZaERO(zaERO);
 
         pipes.add(pipeAZ);
-        requestedBlueprint = testBuilder.buildRequest(pipes);
+        requestedBlueprint = testBuilder.buildRequest(pipes, 1, 1);
         connection = testBuilder.buildConnection(requestedBlueprint, requestedSched, "connBig", "Big Single-link Connection");
 
         log.info("Beginning test: \'" + testName + "\'.");
@@ -1019,12 +1024,13 @@ public class EroPceTest
         azERO.add("nodeQ:1");
         azERO.add("nodeQ");
 
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW,
+                palindrome, survivability, vlan, 1);
         pipeAZ.setAzERO(azERO);
         pipeAZ.setZaERO(zaERO);
 
         pipes.add(pipeAZ);
-        requestedBlueprint = testBuilder.buildRequest(pipes);
+        requestedBlueprint = testBuilder.buildRequest(pipes, 1, 1);
         connection = testBuilder.buildConnection(requestedBlueprint, requestedSched, "connBig", "Big Single-link Connection");
 
         log.info("Beginning test: \'" + testName + "\'.");
@@ -1120,12 +1126,13 @@ public class EroPceTest
         topologyBuilder.buildMultiMplsTopo2();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
 
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW,
+                palindrome, survivability, vlan, 1);
         pipeAZ.setAzERO(azRequested);
         pipeAZ.setZaERO(zaRequested);
 
         pipes.add(pipeAZ);
-        requestedBlueprint = testBuilder.buildRequest(pipes);
+        requestedBlueprint = testBuilder.buildRequest(pipes, 1, 1);
 
         log.info("Beginning test: 'multiMplsPipeTestNonPal'.");
 
@@ -1304,7 +1311,8 @@ public class EroPceTest
         zaERO.add("nodeR");
         zaERO.add("nodeK");
 
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW,
+                palindrome, survivability, vlan, 1);
         pipeAZ.setAzERO(azERO);
         pipeAZ.setZaERO(zaERO);
 
@@ -1380,7 +1388,8 @@ public class EroPceTest
         zaERO.add("nodeL");
         zaERO.add("nodeK");
 
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW,
+                palindrome, survivability, vlan, 1);
         pipeAZ.setAzERO(azERO);
         pipeAZ.setZaERO(zaERO);
 
@@ -1458,7 +1467,8 @@ public class EroPceTest
         zaERO.add("nodeM");
         zaERO.add("nodeK");
 
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW,
+                palindrome, survivability, vlan, 1);
         pipeAZ.setAzERO(azERO);
         pipeAZ.setZaERO(zaERO);
 
@@ -1534,13 +1544,14 @@ public class EroPceTest
         zaERO.add("nodeM");
         zaERO.add("nodeK");
 
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW,
+                palindrome, survivability, vlan, 1);
         pipeAZ.setAzERO(azERO);
         pipeAZ.setZaERO(zaERO);
 
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
 
-        RequestedBlueprintE reqBlueprint = testBuilder.buildRequest(new HashSet<>(Collections.singletonList(pipeAZ)));
+        RequestedBlueprintE reqBlueprint = testBuilder.buildRequest(new HashSet<>(Collections.singletonList(pipeAZ)), 1, 1);
 
         log.info("Beginning test: \'" + testName + "\'.");
 

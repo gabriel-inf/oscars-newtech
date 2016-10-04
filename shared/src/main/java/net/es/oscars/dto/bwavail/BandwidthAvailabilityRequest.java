@@ -1,4 +1,4 @@
-package net.es.oscars.bwavail.enums;
+package net.es.oscars.dto.bwavail;
 
 import lombok.*;
 import net.es.oscars.dto.spec.PalindromicType;

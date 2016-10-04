@@ -1,10 +1,10 @@
 package net.es.oscars.topo.pop;
 
 import lombok.*;
-import net.es.oscars.topo.enums.Layer;
+import net.es.oscars.dto.topo.enums.Layer;
 import net.es.oscars.topo.ent.IntRangeE;
-import net.es.oscars.topo.enums.DeviceModel;
-import net.es.oscars.topo.enums.DeviceType;
+import net.es.oscars.dto.topo.enums.DeviceModel;
+import net.es.oscars.dto.topo.enums.DeviceType;
 
 
 import java.util.HashSet;

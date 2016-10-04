@@ -91,10 +91,11 @@ public class SequentialResvTest {
         PalindromicType palindrome = PalindromicType.PALINDROME;
         SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
 
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW,
+                palindrome, survivability, vlan, 1);
         reqPipes.add(pipeAZ);
 
-        requestedBlueprint = testBuilder.buildRequest(reqPipes);
+        requestedBlueprint = testBuilder.buildRequest(reqPipes, 1, 1);
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
 
         connection1 = testBuilder.buildConnection(requestedBlueprint, requestedSched, "conn1", "First Connection");
@@ -192,10 +193,11 @@ public class SequentialResvTest {
         PalindromicType palindrome = PalindromicType.PALINDROME;
         SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
 
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW,
+                palindrome, survivability, vlan, 1);
         reqPipes.add(pipeAZ);
 
-        requestedBlueprint = testBuilder.buildRequest(reqPipes);
+        requestedBlueprint = testBuilder.buildRequest(reqPipes, 1, 1);
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
 
         connection1 = testBuilder.buildConnection(requestedBlueprint, requestedSched, "conn1", "First Connection");
@@ -299,10 +301,11 @@ public class SequentialResvTest {
         PalindromicType palindrome = PalindromicType.PALINDROME;
         SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
 
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW,
+                palindrome, survivability, vlan, 1);
         reqPipes.add(pipeAZ);
 
-        requestedBlueprint = testBuilder.buildRequest(reqPipes);
+        requestedBlueprint = testBuilder.buildRequest(reqPipes, 1, 1);
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
 
         int numConnections = 6; // Enough to run out of VLANS
@@ -423,10 +426,11 @@ public class SequentialResvTest {
         PalindromicType palindrome = PalindromicType.PALINDROME;
         SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
 
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW,
+                palindrome, survivability, vlan, 1);
         reqPipes.add(pipeAZ);
 
-        requestedBlueprint = testBuilder.buildRequest(reqPipes);
+        requestedBlueprint = testBuilder.buildRequest(reqPipes, 1, 1);
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
 
         int numConnections = 6; // Enough to run out of VLANS
@@ -551,10 +555,11 @@ public class SequentialResvTest {
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
         SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
 
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW,
+                palindrome, survivability, vlan, 1);
         reqPipes.add(pipeAZ);
 
-        requestedBlueprint = testBuilder.buildRequest(reqPipes);
+        requestedBlueprint = testBuilder.buildRequest(reqPipes, 1, 1);
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
 
         connection1 = testBuilder.buildConnection(requestedBlueprint, requestedSched, "conn1", "First Connection");
@@ -665,10 +670,11 @@ public class SequentialResvTest {
         PalindromicType palindrome = PalindromicType.NON_PALINDROME;
         SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
 
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW,
+                palindrome, survivability, vlan, 1);
         reqPipes.add(pipeAZ);
 
-        requestedBlueprint = testBuilder.buildRequest(reqPipes);
+        requestedBlueprint = testBuilder.buildRequest(reqPipes, 1, 1);
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
 
         connection1 = testBuilder.buildConnection(requestedBlueprint, requestedSched, "conn1", "First Connection");
@@ -781,10 +787,11 @@ public class SequentialResvTest {
         PalindromicType palindrome = PalindromicType.PALINDROME;
         SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
 
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW,
+                palindrome, survivability, vlan, 1);
         reqPipes.add(pipeAZ);
 
-        requestedBlueprint = testBuilder.buildRequest(reqPipes);
+        requestedBlueprint = testBuilder.buildRequest(reqPipes, 1, 1);
         requestedSched1 = testBuilder.buildSchedule(startDate1, endDate1);
         requestedSched2 = testBuilder.buildSchedule(startDate2, endDate2);
 
@@ -888,10 +895,11 @@ public class SequentialResvTest {
         PalindromicType palindrome = PalindromicType.PALINDROME;
         SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
 
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW,
+                palindrome, survivability, vlan, 1);
         reqPipes.add(pipeAZ);
 
-        requestedBlueprint = testBuilder.buildRequest(reqPipes);
+        requestedBlueprint = testBuilder.buildRequest(reqPipes, 1, 1);
         requestedSched1 = testBuilder.buildSchedule(startDate1, endDate1);
         requestedSched2 = testBuilder.buildSchedule(startDate2, endDate2);
 
@@ -1029,12 +1037,14 @@ public class SequentialResvTest {
         PalindromicType palindrome = PalindromicType.PALINDROME;
         SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
 
-        RequestedVlanPipeE pipeAZ1 = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
-        RequestedVlanPipeE pipeAZ2 = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan);
+        RequestedVlanPipeE pipeAZ1 = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW,
+                palindrome, survivability, vlan, 1);
+        RequestedVlanPipeE pipeAZ2 = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW,
+                palindrome, survivability, vlan, 1);
         reqPipes.add(pipeAZ1);
         reqPipes.add(pipeAZ2);
 
-        requestedBlueprint = testBuilder.buildRequest(reqPipes);
+        requestedBlueprint = testBuilder.buildRequest(reqPipes, 1, 1);
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
 
         connection1 = testBuilder.buildConnection(requestedBlueprint, requestedSched, "conn1", "First Multipipe Connection");

@@ -1,4 +1,4 @@
-package net.es.oscars.bwavail.enums;
+package net.es.oscars.dto.bwavail;
 
 
 import lombok.*;

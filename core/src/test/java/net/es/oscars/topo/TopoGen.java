@@ -1,10 +1,10 @@
 package net.es.oscars.topo;
 
+import net.es.oscars.dto.topo.enums.*;
 import net.es.oscars.topo.ent.IntRangeE;
 import net.es.oscars.topo.ent.ReservableVlanE;
 import net.es.oscars.topo.ent.UrnAdjcyE;
 import net.es.oscars.topo.ent.UrnE;
-import net.es.oscars.topo.enums.*;
 
 import java.util.*;
 

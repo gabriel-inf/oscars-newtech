@@ -1,9 +1,6 @@
 package net.es.oscars.resv.ent;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.Set;
@@ -24,6 +21,12 @@ public class RequestedVlanFlowE {
 
     @OneToMany (cascade = CascadeType.ALL)
     private Set<RequestedVlanPipeE> pipes;
+
+    @NonNull
+    private Integer minPipes;
+
+    @NonNull
+    private Integer maxPipes;
 
 
 }

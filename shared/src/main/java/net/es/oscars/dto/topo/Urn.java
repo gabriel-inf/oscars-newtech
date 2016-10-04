@@ -1,6 +1,8 @@
 package net.es.oscars.dto.topo;
 
 import lombok.*;
+import net.es.oscars.dto.topo.enums.Layer;
+import net.es.oscars.dto.topo.enums.UrnType;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -27,7 +29,6 @@ public class Urn {
 
     @NonNull
     private UrnType urnType;
-
 
     private Set<Layer> capabilities = new HashSet<>();
 

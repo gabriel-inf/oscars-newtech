@@ -2,16 +2,14 @@ package net.es.oscars.bwavail;
 
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.CoreUnitTestConfiguration;
-import net.es.oscars.bwavail.enums.BandwidthAvailabilityRequest;
-import net.es.oscars.bwavail.enums.BandwidthAvailabilityResponse;
+import net.es.oscars.dto.bwavail.BandwidthAvailabilityRequest;
+import net.es.oscars.dto.bwavail.BandwidthAvailabilityResponse;
 import net.es.oscars.dto.spec.PalindromicType;
 import net.es.oscars.dto.spec.SurvivabilityType;
 import net.es.oscars.resv.dao.ReservedBandwidthRepository;
 import net.es.oscars.resv.ent.ReservedBandwidthE;
 import net.es.oscars.topo.TopologyBuilder;
-import net.es.oscars.topo.beans.Topology;
 import net.es.oscars.topo.dao.UrnRepository;
-import net.es.oscars.topo.ent.ReservableBandwidthE;
 import net.es.oscars.topo.ent.UrnE;
 import net.es.oscars.topo.svc.TopoService;
 import org.junit.Test;

@@ -4,9 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import net.es.oscars.topo.beans.TopoEdge;
-import net.es.oscars.topo.beans.TopoVertex;
-import net.es.oscars.topo.enums.Layer;
+import net.es.oscars.dto.topo.TopoEdge;
+import net.es.oscars.dto.topo.TopoVertex;
+import net.es.oscars.dto.topo.enums.Layer;
 
 import java.util.List;
 

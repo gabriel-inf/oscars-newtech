@@ -7,13 +7,13 @@ import net.es.oscars.resv.ent.ReservedBandwidthE;
 import net.es.oscars.resv.ent.ReservedVlanE;
 import net.es.oscars.resv.ent.ScheduleSpecificationE;
 import net.es.oscars.servicetopo.SurvivableServiceLayerTopology;
-import net.es.oscars.topo.beans.TopoEdge;
-import net.es.oscars.topo.beans.TopoVertex;
-import net.es.oscars.topo.beans.Topology;
+import net.es.oscars.dto.topo.TopoEdge;
+import net.es.oscars.dto.topo.TopoVertex;
+import net.es.oscars.dto.topo.Topology;
 import net.es.oscars.topo.dao.UrnRepository;
 import net.es.oscars.topo.ent.UrnE;
-import net.es.oscars.topo.enums.Layer;
-import net.es.oscars.topo.enums.VertexType;
+import net.es.oscars.dto.topo.enums.Layer;
+import net.es.oscars.dto.topo.VertexType;
 import net.es.oscars.topo.svc.TopoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -54,7 +54,10 @@ public class SurvivabilityPCE
      * @return A four- element Map containing both the primary and secondary link-disjoint forward-direction EROs and the primary and secondary link-disjoint reverse-direction EROs
      * @throws PCEException
      */
-    public Map<String, List<TopoEdge>> computeSurvivableERO(RequestedVlanPipeE requestPipe, ScheduleSpecificationE requestSched, List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList) throws PCEException
+    public Map<String, List<TopoEdge>> computeSurvivableERO(RequestedVlanPipeE requestPipe,
+                                                            ScheduleSpecificationE requestSched,
+                                                            List<ReservedBandwidthE> rsvBwList,
+                                                            List<ReservedVlanE> rsvVlanList) throws PCEException
     {
         if(requestPipe.getEroSurvivability().equals(SurvivabilityType.SURVIVABILITY_TOTAL))
         {
@@ -71,7 +74,10 @@ public class SurvivabilityPCE
     }
 
 
-    private Map<String, List<TopoEdge>> computeSurvivableEroComplete(RequestedVlanPipeE requestPipe, ScheduleSpecificationE requestSched, List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList) throws PCEException
+    private Map<String, List<TopoEdge>> computeSurvivableEroComplete(RequestedVlanPipeE requestPipe,
+                                                                     ScheduleSpecificationE requestSched,
+                                                                     List<ReservedBandwidthE> rsvBwList,
+                                                                     List<ReservedVlanE> rsvVlanList) throws PCEException
     {
         UrnE srcDeviceURN = requestPipe.getAJunction().getDeviceUrn();
         UrnE dstDeviceURN = requestPipe.getZJunction().getDeviceUrn();
@@ -99,15 +105,15 @@ public class SurvivabilityPCE
         Topology prunedTopo = pruningService.pruneWithPipeAZ(multiLayerTopo, requestPipe, requestSched, rsvBwList, rsvVlanList);
 
         // Disjoint shortest-path routing
-        List<List<TopoEdge>> azPathPairCalculated = bhandariPCE.computeDisjointPaths(prunedTopo, srcDevice, dstDevice, 2);
+        List<List<TopoEdge>> azPathPairCalculated = bhandariPCE.computeDisjointPaths(prunedTopo, srcDevice, dstDevice, requestPipe.getNumDisjoint());
 
         if(azPathPairCalculated.isEmpty())
         {
             throw new PCEException("Empty path-pair in Survivability PCE");
         }
-        else if(azPathPairCalculated.size() != 2)
+        else if(azPathPairCalculated.size() != requestPipe.getNumDisjoint())
         {
-            throw new PCEException("Secondary path could not be found in Survivability PCE");
+            throw new PCEException(requestPipe.getNumDisjoint() + " disjoint paths could not be found in Survivability PCE");
         }
 
         // Add the src/dst ports back to the routes to complete the EROs
@@ -157,7 +163,7 @@ public class SurvivabilityPCE
             Collections.reverse(zaERO);
         }
 
-        assert(azPathPairCalculated.size() == 2);
+        assert(azPathPairCalculated.size() == requestPipe.getNumDisjoint());
         assert(azPathPairCalculated.size() == zaPathPairCalculated.size());
 
 
@@ -171,21 +177,28 @@ public class SurvivabilityPCE
         }
 
         Map<String, List<TopoEdge>> theMap = new HashMap<>();
-        theMap.put("azPrimary", azPathPairCalculated.get(0));
-        theMap.put("zaPrimary", zaPathPairCalculated.get(0));
-        theMap.put("azSecondary", azPathPairCalculated.get(1));
-        theMap.put("zaSecondary", zaPathPairCalculated.get(1));
-
-        log.info("AZ Primary: " + azPathPairCalculated.get(0).toString());
-        log.info("ZA Primary: " + zaPathPairCalculated.get(0).toString());
-        log.info("AZ Secondary: " + azPathPairCalculated.get(1).toString());
-        log.info("ZA Secondary: " + zaPathPairCalculated.get(1).toString());
-
+        Integer numPathsSoFar = 0;
+        for(List<TopoEdge> azPath : azPathPairCalculated){
+            numPathsSoFar += 1;
+            theMap.put("az" + numPathsSoFar, azPath);
+            log.info("AZ Path " + numPathsSoFar + ": " + azPath.toString());
+        }
+        numPathsSoFar = 0;
+        for(List<TopoEdge> zaPath : zaPathPairCalculated){
+            numPathsSoFar += 1;
+            theMap.put("za" + numPathsSoFar, zaPath);
+            log.info("ZA Path " + numPathsSoFar + ": " + zaPath.toString());
+        }
         return theMap;
     }
 
 
-    private Map<String, List<TopoEdge>> computeSurvivableEroPartial(RequestedVlanPipeE requestPipe, ScheduleSpecificationE requestSched, List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList) throws PCEException
+    //TODO: Make this work with a set number of disjoint paths
+    // Number of disjoint paths requested specified in the requestPipe
+    private Map<String, List<TopoEdge>> computeSurvivableEroPartial(RequestedVlanPipeE requestPipe,
+                                                                    ScheduleSpecificationE requestSched,
+                                                                    List<ReservedBandwidthE> rsvBwList,
+                                                                    List<ReservedVlanE> rsvVlanList) throws PCEException
     {
         Topology ethTopo = topoService.layer(Layer.ETHERNET);
         Topology intTopo = topoService.layer(Layer.INTERNAL);
@@ -373,10 +386,10 @@ public class SurvivabilityPCE
         if(!(azEROSecondary.size() == zaEROSecondary.size()))
             return  theMap;
 
-        theMap.put("azPrimary", azEROPrimary);
-        theMap.put("zaPrimary", zaEROPrimary);
-        theMap.put("azSecondary", azEROSecondary);
-        theMap.put("zaSecondary", zaEROSecondary);
+        theMap.put("az1", azEROPrimary);
+        theMap.put("za1", zaEROPrimary);
+        theMap.put("az2", azEROSecondary);
+        theMap.put("za2", zaEROSecondary);
 
         log.info("AZ Primary: " + azEROPrimary.toString());
         log.info("ZA Primary: " + zaEROPrimary.toString());

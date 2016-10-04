@@ -4,16 +4,16 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.bwavail.enums.BandwidthAvailabilityRequest;
-import net.es.oscars.bwavail.enums.BandwidthAvailabilityResponse;
+import net.es.oscars.dto.bwavail.BandwidthAvailabilityRequest;
+import net.es.oscars.dto.bwavail.BandwidthAvailabilityResponse;
 import net.es.oscars.helpers.RequestedEntityBuilder;
 import net.es.oscars.helpers.ReservedEntityDecomposer;
 import net.es.oscars.pce.*;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.dao.ReservedBandwidthRepository;
 import net.es.oscars.resv.ent.*;
-import net.es.oscars.topo.beans.TopoVertex;
-import net.es.oscars.topo.beans.Topology;
+import net.es.oscars.dto.topo.TopoVertex;
+import net.es.oscars.dto.topo.Topology;
 import net.es.oscars.topo.dao.UrnRepository;
 import net.es.oscars.topo.ent.UrnE;
 import net.es.oscars.topo.svc.TopoService;
@@ -86,7 +86,7 @@ public class BandwidthAvailabilityService {
         // Create the request blueprint
         RequestedBlueprintE reqBlueprint = entityBuilder.buildRequest(request.getSrcPort(), request.getSrcDevice(),
                 request.getDstPort(), request.getDstDevice(), request.getMinAzBandwidth(), request.getMinZaBandwidth(),
-                request.getPalindromicType(), request.getSurvivabilityType(), "any", "any");
+                request.getPalindromicType(), request.getSurvivabilityType(), "any", "any", 1, 1, 1);
 
         // Try to find a path using the PCE and the requested blueprint & schedule
         try

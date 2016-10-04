@@ -1,7 +1,7 @@
 package net.es.oscars;
 
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.topo.enums.Layer;
+import net.es.oscars.dto.topo.enums.Layer;
 import net.es.oscars.pce.PCEException;
 import net.es.oscars.pce.TopPCE;
 import net.es.oscars.pss.PSSException;
@@ -12,9 +12,9 @@ import net.es.oscars.resv.ent.SpecificationE;
 import net.es.oscars.resv.dao.SpecificationRepository;
 import net.es.oscars.topo.dao.UrnRepository;
 import net.es.oscars.topo.ent.UrnE;
-import net.es.oscars.topo.enums.DeviceType;
-import net.es.oscars.topo.enums.DeviceModel;
-import net.es.oscars.topo.enums.UrnType;
+import net.es.oscars.dto.topo.enums.DeviceType;
+import net.es.oscars.dto.topo.enums.DeviceModel;
+import net.es.oscars.dto.topo.enums.UrnType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

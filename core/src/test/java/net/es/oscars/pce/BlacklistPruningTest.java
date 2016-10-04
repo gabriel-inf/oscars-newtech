@@ -8,9 +8,9 @@ import net.es.oscars.dto.spec.SurvivabilityType;
 import net.es.oscars.helpers.RequestedEntityBuilder;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.topo.TopologyBuilder;
-import net.es.oscars.topo.beans.TopoEdge;
-import net.es.oscars.topo.beans.TopoVertex;
-import net.es.oscars.topo.beans.Topology;
+import net.es.oscars.dto.topo.TopoEdge;
+import net.es.oscars.dto.topo.TopoVertex;
+import net.es.oscars.dto.topo.Topology;
 import net.es.oscars.topo.svc.TopoService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -247,7 +247,7 @@ public class BlacklistPruningTest {
         PalindromicType palindrome = PalindromicType.PALINDROME;
         SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
-        return testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, blacklist);
+        return testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, blacklist, 1, 1, 1);
     }
 
     public void pruneTest(RequestedBlueprintE requestedBlueprint, Topology topo, ScheduleSpecificationE requestedSched,

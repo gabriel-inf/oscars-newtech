@@ -35,68 +35,78 @@ public class RequestedEntityBuilder {
         RequestedVlanJunctionE junction = buildRequestedJunction(deviceName, fixtureNames, azMbps, zaMbps, vlanExp, true);
         junctions.add(junction);
 
-
-
-        return buildRequestedBlueprint(buildRequestedFlow(junctions, new HashSet<>()), Layer3FlowE.builder().build());
+        return buildRequestedBlueprint(buildRequestedFlow(junctions, new HashSet<>(), 0, 0), Layer3FlowE.builder().build());
     }
 
     public RequestedBlueprintE buildRequest(String aPort, String aDevice, String zPort, String zDevice,
                                             Integer azMbps, Integer zaMbps, PalindromicType palindromic,
-                                            SurvivabilityType survivable, String vlanExp){
+                                            SurvivabilityType survivable, String vlanExp, Integer numDisjoint,
+                                            Integer minPipes, Integer maxPipes){
         log.info("Building RequestedBlueprintE");
 
 
         Set<RequestedVlanPipeE> pipes = new HashSet<>();
-        RequestedVlanPipeE pipe = buildRequestedPipe(aPort, aDevice, zPort, zDevice, azMbps, zaMbps, palindromic, survivable, vlanExp);
+        RequestedVlanPipeE pipe = buildRequestedPipe(aPort, aDevice, zPort, zDevice, azMbps, zaMbps, palindromic,
+                survivable, vlanExp, numDisjoint);
         pipes.add(pipe);
 
-        return buildRequestedBlueprint(buildRequestedFlow(new HashSet<>(), pipes), Layer3FlowE.builder().build());
+        return buildRequestedBlueprint(buildRequestedFlow(new HashSet<>(), pipes, minPipes, maxPipes), Layer3FlowE.builder().build());
 
     }
 
     public RequestedBlueprintE buildRequest(String aPort, String aDevice, String zPort, String zDevice,
                                             Integer azMbps, Integer zaMbps, PalindromicType palindromic,
-                                            SurvivabilityType survivable, String vlanExp, Set<String> blacklist){
+                                            SurvivabilityType survivable, String vlanExp, Set<String> blacklist,
+                                            Integer numDisjoint, Integer minPipes, Integer maxPipes){
         log.info("Building RequestedBlueprintE");
 
 
         Set<RequestedVlanPipeE> pipes = new HashSet<>();
-        RequestedVlanPipeE pipe = buildRequestedPipe(aPort, aDevice, zPort, zDevice, azMbps, zaMbps, palindromic, survivable, vlanExp, blacklist);
+        RequestedVlanPipeE pipe = buildRequestedPipe(aPort, aDevice, zPort, zDevice, azMbps, zaMbps, palindromic,
+                survivable, vlanExp, blacklist, numDisjoint);
         pipes.add(pipe);
 
-        return buildRequestedBlueprint(buildRequestedFlow(new HashSet<>(), pipes), Layer3FlowE.builder().build());
+        return buildRequestedBlueprint(buildRequestedFlow(new HashSet<>(), pipes, minPipes, maxPipes), Layer3FlowE.builder().build());
 
     }
 
     public RequestedBlueprintE buildRequest(String aPort, String aDevice, String zPort, String zDevice,
-                                            Integer azMbps, Integer zaMbps, PalindromicType palindromic, SurvivabilityType survivable, String aVlanExp, String zVlanExp){
+                                            Integer azMbps, Integer zaMbps, PalindromicType palindromic,
+                                            SurvivabilityType survivable, String aVlanExp, String zVlanExp,
+                                            Integer numDisjoint, Integer minPipes, Integer maxPipes){
         log.info("Building RequestedBlueprintE");
 
 
         Set<RequestedVlanPipeE> pipes = new HashSet<>();
-        RequestedVlanPipeE pipe = buildRequestedPipe(aPort, aDevice, zPort, zDevice, azMbps, zaMbps, palindromic, survivable, aVlanExp, zVlanExp);
+        RequestedVlanPipeE pipe = buildRequestedPipe(aPort, aDevice, zPort, zDevice, azMbps, zaMbps, palindromic,
+                survivable, aVlanExp, zVlanExp, numDisjoint);
         pipes.add(pipe);
 
-        return buildRequestedBlueprint(buildRequestedFlow(new HashSet<>(), pipes), Layer3FlowE.builder().build());
+        return buildRequestedBlueprint(buildRequestedFlow(new HashSet<>(), pipes, minPipes, maxPipes), Layer3FlowE.builder().build());
 
     }
 
     public RequestedBlueprintE buildRequest(List<String> aPorts, String aDevice, List<String> zPorts, String zDevice,
-                                            Integer azMbps, Integer zaMbps, PalindromicType palindromic, SurvivabilityType survivable, String vlanExp){
+                                            Integer azMbps, Integer zaMbps, PalindromicType palindromic,
+                                            SurvivabilityType survivable, String vlanExp, Integer numDisjoint,
+                                            Integer minPipes, Integer maxPipes){
         log.info("Building RequestedBlueprintE");
 
 
         Set<RequestedVlanPipeE> pipes = new HashSet<>();
-        RequestedVlanPipeE pipe = buildRequestedPipe(aPorts, aDevice, zPorts, zDevice, azMbps, zaMbps, palindromic, survivable, vlanExp);
+        RequestedVlanPipeE pipe = buildRequestedPipe(aPorts, aDevice, zPorts, zDevice, azMbps, zaMbps, palindromic,
+                survivable, vlanExp, numDisjoint);
         pipes.add(pipe);
 
-        return buildRequestedBlueprint(buildRequestedFlow(new HashSet<>(), pipes), Layer3FlowE.builder().build());
+        return buildRequestedBlueprint(buildRequestedFlow(new HashSet<>(), pipes, minPipes, maxPipes), Layer3FlowE.builder().build());
 
     }
 
     public RequestedBlueprintE buildRequest(List<String> aPorts, List<String> aDevices, List<String> zPorts,
                                             List<String> zDevices, List<Integer> azMbpsList, List<Integer> zaMbpsList,
-                                            List<PalindromicType> palindromicList, List<SurvivabilityType> survivableList, List<String> vlanExps){
+                                            List<PalindromicType> palindromicList,
+                                            List<SurvivabilityType> survivableList, List<String> vlanExps,
+                                            List<Integer> numDisjoints, Integer minPipes, Integer maxPipes){
         Set<RequestedVlanPipeE> pipes = new HashSet<>();
         for(int i = 0; i < aPorts.size(); i++){
             RequestedVlanPipeE pipe = buildRequestedPipe(
@@ -108,17 +118,18 @@ public class RequestedEntityBuilder {
                     zaMbpsList.get(i),
                     palindromicList.get(i),
                     survivableList.get(i),
-                    vlanExps.get(i));
+                    vlanExps.get(i),
+                    numDisjoints.get(i));
             pipes.add(pipe);
         }
 
-        return buildRequestedBlueprint(buildRequestedFlow(new HashSet<>(), pipes), Layer3FlowE.builder().build());
+        return buildRequestedBlueprint(buildRequestedFlow(new HashSet<>(), pipes, minPipes, maxPipes), Layer3FlowE.builder().build());
     }
 
     // Added for multi-pipe request
-    public RequestedBlueprintE buildRequest(Set<RequestedVlanPipeE> requestedPipes)
+    public RequestedBlueprintE buildRequest(Set<RequestedVlanPipeE> requestedPipes, Integer minPipes, Integer maxPipes)
     {
-        return buildRequestedBlueprint(buildRequestedFlow(new HashSet<>(), requestedPipes), Layer3FlowE.builder().build());
+        return buildRequestedBlueprint(buildRequestedFlow(new HashSet<>(), requestedPipes, minPipes, maxPipes), Layer3FlowE.builder().build());
     }
 
     public RequestedBlueprintE buildRequest(List<String> deviceNames, List<List<String>> portNames,
@@ -143,7 +154,7 @@ public class RequestedEntityBuilder {
             junctions.add(junction);
         }
 
-        return buildRequestedBlueprint(buildRequestedFlow(junctions, new HashSet<>()), Layer3FlowE.builder().build());
+        return buildRequestedBlueprint(buildRequestedFlow(junctions, new HashSet<>(), 0, 0), Layer3FlowE.builder().build());
     }
 
     public RequestedBlueprintE buildRequestedBlueprint(RequestedVlanFlowE vlanFlow, Layer3FlowE l3Flow){
@@ -153,10 +164,13 @@ public class RequestedEntityBuilder {
                 .build();
     }
 
-    public RequestedVlanFlowE buildRequestedFlow(Set<RequestedVlanJunctionE> junctions, Set<RequestedVlanPipeE> pipes){
+    public RequestedVlanFlowE buildRequestedFlow(Set<RequestedVlanJunctionE> junctions, Set<RequestedVlanPipeE> pipes,
+                                                  Integer minPipes, Integer maxPipes){
         return RequestedVlanFlowE.builder()
                 .junctions(junctions)
                 .pipes(pipes)
+                .minPipes(minPipes)
+                .maxPipes(minPipes)
                 .build();
     }
 
@@ -172,7 +186,8 @@ public class RequestedEntityBuilder {
 
 
     public RequestedVlanPipeE buildRequestedPipe(String aPort, String aDevice, String zPort, String zDevice,
-                                                 Integer azMbps, Integer zaMbps, PalindromicType palindromic, SurvivabilityType survivable, String vlanExp){
+                                                 Integer azMbps, Integer zaMbps, PalindromicType palindromic,
+                                                 SurvivabilityType survivable, String vlanExp, Integer numDisjoint){
 
         List<String> aFixNames = new ArrayList<>();
         aFixNames.add(aPort);
@@ -190,12 +205,14 @@ public class RequestedEntityBuilder {
                 .zaMbps(zaMbps)
                 .eroPalindromic(palindromic)
                 .eroSurvivability(survivable)
+                .numDisjoint(numDisjoint)
                 .build();
     }
 
     public RequestedVlanPipeE buildRequestedPipe(String aPort, String aDevice, String zPort, String zDevice,
                                                  Integer azMbps, Integer zaMbps, PalindromicType palindromic,
-                                                 SurvivabilityType survivable, String aVlanExp, String zVlanExp){
+                                                 SurvivabilityType survivable, String aVlanExp, String zVlanExp,
+                                                 Integer numDisjoint){
 
         List<String> aFixNames = new ArrayList<>();
         aFixNames.add(aPort);
@@ -213,12 +230,14 @@ public class RequestedEntityBuilder {
                 .zaMbps(zaMbps)
                 .eroPalindromic(palindromic)
                 .eroSurvivability(survivable)
+                .numDisjoint(numDisjoint)
                 .build();
     }
 
     public RequestedVlanPipeE buildRequestedPipe(String aPort, String aDevice, String zPort, String zDevice,
                                                  Integer azMbps, Integer zaMbps, PalindromicType palindromic,
-                                                 SurvivabilityType survivable, String vlanExp, Set<String> blacklist){
+                                                 SurvivabilityType survivable, String vlanExp, Set<String> blacklist,
+                                                 Integer numDisjoint){
 
         List<String> aFixNames = new ArrayList<>();
         aFixNames.add(aPort);
@@ -237,12 +256,13 @@ public class RequestedEntityBuilder {
                 .eroPalindromic(palindromic)
                 .eroSurvivability(survivable)
                 .urnBlacklist(blacklist)
+                .numDisjoint(numDisjoint)
                 .build();
     }
 
     public RequestedVlanPipeE buildRequestedPipe(List<String> aPorts, String aDevice, List<String> zPorts, String zDevice,
                                                  Integer azMbps, Integer zaMbps, PalindromicType palindromic,
-                                                 SurvivabilityType survivable, String vlanExp){
+                                                 SurvivabilityType survivable, String vlanExp, Integer numDisjoint){
 
 
         return RequestedVlanPipeE.builder()
@@ -255,6 +275,7 @@ public class RequestedEntityBuilder {
                 .zaMbps(zaMbps)
                 .eroPalindromic(palindromic)
                 .eroSurvivability(survivable)
+                .numDisjoint(numDisjoint)
                 .build();
     }
 

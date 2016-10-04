@@ -101,6 +101,7 @@ public class SpecPopTest {
                 .eroPalindromic(PalindromicType.PALINDROME)
                 .eroSurvivability(SurvivabilityType.SURVIVABILITY_NONE)
                 .pipeType(EthPipeType.REQUESTED)
+                .numDisjoint(1)
                 .build();
 
         RequestedVlanFlowE flow = spec.getRequested().getVlanFlow();
@@ -124,6 +125,8 @@ public class SpecPopTest {
         RequestedVlanFlowE flow = RequestedVlanFlowE.builder()
                 .junctions(new HashSet<>())
                 .pipes(new HashSet<>())
+                .minPipes(1)
+                .maxPipes(1)
                 .build();
 
         RequestedBlueprintE bp = RequestedBlueprintE.builder()
