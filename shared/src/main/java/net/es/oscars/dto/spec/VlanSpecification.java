@@ -10,7 +10,6 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 public class VlanSpecification {
-    private Long specificationId;
 
     @NonNull
     private String connectionId;
