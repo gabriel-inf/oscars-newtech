@@ -403,6 +403,7 @@ public class ResvController {
                 .eroPalindromic(vf.getPalindromic())
                 .eroSurvivability(vf.getSurvivability())
                 .numDisjoint(vf.getNumDisjointPaths())
+                .pipeType(EthPipeType.REQUESTED)
                 .build();
     }
 
