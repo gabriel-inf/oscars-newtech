@@ -63,6 +63,13 @@ public class TopoController {
         return topoService.devices();
     }
 
+    @RequestMapping(value = "/topo/all", method = RequestMethod.GET)
+    @ResponseBody
+    public Topology topology(){
+        log.info("Getting entire topology");
+        return topoService.getMultilayerTopology();
+    }
+
 
     @RequestMapping(value = "/topo/device_port_map", method = RequestMethod.GET)
     @ResponseBody
