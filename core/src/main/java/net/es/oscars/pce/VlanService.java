@@ -903,7 +903,7 @@ public class VlanService {
      */
     public Set<Integer> addToSetOverlap(Set<Integer> overlap, Set<Integer> other){
         // If there are no ranges available, just return the current overlap set
-        if(other.isEmpty()){
+        if(other == null || other.isEmpty()){
             return overlap;
         }
         // If the overlap does not already have elements, add all of the tags retrieved from this range
