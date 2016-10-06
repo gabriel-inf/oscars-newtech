@@ -108,23 +108,19 @@
             <dependency>
                 <groupId>org.webjars</groupId>
                 <artifactId>bootstrap</artifactId>
-                <version>3.3.6</version>
+                <version>3.3.7-1</version>
             </dependency>
             <dependency>
                 <groupId>org.webjars</groupId>
                 <artifactId>jquery</artifactId>
-                <version>1.12.0</version>
+                <version>1.12.4</version>
             </dependency>
             <dependency>
                 <groupId>org.webjars.bower</groupId>
                 <artifactId>typeahead.js</artifactId>
                 <version>0.11.1</version>
             </dependency>
-            <dependency>
-                <groupId>org.webjars</groupId>
-                <artifactId>d3js</artifactId>
-                <version>3.5.17</version>
-            </dependency>
+
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>

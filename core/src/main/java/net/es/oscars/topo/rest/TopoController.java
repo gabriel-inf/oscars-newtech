@@ -1,6 +1,7 @@
 package net.es.oscars.topo.rest;
 
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.dto.topo.Topology;
 import net.es.oscars.dto.topo.enums.Layer;
 import net.es.oscars.topo.svc.TopoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,5 +61,12 @@ public class TopoController {
         return topoService.devices();
     }
 
+
+    @RequestMapping(value = "/topo/multilayer", method = RequestMethod.GET)
+    @ResponseBody
+    public Topology topo_layer() {
+        log.info("getting multilayer topo");
+        return topoService.getMultilayerTopology();
+    }
 
 }

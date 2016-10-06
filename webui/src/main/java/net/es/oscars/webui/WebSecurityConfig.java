@@ -20,10 +20,22 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
+                // development:
+                    .antMatchers("/viz").permitAll()
+
+                // index page and REST endpoints:
                     .antMatchers("/").permitAll()
+                    .antMatchers("/graphs/**").permitAll()
                     .antMatchers("/info/**").permitAll()
+
+                // various static / webjar resources
                     .antMatchers("/webjars/**").permitAll()
+                    .antMatchers("/st/**").permitAll()
+
+                // only admins for this one
                     .antMatchers("/admin/**").hasAuthority("ADMIN")
+
+                // only admins
                     .anyRequest().authenticated()
                     .and()
                 .formLogin()
