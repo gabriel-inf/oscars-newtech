@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.topo.TopoEdge;
 import net.es.oscars.dto.topo.TopoVertex;
 import net.es.oscars.dto.topo.Topology;
-import net.es.oscars.dto.topo.VertexType;
+import net.es.oscars.dto.topo.enums.VertexType;
 import net.es.oscars.dto.topo.enums.DeviceModel;
 import net.es.oscars.dto.topo.enums.DeviceType;
 import net.es.oscars.dto.topo.enums.Layer;
