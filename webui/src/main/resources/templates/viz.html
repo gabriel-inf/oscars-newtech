@@ -1,0 +1,18 @@
+<!DOCTYPE HTML>
+<html xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+
+<head th:include="shared :: headerFragment (pageTitle='Visualization')"/>
+<head th:include="shared :: vizFragment"/>
+
+<body>
+<div th:include="shared :: navbar"></div>
+
+<div id="network_viz"></div>
+
+<div id="reservation_viz"></div>
+
+</body>
+</html>

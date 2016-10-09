@@ -69,4 +69,11 @@ public class TopoController {
     }
 
 
+    @RequestMapping(value = "/topo/multilayer", method = RequestMethod.GET)
+    @ResponseBody
+    public Topology topo_layer() {
+        log.info("getting multilayer topo");
+        return topoService.getMultilayerTopology();
+    }
+
 }
