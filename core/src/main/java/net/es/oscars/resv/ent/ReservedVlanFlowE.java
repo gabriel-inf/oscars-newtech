@@ -28,4 +28,7 @@ public class ReservedVlanFlowE {
     @OneToMany(cascade = CascadeType.ALL)
     private Set<ReservedMplsPipeE> mplsPipes;
 
+    @OneToMany(cascade = CascadeType.ALL)
+    private Set<BidirectionalPathE> allPaths;
+
 }
