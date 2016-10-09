@@ -2,6 +2,8 @@ package net.es.oscars.pce;
 
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.spec.SurvivabilityType;
+import net.es.oscars.dto.topo.BidirectionalPath;
+import net.es.oscars.dto.topo.enums.Layer;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.dto.topo.TopoEdge;
@@ -84,23 +86,7 @@ public class TopPCE {
 
         // Attempt to reserve simple junctions
         log.info("Handling Simple Junctions");
-        Set<ReservedVlanJunctionE> simpleJunctions = new HashSet<>();
-        for(RequestedVlanJunctionE reqJunction : req_f.getJunctions())
-        {
-            // Update list of reserved bandwidths
-            List<ReservedBandwidthE> rsvBandwidths = bwService.createReservedBandwidthList(simpleJunctions, reservedMplsPipes,
-                    reservedEthPipes, schedSpec);
-
-            // Update list of reserved VLAN IDs
-            List<ReservedVlanE> rsvVlans = vlanService.createReservedVlanList(simpleJunctions, reservedEthPipes, schedSpec);
-
-            ReservedVlanJunctionE junction = transPCE.reserveSimpleJunction(reqJunction, schedSpec, simpleJunctions,
-                    rsvBandwidths, rsvVlans, deviceToPortMap, portToDeviceMap);
-
-            if(junction != null){
-                simpleJunctions.add(junction);
-            }
-        }
+        Set<ReservedVlanJunctionE> simpleJunctions = handleRequestedJunctions(req_f, schedSpec, deviceToPortMap, portToDeviceMap);
         log.info("All simple junctions handled");
         // If not all junctions were able to be reserved, return the empty Optional<Blueprint>
         if(simpleJunctions.size() != req_f.getJunctions().size()){
@@ -110,11 +96,14 @@ public class TopPCE {
         List<RequestedVlanPipeE> pipes = new ArrayList<>();
         pipes.addAll(req_f.getPipes());
 
+        //Create a set of all ERO paths taken by pipes
+        Set<BidirectionalPathE> allPaths = new HashSet<>();
+
         // Keep track of the number of successfully reserved pipes (numReserved)
         // Attempt to reserve all requested pipes
         log.info("Starting to handle pipes");
         Integer numReserved = handleRequestedPipes(pipes, schedSpec, simpleJunctions, reservedMplsPipes,
-                reservedEthPipes, deviceToPortMap, portToDeviceMap);
+                reservedEthPipes, deviceToPortMap, portToDeviceMap, allPaths);
 
         // If pipes were not able to be reserved in the original order, try reversing the order pipes are attempted
         if((numReserved != pipes.size()) && (pipes.size() > 1)){
@@ -122,8 +111,9 @@ public class TopPCE {
             reservedEthPipes = new HashSet<>();
             reservedMplsPipes = new HashSet<>();
             reservedEthJunctions = new HashSet<>();
+            allPaths = new HashSet<>();
             numReserved = handleRequestedPipes(pipes, schedSpec, simpleJunctions, reservedMplsPipes,
-                    reservedEthPipes, deviceToPortMap, portToDeviceMap);
+                    reservedEthPipes, deviceToPortMap, portToDeviceMap, allPaths);
         }
 
         // If the pipes still cannot be reserved, return the blank Reserved Vlan Flow
@@ -134,17 +124,47 @@ public class TopPCE {
         Set<ReservedVlanJunctionE> reservedJunctions = new HashSet<>(simpleJunctions);
         reservedJunctions.addAll(reservedEthJunctions);
 
+        // Add paths for each simple junction
+        addJunctionPaths(allPaths, reservedJunctions);
+
         // Make the reserved flow
         ReservedVlanFlowE res_f = ReservedVlanFlowE.builder()
                 .junctions(reservedJunctions)
                 .ethPipes(reservedEthPipes)
                 .mplsPipes(reservedMplsPipes)
+                .allPaths(allPaths)
                 .build();
 
         // Build the reserved Blueprint
         reserved = Optional.of(ReservedBlueprintE.builder().vlanFlow(res_f).build());
         return reserved;
 
+    }
+
+    private Set<ReservedVlanJunctionE> handleRequestedJunctions(RequestedVlanFlowE req_f, ScheduleSpecificationE schedSpec,
+                                                                Map<String, Set<String>> deviceToPortMap,
+                                                                Map<String, String> portToDeviceMap){
+        Set<ReservedVlanJunctionE> simpleJunctions = new HashSet<>();
+        for(RequestedVlanJunctionE reqJunction : req_f.getJunctions())
+        {
+            // Update list of reserved bandwidths
+            List<ReservedBandwidthE> rsvBandwidths = bwService.createReservedBandwidthList(simpleJunctions, new HashSet<>(),
+                    new HashSet<>(), schedSpec);
+
+            // Update list of reserved VLAN IDs
+            List<ReservedVlanE> rsvVlans = vlanService.createReservedVlanList(simpleJunctions, new HashSet<>(), schedSpec);
+
+            try {
+                ReservedVlanJunctionE junction = transPCE.reserveSimpleJunction(reqJunction, schedSpec, simpleJunctions,
+                        rsvBandwidths, rsvVlans, deviceToPortMap, portToDeviceMap);
+                if(junction != null){
+                    simpleJunctions.add(junction);
+                }
+            } catch (PCEException | PSSException e) {
+                e.printStackTrace();
+            }
+        }
+        return simpleJunctions;
     }
 
     /**
@@ -160,7 +180,9 @@ public class TopPCE {
      */
     private Integer handleRequestedPipes(List<RequestedVlanPipeE> pipes, ScheduleSpecificationE schedSpec,
                                          Set<ReservedVlanJunctionE> simpleJunctions, Set<ReservedMplsPipeE> reservedMplsPipes,
-                                         Set<ReservedEthPipeE> reservedEthPipes, Map<String, Set<String>> deviceToPortMap, Map<String, String> portToDeviceMap)
+                                         Set<ReservedEthPipeE> reservedEthPipes,
+                                         Map<String, Set<String>> deviceToPortMap, Map<String, String> portToDeviceMap,
+                                         Set<BidirectionalPathE> allPaths)
     {
         // The number of requested pipes successfully reserved
         Integer numReserved = 0;
@@ -186,6 +208,10 @@ public class TopPCE {
                 // Get the AZ and ZA paths
                 List<TopoEdge> azEros = eroMapForPipe.get("az");
                 List<TopoEdge> zaEros = eroMapForPipe.get("za");
+
+                // Store the paths
+                allPaths.add(BidirectionalPathE.builder().azPath(azEros).zaPath(zaEros).build());
+
 
                 // Try to get the reserved resources
                 try {
@@ -213,6 +239,9 @@ public class TopPCE {
 
                     azEROs.add(eroMapForPipe.get("az" + i));
                     zaEROs.add(eroMapForPipe.get("za" + i));
+
+                    // Store the paths
+                    allPaths.add(BidirectionalPathE.builder().azPath(eroMapForPipe.get("az" + i)).zaPath(eroMapForPipe.get("za" + i)).build());
                 }
 
                 // Try to get the reserved resources
@@ -231,6 +260,7 @@ public class TopPCE {
         }
         return numReserved;
     }
+
 
     /**
      * Given a requested pipe and schedule, find the shortest path that meets the demand given what has been requested
@@ -365,5 +395,37 @@ public class TopPCE {
         }
         log.info("all junctions & pipes are ok");
 
+    }
+
+    private void addJunctionPaths(Set<BidirectionalPathE> allPaths, Set<ReservedVlanJunctionE> reservedJunctions) {
+        for(ReservedVlanJunctionE junction: reservedJunctions){
+            Set<String> fixs = junction.getFixtures().stream().map(f -> f.getIfceUrn().getUrn()).collect(Collectors.toSet());
+            Set<TopoEdge> edges = topoService.getMultilayerTopology().getEdges()
+                    .stream()
+                    .filter(e -> junction.getDeviceUrn().getUrn().equals(e.getA().getUrn()) ||  junction.getDeviceUrn().getUrn().equals(e.getZ().getUrn()))
+                    .filter(e -> fixs.contains(e.getA().getUrn()) || fixs.contains(e.getZ().getUrn()))
+                    .collect(Collectors.toSet());
+
+            List<TopoEdge> fixToJunctionEdges = edges
+                    .stream()
+                    .filter(e -> e.getZ().getUrn().equals(junction.getDeviceUrn().getUrn()))
+                    .sorted((e1, e2) -> e1.getA().getUrn().compareToIgnoreCase(e2.getA().getUrn()))
+                    .collect(Collectors.toList());
+
+            List<TopoEdge> junctionToFixEdges = edges
+                    .stream()
+                    .filter(e -> e.getA().getUrn().equals(junction.getDeviceUrn().getUrn()))
+                    .sorted((e1, e2) -> e1.getZ().getUrn().compareToIgnoreCase(e2.getZ().getUrn()))
+                    .collect(Collectors.toList());
+
+            // (Fix, Junction), (Junction, Fix), (Junction, Fix), ...., (Junction, Fix)
+            List<TopoEdge> azPath = junctionToFixEdges.subList(1, junctionToFixEdges.size());
+            azPath.add(0, fixToJunctionEdges.get(0));
+            // Reverse above list
+            List<TopoEdge> zaPath = fixToJunctionEdges.subList(1, fixToJunctionEdges.size());
+            zaPath.add(0, junctionToFixEdges.get(0));
+
+            allPaths.add(BidirectionalPathE.builder().azPath(azPath).zaPath(zaPath).build());
+        }
     }
 }
