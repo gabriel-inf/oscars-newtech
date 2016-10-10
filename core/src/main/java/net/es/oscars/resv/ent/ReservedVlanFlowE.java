@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import net.es.oscars.topo.ent.BidirectionalPathE;
 
 import javax.persistence.*;
 import java.util.Set;

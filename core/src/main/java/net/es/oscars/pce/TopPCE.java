@@ -2,12 +2,13 @@ package net.es.oscars.pce;
 
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.spec.SurvivabilityType;
-import net.es.oscars.dto.topo.BidirectionalPath;
-import net.es.oscars.dto.topo.enums.Layer;
+import net.es.oscars.dto.topo.Edge;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.dto.topo.TopoEdge;
 import net.es.oscars.dto.spec.PalindromicType;
+import net.es.oscars.topo.ent.BidirectionalPathE;
+import net.es.oscars.topo.ent.EdgeE;
 import net.es.oscars.topo.svc.TopoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -210,7 +211,10 @@ public class TopPCE {
                 List<TopoEdge> zaEros = eroMapForPipe.get("za");
 
                 // Store the paths
-                allPaths.add(BidirectionalPathE.builder().azPath(azEros).zaPath(zaEros).build());
+                allPaths.add(BidirectionalPathE.builder()
+                        .azPath(convertTopoEdgePathToEdges(azEros))
+                        .zaPath(convertTopoEdgePathToEdges(zaEros))
+                        .build());
 
 
                 // Try to get the reserved resources
@@ -241,7 +245,10 @@ public class TopPCE {
                     zaEROs.add(eroMapForPipe.get("za" + i));
 
                     // Store the paths
-                    allPaths.add(BidirectionalPathE.builder().azPath(eroMapForPipe.get("az" + i)).zaPath(eroMapForPipe.get("za" + i)).build());
+                    allPaths.add(BidirectionalPathE.builder()
+                            .azPath(convertTopoEdgePathToEdges(eroMapForPipe.get("az" + i)))
+                            .zaPath(convertTopoEdgePathToEdges(eroMapForPipe.get("za" + i)))
+                            .build());
                 }
 
                 // Try to get the reserved resources
@@ -259,6 +266,13 @@ public class TopPCE {
             }
         }
         return numReserved;
+    }
+
+    private List<EdgeE> convertTopoEdgePathToEdges(List<TopoEdge> topoEdges) {
+        return topoEdges
+                .stream()
+                .map(e -> EdgeE.builder().a(e.getA().getUrn()).z(e.getZ().getUrn()).build())
+                .collect(Collectors.toList());
     }
 
 
@@ -425,7 +439,10 @@ public class TopPCE {
             List<TopoEdge> zaPath = fixToJunctionEdges.subList(1, fixToJunctionEdges.size());
             zaPath.add(0, junctionToFixEdges.get(0));
 
-            allPaths.add(BidirectionalPathE.builder().azPath(azPath).zaPath(zaPath).build());
+            allPaths.add(BidirectionalPathE.builder()
+                    .azPath(convertTopoEdgePathToEdges(azPath))
+                    .zaPath(convertTopoEdgePathToEdges(zaPath))
+                    .build());
         }
     }
 }
