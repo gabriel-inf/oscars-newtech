@@ -17,10 +17,10 @@ public class BidirectionalPathE {
     private Long id;
 
     @ElementCollection
-    @CollectionTable
+    @OneToMany (cascade = CascadeType.ALL)
     private List<EdgeE> azPath;
 
     @ElementCollection
-    @CollectionTable
+    @OneToMany (cascade = CascadeType.ALL)
     private List<EdgeE> zaPath;
 }
