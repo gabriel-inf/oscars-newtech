@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -117,7 +118,12 @@ public class ResvService {
         } else {
             log.error("Reservation Unsuccessful!");
             c.setReserved(ReservedBlueprintE.builder()
-                    .vlanFlow(ReservedVlanFlowE.builder().build())
+                    .vlanFlow(ReservedVlanFlowE.builder()
+                            .junctions(new HashSet<>())
+                            .mplsPipes(new HashSet<>())
+                            .ethPipes(new HashSet<>())
+                            .allPaths(new HashSet<>())
+                            .build())
                     .build());
             c.getStates().setResv(ResvState.ABORTING);
             connRepo.save(c);

@@ -223,8 +223,10 @@ public class SequentialResvTest {
             ReservedBlueprintE reservedBlueprint = oneConnection.getReserved();
 
             if (oneConnection.getConnectionId().equals("conn3")) {
-                assert(oneConnection.getReserved().getVlanFlow().getEthPipes() == null);
-                assert(oneConnection.getReserved().getVlanFlow().getMplsPipes() == null);
+                assert(oneConnection.getReserved().getVlanFlow().getEthPipes().isEmpty());
+                assert(oneConnection.getReserved().getVlanFlow().getMplsPipes().isEmpty());
+                assert(oneConnection.getReserved().getVlanFlow().getJunctions().isEmpty());
+                assert(oneConnection.getReserved().getVlanFlow().getAllPaths().isEmpty());
                 continue;
             }
 
@@ -338,8 +340,10 @@ public class SequentialResvTest {
             ReservedBlueprintE reservedBlueprint = oneConnection.getReserved();
 
             if (oneConnection.getConnectionId().equals("conn6")) {
-                assert(oneConnection.getReserved().getVlanFlow().getEthPipes() == null);
-                assert(oneConnection.getReserved().getVlanFlow().getMplsPipes() == null);
+                assert(oneConnection.getReserved().getVlanFlow().getEthPipes().isEmpty());
+                assert(oneConnection.getReserved().getVlanFlow().getMplsPipes().isEmpty());
+                assert(oneConnection.getReserved().getVlanFlow().getJunctions().isEmpty());
+                assert(oneConnection.getReserved().getVlanFlow().getAllPaths().isEmpty());
                 continue;
             }
 
@@ -464,8 +468,10 @@ public class SequentialResvTest {
             ReservedBlueprintE reservedBlueprint = oneConnection.getReserved();
 
             if (oneConnection.getConnectionId().equals("conn6")) {
-                assert(oneConnection.getReserved().getVlanFlow().getEthPipes() == null);
-                assert(oneConnection.getReserved().getVlanFlow().getMplsPipes() == null);
+                assert(oneConnection.getReserved().getVlanFlow().getEthPipes().isEmpty());
+                assert(oneConnection.getReserved().getVlanFlow().getMplsPipes().isEmpty());
+                assert(oneConnection.getReserved().getVlanFlow().getJunctions().isEmpty());
+                assert(oneConnection.getReserved().getVlanFlow().getAllPaths().isEmpty());
                 continue;
             }
 
@@ -592,8 +598,10 @@ public class SequentialResvTest {
             ReservedBlueprintE reservedBlueprint = oneConnection.getReserved();
 
             if (oneConnection.getConnectionId().equals("conn5")) {
-                assert(oneConnection.getReserved().getVlanFlow().getEthPipes() == null);
-                assert(oneConnection.getReserved().getVlanFlow().getMplsPipes() == null);
+                assert(oneConnection.getReserved().getVlanFlow().getEthPipes().isEmpty());
+                assert(oneConnection.getReserved().getVlanFlow().getMplsPipes().isEmpty());
+                assert(oneConnection.getReserved().getVlanFlow().getJunctions().isEmpty());
+                assert(oneConnection.getReserved().getVlanFlow().getAllPaths().isEmpty());
                 continue;
             }
 
@@ -706,8 +714,10 @@ public class SequentialResvTest {
             ReservedBlueprintE reservedBlueprint = oneConnection.getReserved();
 
             if (oneConnection.getConnectionId().equals("conn4")) {
-                assert(oneConnection.getReserved().getVlanFlow().getEthPipes() == null);
-                assert(oneConnection.getReserved().getVlanFlow().getMplsPipes() == null);
+                assert(oneConnection.getReserved().getVlanFlow().getEthPipes().isEmpty());
+                assert(oneConnection.getReserved().getVlanFlow().getMplsPipes().isEmpty());
+                assert(oneConnection.getReserved().getVlanFlow().getJunctions().isEmpty());
+                assert(oneConnection.getReserved().getVlanFlow().getAllPaths().isEmpty());
                 continue;
             }
 
@@ -940,8 +950,10 @@ public class SequentialResvTest {
             ReservedBlueprintE reservedBlueprint = oneConnection.getReserved();
 
             if (oneConnection.getConnectionId().equals("connT1-6") || oneConnection.getConnectionId().equals("connT2-6")) {
-                assert(oneConnection.getReserved().getVlanFlow().getEthPipes() == null);
-                assert(oneConnection.getReserved().getVlanFlow().getMplsPipes() == null);
+                assert(oneConnection.getReserved().getVlanFlow().getEthPipes().isEmpty());
+                assert(oneConnection.getReserved().getVlanFlow().getMplsPipes().isEmpty());
+                assert(oneConnection.getReserved().getVlanFlow().getJunctions().isEmpty());
+                assert(oneConnection.getReserved().getVlanFlow().getAllPaths().isEmpty());
                 continue;
             }
 
@@ -1076,8 +1088,10 @@ public class SequentialResvTest {
             ReservedBlueprintE reservedBlueprint = oneConnection.getReserved();
 
             if (oneConnection.getConnectionId().equals("conn3")) {
-                assert(oneConnection.getReserved().getVlanFlow().getEthPipes() == null);
-                assert(oneConnection.getReserved().getVlanFlow().getMplsPipes() == null);
+                assert(oneConnection.getReserved().getVlanFlow().getEthPipes().isEmpty());
+                assert(oneConnection.getReserved().getVlanFlow().getMplsPipes().isEmpty());
+                assert(oneConnection.getReserved().getVlanFlow().getJunctions().isEmpty());
+                assert(oneConnection.getReserved().getVlanFlow().getAllPaths().isEmpty());
                 continue;
             }
 
