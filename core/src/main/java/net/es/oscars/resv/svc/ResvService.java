@@ -3,6 +3,7 @@ package net.es.oscars.resv.svc;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.dto.spec.ReservedBlueprint;
 import net.es.oscars.pce.PCEException;
 import net.es.oscars.pce.TopPCE;
 import net.es.oscars.pss.PSSException;
@@ -115,6 +116,11 @@ public class ResvService {
             }
         } else {
             log.error("Reservation Unsuccessful!");
+            c.setReserved(ReservedBlueprintE.builder()
+                    .vlanFlow(ReservedVlanFlowE.builder().build())
+                    .build());
+            c.getStates().setResv(ResvState.ABORTING);
+            connRepo.save(c);
         }
 
     }
