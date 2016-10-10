@@ -748,7 +748,8 @@ public class EroPceTest
         catch(PSSException pssE){ log.error("", pssE); }
 
         assert(!connectionBig.getReserved().getVlanFlow().getMplsPipes().isEmpty());
-        assert(connectionTest.getReserved() == null);
+        assert(connectionTest.getReserved().getVlanFlow().getEthPipes() == null);
+        assert(connectionTest.getReserved().getVlanFlow().getMplsPipes() == null);
 
         log.info("test \'" + testName + "\' passed.");
     }

@@ -223,7 +223,8 @@ public class SequentialResvTest {
             ReservedBlueprintE reservedBlueprint = oneConnection.getReserved();
 
             if (oneConnection.getConnectionId().equals("conn3")) {
-                assert (reservedBlueprint == null);
+                assert(oneConnection.getReserved().getVlanFlow().getEthPipes() == null);
+                assert(oneConnection.getReserved().getVlanFlow().getMplsPipes() == null);
                 continue;
             }
 
@@ -337,7 +338,8 @@ public class SequentialResvTest {
             ReservedBlueprintE reservedBlueprint = oneConnection.getReserved();
 
             if (oneConnection.getConnectionId().equals("conn6")) {
-                assert (reservedBlueprint == null);
+                assert(oneConnection.getReserved().getVlanFlow().getEthPipes() == null);
+                assert(oneConnection.getReserved().getVlanFlow().getMplsPipes() == null);
                 continue;
             }
 
@@ -462,7 +464,8 @@ public class SequentialResvTest {
             ReservedBlueprintE reservedBlueprint = oneConnection.getReserved();
 
             if (oneConnection.getConnectionId().equals("conn6")) {
-                assert (reservedBlueprint == null);
+                assert(oneConnection.getReserved().getVlanFlow().getEthPipes() == null);
+                assert(oneConnection.getReserved().getVlanFlow().getMplsPipes() == null);
                 continue;
             }
 
@@ -589,7 +592,8 @@ public class SequentialResvTest {
             ReservedBlueprintE reservedBlueprint = oneConnection.getReserved();
 
             if (oneConnection.getConnectionId().equals("conn5")) {
-                assert (reservedBlueprint == null);
+                assert(oneConnection.getReserved().getVlanFlow().getEthPipes() == null);
+                assert(oneConnection.getReserved().getVlanFlow().getMplsPipes() == null);
                 continue;
             }
 
@@ -702,7 +706,8 @@ public class SequentialResvTest {
             ReservedBlueprintE reservedBlueprint = oneConnection.getReserved();
 
             if (oneConnection.getConnectionId().equals("conn4")) {
-                assert (reservedBlueprint == null);
+                assert(oneConnection.getReserved().getVlanFlow().getEthPipes() == null);
+                assert(oneConnection.getReserved().getVlanFlow().getMplsPipes() == null);
                 continue;
             }
 
@@ -935,7 +940,8 @@ public class SequentialResvTest {
             ReservedBlueprintE reservedBlueprint = oneConnection.getReserved();
 
             if (oneConnection.getConnectionId().equals("connT1-6") || oneConnection.getConnectionId().equals("connT2-6")) {
-                assert (reservedBlueprint == null);
+                assert(oneConnection.getReserved().getVlanFlow().getEthPipes() == null);
+                assert(oneConnection.getReserved().getVlanFlow().getMplsPipes() == null);
                 continue;
             }
 
@@ -1070,7 +1076,8 @@ public class SequentialResvTest {
             ReservedBlueprintE reservedBlueprint = oneConnection.getReserved();
 
             if (oneConnection.getConnectionId().equals("conn3")) {
-                assert (reservedBlueprint == null);
+                assert(oneConnection.getReserved().getVlanFlow().getEthPipes() == null);
+                assert(oneConnection.getReserved().getVlanFlow().getMplsPipes() == null);
                 continue;
             }
 
