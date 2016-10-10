@@ -1,6 +1,8 @@
 var selected_node_ids = [];
 var display_viz = {};
 var reservation_viz = {};
+var add_form;
+
 
 function loadJSON(url, callback) {
 
@@ -15,6 +17,19 @@ function loadJSON(url, callback) {
         }
     };
     xobj.send(null);
+}
+
+function add_to_reservation() {
+
+    for (var i = 0; i < selected_node_ids.length; i++) {
+        var nodeId = selected_node_ids[i];
+        console.log("adding node "+nodeId);
+        var nodes = reservation_viz.datasource.nodes;
+        if (!nodes.get(nodeId)) {
+            nodes.add({id: nodeId, label: nodeId});
+
+        }
+    }
 }
 
 function make_network(json_data, container, options) {
@@ -61,7 +76,7 @@ function attach_handlers(vis_js_network, vis_js_datasets) {
     });
 
     vis_js_network.on('dragStart', function (params) {
-
+        var draggedNode = false;
         for (var i = 0; i < params.nodes.length; i++) {
             var nodeId = params.nodes[i];
             console.log("dragStart " + nodeId);
@@ -73,13 +88,17 @@ function attach_handlers(vis_js_network, vis_js_datasets) {
             } else {
                 console.log("dragStart: plain " + nodeId);
                 vis_js_datasets.nodes.update({id: nodeId, fixed: {x: false, y: false}});
-
+                draggedNode = true;
             }
+        }
+        if (draggedNode) {
+            add_form.show();
         }
     });
 
     vis_js_network.on("click", function (params) {
         var clickedNode = false;
+        var clickedPlain = false;
         selected_node_ids = [];
         var i;
 
@@ -92,6 +111,7 @@ function attach_handlers(vis_js_network, vis_js_datasets) {
                 selected_node_ids.push(nodeId);
                 console.log("cluster node selected " + nodeId);
             } else {
+                clickedPlain = true;
                 selected_node_ids.push(nodeId);
                 console.log("plain node selected " + nodeId);
             }
@@ -105,11 +125,13 @@ function attach_handlers(vis_js_network, vis_js_datasets) {
 
             }
         }
+        if (clickedPlain) {
+            add_form.show();
+        }
     });
 }
 
 
-// otherwise typeahead doesn't work
 $(document).ready(function () {
 
     loadJSON("/graphs/multilayer", function (response) {
@@ -149,7 +171,17 @@ $(document).ready(function () {
                 color: {background: "white"}
             }
         };
+
         reservation_viz = make_network({}, rv_cont, rv_opts);
+
+        add_form = $('#add_to_resv_form');
+        add_form.hide();
+
+        add_form.on('submit', function (e) {
+            e.preventDefault();
+            add_to_reservation();
+        });
+
 
     });
 
