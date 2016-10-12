@@ -97,6 +97,11 @@ public class VizExporter {
             n.setY(positions.get(node).getY());
         }
 
+
+        n.setTitle("<form class='net_node form-inline' id='add_node_to_resv_form'>" +
+                "        <button type='submit' class='btn btn-primary'>Add to request</button>" +
+                "    </form>");
+
         g.getNodes().add(n);
     }
 

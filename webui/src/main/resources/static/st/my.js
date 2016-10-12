@@ -1,12 +1,14 @@
-var selected_node_ids = [];
+var selected_node_ids = {};
 
 var display_viz = {};
 var reservation_viz = {};
-var add_node_to_resv_form;
+
+var add_node_to_resv_btn;
 
 var resv_edge_params_form;
 var resv_node_params_form;
 
+var resv_viz_name = "reservation_viz";
 
 function loadJSON(url, callback) {
 
@@ -23,7 +25,7 @@ function loadJSON(url, callback) {
     xobj.send(null);
 }
 
-function add_to_reservation(viz) {
+function add_to_reservation(viz, name) {
 
     var last_added_node = null;
     var ds = viz.datasource;
@@ -35,8 +37,8 @@ function add_to_reservation(viz) {
         console.log("last added: " + last_added_node.id);
     }
 
-    for (var i = 0; i < selected_node_ids.length; i++) {
-        var nodeId = selected_node_ids[i];
+    for (var i = 0; i < selected_node_ids.name.length; i++) {
+        var nodeId = selected_node_ids.name[i];
         console.log("adding node " + nodeId);
         if (!ds.nodes.get(nodeId)) {
             ds.nodes.add({id: nodeId, label: nodeId});
@@ -61,7 +63,7 @@ function add_to_reservation(viz) {
 
 }
 
-function make_network(json_data, container, options, is_resv_form) {
+function make_network(json_data, container, options, name) {
 
     // create an array with nodes
     var nodes = new vis.DataSet(json_data['nodes']);
@@ -79,14 +81,14 @@ function make_network(json_data, container, options, is_resv_form) {
     result.network = network;
     result.datasource = datasource;
 
-    attach_handlers(network, datasource, is_resv_form);
+    attach_handlers(network, datasource, name);
     return result;
 }
 
-function attach_handlers(vis_js_network, vis_js_datasets, is_resv_form) {
+function attach_handlers(vis_js_network, vis_js_datasets, name) {
 
     vis_js_network.on('dragEnd', function (params) {
-        selected_node_ids = [];
+        selected_node_ids.name = [];
         for (var i = 0; i < params.nodes.length; i++) {
             var nodeId = params.nodes[i];
             console.log("dragEnd" + nodeId);
@@ -94,12 +96,12 @@ function attach_handlers(vis_js_network, vis_js_datasets, is_resv_form) {
             if (vis_js_network.isCluster(nodeId) == true) {
                 console.log("dragEnd: cluster " + nodeId);
                 vis_js_network.clustering.updateClusteredNode(nodeId, {fixed: {x: true, y: true}});
-                selected_node_ids.push(nodeId);
+                selected_node_ids.name.push(nodeId);
 
             } else {
                 console.log("dragEnd: plain " + nodeId);
                 vis_js_datasets.nodes.update({id: nodeId, fixed: {x: true, y: true}});
-                selected_node_ids.push(nodeId);
+                selected_node_ids.name.push(nodeId);
             }
         }
     });
@@ -107,31 +109,29 @@ function attach_handlers(vis_js_network, vis_js_datasets, is_resv_form) {
     vis_js_network.on('dragStart', function (params) {
         var draggedPlain = false;
         var draggedCluster = false;
-        selected_node_ids = [];
+        selected_node_ids.name = [];
 
         for (var i = 0; i < params.nodes.length; i++) {
             var nodeId = params.nodes[i];
             if (vis_js_network.isCluster(nodeId) == true) {
                 console.log("dragStart: cluster " + nodeId);
                 vis_js_network.clustering.updateClusteredNode(nodeId, {fixed: {x: false, y: false}});
-                selected_node_ids.push(nodeId);
+                selected_node_ids.name.push(nodeId);
                 var draggedCluster = true;
 
             } else {
                 console.log("dragStart: plain " + nodeId);
                 vis_js_datasets.nodes.update({id: nodeId, fixed: {x: false, y: false}});
-                selected_node_ids.push(nodeId);
+                selected_node_ids.name.push(nodeId);
                 draggedPlain = true;
             }
         }
 
-        if (!is_resv_form) {
-            if (draggedPlain) {
-                show_resv_node_card(selected_node_ids[0]);
-            } else {
-                add_node_to_resv_form.hide();
-            }
+        var is_resv = false;
+        if (name == resv_viz_name) {
+            is_resv = true;
         }
+        handle_click_(is_resv, false, true, draggedPlain);
 
     });
 
@@ -139,7 +139,7 @@ function attach_handlers(vis_js_network, vis_js_datasets, is_resv_form) {
         var clickedNode = false;
         var clickedEdge = false;
         var clickedPlain = false;
-        selected_node_ids = [];
+        selected_node_ids.name = [];
         var i;
 
         for (i = 0; i < params.nodes.length; i++) {
@@ -148,15 +148,19 @@ function attach_handlers(vis_js_network, vis_js_datasets, is_resv_form) {
             console.log("node selected " + nodeId);
 
             if (vis_js_network.isCluster(nodeId) == true) {
-                selected_node_ids.push(nodeId);
+                selected_node_ids.name.push(nodeId);
                 console.log("cluster node selected " + nodeId);
             } else {
                 clickedPlain = true;
-                selected_node_ids.push(nodeId);
+                selected_node_ids.name.push(nodeId);
                 console.log("plain node selected " + nodeId);
             }
         }
 
+        var is_resv = false;
+        if (name == resv_viz_name) {
+            is_resv = true;
+        }
 
         if (!clickedNode) {
             for (i = 0; i < params.edges.length; i++) {
@@ -166,44 +170,50 @@ function attach_handlers(vis_js_network, vis_js_datasets, is_resv_form) {
                 console.log("edge selected: " + edgeId);
             }
         }
+        handle_click_(is_resv, clickedEdge, clickedNode, clickedPlain);
 
-        if (is_resv_form) {
-            if (clickedEdge) {
-                resv_edge_params_form.show()
-            } else {
-                resv_edge_params_form.hide();
-            }
-            if (clickedNode) {
-                show_resv_node_card(selected_node_ids[0]);
-            } else {
-                resv_node_params_form.hide();
-            }
-        } else {
-            if (clickedPlain) {
-                add_node_to_resv_form.show();
-            } else {
-                add_node_to_resv_form.hide();
-            }
-        }
     });
 }
 
-function show_resv_node_card(nodeId){
-    console.log("showing card for "+nodeId);
+function handle_click_(is_resv, selected_an_edge, selected_a_node, is_selected_node_plain) {
+    if (is_resv) {
+        add_node_to_resv_btn.addClass("disabled").removeClass("active");
+
+        if (selected_an_edge) {
+            resv_edge_params_form.show();
+        } else {
+            resv_edge_params_form.hide();
+        }
+        if (selected_a_node) {
+            show_resv_node_card(selected_node_ids.name[0]);
+        } else {
+            resv_node_params_form.hide();
+        }
+    } else {
+        if (is_selected_node_plain) {
+            add_node_to_resv_btn.removeClass("disabled").addClass("active");
+        } else {
+            add_node_to_resv_btn.addClass("disabled").removeClass("active");
+        }
+    }
+}
+
+function show_resv_node_card(nodeId) {
+    console.log("showing card for " + nodeId);
     $('#resv_node_table tbody').empty();
     resv_node_params_form.show();
-    var url = "/info/device/"+nodeId+"/vlanEdges";
+    var url = "/info/device/" + nodeId + "/vlanEdges";
     loadJSON(url, function (response) {
         var vlanEdges = JSON.parse(response);
         console.log(vlanEdges);
         vlanEdges.forEach(function (value, index, vlanEdges) {
-            console.log("adding a row for "+value);
-            var tr = "<tr>"+
-                "<td>"+index+"</td>"+
-                "<td>"+value+"</td>"+
-                "<td><input name='bw"+index+"' type='text' placeholder='1G' class='form-control input-md'  /></td>"+
-                "<td><input name='vlan"+index+"' type='text' placeholder='vlan' class='form-control input-md'  /></td>"+
-                "<td><input name='use"+index+"' type='checkbox' class='form-control input-md'  /></td>"+
+            console.log("adding a row for " + value);
+            var tr = "<tr>" +
+                "<td>" + index + "</td>" +
+                "<td>" + value + "</td>" +
+                "<td><input name='bw" + index + "' type='text' placeholder='1G' class='form-control input-md'  /></td>" +
+                "<td><input name='vlan" + index + "' type='text' placeholder='vlan' class='form-control input-md'  /></td>" +
+                "<td><input name='use" + index + "' type='checkbox' class='form-control input-md'  /></td>" +
                 "</tr>";
             $('#resv_node_table tbody').append(tr);
         })
@@ -235,7 +245,7 @@ $(document).ready(function () {
                 color: {background: "white"}
             }
         };
-        display_viz = make_network(json_data, nv_cont, nv_opts, false);
+        display_viz = make_network(json_data, nv_cont, nv_opts, "network_viz");
 
         var rv_cont = document.getElementById('reservation_viz');
         var rv_opts = {
@@ -260,7 +270,7 @@ $(document).ready(function () {
             }
         };
 
-        reservation_viz = make_network({}, rv_cont, rv_opts, true);
+        reservation_viz = make_network({}, rv_cont, rv_opts, "reservation_viz");
 
         resv_edge_params_form = $('#resv_edge_params_form');
         resv_edge_params_form.hide();
@@ -268,13 +278,11 @@ $(document).ready(function () {
         resv_node_params_form = $('#resv_node_params_form');
         resv_node_params_form.hide();
 
+        add_node_to_resv_btn = $('#add_node_to_resv_btn');
 
-        add_node_to_resv_form = $('#add_node_to_resv_form');
-        add_node_to_resv_form.hide();
-
-        add_node_to_resv_form.on('submit', function (e) {
+        add_node_to_resv_btn.on('click', function (e) {
             e.preventDefault();
-            add_to_reservation(reservation_viz);
+            add_to_reservation(reservation_viz, resv_viz_name);
         });
 
 

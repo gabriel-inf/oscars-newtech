@@ -1,4 +1,8 @@
 #!/bin/bash
+function tabname {
+  echo -n -e "\033]0;$1\007"
+}
+tabname "oscars"
 
 orig_dir=`pwd`
 
