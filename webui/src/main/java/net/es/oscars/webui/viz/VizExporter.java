@@ -17,6 +17,7 @@ import java.awt.*;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.*;
+import java.util.List;
 
 @Component
 @Slf4j
@@ -28,23 +29,43 @@ public class VizExporter {
     public VizGraph multilayerGraph() {
 
         VizGraph g = VizGraph.builder().edges(new ArrayList<>()).nodes(new ArrayList<>()).build();
-        
+        Map<String, Set<String>> portMap = topologyProvider.devicePortMap();
+        Map<String, String> reverseMap = new HashMap<>();
+        for (String d : portMap.keySet()) {
+            for (String p : portMap.get(d)) {
+                reverseMap.put(p, d);
+            }
+        }
+
+
         Topology multilayer = topologyProvider.getTopology();
+        List<String> added = new ArrayList<>();
 
         for (TopoEdge topoEdge : multilayer.getEdges()) {
             String a = topoEdge.getA().getUrn();
             String z = topoEdge.getZ().getUrn();
-            VizEdge ve = VizEdge.builder()
-                    .from(a).to(z).title("").label("").value(1)
-                    .id(null)
-                    .arrows(null).arrowStrikethrough(false).color(null)
-                    .build();
+            String dev_a = reverseMap.get(a);
+            String dev_z  = reverseMap.get(z);
+            String e_id = a + " -- " + z;
+            String r_id = z + " -- " + a;
+            if (!added.contains(r_id)) {
 
-            g.getEdges().add(ve);
+                added.add(e_id);
+                added.add(r_id);
+                VizEdge ve = VizEdge.builder()
+                        .from(dev_a).to(dev_z).title("").label("").value(1)
+                        .id(null)
+                        .arrows(null).arrowStrikethrough(false).color(null)
+                        .build();
+
+                g.getEdges().add(ve);
+
+            }
+
         }
 
-        for (TopoVertex vertex : multilayer.getVertices()) {
-            this.makeNode(vertex.getUrn(), g);
+        for (String deviceUrn : portMap.keySet()) {
+            this.makeNode(deviceUrn, g);
         }
 
         return g;

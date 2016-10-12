@@ -1,7 +1,8 @@
 var selected_node_ids = [];
+
 var display_viz = {};
 var reservation_viz = {};
-var add_form;
+var add_node_to_resv_form;
 
 var resv_edge_params_form;
 var resv_node_params_form;
@@ -104,24 +105,34 @@ function attach_handlers(vis_js_network, vis_js_datasets, is_resv_form) {
     });
 
     vis_js_network.on('dragStart', function (params) {
-        var draggedNode = false;
+        var draggedPlain = false;
+        var draggedCluster = false;
+        selected_node_ids = [];
+
         for (var i = 0; i < params.nodes.length; i++) {
             var nodeId = params.nodes[i];
-            console.log("dragStart " + nodeId);
-
             if (vis_js_network.isCluster(nodeId) == true) {
                 console.log("dragStart: cluster " + nodeId);
                 vis_js_network.clustering.updateClusteredNode(nodeId, {fixed: {x: false, y: false}});
+                selected_node_ids.push(nodeId);
+                var draggedCluster = true;
 
             } else {
                 console.log("dragStart: plain " + nodeId);
                 vis_js_datasets.nodes.update({id: nodeId, fixed: {x: false, y: false}});
-                draggedNode = true;
+                selected_node_ids.push(nodeId);
+                draggedPlain = true;
             }
         }
-        if (draggedNode) {
-            add_form.show();
+
+        if (!is_resv_form) {
+            if (draggedPlain) {
+                show_resv_node_card(selected_node_ids[0]);
+            } else {
+                add_node_to_resv_form.hide();
+            }
         }
+
     });
 
     vis_js_network.on("click", function (params) {
@@ -163,22 +174,46 @@ function attach_handlers(vis_js_network, vis_js_datasets, is_resv_form) {
                 resv_edge_params_form.hide();
             }
             if (clickedNode) {
-                resv_node_params_form.show()
+                show_resv_node_card(selected_node_ids[0]);
             } else {
                 resv_node_params_form.hide();
             }
-        }
-
-        if (clickedPlain) {
-            add_form.show();
         } else {
-            add_form.hide();
+            if (clickedPlain) {
+                add_node_to_resv_form.show();
+            } else {
+                add_node_to_resv_form.hide();
+            }
         }
     });
 }
 
+function show_resv_node_card(nodeId){
+    console.log("showing card for "+nodeId);
+    $('#resv_node_table tbody').empty();
+    resv_node_params_form.show();
+    var url = "/info/device/"+nodeId+"/vlanEdges";
+    loadJSON(url, function (response) {
+        var vlanEdges = JSON.parse(response);
+        console.log(vlanEdges);
+        vlanEdges.forEach(function (value, index, vlanEdges) {
+            console.log("adding a row for "+value);
+            var tr = "<tr>"+
+                "<td>"+index+"</td>"+
+                "<td>"+value+"</td>"+
+                "<td><input name='bw"+index+"' type='text' placeholder='1G' class='form-control input-md'  /></td>"+
+                "<td><input name='vlan"+index+"' type='text' placeholder='vlan' class='form-control input-md'  /></td>"+
+                "<td><input name='use"+index+"' type='checkbox' class='form-control input-md'  /></td>"+
+                "</tr>";
+            $('#resv_node_table tbody').append(tr);
+        })
+    });
+
+}
+
 
 $(document).ready(function () {
+
 
     loadJSON("/graphs/multilayer", function (response) {
 
@@ -234,10 +269,10 @@ $(document).ready(function () {
         resv_node_params_form.hide();
 
 
-        add_form = $('#add_to_resv_form');
-        add_form.hide();
+        add_node_to_resv_form = $('#add_node_to_resv_form');
+        add_node_to_resv_form.hide();
 
-        add_form.on('submit', function (e) {
+        add_node_to_resv_form.on('submit', function (e) {
             e.preventDefault();
             add_to_reservation(reservation_viz);
         });

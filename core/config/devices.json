@@ -26,6 +26,13 @@
         ]
       },
       {
+        "urn": "nersc-tb1:8/1/1:to_star-tb1",
+        "capabilities": [
+          "MPLS"
+        ],
+        "reservableBw": 10000
+      },
+      {
         "urn": "nersc-tb1:1/1/1:to_star-tb1",
         "capabilities": [
           "MPLS"
@@ -55,6 +62,13 @@
             "ceiling": 3000
           }
         ]
+      },
+      {
+        "urn": "star-tb1:8/1/1:to_nersc-tb1",
+        "capabilities": [
+          "MPLS"
+        ],
+        "reservableBw": 10000
       },
       {
         "urn": "star-tb1:2/1/1:to_nersc-tb1",
