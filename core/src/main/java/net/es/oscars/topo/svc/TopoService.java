@@ -170,12 +170,15 @@ public class TopoService {
 
     }
 
-    public List<String> deviceEdges(String device, Layer layer) {
-        log.info("finding edges for device " + device + " at " + layer);
+    public List<String> edgesWithCapability(String device, Layer layer) {
+        log.info("finding edges with capability " + layer + " for device " + device);
         List<UrnAdjcyE> adjcies = adjcyRepo.findAll();
 
         return adjcies.stream()
-                .filter(adj -> adj.getMetrics().containsKey(Layer.INTERNAL) && adj.getA().getUrn().equals(device))
+                .filter(adj ->
+                        adj.getMetrics().containsKey(Layer.INTERNAL)
+                        && adj.getA().getUrn().equals(device)
+                        && adj.getZ().getCapabilities().contains(layer))
                 .map(adj -> adj.getZ().getUrn())
                 .collect(Collectors.toList());
 
@@ -202,26 +205,26 @@ public class TopoService {
         Topology topo = getMultilayerTopology();
         Map<String, Set<String>> deviceToPortMap = new HashMap<>();
         Map<TopoVertex, Boolean> checkedMap = topo.getVertices().stream().collect(Collectors.toMap(v -> v, v -> false));
-        for(TopoEdge edge : topo.getEdges()){
+        for (TopoEdge edge : topo.getEdges()) {
             TopoVertex a = edge.getA();
             TopoVertex z = edge.getZ();
             // If either a or z is a device
-            if(!a.getVertexType().equals(VertexType.PORT) || !z.getVertexType().equals(VertexType.PORT)){
+            if (!a.getVertexType().equals(VertexType.PORT) || !z.getVertexType().equals(VertexType.PORT)) {
                 // and if either a or z has not been checked
-                if(!checkedMap.get(a) || !checkedMap.get(z)){
+                if (!checkedMap.get(a) || !checkedMap.get(z)) {
                     // Add A (if it is a device) to the map if it has not been already
-                    if(!a.getVertexType().equals(VertexType.PORT)){
+                    if (!a.getVertexType().equals(VertexType.PORT)) {
                         deviceToPortMap.putIfAbsent(a.getUrn(), new HashSet<>());
                         // If the other node (port) has not been checked, add it to the device's set of ports
-                        if(!checkedMap.get(z) && z.getVertexType().equals(VertexType.PORT)){
+                        if (!checkedMap.get(z) && z.getVertexType().equals(VertexType.PORT)) {
                             deviceToPortMap.get(a.getUrn()).add(z.getUrn());
                         }
                     }
                     // Add Z (if it is a device) to the map if it has not been already
-                    if(!z.getVertexType().equals(VertexType.PORT)){
+                    if (!z.getVertexType().equals(VertexType.PORT)) {
                         deviceToPortMap.putIfAbsent(z.getUrn(), new HashSet<>());
                         // If the other node (port) has not been checked, add it to the device's set of ports
-                        if(!checkedMap.get(a) && a.getVertexType().equals(VertexType.PORT)){
+                        if (!checkedMap.get(a) && a.getVertexType().equals(VertexType.PORT)) {
                             deviceToPortMap.get(z.getUrn()).add(a.getUrn());
                         }
                     }
@@ -234,9 +237,9 @@ public class TopoService {
         return deviceToPortMap;
     }
 
-    public Map<String, String> buildPortToDeviceMap(Map<String, Set<String>> deviceToPortMap){
+    public Map<String, String> buildPortToDeviceMap(Map<String, Set<String>> deviceToPortMap) {
         Map<String, String> portToDeviceMap = new HashMap<>();
-        for(String device : deviceToPortMap.keySet()){
+        for (String device : deviceToPortMap.keySet()) {
             deviceToPortMap.get(device).forEach(port -> portToDeviceMap.put(port, device));
         }
         return portToDeviceMap;

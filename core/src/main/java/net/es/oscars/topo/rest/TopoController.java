@@ -11,7 +11,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 @Slf4j
 @Controller
@@ -49,8 +51,8 @@ public class TopoController {
     @RequestMapping(value = "/topo/device/{device}/vlanEdges", method = RequestMethod.GET)
     @ResponseBody
     public List<String> deviceVlanEdges(@PathVariable("device") String device) {
-        log.info("getting device vlan edges");
-        return topoService.deviceEdges(device, Layer.ETHERNET);
+        log.info("getting device ETHERNET edges");
+        return topoService.edgesWithCapability(device, Layer.ETHERNET);
     }
 
 
@@ -68,6 +70,13 @@ public class TopoController {
         return topoService.getMultilayerTopology();
     }
 
+
+    @RequestMapping(value = "/topo/device_port_map", method = RequestMethod.GET)
+    @ResponseBody
+    public Map<String, Set<String>> devicePortMap() {
+        log.info("getting devicePortMap");
+        return topoService.buildDeviceToPortMap();
+    }
 
     @RequestMapping(value = "/topo/multilayer", method = RequestMethod.GET)
     @ResponseBody
