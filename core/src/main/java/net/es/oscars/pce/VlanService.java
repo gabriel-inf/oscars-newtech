@@ -6,6 +6,7 @@ import net.es.oscars.helpers.IntRangeParsing;
 import net.es.oscars.resv.dao.ReservedVlanRepository;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.dto.topo.TopoEdge;
+import net.es.oscars.topo.dao.UrnRepository;
 import net.es.oscars.topo.ent.IntRangeE;
 import net.es.oscars.topo.ent.UrnE;
 import net.es.oscars.dto.topo.enums.DeviceType;
@@ -22,6 +23,8 @@ import java.util.stream.Collectors;
 @Service
 @Component
 public class VlanService {
+    @Autowired
+    private UrnRepository urnRepository;
 
     @Autowired
     private ReservedVlanRepository resvVlanRepo;
@@ -59,13 +62,18 @@ public class VlanService {
         Set<RequestedVlanFixtureE> fixtures = new HashSet<>(reqPipe.getAJunction().getFixtures());
         fixtures.addAll(reqPipe.getZJunction().getFixtures());
 
-
         for (RequestedVlanFixtureE fix : fixtures) {
-            Set<Integer> requestedVlans = getIntegersFromRanges(getIntRangesFromString(fix.getVlanExpression()));
-            if (requestedVlans.isEmpty()) {
-                requestedVlanIdMap.put(fix.getPortUrn(), availableVlanMap.getOrDefault(fix.getPortUrn(), new HashSet<>()));
+            Optional<UrnE> maybeTopoUrn = urnRepository.findByUrn(fix.getPortUrn().getUrn());
+            if (maybeTopoUrn.isPresent()) {
+                UrnE topoUrn = maybeTopoUrn.get();
+                Set<Integer> requestedVlans = getIntegersFromRanges(getIntRangesFromString(fix.getVlanExpression()));
+                if (requestedVlans.isEmpty()) {
+                    requestedVlanIdMap.put(topoUrn, availableVlanMap.getOrDefault(topoUrn, new HashSet<>()));
+                } else {
+                    requestedVlanIdMap.put(topoUrn, requestedVlans);
+                }
             } else {
-                requestedVlanIdMap.put(fix.getPortUrn(), requestedVlans);
+                log.error("could not build requested vlan id map for "+fix.getPortUrn());
             }
         }
         return requestedVlanIdMap;
@@ -209,13 +217,30 @@ public class VlanService {
 
     private Map<UrnE, Set<Integer>> buildValidVlanIdMap(Map<UrnE, Set<Integer>> requestedVlanMap,
                                                         Map<UrnE, Set<Integer>> availableVlanMap) {
+
+        Map<String, Set<Integer>> intermediateRequestedVlanMap = new HashMap<>();
+        for (UrnE urn : requestedVlanMap.keySet()) {
+            log.info("adding intermediate requested "+urn.getUrn());
+            intermediateRequestedVlanMap.put(urn.getUrn(), requestedVlanMap.get(urn));
+        }
+
         Map<UrnE, Set<Integer>> validVlanIdMap = new HashMap<>();
 
-        for (UrnE urn : requestedVlanMap.keySet()) {
-            Set<Integer> requestedVlans = requestedVlanMap.get(urn);
-            Set<Integer> availableVlans = availableVlanMap.get(urn);
 
-            Set<Integer> validVlans = new HashSet<>(requestedVlans);
+
+        for (UrnE urn : availableVlanMap.keySet()) {
+
+            Set<Integer> availableVlans = availableVlanMap.get(urn);
+            Set<Integer> requestedVlans = new HashSet<>();
+
+            if (intermediateRequestedVlanMap.keySet().contains(urn.getUrn())) {
+                requestedVlans.addAll(intermediateRequestedVlanMap.get(urn.getUrn()));
+            } else {
+                requestedVlans.addAll(availableVlans);
+            }
+
+            Set<Integer> validVlans = new HashSet<>();
+            validVlans.addAll(requestedVlans);
             validVlans.retainAll(availableVlans);
             validVlanIdMap.put(urn, validVlans);
         }
@@ -505,9 +530,11 @@ public class VlanService {
         // Confirm that there is at least one VLAN ID that can support every segment (given what has been reserved so far)
         // Get the available VLANs at all URNs
         Map<UrnE, Set<Integer>> availableVlanMap = buildAvailableVlanIdMap(urnMap, reservedVlans, portToDeviceMap);
+
         // Get the requested VLANs per Fixture URN & Any Ports at Individual URNs
         Map<UrnE, Set<Integer>> requestedVlanMap = buildRequestedVlanIdMap(reqPipe, availableVlanMap);
         log.info("Requested Vlan Map: " + stringifyVlanMap(requestedVlanMap));
+
         // Get the "valid" VLANs per Fixture URN
         Map<UrnE, Set<Integer>> validVlanMap = buildValidVlanIdMap(requestedVlanMap, availableVlanMap);
         log.info("Valid Vlan Map: " + stringifyVlanMap(validVlanMap));

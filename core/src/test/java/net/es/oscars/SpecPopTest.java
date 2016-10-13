@@ -12,6 +12,10 @@ import net.es.oscars.dto.pss.EthPipeType;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.resv.dao.SpecificationRepository;
 import net.es.oscars.topo.ent.UrnE;
+import net.es.oscars.topo.pop.TopoFileImporter;
+import net.es.oscars.topo.pop.TopoImporter;
+import net.es.oscars.topo.prop.TopoProperties;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +23,8 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
+import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -30,11 +36,18 @@ import java.util.*;
 public class SpecPopTest {
 
     @Autowired
+    private TopoImporter topoFileImporter;
+
+    @Autowired
     private SpecificationRepository specRepo;
 
     @Autowired
     private UrnRepository urnRepo;
 
+    @Before
+    public void startup() throws IOException {
+        topoFileImporter.importFromFile(true, "config/devices.json", "config/adjcies.json");
+    }
 
     @Test
     public void testSave() throws PCEException, PSSException {
