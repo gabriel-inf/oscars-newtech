@@ -210,6 +210,7 @@ public class VlanService {
     private Map<UrnE, Set<Integer>> buildValidVlanIdMap(Map<UrnE, Set<Integer>> requestedVlanMap,
                                                         Map<UrnE, Set<Integer>> availableVlanMap) {
         Map<UrnE, Set<Integer>> validVlanIdMap = new HashMap<>();
+
         for (UrnE urn : requestedVlanMap.keySet()) {
             Set<Integer> requestedVlans = requestedVlanMap.get(urn);
             Set<Integer> availableVlans = availableVlanMap.get(urn);

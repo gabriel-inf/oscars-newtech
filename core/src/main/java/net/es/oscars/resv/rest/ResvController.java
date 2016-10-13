@@ -96,7 +96,7 @@ public class ResvController {
 
     @RequestMapping(value = "/resv/vlanSpec/add", method = RequestMethod.POST)
     @ResponseBody
-    public Connection submitVlanSpecRequest(@RequestBody VlanSpecification spec) throws PSSException, PCEException{
+    public Connection submitVlanSpecRequest(@RequestBody VlanSpecification spec) throws PSSException, PCEException {
         log.info("Submitting a new VLAN Circuit Request");
         log.info(spec.toString());
 
@@ -105,13 +105,12 @@ public class ResvController {
 
     @RequestMapping(value = "/resv/connection/add", method = RequestMethod.POST)
     @ResponseBody
-    public Connection submitConnection(@RequestBody Connection connection) throws PSSException, PCEException{
+    public Connection submitConnection(@RequestBody Connection connection) throws PSSException, PCEException {
         log.info("Submitting a new complicated connection request");
         log.info(connection.toString());
 
         return holdConnection(connection);
     }
-
 
 
     @RequestMapping(value = "/resv/bwAvail/", method = RequestMethod.POST)
@@ -155,6 +154,8 @@ public class ResvController {
 
     private Connection holdConnection(Connection connection) throws PCEException, PSSException {
         ConnectionE connE = modelMapper.map(connection, ConnectionE.class);
+        mapConnectionUrns(connE);
+
         resvService.hold(connE);
 
         log.info("saved connection, connectionId " + connection.getConnectionId());
@@ -168,6 +169,43 @@ public class ResvController {
         return conn;
 
     }
+
+
+    private void mapConnectionUrns(ConnectionE connection) {
+        RequestedVlanFlowE rvf = connection.getSpecification().getRequested().getVlanFlow();
+        rvf.getJunctions().forEach(this::mapJunctionUrns);
+        rvf.getPipes().forEach(this::mapPipeUrns);
+    }
+
+    private void mapPipeUrns(RequestedVlanPipeE pipe) {
+        this.mapJunctionUrns(pipe.getAJunction());
+        this.mapJunctionUrns(pipe.getZJunction());
+    }
+
+    private void mapJunctionUrns(RequestedVlanJunctionE rvj) {
+        this.mapUrn(rvj.getDeviceUrn());
+        rvj.getFixtures().forEach(f -> this.mapUrn(f.getPortUrn()));
+    }
+
+    private void mapUrn(UrnE urnE) {
+        Optional<UrnE> maybeUrn = urnRepo.findByUrn(urnE.getUrn());
+        if (maybeUrn.isPresent()) {
+            UrnE dbUrn = maybeUrn.get();
+            urnE.setUrnType(dbUrn.getUrnType());
+            urnE.setReservableBandwidth(dbUrn.getReservableBandwidth());
+            urnE.setReservableVlans(dbUrn.getReservableVlans());
+            urnE.setValid(dbUrn.getValid());
+            urnE.setCapabilities(dbUrn.getCapabilities());
+            urnE.setIfceType(dbUrn.getIfceType());
+            urnE.setDeviceModel(dbUrn.getDeviceModel());
+            urnE.setDeviceType(dbUrn.getDeviceType());
+            urnE.setReservablePssResources(dbUrn.getReservablePssResources());
+
+        } else {
+            throw new NoSuchElementException("URN not found!" + urnE.getUrn());
+        }
+    }
+
 
     private Connection makeConnectionFromBasic(BasicVlanSpecification dtoSpec) throws PCEException, PSSException {
         log.info("making a new connection with id " + dtoSpec.getConnectionId());
@@ -263,7 +301,7 @@ public class ResvController {
             vjz.getFixtures().add(vfz);
 
             Integer numDisjoint = 1;
-            if(!bvf.getSurvivability().equals(SurvivabilityType.SURVIVABILITY_NONE)){
+            if (!bvf.getSurvivability().equals(SurvivabilityType.SURVIVABILITY_NONE)) {
                 numDisjoint = 2;
             }
 
@@ -283,7 +321,6 @@ public class ResvController {
 
             vf.getPipes().add(vpaz);
         }
-
 
 
         Layer3FlowE l3f = Layer3FlowE.builder().build();
@@ -310,7 +347,7 @@ public class ResvController {
 
     }
 
-    private Connection makeConnectionFromVlanSpec(VlanSpecification spec)  throws PCEException, PSSException {
+    private Connection makeConnectionFromVlanSpec(VlanSpecification spec) throws PCEException, PSSException {
         log.info("Making a new connection with id " + spec.getConnectionId());
 
         StatesE states = StatesE.builder()
@@ -388,9 +425,9 @@ public class ResvController {
 
     private void makePipesAndJunctionFromFlows(Set<VlanFlow> vlanFlows, Set<RequestedVlanJunctionE> junctions,
                                                Set<RequestedVlanPipeE> pipes) {
-        for(VlanFlow vf : vlanFlows){
+        for (VlanFlow vf : vlanFlows) {
             // Junction Request
-            if(vf.getADeviceUrn().equals(vf.getZDeviceUrn())){
+            if (vf.getADeviceUrn().equals(vf.getZDeviceUrn())) {
                 List<String> portStrings = new ArrayList<>();
                 portStrings.add(vf.getAUrn());
                 portStrings.add(vf.getZUrn());
@@ -398,7 +435,7 @@ public class ResvController {
                         vf.getZaMbps(), vf.getAVlanExpression(), vf.getZVlanExpression()));
             }
             // Pipe Request
-            else{
+            else {
                 pipes.add(makeRequestedPipeE(vf));
             }
         }
@@ -433,12 +470,12 @@ public class ResvController {
 
     private RequestedVlanJunctionE makeRequestedJunctionE(String deviceString, List<String> portStrings,
                                                           Integer azMbps, Integer zaMbps, String aVlanExpression,
-                                                          String zVlanExpression){
+                                                          String zVlanExpression) {
         UrnE aDevUrn = urnRepo.findByUrn(deviceString).orElseThrow(NoSuchElementException::new);
 
         Set<RequestedVlanFixtureE> fixtures = new HashSet<>();
 
-        if(portStrings.size() > 0){
+        if (portStrings.size() > 0) {
             UrnE aPortUrn = urnRepo.findByUrn(portStrings.get(0)).orElseThrow(NoSuchElementException::new);
             RequestedVlanFixtureE aFix = RequestedVlanFixtureE.builder()
                     .portUrn(aPortUrn)
@@ -448,7 +485,7 @@ public class ResvController {
                     .vlanExpression(aVlanExpression)
                     .build();
             fixtures.add(aFix);
-            if(portStrings.size() == 2){
+            if (portStrings.size() == 2) {
                 UrnE zPortUrn = urnRepo.findByUrn(portStrings.get(1)).orElseThrow(NoSuchElementException::new);
                 RequestedVlanFixtureE zFix = RequestedVlanFixtureE.builder()
                         .portUrn(zPortUrn)
