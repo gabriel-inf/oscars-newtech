@@ -234,13 +234,13 @@ public class PCEAssistant {
         Map<ResourceType, List<String>> result = new HashMap<>();
 
         List<String> deviceScope = new ArrayList<>();
-        deviceScope.add(vj.getDeviceUrn().getUrn());
+        deviceScope.add(vj.getDeviceUrn());
         List<String> global = new ArrayList<>();
         global.add(ResourceType.GLOBAL);
 
         List<String> ports = new ArrayList<>();
         vj.getFixtures().stream().forEach(t -> {
-            ports.add(t.getIfceUrn().getUrn());
+            ports.add(t.getIfceUrn());
         });
 
 

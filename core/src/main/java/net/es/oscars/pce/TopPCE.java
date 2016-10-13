@@ -88,7 +88,7 @@ public class TopPCE {
         Set<ReservedVlanJunctionE> simpleJunctions = new HashSet<>();
         for (RequestedVlanJunctionE reqJunction : req_f.getJunctions()) {
 
-            log.info("handling junction "+reqJunction.getDeviceUrn().getUrn());
+            log.info("handling junction "+reqJunction.getDeviceUrn());
 
             // Update list of reserved bandwidths
             List<ReservedBandwidthE> rsvBandwidths = bwService.createReservedBandwidthList(simpleJunctions, reservedMplsPipes,
@@ -103,7 +103,7 @@ public class TopPCE {
             if (junction != null) {
                 simpleJunctions.add(junction);
             } else {
-                log.error("failed at junction "+reqJunction.getDeviceUrn().getUrn());
+                log.error("failed at junction "+reqJunction.getDeviceUrn());
             }
         }
         log.info("All simple junctions handled");
@@ -339,7 +339,7 @@ public class TopPCE {
         for (RequestedVlanJunctionE junction : allJunctions) {
             // throws exception if device not found in topology
             try {
-                topoService.device(junction.getDeviceUrn().getUrn());
+                topoService.device(junction.getDeviceUrn());
             } catch (NoSuchElementException ex) {
                 throw new PCEException("device not found in topology");
             }
@@ -347,7 +347,7 @@ public class TopPCE {
 
         Set<String> junctionsWithNoFixtures = allJunctions.stream().
                 filter(t -> t.getFixtures().isEmpty()).
-                map(t -> t.getDeviceUrn().getUrn()).collect(Collectors.toSet());
+                map(t -> t.getDeviceUrn()).collect(Collectors.toSet());
 
         if (!junctionsWithNoFixtures.isEmpty()) {
             throw new PCEException("Junctions with no fixtures found: " + String.join(" ", junctionsWithNoFixtures));

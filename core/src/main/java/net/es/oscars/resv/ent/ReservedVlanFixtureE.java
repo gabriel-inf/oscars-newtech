@@ -3,7 +3,6 @@ package net.es.oscars.resv.ent;
 
 import lombok.*;
 import net.es.oscars.dto.pss.EthFixtureType;
-import net.es.oscars.topo.ent.UrnE;
 
 import javax.persistence.*;
 import java.util.Set;
@@ -20,8 +19,7 @@ public class ReservedVlanFixtureE {
     private Long id;
 
     @NonNull
-    @OneToOne(cascade = CascadeType.ALL)
-    private UrnE ifceUrn;
+    private String ifceUrn;
 
     @OneToMany(cascade = CascadeType.ALL)
     private Set<ReservedVlanE> reservedVlans;

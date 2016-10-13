@@ -15,7 +15,7 @@ public class RequestedVlanJunction {
     private Long id;
 
     @NonNull
-    private Urn deviceUrn;
+    private String deviceUrn;
 
     @NonNull
     private EthJunctionType junctionType;

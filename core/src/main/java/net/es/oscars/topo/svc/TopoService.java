@@ -38,6 +38,10 @@ public class TopoService {
 
     private ReservableBandwidthRepository bwRepo;
 
+    public UrnE getUrn(String urn) throws NoSuchElementException {
+        return urnRepo.findByUrn(urn).orElseThrow(NoSuchElementException::new);
+    }
+
 
     @Autowired
     public TopoService(UrnAdjcyRepository adjcyRepo, UrnRepository urnRepo,

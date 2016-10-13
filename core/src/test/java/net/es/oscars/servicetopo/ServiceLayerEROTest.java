@@ -1372,31 +1372,17 @@ public class ServiceLayerEROTest
         RequestedVlanJunctionE zJunc = new RequestedVlanJunctionE();
         RequestedVlanFixtureE aFix = new RequestedVlanFixtureE();
         RequestedVlanFixtureE zFix = new RequestedVlanFixtureE();
-        UrnE aFixURN = new UrnE();
-        UrnE zFixURN = new UrnE();
-        UrnE aJuncURN = new UrnE();
-        UrnE zJuncURN = new UrnE();
-
-        aFixURN.setUrn("switchA:1");
-        aFixURN.setUrnType(UrnType.IFCE);
-
-        zFixURN.setUrn("switchE:2");
-        zFixURN.setUrnType(UrnType.IFCE);
-
-        aJuncURN.setUrn("switchA");
-        aJuncURN.setUrnType(UrnType.DEVICE);
-
-        zJuncURN.setUrn("switchE");
-        zJuncURN.setUrnType(UrnType.DEVICE);
 
 
-        aFix.setPortUrn(aFixURN);
+
+
+        aFix.setPortUrn("switchA:1");
         aFix.setVlanExpression("1234");
         aFix.setFixtureType(EthFixtureType.JUNOS_IFCE);
         aFix.setInMbps(100);
         aFix.setEgMbps(100);
 
-        zFix.setPortUrn(zFixURN);
+        zFix.setPortUrn("switchE:2");
         zFix.setVlanExpression("1234");
         zFix.setFixtureType(EthFixtureType.JUNOS_IFCE);
         zFix.setInMbps(100);
@@ -1408,11 +1394,11 @@ public class ServiceLayerEROTest
         aFixes.add(aFix);
         zFixes.add(zFix);
 
-        aJunc.setDeviceUrn(aJuncURN);
+        aJunc.setDeviceUrn("switchA");
         aJunc.setJunctionType(EthJunctionType.JUNOS_SWITCH);
         aJunc.setFixtures(aFixes);
 
-        zJunc.setDeviceUrn(zJuncURN);
+        zJunc.setDeviceUrn("switchE");
         zJunc.setJunctionType(EthJunctionType.JUNOS_SWITCH);
         zJunc.setFixtures(zFixes);
 
@@ -1436,31 +1422,15 @@ public class ServiceLayerEROTest
         RequestedVlanJunctionE zJunc = new RequestedVlanJunctionE();
         RequestedVlanFixtureE aFix = new RequestedVlanFixtureE();
         RequestedVlanFixtureE zFix = new RequestedVlanFixtureE();
-        UrnE aFixURN = new UrnE();
-        UrnE zFixURN = new UrnE();
-        UrnE aJuncURN = new UrnE();
-        UrnE zJuncURN = new UrnE();
-
-        aFixURN.setUrn("routerA:1");
-        aFixURN.setUrnType(UrnType.IFCE);
-
-        zFixURN.setUrn("routerE:2");
-        zFixURN.setUrnType(UrnType.IFCE);
-
-        aJuncURN.setUrn("routerA");
-        aJuncURN.setUrnType(UrnType.DEVICE);
-
-        zJuncURN.setUrn("routerE");
-        zJuncURN.setUrnType(UrnType.DEVICE);
 
 
-        aFix.setPortUrn(aFixURN);
+        aFix.setPortUrn("switchA:1");
         aFix.setVlanExpression("1234");
         aFix.setFixtureType(EthFixtureType.JUNOS_IFCE);
         aFix.setInMbps(100);
         aFix.setEgMbps(100);
 
-        zFix.setPortUrn(zFixURN);
+        zFix.setPortUrn("switchE:2");
         zFix.setVlanExpression("1234");
         zFix.setFixtureType(EthFixtureType.JUNOS_IFCE);
         zFix.setInMbps(100);
@@ -1472,11 +1442,11 @@ public class ServiceLayerEROTest
         aFixes.add(aFix);
         zFixes.add(zFix);
 
-        aJunc.setDeviceUrn(aJuncURN);
+        aJunc.setDeviceUrn("switchA");
         aJunc.setJunctionType(EthJunctionType.JUNOS_SWITCH);
         aJunc.setFixtures(aFixes);
 
-        zJunc.setDeviceUrn(zJuncURN);
+        zJunc.setDeviceUrn("switchE");
         zJunc.setJunctionType(EthJunctionType.JUNOS_SWITCH);
         zJunc.setFixtures(zFixes);
 
@@ -1500,31 +1470,14 @@ public class ServiceLayerEROTest
         RequestedVlanJunctionE zJunc = new RequestedVlanJunctionE();
         RequestedVlanFixtureE aFix = new RequestedVlanFixtureE();
         RequestedVlanFixtureE zFix = new RequestedVlanFixtureE();
-        UrnE aFixURN = new UrnE();
-        UrnE zFixURN = new UrnE();
-        UrnE aJuncURN = new UrnE();
-        UrnE zJuncURN = new UrnE();
 
-        aFixURN.setUrn("routerA:1");
-        aFixURN.setUrnType(UrnType.IFCE);
-
-        zFixURN.setUrn("switchE:2");
-        zFixURN.setUrnType(UrnType.IFCE);
-
-        aJuncURN.setUrn("routerA");
-        aJuncURN.setUrnType(UrnType.DEVICE);
-
-        zJuncURN.setUrn("switchE");
-        zJuncURN.setUrnType(UrnType.DEVICE);
-
-
-        aFix.setPortUrn(aFixURN);
+        aFix.setPortUrn("switchA:1");
         aFix.setVlanExpression("1234");
         aFix.setFixtureType(EthFixtureType.JUNOS_IFCE);
         aFix.setInMbps(100);
         aFix.setEgMbps(100);
 
-        zFix.setPortUrn(zFixURN);
+        zFix.setPortUrn("switchE:2");
         zFix.setVlanExpression("1234");
         zFix.setFixtureType(EthFixtureType.JUNOS_IFCE);
         zFix.setInMbps(100);
@@ -1536,13 +1489,14 @@ public class ServiceLayerEROTest
         aFixes.add(aFix);
         zFixes.add(zFix);
 
-        aJunc.setDeviceUrn(aJuncURN);
+        aJunc.setDeviceUrn("switchA");
         aJunc.setJunctionType(EthJunctionType.JUNOS_SWITCH);
         aJunc.setFixtures(aFixes);
 
-        zJunc.setDeviceUrn(zJuncURN);
+        zJunc.setDeviceUrn("switchE");
         zJunc.setJunctionType(EthJunctionType.JUNOS_SWITCH);
         zJunc.setFixtures(zFixes);
+
 
 
         bwPipe.setAzMbps(20);
@@ -1564,31 +1518,14 @@ public class ServiceLayerEROTest
         RequestedVlanJunctionE zJunc = new RequestedVlanJunctionE();
         RequestedVlanFixtureE aFix = new RequestedVlanFixtureE();
         RequestedVlanFixtureE zFix = new RequestedVlanFixtureE();
-        UrnE aFixURN = new UrnE();
-        UrnE zFixURN = new UrnE();
-        UrnE aJuncURN = new UrnE();
-        UrnE zJuncURN = new UrnE();
 
-        aFixURN.setUrn("switchA:1");
-        aFixURN.setUrnType(UrnType.IFCE);
-
-        zFixURN.setUrn("routerE:2");
-        zFixURN.setUrnType(UrnType.IFCE);
-
-        aJuncURN.setUrn("switchA");
-        aJuncURN.setUrnType(UrnType.DEVICE);
-
-        zJuncURN.setUrn("routerE");
-        zJuncURN.setUrnType(UrnType.DEVICE);
-
-
-        aFix.setPortUrn(aFixURN);
+        aFix.setPortUrn("switchA:1");
         aFix.setVlanExpression("1234");
         aFix.setFixtureType(EthFixtureType.JUNOS_IFCE);
         aFix.setInMbps(100);
         aFix.setEgMbps(100);
 
-        zFix.setPortUrn(zFixURN);
+        zFix.setPortUrn("switchE:2");
         zFix.setVlanExpression("1234");
         zFix.setFixtureType(EthFixtureType.JUNOS_IFCE);
         zFix.setInMbps(100);
@@ -1600,11 +1537,11 @@ public class ServiceLayerEROTest
         aFixes.add(aFix);
         zFixes.add(zFix);
 
-        aJunc.setDeviceUrn(aJuncURN);
+        aJunc.setDeviceUrn("switchA");
         aJunc.setJunctionType(EthJunctionType.JUNOS_SWITCH);
         aJunc.setFixtures(aFixes);
 
-        zJunc.setDeviceUrn(zJuncURN);
+        zJunc.setDeviceUrn("switchE");
         zJunc.setJunctionType(EthJunctionType.JUNOS_SWITCH);
         zJunc.setFixtures(zFixes);
 

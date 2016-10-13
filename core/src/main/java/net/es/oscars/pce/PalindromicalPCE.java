@@ -8,7 +8,6 @@ import net.es.oscars.resv.ent.ScheduleSpecificationE;
 import net.es.oscars.dto.topo.TopoEdge;
 import net.es.oscars.dto.topo.TopoVertex;
 import net.es.oscars.dto.topo.Topology;
-import net.es.oscars.topo.ent.UrnE;
 import net.es.oscars.dto.topo.VertexType;
 import net.es.oscars.topo.svc.TopoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +20,7 @@ import java.util.*;
  */
 @Slf4j
 @Component
-public class PalindromicalPCE
-{
+public class PalindromicalPCE {
     @Autowired
     private TopoService topoService;
 
@@ -35,20 +33,22 @@ public class PalindromicalPCE
     /**
      * Depends on DijkstraPCE to construct the Physical-Layer EROs for a request
      *
-     * @param requestPipe Requested pipe with required reservation parameters
+     * @param requestPipe  Requested pipe with required reservation parameters
      * @param requestSched Requested schedule parameters
      * @return A two-element Map containing both the forward-direction (A->Z) ERO and the reverse-direction (Z->A) ERO
      * @throws PCEException
      */
-    public Map<String, List<TopoEdge>> computePalindromicERO(RequestedVlanPipeE requestPipe, ScheduleSpecificationE requestSched, List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList) throws PCEException
-    {
+    public Map<String, List<TopoEdge>> computePalindromicERO(RequestedVlanPipeE requestPipe,
+                                                             ScheduleSpecificationE requestSched,
+                                                             List<ReservedBandwidthE> rsvBwList,
+                                                             List<ReservedVlanE> rsvVlanList) throws PCEException {
         Topology multiLayerTopo = topoService.getMultilayerTopology();
 
-        UrnE srcPortURN = requestPipe.getAJunction().getFixtures().iterator().next().getPortUrn();
-        UrnE dstPortURN = requestPipe.getZJunction().getFixtures().iterator().next().getPortUrn();
+        String srcPortURN = requestPipe.getAJunction().getFixtures().iterator().next().getPortUrn();
+        String dstPortURN = requestPipe.getZJunction().getFixtures().iterator().next().getPortUrn();
 
-        TopoVertex srcPort = new TopoVertex(srcPortURN.getUrn(), VertexType.PORT);
-        TopoVertex dstPort = new TopoVertex(dstPortURN.getUrn(), VertexType.PORT);
+        TopoVertex srcPort = new TopoVertex(srcPortURN, VertexType.PORT);
+        TopoVertex dstPort = new TopoVertex(dstPortURN, VertexType.PORT);
 
         // Bandwidth and Vlan pruning
         Topology prunedTopo = pruningService.pruneWithPipe(multiLayerTopo, requestPipe, requestSched, rsvBwList, rsvVlanList);
@@ -56,8 +56,7 @@ public class PalindromicalPCE
         // Shortest path routing
         List<TopoEdge> azERO = dijkstraPCE.computeShortestPathEdges(prunedTopo, srcPort, dstPort);
 
-        if (azERO.isEmpty())
-        {
+        if (azERO.isEmpty()) {
             throw new PCEException("Empty path from Symmetric PCE");
         }
 
@@ -65,21 +64,20 @@ public class PalindromicalPCE
         List<TopoEdge> zaERO = new LinkedList<>();
 
         // 1. Reverse the links
-        for(TopoEdge azEdge : azERO)
-        {
+        for (TopoEdge azEdge : azERO) {
             Optional<TopoEdge> reverseEdge = prunedTopo.getEdges().stream()
                     .filter(r -> r.getA().equals(azEdge.getZ()))
                     .filter(r -> r.getZ().equals(azEdge.getA()))
                     .findFirst();
 
-            if(reverseEdge.isPresent())
+            if (reverseEdge.isPresent())
                 zaERO.add(reverseEdge.get());
         }
 
         // 2. Reverse the order
         Collections.reverse(zaERO);
 
-        assert(azERO.size() == zaERO.size());
+        assert (azERO.size() == zaERO.size());
 
         Map<String, List<TopoEdge>> theMap = new HashMap<>();
         theMap.put("az", azERO);

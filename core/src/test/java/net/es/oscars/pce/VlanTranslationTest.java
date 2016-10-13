@@ -86,19 +86,20 @@ public class VlanTranslationTest {
         assert(mplsPipes.size() == 0);
         assert(junctions.size() == 0);
 
-        Map<String, UrnE> urnMap = new HashMap<>();
-        Map<UrnE, Set<Integer>> reservedVlanMap = new HashMap<>();
+        Map<String, String> urnMap = new HashMap<>();
+        Map<String, Set<Integer>> reservedVlanMap = new HashMap<>();
+
         buildUrnAndReservedVlanMap(urnMap, reservedVlanMap, ethPipes);
 
-        UrnE a0 = urnMap.getOrDefault("A:0", null);
-        UrnE a1 = urnMap.getOrDefault("A:1", null);
-        UrnE a2 = urnMap.getOrDefault("A:2", null);
-        UrnE b0 = urnMap.getOrDefault("B:0", null);
-        UrnE b1 = urnMap.getOrDefault("B:1", null);
-        UrnE b2 = urnMap.getOrDefault("B:2", null);
-        UrnE c0 = urnMap.getOrDefault("C:0", null);
-        UrnE c1 = urnMap.getOrDefault("C:1", null);
-        UrnE c2 = urnMap.getOrDefault("C:2", null);
+        String a0 = urnMap.getOrDefault("A:0", null);
+        String a1 = urnMap.getOrDefault("A:1", null);
+        String a2 = urnMap.getOrDefault("A:2", null);
+        String b0 = urnMap.getOrDefault("B:0", null);
+        String b1 = urnMap.getOrDefault("B:1", null);
+        String b2 = urnMap.getOrDefault("B:2", null);
+        String c0 = urnMap.getOrDefault("C:0", null);
+        String c1 = urnMap.getOrDefault("C:1", null);
+        String c2 = urnMap.getOrDefault("C:2", null);
 
         // Unused
         assert(reservedVlanMap.get(a0).contains(3));
@@ -176,19 +177,19 @@ public class VlanTranslationTest {
         assert(mplsPipes.size() == 0);
         assert(junctions.size() == 0);
 
-        Map<String, UrnE> urnMap = new HashMap<>();
-        Map<UrnE, Set<Integer>> reservedVlanMap = new HashMap<>();
+        Map<String, String> urnMap = new HashMap<>();
+        Map<String, Set<Integer>> reservedVlanMap = new HashMap<>();
         buildUrnAndReservedVlanMap(urnMap, reservedVlanMap, ethPipes);
 
-        UrnE a0 = urnMap.getOrDefault("A:0", null);
-        UrnE a1 = urnMap.getOrDefault("A:1", null);
-        UrnE a2 = urnMap.getOrDefault("A:2", null);
-        UrnE b0 = urnMap.getOrDefault("B:0", null);
-        UrnE b1 = urnMap.getOrDefault("B:1", null);
-        UrnE b2 = urnMap.getOrDefault("B:2", null);
-        UrnE c0 = urnMap.getOrDefault("C:0", null);
-        UrnE c1 = urnMap.getOrDefault("C:1", null);
-        UrnE c2 = urnMap.getOrDefault("C:2", null);
+        String a0 = urnMap.getOrDefault("A:0", null);
+        String a1 = urnMap.getOrDefault("A:1", null);
+        String a2 = urnMap.getOrDefault("A:2", null);
+        String b0 = urnMap.getOrDefault("B:0", null);
+        String b1 = urnMap.getOrDefault("B:1", null);
+        String b2 = urnMap.getOrDefault("B:2", null);
+        String c0 = urnMap.getOrDefault("C:0", null);
+        String c1 = urnMap.getOrDefault("C:1", null);
+        String c2 = urnMap.getOrDefault("C:2", null);
 
         // Unused
         assert(reservedVlanMap.get(a0).contains(2));
@@ -265,19 +266,19 @@ public class VlanTranslationTest {
         assert(mplsPipes.size() == 0);
         assert(junctions.size() == 0);
 
-        Map<String, UrnE> urnMap = new HashMap<>();
-        Map<UrnE, Set<Integer>> reservedVlanMap = new HashMap<>();
+        Map<String, String> urnMap = new HashMap<>();
+        Map<String, Set<Integer>> reservedVlanMap = new HashMap<>();
         buildUrnAndReservedVlanMap(urnMap, reservedVlanMap, ethPipes);
 
-        UrnE a0 = urnMap.getOrDefault("A:0", null);
-        UrnE a1 = urnMap.getOrDefault("A:1", null);
-        UrnE a2 = urnMap.getOrDefault("A:2", null);
-        UrnE b0 = urnMap.getOrDefault("B:0", null);
-        UrnE b1 = urnMap.getOrDefault("B:1", null);
-        UrnE b2 = urnMap.getOrDefault("B:2", null);
-        UrnE c0 = urnMap.getOrDefault("C:0", null);
-        UrnE c1 = urnMap.getOrDefault("C:1", null);
-        UrnE c2 = urnMap.getOrDefault("C:2", null);
+        String a0 = urnMap.getOrDefault("A:0", null);
+        String a1 = urnMap.getOrDefault("A:1", null);
+        String a2 = urnMap.getOrDefault("A:2", null);
+        String b0 = urnMap.getOrDefault("B:0", null);
+        String b1 = urnMap.getOrDefault("B:1", null);
+        String b2 = urnMap.getOrDefault("B:2", null);
+        String c0 = urnMap.getOrDefault("C:0", null);
+        String c1 = urnMap.getOrDefault("C:1", null);
+        String c2 = urnMap.getOrDefault("C:2", null);
 
         // Unused
         assert(reservedVlanMap.get(a0).contains(3));
@@ -537,19 +538,19 @@ public class VlanTranslationTest {
         assert(mplsPipes.size() == 0);
         assert(junctions.size() == 1);
 
-        Map<String, UrnE> urnMap = new HashMap<>();
-        Map<UrnE, Set<Integer>> reservedVlanMap = new HashMap<>();
+        Map<String, String> urnMap = new HashMap<>();
+        Map<String, Set<Integer>> reservedVlanMap = new HashMap<>();
         buildUrnAndReservedVlanMap(urnMap, reservedVlanMap, ethPipes, junctions);
 
-        UrnE a0 = urnMap.getOrDefault("A:0", null);
-        UrnE a1 = urnMap.getOrDefault("A:1", null);
-        UrnE a2 = urnMap.getOrDefault("A:2", null);
-        UrnE b0 = urnMap.getOrDefault("B:0", null);
-        UrnE b1 = urnMap.getOrDefault("B:1", null);
-        UrnE b2 = urnMap.getOrDefault("B:2", null);
-        UrnE c0 = urnMap.getOrDefault("C:0", null);
-        UrnE c1 = urnMap.getOrDefault("C:1", null);
-        UrnE c2 = urnMap.getOrDefault("C:2", null);
+        String a0 = urnMap.getOrDefault("A:0", null);
+        String a1 = urnMap.getOrDefault("A:1", null);
+        String a2 = urnMap.getOrDefault("A:2", null);
+        String b0 = urnMap.getOrDefault("B:0", null);
+        String b1 = urnMap.getOrDefault("B:1", null);
+        String b2 = urnMap.getOrDefault("B:2", null);
+        String c0 = urnMap.getOrDefault("C:0", null);
+        String c1 = urnMap.getOrDefault("C:1", null);
+        String c2 = urnMap.getOrDefault("C:2", null);
 
         // Unused
         assert(reservedVlanMap.get(a0).contains(1) && reservedVlanMap.get(a0).contains(5));
@@ -637,19 +638,19 @@ public class VlanTranslationTest {
         assert(mplsPipes.size() == 0);
         assert(junctions.size() == 0);
 
-        Map<String, UrnE> urnMap = new HashMap<>();
-        Map<UrnE, Set<Integer>> reservedVlanMap = new HashMap<>();
+        Map<String, String> urnMap = new HashMap<>();
+        Map<String, Set<Integer>> reservedVlanMap = new HashMap<>();
         buildUrnAndReservedVlanMap(urnMap, reservedVlanMap, ethPipes);
 
-        UrnE a0 = urnMap.getOrDefault("A:0", null);
-        UrnE a1 = urnMap.getOrDefault("A:1", null);
-        UrnE a2 = urnMap.getOrDefault("A:2", null);
-        UrnE b0 = urnMap.getOrDefault("B:0", null);
-        UrnE b1 = urnMap.getOrDefault("B:1", null);
-        UrnE b2 = urnMap.getOrDefault("B:2", null);
-        UrnE c0 = urnMap.getOrDefault("C:0", null);
-        UrnE c1 = urnMap.getOrDefault("C:1", null);
-        UrnE c2 = urnMap.getOrDefault("C:2", null);
+        String a0 = urnMap.getOrDefault("A:0", null);
+        String a1 = urnMap.getOrDefault("A:1", null);
+        String a2 = urnMap.getOrDefault("A:2", null);
+        String b0 = urnMap.getOrDefault("B:0", null);
+        String b1 = urnMap.getOrDefault("B:1", null);
+        String b2 = urnMap.getOrDefault("B:2", null);
+        String c0 = urnMap.getOrDefault("C:0", null);
+        String c1 = urnMap.getOrDefault("C:1", null);
+        String c2 = urnMap.getOrDefault("C:2", null);
 
         /* Request pipe with 3 on src, 4 on dst. Then request pipe with 5 on src, 5 on dst. Then request pipe with
         * 2 on src (B:1), 2 on dst (C:1).
@@ -676,7 +677,7 @@ public class VlanTranslationTest {
         log.info("Finished test: vlanTransTest8");
     }
 
-    private void buildUrnAndReservedVlanMap(Map<String, UrnE> urnMap, Map<UrnE, Set<Integer>> reservedVlanMap,
+    private void buildUrnAndReservedVlanMap(Map<String, String> urnMap, Map<String, Set<Integer>> reservedVlanMap,
                                             Set<ReservedEthPipeE> ethPipes){
         for(ReservedEthPipeE pipe : ethPipes){
             //assert(pipe.getReservedVlans().stream().map(ReservedVlanE::getVlan).distinct().count() == 1);
@@ -685,31 +686,31 @@ public class VlanTranslationTest {
             ReservedVlanJunctionE zJunction = pipe.getZJunction();
 
             for(ReservedVlanE resVlan :  pipe.getReservedVlans()){
-                urnMap.putIfAbsent(resVlan.getUrn().getUrn(), resVlan.getUrn());
+                urnMap.putIfAbsent(resVlan.getUrn(), resVlan.getUrn());
                 reservedVlanMap.putIfAbsent(resVlan.getUrn(), new HashSet<>());
                 reservedVlanMap.get(resVlan.getUrn()).add(resVlan.getVlan());
             }
 
             for(ReservedVlanE resVlan : aJunction.getReservedVlans()){
-                urnMap.putIfAbsent(resVlan.getUrn().getUrn(), resVlan.getUrn());
+                urnMap.putIfAbsent(resVlan.getUrn(), resVlan.getUrn());
                 reservedVlanMap.putIfAbsent(resVlan.getUrn(), new HashSet<>());
                 reservedVlanMap.get(resVlan.getUrn()).add(resVlan.getVlan());
             }
 
             for(ReservedVlanE resVlan : zJunction.getReservedVlans()){
-                urnMap.putIfAbsent(resVlan.getUrn().getUrn(), resVlan.getUrn());
+                urnMap.putIfAbsent(resVlan.getUrn(), resVlan.getUrn());
                 reservedVlanMap.putIfAbsent(resVlan.getUrn(), new HashSet<>());
                 reservedVlanMap.get(resVlan.getUrn()).add(resVlan.getVlan());
             }
         }
     }
 
-    private void buildUrnAndReservedVlanMap(Map<String, UrnE> urnMap, Map<UrnE, Set<Integer>> reservedVlanMap,
+    private void buildUrnAndReservedVlanMap(Map<String, String> urnMap, Map<String, Set<Integer>> reservedVlanMap,
                                             Set<ReservedEthPipeE> ethPipes, Set<ReservedVlanJunctionE> resJunctions){
         buildUrnAndReservedVlanMap(urnMap, reservedVlanMap, ethPipes);
         for(ReservedVlanJunctionE resJunction: resJunctions){
             for(ReservedVlanE resVlan : resJunction.getReservedVlans()){
-                urnMap.putIfAbsent(resVlan.getUrn().getUrn(), resVlan.getUrn());
+                urnMap.putIfAbsent(resVlan.getUrn(), resVlan.getUrn());
                 reservedVlanMap.putIfAbsent(resVlan.getUrn(), new HashSet<>());
                 reservedVlanMap.get(resVlan.getUrn()).add(resVlan.getVlan());
             }

@@ -216,22 +216,22 @@ public class BlacklistPruningTest {
         Set<String> combinedAzERO = new HashSet<>();
         Set<String> combinedZaERO = new HashSet<>();
         for(ReservedEthPipeE ethPipe : ethPipes){
-            combinedAzERO.add(ethPipe.getAJunction().getDeviceUrn().getUrn());
+            combinedAzERO.add(ethPipe.getAJunction().getDeviceUrn());
             combinedAzERO.addAll(ethPipe.getAzERO());
-            combinedAzERO.add(ethPipe.getZJunction().getDeviceUrn().getUrn());
+            combinedAzERO.add(ethPipe.getZJunction().getDeviceUrn());
 
-            combinedZaERO.add(ethPipe.getZJunction().getDeviceUrn().getUrn());
+            combinedZaERO.add(ethPipe.getZJunction().getDeviceUrn());
             combinedZaERO.addAll(ethPipe.getZaERO());
-            combinedZaERO.add(ethPipe.getAJunction().getDeviceUrn().getUrn());
+            combinedZaERO.add(ethPipe.getAJunction().getDeviceUrn());
         }
         for(ReservedMplsPipeE mplsPipe : mplsPipes){
-            combinedAzERO.add(mplsPipe.getAJunction().getDeviceUrn().getUrn());
+            combinedAzERO.add(mplsPipe.getAJunction().getDeviceUrn());
             combinedAzERO.addAll(mplsPipe.getAzERO());
-            combinedAzERO.add(mplsPipe.getZJunction().getDeviceUrn().getUrn());
+            combinedAzERO.add(mplsPipe.getZJunction().getDeviceUrn());
 
-            combinedZaERO.add(mplsPipe.getZJunction().getDeviceUrn().getUrn());
+            combinedZaERO.add(mplsPipe.getZJunction().getDeviceUrn());
             combinedZaERO.addAll(mplsPipe.getZaERO());
-            combinedZaERO.add(mplsPipe.getAJunction().getDeviceUrn().getUrn());
+            combinedZaERO.add(mplsPipe.getAJunction().getDeviceUrn());
         }
 
         assert(combinedAzERO.stream().noneMatch(blacklist::contains));

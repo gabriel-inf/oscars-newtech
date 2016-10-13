@@ -2,7 +2,6 @@ package net.es.oscars.resv.ent;
 
 import lombok.*;
 import net.es.oscars.dto.pss.EthJunctionType;
-import net.es.oscars.topo.ent.UrnE;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -20,8 +19,7 @@ public class ReservedVlanJunctionE {
     private Long id;
 
     @NonNull
-    @OneToOne(cascade = CascadeType.ALL)
-    private UrnE deviceUrn;
+    private String deviceUrn;
 
     @NonNull
     private EthJunctionType junctionType;

@@ -65,11 +65,10 @@ public class SpecPopTest {
 
     public SpecificationE addEndpoints(SpecificationE spec) {
 
-        UrnE startb1 = urnRepo.findByUrn("star-tb1").orElseThrow(NoSuchElementException::new);
-        UrnE nersctb1 = urnRepo.findByUrn("nersc-tb1").orElseThrow(NoSuchElementException::new);
-
-        UrnE nersctb1_3_1_1 = urnRepo.findByUrn("nersc-tb1:3/1/1").orElseThrow(NoSuchElementException::new);
-        UrnE startb1_1_1_1 = urnRepo.findByUrn("star-tb1:1/1/1").orElseThrow(NoSuchElementException::new);
+        String startb1 =  "star-tb1";
+        String nersctb1 =  "nersc-tb1";
+        String nersctb1_3_1_1 = "nersc-tb1:3/1/1";
+        String startb1_1_1_1 = "star-tb1:1/1/1";
 
 
         RequestedVlanJunctionE aj = RequestedVlanJunctionE.builder()

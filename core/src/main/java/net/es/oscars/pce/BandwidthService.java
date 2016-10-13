@@ -64,10 +64,10 @@ public class BandwidthService {
      * @param rsvBwList A list of all bandwidth reserved.
      * @return A map of UrnE to ReservedBandwidthE objects
      */
-    public Map<UrnE, List<ReservedBandwidthE>> buildReservedBandwidthMap(List<ReservedBandwidthE> rsvBwList) {
-        Map<UrnE, List<ReservedBandwidthE>> map = new HashMap<>();
+    public Map<String, List<ReservedBandwidthE>> buildReservedBandwidthMap(List<ReservedBandwidthE> rsvBwList) {
+        Map<String, List<ReservedBandwidthE>> map = new HashMap<>();
         for (ReservedBandwidthE resv : rsvBwList) {
-            UrnE resvUrn = resv.getUrn();
+            String resvUrn = resv.getUrn();
             if (!map.containsKey(resvUrn)) {
                 map.put(resvUrn, new ArrayList<>());
             }
@@ -83,16 +83,16 @@ public class BandwidthService {
      * @param rsvBandwidths - A list of all bandwidth reserved so far
      * @return A mapping of URN to Ingress/Egress bandwidth availability
      */
-    public Map<UrnE, Map<String, Integer>> buildBandwidthAvailabilityMap(List<ReservedBandwidthE> rsvBandwidths) {
+    public Map<String, Map<String, Integer>> buildBandwidthAvailabilityMap(List<ReservedBandwidthE> rsvBandwidths) {
         // Build a map, allowing us to retrieve a list of ReservedBandwidth given the associated URN
-        Map<UrnE, List<ReservedBandwidthE>> resvBwMap = buildReservedBandwidthMap(rsvBandwidths);
+        Map<String, List<ReservedBandwidthE>> resvBwMap = buildReservedBandwidthMap(rsvBandwidths);
 
         // Build a map, allowing us to retrieve the available "Ingress" and "Egress" bandwidth at each associated URN
-        Map<UrnE, Map<String, Integer>> availBwMap = new HashMap<>();
+        Map<String, Map<String, Integer>> availBwMap = new HashMap<>();
         urnRepository.findAll()
                 .stream()
                 .filter(urn -> urn.getReservableBandwidth() != null)
-                .forEach(urn -> availBwMap.put(urn, buildBandwidthAvailabilityMapUrn(urn, urn.getReservableBandwidth(), resvBwMap)));
+                .forEach(urn -> availBwMap.put(urn.getUrn(), buildBandwidthAvailabilityMapUrn(urn.getUrn(), urn.getReservableBandwidth(), resvBwMap)));
 
         return availBwMap;
     }
@@ -105,16 +105,16 @@ public class BandwidthService {
      * @param urns          - A list of UrnE objects
      * @return A mapping of URN to Ingress/Egress bandwidth availability
      */
-    public Map<UrnE, Map<String, Integer>> buildBandwidthAvailabilityMapWithUrns(List<ReservedBandwidthE> rsvBandwidths,
+    public Map<String, Map<String, Integer>> buildBandwidthAvailabilityMapWithUrns(List<ReservedBandwidthE> rsvBandwidths,
                                                                                  List<UrnE> urns) {
         // Build a map, allowing us to retrieve a list of ReservedBandwidth given the associated URN
-        Map<UrnE, List<ReservedBandwidthE>> resvBwMap = buildReservedBandwidthMap(rsvBandwidths);
+        Map<String, List<ReservedBandwidthE>> resvBwMap = buildReservedBandwidthMap(rsvBandwidths);
 
         // Build a map, allowing us to retrieve the available "Ingress" and "Egress" bandwidth at each associated URN
-        Map<UrnE, Map<String, Integer>> availBwMap = new HashMap<>();
+        Map<String, Map<String, Integer>> availBwMap = new HashMap<>();
         urns.stream()
                 .filter(urn -> urn.getReservableBandwidth() != null)
-                .forEach(urn -> availBwMap.put(urn, buildBandwidthAvailabilityMapUrn(urn, urn.getReservableBandwidth(), resvBwMap)));
+                .forEach(urn -> availBwMap.put(urn.getUrn(), buildBandwidthAvailabilityMapUrn(urn.getUrn(), urn.getReservableBandwidth(), resvBwMap)));
 
         return availBwMap;
     }
@@ -128,8 +128,8 @@ public class BandwidthService {
      * @param resvBwMap - A Mapping from a URN to a list of Reserved Bandwidths at that URN.
      * @return A map containing the net available ingress/egress bandwidth at a URN
      */
-    public Map<String, Integer> buildBandwidthAvailabilityMapUrn(UrnE urn, ReservableBandwidthE bandwidth,
-                                                                 Map<UrnE, List<ReservedBandwidthE>> resvBwMap) {
+    public Map<String, Integer> buildBandwidthAvailabilityMapUrn(String urn, ReservableBandwidthE bandwidth,
+                                                                 Map<String, List<ReservedBandwidthE>> resvBwMap) {
         Map<String, Integer> availBw = new HashMap<>();
         availBw.put("Ingress", bandwidth.getIngressBw());
         availBw.put("Egress", bandwidth.getEgressBw());
@@ -298,7 +298,7 @@ public class BandwidthService {
      * @return True, if there is sufficient bandwidth across all edges. False, otherwise.
      */
     public boolean evaluateBandwidthEROBi(Map<String, UrnE> urnMap, Integer azMbps, Integer zaMbps, List<TopoEdge> azERO,
-                                          List<TopoEdge> zaERO, Map<UrnE, Map<String, Integer>> availBwMap) {
+                                          List<TopoEdge> zaERO, Map<String, Map<String, Integer>> availBwMap) {
 
         // For the AZ direction, fail the test if there is insufficient bandwidth
         if (!evaluateBandwidthERO(azERO, urnMap, availBwMap, azMbps, zaMbps)) {
@@ -320,7 +320,7 @@ public class BandwidthService {
      * @return True, if the segment can support the requested bandwidth. False, otherwise.
      */
     private boolean evaluateBandwidthERO(List<TopoEdge> ERO, Map<String, UrnE> urnMap,
-                                         Map<UrnE, Map<String, Integer>> availBwMap, Integer azMbps,
+                                         Map<String, Map<String, Integer>> availBwMap, Integer azMbps,
                                          Integer zaMbps) {
         // For each edge in that list
         for (TopoEdge edge : ERO) {
@@ -335,14 +335,14 @@ public class BandwidthService {
 
             // If URN A has reservable bandwidth, confirm that there is enough available
             if (urnA.getReservableBandwidth() != null) {
-                if (!evaluateBandwidthURN(urnA, availBwMap, azMbps, zaMbps)) {
+                if (!evaluateBandwidthURN(urnA.getUrn(), availBwMap, azMbps, zaMbps)) {
                     return false;
                 }
             }
 
             // If URN Z has reservable bandwidth, confirm that there is enough available
             if (urnZ.getReservableBandwidth() != null) {
-                if (!evaluateBandwidthURN(urnZ, availBwMap, azMbps, zaMbps)) {
+                if (!evaluateBandwidthURN(urnZ.getUrn(), availBwMap, azMbps, zaMbps)) {
                     return false;
                 }
             }
@@ -361,7 +361,7 @@ public class BandwidthService {
      * @return True, if the segment can support the requested bandwidth. False, otherwise.
      */
     public boolean evaluateBandwidthEROUni(List<TopoEdge> ERO, Map<String, UrnE> urnMap,
-                                           Map<UrnE, Map<String, Integer>> availBwMap, Integer bwMbps) {
+                                           Map<String, Map<String, Integer>> availBwMap, Integer bwMbps) {
         // For each edge in that list
         for (TopoEdge edge : ERO) {
             Map<UrnE, Boolean> urnIngressDirectionMap = new HashMap<>();
@@ -395,7 +395,7 @@ public class BandwidthService {
             if (urnA.getReservableBandwidth() != null) {
                 boolean ingressDirection = urnIngressDirectionMap.get(urnA);
 
-                if (!evaluateBandwidthURNUni(urnA, availBwMap, bwMbps, ingressDirection)) {
+                if (!evaluateBandwidthURNUni(urnStringA, availBwMap, bwMbps, ingressDirection)) {
                     return false;
                 }
             }
@@ -404,7 +404,7 @@ public class BandwidthService {
             if (urnZ.getReservableBandwidth() != null) {
                 boolean ingressDirection = urnIngressDirectionMap.get(urnZ);
 
-                if (!evaluateBandwidthURNUni(urnZ, availBwMap, bwMbps, ingressDirection)) {
+                if (!evaluateBandwidthURNUni(urnStringZ, availBwMap, bwMbps, ingressDirection)) {
                     return false;
                 }
             }
@@ -422,15 +422,15 @@ public class BandwidthService {
      * @param egMbps     - Requested egress Mbps
      * @return True, if there is enough available bandwidth at the URN. False, otherwise
      */
-    public boolean evaluateBandwidthURN(UrnE urn, Map<UrnE, Map<String, Integer>> availBwMap,
+    public boolean evaluateBandwidthURN(String urn, Map<String, Map<String, Integer>> availBwMap,
                                         Integer inMbps, Integer egMbps) {
         if (!availBwMap.keySet().contains(urn)) {
-            log.error("could not locate available bw map for urn " + urn.getUrn());
+            log.error("could not locate available bw map for urn " + urn);
             return false;
         }
         Map<String, Integer> bwAvail = availBwMap.get(urn);
         if (bwAvail.get("Ingress") < inMbps || bwAvail.get("Egress") < egMbps) {
-            log.error("Insufficient Bandwidth at " + urn.toString() + ". Requested: " +
+            log.error("Insufficient Bandwidth at " + urn + ". Requested: " +
                     inMbps + " In and " + egMbps + " Out. Available: " + bwAvail.get("Ingress") +
                     " In and " + bwAvail.get("Egress") + " Out.");
             return false;
@@ -449,7 +449,7 @@ public class BandwidthService {
      * @param egMbpsZA   - Requested egress Mbps in the Z->A direction
      * @return True, if there is enough available bandwidth at the URN. False, otherwise
      */
-    public boolean evaluateBandwidthSharedURN(UrnE urn, Map<UrnE, Map<String, Integer>> availBwMap, Integer inMbpsAZ, Integer egMbpsAZ, Integer inMbpsZA, Integer egMbpsZA) {
+    public boolean evaluateBandwidthSharedURN(String urn, Map<String, Map<String, Integer>> availBwMap, Integer inMbpsAZ, Integer egMbpsAZ, Integer inMbpsZA, Integer egMbpsZA) {
         Map<String, Integer> bwAvail = availBwMap.get(urn);
         if ((bwAvail.get("Ingress") < (inMbpsAZ + inMbpsZA)) || (bwAvail.get("Egress") < (egMbpsAZ + egMbpsZA))) {
             log.error("Insufficient Bandwidth at " + urn.toString() + ". Requested: " + (inMbpsAZ + inMbpsZA) + " In and " + (egMbpsAZ + egMbpsZA) + " Out. Available: " + bwAvail.get("Ingress") + " In and " + bwAvail.get("Egress") + " Out.");
@@ -467,7 +467,7 @@ public class BandwidthService {
      * @param ingressDirection - True if pruning is done based upon port ingress b/w, false if done by egress b/w
      * @return True, if there is enough available bandwidth at the URN. False, otherwise
      */
-    private boolean evaluateBandwidthURNUni(UrnE urn, Map<UrnE, Map<String, Integer>> availBwMap,
+    private boolean evaluateBandwidthURNUni(String  urn, Map<String, Map<String, Integer>> availBwMap,
                                             Integer bwMbps, boolean ingressDirection) {
         Map<String, Integer> bwAvail = availBwMap.get(urn);
 
@@ -483,7 +483,7 @@ public class BandwidthService {
         }
 
         if (unidirectionalBW < bwMbps) {
-            log.error("Insufficient Bandwidth at " + urn.toString() + ". Requested: " + bwMbps + direction);
+            log.error("Insufficient Bandwidth at " + urn + ". Requested: " + bwMbps + direction);
             return false;
         }
 
@@ -505,7 +505,7 @@ public class BandwidthService {
 
 
         // Get map of "Ingress" and "Egress" bandwidth availability
-        Map<UrnE, Map<String, Integer>> availBwMap = buildBandwidthAvailabilityMap(reservedBandwidths);
+        Map<String, Map<String, Integer>> availBwMap = buildBandwidthAvailabilityMap(reservedBandwidths);
 
         // For each requested fixture,
         for (RequestedVlanFixtureE reqFix : reqFixtures) {
@@ -532,7 +532,7 @@ public class BandwidthService {
      * @return True if there is sufficient reservable bandwidth, False otherwise.
      */
     public boolean evaluateBandwidthEdge(TopoEdge edge, Integer azBw, Integer zaBw, Map<String, UrnE> urnMap,
-                                         Map<UrnE, Map<String, Integer>> availBwMap) {
+                                         Map<String, Map<String, Integer>> availBwMap) {
 
         UrnE aUrn = urnMap.get(edge.getA().getUrn());
         UrnE zUrn = urnMap.get(edge.getZ().getUrn());
@@ -569,7 +569,7 @@ public class BandwidthService {
      * @return True if there is sufficient reservable bandwidth, False otherwise.
      */
     public boolean evaluateBandwidthEdgeUni(TopoEdge edge, Integer theBw, Map<String, UrnE> urnMap,
-                                            Map<UrnE, Map<String, Integer>> availBwMap) {
+                                            Map<String, Map<String, Integer>> availBwMap) {
 
         if (!edge.getA().getVertexType().equals(VertexType.PORT) || !edge.getZ().getVertexType().equals(VertexType.PORT))
             return true;

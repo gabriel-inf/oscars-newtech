@@ -12,7 +12,7 @@ import java.time.Instant;
 public class ReservedVlan {
 
     @NonNull
-    private Urn urn;
+    private String urn;
 
     private Integer vlan;
 

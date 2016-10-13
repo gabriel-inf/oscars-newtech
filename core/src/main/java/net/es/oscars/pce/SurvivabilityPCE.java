@@ -79,18 +79,23 @@ public class SurvivabilityPCE
                                                                      List<ReservedBandwidthE> rsvBwList,
                                                                      List<ReservedVlanE> rsvVlanList) throws PCEException
     {
-        UrnE srcDeviceURN = requestPipe.getAJunction().getDeviceUrn();
-        UrnE dstDeviceURN = requestPipe.getZJunction().getDeviceUrn();
-        UrnE srcPortURN = requestPipe.getAJunction().getFixtures().iterator().next().getPortUrn();
-        UrnE dstPortURN = requestPipe.getZJunction().getFixtures().iterator().next().getPortUrn();
+        String srcDeviceURN = requestPipe.getAJunction().getDeviceUrn();
+        String dstDeviceURN = requestPipe.getZJunction().getDeviceUrn();
 
-        VertexType srcType = topoService.getVertexTypeFromDeviceType(srcDeviceURN.getDeviceType());
-        VertexType dstType = topoService.getVertexTypeFromDeviceType(dstDeviceURN.getDeviceType());
+        String srcPortURN = requestPipe.getAJunction().getFixtures().iterator().next().getPortUrn();
+        String dstPortURN = requestPipe.getZJunction().getFixtures().iterator().next().getPortUrn();
 
-        TopoVertex srcDevice = new TopoVertex(srcDeviceURN.getUrn(), srcType);
-        TopoVertex dstDevice = new TopoVertex(dstDeviceURN.getUrn(), dstType);
-        TopoVertex srcPort = new TopoVertex(srcPortURN.getUrn(), VertexType.PORT);
-        TopoVertex dstPort = new TopoVertex(dstPortURN.getUrn(), VertexType.PORT);
+        UrnE srcDeviceURN_e = urnRepo.findByUrn(requestPipe.getAJunction().getDeviceUrn()).orElseThrow(NoSuchElementException::new);
+        UrnE dstDeviceURN_e = urnRepo.findByUrn(requestPipe.getZJunction().getDeviceUrn()).orElseThrow(NoSuchElementException::new);
+
+
+        VertexType srcType = topoService.getVertexTypeFromDeviceType(srcDeviceURN_e.getDeviceType());
+        VertexType dstType = topoService.getVertexTypeFromDeviceType(dstDeviceURN_e.getDeviceType());
+
+        TopoVertex srcDevice = new TopoVertex(srcDeviceURN, srcType);
+        TopoVertex dstDevice = new TopoVertex(dstDeviceURN, dstType);
+        TopoVertex srcPort = new TopoVertex(srcPortURN, VertexType.PORT);
+        TopoVertex dstPort = new TopoVertex(dstPortURN, VertexType.PORT);
 
         Topology multiLayerTopo = topoService.getMultilayerTopology();
 
@@ -243,8 +248,8 @@ public class SurvivabilityPCE
         serviceLayerTopology.createMultilayerTopology();
         serviceLayerTopology.resetLogicalLinks();
 
-        UrnE srcDeviceURN = requestPipe.getAJunction().getDeviceUrn();
-        UrnE dstDeviceURN = requestPipe.getZJunction().getDeviceUrn();
+        UrnE srcDeviceURN = urnRepo.findByUrn(requestPipe.getAJunction().getDeviceUrn()).orElseThrow(NoSuchElementException::new);
+        UrnE dstDeviceURN = urnRepo.findByUrn(requestPipe.getZJunction().getDeviceUrn()).orElseThrow(NoSuchElementException::new);
 
         VertexType srcType = topoService.getVertexTypeFromDeviceType(srcDeviceURN.getDeviceType());
         VertexType dstType = topoService.getVertexTypeFromDeviceType(dstDeviceURN.getDeviceType());
@@ -252,8 +257,8 @@ public class SurvivabilityPCE
         TopoVertex srcDevice = new TopoVertex(srcDeviceURN.getUrn(), srcType);
         TopoVertex dstDevice = new TopoVertex(dstDeviceURN.getUrn(), dstType);
 
-        UrnE srcPortURN = requestPipe.getAJunction().getFixtures().iterator().next().getPortUrn();
-        UrnE dstPortURN = requestPipe.getZJunction().getFixtures().iterator().next().getPortUrn();
+        UrnE srcPortURN = urnRepo.findByUrn(requestPipe.getAJunction().getFixtures().iterator().next().getPortUrn()).orElseThrow(NoSuchElementException::new);
+        UrnE dstPortURN = urnRepo.findByUrn(requestPipe.getZJunction().getFixtures().iterator().next().getPortUrn()).orElseThrow(NoSuchElementException::new);
 
         TopoVertex srcPort = new TopoVertex(srcPortURN.getUrn(), VertexType.PORT);
         TopoVertex dstPort = new TopoVertex(dstPortURN.getUrn(), VertexType.PORT);

@@ -278,14 +278,14 @@ public class PruningService {
         Map<String, UrnE> urnMap = buildUrnMap(urns);
 
         // Build map of URN to available bandwidth
-        Map<UrnE, Map<String, Integer>> availBwMap = bwSvc.buildBandwidthAvailabilityMapWithUrns(rsvBwList, urns);
+        Map<String, Map<String, Integer>> availBwMap = bwSvc.buildBandwidthAvailabilityMapWithUrns(rsvBwList, urns);
 
         // Get map of parent device vertex -> set of port vertices
         Map<String, Set<String>> deviceToPortMap = topoService.buildDeviceToPortMap();
         Map<String, String> portToDeviceMap = topoService.buildPortToDeviceMap(deviceToPortMap);
 
         // Build map of URN to resvVlan
-        Map<UrnE, Set<Integer>> availVlanMap = vlanSvc.buildAvailableVlanIdMap(urnMap, rsvVlanList, portToDeviceMap);
+        Map<String, Set<Integer>> availVlanMap = vlanSvc.buildAvailableVlanIdMap(urnMap, rsvVlanList, portToDeviceMap);
 
         // Copy the original topology's layer and set of vertices.
         Topology pruned = new Topology();
@@ -332,14 +332,14 @@ public class PruningService {
         Map<String, UrnE> urnMap = buildUrnMap(urns);
 
         // Build map of URN to available bandwidth
-        Map<UrnE, Map<String, Integer>> availBwMap = bwSvc.buildBandwidthAvailabilityMapWithUrns(rsvBwList, urns);
+        Map<String, Map<String, Integer>> availBwMap = bwSvc.buildBandwidthAvailabilityMapWithUrns(rsvBwList, urns);
 
         // Get map of parent device vertex -> set of port vertices
         Map<String, Set<String>> deviceToPortMap = topoService.buildDeviceToPortMap();
         Map<String, String> portToDeviceMap = topoService.buildPortToDeviceMap(deviceToPortMap);
 
         // Build map of URN to resvVlan
-        Map<UrnE, Set<Integer>> availVlanMap = vlanSvc.buildAvailableVlanIdMap(urnMap, rsvVlanList, portToDeviceMap);
+        Map<String, Set<Integer>> availVlanMap = vlanSvc.buildAvailableVlanIdMap(urnMap, rsvVlanList, portToDeviceMap);
 
         // Copy the original topology's layer and set of vertices.
         Topology pruned = new Topology();

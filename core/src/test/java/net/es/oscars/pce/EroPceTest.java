@@ -1166,8 +1166,8 @@ public class EroPceTest
             Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
             List<String> azERO = ethPipe.getAzERO();
             List<String> zaERO = ethPipe.getZaERO();
-            String actualAzERO = aJunc.getDeviceUrn().getUrn() + "-";
-            String actualZaERO = zJunc.getDeviceUrn().getUrn() + "-";
+            String actualAzERO = aJunc.getDeviceUrn() + "-";
+            String actualZaERO = zJunc.getDeviceUrn() + "-";
 
             for(String x : azERO)
             {
@@ -1182,8 +1182,8 @@ public class EroPceTest
             actualAzERO = actualAzERO + zJunc.getDeviceUrn();
             actualZaERO = actualZaERO + aJunc.getDeviceUrn();
 
-            assert (aJunc.getDeviceUrn().getUrn().equals("nodeL") || aJunc.getDeviceUrn().getUrn().equals("nodeP") || aJunc.getDeviceUrn().getUrn().equals("nodeQ"));
-            assert (zJunc.getDeviceUrn().getUrn().equals("nodeP") || zJunc.getDeviceUrn().getUrn().equals("nodeQ") || zJunc.getDeviceUrn().getUrn().equals("nodeS"));
+            assert (aJunc.getDeviceUrn().equals("nodeL") || aJunc.getDeviceUrn().equals("nodeP") || aJunc.getDeviceUrn().equals("nodeQ"));
+            assert (zJunc.getDeviceUrn().equals("nodeP") || zJunc.getDeviceUrn().equals("nodeQ") || zJunc.getDeviceUrn().equals("nodeS"));
 
             assert (aFixes.size() == 0);
             assert (zFixes.size() == 0);
@@ -1191,21 +1191,21 @@ public class EroPceTest
             String expectedAzERO;
             String expectedZaERO;
 
-            if(aJunc.getDeviceUrn().getUrn().equals("nodeL"))
+            if(aJunc.getDeviceUrn().equals("nodeL"))
             {
-                assert(zJunc.getDeviceUrn().getUrn().equals("nodeP"));
+                assert(zJunc.getDeviceUrn().equals("nodeP"));
                 expectedAzERO = "nodeL-nodeL:3-nodeP:1-nodeP";
                 expectedZaERO = "nodeP-nodeP:1-nodeL:3-nodeL";
             }
-            else if(aJunc.getDeviceUrn().getUrn().equals("nodeP"))
+            else if(aJunc.getDeviceUrn().equals("nodeP"))
             {
-                assert(zJunc.getDeviceUrn().getUrn().equals("nodeQ"));
+                assert(zJunc.getDeviceUrn().equals("nodeQ"));
                 expectedAzERO = "nodeP-nodeP:2-nodeQ:1-nodeQ";
                 expectedZaERO = "nodeQ-nodeQ:1-nodeP:2-nodeP";
             }
             else
             {
-                assert(zJunc.getDeviceUrn().getUrn().equals("nodeS"));
+                assert(zJunc.getDeviceUrn().equals("nodeS"));
                 expectedAzERO = "nodeQ-nodeQ:3-nodeS:1-nodeS";
                 expectedZaERO = "nodeS-nodeS:1-nodeQ:3-nodeQ";
             }
@@ -1223,8 +1223,8 @@ public class EroPceTest
             Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
             List<String> azERO = mplsPipe.getAzERO();
             List<String> zaERO = mplsPipe.getZaERO();
-            String actualAzERO = aJunc.getDeviceUrn().getUrn() + "-";
-            String actualZaERO = zJunc.getDeviceUrn().getUrn() + "-";
+            String actualAzERO = aJunc.getDeviceUrn() + "-";
+            String actualZaERO = zJunc.getDeviceUrn() + "-";
 
             for(String x : azERO)
             {
@@ -1239,16 +1239,16 @@ public class EroPceTest
             actualAzERO = actualAzERO + zJunc.getDeviceUrn();
             actualZaERO = actualZaERO + aJunc.getDeviceUrn();
 
-            assert ((aJunc.getDeviceUrn().getUrn().equals("nodeK") && zJunc.getDeviceUrn().getUrn().equals("nodeL"))
-                    || (aJunc.getDeviceUrn().getUrn().equals("nodeS") && zJunc.getDeviceUrn().getUrn().equals("nodeT")));
+            assert ((aJunc.getDeviceUrn().equals("nodeK") && zJunc.getDeviceUrn().equals("nodeL"))
+                    || (aJunc.getDeviceUrn().equals("nodeS") && zJunc.getDeviceUrn().equals("nodeT")));
 
-            if(aJunc.getDeviceUrn().getUrn().equals("nodeK"))
+            if(aJunc.getDeviceUrn().equals("nodeK"))
             {
                 assert (aFixes.size() == 1);
                 assert (zFixes.size() == 0);
                 ReservedVlanFixtureE theFix = aFixes.iterator().next();
 
-                assert (theFix.getIfceUrn().getUrn().equals("portA"));
+                assert (theFix.getIfceUrn().equals("portA"));
                 assert (theFix.getReservedBandwidth().getInBandwidth().equals(azBW));
                 assert (theFix.getReservedBandwidth().getEgBandwidth().equals(zaBW));
 
@@ -1264,7 +1264,7 @@ public class EroPceTest
                 assert (zFixes.size() == 1);
                 ReservedVlanFixtureE theFix = zFixes.iterator().next();
 
-                assert (theFix.getIfceUrn().getUrn().equals("portZ"));
+                assert (theFix.getIfceUrn().equals("portZ"));
                 assert (theFix.getReservedBandwidth().getInBandwidth().equals(zaBW));
                 assert (theFix.getReservedBandwidth().getEgBandwidth().equals(azBW));
 
@@ -1571,30 +1571,30 @@ public class EroPceTest
         Set<String> azString = new HashSet<>();
         Set<String> zaString = new HashSet<>();
         for(ReservedEthPipeE ethPipe : ethPipes){
-            azString.addAll(ethPipe.getAJunction().getFixtures().stream().map(fix -> fix.getIfceUrn().getUrn()).collect(Collectors.toList()));
-            azString.add(ethPipe.getAJunction().getDeviceUrn().getUrn());
+            azString.addAll(ethPipe.getAJunction().getFixtures().stream().map(fix -> fix.getIfceUrn()).collect(Collectors.toList()));
+            azString.add(ethPipe.getAJunction().getDeviceUrn());
             azString.addAll(ethPipe.getAzERO());
-            azString.add(ethPipe.getZJunction().getDeviceUrn().getUrn());
-            azString.addAll(ethPipe.getZJunction().getFixtures().stream().map(fix -> fix.getIfceUrn().getUrn()).collect(Collectors.toList()));
+            azString.add(ethPipe.getZJunction().getDeviceUrn());
+            azString.addAll(ethPipe.getZJunction().getFixtures().stream().map(fix -> fix.getIfceUrn()).collect(Collectors.toList()));
 
-            zaString.addAll(ethPipe.getZJunction().getFixtures().stream().map(fix -> fix.getIfceUrn().getUrn()).collect(Collectors.toList()));
-            zaString.add(ethPipe.getZJunction().getDeviceUrn().getUrn());
+            zaString.addAll(ethPipe.getZJunction().getFixtures().stream().map(fix -> fix.getIfceUrn()).collect(Collectors.toList()));
+            zaString.add(ethPipe.getZJunction().getDeviceUrn());
             zaString.addAll(ethPipe.getZaERO());
-            zaString.add(ethPipe.getAJunction().getDeviceUrn().getUrn());
-            zaString.addAll(ethPipe.getAJunction().getFixtures().stream().map(fix -> fix.getIfceUrn().getUrn()).collect(Collectors.toList()));
+            zaString.add(ethPipe.getAJunction().getDeviceUrn());
+            zaString.addAll(ethPipe.getAJunction().getFixtures().stream().map(fix -> fix.getIfceUrn()).collect(Collectors.toList()));
         }
         for(ReservedMplsPipeE mplsPipe : mplsPipes){
-            azString.addAll(mplsPipe.getAJunction().getFixtures().stream().map(fix -> fix.getIfceUrn().getUrn()).collect(Collectors.toList()));
-            azString.add(mplsPipe.getAJunction().getDeviceUrn().getUrn());
+            azString.addAll(mplsPipe.getAJunction().getFixtures().stream().map(fix -> fix.getIfceUrn()).collect(Collectors.toList()));
+            azString.add(mplsPipe.getAJunction().getDeviceUrn());
             azString.addAll(mplsPipe.getAzERO());
-            azString.add(mplsPipe.getZJunction().getDeviceUrn().getUrn());
-            azString.addAll(mplsPipe.getZJunction().getFixtures().stream().map(fix -> fix.getIfceUrn().getUrn()).collect(Collectors.toList()));
+            azString.add(mplsPipe.getZJunction().getDeviceUrn());
+            azString.addAll(mplsPipe.getZJunction().getFixtures().stream().map(fix -> fix.getIfceUrn()).collect(Collectors.toList()));
 
-            zaString.addAll(mplsPipe.getZJunction().getFixtures().stream().map(fix -> fix.getIfceUrn().getUrn()).collect(Collectors.toList()));
-            zaString.add(mplsPipe.getZJunction().getDeviceUrn().getUrn());
+            zaString.addAll(mplsPipe.getZJunction().getFixtures().stream().map(fix -> fix.getIfceUrn()).collect(Collectors.toList()));
+            zaString.add(mplsPipe.getZJunction().getDeviceUrn());
             zaString.addAll(mplsPipe.getZaERO());
-            zaString.add(mplsPipe.getAJunction().getDeviceUrn().getUrn());
-            zaString.addAll(mplsPipe.getAJunction().getFixtures().stream().map(fix -> fix.getIfceUrn().getUrn()).collect(Collectors.toList()));
+            zaString.add(mplsPipe.getAJunction().getDeviceUrn());
+            zaString.addAll(mplsPipe.getAJunction().getFixtures().stream().map(fix -> fix.getIfceUrn()).collect(Collectors.toList()));
         }
 
         // Computed EROs also include port URNs. Add those to requested EROs from comparison.

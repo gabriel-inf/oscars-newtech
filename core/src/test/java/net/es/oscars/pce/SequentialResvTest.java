@@ -132,7 +132,7 @@ public class SequentialResvTest {
         }
 
         Set<ReservedBandwidthE> portBWs = bwRepo.findAll().stream()
-                .filter(bw -> bw.getUrn().getUrn().contains("port"))
+                .filter(bw -> bw.getUrn().contains("port"))
                 .collect(Collectors.toSet());
 
         assert (portBWs.size() == 6);
@@ -143,7 +143,7 @@ public class SequentialResvTest {
         int totalBwZEg = 0;
 
         for (ReservedBandwidthE oneBW : portBWs) {
-            if (oneBW.getUrn().getUrn().equals("portA")) {
+            if (oneBW.getUrn().equals("portA")) {
                 assert (oneBW.getInBandwidth().equals(azBW));
                 assert (oneBW.getInBandwidth().equals(zaBW));
                 totalBwAIn += oneBW.getInBandwidth();
@@ -242,7 +242,7 @@ public class SequentialResvTest {
         }
 
         Set<ReservedBandwidthE> portBWs = bwRepo.findAll().stream()
-                .filter(bw -> bw.getUrn().getUrn().contains("port"))
+                .filter(bw -> bw.getUrn().contains("port"))
                 .collect(Collectors.toSet());
 
         assert (portBWs.size() == 4);
@@ -253,7 +253,7 @@ public class SequentialResvTest {
         int totalBwZEg = 0;
 
         for (ReservedBandwidthE oneBW : portBWs) {
-            if (oneBW.getUrn().getUrn().equals("portA")) {
+            if (oneBW.getUrn().equals("portA")) {
                 assert (oneBW.getInBandwidth().equals(azBW));
                 assert (oneBW.getInBandwidth().equals(zaBW));
                 totalBwAIn += oneBW.getInBandwidth();
@@ -367,7 +367,7 @@ public class SequentialResvTest {
         }
 
         Set<ReservedBandwidthE> portBWs = bwRepo.findAll().stream()
-                .filter(bw -> bw.getUrn().getUrn().contains("port"))
+                .filter(bw -> bw.getUrn().contains("port"))
                 .collect(Collectors.toSet());
 
         assert (portBWs.size() == 2 * (numConnections - 1));
@@ -378,7 +378,7 @@ public class SequentialResvTest {
         int totalBwZEg = 0;
 
         for (ReservedBandwidthE oneBW : portBWs) {
-            if (oneBW.getUrn().getUrn().equals("portA")) {
+            if (oneBW.getUrn().equals("portA")) {
                 assert (oneBW.getInBandwidth().equals(azBW));
                 assert (oneBW.getInBandwidth().equals(zaBW));
                 totalBwAIn += oneBW.getInBandwidth();
@@ -492,7 +492,7 @@ public class SequentialResvTest {
         }
 
         Set<ReservedBandwidthE> portBWs = bwRepo.findAll().stream()
-                .filter(bw -> bw.getUrn().getUrn().contains("port"))
+                .filter(bw -> bw.getUrn().contains("port"))
                 .collect(Collectors.toSet());
 
         assert (portBWs.size() == 2 * (numConnections - 1));
@@ -503,7 +503,7 @@ public class SequentialResvTest {
         int totalBwZEg = 0;
 
         for (ReservedBandwidthE oneBW : portBWs) {
-            if (oneBW.getUrn().getUrn().equals("portA")) {
+            if (oneBW.getUrn().equals("portA")) {
                 assert (oneBW.getInBandwidth().equals(azBW));
                 assert (oneBW.getInBandwidth().equals(zaBW));
                 totalBwAIn += oneBW.getInBandwidth();
@@ -608,7 +608,7 @@ public class SequentialResvTest {
         }
 
         Set<ReservedBandwidthE> portBWs = bwRepo.findAll().stream()
-                .filter(bw -> bw.getUrn().getUrn().contains("port"))
+                .filter(bw -> bw.getUrn().contains("port"))
                 .collect(Collectors.toSet());
 
         assert (portBWs.size() == 8);
@@ -619,7 +619,7 @@ public class SequentialResvTest {
         int totalBwZEg = 0;
 
         for (ReservedBandwidthE oneBW : portBWs) {
-            if (oneBW.getUrn().getUrn().equals("portA")) {
+            if (oneBW.getUrn().equals("portA")) {
                 assert (oneBW.getInBandwidth().equals(azBW));
                 assert (oneBW.getInBandwidth().equals(zaBW));
                 totalBwAIn += oneBW.getInBandwidth();
@@ -721,7 +721,7 @@ public class SequentialResvTest {
         }
 
         Set<ReservedBandwidthE> portBWs = bwRepo.findAll().stream()
-                .filter(bw -> bw.getUrn().getUrn().contains("port"))
+                .filter(bw -> bw.getUrn().contains("port"))
                 .collect(Collectors.toSet());
 
         assert (portBWs.size() == 6);
@@ -732,7 +732,7 @@ public class SequentialResvTest {
         int totalBwZEg = 0;
 
         for (ReservedBandwidthE oneBW : portBWs) {
-            if (oneBW.getUrn().getUrn().equals("portA")) {
+            if (oneBW.getUrn().equals("portA")) {
                 assert (oneBW.getInBandwidth().equals(azBW));
                 assert (oneBW.getInBandwidth().equals(zaBW));
                 totalBwAIn += oneBW.getInBandwidth();
@@ -832,7 +832,7 @@ public class SequentialResvTest {
         }
 
         Set<ReservedBandwidthE> portBWs = bwRepo.findAll().stream()
-                .filter(bw -> bw.getUrn().getUrn().contains("port"))
+                .filter(bw -> bw.getUrn().contains("port"))
                 .collect(Collectors.toSet());
 
         assert (portBWs.size() == 6);
@@ -843,7 +843,7 @@ public class SequentialResvTest {
         int totalBwZEg = 0;
 
         for (ReservedBandwidthE oneBW : portBWs) {
-            if (oneBW.getUrn().getUrn().equals("portA")) {
+            if (oneBW.getUrn().equals("portA")) {
                 assert (oneBW.getInBandwidth().equals(azBW));
                 assert (oneBW.getInBandwidth().equals(zaBW));
                 totalBwAIn += oneBW.getInBandwidth();
@@ -976,7 +976,7 @@ public class SequentialResvTest {
         }
 
         Set<ReservedBandwidthE> portBWs = bwRepo.findAll().stream()
-                .filter(bw -> bw.getUrn().getUrn().contains("port"))
+                .filter(bw -> bw.getUrn().contains("port"))
                 .collect(Collectors.toSet());
 
         assert (portBWs.size() == 2 * (numConnections - 2));
@@ -987,7 +987,7 @@ public class SequentialResvTest {
         int totalBwZEg = 0;
 
         for (ReservedBandwidthE oneBW : portBWs) {
-            if (oneBW.getUrn().getUrn().equals("portA")) {
+            if (oneBW.getUrn().equals("portA")) {
                 assert (oneBW.getInBandwidth().equals(azBW));
                 assert (oneBW.getInBandwidth().equals(zaBW));
                 totalBwAIn += oneBW.getInBandwidth();
@@ -1089,7 +1089,7 @@ public class SequentialResvTest {
         }
 
         Set<ReservedBandwidthE> portBWs = bwRepo.findAll().stream()
-                .filter(bw -> bw.getUrn().getUrn().contains("port"))
+                .filter(bw -> bw.getUrn().contains("port"))
                 .collect(Collectors.toSet());
 
         assert (portBWs.size() == 8);
@@ -1100,7 +1100,7 @@ public class SequentialResvTest {
         int totalBwZEg = 0;
 
         for (ReservedBandwidthE oneBW : portBWs) {
-            if (oneBW.getUrn().getUrn().equals("portA")) {
+            if (oneBW.getUrn().equals("portA")) {
                 assert (oneBW.getInBandwidth().equals(azBW));
                 assert (oneBW.getInBandwidth().equals(zaBW));
                 totalBwAIn += oneBW.getInBandwidth();

@@ -24,17 +24,6 @@ public class ReserveTopoTest {
     public void decideVCIDTest() throws PCEException {
         log.info("resource decision");
 
-        UrnE alpha = UrnE.builder()
-                .urn("alpha")
-                .urnType(UrnType.DEVICE)
-                .valid(true)
-                .build();
-        UrnE bravo = UrnE.builder()
-                .urn("bravo")
-                .urnType(UrnType.DEVICE)
-                .valid(true)
-                .build();
-
         List<ReservedPssResourceE> rrs = new ArrayList<>();
 
 
@@ -43,7 +32,7 @@ public class ReserveTopoTest {
                 .beginning(Instant.MIN)
                 .ending(Instant.MAX)
                 .resourceType(ResourceType.VC_ID)
-                .urn(alpha)
+                .urn("alpha")
                 .build());
 
         rrs.add(ReservedPssResourceE.builder()
@@ -51,7 +40,7 @@ public class ReserveTopoTest {
                 .beginning(Instant.MIN)
                 .ending(Instant.MAX)
                 .resourceType(ResourceType.VC_ID)
-                .urn(bravo)
+                .urn("bravo")
                 .build());
 
         // TODO: complete this

@@ -16,8 +16,6 @@ import net.es.oscars.resv.svc.ResvService;
 import net.es.oscars.st.oper.OperState;
 import net.es.oscars.st.prov.ProvState;
 import net.es.oscars.st.resv.ResvState;
-import net.es.oscars.topo.dao.UrnRepository;
-import net.es.oscars.topo.ent.UrnE;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -37,8 +35,6 @@ public class ResvController {
         this.resvService = resvService;
     }
 
-    @Autowired
-    private UrnRepository urnRepo;
 
     private ResvService resvService;
 
@@ -154,7 +150,6 @@ public class ResvController {
 
     private Connection holdConnection(Connection connection) throws PCEException, PSSException {
         ConnectionE connE = modelMapper.map(connection, ConnectionE.class);
-        mapConnectionUrns(connE);
 
         resvService.hold(connE);
 
@@ -169,43 +164,6 @@ public class ResvController {
         return conn;
 
     }
-
-
-    private void mapConnectionUrns(ConnectionE connection) {
-        RequestedVlanFlowE rvf = connection.getSpecification().getRequested().getVlanFlow();
-        rvf.getJunctions().forEach(this::mapJunctionUrns);
-        rvf.getPipes().forEach(this::mapPipeUrns);
-    }
-
-    private void mapPipeUrns(RequestedVlanPipeE pipe) {
-        this.mapJunctionUrns(pipe.getAJunction());
-        this.mapJunctionUrns(pipe.getZJunction());
-    }
-
-    private void mapJunctionUrns(RequestedVlanJunctionE rvj) {
-        this.mapUrn(rvj.getDeviceUrn());
-        rvj.getFixtures().forEach(f -> this.mapUrn(f.getPortUrn()));
-    }
-
-    private void mapUrn(UrnE urnE) {
-        Optional<UrnE> maybeUrn = urnRepo.findByUrn(urnE.getUrn());
-        if (maybeUrn.isPresent()) {
-            UrnE dbUrn = maybeUrn.get();
-            urnE.setUrnType(dbUrn.getUrnType());
-            urnE.setReservableBandwidth(dbUrn.getReservableBandwidth());
-            urnE.setReservableVlans(dbUrn.getReservableVlans());
-            urnE.setValid(dbUrn.getValid());
-            urnE.setCapabilities(dbUrn.getCapabilities());
-            urnE.setIfceType(dbUrn.getIfceType());
-            urnE.setDeviceModel(dbUrn.getDeviceModel());
-            urnE.setDeviceType(dbUrn.getDeviceType());
-            urnE.setReservablePssResources(dbUrn.getReservablePssResources());
-
-        } else {
-            throw new NoSuchElementException("URN not found!" + urnE.getUrn());
-        }
-    }
-
 
     private Connection makeConnectionFromBasic(BasicVlanSpecification dtoSpec) throws PCEException, PSSException {
         log.info("making a new connection with id " + dtoSpec.getConnectionId());
@@ -257,15 +215,9 @@ public class ResvController {
 
         BasicVlanFlow bvf = bvs.getBasicVlanFlow();
 
-        UrnE aUrn = urnRepo.findByUrn(bvf.getAUrn()).orElseThrow(NoSuchElementException::new);
-        UrnE aDevUrn = urnRepo.findByUrn(bvf.getADeviceUrn()).orElseThrow(NoSuchElementException::new);
-        UrnE zUrn = urnRepo.findByUrn(bvf.getZUrn()).orElseThrow(NoSuchElementException::new);
-        UrnE zDevUrn = urnRepo.findByUrn(bvf.getZDeviceUrn()).orElseThrow(NoSuchElementException::new);
-
-
         RequestedVlanFixtureE vfa = RequestedVlanFixtureE.builder()
                 .fixtureType(EthFixtureType.REQUESTED)
-                .portUrn(aUrn)
+                .portUrn(bvf.getAUrn())
                 .inMbps(bvf.getAzMbps())
                 .egMbps(bvf.getZaMbps())
                 .vlanExpression(bvf.getAVlanExpression())
@@ -273,20 +225,20 @@ public class ResvController {
 
         RequestedVlanFixtureE vfz = RequestedVlanFixtureE.builder()
                 .fixtureType(EthFixtureType.REQUESTED)
-                .portUrn(zUrn)
+                .portUrn(bvf.getZUrn())
                 .inMbps(bvf.getZaMbps())
                 .egMbps(bvf.getAzMbps())
                 .vlanExpression(bvf.getZVlanExpression())
                 .build();
 
         RequestedVlanJunctionE vja = RequestedVlanJunctionE.builder()
-                .deviceUrn(aDevUrn)
+                .deviceUrn(bvf.getADeviceUrn())
                 .fixtures(new HashSet<>())
                 .junctionType(EthJunctionType.REQUESTED)
                 .build();
 
         RequestedVlanJunctionE vjz = RequestedVlanJunctionE.builder()
-                .deviceUrn(zDevUrn)
+                .deviceUrn(bvf.getZDeviceUrn())
                 .fixtures(new HashSet<>())
                 .junctionType(EthJunctionType.REQUESTED)
                 .build();
@@ -471,12 +423,12 @@ public class ResvController {
     private RequestedVlanJunctionE makeRequestedJunctionE(String deviceString, List<String> portStrings,
                                                           Integer azMbps, Integer zaMbps, String aVlanExpression,
                                                           String zVlanExpression) {
-        UrnE aDevUrn = urnRepo.findByUrn(deviceString).orElseThrow(NoSuchElementException::new);
 
         Set<RequestedVlanFixtureE> fixtures = new HashSet<>();
 
         if (portStrings.size() > 0) {
-            UrnE aPortUrn = urnRepo.findByUrn(portStrings.get(0)).orElseThrow(NoSuchElementException::new);
+            String aPortUrn = portStrings.get(0);
+
             RequestedVlanFixtureE aFix = RequestedVlanFixtureE.builder()
                     .portUrn(aPortUrn)
                     .fixtureType(EthFixtureType.REQUESTED)
@@ -486,7 +438,8 @@ public class ResvController {
                     .build();
             fixtures.add(aFix);
             if (portStrings.size() == 2) {
-                UrnE zPortUrn = urnRepo.findByUrn(portStrings.get(1)).orElseThrow(NoSuchElementException::new);
+                String zPortUrn = portStrings.get(1);
+
                 RequestedVlanFixtureE zFix = RequestedVlanFixtureE.builder()
                         .portUrn(zPortUrn)
                         .fixtureType(EthFixtureType.REQUESTED)
@@ -500,7 +453,7 @@ public class ResvController {
         }
 
         return RequestedVlanJunctionE.builder()
-                .deviceUrn(aDevUrn)
+                .deviceUrn(deviceString)
                 .fixtures(fixtures)
                 .junctionType(EthJunctionType.REQUESTED)
                 .build();

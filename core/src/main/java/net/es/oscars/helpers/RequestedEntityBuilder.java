@@ -9,7 +9,6 @@ import net.es.oscars.dto.spec.PalindromicType;
 import net.es.oscars.dto.spec.SurvivabilityType;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.topo.dao.UrnRepository;
-import net.es.oscars.topo.ent.UrnE;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -283,7 +282,6 @@ public class RequestedEntityBuilder {
                                                          Integer azMbps, Integer zaMbps, String vlanExp, boolean startJunc){
         log.info("Building requested junction");
 
-        Optional<UrnE> optUrn = urnRepo.findByUrn(deviceName);
 
         Set<RequestedVlanFixtureE> fixtures = new HashSet<>();
 
@@ -299,7 +297,7 @@ public class RequestedEntityBuilder {
         }
 
         return RequestedVlanJunctionE.builder()
-                .deviceUrn(optUrn.isPresent() ? optUrn.get() : null)
+                .deviceUrn(deviceName)
                 .fixtures(fixtures)
                 .junctionType(EthJunctionType.REQUESTED)
                 .build();
@@ -309,10 +307,9 @@ public class RequestedEntityBuilder {
                                                        String vlanExp){
         log.info("Building requested fixture");
 
-        Optional<UrnE> optUrn = urnRepo.findByUrn(fixName);
 
         return RequestedVlanFixtureE.builder()
-                .portUrn(optUrn.isPresent() ? optUrn.get() : null)
+                .portUrn(fixName)
                 .fixtureType(EthFixtureType.REQUESTED)
                 .inMbps(azMbps)
                 .egMbps(zaMbps)

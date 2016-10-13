@@ -66,21 +66,12 @@ public class CoreTest {
     public void testNoFixtures() throws PCEException {
         SpecPopTest spt = new SpecPopTest();
         SpecificationE spec = spt.getBasicSpec();
-        UrnE urnE = UrnE.builder()
-                .deviceModel(DeviceModel.JUNIPER_EX)
-                .capabilities(new HashSet<>())
-                .deviceType(DeviceType.SWITCH)
-                .urnType(UrnType.DEVICE)
-                .urn("star-tb1")
-                .valid(true)
-                .build();
-
 
         RequestedVlanFlowE flow = spec.getRequested().getVlanFlow();
 
         RequestedVlanJunctionE somejunction = RequestedVlanJunctionE.builder()
                 .junctionType(EthJunctionType.REQUESTED)
-                .deviceUrn(urnE)
+                .deviceUrn("star-tb1")
                 .fixtures(new HashSet<>())
                 .build();
 
@@ -100,7 +91,7 @@ public class CoreTest {
     }
 
     private void makeDeviceUrn(RequestedVlanJunctionE junction) {
-        String urn = junction.getDeviceUrn().getUrn();
+        String urn = junction.getDeviceUrn();
         if (!urnRepo.findByUrn(urn).isPresent()) {
             UrnE urnE = UrnE.builder()
                     .deviceModel(DeviceModel.JUNIPER_EX)

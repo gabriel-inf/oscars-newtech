@@ -1,7 +1,6 @@
 package net.es.oscars.resv.ent;
 
 import lombok.*;
-import net.es.oscars.topo.ent.UrnE;
 
 import javax.persistence.*;
 import java.time.Instant;
@@ -18,8 +17,7 @@ public class ReservedBandwidthE {
     private Long id;
 
     @NonNull
-    @OneToOne(cascade = CascadeType.ALL)
-    private UrnE urn;
+    private String urn;
 
     //private Integer bandwidth;
 

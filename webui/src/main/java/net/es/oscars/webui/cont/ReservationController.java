@@ -97,19 +97,6 @@ public class ReservationController {
         return "resv_view";
     }
 
-    @RequestMapping(value = "/resv_adv_new", params = {"addJunction"})
-    public String addRow(final ReservedVlanFlow vflow, final BindingResult bindingResult) {
-        Urn prompt_urn = Urn.builder().urn("choose a device").build();
-        ReservedVlanJunction vj = ReservedVlanJunction.builder()
-                .deviceUrn(prompt_urn)
-                .fixtures(new HashSet<>())
-                .junctionType(EthJunctionType.REQUESTED)
-                .build();
-
-        vflow.getJunctions().add(vj);
-
-        return "resv_adv_new";
-    }
 
     @RequestMapping(value = "/resv_adv_new", params = {"removeFixture"})
     public String removeRow(final ReservedVlanFlow vflow, final BindingResult bindingResult,
@@ -122,7 +109,7 @@ public class ReservationController {
 
         for (ReservedVlanJunction vj : vflow.getJunctions()) {
             for (ReservedVlanFixture vf : vj.getFixtures()) {
-                if (vf.getIfceUrn().getUrn().equals(fixtureUrn)) {
+                if (vf.getIfceUrn().equals(fixtureUrn)) {
                     removeThis = vf;
                     fromThis = vj;
                 }

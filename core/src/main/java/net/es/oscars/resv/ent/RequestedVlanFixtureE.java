@@ -2,7 +2,6 @@ package net.es.oscars.resv.ent;
 
 import lombok.*;
 import net.es.oscars.dto.pss.EthFixtureType;
-import net.es.oscars.topo.ent.UrnE;
 
 import javax.persistence.*;
 
@@ -18,8 +17,7 @@ public class RequestedVlanFixtureE {
     private Long id;
 
     @NonNull
-    @OneToOne(cascade = CascadeType.ALL)
-    private UrnE portUrn;
+    private String portUrn;
 
     private String vlanExpression;
 

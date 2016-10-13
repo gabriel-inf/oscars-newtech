@@ -1167,7 +1167,7 @@ public class BandwidthAvailabilityServiceTest {
         List<ReservedBandwidthE> reservedBandwidths = new ArrayList<>();
         for(Integer index = 0; index < reservedPortNames.size(); index++){
             reservedBandwidths.add(ReservedBandwidthE.builder()
-                    .urn(urnMap.get(reservedPortNames.get(index)))
+                    .urn(reservedPortNames.get(index))
                     .beginning(reservedStartTimes.get(index))
                     .ending(reservedEndTimes.get(index))
                     .inBandwidth(inBandwidths.get(index))

@@ -25,8 +25,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Component
-public class NonPalindromicalPCE
-{
+public class NonPalindromicalPCE {
     @Autowired
     private TopoService topoService;
 
@@ -45,13 +44,15 @@ public class NonPalindromicalPCE
     /**
      * Depends on DijkstraPCE and ServiceLayerTopology to construct and build the Service-Layer EROs, and then map them to Physical-Layer EROs
      *
-     * @param requestPipe Requested pipe with required reservation parameters
+     * @param requestPipe  Requested pipe with required reservation parameters
      * @param requestSched Requested schedule parameters
      * @return A two-element Map containing both the forward-direction (A->Z) ERO and the reverse-direction (Z->A) ERO
      * @throws PCEException
      */
-    public Map<String, List<TopoEdge>> computeNonPalindromicERO(RequestedVlanPipeE requestPipe, ScheduleSpecificationE requestSched, List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList) throws PCEException
-    {
+    public Map<String, List<TopoEdge>> computeNonPalindromicERO(RequestedVlanPipeE requestPipe,
+                                                                ScheduleSpecificationE requestSched,
+                                                                List<ReservedBandwidthE> rsvBwList,
+                                                                List<ReservedVlanE> rsvVlanList) throws PCEException {
         Topology ethTopo = topoService.layer(Layer.ETHERNET);
         Topology intTopo = topoService.layer(Layer.INTERNAL);
         Topology mplsTopo = topoService.layer(Layer.MPLS);
@@ -61,20 +62,16 @@ public class NonPalindromicalPCE
                 .filter(v -> v.getVertexType().equals(VertexType.PORT))
                 .collect(Collectors.toSet());
 
-        for(TopoEdge intEdge : intTopo.getEdges())
-        {
+        for (TopoEdge intEdge : intTopo.getEdges()) {
             TopoVertex vertA = intEdge.getA();
             TopoVertex vertZ = intEdge.getZ();
 
-            if(portsOnly.isEmpty())
-            {
+            if (portsOnly.isEmpty()) {
                 break;
             }
 
-            if(portsOnly.contains(vertA))
-            {
-                if(!vertZ.getVertexType().equals(VertexType.ROUTER))
-                {
+            if (portsOnly.contains(vertA)) {
+                if (!vertZ.getVertexType().equals(VertexType.ROUTER)) {
                     portsOnly.remove(vertA);
                 }
             }
@@ -97,8 +94,8 @@ public class NonPalindromicalPCE
         serviceLayerTopology.resetLogicalLinks();
 
 
-        UrnE srcDeviceURN = requestPipe.getAJunction().getDeviceUrn();
-        UrnE dstDeviceURN = requestPipe.getZJunction().getDeviceUrn();
+        UrnE srcDeviceURN = topoService.getUrn(requestPipe.getAJunction().getDeviceUrn());
+        UrnE dstDeviceURN = topoService.getUrn(requestPipe.getZJunction().getDeviceUrn());
 
         VertexType srcType = topoService.getVertexTypeFromDeviceType(srcDeviceURN.getDeviceType());
         VertexType dstType = topoService.getVertexTypeFromDeviceType(dstDeviceURN.getDeviceType());
@@ -106,8 +103,8 @@ public class NonPalindromicalPCE
         TopoVertex srcDevice = new TopoVertex(srcDeviceURN.getUrn(), srcType);
         TopoVertex dstDevice = new TopoVertex(dstDeviceURN.getUrn(), dstType);
 
-        UrnE srcPortURN = requestPipe.getAJunction().getFixtures().iterator().next().getPortUrn();
-        UrnE dstPortURN = requestPipe.getZJunction().getFixtures().iterator().next().getPortUrn();
+        UrnE srcPortURN = topoService.getUrn(requestPipe.getAJunction().getFixtures().iterator().next().getPortUrn());
+        UrnE dstPortURN = topoService.getUrn(requestPipe.getZJunction().getFixtures().iterator().next().getPortUrn());
 
         TopoVertex srcPort = new TopoVertex(srcPortURN.getUrn(), VertexType.PORT);
         TopoVertex dstPort = new TopoVertex(dstPortURN.getUrn(), VertexType.PORT);
@@ -128,31 +125,24 @@ public class NonPalindromicalPCE
         TopoVertex serviceLayerSrcNode;
         TopoVertex serviceLayerDstNode;
 
-        if(srcDevice.getVertexType().equals(VertexType.SWITCH))
-        {
+        if (srcDevice.getVertexType().equals(VertexType.SWITCH)) {
             serviceLayerSrcNode = srcPort;
-        }
-        else
-        {
+        } else {
             serviceLayerSrcNode = serviceLayerTopology.getVirtualNode(srcDevice);
-            assert(serviceLayerSrcNode != null);
+            assert (serviceLayerSrcNode != null);
         }
 
-        if(dstDevice.getVertexType().equals(VertexType.SWITCH))
-        {
+        if (dstDevice.getVertexType().equals(VertexType.SWITCH)) {
             serviceLayerDstNode = dstPort;
-        }
-        else
-        {
+        } else {
             serviceLayerDstNode = serviceLayerTopology.getVirtualNode(dstDevice);
-            assert(serviceLayerDstNode != null);
+            assert (serviceLayerDstNode != null);
         }
 
         // Shortest path routing on Service-Layer
         List<TopoEdge> azServiceLayerERO = dijkstraPCE.computeShortestPathEdges(prunedSlTopo, serviceLayerSrcNode, serviceLayerDstNode);
 
-        if (azServiceLayerERO.isEmpty())
-        {
+        if (azServiceLayerERO.isEmpty()) {
             throw new PCEException("Empty path NonPalindromic PCE");
         }
 
@@ -160,15 +150,13 @@ public class NonPalindromicalPCE
         List<TopoEdge> zaServiceLayerERO = new LinkedList<>();
 
         // 1. Reverse the links
-        for(TopoEdge azEdge : azServiceLayerERO)
-        {
+        for (TopoEdge azEdge : azServiceLayerERO) {
             Optional<TopoEdge> reverseEdge = prunedSlTopo.getEdges().stream()
                     .filter(r -> r.getA().equals(azEdge.getZ()))
                     .filter(r -> r.getZ().equals(azEdge.getA()))
                     .findFirst();
 
-            if(reverseEdge.isPresent())
-            {
+            if (reverseEdge.isPresent()) {
                 zaServiceLayerERO.add(reverseEdge.get());
             }
         }
@@ -178,8 +166,8 @@ public class NonPalindromicalPCE
 
         Map<String, List<TopoEdge>> theMap = new HashMap<>();
 
-        if(!(azServiceLayerERO.size() == zaServiceLayerERO.size()))
-            return  theMap;
+        if (!(azServiceLayerERO.size() == zaServiceLayerERO.size()))
+            return theMap;
 
         List<TopoEdge> azERO;
         List<TopoEdge> zaERO;

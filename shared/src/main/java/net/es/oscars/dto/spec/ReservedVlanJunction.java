@@ -15,7 +15,7 @@ public class ReservedVlanJunction {
     private Long id;
 
     @NonNull
-    private Urn deviceUrn;
+    private String deviceUrn;
 
     @NonNull
     private EthJunctionType junctionType;

@@ -13,7 +13,7 @@ public class RequestedVlanFixture {
 
 
     @NonNull
-    private Urn portUrn;
+    private String portUrn;
 
     private Integer vlanId;
 

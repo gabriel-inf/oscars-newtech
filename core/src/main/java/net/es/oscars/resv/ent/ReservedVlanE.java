@@ -1,12 +1,9 @@
 package net.es.oscars.resv.ent;
 
 import lombok.*;
-import net.es.oscars.dto.resv.ResourceType;
-import net.es.oscars.topo.ent.UrnE;
 
 import javax.persistence.*;
 import java.time.Instant;
-import java.util.List;
 
 @Data
 @Builder
@@ -20,8 +17,7 @@ public class ReservedVlanE {
     private Long id;
 
     @NonNull
-    @OneToOne(cascade = CascadeType.ALL)
-    private UrnE urn;
+    private String urn;
 
     private Integer vlan;
 
