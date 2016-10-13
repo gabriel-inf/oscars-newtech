@@ -50,6 +50,7 @@ public class TopPCE {
     /**
      * Given a requested Blueprint (made up of a VLAN or Layer3 Flow) and a Schedule Specification, attempt
      * to reserve available resources to meet the demand. If it is not possible, return an empty Optional<ReservedBlueprintE>
+     *
      * @param requested - Requested blueprint
      * @param schedSpec - Requested schedule
      * @return ReservedBlueprint containing the reserved resources, or an empty Optional if the reservation is not possible.
@@ -85,8 +86,10 @@ public class TopPCE {
         // Attempt to reserve simple junctions
         log.info("Handling Simple Junctions");
         Set<ReservedVlanJunctionE> simpleJunctions = new HashSet<>();
-        for(RequestedVlanJunctionE reqJunction : req_f.getJunctions())
-        {
+        for (RequestedVlanJunctionE reqJunction : req_f.getJunctions()) {
+
+            log.info("handling junction "+reqJunction.getDeviceUrn().getUrn());
+
             // Update list of reserved bandwidths
             List<ReservedBandwidthE> rsvBandwidths = bwService.createReservedBandwidthList(simpleJunctions, reservedMplsPipes,
                     reservedEthPipes, schedSpec);
@@ -97,13 +100,15 @@ public class TopPCE {
             ReservedVlanJunctionE junction = transPCE.reserveSimpleJunction(reqJunction, schedSpec, simpleJunctions,
                     rsvBandwidths, rsvVlans, deviceToPortMap, portToDeviceMap);
 
-            if(junction != null){
+            if (junction != null) {
                 simpleJunctions.add(junction);
+            } else {
+                log.error("failed at junction "+reqJunction.getDeviceUrn().getUrn());
             }
         }
         log.info("All simple junctions handled");
         // If not all junctions were able to be reserved, return the empty Optional<Blueprint>
-        if(simpleJunctions.size() != req_f.getJunctions().size()){
+        if (simpleJunctions.size() != req_f.getJunctions().size()) {
             return reserved;
         }
 
@@ -117,7 +122,7 @@ public class TopPCE {
                 reservedEthPipes, deviceToPortMap, portToDeviceMap);
 
         // If pipes were not able to be reserved in the original order, try reversing the order pipes are attempted
-        if((numReserved != pipes.size()) && (pipes.size() > 1)){
+        if ((numReserved != pipes.size()) && (pipes.size() > 1)) {
             Collections.reverse(pipes);
             reservedEthPipes = new HashSet<>();
             reservedMplsPipes = new HashSet<>();
@@ -127,7 +132,7 @@ public class TopPCE {
         }
 
         // If the pipes still cannot be reserved, return the blank Reserved Vlan Flow
-        if(numReserved != pipes.size()){
+        if (numReserved != pipes.size()) {
             return reserved;
         }
         // All pipes were successfully found, store the reserved resources
@@ -150,24 +155,23 @@ public class TopPCE {
     /**
      * Given a list of requested pipes and a schedule, attempt to reserve junctions & pipes to implement the request.
      * Sets of currently reserved junctions and pipes are passed in to track how many resources have already been reserved.
-     * @param pipes - The requested pipes
-     * @param schedSpec - The requested schedule
-     * @param simpleJunctions - The currently reserved independent junctions
+     *
+     * @param pipes             - The requested pipes
+     * @param schedSpec         - The requested schedule
+     * @param simpleJunctions   - The currently reserved independent junctions
      * @param reservedMplsPipes - The currently reserved MPLS pipes
-     * @param reservedEthPipes - The currently reserved Ethernet pipes
+     * @param reservedEthPipes  - The currently reserved Ethernet pipes
      * @param deviceToPortMap
-     *@param portToDeviceMap @return The number of requested pipes which were able to be reserved
+     * @param portToDeviceMap   @return The number of requested pipes which were able to be reserved
      */
     private Integer handleRequestedPipes(List<RequestedVlanPipeE> pipes, ScheduleSpecificationE schedSpec,
                                          Set<ReservedVlanJunctionE> simpleJunctions, Set<ReservedMplsPipeE> reservedMplsPipes,
-                                         Set<ReservedEthPipeE> reservedEthPipes, Map<String, Set<String>> deviceToPortMap, Map<String, String> portToDeviceMap)
-    {
+                                         Set<ReservedEthPipeE> reservedEthPipes, Map<String, Set<String>> deviceToPortMap, Map<String, String> portToDeviceMap) {
         // The number of requested pipes successfully reserved
         Integer numReserved = 0;
 
         // Loop through all requested pipes
-        for(RequestedVlanPipeE pipe: pipes)
-        {
+        for (RequestedVlanPipeE pipe : pipes) {
 
             // Update list of reserved bandwidths
             List<ReservedBandwidthE> rsvBandwidths = bwService.createReservedBandwidthList(simpleJunctions, reservedMplsPipes,
@@ -180,7 +184,7 @@ public class TopPCE {
             Map<String, List<TopoEdge>> eroMapForPipe = findShortestConstrainedPath(pipe, schedSpec, rsvBandwidths, rsvVlans);
 
             // If the paths are valid, attempt to reserve the resources
-            if(verifyEros(eroMapForPipe)){
+            if (verifyEros(eroMapForPipe)) {
                 // Increment the number reserved
                 numReserved++;
                 // Get the AZ and ZA paths
@@ -193,15 +197,14 @@ public class TopPCE {
                             reservedMplsPipes, reservedEthPipes, deviceToPortMap, portToDeviceMap);
                 }
                 // If it failed, decrement the number reserved
-                catch(Exception e){
+                catch (Exception e) {
                     log.info(e.toString());
                     e.printStackTrace();
                     numReserved--;
                 }
             }
             // If the survivable paths are valid, attempt to reserve the resources
-            else if(verifySurvEros(eroMapForPipe))
-            {
+            else if (verifySurvEros(eroMapForPipe)) {
                 // Increment the number reserved
                 numReserved++;
                 // Get the AZ and ZA paths
@@ -209,21 +212,19 @@ public class TopPCE {
                 List<List<TopoEdge>> azEROs = new ArrayList<>();
                 List<List<TopoEdge>> zaEROs = new ArrayList<>();
 
-                for(Integer i = 1; i < eroMapForPipe.size() / 2 + 1; i++){
+                for (Integer i = 1; i < eroMapForPipe.size() / 2 + 1; i++) {
 
                     azEROs.add(eroMapForPipe.get("az" + i));
                     zaEROs.add(eroMapForPipe.get("za" + i));
                 }
 
                 // Try to get the reserved resources
-                try
-                {
+                try {
                     transPCE.reserveRequestedPipeWithPairs(pipe, schedSpec, azEROs, zaEROs, rsvBandwidths,
                             rsvVlans, reservedMplsPipes, reservedEthPipes, deviceToPortMap, portToDeviceMap);
                 }
                 // If it failed, decrement the number reserved
-                catch(Exception e)
-                {
+                catch (Exception e) {
                     log.info(e.toString());
                     numReserved--;
                 }
@@ -235,47 +236,38 @@ public class TopPCE {
     /**
      * Given a requested pipe and schedule, find the shortest path that meets the demand given what has been requested
      * so far.
-     * @param pipe - The requested pipe.
-     * @param schedSpec - The requested schedule
+     *
+     * @param pipe          - The requested pipe.
+     * @param schedSpec     - The requested schedule
      * @param rsvBandwidths - A list of all reserved bandwidths (so far)
-     * @param rsvVlans - A list of all reserved VLANs (so far)
+     * @param rsvVlans      - A list of all reserved VLANs (so far)
      * @return A map containing the AZ and ZA shortest paths
      */
-    private Map<String,List<TopoEdge>> findShortestConstrainedPath(RequestedVlanPipeE pipe,
-                                                                   ScheduleSpecificationE schedSpec,
-                                                                   List<ReservedBandwidthE> rsvBandwidths,
-                                                                   List<ReservedVlanE> rsvVlans) {
+    private Map<String, List<TopoEdge>> findShortestConstrainedPath(RequestedVlanPipeE pipe,
+                                                                    ScheduleSpecificationE schedSpec,
+                                                                    List<ReservedBandwidthE> rsvBandwidths,
+                                                                    List<ReservedVlanE> rsvVlans) {
         log.info("Computing Shortest Constrained Path");
         Map<String, List<TopoEdge>> eroMap = null;
 
-        try
-        {
-            if(!pipe.getEroSurvivability().equals(SurvivabilityType.SURVIVABILITY_NONE) && pipe.getNumDisjoint() > 1)
-            {
+        try {
+            if (!pipe.getEroSurvivability().equals(SurvivabilityType.SURVIVABILITY_NONE) && pipe.getNumDisjoint() > 1) {
                 log.info("Entering Survivability PCE");
                 eroMap = survivabilityPCE.computeSurvivableERO(pipe, schedSpec, rsvBandwidths, rsvVlans);
                 log.info("Exiting Survivability PCE");
-            }
-            else if(!pipe.getAzERO().isEmpty() && !pipe.getZaERO().isEmpty())
-            {
+            } else if (!pipe.getAzERO().isEmpty() && !pipe.getZaERO().isEmpty()) {
                 log.info("Attempting to reserve specified Explicit Route Object");
                 eroMap = eroPCE.computeSpecifiedERO(pipe, schedSpec, rsvBandwidths, rsvVlans);
-            }
-            else if(pipe.getEroPalindromic().equals(PalindromicType.PALINDROME))
-            {
+            } else if (pipe.getEroPalindromic().equals(PalindromicType.PALINDROME)) {
                 log.info("Entering Palindromical PCE");
                 eroMap = palindromicalPCE.computePalindromicERO(pipe, schedSpec, rsvBandwidths, rsvVlans);       // A->Z ERO is palindrome of Z->A ERO
                 log.info("Exiting Palindromical PCE");
-            }
-            else
-            {
+            } else {
                 log.info("Entering NON-Palindromical PCE");
                 eroMap = nonPalindromicPCE.computeNonPalindromicERO(pipe, schedSpec, rsvBandwidths, rsvVlans);       // A->Z ERO is NOT palindrome of Z->A ERO
                 log.info("Exiting NON-Palindromical PCE");
             }
-        }
-        catch(PCEException e)
-        {
+        } catch (PCEException e) {
             log.error("PCE Unsuccessful", e);
         }
 
@@ -285,15 +277,13 @@ public class TopPCE {
 
     /**
      * Verify that there both the AZ and ZA paths were found given a map of shortest paths.
+     *
      * @param eroMap The map containing the AZ and ZA shortest paths (keys: "az" and "za")
      * @return True if both paths found, False otherwise.
      */
-    private boolean verifyEros(Map<String, List<TopoEdge>> eroMap)
-    {
-        if(eroMap != null)
-        {
-            if (eroMap.size() == 2)
-            {
+    private boolean verifyEros(Map<String, List<TopoEdge>> eroMap) {
+        if (eroMap != null) {
+            if (eroMap.size() == 2) {
                 return eroMap.values().stream().allMatch(l -> l.size() > 0);
             }
         }
@@ -303,15 +293,13 @@ public class TopPCE {
 
     /**
      * Verify that primary and secondary AZ and ZA paths were found given a map of shortest paths.
+     *
      * @param eroMap The map containing the AZ and ZA shortest paths (keys: "azPrimary", "zaPrimary", "azSecondary", "zaSecondary")
      * @return True if both paths found, False otherwise.
      */
-    private boolean verifySurvEros(Map<String, List<TopoEdge>> eroMap)
-    {
-        if(eroMap != null)
-        {
-            if (eroMap.size() == 4)
-            {
+    private boolean verifySurvEros(Map<String, List<TopoEdge>> eroMap) {
+        if (eroMap != null) {
+            if (eroMap.size() == 4) {
                 return eroMap.values().stream().allMatch(l -> l.size() > 0);
             }
         }
@@ -321,6 +309,7 @@ public class TopPCE {
 
     /**
      * Confirm that the requested blueprint is valid.
+     *
      * @param requested The requested blueprint.
      * @throws PCEException
      */
@@ -347,7 +336,7 @@ public class TopPCE {
             allJunctions.add(t.getZJunction());
         });
 
-        for (RequestedVlanJunctionE junction: allJunctions) {
+        for (RequestedVlanJunctionE junction : allJunctions) {
             // throws exception if device not found in topology
             try {
                 topoService.device(junction.getDeviceUrn().getUrn());

@@ -91,8 +91,6 @@ public class ResvController {
         log.info("saving a new basic spec");
         log.info(dtoSpec.toString());
 
-
-
         return makeConnectionFromBasic(dtoSpec);
     }
 
@@ -104,6 +102,16 @@ public class ResvController {
 
         return makeConnectionFromVlanSpec(spec);
     }
+
+    @RequestMapping(value = "/resv/connection/add", method = RequestMethod.POST)
+    @ResponseBody
+    public Connection submitConnection(@RequestBody Connection connection) throws PSSException, PCEException{
+        log.info("Submitting a new complicated connection request");
+        log.info(connection.toString());
+
+        return holdConnection(connection);
+    }
+
 
 
     @RequestMapping(value = "/resv/bwAvail/", method = RequestMethod.POST)
@@ -142,6 +150,22 @@ public class ResvController {
         }
 
         return this.convertConnToDto(connE);
+
+    }
+
+    private Connection holdConnection(Connection connection) throws PCEException, PSSException {
+        ConnectionE connE = modelMapper.map(connection, ConnectionE.class);
+        resvService.hold(connE);
+
+        log.info("saved connection, connectionId " + connection.getConnectionId());
+        log.info(connE.toString());
+
+
+        Connection conn = modelMapper.map(connE, Connection.class);
+        log.info(conn.toString());
+
+
+        return conn;
 
     }
 

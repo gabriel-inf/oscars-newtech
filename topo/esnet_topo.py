@@ -78,6 +78,12 @@ def merge_phy_ports(ports=None, oscars_devices=None, igp_portmap=None):
                         ifce_data["capabilities"] = ["MPLS"]
                     else:
                         ifce_data["capabilities"] = ["ETHERNET"]
+                        ifce_data["reservableVlans"] = [
+                            {
+                                "floor": 2000,
+                                "ceiling": 2999
+                            }
+                        ]
 
                     device["ifces"].append(ifce_data)
 
@@ -131,7 +137,7 @@ def model_map(os=None, description=None):
     elif description == "Juniper":
         parts = str(os).split(" ")
         model = "JUNIPER_MX"
-#        model = "JUNIPER_" + str(parts[0]).upper()
+        #        model = "JUNIPER_" + str(parts[0]).upper()
         return model
     else:
         raise ValueError("could not decide router model for [%s] [%s]" % (os, description))

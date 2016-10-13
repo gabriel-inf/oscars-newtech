@@ -8,6 +8,7 @@ import net.es.oscars.dto.resv.Connection;
 import net.es.oscars.dto.spec.*;
 import net.es.oscars.dto.topo.Urn;
 import net.es.oscars.webui.dto.MinimalRequest;
+import net.es.oscars.webui.ipc.MinimalRequester;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -25,6 +26,9 @@ public class ReservationController {
 
     @Autowired
     private RestTemplate restTemplate;
+
+    @Autowired
+    private MinimalRequester minimalRequester;
 
     @RequestMapping("/resv_basic_new")
     public String resv_basic_new(Model model) {
@@ -148,8 +152,7 @@ public class ReservationController {
     @RequestMapping(value = "/resv/minimal_submit", method = RequestMethod.POST)
     @ResponseBody
     public String resv_minimal_submit(@RequestBody MinimalRequest request) {
-        log.info("got a minimal request");
-        log.info(request.toString());
+        Connection c = minimalRequester.submitMinimal(request);
 
         return "got it";
 

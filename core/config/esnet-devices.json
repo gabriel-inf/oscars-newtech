@@ -23,6 +23,12 @@
         ]
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "pppl-rt5:xe-1/2/0",
         "capabilities": [
           "ETHERNET"
@@ -30,6 +36,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "pppl-rt5:ge-0/0/2",
         "capabilities": [
           "ETHERNET"
@@ -37,6 +49,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "pppl-rt5:xe-1/1/0",
         "capabilities": [
           "ETHERNET"
@@ -44,6 +62,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "pppl-rt5:ge-0/0/0",
         "capabilities": [
           "ETHERNET"
@@ -51,6 +75,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "pppl-rt5:xe-1/3/0",
         "capabilities": [
           "ETHERNET"
@@ -58,6 +88,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "pppl-rt5:xe-2/0/0",
         "capabilities": [
           "ETHERNET"
@@ -65,6 +101,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "pppl-rt5:ge-0/1/1",
         "capabilities": [
           "ETHERNET"
@@ -174,6 +216,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "chic-cr5:10/1/1",
         "capabilities": [
           "ETHERNET"
@@ -195,6 +243,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "chic-cr5:3/2/1",
         "capabilities": [
           "ETHERNET"
@@ -202,6 +256,12 @@
         "reservableBw": 100000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "chic-cr5:10/1/9",
         "capabilities": [
           "ETHERNET"
@@ -209,6 +269,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "chic-cr5:5/1/1",
         "capabilities": [
           "ETHERNET"
@@ -276,6 +342,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "srs-rt3:fe-0/3/3",
         "capabilities": [
           "ETHERNET"
@@ -283,6 +355,12 @@
         "reservableBw": 100
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "srs-rt3:fe-0/3/1",
         "capabilities": [
           "ETHERNET"
@@ -290,6 +368,12 @@
         "reservableBw": 100
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "srs-rt3:ge-1/0/0",
         "capabilities": [
           "ETHERNET"
@@ -297,6 +381,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "srs-rt3:ge-0/0/0",
         "capabilities": [
           "ETHERNET"
@@ -329,6 +419,12 @@
         ]
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "anl-mr2:xe-1/2/0",
         "capabilities": [
           "ETHERNET"
@@ -336,6 +432,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "anl-mr2:ae0",
         "capabilities": [
           "ETHERNET"
@@ -343,6 +445,12 @@
         "reservableBw": 20000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "anl-mr2:xe-0/1/0",
         "capabilities": [
           "ETHERNET"
@@ -350,6 +458,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "anl-mr2:xe-1/3/0",
         "capabilities": [
           "ETHERNET"
@@ -396,6 +510,12 @@
         ]
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "orau-rt3:ge-0/3/0",
         "capabilities": [
           "ETHERNET"
@@ -417,6 +537,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "orau-rt3:fe-0/0/0",
         "capabilities": [
           "ETHERNET"
@@ -424,6 +550,12 @@
         "reservableBw": 100
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "orau-rt3:ge-0/1/0",
         "capabilities": [
           "ETHERNET"
@@ -477,6 +609,12 @@
         ]
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "eqx-ash-rt1:ge-0/0/7",
         "capabilities": [
           "ETHERNET"
@@ -484,6 +622,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "eqx-ash-rt1:ae0",
         "capabilities": [
           "ETHERNET"
@@ -491,6 +635,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "eqx-ash-rt1:ge-0/0/3",
         "capabilities": [
           "ETHERNET"
@@ -498,6 +648,12 @@
         "reservableBw": 100
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "eqx-ash-rt1:ge-0/0/2",
         "capabilities": [
           "ETHERNET"
@@ -512,6 +668,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "eqx-ash-rt1:ge-0/1/9",
         "capabilities": [
           "ETHERNET"
@@ -519,6 +681,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "eqx-ash-rt1:ge-0/1/6",
         "capabilities": [
           "ETHERNET"
@@ -526,6 +694,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "eqx-ash-rt1:xe-0/3/0",
         "capabilities": [
           "ETHERNET"
@@ -533,6 +707,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "eqx-ash-rt1:ge-0/1/5",
         "capabilities": [
           "ETHERNET"
@@ -554,6 +734,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "eqx-ash-rt1:ge-0/0/0",
         "capabilities": [
           "ETHERNET"
@@ -561,6 +747,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "eqx-ash-rt1:ge-0/0/6",
         "capabilities": [
           "ETHERNET"
@@ -575,6 +767,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "eqx-ash-rt1:ge-0/1/7",
         "capabilities": [
           "ETHERNET"
@@ -582,6 +780,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "eqx-ash-rt1:xe-1/2/0",
         "capabilities": [
           "ETHERNET"
@@ -589,6 +793,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "eqx-ash-rt1:ge-0/1/1",
         "capabilities": [
           "ETHERNET"
@@ -596,6 +806,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "eqx-ash-rt1:ge-0/1/8",
         "capabilities": [
           "ETHERNET"
@@ -628,6 +844,12 @@
         ]
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "llnldc-rt4:ge-0/2/0",
         "capabilities": [
           "ETHERNET"
@@ -635,6 +857,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "llnldc-rt4:fe-0/0/3",
         "capabilities": [
           "ETHERNET"
@@ -642,6 +870,12 @@
         "reservableBw": 100
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "llnldc-rt4:ge-0/1/0",
         "capabilities": [
           "ETHERNET"
@@ -702,6 +936,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "newy-cr5:10/1/2",
         "capabilities": [
           "ETHERNET"
@@ -709,6 +949,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "newy-cr5:10/1/3",
         "capabilities": [
           "ETHERNET"
@@ -716,6 +962,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "newy-cr5:10/1/9",
         "capabilities": [
           "ETHERNET"
@@ -730,6 +982,12 @@
         "reservableBw": 100000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "newy-cr5:3/1/1",
         "capabilities": [
           "ETHERNET"
@@ -860,6 +1118,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "sunn-cr5:10/1/6",
         "capabilities": [
           "ETHERNET"
@@ -881,6 +1145,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "sunn-cr5:9/1/5",
         "capabilities": [
           "ETHERNET"
@@ -888,6 +1158,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "sunn-cr5:8/1/1",
         "capabilities": [
           "ETHERNET"
@@ -895,6 +1171,12 @@
         "reservableBw": 100000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "sunn-cr5:5/2/1",
         "capabilities": [
           "ETHERNET"
@@ -909,6 +1191,12 @@
         "reservableBw": 100000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "sunn-cr5:4/1/1",
         "capabilities": [
           "ETHERNET"
@@ -916,6 +1204,12 @@
         "reservableBw": 100000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "sunn-cr5:7/1/1",
         "capabilities": [
           "ETHERNET"
@@ -930,6 +1224,12 @@
         "reservableBw": 100000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "sunn-cr5:7/2/1",
         "capabilities": [
           "ETHERNET"
@@ -951,6 +1251,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "sunn-cr5:8/2/1",
         "capabilities": [
           "ETHERNET"
@@ -1018,6 +1324,12 @@
         ]
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "fnal-mr2:ae0",
         "capabilities": [
           "ETHERNET"
@@ -1032,6 +1344,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "fnal-mr2:xe-1/3/0",
         "capabilities": [
           "ETHERNET"
@@ -1053,6 +1371,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "fnal-mr2:xe-0/2/0",
         "capabilities": [
           "ETHERNET"
@@ -1113,6 +1437,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "ornl-cr5:10/1/3",
         "capabilities": [
           "ETHERNET"
@@ -1120,6 +1450,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "ornl-cr5:7/1/1",
         "capabilities": [
           "ETHERNET"
@@ -1180,6 +1516,12 @@
         "reservableBw": 2000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "wash-ar1:t3-0/3/0",
         "capabilities": [
           "ETHERNET"
@@ -1226,6 +1568,12 @@
         ]
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "forr-rt2:ge-0/0/6",
         "capabilities": [
           "ETHERNET"
@@ -1233,6 +1581,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "forr-rt2:ge-0/0/5",
         "capabilities": [
           "ETHERNET"
@@ -1240,6 +1594,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "forr-rt2:ge-0/0/4",
         "capabilities": [
           "ETHERNET"
@@ -1247,6 +1607,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "forr-rt2:ge-0/0/3",
         "capabilities": [
           "ETHERNET"
@@ -1254,6 +1620,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "forr-rt2:ge-0/0/2",
         "capabilities": [
           "ETHERNET"
@@ -1356,6 +1728,12 @@
         ]
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "sacr-cr5:10/1/4",
         "capabilities": [
           "ETHERNET"
@@ -1363,6 +1741,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "sacr-cr5:10/1/6",
         "capabilities": [
           "ETHERNET"
@@ -1370,6 +1754,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "sacr-cr5:10/1/1",
         "capabilities": [
           "ETHERNET"
@@ -1377,6 +1767,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "sacr-cr5:10/1/2",
         "capabilities": [
           "ETHERNET"
@@ -1472,6 +1868,12 @@
         ]
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "paix-pa-rt3:xe-1/3/0",
         "capabilities": [
           "ETHERNET"
@@ -1511,6 +1913,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "pantex-rt3:ge-0/2/0",
         "capabilities": [
           "ETHERNET"
@@ -1518,6 +1926,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "pantex-rt3:ge-1/0/0",
         "capabilities": [
           "ETHERNET"
@@ -1525,6 +1939,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "pantex-rt3:ge-0/1/0",
         "capabilities": [
           "ETHERNET"
@@ -1578,6 +1998,12 @@
         ]
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "pnwg-cr5:10/1/5",
         "capabilities": [
           "ETHERNET"
@@ -1592,6 +2018,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "pnwg-cr5:10/1/2",
         "capabilities": [
           "ETHERNET"
@@ -1599,6 +2031,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "pnwg-cr5:10/1/3",
         "capabilities": [
           "ETHERNET"
@@ -1627,6 +2065,12 @@
         "reservableBw": 100000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "pnwg-cr5:2/1/1",
         "capabilities": [
           "ETHERNET"
@@ -1634,6 +2078,12 @@
         "reservableBw": 100000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "pnwg-cr5:9/1/5",
         "capabilities": [
           "ETHERNET"
@@ -1641,6 +2091,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "pnwg-cr5:9/1/1",
         "capabilities": [
           "ETHERNET"
@@ -1655,6 +2111,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "pnwg-cr5:9/1/2",
         "capabilities": [
           "ETHERNET"
@@ -1694,6 +2156,12 @@
         ]
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "elpa-cr5:10/1/4",
         "capabilities": [
           "ETHERNET"
@@ -1701,6 +2169,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "elpa-cr5:10/1/3",
         "capabilities": [
           "ETHERNET"
@@ -1761,6 +2235,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "bois-cr1:xe-1/2/0",
         "capabilities": [
           "ETHERNET"
@@ -1768,6 +2248,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "bois-cr1:xe-0/1/0",
         "capabilities": [
           "ETHERNET"
@@ -1782,6 +2268,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "bois-cr1:xe-0/2/0",
         "capabilities": [
           "ETHERNET"
@@ -1789,6 +2281,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "bois-cr1:xe-7/0/0",
         "capabilities": [
           "ETHERNET"
@@ -1796,6 +2294,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "bois-cr1:xe-7/3/0",
         "capabilities": [
           "ETHERNET"
@@ -1803,6 +2307,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "bois-cr1:xe-1/0/0",
         "capabilities": [
           "ETHERNET"
@@ -1874,6 +2384,12 @@
         ]
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "cern-272-cr5:10/1/1",
         "capabilities": [
           "ETHERNET"
@@ -1881,6 +2397,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "cern-272-cr5:10/1/2",
         "capabilities": [
           "ETHERNET"
@@ -1888,6 +2410,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "cern-272-cr5:10/1/3",
         "capabilities": [
           "ETHERNET"
@@ -1895,6 +2423,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "cern-272-cr5:BLANK",
         "capabilities": [
           "ETHERNET"
@@ -1941,6 +2475,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "snla-rt3:ge-1/1/3",
         "capabilities": [
           "ETHERNET"
@@ -1948,6 +2488,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "snla-rt3:ge-1/1/2",
         "capabilities": [
           "ETHERNET"
@@ -1955,6 +2501,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "snla-rt3:ge-1/1/1",
         "capabilities": [
           "ETHERNET"
@@ -1962,6 +2514,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "snla-rt3:ge-1/0/2",
         "capabilities": [
           "ETHERNET"
@@ -1969,6 +2527,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "snla-rt3:xe-0/0/0",
         "capabilities": [
           "ETHERNET"
@@ -1976,6 +2540,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "snla-rt3:ge-1/0/3",
         "capabilities": [
           "ETHERNET"
@@ -2022,6 +2592,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "slac-mr2:xe-2/1/0",
         "capabilities": [
           "ETHERNET"
@@ -2029,6 +2605,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "slac-mr2:xe-0/1/0",
         "capabilities": [
           "ETHERNET"
@@ -2036,6 +2618,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "slac-mr2:xe-1/3/0",
         "capabilities": [
           "ETHERNET"
@@ -2050,6 +2638,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "slac-mr2:xe-0/2/0",
         "capabilities": [
           "ETHERNET"
@@ -2089,6 +2683,12 @@
         ]
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "ameslab-rt3:xe-1/1/0",
         "capabilities": [
           "ETHERNET"
@@ -2096,6 +2696,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "ameslab-rt3:xe-0/1/0",
         "capabilities": [
           "ETHERNET"
@@ -2103,6 +2709,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "ameslab-rt3:xe-1/3/0",
         "capabilities": [
           "ETHERNET"
@@ -2117,6 +2729,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "ameslab-rt3:xe-0/2/0",
         "capabilities": [
           "ETHERNET"
@@ -2191,6 +2809,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "snll-mr2:xe-0/1/0",
         "capabilities": [
           "ETHERNET"
@@ -2198,6 +2822,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "snll-mr2:xe-1/3/0",
         "capabilities": [
           "ETHERNET"
@@ -2212,6 +2842,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "snll-mr2:xe-0/0/0",
         "capabilities": [
           "ETHERNET"
@@ -2226,6 +2862,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "snll-mr2:xe-2/3/0",
         "capabilities": [
           "ETHERNET"
@@ -2272,6 +2914,12 @@
         ]
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "hous-cr5:10/1/4",
         "capabilities": [
           "ETHERNET"
@@ -2279,6 +2927,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "hous-cr5:10/1/3",
         "capabilities": [
           "ETHERNET"
@@ -2332,6 +2986,12 @@
         ]
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "lsvn-cr1:xe-2/1/0",
         "capabilities": [
           "ETHERNET"
@@ -2346,6 +3006,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "lsvn-cr1:xe-2/0/0",
         "capabilities": [
           "ETHERNET"
@@ -2353,6 +3019,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "lsvn-cr1:ge-1/1/1",
         "capabilities": [
           "ETHERNET"
@@ -2360,6 +3032,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "lsvn-cr1:ge-1/1/0",
         "capabilities": [
           "ETHERNET"
@@ -2367,6 +3045,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "lsvn-cr1:ge-1/0/0",
         "capabilities": [
           "ETHERNET"
@@ -2374,6 +3058,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "lsvn-cr1:ge-1/0/1",
         "capabilities": [
           "ETHERNET"
@@ -2427,6 +3117,12 @@
         ]
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "albq-cr5:10/1/4",
         "capabilities": [
           "ETHERNET"
@@ -2434,6 +3130,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "albq-cr5:10/1/5",
         "capabilities": [
           "ETHERNET"
@@ -2462,6 +3164,12 @@
         "reservableBw": 100000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "albq-cr5:3/1/1",
         "capabilities": [
           "ETHERNET"
@@ -2494,6 +3202,12 @@
         ]
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "eqx-sj-rt1:ae0",
         "capabilities": [
           "ETHERNET"
@@ -2501,6 +3215,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "eqx-sj-rt1:ge-0/0/5",
         "capabilities": [
           "ETHERNET"
@@ -2508,6 +3228,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "eqx-sj-rt1:ge-0/0/3",
         "capabilities": [
           "ETHERNET"
@@ -2515,6 +3241,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "eqx-sj-rt1:ge-0/0/2",
         "capabilities": [
           "ETHERNET"
@@ -2522,6 +3254,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "eqx-sj-rt1:ge-0/0/0",
         "capabilities": [
           "ETHERNET"
@@ -2529,6 +3267,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "eqx-sj-rt1:ge-0/1/6",
         "capabilities": [
           "ETHERNET"
@@ -2536,6 +3280,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "eqx-sj-rt1:ge-0/1/7",
         "capabilities": [
           "ETHERNET"
@@ -2543,6 +3293,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "eqx-sj-rt1:ge-0/1/5",
         "capabilities": [
           "ETHERNET"
@@ -2550,6 +3306,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "eqx-sj-rt1:ge-0/1/1",
         "capabilities": [
           "ETHERNET"
@@ -2564,6 +3326,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "eqx-sj-rt1:ge-0/0/6",
         "capabilities": [
           "ETHERNET"
@@ -2571,6 +3339,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "eqx-sj-rt1:xe-0/3/0",
         "capabilities": [
           "ETHERNET"
@@ -2578,6 +3352,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "eqx-sj-rt1:xe-1/0/0",
         "capabilities": [
           "ETHERNET"
@@ -2617,6 +3397,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "lbl-mr2:xe-7/0/0",
         "capabilities": [
           "ETHERNET"
@@ -2624,6 +3410,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "lbl-mr2:xe-7/1/0",
         "capabilities": [
           "ETHERNET"
@@ -2631,6 +3423,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "lbl-mr2:ae0",
         "capabilities": [
           "ETHERNET"
@@ -2638,6 +3436,12 @@
         "reservableBw": 20000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "lbl-mr2:ge-9/1/2",
         "capabilities": [
           "ETHERNET"
@@ -2645,6 +3449,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "lbl-mr2:ge-9/1/1",
         "capabilities": [
           "ETHERNET"
@@ -2652,6 +3462,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "lbl-mr2:ge-9/1/0",
         "capabilities": [
           "ETHERNET"
@@ -2659,6 +3475,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "lbl-mr2:ge-9/0/6",
         "capabilities": [
           "ETHERNET"
@@ -2666,6 +3488,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "lbl-mr2:ge-9/0/7",
         "capabilities": [
           "ETHERNET"
@@ -2673,6 +3501,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "lbl-mr2:ge-9/0/4",
         "capabilities": [
           "ETHERNET"
@@ -2680,6 +3514,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "lbl-mr2:ge-9/0/5",
         "capabilities": [
           "ETHERNET"
@@ -2687,6 +3527,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "lbl-mr2:ge-9/0/2",
         "capabilities": [
           "ETHERNET"
@@ -2694,6 +3540,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "lbl-mr2:ge-9/0/3",
         "capabilities": [
           "ETHERNET"
@@ -2701,6 +3553,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "lbl-mr2:ge-9/1/9",
         "capabilities": [
           "ETHERNET"
@@ -2708,6 +3566,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "lbl-mr2:ge-9/1/8",
         "capabilities": [
           "ETHERNET"
@@ -2715,6 +3579,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "lbl-mr2:xe-9/3/0",
         "capabilities": [
           "ETHERNET"
@@ -2722,6 +3592,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "lbl-mr2:xe-8/3/0",
         "capabilities": [
           "ETHERNET"
@@ -2736,6 +3612,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "lbl-mr2:xe-7/3/0",
         "capabilities": [
           "ETHERNET"
@@ -2743,6 +3625,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "lbl-mr2:xe-2/1/0",
         "capabilities": [
           "ETHERNET"
@@ -2750,6 +3638,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "lbl-mr2:ge-9/1/6",
         "capabilities": [
           "ETHERNET"
@@ -2757,6 +3651,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "lbl-mr2:xe-0/2/0",
         "capabilities": [
           "ETHERNET"
@@ -2764,6 +3664,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "lbl-mr2:xe-2/3/0",
         "capabilities": [
           "ETHERNET"
@@ -2771,6 +3677,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "lbl-mr2:xe-0/1/0",
         "capabilities": [
           "ETHERNET"
@@ -2778,6 +3690,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "lbl-mr2:xe-8/1/0",
         "capabilities": [
           "ETHERNET"
@@ -2785,6 +3703,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "lbl-mr2:xe-9/2/0",
         "capabilities": [
           "ETHERNET"
@@ -2880,6 +3804,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "denv-cr5:10/1/7",
         "capabilities": [
           "ETHERNET"
@@ -2887,6 +3817,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "denv-cr5:10/1/3",
         "capabilities": [
           "ETHERNET"
@@ -2894,6 +3830,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "denv-cr5:9/1/1",
         "capabilities": [
           "ETHERNET"
@@ -2901,6 +3843,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "denv-cr5:BLANK",
         "capabilities": [
           "ETHERNET"
@@ -2943,6 +3891,12 @@
         "reservableBw": 100000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "denv-cr5:10/1/12",
         "capabilities": [
           "ETHERNET"
@@ -2950,6 +3904,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "denv-cr5:9/1/3",
         "capabilities": [
           "ETHERNET"
@@ -2957,6 +3917,12 @@
         "reservableBw": 9953
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "denv-cr5:10/1/11",
         "capabilities": [
           "ETHERNET"
@@ -2989,6 +3955,12 @@
         ]
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "sdsc-sdn2:xe-0/2/0",
         "capabilities": [
           "ETHERNET"
@@ -2996,6 +3968,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "sdsc-sdn2:xe-1/3/0",
         "capabilities": [
           "ETHERNET"
@@ -3003,6 +3981,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "sdsc-sdn2:xe-0/0/0",
         "capabilities": [
           "ETHERNET"
@@ -3049,6 +4033,12 @@
         ]
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "ga-rt2:xe-0/1/0",
         "capabilities": [
           "ETHERNET"
@@ -3056,6 +4046,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "ga-rt2:xe-0/3/0",
         "capabilities": [
           "ETHERNET"
@@ -3077,6 +4073,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "ga-rt2:xe-0/2/0",
         "capabilities": [
           "ETHERNET"
@@ -3084,6 +4086,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "ga-rt2:ge-1/0/5",
         "capabilities": [
           "ETHERNET"
@@ -3130,6 +4138,12 @@
         ]
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "llnl-mr2:xe-2/1/0",
         "capabilities": [
           "ETHERNET"
@@ -3137,6 +4151,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "llnl-mr2:xe-1/1/0",
         "capabilities": [
           "ETHERNET"
@@ -3151,6 +4171,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "llnl-mr2:ge-3/1/5",
         "capabilities": [
           "ETHERNET"
@@ -3172,6 +4198,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "llnl-mr2:xe-0/0/0",
         "capabilities": [
           "ETHERNET"
@@ -3179,6 +4211,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "llnl-mr2:ge-3/1/2",
         "capabilities": [
           "ETHERNET"
@@ -3193,6 +4231,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "llnl-mr2:xe-1/3/0",
         "capabilities": [
           "ETHERNET"
@@ -3200,6 +4244,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "llnl-mr2:ge-3/0/7",
         "capabilities": [
           "ETHERNET"
@@ -3207,6 +4257,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "llnl-mr2:ge-3/0/0",
         "capabilities": [
           "ETHERNET"
@@ -3214,6 +4270,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "llnl-mr2:ge-3/0/1",
         "capabilities": [
           "ETHERNET"
@@ -3221,6 +4283,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "llnl-mr2:xe-1/0/0",
         "capabilities": [
           "ETHERNET"
@@ -3267,6 +4335,12 @@
         ]
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "lond-cr5:10/1/4",
         "capabilities": [
           "ETHERNET"
@@ -3274,6 +4348,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "lond-cr5:1/2/1",
         "capabilities": [
           "ETHERNET"
@@ -3281,6 +4361,12 @@
         "reservableBw": 100000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "lond-cr5:10/1/1",
         "capabilities": [
           "ETHERNET"
@@ -3288,6 +4374,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "lond-cr5:10/1/2",
         "capabilities": [
           "ETHERNET"
@@ -3323,6 +4415,12 @@
         "reservableBw": 100000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "lond-cr5:2/2/1",
         "capabilities": [
           "ETHERNET"
@@ -3348,6 +4446,12 @@
         ]
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "snll-rt2:t3-0/0/0",
         "capabilities": [
           "ETHERNET"
@@ -3464,6 +4568,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "wash-cr5:10/1/8",
         "capabilities": [
           "ETHERNET"
@@ -3471,6 +4581,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "wash-cr5:10/1/9",
         "capabilities": [
           "ETHERNET"
@@ -3492,6 +4608,12 @@
         "reservableBw": 100000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "wash-cr5:6/1/1",
         "capabilities": [
           "ETHERNET"
@@ -3520,6 +4642,12 @@
         "reservableBw": 100000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "wash-cr5:10/1/10",
         "capabilities": [
           "ETHERNET"
@@ -3559,6 +4687,12 @@
         ]
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "amst-cr5:1/2/1",
         "capabilities": [
           "ETHERNET"
@@ -3566,6 +4700,12 @@
         "reservableBw": 100000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "amst-cr5:10/1/1",
         "capabilities": [
           "ETHERNET"
@@ -3573,6 +4713,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "amst-cr5:10/1/2",
         "capabilities": [
           "ETHERNET"
@@ -3594,6 +4740,12 @@
         "reservableBw": 100000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "amst-cr5:3/1/1",
         "capabilities": [
           "ETHERNET"
@@ -3633,6 +4785,12 @@
         ]
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "doe-gtn-rt2:ge-0/0/3",
         "capabilities": [
           "ETHERNET"
@@ -3640,6 +4798,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "doe-gtn-rt2:ge-0/0/2",
         "capabilities": [
           "ETHERNET"
@@ -3647,6 +4811,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "doe-gtn-rt2:ge-0/0/1",
         "capabilities": [
           "ETHERNET"
@@ -3661,6 +4831,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "doe-gtn-rt2:ge-0/1/2",
         "capabilities": [
           "ETHERNET"
@@ -3668,6 +4844,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "doe-gtn-rt2:ge-0/1/3",
         "capabilities": [
           "ETHERNET"
@@ -3682,6 +4864,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "doe-gtn-rt2:ge-0/1/1",
         "capabilities": [
           "ETHERNET"
@@ -3714,6 +4902,12 @@
         ]
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "eqx-chi-rt1:ge-0/0/7",
         "capabilities": [
           "ETHERNET"
@@ -3721,6 +4915,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "eqx-chi-rt1:ge-0/0/6",
         "capabilities": [
           "ETHERNET"
@@ -3728,6 +4928,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "eqx-chi-rt1:xe-5/1/0",
         "capabilities": [
           "ETHERNET"
@@ -3735,6 +4941,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "eqx-chi-rt1:ge-0/0/0",
         "capabilities": [
           "ETHERNET"
@@ -3742,6 +4954,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "eqx-chi-rt1:ge-0/1/6",
         "capabilities": [
           "ETHERNET"
@@ -3749,6 +4967,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "eqx-chi-rt1:ge-0/1/7",
         "capabilities": [
           "ETHERNET"
@@ -3763,6 +4987,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "eqx-chi-rt1:xe-0/3/0",
         "capabilities": [
           "ETHERNET"
@@ -3865,6 +5095,12 @@
         "reservableBw": 100000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "aofa-cr5:10/1/1",
         "capabilities": [
           "ETHERNET"
@@ -3872,6 +5108,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "aofa-cr5:10/1/2",
         "capabilities": [
           "ETHERNET"
@@ -3886,6 +5128,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "aofa-cr5:10/1/8",
         "capabilities": [
           "ETHERNET"
@@ -3893,6 +5141,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "aofa-cr5:10/1/9",
         "capabilities": [
           "ETHERNET"
@@ -3921,6 +5175,12 @@
         "reservableBw": 100000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "aofa-cr5:4/2/1",
         "capabilities": [
           "ETHERNET"
@@ -3935,6 +5195,12 @@
         "reservableBw": 100000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "aofa-cr5:2/1/1",
         "capabilities": [
           "ETHERNET"
@@ -3942,6 +5208,12 @@
         "reservableBw": 100000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "aofa-cr5:9/1/5",
         "capabilities": [
           "ETHERNET"
@@ -4016,6 +5288,12 @@
         "reservableBw": 100000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "cern-513-cr5:10/1/2",
         "capabilities": [
           "ETHERNET"
@@ -4023,6 +5301,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "cern-513-cr5:10/1/3",
         "capabilities": [
           "ETHERNET"
@@ -4037,6 +5321,12 @@
         "reservableBw": 100000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "cern-513-cr5:5/1/1",
         "capabilities": [
           "ETHERNET"
@@ -4044,6 +5334,12 @@
         "reservableBw": 100000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "cern-513-cr5:4/1/1",
         "capabilities": [
           "ETHERNET"
@@ -4058,6 +5354,12 @@
         "reservableBw": 100000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "cern-513-cr5:BLANK",
         "capabilities": [
           "ETHERNET"
@@ -4090,6 +5392,12 @@
         ]
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "nersc-mr2:xe-7/1/0",
         "capabilities": [
           "ETHERNET"
@@ -4097,6 +5405,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "nersc-mr2:xe-1/2/0",
         "capabilities": [
           "ETHERNET"
@@ -4104,6 +5418,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "nersc-mr2:xe-0/1/0",
         "capabilities": [
           "ETHERNET"
@@ -4111,6 +5431,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "nersc-mr2:xe-1/3/0",
         "capabilities": [
           "ETHERNET"
@@ -4125,6 +5451,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "nersc-mr2:xe-0/2/0",
         "capabilities": [
           "ETHERNET"
@@ -4132,6 +5464,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "nersc-mr2:xe-7/2/0",
         "capabilities": [
           "ETHERNET"
@@ -4146,6 +5484,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "nersc-mr2:xe-7/3/0",
         "capabilities": [
           "ETHERNET"
@@ -4227,6 +5571,12 @@
         ]
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "star-cr5:10/1/7",
         "capabilities": [
           "ETHERNET"
@@ -4234,6 +5584,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "star-cr5:6/2/1",
         "capabilities": [
           "ETHERNET"
@@ -4262,6 +5618,12 @@
         "reservableBw": 100000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "star-cr5:9/2/2",
         "capabilities": [
           "ETHERNET"
@@ -4269,6 +5631,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "star-cr5:3/2/1",
         "capabilities": [
           "ETHERNET"
@@ -4276,6 +5644,12 @@
         "reservableBw": 100000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "star-cr5:6/1/1",
         "capabilities": [
           "ETHERNET"
@@ -4283,6 +5657,12 @@
         "reservableBw": 100000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "star-cr5:10/1/8",
         "capabilities": [
           "ETHERNET"
@@ -4297,6 +5677,12 @@
         "reservableBw": 100000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "star-cr5:1/2/1",
         "capabilities": [
           "ETHERNET"
@@ -4311,6 +5697,12 @@
         "reservableBw": 100000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "star-cr5:8/1/4",
         "capabilities": [
           "ETHERNET"
@@ -4318,6 +5710,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "star-cr5:3/1/1",
         "capabilities": [
           "ETHERNET"
@@ -4325,6 +5723,12 @@
         "reservableBw": 100000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "star-cr5:2/2/1",
         "capabilities": [
           "ETHERNET"
@@ -4346,6 +5750,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "star-cr5:8/2/4",
         "capabilities": [
           "ETHERNET"
@@ -4413,6 +5823,12 @@
         ]
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "bnl-mr2:xe-1/2/0",
         "capabilities": [
           "ETHERNET"
@@ -4441,6 +5857,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "bnl-mr2:xe-2/0/0",
         "capabilities": [
           "ETHERNET"
@@ -4448,6 +5870,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "bnl-mr2:xe-2/3/0",
         "capabilities": [
           "ETHERNET"
@@ -4462,6 +5890,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "bnl-mr2:xe-2/2/0",
         "capabilities": [
           "ETHERNET"
@@ -4476,6 +5910,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "bnl-mr2:xe-1/0/0",
         "capabilities": [
           "ETHERNET"
@@ -4543,6 +5983,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "nash-cr5:10/1/6",
         "capabilities": [
           "ETHERNET"
@@ -4550,6 +5996,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "nash-cr5:10/1/3",
         "capabilities": [
           "ETHERNET"
@@ -4631,6 +6083,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "ornl-rt4:xe-2/1/0",
         "capabilities": [
           "ETHERNET"
@@ -4645,6 +6103,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "ornl-rt4:ge-0/0/0",
         "capabilities": [
           "ETHERNET"
@@ -4652,6 +6116,12 @@
         "reservableBw": 1000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "ornl-rt4:xe-1/3/0",
         "capabilities": [
           "ETHERNET"
@@ -4712,6 +6182,12 @@
         ]
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "bost-cr5:10/1/5",
         "capabilities": [
           "ETHERNET"
@@ -4719,6 +6195,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "bost-cr5:10/1/6",
         "capabilities": [
           "ETHERNET"
@@ -4726,6 +6208,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "bost-cr5:10/1/2",
         "capabilities": [
           "ETHERNET"
@@ -4740,6 +6228,12 @@
         "reservableBw": 40000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "bost-cr5:5/1/2",
         "capabilities": [
           "ETHERNET"
@@ -4761,6 +6255,12 @@
         "reservableBw": 100000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "bost-cr5:10/2/3",
         "capabilities": [
           "ETHERNET"
@@ -4793,6 +6293,12 @@
         ]
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "jgi-mr2:xe-0/2/0",
         "capabilities": [
           "ETHERNET"
@@ -4800,6 +6306,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "jgi-mr2:xe-1/3/0",
         "capabilities": [
           "ETHERNET"
@@ -4860,6 +6372,12 @@
         ]
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "atla-cr5:10/1/1",
         "capabilities": [
           "ETHERNET"
@@ -4867,6 +6385,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "atla-cr5:10/1/2",
         "capabilities": [
           "ETHERNET"
@@ -4881,6 +6405,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "atla-cr5:10/1/8",
         "capabilities": [
           "ETHERNET"
@@ -4888,6 +6418,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "atla-cr5:4/1/1",
         "capabilities": [
           "ETHERNET"
@@ -4948,6 +6484,12 @@
         ]
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "kans-cr5:10/1/4",
         "capabilities": [
           "ETHERNET"
@@ -4955,6 +6497,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "kans-cr5:10/1/1",
         "capabilities": [
           "ETHERNET"
@@ -4962,6 +6510,12 @@
         "reservableBw": 10000
       },
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999,
+            "floor": 2000
+          }
+        ],
         "urn": "kans-cr5:10/1/3",
         "capabilities": [
           "ETHERNET"
