@@ -69,6 +69,7 @@ public class MainController {
         String[] all_vlan_edges = restTemplate.getForObject(restPath, String[].class);
         List<String> vlan_edges = new ArrayList<>();
         vlan_edges.addAll(Arrays.asList(all_vlan_edges));
+        Collections.sort(vlan_edges);
         return vlan_edges;
     }
 

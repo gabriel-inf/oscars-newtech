@@ -3,12 +3,17 @@ var selected_node_ids = {};
 var display_viz = {};
 var reservation_viz = {};
 
-var add_node_to_resv_btn;
+var add_junction_btn;
 
-var resv_edge_params_form;
-var resv_node_params_form;
+var pipe_card;
+var junction_card;
 
 var resv_viz_name = "reservation_viz";
+
+var reservation_request = {
+    "junctions": {},
+    "pipes": {}
+};
 
 function loadJSON(url, callback) {
 
@@ -30,16 +35,13 @@ function add_to_reservation(viz, name) {
     var last_added_node = null;
     var ds = viz.datasource;
     var prev_len = ds.nodes.length;
-    console.log("existing nodes num: " + prev_len);
 
     if (prev_len > 0) {
         last_added_node = ds.nodes.get()[prev_len - 1];
-        console.log("last added: " + last_added_node.id);
     }
 
     for (var i = 0; i < selected_node_ids.name.length; i++) {
         var nodeId = selected_node_ids.name[i];
-        console.log("adding node " + nodeId);
         if (!ds.nodes.get(nodeId)) {
             ds.nodes.add({id: nodeId, label: nodeId});
             if (last_added_node != null) {
@@ -51,7 +53,7 @@ function add_to_reservation(viz, name) {
                     from: a,
                     to: z
                 };
-                console.log("adding edge: " + newId);
+                reservation_request["pipes"][newId] = {"bw": 0, "a": a, "z": z};
 
                 ds.edges.add(newEdge);
 
@@ -91,38 +93,27 @@ function attach_handlers(vis_js_network, vis_js_datasets, name) {
         selected_node_ids.name = [];
         for (var i = 0; i < params.nodes.length; i++) {
             var nodeId = params.nodes[i];
-            console.log("dragEnd" + nodeId);
 
+            selected_node_ids.name.push(nodeId);
             if (vis_js_network.isCluster(nodeId) == true) {
-                console.log("dragEnd: cluster " + nodeId);
                 vis_js_network.clustering.updateClusteredNode(nodeId, {fixed: {x: true, y: true}});
-                selected_node_ids.name.push(nodeId);
-
             } else {
-                console.log("dragEnd: plain " + nodeId);
                 vis_js_datasets.nodes.update({id: nodeId, fixed: {x: true, y: true}});
-                selected_node_ids.name.push(nodeId);
             }
         }
     });
 
     vis_js_network.on('dragStart', function (params) {
         var draggedPlain = false;
-        var draggedCluster = false;
         selected_node_ids.name = [];
-
         for (var i = 0; i < params.nodes.length; i++) {
             var nodeId = params.nodes[i];
-            if (vis_js_network.isCluster(nodeId) == true) {
-                console.log("dragStart: cluster " + nodeId);
-                vis_js_network.clustering.updateClusteredNode(nodeId, {fixed: {x: false, y: false}});
-                selected_node_ids.name.push(nodeId);
-                var draggedCluster = true;
+            selected_node_ids.name.push(nodeId);
 
+            if (vis_js_network.isCluster(nodeId) == true) {
+                vis_js_network.clustering.updateClusteredNode(nodeId, {fixed: {x: false, y: false}});
             } else {
-                console.log("dragStart: plain " + nodeId);
                 vis_js_datasets.nodes.update({id: nodeId, fixed: {x: false, y: false}});
-                selected_node_ids.name.push(nodeId);
                 draggedPlain = true;
             }
         }
@@ -131,7 +122,7 @@ function attach_handlers(vis_js_network, vis_js_datasets, name) {
         if (name == resv_viz_name) {
             is_resv = true;
         }
-        handle_click_(is_resv, false, true, draggedPlain);
+        trigger_form_changes(is_resv, false, true, draggedPlain);
 
     });
 
@@ -139,22 +130,19 @@ function attach_handlers(vis_js_network, vis_js_datasets, name) {
         var clickedNode = false;
         var clickedEdge = false;
         var clickedPlain = false;
+        var edgeId = "";
+        var nodeId = "";
         selected_node_ids.name = [];
         var i;
 
         for (i = 0; i < params.nodes.length; i++) {
             clickedNode = true;
-            var nodeId = params.nodes[i];
-            console.log("node selected " + nodeId);
+            nodeId = params.nodes[i];
 
-            if (vis_js_network.isCluster(nodeId) == true) {
-                selected_node_ids.name.push(nodeId);
-                console.log("cluster node selected " + nodeId);
-            } else {
+            if (!vis_js_network.isCluster(nodeId) == true) {
                 clickedPlain = true;
-                selected_node_ids.name.push(nodeId);
-                console.log("plain node selected " + nodeId);
             }
+            selected_node_ids.name.push(nodeId);
         }
 
         var is_resv = false;
@@ -165,60 +153,144 @@ function attach_handlers(vis_js_network, vis_js_datasets, name) {
         if (!clickedNode) {
             for (i = 0; i < params.edges.length; i++) {
                 clickedEdge = true;
-                var edgeId = params.edges[i];
+                edgeId = params.edges[i];
                 edgeId = vis_js_network.clustering.getBaseEdge(edgeId);
                 console.log("edge selected: " + edgeId);
             }
         }
-        handle_click_(is_resv, clickedEdge, clickedNode, clickedPlain);
-
+        trigger_form_changes(is_resv, clickedEdge, clickedNode, clickedPlain, nodeId, edgeId);
     });
 }
 
-function handle_click_(is_resv, selected_an_edge, selected_a_node, is_selected_node_plain) {
+function trigger_form_changes(is_resv, selected_an_edge, selected_a_node, is_selected_node_plain, nodeId, edgeId) {
     if (is_resv) {
-        add_node_to_resv_btn.addClass("disabled").removeClass("active");
+        add_junction_btn.addClass("disabled").removeClass("active");
 
         if (selected_an_edge) {
-            resv_edge_params_form.show();
+            show_pipe_card(edgeId);
         } else {
-            resv_edge_params_form.hide();
+            pipe_card.hide();
         }
         if (selected_a_node) {
-            show_resv_node_card(selected_node_ids.name[0]);
+            show_junction_card(nodeId);
         } else {
-            resv_node_params_form.hide();
+            junction_card.hide();
         }
     } else {
         if (is_selected_node_plain) {
-            add_node_to_resv_btn.removeClass("disabled").addClass("active");
+            add_junction_btn.removeClass("disabled").addClass("active");
         } else {
-            add_node_to_resv_btn.addClass("disabled").removeClass("active");
+            add_junction_btn.addClass("disabled").removeClass("active");
         }
     }
 }
 
-function show_resv_node_card(nodeId) {
-    console.log("showing card for " + nodeId);
+function show_pipe_card(edgeId) {
+    console.log("showing card for pipe " + edgeId);
+    var pipes = reservation_request["pipes"];
+    console.log(pipes);
+    pipe_card.show();
+
+    // populate
+    if (!(edgeId in pipes)) {
+        console.log("new pipe, setting bw to 0 for: " + edgeId);
+        pipes[edgeId] = {"bw": 0};
+    }
+    var prev_bw = pipes[edgeId]["bw"];
+    console.log("updating form for edge: " + edgeId + " to bw: " + prev_bw);
+    // detach previous event handlers
+    $("#pipe_bw").off("change");
+    $("#pipe_bw").val(prev_bw);
+
+    // add new event handler
+    $("#pipe_bw").change(function () {
+        var bw = $("#pipe_bw").val();
+        console.log("saving bw for pipe: " + edgeId + " : " + bw);
+        pipes[edgeId]["bw"] = bw;
+        console.log(reservation_request);
+    });
+}
+
+function show_junction_card(nodeId) {
+    console.log("showing card for junction " + nodeId);
     $('#resv_node_table tbody').empty();
-    resv_node_params_form.show();
+    junction_card.show();
+
     var url = "/info/device/" + nodeId + "/vlanEdges";
     loadJSON(url, function (response) {
-        var vlanEdges = JSON.parse(response);
-        console.log(vlanEdges);
-        vlanEdges.forEach(function (value, index, vlanEdges) {
-            console.log("adding a row for " + value);
+        var current_fixtures = JSON.parse(response);
+        current_fixtures.forEach(function (value, index, current_fixtures) {
             var tr = "<tr>" +
                 "<td>" + index + "</td>" +
                 "<td>" + value + "</td>" +
-                "<td><input name='bw" + index + "' type='text' placeholder='1G' class='form-control input-md'  /></td>" +
-                "<td><input name='vlan" + index + "' type='text' placeholder='vlan' class='form-control input-md'  /></td>" +
-                "<td><input name='use" + index + "' type='checkbox' class='form-control input-md'  /></td>" +
+                "<td><div class='form-check'><label class='form-check-label'>" +
+                "<input id='use_" + index + "' type='checkbox' placeholder='vlan' class='form-check-input' />" +
+                "</label></div></td>" +
+                "<td><input id='bw_" + index + "' type='text' placeholder='1G' class='form-control input-sm'  /></td>" +
+                "<td><input id='vlan_" + index + "' type='text' placeholder='2-4094' class='form-control input-sm'  /></td>" +
                 "</tr>";
             $('#resv_node_table tbody').append(tr);
-        })
-    });
 
+            populate_junction(nodeId, current_fixtures);
+
+            $('#use_' + index).click(function () {
+                update_junction(nodeId, current_fixtures);
+            });
+            $("#bw_" + index).change(function () {
+                $('#use_' + index).prop('checked', true);
+                update_junction(nodeId, current_fixtures);
+            });
+            $("#vlan_" + index).change(function () {
+                $('#use_' + index).prop('checked', true);
+                update_junction(nodeId, current_fixtures);
+            });
+        });
+
+    });
+}
+
+function populate_junction(nodeId, fixtures) {
+    var junctions = reservation_request["junctions"];
+    if (!(nodeId in junctions)) {
+        return;
+    } else if (!("fixtures" in junctions[nodeId])) {
+        return;
+    }
+    fixtures.forEach(function (urn, index, fixtures) {
+        if (urn in junctions[nodeId]["fixtures"]) {
+            var bw = junctions[nodeId]["fixtures"][urn]["bw"];
+            var vlan = junctions[nodeId]["fixtures"][urn]["vlan"];
+            $("#use_" + index).prop('checked', true);
+            $("#vlan_" + index).val(vlan);
+            $("#bw_" + index).val(bw);
+        }
+    });
+}
+
+
+function update_junction(nodeId, fixtures) {
+    var checked = [];
+    var i;
+    var junctions = reservation_request["junctions"];
+    junctions[nodeId] = {
+        "fixtures": {}
+    };
+
+    for (i = 0; i < fixtures.length; i++) {
+        if ($("#use_" + i).is(':checked')) {
+            checked.push(fixtures[i]);
+            junctions[nodeId]["fixtures"][fixtures[i]] = {
+                "bw": $("#bw_" + i).val(),
+                "vlan": $("#vlan_" + i).val()
+            }
+        }
+    }
+
+    if (!checked.length) {
+        delete junctions[nodeId];
+        console.log("no fixtures left in junction " + nodeId);
+    }
+    console.log(reservation_request);
 }
 
 
@@ -265,9 +337,15 @@ $(document).ready(function () {
             },
             manipulation: {
                 addNode: false,
-                addEdge: function (data, callback) {
-                    if (data.from != data.to) {
-                        callback(data);
+                addEdge: function (edgeData, callback) {
+                    if (edgeData.from != edgeData.to) {
+                        callback(edgeData);
+
+                        reservation_request["pipes"][edgeData.id] = {
+                            "bw": 0,
+                            "a": edgeData.from,
+                            "z": edgeData.to
+                        }
                     }
                 }
             }
@@ -285,17 +363,28 @@ $(document).ready(function () {
 
         reservation_viz = make_network({}, rv_cont, rv_opts, "reservation_viz");
 
-        resv_edge_params_form = $('#resv_edge_params_form');
-        resv_edge_params_form.hide();
+        pipe_card = $('#pipe_card');
+        pipe_card.hide();
 
-        resv_node_params_form = $('#resv_node_params_form');
-        resv_node_params_form.hide();
+        $('#pipe_form').on('submit', function (e) {
+            e.preventDefault();
+        });
 
-        add_node_to_resv_btn = $('#add_node_to_resv_btn');
+        junction_card = $('#junction_card');
+        junction_card.hide();
 
-        add_node_to_resv_btn.on('click', function (e) {
+
+        add_junction_btn = $('#add_junction_btn');
+
+        add_junction_btn.on('click', function (e) {
             e.preventDefault();
             add_to_reservation(reservation_viz, resv_viz_name);
+        });
+
+        $('#resv_shared_form').on('submit', function (e) {
+            e.preventDefault();
+            console.log("submitting request");
+            console.log(reservation_request);
         });
 
 

@@ -22,7 +22,7 @@
     <div class="panel panel-default">
         <div class="panel-body">
             <form class="form-inline">
-                <button type="submit" id="add_node_to_resv_btn" class="btn btn-primary disabled">Add to request</button>
+                <button type="submit" id="add_junction_btn" class="btn btn-primary disabled">Add to request</button>
             </form>
         </div>
     </div>
@@ -37,38 +37,38 @@
         <div id="reservation_viz" class="panel-body collapse  collapse in"></div>
     </div>
 
-    <div id="resv_edge_params_form" class="panel panel-default">
+    <div id="pipe_card" class="panel panel-default">
         <div class="panel-heading">
             <h4 class="panel-title">Pipe parameters</h4>
         </div>
         <div class="panel-body">
-            <form class="form-inline" id="resv_edge_form">
+            <form class="form-inline" id="pipe_form">
                 <table class="table table-striped table-bordered table-hover">
                     <thead>
                     <td>Bandwidth</td>
                     </thead>
                     <tbody>
-                    <td><input name='edgebw' type='text' placeholder='1G' class='form-control input-md'/></td>
+                    <td><input id='pipe_bw' type='text' placeholder='1G' class='form-control input-md'/></td>
                     </tbody>
                 </table>
             </form>
         </div>
     </div>
 
-    <div id="resv_node_params_form" class="panel panel-default">
+    <div id="junction_card" class="panel panel-default">
         <div class="panel-heading">
             <h4 class="panel-title">Junction parameters</h4>
         </div>
         <div class="panel-body">
-            <form class="form-inline" id="resv_node_port_form">
+            <form class="form-inline" id="junction_form">
 
                 <table id="resv_node_table" class="table table-striped table-bordered table-hover">
                     <thead>
                     <td>#</td>
                     <td>URN</td>
+                    <td>Use</td>
                     <td>Bandwidth</td>
                     <td>VLAN</td>
-                    <td>Use</td>
                     </thead>
                     <tbody>
                     </tbody>
@@ -81,26 +81,43 @@
             <h4 class="panel-title">Reservation parameters</h4>
         </div>
         <div class="panel-body">
-            <form class="form-inline" id="resv_shared_form">
+            <form class="form-horizontal" id="resv_shared_form">
                 <div class="form-group">
-                    <label class="col-md-4 control-label" for="description">Description</label>
-                    <div class="col-md-4">
-                        <input id="description" placeholder="Description" class="form-control input-md" />
+                    <label class="col-md-3 control-label" for="description">Description</label>
+                    <div class="col-md-3">
+                        <input id="description" placeholder="Description" class="form-control input-md"/>
                     </div>
                 </div>
-                <div class='input-group date' id='start_at'>
-                    <input type='text' class="form-control" />
-                    <span class="input-group-addon">
-                        <span class="glyphicon glyphicon-calendar"></span>
-                    </span>
+
+                <div class="form-group">
+                    <label class="col-md-3 control-label" for="start_at">Start at</label>
+                    <div class='col-md-3 input-group date' id='start_at'>
+                        <input type='text' class="form-control"/>
+                        <span class="input-group-addon">
+                            <span class="glyphicon glyphicon-calendar"></span>
+                        </span>
+                    </div>
                 </div>
 
-                <div class='input-group date' id='end_at'>
-                    <input type='text' class="form-control" />
-                    <span class="input-group-addon">
-                        <span class="glyphicon glyphicon-calendar"></span>
-                    </span>
+                <div class="form-group">
+                    <label class="col-md-3 control-label" for="end_at">End at</label>
+                    <div class='col-md-3 input-group date' id='end_at'>
+                        <input type='text' class="form-control"/>
+                        <span class="input-group-addon">
+                            <span class="glyphicon glyphicon-calendar"></span>
+                        </span>
+                    </div>
                 </div>
+
+
+                <div class="form-group">
+                    <label class="col-md-3 control-label" for="resv_submit_btn">Controls</label>
+                    <div class="col-md-6">
+                        <button id="resv_submit_btn" type="submit" class="btn btn-success">Submit</button>
+                        <button type="reset" class="btn btn-inverse">Reset</button>
+                    </div>
+                </div>
+
 
             </form>
         </div>
@@ -108,7 +125,7 @@
 
 </div>
 
-
+<!--
 <div class="panel-group hidden">
     <div class="panel panel-default">
         <div class="panel-heading">
@@ -123,6 +140,36 @@
         <div id="positions_display" class="panel-body collapse"></div>
     </div>
 </div>
+-->
+
+<script type="text/javascript">
+    var start = moment(new Date());
+    start.add(1, "minutes");
+    var end = moment(new Date());
+    end.add(16, "minutes");
+
+
+    $("#start_at").datetimepicker({
+        format: "dd MM yyyy - hh:ii",
+        autoclose: true,
+        todayBtn: true,
+        minDate: start,
+        startDate: start,
+        setDate: start,
+        minuteStep: 10
+    });
+
+    $("#end_at").datetimepicker({
+        format: "dd MM yyyy - hh:ii",
+        autoclose: true,
+        todayBtn: true,
+        minDate: start,
+        startDate: end,
+        setDate: end,
+        minuteStep: 10
+    });
+</script>
+
 
 </body>
 </html>

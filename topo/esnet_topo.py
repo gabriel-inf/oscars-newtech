@@ -7,8 +7,8 @@ import topo_util
 
 INPUT_DEVICES = "input/devices.json"
 INPUT_SWITCHES = "input/switches.json"
-INPUT_EDGES = "input/edges.json"
 INPUT_ISIS = "input/isis.json"
+INPUT_PORTS = "input/ports.json"
 
 OUTPUT_DEVICES = "output/devices.json"
 OUTPUT_ADJCIES = "output/adjacencies.json"
@@ -17,20 +17,24 @@ OUTPUT_ADJCIES = "output/adjacencies.json"
 def main():
     pp = pprint.PrettyPrinter(indent=4)
 
-    oscars_devices = []
-    oscars_adjcies = []
-
     in_str = open(INPUT_DEVICES).read()
     in_devices = json.loads(in_str)
-
-    oscars_devices = transform_devices(in_devices=in_devices)
 
     in_str = open(INPUT_ISIS).read()
     isis_adjcies = json.loads(in_str)
 
+    in_str = open(INPUT_PORTS).read()
+    in_ports = json.loads(in_str)
+
+    oscars_devices = transform_devices(in_devices=in_devices)
+
     (oscars_adjcies, igp_portmap) = transform_isis(isis_adjcies=isis_adjcies)
 
-    merge_isis_ports(devices=oscars_devices, igp_portmap=igp_portmap)
+    filter_out_not_igp(igp_portmap=igp_portmap, oscars_devices=oscars_devices)
+
+    merge_isis_ports(oscars_devices=oscars_devices, igp_portmap=igp_portmap)
+
+    merge_phy_ports(oscars_devices=oscars_devices, ports=in_ports, igp_portmap=igp_portmap)
 
     with open(OUTPUT_DEVICES, 'w') as outfile:
         json.dump(oscars_devices, outfile, indent=2)
@@ -39,10 +43,49 @@ def main():
         json.dump(oscars_adjcies, outfile, indent=2)
 
 
-def merge_isis_ports(devices=None, igp_portmap=None):
+def filter_out_not_igp(igp_portmap=None, oscars_devices=None):
+    remove_these = []
+    for device in oscars_devices:
+        device_name = device["urn"]
+        if device_name not in igp_portmap.keys():
+            remove_these.append(device)
+
+    for device in remove_these:
+        oscars_devices.remove(device)
+
+
+def merge_phy_ports(ports=None, oscars_devices=None, igp_portmap=None):
+    for device_name in ports.keys():
+        for device in oscars_devices:
+            if device["urn"] == device_name:
+                for port in ports[device_name].keys():
+                    port_ifces = ports[device_name][port]
+                    mbps = 0
+                    for ifce_data in port_ifces:
+                        mbps = ifce_data["mbps"]
+
+                    port_in_igp = False
+                    if device_name in igp_portmap.keys():
+                        if port in igp_portmap[device_name].keys():
+                            port_in_igp = True
+
+                    ifce_data = {
+                        "urn": device_name + ":" + port,
+                        "reservableBw": mbps
+                    }
+
+                    if port_in_igp:
+                        ifce_data["capabilities"] = ["MPLS"]
+                    else:
+                        ifce_data["capabilities"] = ["ETHERNET"]
+
+                    device["ifces"].append(ifce_data)
+
+
+def merge_isis_ports(oscars_devices=None, igp_portmap=None):
     for device_name in igp_portmap.keys():
         found_device = False
-        for device in devices:
+        for device in oscars_devices:
             if device["urn"] == device_name:
                 found_device = True
                 for port_name in igp_portmap[device_name].keys():

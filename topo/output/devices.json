@@ -2,7 +2,7 @@
   {
     "urn": "pppl-rt5", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX480", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -21,6 +21,69 @@
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "pppl-rt5:xe-1/2/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "pppl-rt5:ge-0/0/2", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "pppl-rt5:xe-1/1/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "pppl-rt5:ge-0/0/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "pppl-rt5:xe-1/3/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "pppl-rt5:xe-2/0/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "pppl-rt5:ge-0/1/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "pppl-rt5:xe-0/2/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "pppl-rt5:xe-1/0/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
       }
     ]
   }, 
@@ -95,13 +158,104 @@
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "chic-cr5:10/1/4", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "chic-cr5:10/1/5", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "chic-cr5:10/1/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "chic-cr5:10/1/2", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "chic-cr5:10/1/3", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "chic-cr5:3/2/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "chic-cr5:10/1/9", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "chic-cr5:5/1/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "chic-cr5:4/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "chic-cr5:1/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "chic-cr5:3/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "chic-cr5:2/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "chic-cr5:9/1/4", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
       }
     ]
   }, 
   {
     "urn": "srs-rt3", 
     "type": "ROUTER", 
-    "model": "JUNOS_M10I", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -113,13 +267,48 @@
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "srs-rt3:ge-0/1/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "srs-rt3:fe-0/3/3", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100
+      }, 
+      {
+        "urn": "srs-rt3:fe-0/3/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100
+      }, 
+      {
+        "urn": "srs-rt3:ge-1/0/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "srs-rt3:ge-0/0/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
       }
     ]
   }, 
   {
     "urn": "anl-mr2", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX960", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -138,13 +327,55 @@
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "anl-mr2:xe-1/2/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "anl-mr2:ae0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 20000
+      }, 
+      {
+        "urn": "anl-mr2:xe-0/1/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "anl-mr2:xe-1/3/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "anl-mr2:xe-2/0/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "anl-mr2:xe-0/0/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
       }
     ]
   }, 
   {
     "urn": "orau-rt3", 
     "type": "ROUTER", 
-    "model": "JUNOS_M10I", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -163,13 +394,48 @@
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "orau-rt3:ge-0/3/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "orau-rt3:ge-0/2/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "orau-rt3:ge-1/2/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "orau-rt3:fe-0/0/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100
+      }, 
+      {
+        "urn": "orau-rt3:ge-0/1/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
       }
     ]
   }, 
   {
     "urn": "eqx-ash-rt1", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX480", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -209,13 +475,146 @@
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "eqx-ash-rt1:ge-0/0/7", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "eqx-ash-rt1:ae0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "eqx-ash-rt1:ge-0/0/3", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100
+      }, 
+      {
+        "urn": "eqx-ash-rt1:ge-0/0/2", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100
+      }, 
+      {
+        "urn": "eqx-ash-rt1:xe-1/1/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "eqx-ash-rt1:ge-0/1/9", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "eqx-ash-rt1:ge-0/1/6", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "eqx-ash-rt1:xe-0/3/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "eqx-ash-rt1:ge-0/1/5", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "eqx-ash-rt1:xe-2/0/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "eqx-ash-rt1:ge-0/1/3", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "eqx-ash-rt1:ge-0/0/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "eqx-ash-rt1:ge-0/0/6", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "eqx-ash-rt1:xe-1/0/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "eqx-ash-rt1:ge-0/1/7", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "eqx-ash-rt1:xe-1/2/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "eqx-ash-rt1:ge-0/1/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "eqx-ash-rt1:ge-0/1/8", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "eqx-ash-rt1:xe-2/1/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
       }
     ]
   }, 
   {
     "urn": "llnldc-rt4", 
     "type": "ROUTER", 
-    "model": "JUNOS_M10I", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -227,6 +626,34 @@
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "llnldc-rt4:ge-0/2/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "llnldc-rt4:fe-0/0/3", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100
+      }, 
+      {
+        "urn": "llnldc-rt4:ge-0/1/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "llnldc-rt4:t3-0/3/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 45
       }
     ]
   }, 
@@ -266,6 +693,62 @@
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "newy-cr5:10/1/6", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "newy-cr5:10/1/2", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "newy-cr5:10/1/3", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "newy-cr5:10/1/9", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "newy-cr5:4/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "newy-cr5:3/1/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "newy-cr5:2/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "newy-cr5:4/2/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
       }
     ]
   }, 
@@ -361,13 +844,153 @@
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "sunn-cr5:10/1/4", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "sunn-cr5:10/1/5", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "sunn-cr5:10/1/6", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "sunn-cr5:10/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "sunn-cr5:10/1/3", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "sunn-cr5:9/1/5", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "sunn-cr5:8/1/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "sunn-cr5:5/2/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "sunn-cr5:5/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "sunn-cr5:4/1/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "sunn-cr5:7/1/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "sunn-cr5:1/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "sunn-cr5:7/2/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "sunn-cr5:10/2/3", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "sunn-cr5:10/2/2", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "sunn-cr5:8/2/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "sunn-cr5:9/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "sunn-cr5:10/2/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "sunn-cr5:9/1/3", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "sunn-cr5:9/1/2", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
       }
     ]
   }, 
   {
     "urn": "fnal-mr2", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX960", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -393,6 +1016,48 @@
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "fnal-mr2:ae0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 0
+      }, 
+      {
+        "urn": "fnal-mr2:xe-2/1/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "fnal-mr2:xe-1/3/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "fnal-mr2:xe-0/0/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "fnal-mr2:xe-8/1/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "fnal-mr2:xe-0/2/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
       }
     ]
   }, 
@@ -432,13 +1097,55 @@
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "ornl-cr5:10/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "ornl-cr5:10/1/2", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "ornl-cr5:10/1/3", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "ornl-cr5:7/1/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "ornl-cr5:6/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "ornl-cr5:9/1/4", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
       }
     ]
   }, 
   {
     "urn": "wash-ar1", 
     "type": "ROUTER", 
-    "model": "JUNOS_M10I", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -464,13 +1171,41 @@
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "wash-ar1:ae0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 2000
+      }, 
+      {
+        "urn": "wash-ar1:t3-0/3/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 45
+      }, 
+      {
+        "urn": "wash-ar1:ge-0/1/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "wash-ar1:t3-1/3/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 45
       }
     ]
   }, 
   {
     "urn": "forr-rt2", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX104", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -489,6 +1224,55 @@
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "forr-rt2:ge-0/0/6", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "forr-rt2:ge-0/0/5", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "forr-rt2:ge-0/0/4", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "forr-rt2:ge-0/0/3", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "forr-rt2:ge-0/0/2", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "forr-rt2:ge-0/0/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "forr-rt2:ge-0/0/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 1000
       }
     ]
   }, 
@@ -570,13 +1354,111 @@
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "sacr-cr5:10/1/4", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "sacr-cr5:10/1/6", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "sacr-cr5:10/1/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "sacr-cr5:10/1/2", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "sacr-cr5:10/1/3", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "sacr-cr5:1/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "sacr-cr5:3/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "sacr-cr5:2/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "sacr-cr5:10/2/3", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "sacr-cr5:10/2/2", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "sacr-cr5:10/2/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "sacr-cr5:10/2/6", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "sacr-cr5:10/2/5", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "sacr-cr5:10/2/4", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
       }
     ]
   }, 
   {
     "urn": "paix-pa-rt3", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX480", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -588,13 +1470,27 @@
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "paix-pa-rt3:xe-1/3/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "paix-pa-rt3:ae0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 20000
       }
     ]
   }, 
   {
     "urn": "pantex-rt3", 
     "type": "ROUTER", 
-    "model": "JUNOS_M10I", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -606,6 +1502,34 @@
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "pantex-rt3:ge-1/2/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "pantex-rt3:ge-0/2/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "pantex-rt3:ge-1/0/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "pantex-rt3:ge-0/1/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
       }
     ]
   }, 
@@ -652,6 +1576,90 @@
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "pnwg-cr5:10/1/5", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "pnwg-cr5:10/1/6", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "pnwg-cr5:10/1/2", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "pnwg-cr5:10/1/3", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "pnwg-cr5:10/1/9", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "pnwg-cr5:2/2/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "pnwg-cr5:1/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "pnwg-cr5:2/1/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "pnwg-cr5:9/1/5", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "pnwg-cr5:9/1/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "pnwg-cr5:10/1/10", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "pnwg-cr5:9/1/2", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
       }
     ]
   }, 
@@ -684,13 +1692,48 @@
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "elpa-cr5:10/1/4", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "elpa-cr5:10/1/3", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "elpa-cr5:1/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "elpa-cr5:3/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "elpa-cr5:2/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
       }
     ]
   }, 
   {
     "urn": "bois-cr1", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX960", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -709,13 +1752,69 @@
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "bois-cr1:xe-7/1/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "bois-cr1:xe-1/2/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "bois-cr1:xe-0/1/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "bois-cr1:xe-0/0/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "bois-cr1:xe-0/2/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "bois-cr1:xe-7/0/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "bois-cr1:xe-7/3/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "bois-cr1:xe-1/0/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
       }
     ]
   }, 
   {
     "urn": "osti-rt2", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX480", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -734,6 +1833,20 @@
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "osti-rt2:xe-1/2/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "osti-rt2:xe-0/0/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
       }
     ]
   }, 
@@ -759,13 +1872,55 @@
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "cern-272-cr5:10/1/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "cern-272-cr5:10/1/2", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "cern-272-cr5:10/1/3", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "cern-272-cr5:BLANK", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 20000
+      }, 
+      {
+        "urn": "cern-272-cr5:1/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "cern-272-cr5:2/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
       }
     ]
   }, 
   {
     "urn": "snla-rt3", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX480", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -777,13 +1932,62 @@
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "snla-rt3:xe-1/2/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "snla-rt3:ge-1/1/3", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "snla-rt3:ge-1/1/2", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "snla-rt3:ge-1/1/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "snla-rt3:ge-1/0/2", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "snla-rt3:xe-0/0/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "snla-rt3:ge-1/0/3", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
       }
     ]
   }, 
   {
     "urn": "slac-mr2", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX480", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -809,13 +2013,62 @@
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "slac-mr2:xe-1/2/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "slac-mr2:xe-2/1/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "slac-mr2:xe-0/1/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "slac-mr2:xe-1/3/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "slac-mr2:xe-0/0/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "slac-mr2:xe-0/2/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "slac-mr2:xe-2/2/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
       }
     ]
   }, 
   {
     "urn": "ameslab-rt3", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX480", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -834,13 +2087,55 @@
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "ameslab-rt3:xe-1/1/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "ameslab-rt3:xe-0/1/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "ameslab-rt3:xe-1/3/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "ameslab-rt3:xe-0/0/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "ameslab-rt3:xe-0/2/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "ameslab-rt3:xe-1/0/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
       }
     ]
   }, 
   {
     "urn": "snll-mr2", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX480", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -880,6 +2175,69 @@
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "snll-mr2:xe-1/2/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "snll-mr2:xe-1/1/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "snll-mr2:xe-0/1/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "snll-mr2:xe-1/3/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "snll-mr2:xe-2/0/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "snll-mr2:xe-0/0/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "snll-mr2:xe-0/2/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "snll-mr2:xe-2/3/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "snll-mr2:xe-2/2/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
       }
     ]
   }, 
@@ -912,13 +2270,48 @@
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "hous-cr5:10/1/4", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "hous-cr5:10/1/3", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "hous-cr5:1/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "hous-cr5:3/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "hous-cr5:2/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
       }
     ]
   }, 
   {
     "urn": "lsvn-cr1", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX480", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -937,18 +2330,64 @@
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "lsvn-cr1:xe-2/1/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "lsvn-cr1:ge-1/1/5", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "lsvn-cr1:xe-2/0/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "lsvn-cr1:ge-1/1/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "lsvn-cr1:ge-1/1/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "lsvn-cr1:ge-1/0/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "lsvn-cr1:ge-1/0/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "lsvn-cr1:xe-3/0/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
       }
     ]
-  }, 
-  {
-    "urn": "esnet-rt5", 
-    "type": "ROUTER", 
-    "model": "JUNOS_MX960", 
-    "capabilities": [
-      "ETHERNET", 
-      "MPLS"
-    ], 
-    "ifces": []
   }, 
   {
     "urn": "albq-cr5", 
@@ -986,13 +2425,62 @@
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "albq-cr5:10/1/4", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "albq-cr5:10/1/5", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "albq-cr5:10/1/2", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "albq-cr5:10/1/3", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "albq-cr5:1/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "albq-cr5:3/1/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "albq-cr5:2/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
       }
     ]
   }, 
   {
     "urn": "eqx-sj-rt1", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX480", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -1004,13 +2492,104 @@
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "eqx-sj-rt1:ae0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "eqx-sj-rt1:ge-0/0/5", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "eqx-sj-rt1:ge-0/0/3", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "eqx-sj-rt1:ge-0/0/2", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "eqx-sj-rt1:ge-0/0/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "eqx-sj-rt1:ge-0/1/6", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "eqx-sj-rt1:ge-0/1/7", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "eqx-sj-rt1:ge-0/1/5", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "eqx-sj-rt1:ge-0/1/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "eqx-sj-rt1:xe-0/2/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "eqx-sj-rt1:ge-0/0/6", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "eqx-sj-rt1:xe-0/3/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "eqx-sj-rt1:xe-1/0/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
       }
     ]
   }, 
   {
     "urn": "lbl-mr2", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX960", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -1029,6 +2608,188 @@
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "lbl-mr2:xe-1/3/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "lbl-mr2:xe-7/0/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "lbl-mr2:xe-7/1/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "lbl-mr2:ae0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 20000
+      }, 
+      {
+        "urn": "lbl-mr2:ge-9/1/2", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "lbl-mr2:ge-9/1/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "lbl-mr2:ge-9/1/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "lbl-mr2:ge-9/0/6", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "lbl-mr2:ge-9/0/7", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "lbl-mr2:ge-9/0/4", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "lbl-mr2:ge-9/0/5", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "lbl-mr2:ge-9/0/2", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "lbl-mr2:ge-9/0/3", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "lbl-mr2:ge-9/1/9", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "lbl-mr2:ge-9/1/8", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "lbl-mr2:xe-9/3/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "lbl-mr2:xe-8/3/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "lbl-mr2:xe-7/2/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "lbl-mr2:xe-7/3/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "lbl-mr2:xe-2/1/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "lbl-mr2:ge-9/1/6", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "lbl-mr2:xe-0/2/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "lbl-mr2:xe-2/3/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "lbl-mr2:xe-0/1/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "lbl-mr2:xe-8/1/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "lbl-mr2:xe-9/2/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
       }
     ]
   }, 
@@ -1096,13 +2857,118 @@
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "denv-cr5:10/1/4", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "denv-cr5:10/1/5", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "denv-cr5:10/1/6", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "denv-cr5:10/1/7", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "denv-cr5:10/1/3", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "denv-cr5:9/1/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "denv-cr5:BLANK", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 20000
+      }, 
+      {
+        "urn": "denv-cr5:4/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "denv-cr5:1/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "denv-cr5:10/1/10", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "denv-cr5:3/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "denv-cr5:2/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "denv-cr5:10/1/12", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "denv-cr5:9/1/3", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 9953
+      }, 
+      {
+        "urn": "denv-cr5:10/1/11", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
       }
     ]
   }, 
   {
     "urn": "sdsc-sdn2", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX480", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -1121,13 +2987,48 @@
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "sdsc-sdn2:xe-0/2/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "sdsc-sdn2:xe-1/3/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "sdsc-sdn2:xe-0/0/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "sdsc-sdn2:xe-1/1/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "sdsc-sdn2:xe-0/1/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
       }
     ]
   }, 
   {
     "urn": "ga-rt2", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX480", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -1146,13 +3047,55 @@
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "ga-rt2:xe-0/1/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "ga-rt2:xe-0/3/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "ga-rt2:ge-1/1/3", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "ga-rt2:xe-0/0/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "ga-rt2:xe-0/2/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "ga-rt2:ge-1/0/5", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
       }
     ]
   }, 
   {
     "urn": "llnl-mr2", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX480", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -1185,6 +3128,104 @@
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "llnl-mr2:xe-2/1/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "llnl-mr2:xe-1/1/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "llnl-mr2:xe-0/1/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "llnl-mr2:ge-3/1/5", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "llnl-mr2:xe-3/2/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "llnl-mr2:xe-2/0/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "llnl-mr2:xe-0/0/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "llnl-mr2:ge-3/1/2", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "llnl-mr2:xe-0/2/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "llnl-mr2:xe-1/3/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "llnl-mr2:ge-3/0/7", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "llnl-mr2:ge-3/0/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "llnl-mr2:ge-3/0/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "llnl-mr2:xe-1/0/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
       }
     ]
   }, 
@@ -1224,13 +3265,76 @@
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "lond-cr5:10/1/4", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "lond-cr5:1/2/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "lond-cr5:10/1/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "lond-cr5:10/1/2", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "lond-cr5:4/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "lond-cr5:1/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "lond-cr5:3/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "lond-cr5:2/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "lond-cr5:2/2/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100000
       }
     ]
   }, 
   {
     "urn": "snll-rt2", 
     "type": "ROUTER", 
-    "model": "JUNOS_M10I", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -1242,6 +3346,20 @@
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "snll-rt2:t3-0/0/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 45
+      }, 
+      {
+        "urn": "snll-rt2:ge-0/1/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 1000
       }
     ]
   }, 
@@ -1316,6 +3434,97 @@
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "wash-cr5:10/1/5", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "wash-cr5:10/1/7", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "wash-cr5:10/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "wash-cr5:10/1/3", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "wash-cr5:10/1/8", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "wash-cr5:10/1/9", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "wash-cr5:5/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "wash-cr5:4/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "wash-cr5:6/1/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "wash-cr5:1/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "wash-cr5:3/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "wash-cr5:2/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "wash-cr5:10/1/10", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
       }
     ]
   }, 
@@ -1348,13 +3557,62 @@
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "amst-cr5:1/2/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "amst-cr5:10/1/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "amst-cr5:10/1/2", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "amst-cr5:4/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 40000
+      }, 
+      {
+        "urn": "amst-cr5:1/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "amst-cr5:3/1/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "amst-cr5:2/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
       }
     ]
   }, 
   {
     "urn": "doe-gtn-rt2", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX104", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -1373,13 +3631,69 @@
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "doe-gtn-rt2:ge-0/0/3", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "doe-gtn-rt2:ge-0/0/2", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "doe-gtn-rt2:ge-0/0/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "doe-gtn-rt2:ge-0/0/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "doe-gtn-rt2:ge-0/1/2", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "doe-gtn-rt2:ge-0/1/3", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "doe-gtn-rt2:ge-0/1/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "doe-gtn-rt2:ge-0/1/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100
       }
     ]
   }, 
   {
     "urn": "eqx-chi-rt1", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX480", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -1398,6 +3712,69 @@
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "eqx-chi-rt1:ge-0/0/7", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "eqx-chi-rt1:ge-0/0/6", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "eqx-chi-rt1:xe-5/1/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "eqx-chi-rt1:ge-0/0/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "eqx-chi-rt1:ge-0/1/6", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "eqx-chi-rt1:ge-0/1/7", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "eqx-chi-rt1:ge-0/1/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "eqx-chi-rt1:xe-0/3/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "eqx-chi-rt1:xe-5/0/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
       }
     ]
   }, 
@@ -1479,6 +3856,125 @@
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "aofa-cr5:6/2/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "aofa-cr5:10/1/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "aofa-cr5:10/1/2", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "aofa-cr5:10/1/12", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "aofa-cr5:10/1/8", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "aofa-cr5:10/1/9", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "aofa-cr5:5/2/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "aofa-cr5:5/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "aofa-cr5:1/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "aofa-cr5:4/2/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "aofa-cr5:3/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "aofa-cr5:2/1/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "aofa-cr5:9/1/5", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "aofa-cr5:9/1/4", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "aofa-cr5:9/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "aofa-cr5:9/1/3", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "aofa-cr5:10/1/11", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
       }
     ]
   }, 
@@ -1511,13 +4007,69 @@
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "cern-513-cr5:1/2/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "cern-513-cr5:10/1/2", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "cern-513-cr5:10/1/3", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "cern-513-cr5:2/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "cern-513-cr5:5/1/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "cern-513-cr5:4/1/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "cern-513-cr5:1/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "cern-513-cr5:BLANK", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 20000
       }
     ]
   }, 
   {
     "urn": "nersc-mr2", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX960", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -1536,6 +4088,69 @@
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "nersc-mr2:xe-7/1/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "nersc-mr2:xe-1/2/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "nersc-mr2:xe-0/1/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "nersc-mr2:xe-1/3/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "nersc-mr2:xe-8/1/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "nersc-mr2:xe-0/2/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "nersc-mr2:xe-7/2/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "nersc-mr2:xe-2/2/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "nersc-mr2:xe-7/3/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
       }
     ]
   }, 
@@ -1610,13 +4225,153 @@
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "star-cr5:10/1/7", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "star-cr5:6/2/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "star-cr5:10/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "star-cr5:10/1/2", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "star-cr5:4/2/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "star-cr5:9/2/2", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "star-cr5:3/2/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "star-cr5:6/1/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "star-cr5:10/1/8", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "star-cr5:4/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "star-cr5:1/2/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "star-cr5:1/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "star-cr5:8/1/4", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "star-cr5:3/1/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "star-cr5:2/2/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "star-cr5:9/1/4", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "star-cr5:8/1/6", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "star-cr5:8/2/4", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "star-cr5:8/1/2", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "star-cr5:9/1/2", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
       }
     ]
   }, 
   {
     "urn": "bnl-mr2", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX480", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -1656,6 +4411,76 @@
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "bnl-mr2:xe-1/2/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "bnl-mr2:xe-1/1/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "bnl-mr2:xe-0/1/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "bnl-mr2:xe-1/3/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "bnl-mr2:xe-2/0/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "bnl-mr2:xe-2/3/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "bnl-mr2:xe-4/3/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "bnl-mr2:xe-2/2/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "bnl-mr2:xe-3/0/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "bnl-mr2:xe-1/0/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
       }
     ]
   }, 
@@ -1702,23 +4527,62 @@
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "nash-cr5:10/1/4", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "nash-cr5:10/1/5", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "nash-cr5:10/1/6", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "nash-cr5:10/1/3", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "nash-cr5:1/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "nash-cr5:3/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "nash-cr5:2/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
       }
     ]
   }, 
   {
-    "urn": "bnl-rt3", 
-    "type": "ROUTER", 
-    "model": "JUNOS_MX960", 
-    "capabilities": [
-      "ETHERNET", 
-      "MPLS"
-    ], 
-    "ifces": []
-  }, 
-  {
     "urn": "ornl-rt4", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX480", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -1758,6 +4622,62 @@
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "ornl-rt4:xe-1/2/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "ornl-rt4:xe-2/1/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "ornl-rt4:ge-0/0/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "ornl-rt4:ge-0/0/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "ornl-rt4:xe-1/3/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "ornl-rt4:xe-0/2/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "ornl-rt4:xe-2/3/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "ornl-rt4:xe-1/0/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
       }
     ]
   }, 
@@ -1790,23 +4710,69 @@
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "bost-cr5:10/1/5", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "bost-cr5:10/1/6", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "bost-cr5:10/1/2", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "bost-cr5:5/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 40000
+      }, 
+      {
+        "urn": "bost-cr5:5/1/2", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 40000
+      }, 
+      {
+        "urn": "bost-cr5:1/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "bost-cr5:2/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "bost-cr5:10/2/3", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
       }
     ]
   }, 
   {
-    "urn": "lvk-rt2", 
-    "type": "ROUTER", 
-    "model": "JUNOS_M10I", 
-    "capabilities": [
-      "ETHERNET", 
-      "MPLS"
-    ], 
-    "ifces": []
-  }, 
-  {
     "urn": "jgi-mr2", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX480", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -1825,6 +4791,34 @@
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "jgi-mr2:xe-0/2/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "jgi-mr2:xe-1/3/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "jgi-mr2:xe-2/2/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "jgi-mr2:xe-1/1/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
       }
     ]
   }, 
@@ -1864,6 +4858,62 @@
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "atla-cr5:10/1/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "atla-cr5:10/1/2", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "atla-cr5:10/1/3", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "atla-cr5:10/1/8", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "atla-cr5:4/1/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "atla-cr5:1/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "atla-cr5:3/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "atla-cr5:2/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
       }
     ]
   }, 
@@ -1896,6 +4946,48 @@
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "kans-cr5:10/1/4", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "kans-cr5:10/1/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "kans-cr5:10/1/3", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "kans-cr5:1/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "kans-cr5:3/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "kans-cr5:2/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
       }
     ]
   }
