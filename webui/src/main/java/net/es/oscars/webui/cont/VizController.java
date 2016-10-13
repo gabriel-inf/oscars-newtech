@@ -27,9 +27,6 @@ public class VizController {
             throw new NoSuchElementException("bad classifier " + classifier);
         }
     }
-    @RequestMapping("/viz")
-    public String viz(Model model) {
-        return "viz";
-    }
+
 
 }

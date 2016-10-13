@@ -15,27 +15,34 @@ public class TopologyProvider {
     @Autowired
     private RestTemplate restTemplate;
 
+    private Topology topology = null;
+    private Map<String, Position> positions = null;
+    private Map<String, Set<String>> devicePortMap = null;
 
     public Topology getTopology() {
-
-        String restPath = "https://localhost:8000/topo/multilayer";
-        Topology topology = restTemplate.getForObject(restPath, Topology.class);
+        if (topology == null) {
+            String restPath = "https://localhost:8000/topo/multilayer";
+            topology = restTemplate.getForObject(restPath, Topology.class);
+        }
 
         return topology;
     }
 
     public Map<String, Set<String>> devicePortMap() {
-        String restPath = "https://localhost:8000/topo/device_port_map";
+        if (devicePortMap == null) {
+            devicePortMap = new HashMap<>();
+            String restPath = "https://localhost:8000/topo/device_port_map";
 
-        Map<String, List<String>> receivedMap = restTemplate.getForObject(restPath, Map.class);
-        Map<String, Set<String>> portMap = new HashMap<>();
-        receivedMap.keySet().forEach(d -> {
-            portMap.put(d, new HashSet<>());
-            portMap.get(d).addAll(receivedMap.get(d));
+            Map<String, List<String>> receivedMap = restTemplate.getForObject(restPath, Map.class);
+            receivedMap.keySet().forEach(d -> {
+                devicePortMap.put(d, new HashSet<>());
+                devicePortMap.get(d).addAll(receivedMap.get(d));
 
-        });
+            });
 
-        return portMap;
+        }
+
+        return devicePortMap;
     }
     public Map<String, Set<String>> getHubs() {
         Map<String, Set<String>> result = new HashMap<>();
@@ -43,8 +50,20 @@ public class TopologyProvider {
     }
 
     public Map<String, Position> getPositions() {
-        Map<String, Position> positionMap = new HashMap<>();
-        return positionMap;
+        if (positions == null) {
+            positions = new HashMap<>();
+            String restPath = "https://localhost:8000/ui/positions";
+            Map<String, Map<String,Integer>> rcvd = restTemplate.getForObject(restPath, Map.class);
+
+            rcvd.keySet().forEach(d -> {
+                Integer x = rcvd.get(d).get("x");
+                Integer y = rcvd.get(d).get("y");
+                Position p = Position.builder().x(x).y(y).build();
+                positions.put(d, p);
+            });
+        }
+
+        return positions;
     }
 
 

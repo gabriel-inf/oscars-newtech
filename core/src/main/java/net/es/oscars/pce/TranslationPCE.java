@@ -42,11 +42,12 @@ public class TranslationPCE {
 
     /**
      * Creates a ReservedVlanJunctionE given a request for ingress/egress traffic within a device.
-     * @param req_j - The requested junction
-     * @param sched - The requested schedule
+     *
+     * @param req_j           - The requested junction
+     * @param sched           - The requested schedule
      * @param simpleJunctions - A set of all singular requested junctions so far
      * @param deviceToPortMap
-     *@param portToDeviceMap @return The Reserved Junction
+     * @param portToDeviceMap @return The Reserved Junction
      * @throws PCEException
      * @throws PSSException
      */
@@ -63,10 +64,9 @@ public class TranslationPCE {
         Optional<UrnE> optUrn = urnRepository.findByUrn(deviceUrnString);
 
         UrnE deviceUrn;
-        if(optUrn.isPresent()){
+        if (optUrn.isPresent()) {
             deviceUrn = optUrn.get();
-        }
-        else{
+        } else {
             log.error("URN " + deviceUrnString + " not found in URN Repository");
             return null;
         }
@@ -78,20 +78,21 @@ public class TranslationPCE {
         // Select VLAN IDs for this junction
         Map<UrnE, Set<Integer>> urnVlanMap = vlanService.selectVLANsForJunction(req_j, reservedVlans,
                 deviceToPortMap, portToDeviceMap, urnMap);
-        if(urnVlanMap.keySet().stream().anyMatch(urn -> urnVlanMap.get(urn).isEmpty())){
+        if (urnVlanMap.keySet().stream().anyMatch(urn -> urnVlanMap.get(urn).isEmpty())) {
+            log.error("could not choose VLAN id");
             return null;
         }
         log.info("Chosen VLAN Map: " + urnVlanMap);
 
         // Confirm that there is sufficient available bandwidth
         boolean sufficientBandwidth = bwService.evaluateBandwidthJunction(req_j, reservedBandwidths);
-        if(!sufficientBandwidth){
+        if (!sufficientBandwidth) {
             return null;
         }
 
         // Add the union of the reserved VLAN IDs to this junction
         Map<UrnE, Set<ReservedVlanE>> urnToRsvVlanMap = new HashMap<>();
-        for(UrnE portUrn : urnVlanMap.keySet()){
+        for (UrnE portUrn : urnVlanMap.keySet()) {
             Set<Integer> vlans = urnVlanMap.get(portUrn);
             urnToRsvVlanMap.put(portUrn, vlans.stream()
                     .map(vlan -> createReservedVlan(portUrn, vlan, sched))
@@ -101,12 +102,12 @@ public class TranslationPCE {
         // For each requested fixture, create a reserved bandwdith and reserved VLAN object
         // and store them in a Reserved Fixture
         Set<RequestedVlanFixtureE> reqFixtures = req_j.getFixtures();
-        for(RequestedVlanFixtureE reqFix : reqFixtures){
+        for (RequestedVlanFixtureE reqFix : reqFixtures) {
             ReservedBandwidthE rsvBw = createReservedBandwidth(reqFix.getPortUrn(), reqFix.getInMbps(),
                     reqFix.getEgMbps(), sched);
 
             ReservedVlanFixtureE rsvFix = createReservedFixture(reqFix.getPortUrn(), new HashSet<>(),
-                    urnToRsvVlanMap.get(reqFix.getPortUrn()), rsvBw, pceAssistant.decideFixtureType(reqFix.getPortUrn().getDeviceModel()));
+                    urnToRsvVlanMap.get(reqFix.getPortUrn()), rsvBw, pceAssistant.decideFixtureType(req_j.getDeviceUrn().getDeviceModel()));
 
             // Add the fixtures to the Reserved Junction
             rsv_j.getFixtures().add(rsvFix);
@@ -122,16 +123,17 @@ public class TranslationPCE {
      * One pipe for each pair of Ethernet devices
      * One pipe for each MPLS segment along the path
      * This function will add to the reservedMplsPipes and reservedEthPipes sets passed in as input
-     * @param reqPipe - THe requested pipe, containing details on the requested endpoints/bandwidth/VLANs
-     * @param sched - The requested schedule (i.e. start/end date)
-     * @param azERO - The physical path taken by the pipe in the A->Z direction
-     * @param zaERO - The physical path taken by the pipe in the Z->A direction
+     *
+     * @param reqPipe            - THe requested pipe, containing details on the requested endpoints/bandwidth/VLANs
+     * @param sched              - The requested schedule (i.e. start/end date)
+     * @param azERO              - The physical path taken by the pipe in the A->Z direction
+     * @param zaERO              - The physical path taken by the pipe in the Z->A direction
      * @param reservedBandwidths - The list of all bandwidth reserved so far
-     * @param reservedVlans - The list of all VLAN IDs reserved so far
-     * @param reservedMplsPipes - The set of all reserved MPLS pipes so far
-     * @param reservedEthPipes - The set of all reserved Ethernet pipes so far
+     * @param reservedVlans      - The list of all VLAN IDs reserved so far
+     * @param reservedMplsPipes  - The set of all reserved MPLS pipes so far
+     * @param reservedEthPipes   - The set of all reserved Ethernet pipes so far
      * @param deviceToPortMap
-     *@param portToDeviceMap @throws PCEException
+     * @param portToDeviceMap    @throws PCEException
      * @throws PSSException
      */
     public void reserveRequestedPipe(RequestedVlanPipeE reqPipe, ScheduleSpecificationE sched, List<TopoEdge> azERO,
@@ -139,10 +141,10 @@ public class TranslationPCE {
                                      List<ReservedVlanE> reservedVlans, Set<ReservedMplsPipeE> reservedMplsPipes,
                                      Set<ReservedEthPipeE> reservedEthPipes,
                                      Map<String, Set<String>> deviceToPortMap, Map<String, String> portToDeviceMap)
-    throws PCEException, PSSException{
+            throws PCEException, PSSException {
 
         // Build a urn map
-        Map<String , UrnE> urnMap = new HashMap<>();
+        Map<String, UrnE> urnMap = new HashMap<>();
         urnRepository.findAll().forEach(u -> {
             urnMap.put(u.getUrn(), u);
         });
@@ -152,8 +154,8 @@ public class TranslationPCE {
         Map<UrnE, Set<Integer>> chosenVlanMap = vlanService.selectVlansForPipe(reqPipe, urnMap, reservedVlans, azERO,
                 zaERO, deviceToPortMap, portToDeviceMap);
         log.info("Chosen VLAN Map: " + chosenVlanMap);
-        for(UrnE urn : chosenVlanMap.keySet()){
-            if(chosenVlanMap.get(urn).isEmpty() && urn.getReservableVlans() != null){
+        for (UrnE urn : chosenVlanMap.keySet()) {
+            if (chosenVlanMap.get(urn).isEmpty() && urn.getReservableVlans() != null) {
                 throw new PCEException(("VLAN could not not be found for URN " + urn.toString()));
             }
         }
@@ -169,16 +171,16 @@ public class TranslationPCE {
     }
 
     public void reserveRequestedPipeWithPairs(RequestedVlanPipeE reqPipe, ScheduleSpecificationE sched, List<List<TopoEdge>> azEROs,
-                                     List<List<TopoEdge>> zaEROs, List<ReservedBandwidthE> reservedBandwidths,
-                                     List<ReservedVlanE> reservedVlans, Set<ReservedMplsPipeE> reservedMplsPipes,
-                                     Set<ReservedEthPipeE> reservedEthPipes, Map<String, Set<String>> deviceToPortMap,
+                                              List<List<TopoEdge>> zaEROs, List<ReservedBandwidthE> reservedBandwidths,
+                                              List<ReservedVlanE> reservedVlans, Set<ReservedMplsPipeE> reservedMplsPipes,
+                                              Set<ReservedEthPipeE> reservedEthPipes, Map<String, Set<String>> deviceToPortMap,
                                               Map<String, String> portToDeviceMap) throws PSSException, PCEException {
 
         List<TopoEdge> combinedAzERO = combineEROs(azEROs);
         List<TopoEdge> combinedZaERO = combineEROs(zaEROs);
 
         // Build a urn map
-        Map<String , UrnE> urnMap = new HashMap<>();
+        Map<String, UrnE> urnMap = new HashMap<>();
         urnRepository.findAll().forEach(u -> {
             urnMap.put(u.getUrn(), u);
         });
@@ -190,8 +192,8 @@ public class TranslationPCE {
         Map<UrnE, Set<Integer>> chosenVlanMap = vlanService.selectVlansForPipe(reqPipe, urnMap, reservedVlans,
                 combinedAzERO, combinedZaERO, deviceToPortMap, portToDeviceMap);
         log.info("Chosen VLAN Map: " + chosenVlanMap);
-        for(UrnE urn : chosenVlanMap.keySet()){
-            if(chosenVlanMap.get(urn).isEmpty()  && urn.getReservableVlans() != null){
+        for (UrnE urn : chosenVlanMap.keySet()) {
+            if (chosenVlanMap.get(urn).isEmpty() && urn.getReservableVlans() != null) {
                 throw new PCEException(("VLAN could not not be found for URN " + urn.toString()));
             }
         }
@@ -200,13 +202,13 @@ public class TranslationPCE {
 
         Set<ReservedEthPipeE> tempEthPipes = new HashSet<>();
         Set<ReservedMplsPipeE> tempMplsPipes = new HashSet<>();
-        for(Integer pairIndex = 0; pairIndex < azEROs.size(); pairIndex++){
+        for (Integer pairIndex = 0; pairIndex < azEROs.size(); pairIndex++) {
             List<TopoEdge> azERO = azEROs.get(pairIndex);
             List<TopoEdge> zaERO = zaEROs.get(pairIndex);
 
             List<Map<Layer, List<TopoVertex>>> azSegments = PCEAssistant.decompose(azERO);
             List<Map<Layer, List<TopoVertex>>> zaSegments = PCEAssistant.decompose(zaERO);
-            if(azSegments.size() > 0 && zaSegments.size() > 0){
+            if (azSegments.size() > 0 && zaSegments.size() > 0) {
                 reserveEntities(reqPipe, azSegments, zaSegments, sched, urnMap, requestedBandwidthMap,
                         chosenVlanMap, tempEthPipes, tempMplsPipes, junctionMap, deviceToPortMap, portToDeviceMap);
             }
@@ -258,7 +260,7 @@ public class TranslationPCE {
         reqPipeJunctions.add(reqPipe.getZJunction());
 
         // now, decompose the path
-        assert(azSegments.size() == zaSegments.size());
+        assert (azSegments.size() == zaSegments.size());
 
         // for each segment:
         // if it is an Ethernet segment, make junctions, one per device
@@ -280,7 +282,7 @@ public class TranslationPCE {
         // MPLS Pipe: needs bandwidth
         // All junctions: Add fixtures if requested
 
-        for(List<TopoVertex> junctionPair : allJunctionPairs.keySet()){
+        for (List<TopoVertex> junctionPair : allJunctionPairs.keySet()) {
             Layer thisLayer = allJunctionPairs.get(junctionPair);
 
             Map<String, List<TopoVertex>> pipeEroMap = junctionPairToPipeEROMap.get(junctionPair);
@@ -302,21 +304,19 @@ public class TranslationPCE {
             ReservedVlanJunctionE zJunction;
 
             // Create or retrieve A Junction
-            if(!junctionMap.containsKey(aVertex)){
+            if (!junctionMap.containsKey(aVertex)) {
                 aJunction = createJunctionAndFixtures(aVertex, urnMap, deviceModels, reqPipeJunctions,
                         chosenVlanMap, sched, portToDeviceMap, azPipeEro, zaPipeEro);
                 junctionMap.put(aVertex, aJunction);
-            }
-            else{
+            } else {
                 aJunction = junctionMap.get(aVertex);
             }
             // Create Z Junction
-            if(!junctionMap.containsKey(zVertex)){
+            if (!junctionMap.containsKey(zVertex)) {
                 zJunction = createJunctionAndFixtures(zVertex, urnMap, deviceModels, reqPipeJunctions,
                         chosenVlanMap, sched, portToDeviceMap, azPipeEro, zaPipeEro);
                 junctionMap.put(zVertex, zJunction);
-            }
-            else{
+            } else {
                 zJunction = junctionMap.get(zVertex);
             }
 
@@ -327,7 +327,7 @@ public class TranslationPCE {
                     pipeEroMap.get("ZA"), urnMap, requestedBandwidthMap, sched);
 
 
-            if(thisLayer.equals(Layer.MPLS)){
+            if (thisLayer.equals(Layer.MPLS)) {
                 ReservedMplsPipeE mplsPipe = ReservedMplsPipeE.builder()
                         .aJunction(aJunction)
                         .zJunction(zJunction)
@@ -340,7 +340,7 @@ public class TranslationPCE {
                 reservedMplsPipes.add(mplsPipe);
             }
             // ETHERNET
-            else{
+            else {
                 Set<ReservedVlanE> pipeVlans = createReservedVlanForEROs(pipeEroMap.get("AZ"),
                         pipeEroMap.get("ZA"), urnMap, chosenVlanMap, sched, deviceToPortMap);
 
@@ -359,18 +359,18 @@ public class TranslationPCE {
         }
     }
 
-    private List<TopoEdge> combineEROs(List<List<TopoEdge>> EROs){
+    private List<TopoEdge> combineEROs(List<List<TopoEdge>> EROs) {
         List<TopoEdge> combinedERO = new ArrayList<>();
         TopoEdge firstEdge = null;
         TopoEdge lastEdge = null;
-        for(List<TopoEdge> ero: EROs){
-            if(firstEdge == null){
+        for (List<TopoEdge> ero : EROs) {
+            if (firstEdge == null) {
                 firstEdge = ero.get(0);
                 combinedERO.add(firstEdge);
             }
-            combinedERO.addAll(ero.subList(1, ero.size()-1).stream().distinct().collect(Collectors.toList()));
-            if(lastEdge == null){
-                lastEdge = ero.get(ero.size()-1);
+            combinedERO.addAll(ero.subList(1, ero.size() - 1).stream().distinct().collect(Collectors.toList()));
+            if (lastEdge == null) {
+                lastEdge = ero.get(ero.size() - 1);
             }
         }
         combinedERO.add(lastEdge);
@@ -380,11 +380,12 @@ public class TranslationPCE {
     /**
      * Given two lists of EROS in the AZ and ZA direction, a map of URNs, a map of the requested bandwidth at each URN,
      * and the requested schedule, return a combined set of reserved bandwidth objects for the AZ and ZA paths
-     * @param az - The AZ vertices
-     * @param za - The ZA vertices
-     * @param urnMap - A mapping of URN string to URN object
+     *
+     * @param az                    - The AZ vertices
+     * @param za                    - The ZA vertices
+     * @param urnMap                - A mapping of URN string to URN object
      * @param requestedBandwidthMap - A mapping of Vertex objects to "Ingress"/"Egress" requested bandwidth
-     * @param sched - THe requested schedule
+     * @param sched                 - THe requested schedule
      * @return A set of all reserved bandwidth for every port (across both paths)
      */
     public Set<ReservedBandwidthE> createReservedBandwidthForEROs(List<TopoVertex> az, List<TopoVertex> za,
@@ -417,11 +418,12 @@ public class TranslationPCE {
     /**
      * Given two lists of EROS in the AZ and ZA direction, a map of URNs, a chosen vlan ID,
      * and the requested schedule, return a combined set of reserved VLAN objects for the AZ and ZA paths
-     * @param az - The AZ vertices
-     * @param za - The ZA vertices
-     * @param urnMap - A mapping of URN string to URN object
+     *
+     * @param az      - The AZ vertices
+     * @param za      - The ZA vertices
+     * @param urnMap  - A mapping of URN string to URN object
      * @param vlanMap - A mapping of URN object to assigned VLAN ID
-     * @param sched - THe requested schedule
+     * @param sched   - THe requested schedule
      * @return A set of all reserved VLAN objects for every port (across both paths)
      */
     public Set<ReservedVlanE> createReservedVlanForEROs(List<TopoVertex> az, List<TopoVertex> za,
@@ -450,12 +452,13 @@ public class TranslationPCE {
 
     /**
      * Create a Junction and it's associated fixtures given the input parameters.
-     * @param device - The device vertex associated with the junction
-     * @param urnMap - A mapping of URN strings to URN objects
-     * @param deviceModels - A mapping of URN strings to Device Models
+     *
+     * @param device             - The device vertex associated with the junction
+     * @param urnMap             - A mapping of URN strings to URN objects
+     * @param deviceModels       - A mapping of URN strings to Device Models
      * @param requestedJunctions - A set of requested junctions - used to determine attributes of junction/fixtures
-     * @param vlanMap - Map of assigned VLANs for each fixture
-     * @param sched - The requested schedule
+     * @param vlanMap            - Map of assigned VLANs for each fixture
+     * @param sched              - The requested schedule
      * @return A Reserved Vlan Junction with Reserved Fixtures (if contained in a matching requested junction)
      * @throws PSSException
      */
@@ -487,11 +490,11 @@ public class TranslationPCE {
                 .collect(Collectors.toSet());
 
         Set<UrnE> fixtureUrns = reservedVlanFixtures.stream().map(ReservedVlanFixtureE::getIfceUrn).collect(Collectors.toSet());
-        for(UrnE portUrn : vlanMap.keySet()){
-            if(!fixtureUrns.contains(portUrn) && portToDeviceMap.get(portUrn.getUrn()).equals(device.getUrn())){
-                    reservedVlans.addAll(vlanMap.get(portUrn).stream()
-                            .map(id -> createReservedVlan(portUrn, id, sched))
-                            .collect(Collectors.toSet()));
+        for (UrnE portUrn : vlanMap.keySet()) {
+            if (!fixtureUrns.contains(portUrn) && portToDeviceMap.get(portUrn.getUrn()).equals(device.getUrn())) {
+                reservedVlans.addAll(vlanMap.get(portUrn).stream()
+                        .map(id -> createReservedVlan(portUrn, id, sched))
+                        .collect(Collectors.toSet()));
             }
         }
 
@@ -502,17 +505,18 @@ public class TranslationPCE {
 
     /**
      * Create a Reserved Fixtures and it's associated resources (VLAN and Bandwidth) using the input.
-     * @param portUrn - The URN of the desired fixture
+     *
+     * @param portUrn     - The URN of the desired fixture
      * @param fixtureType - The typing of the desired fixture
-     * @param azMbps - The requested ingress bandwidth
-     * @param zaMbps - The requested egress bandwidth
-     * @param vlanIds - The assigned VLAN IDs
-     * @param sched - The requested schedule
+     * @param azMbps      - The requested ingress bandwidth
+     * @param zaMbps      - The requested egress bandwidth
+     * @param vlanIds     - The assigned VLAN IDs
+     * @param sched       - The requested schedule
      * @return The reserved fixture, containing all of its reserved resources
      */
     public ReservedVlanFixtureE createFixtureAndResources(UrnE portUrn, EthFixtureType fixtureType, Integer azMbps,
                                                           Integer zaMbps, Set<Integer> vlanIds,
-                                                          ScheduleSpecificationE sched){
+                                                          ScheduleSpecificationE sched) {
 
 
         // Create reserved resources for Fixture
@@ -524,15 +528,16 @@ public class TranslationPCE {
 
     /**
      * Create a reserved junction given the input
-     * @param urn - The junction's URN
+     *
+     * @param urn          - The junction's URN
      * @param pssResources - The junction's PSS Resources
-     * @param fixtures - The junction's fixtures
+     * @param fixtures     - The junction's fixtures
      * @param junctionType - The junction's type
      * @return The Reserved VLAN Junction
      */
     public ReservedVlanJunctionE createReservedJunction(UrnE urn, Set<ReservedPssResourceE> pssResources,
                                                         Set<ReservedVlanFixtureE> fixtures, EthJunctionType junctionType,
-                                                        Set<ReservedVlanE> reservedVlans){
+                                                        Set<ReservedVlanE> reservedVlans) {
         return ReservedVlanJunctionE.builder()
                 .deviceUrn(urn)
                 .reservedPssResources(pssResources)
@@ -544,16 +549,17 @@ public class TranslationPCE {
 
     /**
      * Create a reserved fixture, given the input parameters.
-     * @param urn - The fixture's URN
+     *
+     * @param urn          - The fixture's URN
      * @param pssResources - The fixture's PSS Resources
-     * @param rsvVlans - The fixture's assigned VLAN IDs
-     * @param rsvBw - The fixture's assigned bandwidth
-     * @param fixtureType - The fixture's type
+     * @param rsvVlans     - The fixture's assigned VLAN IDs
+     * @param rsvBw        - The fixture's assigned bandwidth
+     * @param fixtureType  - The fixture's type
      * @return The Reserved VLAN Fixture
      */
     public ReservedVlanFixtureE createReservedFixture(UrnE urn, Set<ReservedPssResourceE> pssResources,
                                                       Set<ReservedVlanE> rsvVlans, ReservedBandwidthE rsvBw,
-                                                      EthFixtureType fixtureType){
+                                                      EthFixtureType fixtureType) {
         return ReservedVlanFixtureE.builder()
                 .ifceUrn(urn)
                 .reservedPssResources(pssResources)
@@ -566,13 +572,14 @@ public class TranslationPCE {
 
     /**
      * Create the reserved bandwidth given the input parameters.
-     * @param urn - The URN associated with this bandwidth
+     *
+     * @param urn    - The URN associated with this bandwidth
      * @param inMbps - The ingress bandwidth
      * @param egMbps - The egress bandwidth
-     * @param sched - The requested schedule
+     * @param sched  - The requested schedule
      * @return A reserved bandwidth object
      */
-    public ReservedBandwidthE createReservedBandwidth(UrnE urn, Integer inMbps, Integer egMbps, ScheduleSpecificationE sched){
+    public ReservedBandwidthE createReservedBandwidth(UrnE urn, Integer inMbps, Integer egMbps, ScheduleSpecificationE sched) {
         return ReservedBandwidthE.builder()
                 .urn(urn)
                 .inBandwidth(inMbps)
@@ -584,12 +591,13 @@ public class TranslationPCE {
 
     /**
      * Create the reserved VLAN ID given the input parameters.
-     * @param urn - The URN associated with this VLAN
+     *
+     * @param urn    - The URN associated with this VLAN
      * @param vlanId - The ID value for the VLAN tag
-     * @param sched - The requested schedule
+     * @param sched  - The requested schedule
      * @return The reserved VLAN objct
      */
-    public ReservedVlanE createReservedVlan(UrnE urn, Integer vlanId, ScheduleSpecificationE sched){
+    public ReservedVlanE createReservedVlan(UrnE urn, Integer vlanId, ScheduleSpecificationE sched) {
         return ReservedVlanE.builder()
                 .urn(urn)
                 .vlan(vlanId)
@@ -606,26 +614,23 @@ public class TranslationPCE {
                                           List<ReservedBandwidthE> reservedBandwidths) throws PCEException {
         // Confirm that there is sufficient bandwidth to meet the request (given what has been reserved so far)
         // Palindromic EROs -- evaluate both directions at each port - traffic flows both ways
-        if(pceAssistant.palindromicEros(azERO, zaERO)){
+        if (pceAssistant.palindromicEros(azERO, zaERO)) {
             boolean sufficientBw = bwService.evaluateBandwidthEROBi(urnMap, azMbps, zaMbps, azERO, zaERO, availBwMap);
-            if(!sufficientBw)
+            if (!sufficientBw)
                 throw new PCEException("Insufficient Bandwidth to meet requested pipe" + reqPipe.toString() +
                         " given previous reservations in flow");
         }
         // Non-Palindromic EROs -- evaluate the ports in each ERO just for traffic in the AZ or ZA direction
-        else
-        {
+        else {
             // Consider A->Z ERO with bwAZ
             boolean sufficientBwAZ = bwService.evaluateBandwidthEROUni(azERO, urnMap, availBwMap, azMbps);
             // Consider Z->A ERO with bwZA
             boolean sufficientBwZA = bwService.evaluateBandwidthEROUni(zaERO, urnMap, availBwMap, zaMbps);
-            if(!sufficientBwAZ)
-            {
+            if (!sufficientBwAZ) {
                 throw new PCEException("Insufficient Bandwidth to meet requested A->Z pipe" + reqPipe.toString() +
                         " given previous reservations in flow");
             }
-            if(!sufficientBwZA)
-            {
+            if (!sufficientBwZA) {
                 throw new PCEException("Insufficient Bandwidth to meet requested Z->A pipe" + reqPipe.toString() +
                         " given previous reservations in flow");
             }
@@ -638,15 +643,13 @@ public class TranslationPCE {
                     .filter(v -> requestedBandwidthMap.get(v).get("Egress") > 0)
                     .collect(Collectors.toList());
 
-            for(TopoVertex biPort : bidirectionalPorts)
-            {
-                if(!urnMap.containsKey(biPort.getUrn()))
-                {
+            for (TopoVertex biPort : bidirectionalPorts) {
+                if (!urnMap.containsKey(biPort.getUrn())) {
                     assert false;
                 }
                 UrnE biUrn = urnMap.get(biPort.getUrn());
 
-                if(!bwService.evaluateBandwidthURN(biUrn, availBwMap, azMbps, zaMbps)){
+                if (!bwService.evaluateBandwidthURN(biUrn, availBwMap, azMbps, zaMbps)) {
                     throw new PCEException("Insufficient Bandwidth to meet requested pipe" + reqPipe.toString() +
                             " given previous reservations in flow");
                 }
@@ -656,14 +659,12 @@ public class TranslationPCE {
             List<TopoEdge> sharedEdges = azERO.stream().collect(Collectors.toList());
             sharedEdges.retainAll(zaERO);
 
-            if(!sharedEdges.isEmpty())
-            {
+            if (!sharedEdges.isEmpty()) {
                 List<TopoVertex> sharedPorts = new ArrayList<>();
                 List<String> sharedPortNames = new ArrayList<>();
                 sharedPorts.add(sharedEdges.get(0).getA());
                 sharedPortNames.add(sharedEdges.get(0).getA().getUrn());
-                for(TopoEdge e : sharedEdges)
-                {
+                for (TopoEdge e : sharedEdges) {
                     sharedPorts.add(e.getZ());
                     sharedPortNames.add(e.getZ().getUrn());
                 }
@@ -678,16 +679,13 @@ public class TranslationPCE {
                 Map<UrnE, Map<String, Integer>> sharedBwMap;
                 sharedBwMap = bwService.buildBandwidthAvailabilityMap(sharedBandwidths);
 
-                for(TopoVertex sharedPort : sharedPorts)
-                {
-                    if(!urnMap.containsKey(sharedPort.getUrn()))
-                    {
+                for (TopoVertex sharedPort : sharedPorts) {
+                    if (!urnMap.containsKey(sharedPort.getUrn())) {
                         assert false;
                     }
                     UrnE sharedUrn = urnMap.get(sharedPort.getUrn());
 
-                    if(!bwService.evaluateBandwidthSharedURN(sharedUrn, sharedBwMap, azMbps, azMbps, zaMbps, zaMbps))
-                    {
+                    if (!bwService.evaluateBandwidthSharedURN(sharedUrn, sharedBwMap, azMbps, azMbps, zaMbps, zaMbps)) {
                         throw new PCEException("Insufficient Bandwidth to meet requested pipe" + reqPipe.toString() + " given previous reservations in flow");
                     }
                 }

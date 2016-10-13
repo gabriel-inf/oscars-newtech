@@ -71,7 +71,7 @@ public class TopoFileImporter implements TopoImporter {
     public void importFromFile(boolean overwrite, String devicesFilename, String adjciesFilename) throws IOException {
 
         List<Device> devices = importDevicesFromFile(devicesFilename);
-        devices.forEach(t -> log.info(t.toString()));
+        log.info("Devices defined in file " + devicesFilename + " : " + devices.size());
 
         List<UrnE> urns = urnRepo.findAll();
 
@@ -80,20 +80,17 @@ public class TopoFileImporter implements TopoImporter {
             List<UrnE> newUrns = this.urnsFromDevices(devices);
 
             urnRepo.save(newUrns);
-            log.info("URNs defined from devices:");
-            newUrns.forEach(t -> log.info(t.getUrn()));
+            log.info("URNs defined from devices: " + newUrns.size());
         } else {
             log.info("Devices DB is not empty; skipping import");
         }
 
 
-        log.info("Defined adjacencies from adjacencies file:");
         List<UrnAdjcyE> newAdjcies = importAdjciesFromFile(adjciesFilename);
-        newAdjcies.forEach(t -> log.info(t.toString()));
+        log.info("Defined adjacencies from adjacencies file: " + newAdjcies.size());
 
-        log.info("Implied adjacencies from devices file:");
         List<UrnAdjcyE> deviceAdjcies = adjciesFromDevices(devices);
-        deviceAdjcies.forEach(t -> log.info(t.toString()));
+        log.info("Implied adjacencies from devices file: " + deviceAdjcies.size());
 
 
         if (overwrite) {
@@ -104,15 +101,12 @@ public class TopoFileImporter implements TopoImporter {
 
         List<UrnAdjcyE> adjcies = adjcyRepo.findAll();
         if (adjcies.isEmpty()) {
-            log.info("Adjacencies DB empty. Will import from file: " + adjciesFilename);
+            log.info("Adjacencies DB empty. Will replace with those from files. ");
             newAdjcies.forEach(adjcyE -> {
-                log.info(adjcyE.toString());
                 adjcyRepo.save(adjcyE);
             });
 
-            log.info("adding device adjacencies...");
             deviceAdjcies.forEach(adjcyE -> {
-                log.info(adjcyE.toString());
                 adjcyRepo.save(adjcyE);
             });
 
@@ -222,8 +216,6 @@ public class TopoFileImporter implements TopoImporter {
         fromFile.forEach(t -> {
             UrnE a = urnRepo.findByUrn(t.getA()).get();
             UrnE z = urnRepo.findByUrn(t.getZ()).get();
-            log.info("a: " + a.getUrn() + " id " + a.getId());
-            log.info("z: " + z.getUrn() + " id " + z.getId());
             Map<Layer, Long> metrics = t.getMetrics();
 
             UrnAdjcyE adjcy = UrnAdjcyE.builder().a(a).z(z).metrics(metrics).build();

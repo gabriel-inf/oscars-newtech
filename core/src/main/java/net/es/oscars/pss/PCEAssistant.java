@@ -289,6 +289,9 @@ public class PCEAssistant {
      * @throws PSSException
      */
     public EthFixtureType decideFixtureType(DeviceModel model) throws PSSException {
+        if (model == null) {
+            throw new PSSException("Null device model");
+        }
         switch (model) {
             case ALCATEL_SR7750:
                 return EthFixtureType.ALU_SAP;

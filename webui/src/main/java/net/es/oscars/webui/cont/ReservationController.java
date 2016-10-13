@@ -7,14 +7,13 @@ import net.es.oscars.dto.pss.EthJunctionType;
 import net.es.oscars.dto.resv.Connection;
 import net.es.oscars.dto.spec.*;
 import net.es.oscars.dto.topo.Urn;
+import net.es.oscars.webui.dto.MinimalRequest;
+import net.es.oscars.webui.ipc.MinimalRequester;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletRequest;
@@ -28,11 +27,8 @@ public class ReservationController {
     @Autowired
     private RestTemplate restTemplate;
 
-    @RequestMapping("/resv_list")
-    public String resv_list(Model model) {
-
-        return "resv_list";
-    }
+    @Autowired
+    private MinimalRequester minimalRequester;
 
     @RequestMapping("/resv_basic_new")
     public String resv_basic_new(Model model) {
@@ -70,7 +66,7 @@ public class ReservationController {
     }
 
 
-    @RequestMapping(value="/resv_basic_new_submit", method = RequestMethod.POST)
+    @RequestMapping(value = "/resv_basic_new_submit", method = RequestMethod.POST)
     public String resv_basic_new_submit(@ModelAttribute BasicVlanSpecification addedSpecification) {
         log.info("adding a basic vlan spec ");
 
@@ -101,7 +97,7 @@ public class ReservationController {
         return "resv_view";
     }
 
-    @RequestMapping(value="/resv_adv_new", params={"addJunction"})
+    @RequestMapping(value = "/resv_adv_new", params = {"addJunction"})
     public String addRow(final ReservedVlanFlow vflow, final BindingResult bindingResult) {
         Urn prompt_urn = Urn.builder().urn("choose a device").build();
         ReservedVlanJunction vj = ReservedVlanJunction.builder()
@@ -115,7 +111,7 @@ public class ReservationController {
         return "resv_adv_new";
     }
 
-    @RequestMapping(value="/resv_adv_new", params={"removeFixture"})
+    @RequestMapping(value = "/resv_adv_new", params = {"removeFixture"})
     public String removeRow(final ReservedVlanFlow vflow, final BindingResult bindingResult,
                             final HttpServletRequest req) {
 
@@ -132,7 +128,7 @@ public class ReservationController {
                 }
             }
         }
-        if (fromThis != null && removeThis != null){
+        if (fromThis != null && removeThis != null) {
             fromThis.getFixtures().remove(removeThis);
         }
 
@@ -140,5 +136,26 @@ public class ReservationController {
         return "resv_adv_new";
     }
 
+
+    @RequestMapping("/resv/list")
+    public String resv_list(Model model) {
+        return "resv_list";
+    }
+
+
+    @RequestMapping("/resv/gui")
+    public String resv_gui(Model model) {
+        return "resv_gui";
+    }
+
+
+    @RequestMapping(value = "/resv/minimal_submit", method = RequestMethod.POST)
+    @ResponseBody
+    public String resv_minimal_submit(@RequestBody MinimalRequest request) {
+        Connection c = minimalRequester.submitMinimal(request);
+
+        return "got it";
+
+    }
 
 }

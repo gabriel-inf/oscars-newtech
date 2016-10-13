@@ -2,7 +2,7 @@
   {
     "urn": "pppl-rt5", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX480", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -10,12 +10,25 @@
     "ifces": [
       {
         "urn": "pppl-rt5:xe-0/2/0", 
+        "reservableBw": 10000, 
         "capabilities": [
           "MPLS"
-        ], 
-        "reservableBw": 10000
+        ]
       }, 
       {
+        "urn": "pppl-rt5:xe-1/0/0", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "pppl-rt5:xe-1/2/0", 
         "capabilities": [
           "ETHERNET"
@@ -23,6 +36,51 @@
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "pppl-rt5:ge-0/0/2", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "pppl-rt5:xe-1/1/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "pppl-rt5:ge-0/0/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "pppl-rt5:xe-1/3/0", 
         "capabilities": [
           "ETHERNET"
@@ -30,9 +88,35 @@
         "reservableBw": 10000
       }, 
       {
-        "urn": "pppl-rt5:xe-1/1/0", 
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "pppl-rt5:xe-2/0/0", 
         "capabilities": [
           "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "pppl-rt5:ge-0/1/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "pppl-rt5:xe-0/2/0", 
+        "capabilities": [
+          "MPLS"
         ], 
         "reservableBw": 10000
       }, 
@@ -42,20 +126,6 @@
           "MPLS"
         ], 
         "reservableBw": 10000
-      }, 
-      {
-        "urn": "pppl-rt5:xe-0/2/0.5", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "pppl-rt5:xe-1/0/0.5", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
       }
     ]
   }, 
@@ -69,20 +139,66 @@
     ], 
     "ifces": [
       {
-        "reservableVlans": [
-          {
-            "ceiling": 55, 
-            "floor": 55
-          }, 
-          {
-            "ceiling": 200, 
-            "floor": 100
-          }
-        ], 
-        "urn": "chic-cr5:1/2/0", 
+        "urn": "chic-cr5:10/1/4", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "chic-cr5:10/1/5", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "chic-cr5:10/1/2", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "chic-cr5:10/1/3", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "chic-cr5:4/1/1", 
         "reservableBw": 100000, 
         "capabilities": [
-          "ETHERNET"
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "chic-cr5:1/1/1", 
+        "reservableBw": 100000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "chic-cr5:3/1/1", 
+        "reservableBw": 100000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "chic-cr5:2/1/1", 
+        "reservableBw": 100000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "chic-cr5:9/1/4", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
         ]
       }, 
       {
@@ -100,9 +216,15 @@
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "chic-cr5:10/1/1", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 10000
       }, 
@@ -121,23 +243,41 @@
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "chic-cr5:3/2/1", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 100000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "chic-cr5:10/1/9", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "chic-cr5:5/1/1", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 100000
       }, 
@@ -175,87 +315,24 @@
           "MPLS"
         ], 
         "reservableBw": 10000
-      }, 
-      {
-        "urn": "chic-cr5:to_ameslab-rt3_ip-a", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "chic-cr5:to_nash-cr5_ip-a", 
-        "reservableBw": 100000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "chic-cr5:to_wash-cr5_ip-a", 
-        "reservableBw": 100000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "chic-cr5:to_fnal-mr2_ip-a", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "chic-cr5:to_anl-mr2_ip-a", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "chic-cr5:to_kans-cr5_ip-a", 
-        "reservableBw": 100000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "chic-cr5:to_star-cr5_ip-a", 
-        "reservableBw": 100000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "chic-cr5:to_eqx-chi-rt1_ip-a", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "chic-cr5:to_eqx-chi-rt1_ip-b", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
       }
     ]
   }, 
   {
     "urn": "srs-rt3", 
     "type": "ROUTER", 
-    "model": "JUNOS_M10I", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
     "ifces": [
       {
-        "urn": "srs-rt3:ge-1/0/0", 
+        "urn": "srs-rt3:ge-0/1/0", 
+        "reservableBw": 1000, 
         "capabilities": [
-          "ETHERNET"
-        ], 
-        "reservableBw": 1000
+          "MPLS"
+        ]
       }, 
       {
         "urn": "srs-rt3:ge-0/1/0", 
@@ -265,127 +342,154 @@
         "reservableBw": 1000
       }, 
       {
-        "urn": "srs-rt3:ge-0/0/0", 
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "srs-rt3:fe-0/3/3", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "srs-rt3:fe-0/3/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "srs-rt3:ge-1/0/0", 
         "capabilities": [
           "ETHERNET"
         ], 
         "reservableBw": 1000
       }, 
       {
-        "urn": "srs-rt3:ge-0/1/0.5", 
-        "reservableBw": 1000, 
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "srs-rt3:ge-0/0/0", 
         "capabilities": [
-          "MPLS"
-        ]
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
       }
     ]
   }, 
   {
-    "urn": "lond-cr5", 
+    "urn": "anl-mr2", 
     "type": "ROUTER", 
-    "model": "ALCATEL_SR7750", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
     "ifces": [
       {
-        "urn": "lond-cr5:10/1/4", 
+        "urn": "anl-mr2:xe-2/0/0", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "anl-mr2:xe-0/0/0", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "anl-mr2:xe-1/2/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "anl-mr2:ae0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 20000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "anl-mr2:xe-0/1/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "anl-mr2:xe-1/3/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "anl-mr2:xe-2/0/0", 
         "capabilities": [
           "MPLS"
         ], 
         "reservableBw": 10000
       }, 
       {
-        "urn": "lond-cr5:1/2/1", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 100000
-      }, 
-      {
-        "urn": "lond-cr5:10/1/1", 
+        "urn": "anl-mr2:xe-0/0/0", 
         "capabilities": [
           "MPLS"
         ], 
         "reservableBw": 10000
-      }, 
-      {
-        "urn": "lond-cr5:10/1/2", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "lond-cr5:4/1/1", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 100000
-      }, 
-      {
-        "urn": "lond-cr5:1/1/1", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 100000
-      }, 
-      {
-        "urn": "lond-cr5:3/1/1", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 100000
-      }, 
-      {
-        "urn": "lond-cr5:2/1/1", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 100000
-      }, 
-      {
-        "urn": "lond-cr5:2/2/1", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 100000
-      }, 
-      {
-        "urn": "lond-cr5:to_amst-cr5_ip-a", 
-        "reservableBw": 100000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "lond-cr5:to_newy-cr5_ip-a", 
-        "reservableBw": 100000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "lond-cr5:to_cern-513-cr5_ip-a", 
-        "reservableBw": 100000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "lond-cr5:to_aofa-cr5_ip-a", 
-        "reservableBw": 100000, 
-        "capabilities": [
-          "MPLS"
-        ]
       }
     ]
   }, 
   {
     "urn": "orau-rt3", 
     "type": "ROUTER", 
-    "model": "JUNOS_M10I", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -393,20 +497,26 @@
     "ifces": [
       {
         "urn": "orau-rt3:ge-1/2/0", 
+        "reservableBw": 1000, 
         "capabilities": [
           "MPLS"
-        ], 
-        "reservableBw": 1000
+        ]
       }, 
       {
-        "urn": "orau-rt3:ge-0/3/0", 
+        "urn": "orau-rt3:ge-0/2/0", 
+        "reservableBw": 1000, 
         "capabilities": [
-          "ETHERNET"
-        ], 
-        "reservableBw": 1000
+          "MPLS"
+        ]
       }, 
       {
-        "urn": "orau-rt3:ge-0/1/0", 
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "orau-rt3:ge-0/3/0", 
         "capabilities": [
           "ETHERNET"
         ], 
@@ -420,32 +530,307 @@
         "reservableBw": 1000
       }, 
       {
-        "urn": "orau-rt3:ge-0/2/0.2114", 
+        "urn": "orau-rt3:ge-1/2/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "orau-rt3:fe-0/0/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "orau-rt3:ge-0/1/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }
+    ]
+  }, 
+  {
+    "urn": "eqx-ash-rt1", 
+    "type": "ROUTER", 
+    "model": "JUNIPER_MX", 
+    "capabilities": [
+      "ETHERNET", 
+      "MPLS"
+    ], 
+    "ifces": [
+      {
+        "urn": "eqx-ash-rt1:xe-2/1/0", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "eqx-ash-rt1:xe-2/0/0", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "eqx-ash-rt1:ge-0/1/3", 
         "reservableBw": 1000, 
         "capabilities": [
           "MPLS"
         ]
       }, 
       {
-        "urn": "orau-rt3:ge-0/2/0.2115", 
-        "reservableBw": 1000, 
+        "urn": "eqx-ash-rt1:xe-1/1/0", 
+        "reservableBw": 10000, 
         "capabilities": [
           "MPLS"
         ]
       }, 
       {
-        "urn": "orau-rt3:ge-1/2/0.5", 
-        "reservableBw": 1000, 
+        "urn": "eqx-ash-rt1:xe-1/0/0", 
+        "reservableBw": 10000, 
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "eqx-ash-rt1:ge-0/0/7", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "eqx-ash-rt1:ae0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "eqx-ash-rt1:ge-0/0/3", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "eqx-ash-rt1:ge-0/0/2", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100
+      }, 
+      {
+        "urn": "eqx-ash-rt1:xe-1/1/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "eqx-ash-rt1:ge-0/1/9", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "eqx-ash-rt1:ge-0/1/6", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "eqx-ash-rt1:xe-0/3/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "eqx-ash-rt1:ge-0/1/5", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "eqx-ash-rt1:xe-2/0/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "eqx-ash-rt1:ge-0/1/3", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "eqx-ash-rt1:ge-0/0/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "eqx-ash-rt1:ge-0/0/6", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "eqx-ash-rt1:xe-1/0/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "eqx-ash-rt1:ge-0/1/7", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "eqx-ash-rt1:xe-1/2/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "eqx-ash-rt1:ge-0/1/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "eqx-ash-rt1:ge-0/1/8", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "eqx-ash-rt1:xe-2/1/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
       }
     ]
   }, 
   {
     "urn": "llnldc-rt4", 
     "type": "ROUTER", 
-    "model": "JUNOS_M10I", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -453,119 +838,175 @@
     "ifces": [
       {
         "urn": "llnldc-rt4:t3-0/3/0", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 45
-      }, 
-      {
-        "urn": "llnldc-rt4:t3-0/3/0.0", 
         "reservableBw": 45, 
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "llnldc-rt4:ge-0/2/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "llnldc-rt4:fe-0/0/3", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "llnldc-rt4:ge-0/1/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "llnldc-rt4:t3-0/3/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 45
       }
     ]
   }, 
   {
-    "urn": "ornl-rt4", 
+    "urn": "newy-cr5", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX480", 
+    "model": "ALCATEL_SR7750", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
     "ifces": [
       {
-        "urn": "ornl-rt4:xe-1/2/0", 
+        "urn": "newy-cr5:4/1/1", 
+        "reservableBw": 100000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "newy-cr5:10/1/6", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "newy-cr5:4/2/1", 
+        "reservableBw": 100000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "newy-cr5:2/1/1", 
+        "reservableBw": 100000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "newy-cr5:10/1/6", 
         "capabilities": [
           "MPLS"
         ], 
         "reservableBw": 10000
       }, 
       {
-        "urn": "ornl-rt4:xe-2/1/0", 
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "newy-cr5:10/1/2", 
         "capabilities": [
           "ETHERNET"
         ], 
         "reservableBw": 10000
       }, 
       {
-        "urn": "ornl-rt4:ge-0/0/1", 
-        "capabilities": [
-          "MPLS"
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
         ], 
-        "reservableBw": 1000
-      }, 
-      {
-        "urn": "ornl-rt4:xe-1/3/0", 
+        "urn": "newy-cr5:10/1/3", 
         "capabilities": [
           "ETHERNET"
         ], 
         "reservableBw": 10000
       }, 
       {
-        "urn": "ornl-rt4:xe-0/2/0", 
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "newy-cr5:10/1/9", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 10000
       }, 
       {
-        "urn": "ornl-rt4:xe-2/3/0", 
+        "urn": "newy-cr5:4/1/1", 
         "capabilities": [
           "MPLS"
         ], 
-        "reservableBw": 10000
+        "reservableBw": 100000
       }, 
       {
-        "urn": "ornl-rt4:xe-1/0/0", 
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "newy-cr5:3/1/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "newy-cr5:2/1/1", 
         "capabilities": [
           "MPLS"
         ], 
-        "reservableBw": 10000
+        "reservableBw": 100000
       }, 
       {
-        "urn": "ornl-rt4:xe-1/2/0.5", 
-        "reservableBw": 10000, 
+        "urn": "newy-cr5:4/2/1", 
         "capabilities": [
           "MPLS"
-        ]
-      }, 
-      {
-        "urn": "ornl-rt4:xe-0/2/0.5", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "ornl-rt4:xe-2/3/0.2112", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "ornl-rt4:ge-0/0/1.5", 
-        "reservableBw": 1000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "ornl-rt4:xe-2/3/0.2114", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "ornl-rt4:xe-1/0/0.5", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
+        ], 
+        "reservableBw": 100000
       }
     ]
   }, 
@@ -578,6 +1019,90 @@
       "MPLS"
     ], 
     "ifces": [
+      {
+        "urn": "sunn-cr5:10/1/4", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "sunn-cr5:10/1/5", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "sunn-cr5:10/1/1", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "sunn-cr5:10/1/3", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "sunn-cr5:5/1/1", 
+        "reservableBw": 100000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "sunn-cr5:1/1/1", 
+        "reservableBw": 100000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "sunn-cr5:10/2/3", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "sunn-cr5:10/2/2", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "sunn-cr5:10/2/1", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "sunn-cr5:9/1/1", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "sunn-cr5:9/1/3", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "sunn-cr5:9/1/2", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
       {
         "urn": "sunn-cr5:10/1/4", 
         "capabilities": [
@@ -593,9 +1118,15 @@
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "sunn-cr5:10/1/6", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 10000
       }, 
@@ -614,16 +1145,41 @@
         "reservableBw": 10000
       }, 
       {
-        "urn": "sunn-cr5:10/2/3", 
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "sunn-cr5:9/1/5", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "sunn-cr5:8/1/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "sunn-cr5:5/2/1", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 100000
       }, 
@@ -635,23 +1191,28 @@
         "reservableBw": 100000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "sunn-cr5:4/1/1", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 100000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "sunn-cr5:7/1/1", 
         "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 100000
-      }, 
-      {
-        "urn": "sunn-cr5:8/2/1", 
-        "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 100000
       }, 
@@ -663,14 +1224,20 @@
         "reservableBw": 100000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "sunn-cr5:7/2/1", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 100000
       }, 
       {
-        "urn": "sunn-cr5:9/1/5", 
+        "urn": "sunn-cr5:10/2/3", 
         "capabilities": [
           "MPLS"
         ], 
@@ -684,11 +1251,17 @@
         "reservableBw": 10000
       }, 
       {
-        "urn": "sunn-cr5:10/2/1", 
-        "capabilities": [
-          "MPLS"
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
         ], 
-        "reservableBw": 10000
+        "urn": "sunn-cr5:8/2/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100000
       }, 
       {
         "urn": "sunn-cr5:9/1/1", 
@@ -698,11 +1271,11 @@
         "reservableBw": 10000
       }, 
       {
-        "urn": "sunn-cr5:8/1/1", 
+        "urn": "sunn-cr5:10/2/1", 
         "capabilities": [
           "MPLS"
         ], 
-        "reservableBw": 100000
+        "reservableBw": 10000
       }, 
       {
         "urn": "sunn-cr5:9/1/3", 
@@ -717,90 +1290,98 @@
           "MPLS"
         ], 
         "reservableBw": 10000
-      }, 
+      }
+    ]
+  }, 
+  {
+    "urn": "fnal-mr2", 
+    "type": "ROUTER", 
+    "model": "JUNIPER_MX", 
+    "capabilities": [
+      "ETHERNET", 
+      "MPLS"
+    ], 
+    "ifces": [
       {
-        "urn": "sunn-cr5:to_lbl-mr2_ip-a", 
+        "urn": "fnal-mr2:xe-2/1/0", 
         "reservableBw": 10000, 
         "capabilities": [
           "MPLS"
         ]
       }, 
       {
-        "urn": "sunn-cr5:to_sacr-cr5_ip-a", 
-        "reservableBw": 100000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "sunn-cr5:to_slac-mr2_ip-a", 
+        "urn": "fnal-mr2:xe-0/0/0", 
         "reservableBw": 10000, 
         "capabilities": [
           "MPLS"
         ]
       }, 
       {
-        "urn": "sunn-cr5:to_slac-mr2_ip-b", 
+        "urn": "fnal-mr2:xe-8/1/0", 
         "reservableBw": 10000, 
         "capabilities": [
           "MPLS"
         ]
       }, 
       {
-        "urn": "sunn-cr5:to_nersc-mr2_ip-a", 
-        "reservableBw": 10000, 
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "fnal-mr2:ae0", 
         "capabilities": [
-          "MPLS"
-        ]
+          "ETHERNET"
+        ], 
+        "reservableBw": 0
       }, 
       {
-        "urn": "sunn-cr5:to_jgi-mr2_ip-a", 
-        "reservableBw": 10000, 
+        "urn": "fnal-mr2:xe-2/1/0", 
         "capabilities": [
           "MPLS"
-        ]
+        ], 
+        "reservableBw": 10000
       }, 
       {
-        "urn": "sunn-cr5:to_sdsc-sdn2_ip-a", 
-        "reservableBw": 10000, 
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "fnal-mr2:xe-1/3/0", 
         "capabilities": [
-          "MPLS"
-        ]
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
       }, 
       {
-        "urn": "sunn-cr5:to_paix-pa-rt3_ip-a", 
-        "reservableBw": 10000, 
+        "urn": "fnal-mr2:xe-0/0/0", 
         "capabilities": [
           "MPLS"
-        ]
+        ], 
+        "reservableBw": 10000
       }, 
       {
-        "urn": "sunn-cr5:to_llnl-mr2_ip-a", 
-        "reservableBw": 10000, 
+        "urn": "fnal-mr2:xe-8/1/0", 
         "capabilities": [
           "MPLS"
-        ]
+        ], 
+        "reservableBw": 10000
       }, 
       {
-        "urn": "sunn-cr5:to_eqx-sj-rt1_ip-a", 
-        "reservableBw": 10000, 
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "fnal-mr2:xe-0/2/0", 
         "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "sunn-cr5:to_elpa-cr5_ip-a", 
-        "reservableBw": 100000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "sunn-cr5:to_snll-mr2_ip-a", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
       }
     ]
   }, 
@@ -813,6 +1394,34 @@
       "MPLS"
     ], 
     "ifces": [
+      {
+        "urn": "ornl-cr5:9/1/4", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "ornl-cr5:6/1/1", 
+        "reservableBw": 100000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "ornl-cr5:10/1/1", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "ornl-cr5:10/1/2", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
       {
         "urn": "ornl-cr5:10/1/1", 
         "capabilities": [
@@ -828,16 +1437,28 @@
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "ornl-cr5:10/1/3", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "ornl-cr5:7/1/1", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 100000
       }, 
@@ -854,66 +1475,38 @@
           "MPLS"
         ], 
         "reservableBw": 10000
-      }, 
-      {
-        "urn": "ornl-cr5:to_osti-rt2_ip-a", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "ornl-cr5:to_ornl-rt4_ip-a", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "ornl-cr5:to_orau-rt3_ip-a", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "ornl-cr5:to_atla-cr5_ip-a", 
-        "reservableBw": 100000, 
-        "capabilities": [
-          "MPLS"
-        ]
       }
     ]
   }, 
   {
     "urn": "wash-ar1", 
     "type": "ROUTER", 
-    "model": "JUNOS_M10I", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
     "ifces": [
       {
-        "urn": "wash-ar1:ge-0/2/1", 
-        "capabilities": [
-          "ETHERNET"
-        ], 
-        "reservableBw": 1000
-      }, 
-      {
-        "urn": "wash-ar1:ge-0/2/0", 
-        "capabilities": [
-          "ETHERNET"
-        ], 
-        "reservableBw": 1000
-      }, 
-      {
-        "urn": "wash-ar1:t3-0/3/0", 
+        "urn": "wash-ar1:ae0", 
+        "reservableBw": 2000, 
         "capabilities": [
           "MPLS"
-        ], 
-        "reservableBw": 45
+        ]
+      }, 
+      {
+        "urn": "wash-ar1:ge-0/1/0", 
+        "reservableBw": 1000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "wash-ar1:t3-1/3/1", 
+        "reservableBw": 45, 
+        "capabilities": [
+          "MPLS"
+        ]
       }, 
       {
         "urn": "wash-ar1:ae0", 
@@ -923,197 +1516,135 @@
         "reservableBw": 2000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "wash-ar1:t3-0/3/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 45
+      }, 
+      {
+        "urn": "wash-ar1:ge-0/1/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
         "urn": "wash-ar1:t3-1/3/1", 
         "capabilities": [
           "MPLS"
         ], 
         "reservableBw": 45
-      }, 
-      {
-        "urn": "wash-ar1:ae0.2400", 
-        "reservableBw": 2000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "wash-ar1:t3-1/3/1.0", 
-        "reservableBw": 45, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "wash-ar1:ge-0/1/0.0", 
-        "reservableBw": 1000, 
-        "capabilities": [
-          "MPLS"
-        ]
       }
     ]
   }, 
   {
-    "urn": "wash-cr5", 
+    "urn": "forr-rt2", 
     "type": "ROUTER", 
-    "model": "ALCATEL_SR7750", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
     "ifces": [
       {
-        "urn": "wash-cr5:10/1/5", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "wash-cr5:10/1/7", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "wash-cr5:10/1/1", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "wash-cr5:10/1/3", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "wash-cr5:10/1/8", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "wash-cr5:10/1/9", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "wash-cr5:5/1/1", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 100000
-      }, 
-      {
-        "urn": "wash-cr5:4/1/1", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 100000
-      }, 
-      {
-        "urn": "wash-cr5:6/1/1", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 100000
-      }, 
-      {
-        "urn": "wash-cr5:1/1/1", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 100000
-      }, 
-      {
-        "urn": "wash-cr5:3/1/1", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 100000
-      }, 
-      {
-        "urn": "wash-cr5:2/1/1", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 100000
-      }, 
-      {
-        "urn": "wash-cr5:10/1/10", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "wash-cr5:to_wash-ar1_ip-a", 
-        "reservableBw": 10000, 
+        "urn": "forr-rt2:ge-0/0/1", 
+        "reservableBw": 1000, 
         "capabilities": [
           "MPLS"
         ]
       }, 
       {
-        "urn": "wash-cr5:to_cern-513-cr5_ip-a", 
-        "reservableBw": 100000, 
+        "urn": "forr-rt2:ge-0/0/0", 
+        "reservableBw": 1000, 
         "capabilities": [
           "MPLS"
         ]
       }, 
       {
-        "urn": "wash-cr5:to_chic-cr5_ip-a", 
-        "reservableBw": 100000, 
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "forr-rt2:ge-0/0/6", 
         "capabilities": [
-          "MPLS"
-        ]
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
       }, 
       {
-        "urn": "wash-cr5:to_eqx-ash-rt1_ip-a", 
-        "reservableBw": 10000, 
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "forr-rt2:ge-0/0/5", 
         "capabilities": [
-          "MPLS"
-        ]
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
       }, 
       {
-        "urn": "wash-cr5:to_eqx-ash-rt1_ip-b", 
-        "reservableBw": 10000, 
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "forr-rt2:ge-0/0/4", 
         "capabilities": [
-          "MPLS"
-        ]
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
       }, 
       {
-        "urn": "wash-cr5:to_aofa-cr5_sdn-a", 
-        "reservableBw": 100000, 
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "forr-rt2:ge-0/0/3", 
         "capabilities": [
-          "MPLS"
-        ]
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
       }, 
       {
-        "urn": "wash-cr5:to_aofa-cr5_ip-a", 
-        "reservableBw": 100000, 
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "forr-rt2:ge-0/0/2", 
         "capabilities": [
-          "MPLS"
-        ]
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
       }, 
       {
-        "urn": "wash-cr5:to_pppl-rt5_ip-a", 
-        "reservableBw": 10000, 
+        "urn": "forr-rt2:ge-0/0/1", 
         "capabilities": [
           "MPLS"
-        ]
+        ], 
+        "reservableBw": 1000
       }, 
       {
-        "urn": "wash-cr5:to_atla-cr5_ip-a", 
-        "reservableBw": 100000, 
+        "urn": "forr-rt2:ge-0/0/0", 
         "capabilities": [
           "MPLS"
-        ]
+        ], 
+        "reservableBw": 1000
       }
     ]
   }, 
@@ -1127,30 +1658,124 @@
     ], 
     "ifces": [
       {
+        "urn": "sacr-cr5:10/1/3", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "sacr-cr5:1/1/1", 
+        "reservableBw": 100000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "sacr-cr5:3/1/1", 
+        "reservableBw": 100000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "sacr-cr5:2/1/1", 
+        "reservableBw": 100000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "sacr-cr5:10/2/3", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "sacr-cr5:10/2/2", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "sacr-cr5:10/2/1", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "sacr-cr5:10/2/6", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "sacr-cr5:10/2/5", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "sacr-cr5:10/2/4", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "sacr-cr5:10/1/4", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "sacr-cr5:10/1/6", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "sacr-cr5:10/1/1", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "sacr-cr5:10/1/2", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 10000
       }, 
@@ -1223,89 +1848,32 @@
           "MPLS"
         ], 
         "reservableBw": 10000
-      }, 
-      {
-        "urn": "sacr-cr5:to_jgi-mr2_ip-a", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "sacr-cr5:to_slac-mr2_ip-a", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "sacr-cr5:to_nersc-mr2_ip-a", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "sacr-cr5:to_lbl-mr2_ip-a", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "sacr-cr5:to_llnl-mr2_ip-a", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "sacr-cr5:to_paix-pa_ip-a", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "sacr-cr5:to_pnwg-cr5_ip-a", 
-        "reservableBw": 100000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "sacr-cr5:to_sunn-cr5_ip-a", 
-        "reservableBw": 100000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "sacr-cr5:to_snll-mr2_ip-a", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "sacr-cr5:to_denv-cr5_ip-a", 
-        "reservableBw": 100000, 
-        "capabilities": [
-          "MPLS"
-        ]
       }
     ]
   }, 
   {
     "urn": "paix-pa-rt3", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX480", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
     "ifces": [
       {
+        "urn": "paix-pa-rt3:ae0", 
+        "reservableBw": 20000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "paix-pa-rt3:xe-1/3/0", 
         "capabilities": [
           "ETHERNET"
@@ -1318,46 +1886,25 @@
           "MPLS"
         ], 
         "reservableBw": 20000
-      }, 
-      {
-        "urn": "paix-pa-rt3:xe-0/0/0", 
-        "capabilities": [
-          "ETHERNET"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "paix-pa-rt3:xe-1/0/0", 
-        "capabilities": [
-          "ETHERNET"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "paix-pa-rt3:ae0.15", 
-        "reservableBw": 20000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "paix-pa-rt3:ae0.25", 
-        "reservableBw": 20000, 
-        "capabilities": [
-          "MPLS"
-        ]
       }
     ]
   }, 
   {
     "urn": "pantex-rt3", 
     "type": "ROUTER", 
-    "model": "JUNOS_M10I", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
     "ifces": [
+      {
+        "urn": "pantex-rt3:ge-1/2/0", 
+        "reservableBw": 1000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
       {
         "urn": "pantex-rt3:ge-1/2/0", 
         "capabilities": [
@@ -1366,6 +1913,12 @@
         "reservableBw": 1000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "pantex-rt3:ge-0/2/0", 
         "capabilities": [
           "ETHERNET"
@@ -1373,18 +1926,30 @@
         "reservableBw": 1000
       }, 
       {
-        "urn": "pantex-rt3:ge-0/1/0", 
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "pantex-rt3:ge-1/0/0", 
         "capabilities": [
           "ETHERNET"
         ], 
         "reservableBw": 1000
       }, 
       {
-        "urn": "pantex-rt3:ge-1/2/0.1301", 
-        "reservableBw": 1000, 
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "pantex-rt3:ge-0/1/0", 
         "capabilities": [
-          "MPLS"
-        ]
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
       }
     ]
   }, 
@@ -1398,9 +1963,50 @@
     ], 
     "ifces": [
       {
-        "urn": "pnwg-cr5:10/1/5", 
+        "urn": "pnwg-cr5:2/2/1", 
+        "reservableBw": 100000, 
         "capabilities": [
           "MPLS"
+        ]
+      }, 
+      {
+        "urn": "pnwg-cr5:10/1/6", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "pnwg-cr5:1/1/1", 
+        "reservableBw": 100000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "pnwg-cr5:10/1/9", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "pnwg-cr5:10/1/10", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "pnwg-cr5:10/1/5", 
+        "capabilities": [
+          "ETHERNET"
         ], 
         "reservableBw": 10000
       }, 
@@ -1412,16 +2018,28 @@
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "pnwg-cr5:10/1/2", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "pnwg-cr5:10/1/3", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 10000
       }, 
@@ -1433,20 +2051,6 @@
         "reservableBw": 10000
       }, 
       {
-        "urn": "pnwg-cr5:1/1/1", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 100000
-      }, 
-      {
-        "urn": "pnwg-cr5:2/1/1", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 100000
-      }, 
-      {
         "urn": "pnwg-cr5:2/2/1", 
         "capabilities": [
           "MPLS"
@@ -1454,9 +2058,48 @@
         "reservableBw": 100000
       }, 
       {
-        "urn": "pnwg-cr5:9/1/1", 
+        "urn": "pnwg-cr5:1/1/1", 
         "capabilities": [
           "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "pnwg-cr5:2/1/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "pnwg-cr5:9/1/5", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "pnwg-cr5:9/1/1", 
+        "capabilities": [
+          "ETHERNET"
         ], 
         "reservableBw": 10000
       }, 
@@ -1468,46 +2111,17 @@
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "pnwg-cr5:9/1/2", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 10000
-      }, 
-      {
-        "urn": "pnwg-cr5:to_sacr-cr5_ip-a", 
-        "reservableBw": 100000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "pnwg-cr5:to_bois-cr1_ip-a", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "pnwg-cr5:to_denv-cr5_ip-c", 
-        "reservableBw": 100000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "pnwg-cr5:to_denv-cr5_ip-b", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "pnwg-cr5:to_denv-cr5_ip-a", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
       }
     ]
   }, 
@@ -1521,30 +2135,49 @@
     ], 
     "ifces": [
       {
+        "urn": "elpa-cr5:1/1/1", 
+        "reservableBw": 100000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "elpa-cr5:3/1/1", 
+        "reservableBw": 100000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "elpa-cr5:2/1/1", 
+        "reservableBw": 100000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "elpa-cr5:10/1/4", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 10000
       }, 
       {
-        "urn": "elpa-cr5:10/1/1", 
-        "capabilities": [
-          "MPLS"
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
         ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "elpa-cr5:10/1/2", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
         "urn": "elpa-cr5:10/1/3", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 10000
       }, 
@@ -1568,239 +2201,32 @@
           "MPLS"
         ], 
         "reservableBw": 100000
-      }, 
-      {
-        "urn": "elpa-cr5:to_hous-cr5_ip-a", 
-        "reservableBw": 100000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "elpa-cr5:to_sunn-cr5_ip-a", 
-        "reservableBw": 100000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "elpa-cr5:to_albq-cr5_ip-a", 
-        "reservableBw": 100000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }
-    ]
-  }, 
-  {
-    "urn": "aofa-cr5", 
-    "type": "ROUTER", 
-    "model": "ALCATEL_SR7750", 
-    "capabilities": [
-      "ETHERNET", 
-      "MPLS"
-    ], 
-    "ifces": [
-      {
-        "urn": "aofa-cr5:6/2/1", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 100000
-      }, 
-      {
-        "urn": "aofa-cr5:10/1/1", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "aofa-cr5:10/1/2", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "aofa-cr5:9/1/1", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "aofa-cr5:10/1/8", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "aofa-cr5:10/1/9", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "aofa-cr5:5/2/1", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 100000
-      }, 
-      {
-        "urn": "aofa-cr5:5/1/1", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 100000
-      }, 
-      {
-        "urn": "aofa-cr5:1/1/1", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 100000
-      }, 
-      {
-        "urn": "aofa-cr5:4/2/1", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 100000
-      }, 
-      {
-        "urn": "aofa-cr5:3/1/1", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 100000
-      }, 
-      {
-        "urn": "aofa-cr5:2/1/1", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 100000
-      }, 
-      {
-        "urn": "aofa-cr5:9/1/5", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "aofa-cr5:9/1/4", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "aofa-cr5:10/1/12", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "aofa-cr5:9/1/3", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "aofa-cr5:10/1/11", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "aofa-cr5:to_bnl-mr2_ip-a", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "aofa-cr5:to_bnl-mr2_ip-b", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "aofa-cr5:to_wash-cr5_sdn-a", 
-        "reservableBw": 100000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "aofa-cr5:to_newy-cr5_ip-a", 
-        "reservableBw": 100000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "aofa-cr5:to_lond-cr5_ip-a", 
-        "reservableBw": 100000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "aofa-cr5:to_wash-cr5_ip-a", 
-        "reservableBw": 100000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "aofa-cr5:to_pppl-rt5_ip-a", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "aofa-cr5:to_bnl-mr2_sdn-b", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "aofa-cr5:to_bnl-mr2_sdn-a", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "aofa-cr5:to_star-cr5_ip-a", 
-        "reservableBw": 100000, 
-        "capabilities": [
-          "MPLS"
-        ]
       }
     ]
   }, 
   {
     "urn": "bois-cr1", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX960", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
     "ifces": [
+      {
+        "urn": "bois-cr1:xe-7/1/0", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "bois-cr1:xe-0/0/0", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
       {
         "urn": "bois-cr1:xe-7/1/0", 
         "capabilities": [
@@ -1809,6 +2235,12 @@
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "bois-cr1:xe-1/2/0", 
         "capabilities": [
           "ETHERNET"
@@ -1816,6 +2248,12 @@
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "bois-cr1:xe-0/1/0", 
         "capabilities": [
           "ETHERNET"
@@ -1830,6 +2268,12 @@
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "bois-cr1:xe-0/2/0", 
         "capabilities": [
           "ETHERNET"
@@ -1837,6 +2281,12 @@
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "bois-cr1:xe-7/0/0", 
         "capabilities": [
           "ETHERNET"
@@ -1844,6 +2294,12 @@
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "bois-cr1:xe-7/3/0", 
         "capabilities": [
           "ETHERNET"
@@ -1851,37 +2307,43 @@
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "bois-cr1:xe-1/0/0", 
         "capabilities": [
           "ETHERNET"
         ], 
         "reservableBw": 10000
-      }, 
-      {
-        "urn": "bois-cr1:xe-0/0/0.5", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "bois-cr1:xe-7/1/0.5", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
       }
     ]
   }, 
   {
     "urn": "osti-rt2", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX480", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
     "ifces": [
+      {
+        "urn": "osti-rt2:xe-1/2/0", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "osti-rt2:xe-0/0/0", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
       {
         "urn": "osti-rt2:xe-1/2/0", 
         "capabilities": [
@@ -1895,20 +2357,6 @@
           "MPLS"
         ], 
         "reservableBw": 10000
-      }, 
-      {
-        "urn": "osti-rt2:xe-1/2/0.5", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "osti-rt2:xe-0/0/0.2112", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
       }
     ]
   }, 
@@ -1922,30 +2370,68 @@
     ], 
     "ifces": [
       {
+        "urn": "cern-272-cr5:1/1/1", 
+        "reservableBw": 100000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "cern-272-cr5:2/1/1", 
+        "reservableBw": 100000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "cern-272-cr5:10/1/1", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "cern-272-cr5:10/1/2", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "cern-272-cr5:10/1/3", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "cern-272-cr5:BLANK", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 20000
       }, 
@@ -1962,32 +2448,25 @@
           "MPLS"
         ], 
         "reservableBw": 100000
-      }, 
-      {
-        "urn": "cern-272-cr5:to_amst-cr5_ip-a", 
-        "reservableBw": 100000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "cern-272-cr5:to_cern-513-cr5_ip-a", 
-        "reservableBw": 100000, 
-        "capabilities": [
-          "MPLS"
-        ]
       }
     ]
   }, 
   {
     "urn": "snla-rt3", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX480", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
     "ifces": [
+      {
+        "urn": "snla-rt3:xe-1/2/0", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
       {
         "urn": "snla-rt3:xe-1/2/0", 
         "capabilities": [
@@ -1996,6 +2475,51 @@
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "snla-rt3:ge-1/1/3", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "snla-rt3:ge-1/1/2", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "snla-rt3:ge-1/1/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "snla-rt3:ge-1/0/2", 
         "capabilities": [
           "ETHERNET"
@@ -2003,6 +2527,12 @@
         "reservableBw": 1000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "snla-rt3:xe-0/0/0", 
         "capabilities": [
           "ETHERNET"
@@ -2010,23 +2540,50 @@
         "reservableBw": 10000
       }, 
       {
-        "urn": "snla-rt3:xe-1/2/0.5", 
-        "reservableBw": 10000, 
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "snla-rt3:ge-1/0/3", 
         "capabilities": [
-          "MPLS"
-        ]
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
       }
     ]
   }, 
   {
     "urn": "slac-mr2", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX480", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
     "ifces": [
+      {
+        "urn": "slac-mr2:xe-1/2/0", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "slac-mr2:xe-2/2/0", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "slac-mr2:xe-0/0/0", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
       {
         "urn": "slac-mr2:xe-1/2/0", 
         "capabilities": [
@@ -2035,6 +2592,25 @@
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "slac-mr2:xe-2/1/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "slac-mr2:xe-0/1/0", 
         "capabilities": [
           "ETHERNET"
@@ -2042,6 +2618,12 @@
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "slac-mr2:xe-1/3/0", 
         "capabilities": [
           "ETHERNET"
@@ -2056,6 +2638,12 @@
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "slac-mr2:xe-0/2/0", 
         "capabilities": [
           "ETHERNET"
@@ -2068,114 +2656,39 @@
           "MPLS"
         ], 
         "reservableBw": 10000
-      }, 
-      {
-        "urn": "slac-mr2:xe-1/2/0.5", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "slac-mr2:xe-0/0/0.5", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "slac-mr2:xe-2/2/0.5", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }
-    ]
-  }, 
-  {
-    "urn": "kans-cr5", 
-    "type": "ROUTER", 
-    "model": "ALCATEL_SR7750", 
-    "capabilities": [
-      "ETHERNET", 
-      "MPLS"
-    ], 
-    "ifces": [
-      {
-        "urn": "kans-cr5:10/1/4", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "kans-cr5:10/1/1", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "kans-cr5:10/1/3", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "kans-cr5:1/1/1", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 100000
-      }, 
-      {
-        "urn": "kans-cr5:3/1/1", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 100000
-      }, 
-      {
-        "urn": "kans-cr5:2/1/1", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 100000
-      }, 
-      {
-        "urn": "kans-cr5:to_hous-cr5_ip-a", 
-        "reservableBw": 100000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "kans-cr5:to_chic-cr5_ip-a", 
-        "reservableBw": 100000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "kans-cr5:to_denv-cr5_ip-a", 
-        "reservableBw": 100000, 
-        "capabilities": [
-          "MPLS"
-        ]
       }
     ]
   }, 
   {
     "urn": "ameslab-rt3", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX480", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
     "ifces": [
       {
+        "urn": "ameslab-rt3:xe-0/0/0", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "ameslab-rt3:xe-1/0/0", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "ameslab-rt3:xe-1/1/0", 
         "capabilities": [
           "ETHERNET"
@@ -2183,6 +2696,12 @@
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "ameslab-rt3:xe-0/1/0", 
         "capabilities": [
           "ETHERNET"
@@ -2190,6 +2709,12 @@
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "ameslab-rt3:xe-1/3/0", 
         "capabilities": [
           "ETHERNET"
@@ -2204,6 +2729,12 @@
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "ameslab-rt3:xe-0/2/0", 
         "capabilities": [
           "ETHERNET"
@@ -2216,115 +2747,139 @@
           "MPLS"
         ], 
         "reservableBw": 10000
-      }, 
-      {
-        "urn": "ameslab-rt3:xe-0/0/0.5", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "ameslab-rt3:xe-1/0/0.5", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
       }
     ]
   }, 
   {
-    "urn": "nash-cr5", 
+    "urn": "snll-mr2", 
     "type": "ROUTER", 
-    "model": "ALCATEL_SR7750", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
     "ifces": [
       {
-        "urn": "nash-cr5:10/1/4", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "nash-cr5:10/1/5", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "nash-cr5:10/1/6", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "nash-cr5:10/1/3", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "nash-cr5:1/1/1", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 100000
-      }, 
-      {
-        "urn": "nash-cr5:3/1/1", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 100000
-      }, 
-      {
-        "urn": "nash-cr5:2/1/1", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 100000
-      }, 
-      {
-        "urn": "nash-cr5:to_hous-cr5_ip-a", 
-        "reservableBw": 100000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "nash-cr5:to_chic-cr5_ip-a", 
-        "reservableBw": 100000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "nash-cr5:to_atla-cr5_ip-a", 
-        "reservableBw": 100000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "nash-cr5:to_ornl-rt4_ip-a", 
+        "urn": "snll-mr2:xe-0/2/0", 
         "reservableBw": 10000, 
         "capabilities": [
           "MPLS"
         ]
       }, 
       {
-        "urn": "nash-cr5:to_ornl-rt4_ip-b", 
+        "urn": "snll-mr2:xe-1/2/0", 
         "reservableBw": 10000, 
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "snll-mr2:xe-2/2/0", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "snll-mr2:xe-2/0/0", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "snll-mr2:xe-1/1/0", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "snll-mr2:xe-1/2/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "snll-mr2:xe-1/1/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "snll-mr2:xe-0/1/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "snll-mr2:xe-1/3/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "snll-mr2:xe-2/0/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "snll-mr2:xe-0/0/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "snll-mr2:xe-0/2/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "snll-mr2:xe-2/3/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "snll-mr2:xe-2/2/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
       }
     ]
   }, 
@@ -2338,16 +2893,49 @@
     ], 
     "ifces": [
       {
-        "urn": "hous-cr5:10/1/4", 
+        "urn": "hous-cr5:1/1/1", 
+        "reservableBw": 100000, 
         "capabilities": [
           "MPLS"
+        ]
+      }, 
+      {
+        "urn": "hous-cr5:3/1/1", 
+        "reservableBw": 100000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "hous-cr5:2/1/1", 
+        "reservableBw": 100000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "hous-cr5:10/1/4", 
+        "capabilities": [
+          "ETHERNET"
         ], 
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "hous-cr5:10/1/3", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 10000
       }, 
@@ -2371,40 +2959,39 @@
           "MPLS"
         ], 
         "reservableBw": 100000
-      }, 
-      {
-        "urn": "hous-cr5:to_kans-cr5_ip-a", 
-        "reservableBw": 100000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "hous-cr5:to_nash-cr5_ip-a", 
-        "reservableBw": 100000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "hous-cr5:to_elpa-cr5_ip-a", 
-        "reservableBw": 100000, 
-        "capabilities": [
-          "MPLS"
-        ]
       }
     ]
   }, 
   {
     "urn": "lsvn-cr1", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX480", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
     "ifces": [
       {
+        "urn": "lsvn-cr1:ge-1/1/5", 
+        "reservableBw": 1000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "lsvn-cr1:xe-3/0/0", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "lsvn-cr1:xe-2/1/0", 
         "capabilities": [
           "ETHERNET"
@@ -2419,6 +3006,12 @@
         "reservableBw": 1000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "lsvn-cr1:xe-2/0/0", 
         "capabilities": [
           "ETHERNET"
@@ -2426,6 +3019,12 @@
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "lsvn-cr1:ge-1/1/1", 
         "capabilities": [
           "ETHERNET"
@@ -2433,6 +3032,12 @@
         "reservableBw": 1000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "lsvn-cr1:ge-1/1/0", 
         "capabilities": [
           "ETHERNET"
@@ -2440,7 +3045,26 @@
         "reservableBw": 1000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "lsvn-cr1:ge-1/0/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "lsvn-cr1:ge-1/0/1", 
         "capabilities": [
           "ETHERNET"
         ], 
@@ -2450,52 +3074,6 @@
         "urn": "lsvn-cr1:xe-3/0/0", 
         "capabilities": [
           "MPLS"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "lsvn-cr1:xe-3/0/0.5", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "lsvn-cr1:ge-1/1/5.5", 
-        "reservableBw": 1000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }
-    ]
-  }, 
-  {
-    "urn": "esnet-rt5", 
-    "type": "ROUTER", 
-    "model": "JUNOS_MX960", 
-    "capabilities": [
-      "ETHERNET", 
-      "MPLS"
-    ], 
-    "ifces": [
-      {
-        "urn": "esnet-rt5:xe-0/0/0", 
-        "capabilities": [
-          "ETHERNET"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "esnet-rt5:xe-8/0/0", 
-        "capabilities": [
-          "ETHERNET"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "esnet-rt5:xe-1/0/0", 
-        "capabilities": [
-          "ETHERNET"
         ], 
         "reservableBw": 10000
       }
@@ -2511,16 +3089,56 @@
     ], 
     "ifces": [
       {
-        "urn": "albq-cr5:10/1/4", 
+        "urn": "albq-cr5:2/1/1", 
+        "reservableBw": 100000, 
         "capabilities": [
           "MPLS"
+        ]
+      }, 
+      {
+        "urn": "albq-cr5:1/1/1", 
+        "reservableBw": 100000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "albq-cr5:10/1/2", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "albq-cr5:10/1/3", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "albq-cr5:10/1/4", 
+        "capabilities": [
+          "ETHERNET"
         ], 
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "albq-cr5:10/1/5", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 10000
       }, 
@@ -2546,9 +3164,15 @@
         "reservableBw": 100000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "albq-cr5:3/1/1", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 100000
       }, 
@@ -2558,46 +3182,142 @@
           "MPLS"
         ], 
         "reservableBw": 100000
-      }, 
-      {
-        "urn": "albq-cr5:to_pantex-rt3_ip-a", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "albq-cr5:to_snla-rt3_ip-a", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "albq-cr5:to_denv-cr5_ip-a", 
-        "reservableBw": 100000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "albq-cr5:to_elpa-cr5_ip-a", 
-        "reservableBw": 100000, 
-        "capabilities": [
-          "MPLS"
-        ]
       }
     ]
   }, 
   {
     "urn": "eqx-sj-rt1", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX480", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
     "ifces": [
+      {
+        "urn": "eqx-sj-rt1:xe-0/2/0", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "eqx-sj-rt1:ae0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "eqx-sj-rt1:ge-0/0/5", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "eqx-sj-rt1:ge-0/0/3", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "eqx-sj-rt1:ge-0/0/2", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "eqx-sj-rt1:ge-0/0/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "eqx-sj-rt1:ge-0/1/6", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "eqx-sj-rt1:ge-0/1/7", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "eqx-sj-rt1:ge-0/1/5", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "eqx-sj-rt1:ge-0/1/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
       {
         "urn": "eqx-sj-rt1:xe-0/2/0", 
         "capabilities": [
@@ -2606,6 +3326,12 @@
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "eqx-sj-rt1:ge-0/0/6", 
         "capabilities": [
           "ETHERNET"
@@ -2613,20 +3339,12 @@
         "reservableBw": 1000
       }, 
       {
-        "urn": "eqx-sj-rt1:ge-0/0/3", 
-        "capabilities": [
-          "MPLS"
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
         ], 
-        "reservableBw": 1000
-      }, 
-      {
-        "urn": "eqx-sj-rt1:ae0", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
         "urn": "eqx-sj-rt1:xe-0/3/0", 
         "capabilities": [
           "ETHERNET"
@@ -2634,37 +3352,70 @@
         "reservableBw": 10000
       }, 
       {
-        "urn": "eqx-sj-rt1:xe-0/2/0.5", 
-        "reservableBw": 10000, 
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "eqx-sj-rt1:xe-1/0/0", 
         "capabilities": [
-          "MPLS"
-        ]
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
       }
     ]
   }, 
   {
     "urn": "lbl-mr2", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX960", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
     "ifces": [
       {
-        "reservableVlans": [
-          {
-            "ceiling": 3999, 
-            "floor": 2000
-          }
-        ], 
         "urn": "lbl-mr2:xe-1/3/0", 
         "reservableBw": 10000, 
         "capabilities": [
-          "ETHERNET"
+          "MPLS"
         ]
       }, 
       {
+        "urn": "lbl-mr2:xe-7/2/0", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "lbl-mr2:xe-1/3/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "lbl-mr2:xe-7/0/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "lbl-mr2:xe-7/1/0", 
         "capabilities": [
           "ETHERNET"
@@ -2672,27 +3423,38 @@
         "reservableBw": 10000
       }, 
       {
-        "urn": "lbl-mr2:xe-1/2/0", 
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "lbl-mr2:ae0", 
         "capabilities": [
           "ETHERNET"
         ], 
-        "reservableBw": 10000
+        "reservableBw": 20000
       }, 
       {
-        "urn": "lbl-mr2:xe-0/2/0", 
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "lbl-mr2:ge-9/1/2", 
         "capabilities": [
           "ETHERNET"
         ], 
-        "reservableBw": 10000
+        "reservableBw": 1000
       }, 
       {
-        "urn": "lbl-mr2:xe-2/1/0", 
-        "capabilities": [
-          "ETHERNET"
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
         ], 
-        "reservableBw": 10000
-      }, 
-      {
         "urn": "lbl-mr2:ge-9/1/1", 
         "capabilities": [
           "ETHERNET"
@@ -2700,6 +3462,12 @@
         "reservableBw": 1000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "lbl-mr2:ge-9/1/0", 
         "capabilities": [
           "ETHERNET"
@@ -2707,13 +3475,38 @@
         "reservableBw": 1000
       }, 
       {
-        "urn": "lbl-mr2:xe-1/3/0", 
-        "capabilities": [
-          "MPLS"
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
         ], 
-        "reservableBw": 10000
+        "urn": "lbl-mr2:ge-9/0/6", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "lbl-mr2:ge-9/0/7", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "lbl-mr2:ge-9/0/4", 
         "capabilities": [
           "ETHERNET"
@@ -2721,27 +3514,77 @@
         "reservableBw": 1000
       }, 
       {
-        "urn": "lbl-mr2:xe-0/1/0", 
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "lbl-mr2:ge-9/0/5", 
         "capabilities": [
           "ETHERNET"
         ], 
-        "reservableBw": 10000
+        "reservableBw": 1000
       }, 
       {
-        "urn": "lbl-mr2:ae0", 
-        "capabilities": [
-          "MPLS"
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
         ], 
-        "reservableBw": 20000
-      }, 
-      {
-        "urn": "lbl-mr2:xe-8/1/0", 
+        "urn": "lbl-mr2:ge-9/0/2", 
         "capabilities": [
           "ETHERNET"
         ], 
-        "reservableBw": 10000
+        "reservableBw": 1000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "lbl-mr2:ge-9/0/3", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "lbl-mr2:ge-9/1/9", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "lbl-mr2:ge-9/1/8", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "lbl-mr2:xe-9/3/0", 
         "capabilities": [
           "ETHERNET"
@@ -2749,21 +3592,13 @@
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "lbl-mr2:xe-8/3/0", 
-        "capabilities": [
-          "ETHERNET"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "lbl-mr2:xe-2/3/0", 
-        "capabilities": [
-          "ETHERNET"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "lbl-mr2:xe-8/0/0", 
         "capabilities": [
           "ETHERNET"
         ], 
@@ -2777,25 +3612,108 @@
         "reservableBw": 10000
       }, 
       {
-        "urn": "lbl-mr2:xe-7/0/0", 
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "lbl-mr2:xe-7/3/0", 
         "capabilities": [
           "ETHERNET"
         ], 
         "reservableBw": 10000
       }, 
       {
-        "urn": "lbl-mr2:xe-1/3/0.5", 
-        "reservableBw": 10000, 
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "lbl-mr2:xe-2/1/0", 
         "capabilities": [
-          "MPLS"
-        ]
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
       }, 
       {
-        "urn": "lbl-mr2:xe-7/2/0.5", 
-        "reservableBw": 10000, 
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "lbl-mr2:ge-9/1/6", 
         "capabilities": [
-          "MPLS"
-        ]
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "lbl-mr2:xe-0/2/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "lbl-mr2:xe-2/3/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "lbl-mr2:xe-0/1/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "lbl-mr2:xe-8/1/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "lbl-mr2:xe-9/2/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
       }
     ]
   }, 
@@ -2808,6 +3726,62 @@
       "MPLS"
     ], 
     "ifces": [
+      {
+        "urn": "denv-cr5:10/1/4", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "denv-cr5:10/1/5", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "denv-cr5:10/1/6", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "denv-cr5:4/1/1", 
+        "reservableBw": 100000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "denv-cr5:1/1/1", 
+        "reservableBw": 100000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "denv-cr5:3/1/1", 
+        "reservableBw": 100000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "denv-cr5:2/1/1", 
+        "reservableBw": 100000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "denv-cr5:10/1/10", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
       {
         "urn": "denv-cr5:10/1/4", 
         "capabilities": [
@@ -2830,32 +3804,56 @@
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "denv-cr5:10/1/7", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "denv-cr5:10/1/3", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 10000
       }, 
       {
-        "urn": "denv-cr5:10/1/12", 
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "denv-cr5:9/1/1", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 10000
       }, 
       {
-        "urn": "denv-cr5:2/1/1", 
-        "capabilities": [
-          "MPLS"
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
         ], 
-        "reservableBw": 100000
+        "urn": "denv-cr5:BLANK", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 20000
       }, 
       {
         "urn": "denv-cr5:4/1/1", 
@@ -2872,34 +3870,6 @@
         "reservableBw": 100000
       }, 
       {
-        "urn": "denv-cr5:3/1/1", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 100000
-      }, 
-      {
-        "urn": "denv-cr5:BLANK", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 20000
-      }, 
-      {
-        "urn": "denv-cr5:9/1/2", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 9953
-      }, 
-      {
-        "urn": "denv-cr5:9/1/1", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
         "urn": "denv-cr5:10/1/10", 
         "capabilities": [
           "MPLS"
@@ -2907,145 +3877,186 @@
         "reservableBw": 10000
       }, 
       {
-        "urn": "denv-cr5:10/1/11", 
+        "urn": "denv-cr5:3/1/1", 
         "capabilities": [
           "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "denv-cr5:2/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "denv-cr5:10/1/12", 
+        "capabilities": [
+          "ETHERNET"
         ], 
         "reservableBw": 10000
       }, 
       {
-        "urn": "denv-cr5:to_sacr-cr5_ip-a", 
-        "reservableBw": 100000, 
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "denv-cr5:9/1/3", 
         "capabilities": [
-          "MPLS"
-        ]
+          "ETHERNET"
+        ], 
+        "reservableBw": 9953
       }, 
       {
-        "urn": "denv-cr5:to_bois-cr1_ip-b", 
-        "reservableBw": 10000, 
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "denv-cr5:10/1/11", 
         "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "denv-cr5:to_albq-cr5_ip-a", 
-        "reservableBw": 100000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "denv-cr5:to_kans-cr5_ip-a", 
-        "reservableBw": 100000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "denv-cr5:to_pnwg-cr5_ip-a", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "denv-cr5:to_pnwg-cr5_ip-b", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "denv-cr5:to_pnwg-cr5_ip-c", 
-        "reservableBw": 100000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "denv-cr5:to_lsvn-cr1_ip-a", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
       }
     ]
   }, 
   {
-    "urn": "eqx-chi-rt1", 
+    "urn": "sdsc-sdn2", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX480", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
     "ifces": [
       {
-        "urn": "eqx-chi-rt1:ge-0/0/7", 
-        "capabilities": [
-          "ETHERNET"
-        ], 
-        "reservableBw": 1000
-      }, 
-      {
-        "urn": "eqx-chi-rt1:xe-0/3/0", 
-        "capabilities": [
-          "ETHERNET"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "eqx-chi-rt1:xe-5/0/0", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "eqx-chi-rt1:xe-5/0/0.5", 
+        "urn": "sdsc-sdn2:xe-1/1/0", 
         "reservableBw": 10000, 
         "capabilities": [
           "MPLS"
         ]
       }, 
       {
-        "urn": "eqx-chi-rt1:ge-0/1/0.0", 
-        "reservableBw": 1000, 
+        "urn": "sdsc-sdn2:xe-0/1/0", 
+        "reservableBw": 10000, 
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "sdsc-sdn2:xe-0/2/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "sdsc-sdn2:xe-1/3/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "sdsc-sdn2:xe-0/0/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "sdsc-sdn2:xe-1/1/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "sdsc-sdn2:xe-0/1/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
       }
     ]
   }, 
   {
     "urn": "ga-rt2", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX480", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
     "ifces": [
       {
-        "urn": "ga-rt2:xe-0/2/0", 
+        "urn": "ga-rt2:ge-1/1/3", 
+        "reservableBw": 1000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "ga-rt2:xe-0/0/0", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "ga-rt2:xe-0/1/0", 
         "capabilities": [
           "ETHERNET"
         ], 
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "ga-rt2:xe-0/3/0", 
         "capabilities": [
           "ETHERNET"
         ], 
         "reservableBw": 10000
-      }, 
-      {
-        "urn": "ga-rt2:ge-1/0/5", 
-        "capabilities": [
-          "ETHERNET"
-        ], 
-        "reservableBw": 1000
       }, 
       {
         "urn": "ga-rt2:ge-1/1/3", 
@@ -3055,38 +4066,84 @@
         "reservableBw": 1000
       }, 
       {
-        "urn": "ga-rt2:ge-1/1/3.5", 
-        "reservableBw": 1000, 
+        "urn": "ga-rt2:xe-0/0/0", 
         "capabilities": [
           "MPLS"
-        ]
+        ], 
+        "reservableBw": 10000
       }, 
       {
-        "urn": "ga-rt2:xe-0/0/0.0", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }
-    ]
-  }, 
-  {
-    "urn": "llnl-mr2", 
-    "type": "ROUTER", 
-    "model": "JUNOS_MX480", 
-    "capabilities": [
-      "ETHERNET", 
-      "MPLS"
-    ], 
-    "ifces": [
-      {
-        "urn": "llnl-mr2:xe-1/2/0", 
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "ga-rt2:xe-0/2/0", 
         "capabilities": [
           "ETHERNET"
         ], 
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "ga-rt2:ge-1/0/5", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }
+    ]
+  }, 
+  {
+    "urn": "llnl-mr2", 
+    "type": "ROUTER", 
+    "model": "JUNIPER_MX", 
+    "capabilities": [
+      "ETHERNET", 
+      "MPLS"
+    ], 
+    "ifces": [
+      {
+        "urn": "llnl-mr2:xe-0/2/0", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "llnl-mr2:xe-3/2/0", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "llnl-mr2:xe-2/0/0", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "llnl-mr2:xe-0/1/0", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "llnl-mr2:xe-2/1/0", 
         "capabilities": [
           "ETHERNET"
@@ -3094,6 +4151,32 @@
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "llnl-mr2:xe-1/1/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "llnl-mr2:xe-0/1/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "llnl-mr2:ge-3/1/5", 
         "capabilities": [
           "ETHERNET"
@@ -3108,11 +4191,37 @@
         "reservableBw": 10000
       }, 
       {
+        "urn": "llnl-mr2:xe-2/0/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "llnl-mr2:xe-0/0/0", 
         "capabilities": [
           "ETHERNET"
         ], 
         "reservableBw": 10000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "llnl-mr2:ge-3/1/2", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
       }, 
       {
         "urn": "llnl-mr2:xe-0/2/0", 
@@ -3122,6 +4231,12 @@
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "llnl-mr2:xe-1/3/0", 
         "capabilities": [
           "ETHERNET"
@@ -3129,6 +4244,25 @@
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "llnl-mr2:ge-3/0/7", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "llnl-mr2:ge-3/0/0", 
         "capabilities": [
           "ETHERNET"
@@ -3136,125 +4270,35 @@
         "reservableBw": 1000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "llnl-mr2:ge-3/0/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "llnl-mr2:xe-1/0/0", 
         "capabilities": [
           "ETHERNET"
         ], 
         "reservableBw": 10000
-      }, 
-      {
-        "urn": "llnl-mr2:xe-3/2/0.5", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "llnl-mr2:xe-0/1/0.0", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "llnl-mr2:xe-2/0/0.0", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "llnl-mr2:xe-0/2/0.5", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
       }
     ]
   }, 
   {
-    "urn": "anl-mr2", 
-    "type": "ROUTER", 
-    "model": "JUNOS_MX960", 
-    "capabilities": [
-      "ETHERNET", 
-      "MPLS"
-    ], 
-    "ifces": [
-      {
-        "urn": "anl-mr2:xe-1/2/0", 
-        "capabilities": [
-          "ETHERNET"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "anl-mr2:ae0", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 20000
-      }, 
-      {
-        "urn": "anl-mr2:xe-0/1/0", 
-        "capabilities": [
-          "ETHERNET"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "anl-mr2:xe-1/3/0", 
-        "capabilities": [
-          "ETHERNET"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "anl-mr2:xe-2/0/0", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "anl-mr2:xe-0/0/0", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "anl-mr2:xe-8/1/0", 
-        "capabilities": [
-          "ETHERNET"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "anl-mr2:xe-0/2/0", 
-        "capabilities": [
-          "ETHERNET"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "anl-mr2:xe-2/0/0.5", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "anl-mr2:xe-0/0/0.5", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }
-    ]
-  }, 
-  {
-    "urn": "atla-cr5", 
+    "urn": "lond-cr5", 
     "type": "ROUTER", 
     "model": "ALCATEL_SR7750", 
     "capabilities": [
@@ -3263,194 +4307,352 @@
     ], 
     "ifces": [
       {
-        "urn": "atla-cr5:10/1/1", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "atla-cr5:10/1/2", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "atla-cr5:10/1/3", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "atla-cr5:10/1/8", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "atla-cr5:1/1/1", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 100000
-      }, 
-      {
-        "urn": "atla-cr5:3/1/1", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 100000
-      }, 
-      {
-        "urn": "atla-cr5:2/1/1", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 100000
-      }, 
-      {
-        "urn": "atla-cr5:to_wash-cr5_ip-a", 
+        "urn": "lond-cr5:4/1/1", 
         "reservableBw": 100000, 
         "capabilities": [
           "MPLS"
         ]
       }, 
       {
-        "urn": "atla-cr5:to_nash-cr5_ip-a", 
+        "urn": "lond-cr5:1/1/1", 
         "reservableBw": 100000, 
         "capabilities": [
           "MPLS"
         ]
       }, 
       {
-        "urn": "atla-cr5:to_srs-rt2_ip-a", 
-        "reservableBw": 10000, 
+        "urn": "lond-cr5:3/1/1", 
+        "reservableBw": 100000, 
         "capabilities": [
           "MPLS"
         ]
       }, 
       {
-        "urn": "atla-cr5:to_ornl-cr5_ip-a", 
+        "urn": "lond-cr5:2/1/1", 
         "reservableBw": 100000, 
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "lond-cr5:10/1/4", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "lond-cr5:1/2/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "lond-cr5:10/1/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "lond-cr5:10/1/2", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "lond-cr5:4/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "lond-cr5:1/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "lond-cr5:3/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "lond-cr5:2/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "lond-cr5:2/2/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100000
       }
     ]
   }, 
   {
-    "urn": "fnal-mr2", 
+    "urn": "snll-rt2", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX960", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
     "ifces": [
       {
-        "urn": "fnal-mr2:xe-2/1/0", 
+        "urn": "snll-rt2:ge-0/1/0", 
+        "reservableBw": 1000, 
         "capabilities": [
           "MPLS"
-        ], 
-        "reservableBw": 10000
+        ]
       }, 
       {
-        "urn": "fnal-mr2:xe-1/3/0", 
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "snll-rt2:t3-0/0/0", 
         "capabilities": [
           "ETHERNET"
         ], 
-        "reservableBw": 10000
+        "reservableBw": 45
       }, 
       {
-        "urn": "fnal-mr2:xe-0/0/0", 
+        "urn": "snll-rt2:ge-0/1/0", 
         "capabilities": [
           "MPLS"
         ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "fnal-mr2:xe-8/1/0", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "fnal-mr2:xe-0/2/0", 
-        "capabilities": [
-          "ETHERNET"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "fnal-mr2:xe-0/0/0.5", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "fnal-mr2:xe-2/1/0.5", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "fnal-mr2:xe-8/1/0.5", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
+        "reservableBw": 1000
       }
     ]
   }, 
   {
-    "urn": "forr-rt2", 
+    "urn": "wash-cr5", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX104", 
+    "model": "ALCATEL_SR7750", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
     "ifces": [
       {
-        "urn": "forr-rt2:ge-0/0/5", 
-        "capabilities": [
-          "ETHERNET"
-        ], 
-        "reservableBw": 1000
-      }, 
-      {
-        "urn": "forr-rt2:ge-0/0/4", 
-        "capabilities": [
-          "ETHERNET"
-        ], 
-        "reservableBw": 1000
-      }, 
-      {
-        "urn": "forr-rt2:ge-0/0/2", 
-        "capabilities": [
-          "ETHERNET"
-        ], 
-        "reservableBw": 1000
-      }, 
-      {
-        "urn": "forr-rt2:ge-0/0/0.0", 
-        "reservableBw": 1000, 
+        "urn": "wash-cr5:10/1/5", 
+        "reservableBw": 10000, 
         "capabilities": [
           "MPLS"
         ]
       }, 
       {
-        "urn": "forr-rt2:ge-0/0/1.0", 
-        "reservableBw": 1000, 
+        "urn": "wash-cr5:10/1/7", 
+        "reservableBw": 10000, 
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "wash-cr5:10/1/1", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "wash-cr5:10/1/3", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "wash-cr5:5/1/1", 
+        "reservableBw": 100000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "wash-cr5:4/1/1", 
+        "reservableBw": 100000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "wash-cr5:1/1/1", 
+        "reservableBw": 100000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "wash-cr5:3/1/1", 
+        "reservableBw": 100000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "wash-cr5:2/1/1", 
+        "reservableBw": 100000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "wash-cr5:10/1/5", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "wash-cr5:10/1/7", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "wash-cr5:10/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "wash-cr5:10/1/3", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "wash-cr5:10/1/8", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "wash-cr5:10/1/9", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "wash-cr5:5/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "wash-cr5:4/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "wash-cr5:6/1/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "wash-cr5:1/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "wash-cr5:3/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "wash-cr5:2/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "wash-cr5:10/1/10", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
       }
     ]
   }, 
@@ -3464,23 +4666,62 @@
     ], 
     "ifces": [
       {
-        "urn": "amst-cr5:1/2/1", 
+        "urn": "amst-cr5:4/1/1", 
+        "reservableBw": 40000, 
         "capabilities": [
           "MPLS"
+        ]
+      }, 
+      {
+        "urn": "amst-cr5:1/1/1", 
+        "reservableBw": 100000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "amst-cr5:2/1/1", 
+        "reservableBw": 100000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "amst-cr5:1/2/1", 
+        "capabilities": [
+          "ETHERNET"
         ], 
         "reservableBw": 100000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "amst-cr5:10/1/1", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "amst-cr5:10/1/2", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 10000
       }, 
@@ -3499,9 +4740,15 @@
         "reservableBw": 100000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "amst-cr5:3/1/1", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 100000
       }, 
@@ -3511,40 +4758,39 @@
           "MPLS"
         ], 
         "reservableBw": 100000
-      }, 
-      {
-        "urn": "amst-cr5:to_bost-cr5_ip-a", 
-        "reservableBw": 40000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "amst-cr5:to_lond-cr5_ip-a", 
-        "reservableBw": 100000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "amst-cr5:to_cern-272-cr5_ip-a", 
-        "reservableBw": 100000, 
-        "capabilities": [
-          "MPLS"
-        ]
       }
     ]
   }, 
   {
     "urn": "doe-gtn-rt2", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX104", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
     "ifces": [
       {
+        "urn": "doe-gtn-rt2:ge-0/1/0", 
+        "reservableBw": 1000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "doe-gtn-rt2:ge-0/0/0", 
+        "reservableBw": 1000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "doe-gtn-rt2:ge-0/0/3", 
         "capabilities": [
           "ETHERNET"
@@ -3552,6 +4798,58 @@
         "reservableBw": 1000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "doe-gtn-rt2:ge-0/0/2", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "doe-gtn-rt2:ge-0/0/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "doe-gtn-rt2:ge-0/0/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "doe-gtn-rt2:ge-0/1/2", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "doe-gtn-rt2:ge-0/1/3", 
         "capabilities": [
           "ETHERNET"
@@ -3566,96 +4864,389 @@
         "reservableBw": 1000
       }, 
       {
-        "urn": "doe-gtn-rt2:ge-0/0/0.0", 
-        "reservableBw": 1000, 
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "doe-gtn-rt2:ge-0/1/1", 
         "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "doe-gtn-rt2:ge-0/1/0.5", 
-        "reservableBw": 1000, 
-        "capabilities": [
-          "MPLS"
-        ]
+          "ETHERNET"
+        ], 
+        "reservableBw": 100
       }
     ]
   }, 
   {
-    "urn": "sdsc-sdn2", 
+    "urn": "eqx-chi-rt1", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX480", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
     "ifces": [
       {
-        "urn": "sdsc-sdn2:xe-0/2/0", 
-        "capabilities": [
-          "ETHERNET"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "sdsc-sdn2:xe-1/3/0", 
-        "capabilities": [
-          "ETHERNET"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "sdsc-sdn2:xe-0/0/0", 
-        "capabilities": [
-          "ETHERNET"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "sdsc-sdn2:xe-0/1/0", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "sdsc-sdn2:xe-1/1/0.0", 
+        "urn": "eqx-chi-rt1:xe-5/0/0", 
         "reservableBw": 10000, 
         "capabilities": [
           "MPLS"
         ]
       }, 
       {
-        "urn": "sdsc-sdn2:xe-0/1/0.5", 
-        "reservableBw": 10000, 
+        "urn": "eqx-chi-rt1:ge-0/1/0", 
+        "reservableBw": 1000, 
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "eqx-chi-rt1:ge-0/0/7", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "eqx-chi-rt1:ge-0/0/6", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "eqx-chi-rt1:xe-5/1/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "eqx-chi-rt1:ge-0/0/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "eqx-chi-rt1:ge-0/1/6", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "eqx-chi-rt1:ge-0/1/7", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "urn": "eqx-chi-rt1:ge-0/1/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 1000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "eqx-chi-rt1:xe-0/3/0", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "eqx-chi-rt1:xe-5/0/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
       }
     ]
   }, 
   {
-    "urn": "snll-rt2", 
+    "urn": "aofa-cr5", 
     "type": "ROUTER", 
-    "model": "JUNOS_M10I", 
+    "model": "ALCATEL_SR7750", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
     "ifces": [
       {
-        "urn": "snll-rt2:t3-0/0/0", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 45
-      }, 
-      {
-        "urn": "snll-rt2:ge-0/1/0.0", 
-        "reservableBw": 1000, 
+        "urn": "aofa-cr5:6/2/1", 
+        "reservableBw": 100000, 
         "capabilities": [
           "MPLS"
         ]
+      }, 
+      {
+        "urn": "aofa-cr5:9/1/1", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "aofa-cr5:5/2/1", 
+        "reservableBw": 100000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "aofa-cr5:5/1/1", 
+        "reservableBw": 100000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "aofa-cr5:1/1/1", 
+        "reservableBw": 100000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "aofa-cr5:3/1/1", 
+        "reservableBw": 100000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "aofa-cr5:9/1/4", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "aofa-cr5:10/1/12", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "aofa-cr5:9/1/3", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "aofa-cr5:10/1/11", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "aofa-cr5:6/2/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "aofa-cr5:10/1/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "aofa-cr5:10/1/2", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "aofa-cr5:10/1/12", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "aofa-cr5:10/1/8", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "aofa-cr5:10/1/9", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "aofa-cr5:5/2/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "aofa-cr5:5/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "aofa-cr5:1/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "aofa-cr5:4/2/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "aofa-cr5:3/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "aofa-cr5:2/1/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "aofa-cr5:9/1/5", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "aofa-cr5:9/1/4", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "aofa-cr5:9/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "aofa-cr5:9/1/3", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "aofa-cr5:10/1/11", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
       }
     ]
   }, 
@@ -3670,22 +5261,55 @@
     "ifces": [
       {
         "urn": "cern-513-cr5:1/2/1", 
+        "reservableBw": 100000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "cern-513-cr5:1/1/1", 
+        "reservableBw": 100000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "cern-513-cr5:2/1/1", 
+        "reservableBw": 100000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "cern-513-cr5:1/2/1", 
         "capabilities": [
           "MPLS"
         ], 
         "reservableBw": 100000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "cern-513-cr5:10/1/2", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "cern-513-cr5:10/1/3", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 10000
       }, 
@@ -3697,16 +5321,28 @@
         "reservableBw": 100000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "cern-513-cr5:5/1/1", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 100000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "cern-513-cr5:4/1/1", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 100000
       }, 
@@ -3718,127 +5354,50 @@
         "reservableBw": 100000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "cern-513-cr5:BLANK", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 20000
-      }, 
-      {
-        "urn": "cern-513-cr5:to_wash-cr5_ip-a", 
-        "reservableBw": 100000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "cern-513-cr5:to_lond-cr5_ip-a", 
-        "reservableBw": 100000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "cern-513-cr5:to_cern-272-cr5_ip-a", 
-        "reservableBw": 100000, 
-        "capabilities": [
-          "MPLS"
-        ]
       }
     ]
   }, 
   {
     "urn": "nersc-mr2", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX960", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
     "ifces": [
       {
-        "reservableVlans": [
-          {
-            "ceiling": 55, 
-            "floor": 55
-          }, 
-          {
-            "ceiling": 2200, 
-            "floor": 100
-          }
-        ], 
-        "urn": "nersc-mr2:xe-2/0/0", 
+        "urn": "nersc-mr2:xe-2/2/0", 
         "reservableBw": 10000, 
         "capabilities": [
-          "ETHERNET"
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "nersc-mr2:xe-8/1/0", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
         ]
       }, 
       {
         "reservableVlans": [
           {
-            "ceiling": 200, 
-            "floor": 100
-          }
-        ], 
-        "urn": "nersc-mr2:2/0/0", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "ETHERNET"
-        ]
-      }, 
-      {
-        "reservableVlans": [
-          {
-            "ceiling": 200, 
-            "floor": 100
-          }
-        ], 
-        "urn": "nersc-mr2:2/1/0", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "ETHERNET"
-        ]
-      }, 
-      {
-        "reservableVlans": [
-          {
-            "ceiling": 200, 
-            "floor": 100
-          }
-        ], 
-        "urn": "nersc-mr2:2/2/0", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "ETHERNET"
-        ]
-      }, 
-      {
-        "reservableVlans": [
-          {
-            "ceiling": 200, 
-            "floor": 100
-          }
-        ], 
-        "urn": "nersc-mr2:2/3/0", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "ETHERNET"
-        ]
-      }, 
-      {
-        "reservableVlans": [
-          {
-            "ceiling": 3999, 
+            "ceiling": 2999, 
             "floor": 2000
           }
         ], 
-        "urn": "nersc-mr2:xe-1/3/0", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "ETHERNET"
-        ]
-      }, 
-      {
         "urn": "nersc-mr2:xe-7/1/0", 
         "capabilities": [
           "ETHERNET"
@@ -3846,6 +5405,12 @@
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "nersc-mr2:xe-1/2/0", 
         "capabilities": [
           "ETHERNET"
@@ -3853,6 +5418,12 @@
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "nersc-mr2:xe-0/1/0", 
         "capabilities": [
           "ETHERNET"
@@ -3860,6 +5431,12 @@
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "nersc-mr2:xe-1/3/0", 
         "capabilities": [
           "ETHERNET"
@@ -3874,6 +5451,12 @@
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "nersc-mr2:xe-0/2/0", 
         "capabilities": [
           "ETHERNET"
@@ -3881,6 +5464,12 @@
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "nersc-mr2:xe-7/2/0", 
         "capabilities": [
           "ETHERNET"
@@ -3895,25 +5484,17 @@
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "nersc-mr2:xe-7/3/0", 
         "capabilities": [
           "ETHERNET"
         ], 
         "reservableBw": 10000
-      }, 
-      {
-        "urn": "nersc-mr2:xe-8/1/0.5", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "nersc-mr2:xe-2/2/0.5", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
       }
     ]
   }, 
@@ -3927,16 +5508,91 @@
     ], 
     "ifces": [
       {
-        "urn": "star-cr5:1/2/1", 
+        "urn": "star-cr5:10/1/1", 
+        "reservableBw": 10000, 
         "capabilities": [
           "MPLS"
-        ], 
-        "reservableBw": 100000
+        ]
       }, 
       {
-        "urn": "star-cr5:6/2/1", 
+        "urn": "star-cr5:10/1/2", 
+        "reservableBw": 10000, 
         "capabilities": [
           "MPLS"
+        ]
+      }, 
+      {
+        "urn": "star-cr5:4/1/1", 
+        "reservableBw": 100000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "star-cr5:1/1/1", 
+        "reservableBw": 100000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "star-cr5:4/2/1", 
+        "reservableBw": 100000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "star-cr5:9/1/4", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "star-cr5:8/1/6", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "star-cr5:8/1/2", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "star-cr5:9/1/2", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "star-cr5:10/1/7", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "star-cr5:6/2/1", 
+        "capabilities": [
+          "ETHERNET"
         ], 
         "reservableBw": 100000
       }, 
@@ -3955,30 +5611,61 @@
         "reservableBw": 10000
       }, 
       {
-        "urn": "star-cr5:9/2/2", 
+        "urn": "star-cr5:4/2/1", 
         "capabilities": [
           "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "star-cr5:9/2/2", 
+        "capabilities": [
+          "ETHERNET"
         ], 
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "star-cr5:3/2/1", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 100000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "star-cr5:6/1/1", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 100000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "star-cr5:10/1/8", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 10000
       }, 
@@ -3990,18 +5677,17 @@
         "reservableBw": 100000
       }, 
       {
-        "urn": "star-cr5:2/2/1", 
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "star-cr5:1/2/1", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 100000
-      }, 
-      {
-        "urn": "star-cr5:10/1/7", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 10000
       }, 
       {
         "urn": "star-cr5:1/1/1", 
@@ -4011,25 +5697,43 @@
         "reservableBw": 100000
       }, 
       {
-        "urn": "star-cr5:8/1/2", 
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "star-cr5:8/1/4", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "star-cr5:3/1/1", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 100000
       }, 
       {
-        "urn": "star-cr5:8/1/4", 
-        "capabilities": [
-          "MPLS"
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
         ], 
-        "reservableBw": 10000
+        "urn": "star-cr5:2/2/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100000
       }, 
       {
         "urn": "star-cr5:9/1/4", 
@@ -4046,18 +5750,24 @@
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "star-cr5:8/2/4", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 10000
       }, 
       {
-        "urn": "star-cr5:4/2/1", 
+        "urn": "star-cr5:8/1/2", 
         "capabilities": [
           "MPLS"
         ], 
-        "reservableBw": 100000
+        "reservableBw": 10000
       }, 
       {
         "urn": "star-cr5:9/1/2", 
@@ -4065,82 +5775,60 @@
           "MPLS"
         ], 
         "reservableBw": 10000
-      }, 
-      {
-        "urn": "star-cr5:to_ameslab-rt3_ip-a", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "star-cr5:to_eqx-ash-rt1_ip-a", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "star-cr5:to_chic-cr5_ip-a", 
-        "reservableBw": 100000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "star-cr5:to_fnal-mr2_ip-b", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "star-cr5:to_eqx-ash-rt1_ip-b", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "star-cr5:to_anl-mr2_ip-a", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "star-cr5:to_aofa-cr5_ip-a", 
-        "reservableBw": 100000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "star-cr5:to_bost-cr5_ip-a", 
-        "reservableBw": 100000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "star-cr5:to_fnal-mr2_ip-a", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
       }
     ]
   }, 
   {
     "urn": "bnl-mr2", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX480", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
     "ifces": [
       {
+        "urn": "bnl-mr2:xe-1/3/0", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "bnl-mr2:xe-0/1/0", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "bnl-mr2:xe-3/0/0", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "bnl-mr2:xe-1/1/0", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "bnl-mr2:xe-4/3/0", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "bnl-mr2:xe-1/2/0", 
         "capabilities": [
           "ETHERNET"
@@ -4169,6 +5857,12 @@
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "bnl-mr2:xe-2/0/0", 
         "capabilities": [
           "ETHERNET"
@@ -4176,6 +5870,12 @@
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "bnl-mr2:xe-2/3/0", 
         "capabilities": [
           "ETHERNET"
@@ -4190,6 +5890,12 @@
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "bnl-mr2:xe-2/2/0", 
         "capabilities": [
           "ETHERNET"
@@ -4204,185 +5910,242 @@
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "bnl-mr2:xe-1/0/0", 
         "capabilities": [
           "ETHERNET"
         ], 
         "reservableBw": 10000
-      }, 
-      {
-        "urn": "bnl-mr2:xe-4/3/0.5", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "bnl-mr2:xe-1/1/0.5", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "bnl-mr2:xe-3/0/0.5", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "bnl-mr2:xe-1/3/0.5", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "bnl-mr2:xe-0/1/0.5", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
       }
     ]
   }, 
   {
-    "urn": "snll-mr2", 
+    "urn": "nash-cr5", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX480", 
+    "model": "ALCATEL_SR7750", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
     "ifces": [
       {
-        "urn": "snll-mr2:xe-1/2/0", 
+        "urn": "nash-cr5:10/1/4", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "nash-cr5:10/1/5", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "nash-cr5:1/1/1", 
+        "reservableBw": 100000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "nash-cr5:3/1/1", 
+        "reservableBw": 100000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "nash-cr5:2/1/1", 
+        "reservableBw": 100000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "nash-cr5:10/1/4", 
         "capabilities": [
           "MPLS"
         ], 
         "reservableBw": 10000
       }, 
       {
-        "urn": "snll-mr2:xe-1/3/0", 
+        "urn": "nash-cr5:10/1/5", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "nash-cr5:10/1/6", 
         "capabilities": [
           "ETHERNET"
         ], 
         "reservableBw": 10000
       }, 
       {
-        "urn": "snll-mr2:xe-0/0/0", 
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "nash-cr5:10/1/3", 
         "capabilities": [
           "ETHERNET"
         ], 
         "reservableBw": 10000
       }, 
       {
-        "urn": "snll-mr2:xe-0/2/0", 
+        "urn": "nash-cr5:1/1/1", 
         "capabilities": [
           "MPLS"
         ], 
-        "reservableBw": 10000
+        "reservableBw": 100000
       }, 
       {
-        "urn": "snll-mr2:xe-2/3/0", 
-        "capabilities": [
-          "ETHERNET"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "snll-mr2:xe-2/2/0", 
+        "urn": "nash-cr5:3/1/1", 
         "capabilities": [
           "MPLS"
         ], 
-        "reservableBw": 10000
+        "reservableBw": 100000
       }, 
       {
-        "urn": "snll-mr2:xe-1/2/0.5", 
-        "reservableBw": 10000, 
+        "urn": "nash-cr5:2/1/1", 
         "capabilities": [
           "MPLS"
-        ]
-      }, 
-      {
-        "urn": "snll-mr2:xe-0/2/0.1122", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "snll-mr2:xe-2/0/0.0", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "snll-mr2:xe-1/1/0.0", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "snll-mr2:xe-2/2/0.5", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
+        ], 
+        "reservableBw": 100000
       }
     ]
   }, 
   {
-    "urn": "bnl-rt3", 
+    "urn": "ornl-rt4", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX960", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
     "ifces": [
       {
-        "urn": "bnl-rt3:xe-7/1/0", 
+        "urn": "ornl-rt4:xe-0/2/0", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "ornl-rt4:xe-1/2/0", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "ornl-rt4:xe-2/3/0", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "ornl-rt4:ge-0/0/1", 
+        "reservableBw": 1000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "ornl-rt4:xe-1/0/0", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "ornl-rt4:xe-1/2/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "ornl-rt4:xe-2/1/0", 
         "capabilities": [
           "ETHERNET"
         ], 
         "reservableBw": 10000
       }, 
       {
-        "urn": "bnl-rt3:xe-1/2/0", 
+        "urn": "ornl-rt4:ge-0/0/1", 
         "capabilities": [
-          "ETHERNET"
+          "MPLS"
         ], 
-        "reservableBw": 10000
+        "reservableBw": 1000
       }, 
       {
-        "urn": "bnl-rt3:ge-10/0/3", 
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "ornl-rt4:ge-0/0/0", 
         "capabilities": [
           "ETHERNET"
         ], 
         "reservableBw": 1000
       }, 
       {
-        "urn": "bnl-rt3:ge-10/0/0", 
-        "capabilities": [
-          "ETHERNET"
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
         ], 
-        "reservableBw": 1000
-      }, 
-      {
-        "urn": "bnl-rt3:xe-8/2/0", 
+        "urn": "ornl-rt4:xe-1/3/0", 
         "capabilities": [
           "ETHERNET"
         ], 
         "reservableBw": 10000
       }, 
       {
-        "urn": "bnl-rt3:xe-1/0/0", 
+        "urn": "ornl-rt4:xe-0/2/0", 
         "capabilities": [
-          "ETHERNET"
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "ornl-rt4:xe-2/3/0", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "urn": "ornl-rt4:xe-1/0/0", 
+        "capabilities": [
+          "MPLS"
         ], 
         "reservableBw": 10000
       }
@@ -4398,23 +6161,62 @@
     ], 
     "ifces": [
       {
+        "urn": "bost-cr5:5/1/1", 
+        "reservableBw": 40000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "bost-cr5:1/1/1", 
+        "reservableBw": 100000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "bost-cr5:2/1/1", 
+        "reservableBw": 100000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "bost-cr5:10/1/5", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "bost-cr5:10/1/6", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "bost-cr5:10/1/2", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 10000
       }, 
@@ -4426,9 +6228,15 @@
         "reservableBw": 40000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "bost-cr5:5/1/2", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 40000
       }, 
@@ -4447,77 +6255,50 @@
         "reservableBw": 100000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "bost-cr5:10/2/3", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 10000
-      }, 
-      {
-        "urn": "bost-cr5:to_amst-cr5_ip-a", 
-        "reservableBw": 40000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "bost-cr5:to_newy-cr5_ip-a", 
-        "reservableBw": 100000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "bost-cr5:to_star-cr5_ip-a", 
-        "reservableBw": 100000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }
-    ]
-  }, 
-  {
-    "urn": "lvk-rt2", 
-    "type": "ROUTER", 
-    "model": "JUNOS_M10I", 
-    "capabilities": [
-      "ETHERNET", 
-      "MPLS"
-    ], 
-    "ifces": [
-      {
-        "urn": "lvk-rt2:t3-0/0/0", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 45
-      }, 
-      {
-        "urn": "lvk-rt2:ge-1/3/0", 
-        "capabilities": [
-          "ETHERNET"
-        ], 
-        "reservableBw": 1000
-      }, 
-      {
-        "urn": "lvk-rt2:fe-0/3/0", 
-        "capabilities": [
-          "ETHERNET"
-        ], 
-        "reservableBw": 100
       }
     ]
   }, 
   {
     "urn": "jgi-mr2", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX480", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
     "ifces": [
       {
+        "urn": "jgi-mr2:xe-2/2/0", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "urn": "jgi-mr2:xe-1/1/0", 
+        "reservableBw": 10000, 
+        "capabilities": [
+          "MPLS"
+        ]
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "jgi-mr2:xe-0/2/0", 
         "capabilities": [
           "ETHERNET"
@@ -4525,6 +6306,12 @@
         "reservableBw": 10000
       }, 
       {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
         "urn": "jgi-mr2:xe-1/3/0", 
         "capabilities": [
           "ETHERNET"
@@ -4544,25 +6331,11 @@
           "MPLS"
         ], 
         "reservableBw": 10000
-      }, 
-      {
-        "urn": "jgi-mr2:xe-1/1/0.5", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "jgi-mr2:xe-2/2/0.5", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
       }
     ]
   }, 
   {
-    "urn": "newy-cr5", 
+    "urn": "atla-cr5", 
     "type": "ROUTER", 
     "model": "ALCATEL_SR7750", 
     "capabilities": [
@@ -4571,346 +6344,204 @@
     ], 
     "ifces": [
       {
-        "urn": "newy-cr5:10/1/6", 
+        "urn": "atla-cr5:2/1/1", 
+        "reservableBw": 100000, 
         "capabilities": [
           "MPLS"
-        ], 
-        "reservableBw": 10000
+        ]
       }, 
       {
-        "urn": "newy-cr5:10/1/2", 
+        "urn": "atla-cr5:1/1/1", 
+        "reservableBw": 100000, 
         "capabilities": [
           "MPLS"
-        ], 
-        "reservableBw": 10000
+        ]
       }, 
       {
-        "urn": "newy-cr5:10/1/3", 
+        "urn": "atla-cr5:3/1/1", 
+        "reservableBw": 100000, 
         "capabilities": [
           "MPLS"
-        ], 
-        "reservableBw": 10000
+        ]
       }, 
       {
-        "urn": "newy-cr5:10/1/9", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "newy-cr5:4/1/1", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 100000
-      }, 
-      {
-        "urn": "newy-cr5:3/1/1", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 100000
-      }, 
-      {
-        "urn": "newy-cr5:2/1/1", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 100000
-      }, 
-      {
-        "urn": "newy-cr5:4/2/1", 
-        "capabilities": [
-          "MPLS"
-        ], 
-        "reservableBw": 100000
-      }, 
-      {
-        "urn": "newy-cr5:to_bnl-mr2_ip-a", 
+        "urn": "atla-cr5:10/1/3", 
         "reservableBw": 10000, 
         "capabilities": [
           "MPLS"
         ]
       }, 
       {
-        "urn": "newy-cr5:to_aofa-cr5_ip-a", 
-        "reservableBw": 100000, 
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "atla-cr5:10/1/1", 
         "capabilities": [
-          "MPLS"
-        ]
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
       }, 
       {
-        "urn": "newy-cr5:to_bost-cr5_ip-a", 
-        "reservableBw": 100000, 
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "atla-cr5:10/1/2", 
         "capabilities": [
-          "MPLS"
-        ]
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
       }, 
       {
-        "urn": "newy-cr5:to_lond-cr5_ip-a", 
-        "reservableBw": 100000, 
+        "urn": "atla-cr5:10/1/3", 
         "capabilities": [
           "MPLS"
-        ]
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "atla-cr5:10/1/8", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 10000
+      }, 
+      {
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "atla-cr5:4/1/1", 
+        "capabilities": [
+          "ETHERNET"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "atla-cr5:1/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "atla-cr5:3/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
+      }, 
+      {
+        "urn": "atla-cr5:2/1/1", 
+        "capabilities": [
+          "MPLS"
+        ], 
+        "reservableBw": 100000
       }
     ]
   }, 
   {
-    "urn": "eqx-ash-rt1", 
+    "urn": "kans-cr5", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX480", 
+    "model": "ALCATEL_SR7750", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
     "ifces": [
       {
-        "urn": "eqx-ash-rt1:ge-0/0/7", 
-        "capabilities": [
-          "ETHERNET"
-        ], 
-        "reservableBw": 1000
-      }, 
-      {
-        "urn": "eqx-ash-rt1:ae0", 
+        "urn": "kans-cr5:1/1/1", 
+        "reservableBw": 100000, 
         "capabilities": [
           "MPLS"
-        ], 
-        "reservableBw": 10000
+        ]
       }, 
       {
-        "urn": "eqx-ash-rt1:ge-0/0/3", 
+        "urn": "kans-cr5:3/1/1", 
+        "reservableBw": 100000, 
         "capabilities": [
           "MPLS"
-        ], 
-        "reservableBw": 100
+        ]
       }, 
       {
-        "urn": "eqx-ash-rt1:xe-2/1/0", 
+        "urn": "kans-cr5:2/1/1", 
+        "reservableBw": 100000, 
         "capabilities": [
           "MPLS"
-        ], 
-        "reservableBw": 10000
+        ]
       }, 
       {
-        "urn": "eqx-ash-rt1:xe-1/1/0", 
-        "capabilities": [
-          "MPLS"
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
         ], 
-        "reservableBw": 10000
-      }, 
-      {
-        "urn": "eqx-ash-rt1:xe-0/3/0", 
+        "urn": "kans-cr5:10/1/4", 
         "capabilities": [
           "ETHERNET"
         ], 
         "reservableBw": 10000
       }, 
       {
-        "urn": "eqx-ash-rt1:xe-2/0/0", 
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
+        ], 
+        "urn": "kans-cr5:10/1/1", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 10000
       }, 
       {
-        "urn": "eqx-ash-rt1:ge-0/1/3", 
-        "capabilities": [
-          "MPLS"
+        "reservableVlans": [
+          {
+            "ceiling": 2999, 
+            "floor": 2000
+          }
         ], 
-        "reservableBw": 1000
-      }, 
-      {
-        "urn": "eqx-ash-rt1:xe-1/0/0", 
+        "urn": "kans-cr5:10/1/3", 
         "capabilities": [
-          "MPLS"
+          "ETHERNET"
         ], 
         "reservableBw": 10000
       }, 
       {
-        "urn": "eqx-ash-rt1:xe-2/1/0.5", 
-        "reservableBw": 10000, 
+        "urn": "kans-cr5:1/1/1", 
         "capabilities": [
           "MPLS"
-        ]
+        ], 
+        "reservableBw": 100000
       }, 
       {
-        "urn": "eqx-ash-rt1:xe-1/1/0.5", 
-        "reservableBw": 10000, 
+        "urn": "kans-cr5:3/1/1", 
         "capabilities": [
           "MPLS"
-        ]
+        ], 
+        "reservableBw": 100000
       }, 
       {
-        "urn": "eqx-ash-rt1:ge-0/1/3.5", 
-        "reservableBw": 1000, 
+        "urn": "kans-cr5:2/1/1", 
         "capabilities": [
           "MPLS"
-        ]
-      }, 
-      {
-        "urn": "eqx-ash-rt1:xe-1/0/0.5", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }, 
-      {
-        "urn": "eqx-ash-rt1:xe-2/0/0.5", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "MPLS"
-        ]
-      }
-    ]
-  }, 
-  {
-    "urn": "nersc-asw1", 
-    "capabilities": [
-      "ETHERNET"
-    ], 
-    "reservableVlans": [
-      {
-        "ceiling": 150, 
-        "floor": 100
-      }, 
-      {
-        "ceiling": 200, 
-        "floor": 200
-      }, 
-      {
-        "ceiling": 301, 
-        "floor": 300
-      }
-    ], 
-    "model": "JUNIPER_EX", 
-    "type": "SWITCH", 
-    "ifces": [
-      {
-        "urn": "nersc-asw1:xe-0/0/0", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "ETHERNET"
-        ]
-      }, 
-      {
-        "urn": "nersc-asw1:ge-2/8/0", 
-        "reservableBw": 1000, 
-        "capabilities": [
-          "ETHERNET"
-        ]
-      }, 
-      {
-        "urn": "nersc-asw1:ge-2/9/0", 
-        "reservableBw": 1000, 
-        "capabilities": [
-          "ETHERNET"
-        ]
-      }, 
-      {
-        "urn": "nersc-asw1:ge-2/10/0", 
-        "reservableBw": 1000, 
-        "capabilities": [
-          "ETHERNET"
-        ]
-      }, 
-      {
-        "urn": "nersc-asw1:ge-1/1/0", 
-        "reservableBw": 1000, 
-        "capabilities": [
-          "ETHERNET"
-        ]
-      }, 
-      {
-        "urn": "nersc-asw1:5/2/0", 
-        "reservableBw": 1000, 
-        "capabilities": [
-          "ETHERNET"
-        ]
-      }, 
-      {
-        "urn": "nersc-asw1:6/2/0", 
-        "reservableBw": 1000, 
-        "capabilities": [
-          "ETHERNET"
-        ]
-      }, 
-      {
-        "urn": "nersc-asw1:5/3/0", 
-        "reservableBw": 1000, 
-        "capabilities": [
-          "ETHERNET"
-        ]
-      }, 
-      {
-        "urn": "nersc-asw1:6/3/0", 
-        "reservableBw": 1000, 
-        "capabilities": [
-          "ETHERNET"
-        ]
-      }, 
-      {
-        "urn": "nersc-asw1:5/5/0", 
-        "reservableBw": 1000, 
-        "capabilities": [
-          "ETHERNET"
-        ]
-      }, 
-      {
-        "urn": "nersc-asw1:6/5/0", 
-        "reservableBw": 1000, 
-        "capabilities": [
-          "ETHERNET"
-        ]
-      }, 
-      {
-        "urn": "nersc-asw1:xe-1/0/0", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "ETHERNET"
-        ]
-      }, 
-      {
-        "urn": "nersc-asw1:xe-1/1/0", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "ETHERNET"
-        ]
-      }
-    ]
-  }, 
-  {
-    "urn": "lbl-asw1", 
-    "capabilities": [
-      "ETHERNET"
-    ], 
-    "reservableVlans": [
-      {
-        "ceiling": 301, 
-        "floor": 11
-      }, 
-      {
-        "ceiling": 550, 
-        "floor": 550
-      }
-    ], 
-    "model": "JUNIPER_EX", 
-    "type": "SWITCH", 
-    "ifces": [
-      {
-        "urn": "lbl-asw1:xe-0/0/0", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "ETHERNET"
-        ]
-      }, 
-      {
-        "urn": "lbl-asw1:xe-1/1/0", 
-        "reservableBw": 10000, 
-        "capabilities": [
-          "ETHERNET"
-        ]
+        ], 
+        "reservableBw": 100000
       }
     ]
   }
