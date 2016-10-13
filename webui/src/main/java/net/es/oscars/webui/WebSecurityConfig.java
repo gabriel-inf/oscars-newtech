@@ -20,8 +20,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                // development:
-                    .antMatchers("/viz").permitAll()
+                // development!
+                    .antMatchers("/resv/**").permitAll()
 
                 // index page and REST endpoints:
                     .antMatchers("/").permitAll()
@@ -45,7 +45,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .logout()
                     .permitAll()
                     .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
-                    .logoutSuccessUrl("/login");
+                    .logoutSuccessUrl("/login")
+                    .deleteCookies("remember-me")
+                .and().rememberMe();
 
     }
 

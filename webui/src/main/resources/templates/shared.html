@@ -11,6 +11,8 @@
     <title th:text="${pageTitle}">Page title</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 
+    <meta th:name="_csrf" th:content="${_csrf.token}"/>
+    <meta th:name="_csrf_header" th:content="${_csrf.headerName}"/>
 
     <link th:href="@{/webjars/bootstrap/3.3.7-1/css/bootstrap.min.css}" rel="stylesheet"/>
 
@@ -69,8 +71,8 @@
                         Reservations<span class="caret"></span></a>
 
                     <ul class="dropdown-menu">
-                        <li><a href="/resv_list">List</a></li>
-                        <li><a href="/resv_basic_new">New (basic)</a></li>
+                        <li><a href="/resv/list">List</a></li>
+                        <li><a href="/resv/gui">New</a></li>
                     </ul>
                 </li>
 

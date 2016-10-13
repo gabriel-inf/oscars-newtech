@@ -40,8 +40,13 @@ function add_to_reservation(viz, name) {
         last_added_node = ds.nodes.get()[prev_len - 1];
     }
 
+    var junctions = reservation_request["junctions"];
+
     for (var i = 0; i < selected_node_ids.name.length; i++) {
         var nodeId = selected_node_ids.name[i];
+        if (!(nodeId in junctions)) {
+            junctions[nodeId] = {"fixtures": {}};
+        }
         if (!ds.nodes.get(nodeId)) {
             ds.nodes.add({id: nodeId, label: nodeId});
             if (last_added_node != null) {
@@ -197,10 +202,15 @@ function show_pipe_card(edgeId) {
         pipes[edgeId] = {"bw": 0};
     }
     var prev_bw = pipes[edgeId]["bw"];
+    var prev_a = pipes[edgeId]["a"];
+    var prev_z = pipes[edgeId]["z"];
+
     console.log("updating form for edge: " + edgeId + " to bw: " + prev_bw);
     // detach previous event handlers
     $("#pipe_bw").off("change");
     $("#pipe_bw").val(prev_bw);
+    $("#pipe_a").val(prev_a);
+    $("#pipe_z").val(prev_z);
 
     // add new event handler
     $("#pipe_bw").change(function () {
@@ -226,8 +236,8 @@ function show_junction_card(nodeId) {
                 "<td><div class='form-check'><label class='form-check-label'>" +
                 "<input id='use_" + index + "' type='checkbox' placeholder='vlan' class='form-check-input' />" +
                 "</label></div></td>" +
-                "<td><input id='bw_" + index + "' type='text' placeholder='1G' class='form-control input-sm'  /></td>" +
-                "<td><input id='vlan_" + index + "' type='text' placeholder='2-4094' class='form-control input-sm'  /></td>" +
+                "<td><input id='bw_" + index + "' type='text' value='0' class='form-control input-sm'  /></td>" +
+                "<td><input id='vlan_" + index + "' type='text' value='2-4094' class='form-control input-sm'  /></td>" +
                 "</tr>";
             $('#resv_node_table tbody').append(tr);
 
@@ -252,9 +262,10 @@ function show_junction_card(nodeId) {
 function populate_junction(nodeId, fixtures) {
     var junctions = reservation_request["junctions"];
     if (!(nodeId in junctions)) {
+        junctions[nodeId] = {"fixtures": {}};
         return;
     } else if (!("fixtures" in junctions[nodeId])) {
-        return;
+        junctions[nodeId] = {"fixtures": {}};
     }
     fixtures.forEach(function (urn, index, fixtures) {
         if (urn in junctions[nodeId]["fixtures"]) {
@@ -269,7 +280,6 @@ function populate_junction(nodeId, fixtures) {
 
 
 function update_junction(nodeId, fixtures) {
-    var checked = [];
     var i;
     var junctions = reservation_request["junctions"];
     junctions[nodeId] = {
@@ -278,7 +288,6 @@ function update_junction(nodeId, fixtures) {
 
     for (i = 0; i < fixtures.length; i++) {
         if ($("#use_" + i).is(':checked')) {
-            checked.push(fixtures[i]);
             junctions[nodeId]["fixtures"][fixtures[i]] = {
                 "bw": $("#bw_" + i).val(),
                 "vlan": $("#vlan_" + i).val()
@@ -286,10 +295,6 @@ function update_junction(nodeId, fixtures) {
         }
     }
 
-    if (!checked.length) {
-        delete junctions[nodeId];
-        console.log("no fixtures left in junction " + nodeId);
-    }
     console.log(reservation_request);
 }
 
@@ -381,14 +386,49 @@ $(document).ready(function () {
             add_to_reservation(reservation_viz, resv_viz_name);
         });
 
+        $(function () {
+            var token = $("meta[name='_csrf']").attr("content");
+            var header = $("meta[name='_csrf_header']").attr("content");
+            $(document).ajaxSend(function (e, xhr, options) {
+                xhr.setRequestHeader(header, token);
+            });
+        });
+
         $('#resv_shared_form').on('submit', function (e) {
             e.preventDefault();
-            console.log("submitting request");
-            console.log(reservation_request);
+            reservation_request["description"] = $('#description').val();
+
+            var start_dtstring = $('#start_at').val();
+            var end_dtstring = $('#end_at').val();
+
+            var start_m = moment(start_dtstring);
+            var end_m = moment(end_dtstring);
+
+            reservation_request["startAt"] = parseInt(start_m.unix());
+            reservation_request["endAt"] = parseInt(end_m.unix());
+
+            var json = JSON.stringify(reservation_request);
+
+            $.ajax({
+                type: "POST",
+                url: "/resv/minimal_submit",
+                data: json,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (data) {
+                    console.log(data);
+                },
+                failure: function (errMsg) {
+                    console.log(errMsg);
+                }
+            });
+
+
         });
 
 
     });
 
 });
+
 
