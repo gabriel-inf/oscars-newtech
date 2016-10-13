@@ -8,8 +8,6 @@ import net.es.oscars.dto.resv.Connection;
 import net.es.oscars.dto.resv.Schedule;
 import net.es.oscars.dto.resv.States;
 import net.es.oscars.dto.spec.*;
-import net.es.oscars.dto.topo.Urn;
-import net.es.oscars.dto.topo.enums.UrnType;
 import net.es.oscars.st.oper.OperState;
 import net.es.oscars.st.prov.ProvState;
 import net.es.oscars.st.resv.ResvState;
@@ -19,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import javax.validation.constraints.Min;
 import java.util.*;
 
 
@@ -77,21 +74,19 @@ public class MinimalRequester {
         Map<String, RequestedVlanJunction> junctionMap = new HashMap<>();
 
         for (String nodeId : minimalRequest.getJunctions().keySet()) {
-            Urn nodeUrn = Urn.builder().urn(nodeId).urnType(UrnType.DEVICE).valid(true).build();
             RequestedVlanJunction rvj = RequestedVlanJunction.builder()
-                    .deviceUrn(nodeUrn)
+                    .deviceUrn(nodeId)
                     .fixtures(new HashSet<>())
                     .junctionType(EthJunctionType.REQUESTED)
                     .build();
             for (String port : minimalRequest.getJunctions().get(nodeId).getFixtures().keySet()) {
-                Urn portUrn = Urn.builder().urn(port).urnType(UrnType.IFCE).valid(true).build();
                 MinimalFixture fix = minimalRequest.getJunctions().get(nodeId).getFixtures().get(port);
                 Integer bw = Integer.parseInt(fix.getBw());
                 String vlan = fix.getVlan();
 
                 RequestedVlanFixture rvfix = RequestedVlanFixture.builder()
                         .fixtureType(EthFixtureType.REQUESTED)
-                        .portUrn(portUrn)
+                        .portUrn(port)
                         .egMbps(bw)
                         .inMbps(bw)
                         .vlanExpression(vlan)

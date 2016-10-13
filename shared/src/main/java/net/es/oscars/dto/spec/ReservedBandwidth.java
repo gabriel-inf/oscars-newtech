@@ -13,7 +13,7 @@ public class ReservedBandwidth {
 
 
     @NonNull
-    private Urn urn;
+    private String urn;
 
     //private Integer bandwidth;
 

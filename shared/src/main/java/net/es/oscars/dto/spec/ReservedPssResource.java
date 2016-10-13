@@ -15,7 +15,7 @@ public class ReservedPssResource {
     private Long id;
 
     @NonNull
-    private Urn urn;
+    private String urn;
 
     @NonNull
     private ResourceType resourceType;

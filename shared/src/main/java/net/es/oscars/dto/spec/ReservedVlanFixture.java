@@ -14,7 +14,7 @@ public class ReservedVlanFixture {
     private Long id;
 
     @NonNull
-    private Urn ifceUrn;
+    private String ifceUrn;
 
     private Set<ReservedVlan> reservedVlans;
 
