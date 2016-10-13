@@ -70,7 +70,13 @@ public class TopoFileImporter implements TopoImporter {
     @Transactional
     public void importFromFile(boolean overwrite, String devicesFilename, String adjciesFilename) throws IOException {
 
-        List<Device> devices = importDevicesFromFile(devicesFilename);
+        if (overwrite) {
+            log.info("Overwrite set; deleting topology DB entries.");
+            urnRepo.deleteAll();
+            adjcyRepo.deleteAll();
+        }
+
+        List<Device> devices = importDevicesFromFile(devicesFilename, overwrite);
         log.info("Devices defined in file " + devicesFilename + " : " + devices.size());
 
         List<UrnE> urns = urnRepo.findAll();
@@ -86,18 +92,13 @@ public class TopoFileImporter implements TopoImporter {
         }
 
 
-        List<UrnAdjcyE> newAdjcies = importAdjciesFromFile(adjciesFilename);
+
+        List<UrnAdjcyE> newAdjcies = importAdjciesFromFile(adjciesFilename, overwrite);
         log.info("Defined adjacencies from adjacencies file: " + newAdjcies.size());
 
-        List<UrnAdjcyE> deviceAdjcies = adjciesFromDevices(devices);
+        List<UrnAdjcyE> deviceAdjcies = adjciesFromDevices(devices, overwrite);
         log.info("Implied adjacencies from devices file: " + deviceAdjcies.size());
 
-
-        if (overwrite) {
-            log.info("Overwrite set; deleting topology DB entries.");
-            urnRepo.deleteAll();
-            adjcyRepo.deleteAll();
-        }
 
         List<UrnAdjcyE> adjcies = adjcyRepo.findAll();
         if (adjcies.isEmpty()) {
@@ -117,29 +118,38 @@ public class TopoFileImporter implements TopoImporter {
     }
 
 
-    private List<UrnAdjcyE> adjciesFromDevices(List<Device> devices) {
+    private List<UrnAdjcyE> adjciesFromDevices(List<Device> devices, boolean overwrite) {
         List<UrnAdjcyE> adjcies = new ArrayList<>();
         devices.forEach(d -> {
-            UrnE deviceUrn = urnRepo.findByUrn(d.getUrn()).get();
-            d.getIfces().forEach(i -> {
-                UrnE ifceUrn = urnRepo.findByUrn(i.getUrn()).get();
-                UrnAdjcyE azAdjcy = UrnAdjcyE.builder()
-                        .a(deviceUrn)
-                        .z(ifceUrn)
-                        .metrics(new HashMap<>())
-                        .build();
+            Optional<UrnE> maybeDevUrn = urnRepo.findByUrn(d.getUrn());
+            if (maybeDevUrn.isPresent()) {
+                UrnE deviceUrn = maybeDevUrn.get();
 
-                UrnAdjcyE zaAdjcy = UrnAdjcyE.builder()
-                        .a(ifceUrn)
-                        .z(deviceUrn)
-                        .metrics(new HashMap<>())
-                        .build();
+                d.getIfces().forEach(i -> {
+                    Optional<UrnE> maybeIfceUrn = urnRepo.findByUrn(i.getUrn());
+                    if (maybeIfceUrn.isPresent()) {
+                        UrnE ifceUrn = maybeIfceUrn.get();
+                        UrnAdjcyE azAdjcy = UrnAdjcyE.builder()
+                                .a(deviceUrn)
+                                .z(ifceUrn)
+                                .metrics(new HashMap<>())
+                                .build();
 
-                azAdjcy.getMetrics().put(Layer.INTERNAL, 1L);
-                zaAdjcy.getMetrics().put(Layer.INTERNAL, 1L);
-                adjcies.add(azAdjcy);
-                adjcies.add(zaAdjcy);
-            });
+                        UrnAdjcyE zaAdjcy = UrnAdjcyE.builder()
+                                .a(ifceUrn)
+                                .z(deviceUrn)
+                                .metrics(new HashMap<>())
+                                .build();
+
+                        azAdjcy.getMetrics().put(Layer.INTERNAL, 1L);
+                        zaAdjcy.getMetrics().put(Layer.INTERNAL, 1L);
+                        adjcies.add(azAdjcy);
+                        adjcies.add(zaAdjcy);
+
+                    }
+                });
+
+            }
 
         });
 
@@ -202,24 +212,27 @@ public class TopoFileImporter implements TopoImporter {
     }
 
 
-    private List<Device> importDevicesFromFile(String filename) throws IOException {
+    private List<Device> importDevicesFromFile(String filename, boolean overwrite) throws IOException {
         File jsonFile = new File(filename);
         ObjectMapper mapper = new ObjectMapper();
         return Arrays.asList(mapper.readValue(jsonFile, Device[].class));
     }
 
-    private List<UrnAdjcyE> importAdjciesFromFile(String filename) throws IOException {
+    private List<UrnAdjcyE> importAdjciesFromFile(String filename, boolean overwrite) throws IOException {
         File jsonFile = new File(filename);
         ObjectMapper mapper = new ObjectMapper();
         List<UrnAdjcy> fromFile = Arrays.asList(mapper.readValue(jsonFile, UrnAdjcy[].class));
         List<UrnAdjcyE> result = new ArrayList<>();
         fromFile.forEach(t -> {
-            UrnE a = urnRepo.findByUrn(t.getA()).get();
-            UrnE z = urnRepo.findByUrn(t.getZ()).get();
-            Map<Layer, Long> metrics = t.getMetrics();
-
-            UrnAdjcyE adjcy = UrnAdjcyE.builder().a(a).z(z).metrics(metrics).build();
-            result.add(adjcy);
+            Optional<UrnE> maybeA = urnRepo.findByUrn(t.getA());
+            Optional<UrnE> maybeZ = urnRepo.findByUrn(t.getZ());
+            if (maybeA.isPresent() && maybeZ.isPresent()) {
+                UrnE a = maybeA.get();
+                UrnE z = maybeZ.get();
+                Map<Layer, Long> metrics = t.getMetrics();
+                UrnAdjcyE adjcy = UrnAdjcyE.builder().a(a).z(z).metrics(metrics).build();
+                result.add(adjcy);
+            }
         });
         return result;
 
