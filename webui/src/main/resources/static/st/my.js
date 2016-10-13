@@ -234,6 +234,8 @@ $(document).ready(function () {
         var nv_opts = {
             height: '500px',
             interaction: {
+                hover: false,
+                navigationButtons: true,
                 zoomView: true,
                 dragView: true
             },
@@ -262,6 +264,7 @@ $(document).ready(function () {
                 color: {background: "white"}
             },
             manipulation: {
+                addNode: false,
                 addEdge: function (data, callback) {
                     if (data.from != data.to) {
                         callback(data);
@@ -269,6 +272,16 @@ $(document).ready(function () {
                 }
             }
         };
+
+        $('#dump_positions_btn').on('click', function (e) {
+            e.preventDefault();
+            var pos = display_viz.network.getPositions();
+            var jsonText = JSON.stringify(pos, null);
+            $('#positions_display').text(jsonText);
+            return false;
+
+        });
+
 
         reservation_viz = make_network({}, rv_cont, rv_opts, "reservation_viz");
 

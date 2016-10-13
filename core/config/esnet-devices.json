@@ -2,7 +2,7 @@
   {
     "urn": "pppl-rt5", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX480", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -101,7 +101,7 @@
   {
     "urn": "srs-rt3", 
     "type": "ROUTER", 
-    "model": "JUNOS_M10I", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -119,7 +119,7 @@
   {
     "urn": "anl-mr2", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX960", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -144,7 +144,7 @@
   {
     "urn": "orau-rt3", 
     "type": "ROUTER", 
-    "model": "JUNOS_M10I", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -169,7 +169,7 @@
   {
     "urn": "eqx-ash-rt1", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX480", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -215,7 +215,7 @@
   {
     "urn": "llnldc-rt4", 
     "type": "ROUTER", 
-    "model": "JUNOS_M10I", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -367,7 +367,7 @@
   {
     "urn": "fnal-mr2", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX960", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -438,7 +438,7 @@
   {
     "urn": "wash-ar1", 
     "type": "ROUTER", 
-    "model": "JUNOS_M10I", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -470,7 +470,7 @@
   {
     "urn": "forr-rt2", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX104", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -576,7 +576,7 @@
   {
     "urn": "paix-pa-rt3", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX480", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -594,7 +594,7 @@
   {
     "urn": "pantex-rt3", 
     "type": "ROUTER", 
-    "model": "JUNOS_M10I", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -690,7 +690,7 @@
   {
     "urn": "bois-cr1", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX960", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -715,7 +715,7 @@
   {
     "urn": "osti-rt2", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX480", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -765,7 +765,7 @@
   {
     "urn": "snla-rt3", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX480", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -783,7 +783,7 @@
   {
     "urn": "slac-mr2", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX480", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -815,7 +815,7 @@
   {
     "urn": "ameslab-rt3", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX480", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -840,7 +840,7 @@
   {
     "urn": "snll-mr2", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX480", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -918,7 +918,7 @@
   {
     "urn": "lsvn-cr1", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX480", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -943,7 +943,7 @@
   {
     "urn": "esnet-rt5", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX960", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -992,7 +992,7 @@
   {
     "urn": "eqx-sj-rt1", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX480", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -1010,7 +1010,7 @@
   {
     "urn": "lbl-mr2", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX960", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -1102,7 +1102,7 @@
   {
     "urn": "sdsc-sdn2", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX480", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -1127,7 +1127,7 @@
   {
     "urn": "ga-rt2", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX480", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -1152,7 +1152,7 @@
   {
     "urn": "llnl-mr2", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX480", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -1230,7 +1230,7 @@
   {
     "urn": "snll-rt2", 
     "type": "ROUTER", 
-    "model": "JUNOS_M10I", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -1354,7 +1354,7 @@
   {
     "urn": "doe-gtn-rt2", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX104", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -1379,7 +1379,7 @@
   {
     "urn": "eqx-chi-rt1", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX480", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -1517,7 +1517,7 @@
   {
     "urn": "nersc-mr2", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX960", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -1616,7 +1616,7 @@
   {
     "urn": "bnl-mr2", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX480", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -1708,7 +1708,7 @@
   {
     "urn": "bnl-rt3", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX960", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -1718,7 +1718,7 @@
   {
     "urn": "ornl-rt4", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX480", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -1796,7 +1796,7 @@
   {
     "urn": "lvk-rt2", 
     "type": "ROUTER", 
-    "model": "JUNOS_M10I", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
@@ -1806,7 +1806,7 @@
   {
     "urn": "jgi-mr2", 
     "type": "ROUTER", 
-    "model": "JUNOS_MX480", 
+    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
