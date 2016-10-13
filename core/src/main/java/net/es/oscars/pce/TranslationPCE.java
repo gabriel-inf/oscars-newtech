@@ -107,7 +107,7 @@ public class TranslationPCE {
                     reqFix.getEgMbps(), sched);
 
             ReservedVlanFixtureE rsvFix = createReservedFixture(reqFix.getPortUrn(), new HashSet<>(),
-                    urnToRsvVlanMap.get(reqFix.getPortUrn()), rsvBw, pceAssistant.decideFixtureType(reqFix.getPortUrn().getDeviceModel()));
+                    urnToRsvVlanMap.get(reqFix.getPortUrn()), rsvBw, pceAssistant.decideFixtureType(req_j.getDeviceUrn().getDeviceModel()));
 
             // Add the fixtures to the Reserved Junction
             rsv_j.getFixtures().add(rsvFix);

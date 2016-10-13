@@ -84,7 +84,7 @@ public class MinimalRequester {
                     .junctionType(EthJunctionType.REQUESTED)
                     .build();
             for (String port : minimalRequest.getJunctions().get(nodeId).getFixtures().keySet()) {
-                Urn portUrn = Urn.builder().urn(nodeId).urnType(UrnType.IFCE).valid(true).build();
+                Urn portUrn = Urn.builder().urn(port).urnType(UrnType.IFCE).valid(true).build();
                 MinimalFixture fix = minimalRequest.getJunctions().get(nodeId).getFixtures().get(port);
                 Integer bw = Integer.parseInt(fix.getBw());
                 String vlan = fix.getVlan();
@@ -99,12 +99,14 @@ public class MinimalRequester {
                 rvj.getFixtures().add(rvfix);
             }
 
-            reqvf.getJunctions().add(rvj);
             junctionMap.put(nodeId, rvj);
         }
+        Set<RequestedVlanJunction> inPipes = new HashSet<>();
         for (String pipeId : minimalRequest.getPipes().keySet()) {
             RequestedVlanJunction aJ = junctionMap.get(minimalRequest.getPipes().get(pipeId).getA());
             RequestedVlanJunction zJ = junctionMap.get(minimalRequest.getPipes().get(pipeId).getZ());
+            inPipes.add(aJ);
+            inPipes.add(zJ);
             Integer bw = Integer.parseInt(minimalRequest.getPipes().get(pipeId).getBw());
             RequestedVlanPipe rvp = RequestedVlanPipe.builder()
                     .aJunction(aJ)
@@ -119,6 +121,11 @@ public class MinimalRequester {
                     .pipeType(EthPipeType.REQUESTED)
                     .build();
             reqvf.getPipes().add(rvp);
+        }
+        for (RequestedVlanJunction rvj : junctionMap.values()) {
+            if (!inPipes.contains(rvj)) {
+                reqvf.getJunctions().add(rvj);
+            }
         }
 
 
