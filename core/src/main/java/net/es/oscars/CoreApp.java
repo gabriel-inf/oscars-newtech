@@ -18,15 +18,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableConfigurationProperties
 @EnableAsync
 @EnableScheduling
-@EnableAutoConfiguration(
-        exclude = {
-                WebMvcAutoConfiguration.class,
-                JmxAutoConfiguration.class,
-                ErrorMvcAutoConfiguration.class,
-                AopAutoConfiguration.class,
-                MultipartAutoConfiguration.class,
-        })
-
 public class CoreApp {
     public static void main(String[] args) {
         SpringApplication.run(CoreApp.class, args);
