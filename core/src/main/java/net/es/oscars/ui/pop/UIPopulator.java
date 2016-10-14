@@ -9,6 +9,7 @@ import net.es.oscars.authnz.ent.EPermissions;
 import net.es.oscars.authnz.ent.EUser;
 import net.es.oscars.authnz.prop.AuthnzProperties;
 import net.es.oscars.dto.viz.Position;
+import net.es.oscars.helpers.JsonHelper;
 import net.es.oscars.ui.prop.UIProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -28,11 +29,14 @@ public class UIPopulator {
     private UIProperties properties;
 
     private Map<String, Position> positions;
+    @Autowired
+    private JsonHelper jsonHelper;
 
 
     @PostConstruct
     public void loadPositions() throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = jsonHelper.mapper();
+
 
         File positionsFile = properties.getPositionsFile();
         positions = mapper.readValue(positionsFile, new TypeReference< Map<String, Position>>() {});

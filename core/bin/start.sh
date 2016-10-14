@@ -4,4 +4,4 @@ function tabname {
 }
 tabname "oscars core"
 
-java -jar target/core-0.7.0.jar
+java -Xmx512m -jar target/core-0.7.0.jar

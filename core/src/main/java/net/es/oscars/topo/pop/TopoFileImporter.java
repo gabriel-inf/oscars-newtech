@@ -3,6 +3,7 @@ package net.es.oscars.topo.pop;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.topo.enums.Layer;
+import net.es.oscars.helpers.JsonHelper;
 import net.es.oscars.topo.dao.UrnAdjcyRepository;
 import net.es.oscars.topo.dao.UrnRepository;
 import net.es.oscars.topo.ent.ReservableBandwidthE;
@@ -32,6 +33,8 @@ public class TopoFileImporter implements TopoImporter {
 
     private TopoProperties topoProperties;
 
+    @Autowired
+    private JsonHelper jsonHelper;
 
     @Autowired
     public TopoFileImporter(UrnRepository urnRepo, UrnAdjcyRepository adjcyRepo, TopoProperties topoProperties) {
@@ -79,9 +82,7 @@ public class TopoFileImporter implements TopoImporter {
         List<Device> devices = importDevicesFromFile(devicesFilename, overwrite);
         log.info("Devices defined in file " + devicesFilename + " : " + devices.size());
 
-        List<UrnE> urns = urnRepo.findAll();
-
-        if (urns.isEmpty()) {
+        if (urnRepo.count() == 0 ) {
             log.info("URN DB empty. Will replace with input from devices file " + devicesFilename);
             List<UrnE> newUrns = this.urnsFromDevices(devices);
 
@@ -92,7 +93,6 @@ public class TopoFileImporter implements TopoImporter {
         }
 
 
-
         List<UrnAdjcyE> newAdjcies = importAdjciesFromFile(adjciesFilename, overwrite);
         log.info("Defined adjacencies from adjacencies file: " + newAdjcies.size());
 
@@ -100,8 +100,7 @@ public class TopoFileImporter implements TopoImporter {
         log.info("Implied adjacencies from devices file: " + deviceAdjcies.size());
 
 
-        List<UrnAdjcyE> adjcies = adjcyRepo.findAll();
-        if (adjcies.isEmpty()) {
+        if (adjcyRepo.count() == 0) {
             log.info("Adjacencies DB empty. Will replace with those from files. ");
             newAdjcies.forEach(adjcyE -> {
                 adjcyRepo.save(adjcyE);
@@ -214,13 +213,13 @@ public class TopoFileImporter implements TopoImporter {
 
     private List<Device> importDevicesFromFile(String filename, boolean overwrite) throws IOException {
         File jsonFile = new File(filename);
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = jsonHelper.mapper();
         return Arrays.asList(mapper.readValue(jsonFile, Device[].class));
     }
 
     private List<UrnAdjcyE> importAdjciesFromFile(String filename, boolean overwrite) throws IOException {
         File jsonFile = new File(filename);
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = jsonHelper.mapper();
         List<UrnAdjcy> fromFile = Arrays.asList(mapper.readValue(jsonFile, UrnAdjcy[].class));
         List<UrnAdjcyE> result = new ArrayList<>();
         fromFile.forEach(t -> {
