@@ -3,6 +3,7 @@ package net.es.oscars.resv.svc;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.dto.spec.ReservedBlueprint;
 import net.es.oscars.pce.PCEException;
 import net.es.oscars.pce.TopPCE;
 import net.es.oscars.pss.PSSException;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -115,6 +117,16 @@ public class ResvService {
             }
         } else {
             log.error("Reservation Unsuccessful!");
+            c.setReserved(ReservedBlueprintE.builder()
+                    .vlanFlow(ReservedVlanFlowE.builder()
+                            .junctions(new HashSet<>())
+                            .mplsPipes(new HashSet<>())
+                            .ethPipes(new HashSet<>())
+                            .allPaths(new HashSet<>())
+                            .build())
+                    .build());
+            c.getStates().setResv(ResvState.ABORTING);
+            connRepo.save(c);
         }
 
     }

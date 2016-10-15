@@ -6,7 +6,7 @@ import net.es.oscars.dto.topo.TopoEdge;
 import net.es.oscars.dto.topo.TopoVertex;
 import net.es.oscars.dto.topo.Topology;
 import net.es.oscars.dto.topo.enums.Layer;
-import net.es.oscars.dto.topo.VertexType;
+import net.es.oscars.dto.topo.enums.VertexType;
 import org.junit.Test;
 
 import java.util.HashSet;

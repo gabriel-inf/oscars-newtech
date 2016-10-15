@@ -61,7 +61,7 @@ public class SpecPopulator {
         RequestedVlanJunctionE j = RequestedVlanJunctionE.builder()
                 .junctionType(EthJunctionType.REQUESTED)
                 .fixtures(new HashSet<>())
-                .deviceUrn(albqcr5)
+                .deviceUrn(albqcr5.getUrn())
                 .build();
 
         fl.getJunctions().add(j);
@@ -70,14 +70,14 @@ public class SpecPopulator {
                 .vlanExpression("2-100")
                 .inMbps(100)
                 .egMbps(100)
-                .portUrn(albqcr5_1_0_0)
+                .portUrn(albqcr5_1_0_0.getUrn())
                 .build();
 
         RequestedVlanFixtureE fb = RequestedVlanFixtureE.builder()
                 .vlanExpression("2-100")
                 .inMbps(100)
                 .egMbps(100)
-                .portUrn(albqcr5_2_0_0)
+                .portUrn(albqcr5_2_0_0.getUrn())
                 .build();
 
         j.getFixtures().add(fa);

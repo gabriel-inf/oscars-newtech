@@ -1,4 +1,4 @@
-package net.es.oscars.dto.topo;
+package net.es.oscars.dto.topo.enums;
 
 
 import java.util.EnumSet;

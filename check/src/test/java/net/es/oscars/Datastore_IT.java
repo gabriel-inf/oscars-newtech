@@ -33,13 +33,12 @@ public class Datastore_IT {
     @Before
     public void prepare() throws IOException {
         importer.importFromFile(true, "config/topo-basic/devices.json", "config/topo-basic/adjcies.json");
-        UrnE urn = UrnE.builder().urn("star-tb1").build();
 
         ReservedPssResourceE rr = ReservedPssResourceE.builder()
                 .beginning(Instant.ofEpochSecond(0))
                 .ending(Instant.ofEpochSecond(5000))
                 .resource(10)
-                .urn(urn)
+                .urn("star-tb1")
                 .resourceType(ResourceType.VC_ID)
                 .build();
 

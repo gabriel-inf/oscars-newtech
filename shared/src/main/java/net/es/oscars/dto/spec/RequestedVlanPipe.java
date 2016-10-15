@@ -44,5 +44,6 @@ public class RequestedVlanPipe {
     @NonNull
     private SurvivabilityType eroSurvivability;
 
-
+    @NonNull
+    private Integer numDisjoint;
 }

@@ -37,7 +37,7 @@ public class DijkstraPCE {
      * @return path as List of TopoEdge objects
      */
     public List<TopoEdge> computeShortestPathEdges(Topology topology, TopoVertex srcVertex, TopoVertex dstVertex) {
-        log.info("finding shortest path between " + srcVertex.getUrn() + " -- " + dstVertex.getUrn());
+        //log.info("finding shortest path between " + srcVertex.getUrn() + " -- " + dstVertex.getUrn());
 
         Graph<TopoVertex, TopoEdge> graph = new DirectedSparseMultigraph<>();
 
@@ -58,12 +58,12 @@ public class DijkstraPCE {
 
         List<TopoEdge> path = alg.getPath(srcVertex, dstVertex);
 
-        log.info("calculated path: ");
+        //log.info("calculated path: ");
         if (path.isEmpty()) {
-            log.error("no path found");
+            //log.error("no path found");
         }
 
-        path.stream().forEach(h -> log.info(h.getA().getUrn() + " -- " + h.getLayer() + " -- " + h.getZ().getUrn()));
+        //path.stream().forEach(h -> log.info(h.getA().getUrn() + " -- " + h.getLayer() + " -- " + h.getZ().getUrn()));
 
         return path;
     }

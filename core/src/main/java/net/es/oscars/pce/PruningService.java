@@ -9,7 +9,7 @@ import net.es.oscars.dto.topo.Topology;
 import net.es.oscars.topo.dao.UrnRepository;
 import net.es.oscars.topo.ent.UrnE;
 import net.es.oscars.dto.topo.enums.Layer;
-import net.es.oscars.dto.topo.VertexType;
+import net.es.oscars.dto.topo.enums.VertexType;
 import net.es.oscars.topo.svc.TopoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -69,10 +69,6 @@ public class PruningService {
      */
     public Topology pruneWithPipe(Topology topo, RequestedVlanPipeE pipe, ScheduleSpecificationE sched,
                                   List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList){
-        Date start = sched.getNotBefore();
-        Date end = sched.getNotAfter();
-
-
         return pruneWithPipe(topo, pipe, urnRepo.findAll(),
                 rsvBwList, rsvVlanList);
     }
@@ -89,10 +85,6 @@ public class PruningService {
      */
     public Topology pruneWithPipeAZ(Topology topo, RequestedVlanPipeE pipe, ScheduleSpecificationE sched,
                                   List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList){
-        Date start = sched.getNotBefore();
-        Date end = sched.getNotAfter();
-
-
         return pruneWithPipeAZ(topo, pipe, urnRepo.findAll(), rsvBwList, rsvVlanList);
     }
 
@@ -108,9 +100,6 @@ public class PruningService {
      */
     public Topology pruneWithPipeZA(Topology topo, RequestedVlanPipeE pipe, ScheduleSpecificationE sched,
                                     List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList){
-        Date start = sched.getNotBefore();
-        Date end = sched.getNotAfter();
-
         return pruneWithPipeZA(topo, pipe, urnRepo.findAll(), rsvBwList, rsvVlanList);
     }
 
@@ -166,7 +155,7 @@ public class PruningService {
      * @param urns - The URNs that will be used to match available resources with elements of the topology.
      * @return The topology with ineligible edges removed.
      */
-    private Topology pruneWithPipeZA(Topology topo, RequestedVlanPipeE pipe, List<UrnE> urns,
+    private Topology  pruneWithPipeZA(Topology topo, RequestedVlanPipeE pipe, List<UrnE> urns,
                                      List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList){
         Integer zaBw = pipe.getZaMbps();
         List<IntRange> vlans = new ArrayList<>();
@@ -272,7 +261,9 @@ public class PruningService {
      * @param urnBlacklist - URNs which are to be explicitly pruned out of the topology, regardless of availability.
      * @return The topology with ineligible edges removed.
      */
-    private Topology pruneTopology(Topology topo, Integer azBw, Integer zaBw, List<IntRange> vlans, List<UrnE> urns, List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList, Set<String> urnBlacklist)
+    private Topology pruneTopology(Topology topo, Integer azBw, Integer zaBw, List<IntRange> vlans,
+                                   List<UrnE> urns, List<ReservedBandwidthE> rsvBwList,
+                                   List<ReservedVlanE> rsvVlanList, Set<String> urnBlacklist)
     {
         //Build map of URN name to UrnE
         Map<String, UrnE> urnMap = buildUrnMap(urns);
@@ -326,7 +317,9 @@ public class PruningService {
      * @param rsvVlanList - A list of Reserved VLAN tags to be considered when pruning.
      * @param urnBlacklist - URNs which are to be explicitly pruned out of the topology, regardless of availability.
      */
-    private Topology pruneTopologyUni(Topology topo, Integer theBw, List<IntRange> vlans, List<UrnE> urns, List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList, Set<String> urnBlacklist)
+    private Topology pruneTopologyUni(Topology topo, Integer theBw, List<IntRange> vlans, List<UrnE> urns,
+                                      List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList,
+                                      Set<String> urnBlacklist)
     {
         //Build map of URN name to UrnE
         Map<String, UrnE> urnMap = buildUrnMap(urns);
@@ -436,13 +429,9 @@ public class PruningService {
         // Identify edges to blacklist
         for(TopoVertex badVertex : badVertices)
         {
-            for(TopoEdge oneEdge : topoEdges)
-            {
-                if(oneEdge.getA().equals(badVertex) || oneEdge.getZ().equals(badVertex))
-                {
-                    blacklistedEdges.add(oneEdge);
-                }
-            }
+            blacklistedEdges.addAll(topoEdges.stream()
+                    .filter(oneEdge -> oneEdge.getA().equals(badVertex) || oneEdge.getZ().equals(badVertex))
+                    .collect(Collectors.toList()));
         }
 
         return blacklistedEdges;

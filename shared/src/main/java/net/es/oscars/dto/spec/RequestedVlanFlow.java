@@ -19,5 +19,7 @@ public class RequestedVlanFlow {
 
     private Set<RequestedVlanPipe> pipes;
 
+    private Integer minPipes;
 
+    private Integer maxPipes;
 }

@@ -81,7 +81,7 @@ public class BandwidthAvailabilityServiceTest {
         log.info("End time: " + requestEndTime);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths, urnMap);
+        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime);
         testResponse(response, expectedMinAzBw, expectedMaxAzBw, expectedMinZaBw, expectedMaxZaBw, azGoalMap, zaGoalMap);
@@ -127,7 +127,7 @@ public class BandwidthAvailabilityServiceTest {
         log.info("End time: " + requestEndTime);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths, urnMap);
+        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime);
         testResponse(response, expectedMinAzBw, expectedMaxAzBw, expectedMinZaBw, expectedMaxZaBw, azGoalMap, zaGoalMap);
@@ -173,7 +173,7 @@ public class BandwidthAvailabilityServiceTest {
         log.info("End time: " + requestEndTime);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths, urnMap);
+        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime);
         testResponse(response, expectedMinAzBw, expectedMaxAzBw, expectedMinZaBw, expectedMaxZaBw, azGoalMap, zaGoalMap);
@@ -218,7 +218,7 @@ public class BandwidthAvailabilityServiceTest {
         zaGoalMap.put(requestEndTime, expectedMaxZaBw);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths, urnMap);
+        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime);
         testResponse(response, expectedMinAzBw, expectedMaxAzBw, expectedMinZaBw, expectedMaxZaBw, azGoalMap, zaGoalMap);
@@ -266,7 +266,7 @@ public class BandwidthAvailabilityServiceTest {
         zaGoalMap.put(requestEndTime, expectedMaxZaBw);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths, urnMap);
+        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime);
         testResponse(response, expectedMinAzBw, expectedMaxAzBw, expectedMinZaBw, expectedMaxZaBw, azGoalMap, zaGoalMap);
@@ -314,7 +314,7 @@ public class BandwidthAvailabilityServiceTest {
         log.info("End time: " + requestEndTime);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths, urnMap);
+        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime);
         testResponse(response, expectedMinAzBw, expectedMaxAzBw, expectedMinZaBw, expectedMaxZaBw, azGoalMap, zaGoalMap);
@@ -360,7 +360,7 @@ public class BandwidthAvailabilityServiceTest {
         log.info("End time: " + requestEndTime);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths, urnMap);
+        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime);
         testResponse(response, expectedMinAzBw, expectedMaxAzBw, expectedMinZaBw, expectedMaxZaBw, azGoalMap, zaGoalMap);
@@ -406,7 +406,7 @@ public class BandwidthAvailabilityServiceTest {
         log.info("End time: " + requestEndTime);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths, urnMap);
+        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime);
         testResponse(response, expectedMinAzBw, expectedMaxAzBw, expectedMinZaBw, expectedMaxZaBw, azGoalMap, zaGoalMap);
@@ -452,7 +452,7 @@ public class BandwidthAvailabilityServiceTest {
         log.info("End time: " + requestEndTime);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths, urnMap);
+        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime);
         testResponse(response, expectedMinAzBw, expectedMaxAzBw, expectedMinZaBw, expectedMaxZaBw, azGoalMap, zaGoalMap);
@@ -510,7 +510,7 @@ public class BandwidthAvailabilityServiceTest {
         log.info("End time: " + requestEndTime);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths, urnMap);
+        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime);
         testResponse(response, expectedMinAzBw, expectedMaxAzBw, expectedMinZaBw, expectedMaxZaBw, azGoalMap, zaGoalMap);
@@ -561,7 +561,7 @@ public class BandwidthAvailabilityServiceTest {
         log.info("End time: " + requestEndTime);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths, urnMap);
+        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime);
         testResponse(response, expectedMinAzBw, expectedMaxAzBw, expectedMinZaBw, expectedMaxZaBw, azGoalMap, zaGoalMap);
@@ -612,7 +612,7 @@ public class BandwidthAvailabilityServiceTest {
         log.info("End time: " + requestEndTime);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths, urnMap);
+        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime);
         testResponse(response, expectedMinAzBw, expectedMaxAzBw, expectedMinZaBw, expectedMaxZaBw, azGoalMap, zaGoalMap);
@@ -663,7 +663,7 @@ public class BandwidthAvailabilityServiceTest {
         log.info("End time: " + requestEndTime);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths, urnMap);
+        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime);
         testResponse(response, expectedMinAzBw, expectedMaxAzBw, expectedMinZaBw, expectedMaxZaBw, azGoalMap, zaGoalMap);
@@ -714,7 +714,7 @@ public class BandwidthAvailabilityServiceTest {
         log.info("End time: " + requestEndTime);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths, urnMap);
+        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime);
         testResponse(response, expectedMinAzBw, expectedMaxAzBw, expectedMinZaBw, expectedMaxZaBw, azGoalMap, zaGoalMap);
@@ -765,7 +765,7 @@ public class BandwidthAvailabilityServiceTest {
         log.info("End time: " + requestEndTime);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths, urnMap);
+        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime);
         testResponse(response, expectedMinAzBw, expectedMaxAzBw, expectedMinZaBw, expectedMaxZaBw, azGoalMap, zaGoalMap);
@@ -816,7 +816,7 @@ public class BandwidthAvailabilityServiceTest {
         log.info("End time: " + requestEndTime);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths, urnMap);
+        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime);
         testResponse(response, expectedMinAzBw, expectedMaxAzBw, expectedMinZaBw, expectedMaxZaBw, azGoalMap, zaGoalMap);
@@ -867,7 +867,7 @@ public class BandwidthAvailabilityServiceTest {
         log.info("End time: " + requestEndTime);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths, urnMap);
+        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime);
         testResponse(response, expectedMinAzBw, expectedMaxAzBw, expectedMinZaBw, expectedMaxZaBw, azGoalMap, zaGoalMap);
@@ -916,7 +916,7 @@ public class BandwidthAvailabilityServiceTest {
         log.info("End time: " + requestEndTime);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths, urnMap);
+        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime);
         testResponse(response, expectedMinAzBw, expectedMaxAzBw, expectedMinZaBw, expectedMaxZaBw, azGoalMap, zaGoalMap);
@@ -965,7 +965,7 @@ public class BandwidthAvailabilityServiceTest {
         log.info("End time: " + requestEndTime);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths, urnMap);
+        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime);
         testResponse(response, expectedMinAzBw, expectedMaxAzBw, expectedMinZaBw, expectedMaxZaBw, azGoalMap, zaGoalMap);
@@ -1008,7 +1008,7 @@ public class BandwidthAvailabilityServiceTest {
         log.info("End time: " + requestEndTime);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths, urnMap);
+        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime);
         testResponse(response, expectedMinAzBw, expectedMaxAzBw, expectedMinZaBw, expectedMaxZaBw, azGoalMap, zaGoalMap);
@@ -1058,7 +1058,7 @@ public class BandwidthAvailabilityServiceTest {
         log.info("End time: " + requestEndTime);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths, urnMap);
+        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime);
         testResponse(response, expectedMinAzBw, expectedMaxAzBw, expectedMinZaBw, expectedMaxZaBw, azGoalMap, zaGoalMap);
@@ -1112,7 +1112,7 @@ public class BandwidthAvailabilityServiceTest {
         log.info("End time: " + requestEndTime);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths, urnMap);
+        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime);
         testResponse(response, expectedMinAzBw, expectedMaxAzBw, expectedMinZaBw, expectedMaxZaBw, azGoalMap, zaGoalMap);
@@ -1162,8 +1162,7 @@ public class BandwidthAvailabilityServiceTest {
     }
 
     private void reserveBandwidth(List<String> reservedPortNames, List<Instant> reservedStartTimes,
-                                  List<Instant> reservedEndTimes, List<Integer> inBandwidths, List<Integer> egBandwidths,
-                                  Map<String, UrnE> urnMap) {
+                                  List<Instant> reservedEndTimes, List<Integer> inBandwidths, List<Integer> egBandwidths) {
         List<ReservedBandwidthE> reservedBandwidths = new ArrayList<>();
         for(Integer index = 0; index < reservedPortNames.size(); index++){
             reservedBandwidths.add(ReservedBandwidthE.builder()

@@ -1,6 +1,7 @@
 package net.es.oscars.dto.spec;
 
 import lombok.*;
+import net.es.oscars.dto.topo.BidirectionalPath;
 
 import java.util.Set;
 
@@ -18,5 +19,5 @@ public class ReservedVlanFlow {
 
     private Set<ReservedMplsPipe> mplsPipes;
 
-
+    private Set<BidirectionalPath> allPaths;
 }

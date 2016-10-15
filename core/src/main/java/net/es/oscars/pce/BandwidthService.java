@@ -9,7 +9,7 @@ import net.es.oscars.dto.topo.TopoVertex;
 import net.es.oscars.topo.dao.UrnRepository;
 import net.es.oscars.topo.ent.ReservableBandwidthE;
 import net.es.oscars.topo.ent.UrnE;
-import net.es.oscars.dto.topo.VertexType;
+import net.es.oscars.dto.topo.enums.VertexType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
@@ -452,7 +452,7 @@ public class BandwidthService {
     public boolean evaluateBandwidthSharedURN(String urn, Map<String, Map<String, Integer>> availBwMap, Integer inMbpsAZ, Integer egMbpsAZ, Integer inMbpsZA, Integer egMbpsZA) {
         Map<String, Integer> bwAvail = availBwMap.get(urn);
         if ((bwAvail.get("Ingress") < (inMbpsAZ + inMbpsZA)) || (bwAvail.get("Egress") < (egMbpsAZ + egMbpsZA))) {
-            log.error("Insufficient Bandwidth at " + urn.toString() + ". Requested: " + (inMbpsAZ + inMbpsZA) + " In and " + (egMbpsAZ + egMbpsZA) + " Out. Available: " + bwAvail.get("Ingress") + " In and " + bwAvail.get("Egress") + " Out.");
+            log.error("Insufficient Bandwidth at " + urn + ". Requested: " + (inMbpsAZ + inMbpsZA) + " In and " + (egMbpsAZ + egMbpsZA) + " Out. Available: " + bwAvail.get("Ingress") + " In and " + bwAvail.get("Egress") + " Out.");
             return false;
         }
         return true;
@@ -534,21 +534,19 @@ public class BandwidthService {
     public boolean evaluateBandwidthEdge(TopoEdge edge, Integer azBw, Integer zaBw, Map<String, UrnE> urnMap,
                                          Map<String, Map<String, Integer>> availBwMap) {
 
-        UrnE aUrn = urnMap.get(edge.getA().getUrn());
-        UrnE zUrn = urnMap.get(edge.getZ().getUrn());
         // At least one of the two has reservable bandwidth, so check the valid nodes to determine
         // If they have sufficient bandwidth. In the case of a (device, port) edge, only the port must be checked.
         // If it is a (port, port) edge, then both must be checked.
         boolean aPasses = true;
         boolean zPasses = true;
-        if (availBwMap.containsKey(aUrn)) {
+        if (availBwMap.containsKey(edge.getA().getUrn())) {
             // Get a map of the available Ingress/Egress bandwidth for URN a
-            Map<String, Integer> aAvailBwMap = availBwMap.get(aUrn);
+            Map<String, Integer> aAvailBwMap = availBwMap.get(edge.getA().getUrn());
             aPasses = aAvailBwMap.get("Egress") >= azBw && aAvailBwMap.get("Ingress") >= zaBw;
         }
-        if (availBwMap.containsKey(zUrn)) {
+        if (availBwMap.containsKey(edge.getA().getUrn())) {
             // Get a map of the available Ingress/Egress bandwidth for URN z
-            Map<String, Integer> zAvailBwMap = availBwMap.get(zUrn);
+            Map<String, Integer> zAvailBwMap = availBwMap.get(edge.getA().getUrn());
             zPasses = zAvailBwMap.get("Ingress") >= azBw && zAvailBwMap.get("Egress") >= zaBw;
         }
 
@@ -574,21 +572,19 @@ public class BandwidthService {
         if (!edge.getA().getVertexType().equals(VertexType.PORT) || !edge.getZ().getVertexType().equals(VertexType.PORT))
             return true;
 
-        UrnE aUrn = urnMap.get(edge.getA().getUrn());
-        UrnE zUrn = urnMap.get(edge.getZ().getUrn());
         // At least one of the two has reservable bandwidth, so check the valid nodes to determine
         // If they have sufficient bandwidth. In the case of a (device, port) edge, only the port must be checked.
         // If it is a (port, port) edge, then both must be checked.
         boolean aPasses = true;
         boolean zPasses = true;
-        if (availBwMap.containsKey(aUrn)) {
+        if (availBwMap.containsKey(edge.getA().getUrn())) {
             // Get a map of the available Ingress/Egress bandwidth for URN a
-            Map<String, Integer> aAvailBwMap = availBwMap.get(aUrn);
+            Map<String, Integer> aAvailBwMap = availBwMap.get(edge.getA().getUrn());
             aPasses = aAvailBwMap.get("Egress") >= theBw;
         }
-        if (availBwMap.containsKey(zUrn)) {
+        if (availBwMap.containsKey(edge.getZ().getUrn())) {
             // Get a map of the available Ingress/Egress bandwidth for URN z
-            Map<String, Integer> zAvailBwMap = availBwMap.get(zUrn);
+            Map<String, Integer> zAvailBwMap = availBwMap.get(edge.getZ().getUrn());
             zPasses = zAvailBwMap.get("Ingress") >= theBw;
         }
 

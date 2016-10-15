@@ -12,7 +12,7 @@ import net.es.oscars.dto.topo.Topology;
 import net.es.oscars.topo.dao.UrnRepository;
 import net.es.oscars.topo.ent.UrnE;
 import net.es.oscars.dto.topo.enums.Layer;
-import net.es.oscars.dto.topo.VertexType;
+import net.es.oscars.dto.topo.enums.VertexType;
 import net.es.oscars.topo.svc.TopoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
