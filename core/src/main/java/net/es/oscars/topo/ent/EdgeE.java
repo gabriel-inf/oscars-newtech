@@ -18,9 +18,9 @@ public class EdgeE {
     private Long id;
 
     @NonNull
-    String a;
+    String from;
 
     @NonNull
-    String z;
+    String to;
 
 }

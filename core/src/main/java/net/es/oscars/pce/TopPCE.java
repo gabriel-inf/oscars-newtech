@@ -384,7 +384,7 @@ public class TopPCE {
     private List<EdgeE> convertTopoEdgePathToEdges(List<TopoEdge> topoEdges) {
         return topoEdges
                 .stream()
-                .map(e -> EdgeE.builder().a(e.getA().getUrn()).z(e.getZ().getUrn()).build())
+                .map(e -> EdgeE.builder().from(e.getA().getUrn()).to(e.getZ().getUrn()).build())
                 .collect(Collectors.toList());
     }
 

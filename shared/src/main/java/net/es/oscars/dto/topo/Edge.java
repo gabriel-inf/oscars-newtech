@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Edge {
 
-    String a;
+    String from;
 
-    String z;
+    String to;
 }
