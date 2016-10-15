@@ -116,13 +116,14 @@ public class BandwidthAvailabilityService {
         }
 
 
+        Set<String> urnStrings = urns.stream().map(UrnE::getUrn).collect(Collectors.toSet());
         // Retrieve the reserved bandwidths that overlap with the given start and end time
         Optional<List<ReservedBandwidthE>> optRsvList = bwRepo.findOverlappingInterval(
                 request.getStartDate().toInstant(), request.getEndDate().toInstant());
         if (optRsvList.isPresent())
             rsvList.addAll(optRsvList.get());
         // Filter out the reservations that do not involve this request's URNs
-        rsvList = rsvList.stream().filter(rsv -> urns.contains(rsv.getUrn())).collect(Collectors.toList());
+        rsvList = rsvList.stream().filter(rsv -> urnStrings.contains(rsv.getUrn())).collect(Collectors.toList());
         // Build a map from those reservations
         rsvMap = bwService.buildReservedBandwidthMap(rsvList);
 
@@ -396,9 +397,9 @@ public class BandwidthAvailabilityService {
                 urnTables.get(AZ).putIfAbsent(urn.getUrn(), new ArrayList<>());
 
                 if (isIngress)
-                    urnTables.get(AZ).get(urn).add(INGRESS);
+                    urnTables.get(AZ).get(urn.getUrn()).add(INGRESS);
                 else
-                    urnTables.get(AZ).get(urn).add(EGRESS);
+                    urnTables.get(AZ).get(urn.getUrn()).add(EGRESS);
 
                 // Alternate ingress/egress.
                 isIngress = Boolean.logicalXor(isIngress, true);
