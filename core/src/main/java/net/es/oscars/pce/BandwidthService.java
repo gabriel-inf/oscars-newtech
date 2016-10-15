@@ -582,9 +582,9 @@ public class BandwidthService {
             Map<String, Integer> aAvailBwMap = availBwMap.get(edge.getA().getUrn());
             aPasses = aAvailBwMap.get("Egress") >= theBw;
         }
-        if (availBwMap.containsKey(edge.getA().getUrn())) {
+        if (availBwMap.containsKey(edge.getZ().getUrn())) {
             // Get a map of the available Ingress/Egress bandwidth for URN z
-            Map<String, Integer> zAvailBwMap = availBwMap.get(edge.getA().getUrn());
+            Map<String, Integer> zAvailBwMap = availBwMap.get(edge.getZ().getUrn());
             zPasses = zAvailBwMap.get("Ingress") >= theBw;
         }
 
