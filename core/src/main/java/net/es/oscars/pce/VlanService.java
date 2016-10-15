@@ -100,12 +100,12 @@ public class VlanService {
         // Get map of all reserved VLAN IDs per URN
         Map<String, Set<Integer>> reservedVlanIdMap = buildReservedVlanIdMap(urnMap, reservedVlans);
         String stringifyVlanMap = stringifyVlanMap(reservedVlanIdMap);
-        log.info("Reserved VLAN ID Map: " + stringifyVlanMap);
+        //log.info("Reserved VLAN ID Map: " + stringifyVlanMap);
 
         // Get map of all reservable VLAN IDs per URN
         Map<String, Set<Integer>> reservableVlanIdMap = buildReservableVlanIdMap(urnMap);
         stringifyVlanMap = stringifyVlanMap(reservableVlanIdMap);
-        log.info("Reservable VLAN ID Map: " + stringifyVlanMap);
+        //log.info("Reservable VLAN ID Map: " + stringifyVlanMap);
 
         if (urnMap == null) {
             log.error("null URN map!");
@@ -142,7 +142,7 @@ public class VlanService {
                 });
 
         stringifyVlanMap = stringifyVlanMap(availableVlanIdMap);
-        log.info("Available VLAN ID Map: " + stringifyVlanMap);
+        //log.info("Available VLAN ID Map: " + stringifyVlanMap);
 
         return availableVlanIdMap;
     }
@@ -528,11 +528,11 @@ public class VlanService {
 
         // Get the requested VLANs per Fixture URN & Any Ports at Individual URNs
         Map<String, Set<Integer>> requestedVlanMap = buildRequestedVlanIdMap(reqPipe, availableVlanMap);
-        log.info("Requested Vlan Map: " + stringifyVlanMap(requestedVlanMap));
+        //log.info("Requested Vlan Map: " + stringifyVlanMap(requestedVlanMap));
 
         // Get the "valid" VLANs per Fixture URN
         Map<String, Set<Integer>> validVlanMap = buildValidVlanIdMap(requestedVlanMap, availableVlanMap);
-        log.info("Valid Vlan Map: " + stringifyVlanMap(validVlanMap));
+        //log.info("Valid Vlan Map: " + stringifyVlanMap(validVlanMap));
         // Create a map of URNs to chosen VLAN IDs
         return selectVlansForPath(azERO, zaERO, urnMap, availableVlanMap, validVlanMap, deviceToPortMap, portToDeviceMap, reqPipe);
 

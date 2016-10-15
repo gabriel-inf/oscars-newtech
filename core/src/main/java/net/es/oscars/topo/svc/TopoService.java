@@ -54,7 +54,7 @@ public class TopoService {
 
     public Topology layer(Layer layer) throws NoSuchElementException {
 
-        log.info("topology for layer " + layer);
+        //log.info("topology for layer " + layer);
         Topology topo = new Topology();
         topo.setLayer(layer);
         List<UrnE> urns = urnRepo.findAll();

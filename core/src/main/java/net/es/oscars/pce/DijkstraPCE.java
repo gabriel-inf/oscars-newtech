@@ -58,12 +58,12 @@ public class DijkstraPCE {
 
         List<TopoEdge> path = alg.getPath(srcVertex, dstVertex);
 
-        log.info("calculated path: ");
+        //log.info("calculated path: ");
         if (path.isEmpty()) {
             log.error("no path found");
         }
 
-        path.stream().forEach(h -> log.info(h.getA().getUrn() + " -- " + h.getLayer() + " -- " + h.getZ().getUrn()));
+        //path.stream().forEach(h -> log.info(h.getA().getUrn() + " -- " + h.getLayer() + " -- " + h.getZ().getUrn()));
 
         return path;
     }
