@@ -373,7 +373,7 @@ public class TopPCE {
 
         Set<String> junctionsWithNoFixtures = allJunctions.stream().
                 filter(t -> t.getFixtures().isEmpty()).
-                map(t -> t.getDeviceUrn()).collect(Collectors.toSet());
+                map(RequestedVlanJunctionE::getDeviceUrn).collect(Collectors.toSet());
 
         if (!junctionsWithNoFixtures.isEmpty()) {
             throw new PCEException("Junctions with no fixtures found: " + String.join(" ", junctionsWithNoFixtures));

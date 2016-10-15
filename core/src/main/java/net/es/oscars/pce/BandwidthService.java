@@ -452,7 +452,7 @@ public class BandwidthService {
     public boolean evaluateBandwidthSharedURN(String urn, Map<String, Map<String, Integer>> availBwMap, Integer inMbpsAZ, Integer egMbpsAZ, Integer inMbpsZA, Integer egMbpsZA) {
         Map<String, Integer> bwAvail = availBwMap.get(urn);
         if ((bwAvail.get("Ingress") < (inMbpsAZ + inMbpsZA)) || (bwAvail.get("Egress") < (egMbpsAZ + egMbpsZA))) {
-            log.error("Insufficient Bandwidth at " + urn.toString() + ". Requested: " + (inMbpsAZ + inMbpsZA) + " In and " + (egMbpsAZ + egMbpsZA) + " Out. Available: " + bwAvail.get("Ingress") + " In and " + bwAvail.get("Egress") + " Out.");
+            log.error("Insufficient Bandwidth at " + urn + ". Requested: " + (inMbpsAZ + inMbpsZA) + " In and " + (egMbpsAZ + egMbpsZA) + " Out. Available: " + bwAvail.get("Ingress") + " In and " + bwAvail.get("Egress") + " Out.");
             return false;
         }
         return true;
