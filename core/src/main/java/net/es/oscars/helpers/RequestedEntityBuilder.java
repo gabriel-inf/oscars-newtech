@@ -23,13 +23,6 @@ public class RequestedEntityBuilder {
     UrnRepository urnRepo;
     public RequestedBlueprintE buildRequest(String deviceName, List<String> fixtureNames,
                                             Integer azMbps, Integer zaMbps, String vlanExp){
-        log.info("Building RequestedBlueprintE");
-        log.info("Device: " + deviceName);
-        fixtureNames.forEach(f -> log.info("Fixture: " + f));
-        log.info("A-Z Mbps: " + azMbps);
-        log.info("Z-A Mbps: " + zaMbps);
-        log.info("VLAN Expression: " + vlanExp);
-
         Set<RequestedVlanJunctionE> junctions = new HashSet<>();
         RequestedVlanJunctionE junction = buildRequestedJunction(deviceName, fixtureNames, azMbps, zaMbps, vlanExp, true);
         junctions.add(junction);
@@ -41,8 +34,6 @@ public class RequestedEntityBuilder {
                                             Integer azMbps, Integer zaMbps, PalindromicType palindromic,
                                             SurvivabilityType survivable, String vlanExp, Integer numDisjoint,
                                             Integer minPipes, Integer maxPipes){
-        log.info("Building RequestedBlueprintE");
-
 
         Set<RequestedVlanPipeE> pipes = new HashSet<>();
         RequestedVlanPipeE pipe = buildRequestedPipe(aPort, aDevice, zPort, zDevice, azMbps, zaMbps, palindromic,
@@ -57,8 +48,6 @@ public class RequestedEntityBuilder {
                                             Integer azMbps, Integer zaMbps, PalindromicType palindromic,
                                             SurvivabilityType survivable, String vlanExp, Set<String> blacklist,
                                             Integer numDisjoint, Integer minPipes, Integer maxPipes){
-        log.info("Building RequestedBlueprintE");
-
 
         Set<RequestedVlanPipeE> pipes = new HashSet<>();
         RequestedVlanPipeE pipe = buildRequestedPipe(aPort, aDevice, zPort, zDevice, azMbps, zaMbps, palindromic,
@@ -73,8 +62,6 @@ public class RequestedEntityBuilder {
                                             Integer azMbps, Integer zaMbps, PalindromicType palindromic,
                                             SurvivabilityType survivable, String aVlanExp, String zVlanExp,
                                             Integer numDisjoint, Integer minPipes, Integer maxPipes){
-        log.info("Building RequestedBlueprintE");
-
 
         Set<RequestedVlanPipeE> pipes = new HashSet<>();
         RequestedVlanPipeE pipe = buildRequestedPipe(aPort, aDevice, zPort, zDevice, azMbps, zaMbps, palindromic,
@@ -89,8 +76,6 @@ public class RequestedEntityBuilder {
                                             Integer azMbps, Integer zaMbps, PalindromicType palindromic,
                                             SurvivabilityType survivable, String vlanExp, Integer numDisjoint,
                                             Integer minPipes, Integer maxPipes){
-        log.info("Building RequestedBlueprintE");
-
 
         Set<RequestedVlanPipeE> pipes = new HashSet<>();
         RequestedVlanPipeE pipe = buildRequestedPipe(aPorts, aDevice, zPorts, zDevice, azMbps, zaMbps, palindromic,
@@ -174,7 +159,6 @@ public class RequestedEntityBuilder {
     }
 
     public ScheduleSpecificationE buildSchedule(Date start, Date end){
-        log.info("Populating request schedule");
 
         return ScheduleSpecificationE.builder()
                 .notBefore(start)
@@ -280,8 +264,6 @@ public class RequestedEntityBuilder {
 
     public RequestedVlanJunctionE buildRequestedJunction(String deviceName, List<String> fixtureNames,
                                                          Integer azMbps, Integer zaMbps, String vlanExp, boolean startJunc){
-        log.info("Building requested junction");
-
 
         Set<RequestedVlanFixtureE> fixtures = new HashSet<>();
 
@@ -305,9 +287,6 @@ public class RequestedEntityBuilder {
 
     public RequestedVlanFixtureE buildRequestedFixture(String fixName, Integer azMbps, Integer zaMbps,
                                                        String vlanExp){
-        log.info("Building requested fixture");
-
-
         return RequestedVlanFixtureE.builder()
                 .portUrn(fixName)
                 .fixtureType(EthFixtureType.REQUESTED)
