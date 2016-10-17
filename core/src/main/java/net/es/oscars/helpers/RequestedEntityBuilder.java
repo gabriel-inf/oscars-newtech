@@ -329,12 +329,11 @@ public class RequestedEntityBuilder {
                 .scheduleSpec(schedule)
                 .build();
 
-        ConnectionE theConnection = ConnectionE.builder()
+        return ConnectionE.builder()
                 .connectionId(connectionID)
                 .specification(requestSpec)
                 .states(new StatesE())
                 .build();
 
-        return theConnection;
     }
 }
