@@ -158,7 +158,6 @@ public class TranslationPCE {
 
         Map<String, Set<Integer>> chosenVlanMap
                 = vlanService.selectVlansForPipe(reqPipe, urnMap, reservedVlans, azERO, zaERO, deviceToPortMap, portToDeviceMap);
-        log.info("Chosen VLAN Map: " + chosenVlanMap);
         for (String urn : chosenVlanMap.keySet()) {
             UrnE topoUrn = urnMap.get(urn);
             if (chosenVlanMap.get(urn).isEmpty() && topoUrn.getReservableVlans() != null) {
@@ -197,7 +196,6 @@ public class TranslationPCE {
 
         Map<String, Set<Integer>> chosenVlanMap = vlanService.selectVlansForPipe(reqPipe, urnMap, reservedVlans,
                 combinedAzERO, combinedZaERO, deviceToPortMap, portToDeviceMap);
-        log.info("Chosen VLAN Map: " + chosenVlanMap);
         for (String urn : chosenVlanMap.keySet()) {
             UrnE topoUrn = urnMap.get(urn);
             if (chosenVlanMap.get(urn).isEmpty() && topoUrn.getReservableVlans() != null) {
@@ -235,7 +233,6 @@ public class TranslationPCE {
         // Get map of "Ingress" and "Egress" bandwidth availability
         Map<String, Map<String, Integer>> availBwMap;
         availBwMap = bwService.buildBandwidthAvailabilityMap(reservedBandwidths);
-        log.info("Available bandwidth: " + availBwMap.toString());
 
         // Returns a mapping from topovertices (ports) to an "Ingress"/"Egress" map of the total Ingress/Egress
         // Requested bandwidth at that port across both the azERO and the zaERO

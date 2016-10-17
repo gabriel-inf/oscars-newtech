@@ -127,8 +127,6 @@ public class TopPCE {
         // Add paths for each simple junction
         addJunctionPaths(allPaths, reservedJunctions);
 
-        log.info("All paths: " + allPaths.stream().map(p -> "AZ:" +p.getAzPath() + ", ZA: " + p.getZaPath()).collect(Collectors.toList()));
-
         // Make the reserved flow
         ReservedVlanFlowE res_f = ReservedVlanFlowE.builder()
                 .junctions(reservedJunctions)

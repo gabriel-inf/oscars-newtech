@@ -176,8 +176,6 @@ public class SurvivabilityPCE
         {
             List<TopoEdge> azERO = azPathPairCalculated.get(p);
             List<TopoEdge> zaERO = zaPathPairCalculated.get(p);
-            log.info("AZ: " + azERO.stream().map(e -> "(" + e.getA().getUrn() + ", " + e.getZ().getUrn() + ")").collect(Collectors.toList()).toString());
-            log.info("ZA: " + zaERO.stream().map(e -> "(" + e.getA().getUrn() + ", " + e.getZ().getUrn() + ")").collect(Collectors.toList()).toString());
             assert(azERO.size() == zaERO.size());
         }
 
@@ -186,13 +184,11 @@ public class SurvivabilityPCE
         for(List<TopoEdge> azPath : azPathPairCalculated){
             numPathsSoFar += 1;
             theMap.put("az" + numPathsSoFar, azPath);
-            log.info("AZ Path " + numPathsSoFar + ": " + azPath.toString());
         }
         numPathsSoFar = 0;
         for(List<TopoEdge> zaPath : zaPathPairCalculated){
             numPathsSoFar += 1;
             theMap.put("za" + numPathsSoFar, zaPath);
-            log.info("ZA Path " + numPathsSoFar + ": " + zaPath.toString());
         }
         return theMap;
     }
@@ -345,9 +341,6 @@ public class SurvivabilityPCE
             theMap.put("az", azServiceLayerERO);
             theMap.put("za", zaServiceLayerERO);
 
-            log.info("AZ ERO: " + azServiceLayerERO.toString());
-            log.info("ZA ERO: " + zaServiceLayerERO.toString());
-
             return theMap;
         }
 
@@ -395,11 +388,6 @@ public class SurvivabilityPCE
         theMap.put("za1", zaEROPrimary);
         theMap.put("az2", azEROSecondary);
         theMap.put("za2", zaEROSecondary);
-
-        log.info("AZ Primary: " + azEROPrimary.toString());
-        log.info("ZA Primary: " + zaEROPrimary.toString());
-        log.info("AZ Secondary: " + azEROSecondary.toString());
-        log.info("ZA Secondary: " + zaEROSecondary.toString());
 
         return theMap;
     }

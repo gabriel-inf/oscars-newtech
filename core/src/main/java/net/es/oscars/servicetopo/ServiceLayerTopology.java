@@ -69,11 +69,9 @@ public class ServiceLayerTopology
         mplsLayerPorts = new HashSet<>();
         mplsLayerLinks = new HashSet<>();
 
-        log.info("decomposing topology into Service-Layer and MPLS-Layer.");
         buildServiceLayerTopo();
         buildMplsLayerTopo();
 
-        log.info("building logical edges for Service-Layer topology.");
         buildLogicalLayerTopo();
     }
 
@@ -219,8 +217,6 @@ public class ServiceLayerTopology
                 logicalLinks.add(zaLogicalEdge);
             }
         }
-
-        log.info("logical edges added to Service-Layer Topology.");
 
         // Create a backup of all topology-based Logical Links (excludes links created for a specific request).
         llBackup = new HashSet<>();
