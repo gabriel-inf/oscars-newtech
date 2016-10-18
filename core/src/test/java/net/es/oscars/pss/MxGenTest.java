@@ -2,6 +2,7 @@ package net.es.oscars.pss;
 
 import freemarker.template.TemplateException;
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.CoreUnitTestConfiguration;
 import net.es.oscars.pss.cmd.AluGenerationParams;
 import net.es.oscars.pss.cmd.MxGenerationParams;
 import net.es.oscars.pss.dao.TemplateRepository;
@@ -21,7 +22,7 @@ import java.util.Map;
 
 @Slf4j
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(PssUnitTestConfiguration.class)
+@SpringApplicationConfiguration(CoreUnitTestConfiguration.class)
 public class MxGenTest {
     @Autowired
     private Stringifier stringifier;

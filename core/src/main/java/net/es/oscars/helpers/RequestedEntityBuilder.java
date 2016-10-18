@@ -267,7 +267,7 @@ public class RequestedEntityBuilder {
 
         Set<RequestedVlanFixtureE> fixtures = new HashSet<>();
 
-        assert(fixtureNames.size() >= 1);
+        // assert(fixtureNames.size() >= 1);
 
         for(String fixName : fixtureNames){
             RequestedVlanFixtureE fix;

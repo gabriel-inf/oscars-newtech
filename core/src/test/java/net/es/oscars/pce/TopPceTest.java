@@ -1496,7 +1496,110 @@ public class TopPceTest
 
         log.info("test 'multiFixtureTest' passed.");
     }
+/*
+    @Test
+    public void emptyFixtureSetTest()
+    {
+        log.info("Initializing test: 'emptyFixtureSetTest'.");
 
+        RequestedBlueprintE requestedBlueprint;
+        Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
+        ScheduleSpecificationE requestedSched;
+
+        Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
+        Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
+
+        List<String> srcPorts = Arrays.asList("portA", "portB", "portC");
+        List<String> dstPorts = new ArrayList<>();
+        String srcDevice = "nodeK";
+        String dstDevice = "nodeL";
+        Integer azBW = 25;
+        Integer zaBW = 25;
+        PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
+        String vlan = "any";
+
+        topologyBuilder.buildTopo7MultiFix();
+        requestedSched = testBuilder.buildSchedule(startDate, endDate);
+        requestedBlueprint = testBuilder.buildRequest(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome,
+                survivability, vlan, 1, 1, 1);
+
+        log.info("Beginning test: 'emptyFixtureSetTest'.");
+
+        try
+        {
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
+        }
+        catch(PCEException | PSSException pceE)
+        {
+            log.error("", pceE);
+        }
+
+        assert (reservedBlueprint.isPresent());
+
+        ReservedVlanFlowE reservedFlow = reservedBlueprint.get().getVlanFlow();
+
+        Set<ReservedEthPipeE> allResEthPipes = reservedFlow.getEthPipes();
+        Set<ReservedMplsPipeE> allResMplsPipes = reservedFlow.getMplsPipes();
+        Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
+
+        assert (allResJunctions.size() == 0);
+        assert (allResEthPipes.size() == 1);
+        assert (allResMplsPipes.size() == 0);
+
+        // Ethernet Pipes
+        for(ReservedEthPipeE ethPipe : allResEthPipes)
+        {
+            ReservedVlanJunctionE aJunc = ethPipe.getAJunction();
+            ReservedVlanJunctionE zJunc = ethPipe.getZJunction();
+            Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
+            Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
+            List<String> azERO = ethPipe.getAzERO();
+            List<String> zaERO = ethPipe.getZaERO();
+            String actualAzERO = aJunc.getDeviceUrn() + "-";
+            String actualZaERO = zJunc.getDeviceUrn() + "-";
+
+            for(String x : azERO)
+            {
+                actualAzERO = actualAzERO + x + "-";
+            }
+
+            for(String x : zaERO)
+            {
+                actualZaERO = actualZaERO + x + "-";
+            }
+
+            actualAzERO = actualAzERO + zJunc.getDeviceUrn();
+            actualZaERO = actualZaERO + aJunc.getDeviceUrn();
+            String expectedAzERO = "nodeK-nodeK:1-nodeL:1-nodeL";
+            String expectedZaERO = "nodeL-nodeL:1-nodeK:1-nodeK";
+
+            assert (aJunc.getDeviceUrn().equals("nodeK"));
+            assert (zJunc.getDeviceUrn().equals("nodeL"));
+            assert (aFixes.size() == 3);
+            assert (zFixes.size() == 0);
+
+
+            assert (aFixes
+                    .stream()
+                    .filter(f -> f.getIfceUrn().equals("portA")
+                            || f.getIfceUrn().equals("portB")
+                            || f.getIfceUrn().equals("portC"))
+                    .filter(f -> f.getReservedBandwidth().getInBandwidth().equals(azBW))
+                    .filter(f -> f.getReservedBandwidth().getEgBandwidth().equals(zaBW))
+                    .count() == 3);
+
+            assert (zFixes
+                    .stream()
+                    .count() == 0);
+
+            assert (actualAzERO.equals(expectedAzERO));
+            assert (actualZaERO.equals(expectedZaERO));
+        }
+
+        log.info("test 'emptyFixtureSetTest' passed.");
+    }
+    */
     @Test
     public void multiMplsPipeTest()
     {

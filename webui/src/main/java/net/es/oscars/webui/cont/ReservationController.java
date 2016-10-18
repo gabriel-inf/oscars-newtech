@@ -97,6 +97,20 @@ public class ReservationController {
     }
 
 
+    @RequestMapping(value = "/resv/commands/{connectionId}/{deviceUrn}", method = RequestMethod.GET)
+    @ResponseBody
+    public Map<String, String> commands(@PathVariable("connectionId") String connectionId,
+                                        @PathVariable("deviceUrn") String deviceUrn) {
+        log.info("getting commands for " + connectionId + " " + deviceUrn);
+        String restPath = "https://localhost:8000/pss/commands/" + connectionId + "/" + deviceUrn;
+        log.info("rest :" + restPath);
+
+        Map<String, String> commands = restTemplate.getForObject(restPath, Map.class);
+
+        return commands;
+    }
+
+
     @RequestMapping(value = "/resv/minimal_hold", method = RequestMethod.POST)
     @ResponseBody
     public Map<String, String> resv_minimal_hold(@RequestBody MinimalRequest request) {

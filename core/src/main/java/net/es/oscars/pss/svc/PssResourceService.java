@@ -8,6 +8,9 @@ import net.es.oscars.dto.spec.ReservedBlueprint;
 import net.es.oscars.dto.spec.ReservedVlanFlow;
 import net.es.oscars.dto.spec.ReservedVlanJunction;
 import net.es.oscars.dto.topo.enums.DeviceModel;
+import net.es.oscars.pce.TopPCE;
+import net.es.oscars.pss.tpl.Assembler;
+import net.es.oscars.pss.tpl.Stringifier;
 import net.es.oscars.resv.dao.ConnectionRepository;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.st.prov.ProvState;
@@ -32,18 +35,12 @@ public class PssResourceService {
     @Autowired
     private ConnectionRepository connRepo;
 
+    @Autowired
+    private RouterCommandGenerator rcg;
+
     public void generateConfig(ConnectionE conn) {
-        log.info("generating config");
-        conn.getStates().setProv(ProvState.GENERATING);
-        connRepo.save(conn);
-
-
-
-        conn.getStates().setProv(ProvState.DISMANTLED_AUTO);
-        connRepo.save(conn);
-        log.info(" done generating config");
+        rcg.generateConfig(conn);
     }
-
 
     public void reserve(ConnectionE conn) {
         log.info("starting PSS resource reservation");
@@ -74,7 +71,9 @@ public class PssResourceService {
 
     private void reservePssJunction(Set<ReservedVlanJunctionE> rvjs,
                                     Instant beginning, Instant ending) {
-
+        if (rvjs == null) {
+            return;
+        }
         for (ReservedVlanJunctionE rvj : rvjs) {
             UrnE device = topoService.device(rvj.getDeviceUrn());
             Set<ReservedPssResourceE> junctionResources = new HashSet<>();
