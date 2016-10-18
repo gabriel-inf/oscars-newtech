@@ -5,6 +5,7 @@ import net.es.oscars.pce.PCEException;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.svc.ResvService;
 import net.es.oscars.st.resv.ResvState;
+import net.es.oscars.tasks.prop.ProcessingProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -15,6 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 public class ResvProcessor {
     private ResvService resvService;
+
+    @Autowired
+    private ProcessingProperties processingProperties;
 
 
     @Autowired
@@ -35,9 +39,9 @@ public class ResvProcessor {
         );
 
         // time out expired HELD reservations
-        Integer timeoutMs = 30000;
+        Integer timeoutMs = processingProperties.getTimeoutHeldAfter() * 1000;
         resvService.ofHeldTimeout(timeoutMs).forEach(c -> {
-                    log.info("reservation " + c.getConnectionId() + " timing out from HELD");
+                    log.info("reservation " + c.getConnectionId() + " timing out from HELD after "+ timeoutMs + "ms");
                     resvService.timeout(c);
                 }
         );

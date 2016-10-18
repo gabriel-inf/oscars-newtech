@@ -8,12 +8,17 @@ var add_junction_btn;
 var pipe_card;
 var junction_card;
 
+
 var resv_viz_name = "reservation_viz";
 
 var reservation_request = {
+    "connectionId": "",
     "junctions": {},
     "pipes": {}
 };
+
+var resv_commit_btn;
+var resv_hold_btn;
 
 function loadJSON(url, callback) {
 
@@ -30,8 +35,14 @@ function loadJSON(url, callback) {
     xobj.send(null);
 }
 
-function add_to_reservation(viz, name) {
+var doNothing = function (e) {
+    console.log("doing nothing");
+    e.preventDefault();
+    return false;
+};
 
+function add_to_reservation(viz, name) {
+    console.log("adding to reservation");
     var last_added_node = null;
     var ds = viz.datasource;
     var prev_len = ds.nodes.length;
@@ -170,6 +181,8 @@ function attach_handlers(vis_js_network, vis_js_datasets, name) {
 function trigger_form_changes(is_resv, selected_an_edge, selected_a_node, is_selected_node_plain, nodeId, edgeId) {
     if (is_resv) {
         add_junction_btn.addClass("disabled").removeClass("active");
+        add_junction_btn.off();
+        add_junction_btn.on('click', doNothing);
 
         if (selected_an_edge) {
             show_pipe_card(edgeId);
@@ -184,8 +197,16 @@ function trigger_form_changes(is_resv, selected_an_edge, selected_a_node, is_sel
     } else {
         if (is_selected_node_plain) {
             add_junction_btn.removeClass("disabled").addClass("active");
+            add_junction_btn.off();
+            add_junction_btn.on('click', function (e) {
+                e.preventDefault();
+                add_to_reservation(reservation_viz, resv_viz_name);
+            });
+
         } else {
             add_junction_btn.addClass("disabled").removeClass("active");
+            add_junction_btn.off();
+            add_junction_btn.on('click', doNothing);
         }
     }
 }
@@ -259,6 +280,36 @@ function show_junction_card(nodeId) {
     });
 }
 
+function review_ready() {
+    console.log("reviewing if ready to hold..");
+    var junctions = reservation_request["junctions"];
+    var totalFixtures = 0;
+    for (var nodeId in junctions) {
+        for (var fixture in junctions[nodeId]["fixtures"]) {
+            totalFixtures += 1;
+        }
+    }
+
+    var description = $('#description').val();
+    if (!description) {
+        console.log("not ready, no description");
+    } else {
+
+        if (totalFixtures >= 2) {
+            console.log("at least two fixtures used, ready to hold!");
+            resv_hold_btn.addClass("active").removeClass("disabled");
+            resv_hold_btn.off();
+            resv_hold_btn.on('click', resv_hold);
+        } else {
+            console.log("not ready to hold.");
+            resv_hold_btn.addClass("disabled").removeClass("active");
+            resv_hold_btn.off();
+            resv_hold_btn.on('click', doNothing);
+        }
+    }
+    console.log("updated button links");
+}
+
 function populate_junction(nodeId, fixtures) {
     var junctions = reservation_request["junctions"];
     if (!(nodeId in junctions)) {
@@ -294,13 +345,63 @@ function update_junction(nodeId, fixtures) {
             }
         }
     }
-
+    review_ready();
     console.log(reservation_request);
 }
 
+var resv_hold = function (e) {
+    e.preventDefault();
 
-$(document).ready(function () {
+    console.log("holding a reservation");
+    reservation_request["description"] = $('#description').val();
 
+    var start_dtstring = $('#start_at').val();
+    var end_dtstring = $('#end_at').val();
+
+    var start_m = moment(start_dtstring);
+    var end_m = moment(end_dtstring);
+
+    reservation_request["startAt"] = parseInt(start_m.unix());
+    reservation_request["endAt"] = parseInt(end_m.unix());
+
+
+    loadJSON("/resv/newConnectionId", function (response) {
+        var json_data = JSON.parse(response);
+        console.log(json_data);
+        reservation_request["connectionId"] = json_data["connectionId"];
+        console.log("got a new connection id "+reservation_request["connectionId"]);
+
+        var json = JSON.stringify(reservation_request);
+        console.log(json);
+
+        // TODO: handle errors
+        $.ajax({
+            type: "POST",
+            url: "/resv/minimal_hold",
+            data: json,
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+                console.log(data);
+            }
+        });
+        console.log("held a reservation with connectionId " + reservation_request["connectionId"]);
+
+        resv_commit_btn.addClass("active").removeClass("disabled");
+        resv_commit_btn.attr("href", "/resv/commit/" + reservation_request["connectionId"]);
+        resv_commit_btn.off();
+
+        resv_hold_btn.addClass("disabled").removeClass("active");
+        resv_hold_btn.off();
+        resv_hold_btn.on('click', doNothing);
+
+    });
+
+    return false;
+};
+
+
+var make_graphs = function() {
 
     loadJSON("/graphs/multilayer", function (response) {
 
@@ -355,80 +456,56 @@ $(document).ready(function () {
                 }
             }
         };
-
-        $('#dump_positions_btn').on('click', function (e) {
-            e.preventDefault();
-            var pos = display_viz.network.getPositions();
-            var jsonText = JSON.stringify(pos, null);
-            $('#positions_display').text(jsonText);
-            return false;
-
-        });
-
-
         reservation_viz = make_network({}, rv_cont, rv_opts, "reservation_viz");
-
-        pipe_card = $('#pipe_card');
-        pipe_card.hide();
-
-        $('#pipe_form').on('submit', function (e) {
-            e.preventDefault();
-        });
-
-        junction_card = $('#junction_card');
-        junction_card.hide();
+    });
+};
 
 
-        add_junction_btn = $('#add_junction_btn');
 
-        add_junction_btn.on('click', function (e) {
-            e.preventDefault();
-            add_to_reservation(reservation_viz, resv_viz_name);
-        });
+$(document).ready(function () {
 
-        $(function () {
-            var token = $("meta[name='_csrf']").attr("content");
-            var header = $("meta[name='_csrf_header']").attr("content");
-            $(document).ajaxSend(function (e, xhr, options) {
-                xhr.setRequestHeader(header, token);
-            });
-        });
+    make_graphs();
 
-        $('#resv_shared_form').on('submit', function (e) {
-            e.preventDefault();
-            reservation_request["description"] = $('#description').val();
-
-            var start_dtstring = $('#start_at').val();
-            var end_dtstring = $('#end_at').val();
-
-            var start_m = moment(start_dtstring);
-            var end_m = moment(end_dtstring);
-
-            reservation_request["startAt"] = parseInt(start_m.unix());
-            reservation_request["endAt"] = parseInt(end_m.unix());
-
-            var json = JSON.stringify(reservation_request);
-
-            $.ajax({
-                type: "POST",
-                url: "/resv/minimal_submit",
-                data: json,
-                contentType: "application/json; charset=utf-8",
-                dataType: "json",
-                success: function (data) {
-                    console.log(data);
-                },
-                failure: function (errMsg) {
-                    console.log(errMsg);
-                }
-            });
-
-
-        });
-
-
+    $('#dump_positions_btn').on('click', function (e) {
+        e.preventDefault();
+        var pos = display_viz.network.getPositions();
+        var jsonText = JSON.stringify(pos, null);
+        $('#positions_display').text(jsonText);
+        return false;
     });
 
+    pipe_card = $('#pipe_card');
+    pipe_card.hide();
+
+    $('#pipe_form').on('submit', doNothing);
+
+    junction_card = $('#junction_card');
+    junction_card.hide();
+
+    add_junction_btn = $('#add_junction_btn');
+    add_junction_btn.on('click', doNothing);
+
+    resv_hold_btn = $('#resv_hold_btn');
+    resv_hold_btn.on('click', doNothing);
+
+    resv_commit_btn = $('#resv_commit_btn');
+    resv_commit_btn.on('click', doNothing);
+
+    $("#description").change(function () {
+        review_ready();
+    });
+
+
+    $('#resv_buttons_form').on('submit', doNothing);
+
+
+    $(function () {
+        var token = $("meta[name='_csrf']").attr("content");
+        var header = $("meta[name='_csrf_header']").attr("content");
+        $(document).ajaxSend(function (e, xhr, options) {
+            xhr.setRequestHeader(header, token);
+        });
+    });
 });
 
 

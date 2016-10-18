@@ -18,4 +18,5 @@ public class MinimalRequest {
     private Integer startAt;
     private Integer endAt;
     private String description;
+    private String connectionId;
 }

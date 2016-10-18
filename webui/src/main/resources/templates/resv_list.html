@@ -12,18 +12,23 @@
         <thead>
         <tr>
             <th style="width: 150px;">GRI</th>
+            <th style="width: 200px;">Commit</th>
             <th style="width: 200px;">Description</th>
             <th style="width: 200px;">Username</th>
         </tr>
         </thead>
         <tbody>
-        <tr th:each="resv : ${resvs}">
+        <tr th:each="connection : ${connections}">
             <td>
-                <a th:href="@{|/resvs/resv)view/${resv.connectionId}|}"
-                   th:text="|${resv.connectionId}|"/>
+                <a th:href="@{|/resv/view/${connection.connectionId}|}"
+                   th:text="|${connection.connectionId}|"/>
             </td>
-            <td th:text="${resv.description}"/>
-            <td th:text="${resv.username}"/>
+            <td>
+                <a th:href="@{|/resv/commit/${connection.connectionId}|}"
+                   th:text="Commit"/>
+            </td>
+            <td th:text="${connection.specification.description}"/>
+            <td th:text="${connection.specification.username}"/>
         </tr>
         </tbody>
     </table>
