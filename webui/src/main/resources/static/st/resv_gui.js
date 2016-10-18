@@ -296,9 +296,10 @@ var resv_hold = function (e) {
                 console.log(data);
             }
         });
-        errors_box.text("Reseration held! Click commit.");
+        errors_box.text("Reservation held! Click commit.");
 
         resv_commit_btn.addClass("active").removeClass("disabled");
+        // TODO: handle when path not found
         resv_commit_btn.attr("href", "/resv/commit/" + reservation_request["connectionId"]);
         resv_commit_btn.off();
 

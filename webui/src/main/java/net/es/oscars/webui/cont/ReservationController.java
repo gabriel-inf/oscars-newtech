@@ -71,6 +71,11 @@ public class ReservationController {
 
         String restPath = "https://localhost:8000/resv/commit/" + connectionId;
         Connection c = restTemplate.getForObject(restPath, Connection.class);
+        try {
+            Thread.sleep(500L);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         return "redirect:/resv/view/" + c.getConnectionId();
 
     }
@@ -96,6 +101,11 @@ public class ReservationController {
     @ResponseBody
     public Map<String, String> resv_minimal_hold(@RequestBody MinimalRequest request) {
         Connection c = minimalRequester.holdMinimal(request);
+        try {
+            Thread.sleep(500L);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         Map<String, String> res = new HashMap<>();
         res.put("connectionId", c.getConnectionId());
 
