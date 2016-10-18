@@ -294,19 +294,19 @@ var resv_hold = function (e) {
             dataType: "json",
             success: function (data) {
                 console.log(data);
+                errors_box.text("Reservation held! Click commit.");
+
+                resv_commit_btn.addClass("active").removeClass("disabled");
+                // TODO: handle when path not
+                resv_commit_btn.attr("href", "/resv/commit/" + reservation_request["connectionId"]);
+                resv_commit_btn.off();
+
+                resv_hold_btn.addClass("disabled").removeClass("active");
+                resv_hold_btn.off();
+                resv_hold_btn.on('click', doNothing);
+                need_review = false;
             }
         });
-        errors_box.text("Reservation held! Click commit.");
-
-        resv_commit_btn.addClass("active").removeClass("disabled");
-        // TODO: handle when path not
-        resv_commit_btn.attr("href", "/resv/commit/" + reservation_request["connectionId"]);
-        resv_commit_btn.off();
-
-        resv_hold_btn.addClass("disabled").removeClass("active");
-        resv_hold_btn.off();
-        resv_hold_btn.on('click', doNothing);
-        need_review = false;
 
     });
 

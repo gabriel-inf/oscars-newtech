@@ -1,6 +1,7 @@
 package net.es.oscars.pss.svc;
 
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.dto.spec.ReservedVlanFixture;
 import net.es.oscars.pss.dao.RouterCommandsRepository;
 import net.es.oscars.pss.dao.TemplateRepository;
 import net.es.oscars.pss.ent.RouterCommandsE;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -62,7 +64,7 @@ public class RouterCommandGenerator {
         }
         Map<String, List<String>> commandsByDevice = new HashMap<>();
 
-        isolatedJunctionCommands.forEach((urn, commands)-> {
+        isolatedJunctionCommands.forEach((urn, commands) -> {
             if (!commandsByDevice.keySet().contains(urn)) {
                 commandsByDevice.put(urn, commands);
             } else {
@@ -78,7 +80,7 @@ public class RouterCommandGenerator {
             }
         });
 
-        mplsCommands.forEach((urn, commands)-> {
+        mplsCommands.forEach((urn, commands) -> {
             if (!commandsByDevice.keySet().contains(urn)) {
                 commandsByDevice.put(urn, commands);
             } else {
@@ -91,11 +93,11 @@ public class RouterCommandGenerator {
             RouterCommandsE rc_e = RouterCommandsE.builder()
                     .connectionId(conn.getConnectionId())
                     .deviceUrn(deviceUrn)
-                    .contents(String.join("\n",commands))
+                    .contents(String.join("\n", commands))
                     .build();
 
             rcRepo.save(rc_e);
-            log.info("saved router commands: "+rc_e.toString());
+            log.info("saved router commands: " + rc_e.toString());
         }
 
 
@@ -137,6 +139,7 @@ public class RouterCommandGenerator {
         rvjs.add(rep.getZJunction());
         return isolatedJunctionCommands(rvjs);
     }
+
     private Map<String, List<String>> mplsPipeCommands(ReservedMplsPipeE rep) {
         Set<ReservedVlanJunctionE> rvjs = new HashSet<>();
         rvjs.add(rep.getAJunction());
@@ -145,15 +148,49 @@ public class RouterCommandGenerator {
     }
 
     private String alcatelJunction(ReservedVlanJunctionE rvj) {
-        return "Sample Alcatel router config for a junction ; "+rvj.getDeviceUrn();
+        String out = "Sample Alcatel router config for junction ; " + rvj.getDeviceUrn() + " \n";
+        for (ReservedVlanFixtureE f : rvj.getFixtures()) {
+            out += f.getIfceUrn();
+            out += "  bw : " + f.getReservedBandwidth().getInBandwidth() + " / " + f.getReservedBandwidth().getEgBandwidth() + "\n";
+            List<String> vlans = f.getReservedVlans()
+                    .stream()
+                    .map(ReservedVlanE::getVlan)
+                    .map(Object::toString)
+                    .collect(Collectors.toList());
+            out += "  vlan : " + String.join(",", vlans);
+        }
+        return out;
 
     }
+
     private String juniperMxJunction(ReservedVlanJunctionE rvj) {
-        return "Sample Juniper MX router config for a junction "+rvj.getDeviceUrn();
-
+        String out = "Sample Juniper MX router config for junction ; " + rvj.getDeviceUrn() + " \n";
+        for (ReservedVlanFixtureE f : rvj.getFixtures()) {
+            out += f.getIfceUrn();
+            out += "  bw : " + f.getReservedBandwidth().getInBandwidth() + " / " + f.getReservedBandwidth().getEgBandwidth() + "\n";
+            List<String> vlans = f.getReservedVlans()
+                    .stream()
+                    .map(ReservedVlanE::getVlan)
+                    .map(Object::toString)
+                    .collect(Collectors.toList());
+            out += "  vlan : " + String.join(",", vlans);
+        }
+        return out;
     }
+
     private String juniperExJunction(ReservedVlanJunctionE rvj) {
-        return "Sample Juniper EX switch config for a junction "+rvj.getDeviceUrn();
+        String out = "Sample Juniper EX switch config for junction ; " + rvj.getDeviceUrn() + " \n";
+        for (ReservedVlanFixtureE f : rvj.getFixtures()) {
+            out += f.getIfceUrn();
+            out += "  bw : " + f.getReservedBandwidth().getInBandwidth() + " / " + f.getReservedBandwidth().getEgBandwidth() + "\n";
+            List<String> vlans = f.getReservedVlans()
+                    .stream()
+                    .map(ReservedVlanE::getVlan)
+                    .map(Object::toString)
+                    .collect(Collectors.toList());
+            out += "  vlan : " + String.join(",", vlans);
+        }
+        return out;
     }
 
 }

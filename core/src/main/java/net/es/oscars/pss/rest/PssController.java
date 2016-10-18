@@ -12,10 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -56,12 +53,17 @@ public class PssController {
     @ResponseBody
     public Map<String, String> commands(@PathVariable("connectionId") String connectionId,
                                         @PathVariable("deviceUrn") String deviceUrn) {
-        log.info("retrieving commands for "+connectionId+ " "+deviceUrn);
-        RouterCommandsE rce = rcRepo
-                .findByConnectionIdAndDeviceUrn(connectionId, deviceUrn)
-                .orElseThrow(NoSuchElementException::new);
-        Map<String, String>  result = new HashMap<>();
-        result.put("commands", rce.getContents());
+        log.info("retrieving commands for " + connectionId + " " + deviceUrn);
+        Map<String, String> result = new HashMap<>();
+
+        Optional<RouterCommandsE> maybeRce = rcRepo.findByConnectionIdAndDeviceUrn(connectionId, deviceUrn);
+        if (maybeRce.isPresent()) {
+            result.put("commands", maybeRce.get().getContents());
+
+        } else {
+            result.put("commands", "");
+
+        }
         return result;
 
     }

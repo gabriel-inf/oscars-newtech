@@ -69,13 +69,13 @@ public class ReservationController {
     public String connection_commit(@PathVariable String connectionId, Model model) {
 
 
-        String restPath = "https://localhost:8000/resv/commit/" + connectionId;
-        Connection c = restTemplate.getForObject(restPath, Connection.class);
         try {
             Thread.sleep(500L);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        String restPath = "https://localhost:8000/resv/commit/" + connectionId;
+        Connection c = restTemplate.getForObject(restPath, Connection.class);
         return "redirect:/resv/view/" + c.getConnectionId();
 
     }
