@@ -31,10 +31,55 @@
     <div class="panel panel-default">
         <div class="panel-heading">
             <h4 class="panel-title">
-                <a data-toggle="collapse" href="#reservation_viz">Show / hide reservation</a>
+                <a data-toggle="collapse" href="#reservation_panel">Show / hide reservation</a>
             </h4>
         </div>
-        <div id="reservation_viz" class="panel-body collapse  collapse in"></div>
+        <div id="reservation_panel" class="panel-body collapse  collapse in">
+
+            <div id="reservation_viz" class="panel-body collapse  collapse in col-md-6"></div>
+            <div id="resv_common_params_form" class="panel panel-default col-md-6 ">
+                <div class="panel-heading">
+                    <h4 class="panel-title">Reservation parameters</h4>
+                </div>
+                <div class="panel-body">
+                    <form class="form-horizontal" id="resv_shared_form">
+                        <div class="form-group">
+                            <label class="col-md-2 control-label" for="description">Description</label>
+                            <div class="col-md-4">
+                                <input id="description" placeholder="Description" class="form-control input-md"/>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-md-2 control-label" for="start_at">Start at</label>
+                            <div class='col-md-4 input-group' id="start_at_dtp">
+                                <input type='text' id='start_at' class="form-control"/>
+                                <span class="input-group-addon">
+                                <span class="glyphicon glyphicon-calendar"></span>
+                            </span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-md-2 control-label" for="end_at">End at</label>
+                            <div class='col-md-4 input-group' id="end_at_dtp">
+                                <input type='text' id='end_at' class="form-control"/>
+                                <span class="input-group-addon">
+                                <span class="glyphicon glyphicon-calendar"></span>
+                            </span>
+                            </div>
+                        </div>
+                        <div id="errors_box" class="alert"/>
+                        <div class="col-md-6">
+                            <a href="#" id="resv_hold_btn" class="btn btn-primary disabled">Hold</a>
+                            <a href="#" id="resv_commit_btn" class="btn btn-success disabled">Commit</a>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <div id="pipe_card" class="panel panel-default">
@@ -80,46 +125,7 @@
             </form>
         </div>
     </div>
-    <div id="resv_common_params_form" class="panel panel-default">
-        <div class="panel-heading">
-            <h4 class="panel-title">Reservation parameters</h4>
-        </div>
-        <div class="panel-body">
-            <form class="form-horizontal" id="resv_shared_form">
-                <div class="form-group">
-                    <label class="col-md-3 control-label" for="description">Description</label>
-                    <div class="col-md-3">
-                        <input id="description" placeholder="Description" class="form-control input-md"/>
-                    </div>
-                </div>
 
-                <div class="form-group">
-                    <label class="col-md-3 control-label" for="start_at">Start at</label>
-                    <div class='col-md-3 input-group' id="start_at_dtp">
-                        <input type='text' id='start_at' class="form-control"/>
-                        <span class="input-group-addon">
-                            <span class="glyphicon glyphicon-calendar"></span>
-                        </span>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="col-md-3 control-label" for="end_at">End at</label>
-                    <div class='col-md-3 input-group' id="end_at_dtp">
-                        <input type='text' id='end_at' class="form-control"/>
-                        <span class="input-group-addon">
-                            <span class="glyphicon glyphicon-calendar"></span>
-                        </span>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <a href="#" id="resv_hold_btn" class="btn btn-primary disabled">Hold</a>
-                    <a href="#" id="resv_commit_btn" class="btn btn-success disabled">Commit</a>
-                </div>
-            </form>
-
-        </div>
-    </div>
 
 </div>
 

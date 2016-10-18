@@ -8,8 +8,7 @@ var add_junction_btn;
 var pipe_card;
 var junction_card;
 
-
-var resv_viz_name = "reservation_viz";
+var need_review = true;
 
 var reservation_request = {
     "connectionId": "",
@@ -19,21 +18,7 @@ var reservation_request = {
 
 var resv_commit_btn;
 var resv_hold_btn;
-
-function loadJSON(url, callback) {
-
-    var xobj = new XMLHttpRequest();
-    xobj.overrideMimeType('application/json');
-    xobj.open('GET', url, true);
-    xobj.onreadystatechange = function () {
-        if (xobj.readyState == 4) {
-            if (xobj.status == '200') {
-                callback(xobj.responseText);
-            }
-        }
-    };
-    xobj.send(null);
-}
+var errors_box;
 
 var doNothing = function (e) {
     console.log("doing nothing");
@@ -81,102 +66,7 @@ function add_to_reservation(viz, name) {
 
 }
 
-function make_network(json_data, container, options, name) {
 
-    // create an array with nodes
-    var nodes = new vis.DataSet(json_data['nodes']);
-    var edges = new vis.DataSet(json_data['edges']);
-
-    // create a network
-    var datasource = {
-        nodes: nodes,
-        edges: edges
-    };
-
-    var network = new vis.Network(container, datasource, options);
-
-    var result = {};
-    result.network = network;
-    result.datasource = datasource;
-
-    attach_handlers(network, datasource, name);
-    return result;
-}
-
-function attach_handlers(vis_js_network, vis_js_datasets, name) {
-
-    vis_js_network.on('dragEnd', function (params) {
-        selected_node_ids.name = [];
-        for (var i = 0; i < params.nodes.length; i++) {
-            var nodeId = params.nodes[i];
-
-            selected_node_ids.name.push(nodeId);
-            if (vis_js_network.isCluster(nodeId) == true) {
-                vis_js_network.clustering.updateClusteredNode(nodeId, {fixed: {x: true, y: true}});
-            } else {
-                vis_js_datasets.nodes.update({id: nodeId, fixed: {x: true, y: true}});
-            }
-        }
-    });
-
-    vis_js_network.on('dragStart', function (params) {
-        var draggedPlain = false;
-        selected_node_ids.name = [];
-        for (var i = 0; i < params.nodes.length; i++) {
-            var nodeId = params.nodes[i];
-            selected_node_ids.name.push(nodeId);
-
-            if (vis_js_network.isCluster(nodeId) == true) {
-                vis_js_network.clustering.updateClusteredNode(nodeId, {fixed: {x: false, y: false}});
-            } else {
-                vis_js_datasets.nodes.update({id: nodeId, fixed: {x: false, y: false}});
-                draggedPlain = true;
-            }
-        }
-
-        var is_resv = false;
-        if (name == resv_viz_name) {
-            is_resv = true;
-        }
-        trigger_form_changes(is_resv, false, true, draggedPlain);
-
-    });
-
-    vis_js_network.on("click", function (params) {
-        var clickedNode = false;
-        var clickedEdge = false;
-        var clickedPlain = false;
-        var edgeId = "";
-        var nodeId = "";
-        selected_node_ids.name = [];
-        var i;
-
-        for (i = 0; i < params.nodes.length; i++) {
-            clickedNode = true;
-            nodeId = params.nodes[i];
-
-            if (!vis_js_network.isCluster(nodeId) == true) {
-                clickedPlain = true;
-            }
-            selected_node_ids.name.push(nodeId);
-        }
-
-        var is_resv = false;
-        if (name == resv_viz_name) {
-            is_resv = true;
-        }
-
-        if (!clickedNode) {
-            for (i = 0; i < params.edges.length; i++) {
-                clickedEdge = true;
-                edgeId = params.edges[i];
-                edgeId = vis_js_network.clustering.getBaseEdge(edgeId);
-                console.log("edge selected: " + edgeId);
-            }
-        }
-        trigger_form_changes(is_resv, clickedEdge, clickedNode, clickedPlain, nodeId, edgeId);
-    });
-}
 
 function trigger_form_changes(is_resv, selected_an_edge, selected_a_node, is_selected_node_plain, nodeId, edgeId) {
     if (is_resv) {
@@ -280,35 +170,57 @@ function show_junction_card(nodeId) {
     });
 }
 
-function review_ready() {
-    console.log("reviewing if ready to hold..");
+var review_ready = function () {
+    if (!need_review) {
+        return;
+    }
+    console.log("reviewing if reservation can be submitted");
+    var errors = [];
+
     var junctions = reservation_request["junctions"];
     var totalFixtures = 0;
+    var junctionsWithNoFixtures = [];
     for (var nodeId in junctions) {
         for (var fixture in junctions[nodeId]["fixtures"]) {
             totalFixtures += 1;
         }
+        if (junctions[nodeId]["fixtures"].length == 0) {
+            junctionsWithNoFixtures.push(nodeId);
+        }
+    }
+    if (junctionsWithNoFixtures.length > 0) {
+        errors.push("Found junctions with no fixtures: "+junctionsWithNoFixtures);
     }
 
     var description = $('#description').val();
     if (!description) {
-        console.log("not ready, no description");
+        errors.push("no description set");
     } else {
-
-        if (totalFixtures >= 2) {
-            console.log("at least two fixtures used, ready to hold!");
-            resv_hold_btn.addClass("active").removeClass("disabled");
-            resv_hold_btn.off();
-            resv_hold_btn.on('click', resv_hold);
-        } else {
-            console.log("not ready to hold.");
-            resv_hold_btn.addClass("disabled").removeClass("active");
-            resv_hold_btn.off();
-            resv_hold_btn.on('click', doNothing);
+        if (totalFixtures < 2) {
+            errors.push("At least two fixtures are needed.");
         }
     }
-    console.log("updated button links");
-}
+
+
+    if (errors.length == 0) {
+        errors_box.removeClass("alert-danger");
+        errors_box.addClass("alert-success");
+        errors_box.text("ready to submit!");
+
+        resv_hold_btn.addClass("active").removeClass("disabled");
+        resv_hold_btn.off();
+        resv_hold_btn.on('click', resv_hold);
+    } else {
+        errors_box.addClass("alert-danger");
+        errors_box.removeClass("alert-success");
+        errors_box.text(errors);
+        resv_hold_btn.addClass("disabled").removeClass("active");
+        resv_hold_btn.off();
+        resv_hold_btn.on('click', doNothing);
+    }
+    setTimeout(review_ready, 1000);
+
+};
 
 function populate_junction(nodeId, fixtures) {
     var junctions = reservation_request["junctions"];
@@ -327,7 +239,7 @@ function populate_junction(nodeId, fixtures) {
             $("#bw_" + index).val(bw);
         }
     });
-}
+};
 
 
 function update_junction(nodeId, fixtures) {
@@ -345,7 +257,6 @@ function update_junction(nodeId, fixtures) {
             }
         }
     }
-    review_ready();
     console.log(reservation_request);
 }
 
@@ -385,7 +296,7 @@ var resv_hold = function (e) {
                 console.log(data);
             }
         });
-        console.log("held a reservation with connectionId " + reservation_request["connectionId"]);
+        errors_box.text("Reseration held! Click commit.");
 
         resv_commit_btn.addClass("active").removeClass("disabled");
         resv_commit_btn.attr("href", "/resv/commit/" + reservation_request["connectionId"]);
@@ -394,6 +305,7 @@ var resv_hold = function (e) {
         resv_hold_btn.addClass("disabled").removeClass("active");
         resv_hold_btn.off();
         resv_hold_btn.on('click', doNothing);
+        need_review = false;
 
     });
 
@@ -403,7 +315,7 @@ var resv_hold = function (e) {
 
 var make_graphs = function() {
 
-    loadJSON("/graphs/multilayer", function (response) {
+    loadJSON("/viz/topology/multilayer", function (response) {
 
         var json_data = JSON.parse(response);
 
@@ -453,6 +365,11 @@ var make_graphs = function() {
                             "z": edgeData.to
                         }
                     }
+                },
+                deleteEdge: function (edgeData, callback) {
+                    callback(edgeData);
+
+                    delete(reservation_request["pipes"][edgeData.id]);
                 }
             }
         };
@@ -491,12 +408,12 @@ $(document).ready(function () {
     resv_commit_btn = $('#resv_commit_btn');
     resv_commit_btn.on('click', doNothing);
 
-    $("#description").change(function () {
-        review_ready();
-    });
+    errors_box = $('#errors_box');
 
 
     $('#resv_buttons_form').on('submit', doNothing);
+
+    setTimeout(review_ready, 1000);
 
 
     $(function () {

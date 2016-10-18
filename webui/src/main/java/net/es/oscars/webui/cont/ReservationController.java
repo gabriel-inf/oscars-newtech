@@ -40,16 +40,18 @@ public class ReservationController {
 
         Connection conn = restTemplate.getForObject(restPath, Connection.class);
         ObjectMapper mapper = new ObjectMapper();
-
+/*
         String pretty = null;
         try {
             pretty = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(conn);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
+        */
+        model.addAttribute("connectionId", conn.getConnectionId());
 
 
-        model.addAttribute("connection", pretty);
+        model.addAttribute("connection", conn);
         return "resv_view";
     }
 
