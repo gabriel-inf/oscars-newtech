@@ -223,7 +223,6 @@ public class SurvivableServiceLayerTopology
             }
         }
 
-        log.info("logical edges added to Service-Layer Topology.");
 
         // Create a backup of all topology-based Logical Links (excludes links created for a specific request).
         llBackup = new HashSet<>();
@@ -243,7 +242,6 @@ public class SurvivableServiceLayerTopology
      */
     public void calculateLogicalLinkWeights(RequestedVlanPipeE requestedVlanPipe, ScheduleSpecificationE requestedSchedule, List<UrnE> urnList, List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList)
     {
-        log.info("Performing Survivable routing on MPLS-Layer topology to assign weights to Service-Layer logical links.");
         Set<SurvivableLogicalEdge> logicalLinksToRemoveFromServiceLayer = new HashSet<>();
 
         Topology mplsLayerTopo = new Topology();
@@ -252,9 +250,7 @@ public class SurvivableServiceLayerTopology
         mplsLayerTopo.getEdges().addAll(mplsLayerLinks);
 
         // Step 1: Prune MPLS-Layer topology once before considering any logical links.
-        log.info("step 1: pruning MPLS-layer by bandwidth and vlan availability.");
         Topology prunedMPLSTopo = pruningService.pruneWithPipe(mplsLayerTopo, requestedVlanPipe, requestedSchedule, urnList, rsvBwList, rsvVlanList);
-        log.info("step 1 COMPLETE.");
 
         for(SurvivableLogicalEdge oneLogicalLink : logicalLinks)
         {
@@ -347,7 +343,6 @@ public class SurvivableServiceLayerTopology
             assert(mplsDstDevice != null);
 
             // Step 2: Prune the adaptation (Ethernet-MPLS) edges and ports to ensure this logical link is worth building.
-            log.info("step 2: pruning adaptation (Ethernet-MPLS) edges and ports to ensure logical link is worth building.");
             adaptationPorts.add(srcEthPort);
             adaptationPorts.add(dstEthPort);
             adaptationPorts.add(mplsSrcPort);
@@ -365,41 +360,26 @@ public class SurvivableServiceLayerTopology
 
             if(!prunedAdaptationTopo.equals(adaptationTopo))
             {
-                log.info("cannot assign weight to logical edge: adaptation ports/links do not support demand.");
-                log.info("step 2 FAILED.");
-                log.info("removing logical link from Service-Layer topology.");
-
                 logicalLinksToRemoveFromServiceLayer.add(oneLogicalLink);
                 continue;
             }
-            log.info("step 2 COMPLETE.");
 
             // Step 3: Perform routing on MPLS layer to construct physical routes corresponding to the logical link.
-            log.info("step 3: performing MPLS-Layer routing.");
 
             List<List<TopoEdge>> pathPair = bhandariPCE.computeDisjointPaths(prunedMPLSTopo, mplsSrcDevice, mplsDstDevice, 2);
 
             if(pathPair.isEmpty())
             {
-                log.error("no path found for logical link.");
-                log.info("step 3 FAILED.");
-                log.info("removing logical link from Service-Layer topology.");
                 logicalLinksToRemoveFromServiceLayer.add(oneLogicalLink);
-                log.info("HERE MAN!");
                 continue;
             }
             else if(pathPair.size() != 2)
             {
-                log.error("no path found for logical link.");
-                log.info("step 3 FAILED.");
-                log.info("removing logical link from Service-Layer topology.");
                 logicalLinksToRemoveFromServiceLayer.add(oneLogicalLink);
                 continue;
             }
-            log.info("step 3 COMPLETE.");
 
             // Step 4: Calculate total cost-metric for logical link.
-            log.info("step 4: compute logical link-weights.");
 
             List<TopoEdge> primaryPath = pathPair.get(0);
             List<TopoEdge> secondaryPath = pathPair.get(1);
@@ -437,8 +417,6 @@ public class SurvivableServiceLayerTopology
             oneLogicalLink.setMetricSecondary(weightMetricSecondary);
 
             oneLogicalLink.setMetric(weightMetricPrimary);   // The calling function expects metric to be set. Pathfinding is done based on shortest primary path, so we use that value here
-
-            log.info("step 4 COMPLETE.");
 
             // Step 5: Store the physical route corresponding to this logical link
             for(List<TopoEdge> path : pathPair)
@@ -485,14 +463,11 @@ public class SurvivableServiceLayerTopology
      */
     public void buildLogicalLayerSrcNodes(TopoVertex srcDevice, TopoVertex srcInPort)
     {
-        log.info("determining if source is already represented on Service-Layer topology.");
         if(srcDevice.getVertexType().equals(VertexType.SWITCH))
         {
-            log.info("it is.");
             return;
         }
 
-        log.info("representing MPLS source on Service-Layer topology as VIRTUAL node.");
 
         TopoVertex virtualSrcDevice = new TopoVertex(srcDevice.getUrn() + "-virtual", VertexType.VIRTUAL);
         TopoVertex virtualSrcPort = new TopoVertex(srcInPort.getUrn() + "-virtual", VertexType.VIRTUAL);
@@ -526,14 +501,11 @@ public class SurvivableServiceLayerTopology
      */
     public void buildLogicalLayerDstNodes(TopoVertex dstDevice, TopoVertex dstOutPort)
     {
-        log.info("determining if destination is already represented on Service-Layer topology.");
         if(dstDevice.getVertexType().equals(VertexType.SWITCH))
         {
-            log.info("it is.");
             return;
         }
 
-        log.info("representing MPLS destination on Service-Layer topology as VIRTUAL node.");
 
         TopoVertex virtualDstDevice = new TopoVertex(dstDevice.getUrn() + "-virtual", VertexType.VIRTUAL);
         TopoVertex virtualDstPort = new TopoVertex(dstOutPort.getUrn() + "-virtual", VertexType.VIRTUAL);

@@ -2,25 +2,21 @@ package net.es.oscars.topo.ent;
 
 import lombok.*;
 
+import javax.persistence.Embeddable;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import java.util.List;
 
 @Data
-@Entity
+@Embeddable
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class EdgeE {
-    @Id
-    @GeneratedValue
-    private Long id;
 
-    @NonNull
-    String from;
+    private String origin;
 
-    @NonNull
-    String to;
+    private String target;
 
 }

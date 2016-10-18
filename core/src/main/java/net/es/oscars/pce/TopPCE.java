@@ -132,6 +132,7 @@ public class TopPCE {
                 .junctions(reservedJunctions)
                 .ethPipes(reservedEthPipes)
                 .mplsPipes(reservedMplsPipes)
+                .allPaths(allPaths)
                 .build();
 
         // Build the reserved Blueprint
@@ -384,7 +385,7 @@ public class TopPCE {
     private List<EdgeE> convertTopoEdgePathToEdges(List<TopoEdge> topoEdges) {
         return topoEdges
                 .stream()
-                .map(e -> EdgeE.builder().from(e.getA().getUrn()).to(e.getZ().getUrn()).build())
+                .map(e -> EdgeE.builder().origin(e.getA().getUrn()).target(e.getZ().getUrn()).build())
                 .collect(Collectors.toList());
     }
 
