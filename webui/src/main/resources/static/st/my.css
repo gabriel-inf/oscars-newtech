@@ -8,6 +8,11 @@
     width: 50%;
     height: 300px;
 }
+#reservation_view_viz {
+    border: 2px solid lightgray;
+    width: 80%;
+    height: 500px;
+}
 
 
 .typeahead,

@@ -1,9 +1,6 @@
 package net.es.oscars.dto.spec;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.Set;
 
@@ -19,7 +16,9 @@ public class RequestedVlanFlow {
 
     private Set<RequestedVlanPipe> pipes;
 
+    @NonNull
     private Integer minPipes;
 
+    @NonNull
     private Integer maxPipes;
 }

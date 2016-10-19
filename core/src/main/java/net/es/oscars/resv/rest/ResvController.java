@@ -24,6 +24,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Controller
@@ -65,9 +66,9 @@ public class ResvController {
     }
 
     // TODO: make better
-    @RequestMapping(value = "/resv", method = RequestMethod.GET)
+    @RequestMapping(value = "/resv/all", method = RequestMethod.GET)
     @ResponseBody
-    public List<Connection> listResvs() {
+    public List<Connection> allResvs() {
 
         log.info("listing all resvs");
         List<Connection> dtoItems = new ArrayList<>();
@@ -80,6 +81,35 @@ public class ResvController {
 
     }
 
+
+    @RequestMapping(value = "/resv/filter", method = RequestMethod.POST)
+    @ResponseBody
+    public Set<Connection> resvFilter(@RequestBody ConnectionFilter filter) {
+        Set<Connection> result = new HashSet<>();
+        if (filter.getConnectionId() != null) {
+
+            Optional<ConnectionE> c = resvService.findByConnectionId(filter.getConnectionId());
+            if (c.isPresent()) {
+                result.add(this.convertConnToDto(c.get()));
+            }
+        } else if (filter.getResvStates() != null) {
+            filter.getResvStates().forEach(st -> {
+                resvService.ofResvState(st).forEach(ce -> {
+                    Connection c = this.convertConnToDto(ce);
+                    result.add(c);
+                });
+
+            });
+
+        } else {
+            for (ConnectionE eItem : resvService.findAll()) {
+                Connection dtoItem = convertConnToDto(eItem);
+                result.add(dtoItem);
+            }
+        }
+        return result;
+
+    }
 
     @RequestMapping(value = "/resv/basic_vlan/add", method = RequestMethod.POST)
     @ResponseBody
@@ -155,6 +185,7 @@ public class ResvController {
 
         log.info("saved connection, connectionId " + connection.getConnectionId());
         log.info(connE.toString());
+
 
 
         Connection conn = modelMapper.map(connE, Connection.class);

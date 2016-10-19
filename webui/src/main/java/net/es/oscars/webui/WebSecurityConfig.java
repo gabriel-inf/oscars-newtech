@@ -25,7 +25,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
                 // index page and REST endpoints:
                     .antMatchers("/").permitAll()
-                    .antMatchers("/graphs/**").permitAll()
+                    .antMatchers("/viz/**").permitAll()
                     .antMatchers("/info/**").permitAll()
 
                 // various static / webjar resources

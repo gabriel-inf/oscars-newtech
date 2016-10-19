@@ -27,12 +27,12 @@ public class MinimalRequester {
     private RestTemplate restTemplate;
 
 
-    public Connection submitMinimal(MinimalRequest minimalRequest) {
-        log.info("submitting minimal " + minimalRequest.toString());
+    public Connection holdMinimal(MinimalRequest minimalRequest) {
+        log.info("holding minimal " + minimalRequest.toString());
 
         Date notBefore = new Date(minimalRequest.getStartAt());
         Date notAfter = new Date(minimalRequest.getEndAt());
-        String connectionId = UUID.randomUUID().toString();
+        String connectionId = minimalRequest.getConnectionId();
         String username = "some user";
 
 
@@ -69,6 +69,8 @@ public class MinimalRequester {
         RequestedVlanFlow reqvf = RequestedVlanFlow.builder()
                 .junctions(new HashSet<>())
                 .pipes(new HashSet<>())
+                .maxPipes(1)
+                .minPipes(1)
                 .build();
 
         Map<String, RequestedVlanJunction> junctionMap = new HashMap<>();
@@ -106,6 +108,7 @@ public class MinimalRequester {
             RequestedVlanPipe rvp = RequestedVlanPipe.builder()
                     .aJunction(aJ)
                     .zJunction(zJ)
+                    .numDisjoint(1)
                     .azMbps(bw)
                     .zaMbps(bw)
                     .azERO(new ArrayList<>())

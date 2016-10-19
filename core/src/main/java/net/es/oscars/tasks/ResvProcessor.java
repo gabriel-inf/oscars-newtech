@@ -3,8 +3,11 @@ package net.es.oscars.tasks;
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.pce.PCEException;
 import net.es.oscars.pss.PSSException;
+import net.es.oscars.pss.svc.PssResourceService;
 import net.es.oscars.resv.svc.ResvService;
+import net.es.oscars.st.prov.ProvState;
 import net.es.oscars.st.resv.ResvState;
+import net.es.oscars.tasks.prop.ProcessingProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -15,6 +18,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 public class ResvProcessor {
     private ResvService resvService;
+
+    @Autowired
+    private PssResourceService pssResourceService;
+
+    @Autowired
+    private ProcessingProperties processingProperties;
 
 
     @Autowired
@@ -35,9 +44,9 @@ public class ResvProcessor {
         );
 
         // time out expired HELD reservations
-        Integer timeoutMs = 30000;
+        Integer timeoutMs = processingProperties.getTimeoutHeldAfter() * 1000;
         resvService.ofHeldTimeout(timeoutMs).forEach(c -> {
-                    log.info("reservation " + c.getConnectionId() + " timing out from HELD");
+                    log.info("reservation " + c.getConnectionId() + " timing out from HELD after "+ timeoutMs + "ms");
                     resvService.timeout(c);
                 }
         );
@@ -49,7 +58,16 @@ public class ResvProcessor {
                 }
         );
 
-        // finally, process newly submitted reservations
+        // process committing reservations
+        resvService.ofProvState(ProvState.READY_TO_GENERATE).forEach(c -> {
+                    log.info("ready to generate config for " + c.getConnectionId());
+                    pssResourceService.generateConfig(c);
+                }
+        );
+
+
+
+        // process newly submitted reservations
         resvService.ofResvState(ResvState.SUBMITTED).forEach(c -> {
                     log.info("detected submitted connection " + c.getConnectionId());
                     try {

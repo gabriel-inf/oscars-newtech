@@ -5,9 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.pss.EthJunctionType;
 import net.es.oscars.dto.resv.Connection;
+import net.es.oscars.dto.resv.ConnectionFilter;
 import net.es.oscars.dto.spec.*;
 import net.es.oscars.dto.topo.Urn;
 import net.es.oscars.webui.dto.MinimalRequest;
+import net.es.oscars.webui.ipc.ConnectionProvider;
 import net.es.oscars.webui.ipc.MinimalRequester;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -17,8 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Date;
-import java.util.HashSet;
+import java.util.*;
 
 @Slf4j
 @Controller
@@ -30,103 +31,63 @@ public class ReservationController {
     @Autowired
     private MinimalRequester minimalRequester;
 
-    @RequestMapping("/resv_basic_new")
-    public String resv_basic_new(Model model) {
+    @Autowired
+    private ConnectionProvider connectionProvider;
 
-        BasicVlanFlow flow = BasicVlanFlow.builder()
-                .aDeviceUrn("")
-                .aUrn("")
-                .aVlanExpression("")
-                .azMbps(0)
-                .zDeviceUrn("")
-                .zUrn("")
-                .zVlanExpression("")
-                .zaMbps(0)
-                .palindromic(PalindromicType.NON_PALINDROME)
-                .build();
-
-        ScheduleSpecification ss = ScheduleSpecification.builder()
-                .durationMinutes(0L)
-                .notBefore(new Date())
-                .notAfter(new Date())
-                .build();
-
-        BasicVlanSpecification basicSpec = BasicVlanSpecification.builder()
-                .connectionId("")
-                .basicVlanFlow(flow)
-                .scheduleSpec(ss)
-                .specificationId(0L)
-                .description("")
-                .username("")
-                .build();
-
-        model.addAttribute("basicSpec", basicSpec);
-
-        return "resv_basic_new";
-    }
-
-
-    @RequestMapping(value = "/resv_basic_new_submit", method = RequestMethod.POST)
-    public String resv_basic_new_submit(@ModelAttribute BasicVlanSpecification addedSpecification) {
-        log.info("adding a basic vlan spec ");
-
-        String restPath = "https://localhost:8000/resv/basic_vlan/add";
-        Connection conn = restTemplate.postForObject(restPath, addedSpecification, Connection.class);
-
-
-        return "redirect:/resv_view/" + conn.getConnectionId();
-
-    }
-
-    @RequestMapping("/resv_view/{connectionId}")
+    @RequestMapping("/resv/view/{connectionId}")
     public String resv_view(@PathVariable String connectionId, Model model) {
         String restPath = "https://localhost:8000/resv/get/" + connectionId;
 
         Connection conn = restTemplate.getForObject(restPath, Connection.class);
         ObjectMapper mapper = new ObjectMapper();
-
+/*
         String pretty = null;
         try {
             pretty = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(conn);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
+        */
+        model.addAttribute("connectionId", conn.getConnectionId());
 
 
-        model.addAttribute("connection", pretty);
+        model.addAttribute("connection", conn);
         return "resv_view";
-    }
-
-
-    @RequestMapping(value = "/resv_adv_new", params = {"removeFixture"})
-    public String removeRow(final ReservedVlanFlow vflow, final BindingResult bindingResult,
-                            final HttpServletRequest req) {
-
-        final String fixtureUrn = req.getParameter("removeFixture");
-
-        ReservedVlanFixture removeThis = null;
-        ReservedVlanJunction fromThis = null;
-
-        for (ReservedVlanJunction vj : vflow.getJunctions()) {
-            for (ReservedVlanFixture vf : vj.getFixtures()) {
-                if (vf.getIfceUrn().equals(fixtureUrn)) {
-                    removeThis = vf;
-                    fromThis = vj;
-                }
-            }
-        }
-        if (fromThis != null && removeThis != null) {
-            fromThis.getFixtures().remove(removeThis);
-        }
-
-
-        return "resv_adv_new";
     }
 
 
     @RequestMapping("/resv/list")
     public String resv_list(Model model) {
+        ConnectionFilter f = ConnectionFilter.builder().build();
+        Set<Connection> connections = connectionProvider.filtered(f);
+        model.addAttribute("connections", connections);
+
         return "resv_list";
+    }
+
+    @RequestMapping(value = "/resv/commit/{connectionId}", method = RequestMethod.GET)
+    public String connection_commit(@PathVariable String connectionId, Model model) {
+
+
+        try {
+            Thread.sleep(500L);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        String restPath = "https://localhost:8000/resv/commit/" + connectionId;
+        Connection c = restTemplate.getForObject(restPath, Connection.class);
+        return "redirect:/resv/view/" + c.getConnectionId();
+
+    }
+
+
+    @RequestMapping("/resv/newConnectionId")
+    @ResponseBody
+    public Map<String, String> new_connection_id() {
+        Map<String, String> result = new HashMap<>();
+        result.put("connectionId", UUID.randomUUID().toString());
+        log.info("provided new connection id: " + result.get("connectionId"));
+        return result;
     }
 
 
@@ -136,12 +97,33 @@ public class ReservationController {
     }
 
 
-    @RequestMapping(value = "/resv/minimal_submit", method = RequestMethod.POST)
+    @RequestMapping(value = "/resv/commands/{connectionId}/{deviceUrn}", method = RequestMethod.GET)
     @ResponseBody
-    public String resv_minimal_submit(@RequestBody MinimalRequest request) {
-        Connection c = minimalRequester.submitMinimal(request);
+    public Map<String, String> commands(@PathVariable("connectionId") String connectionId,
+                                        @PathVariable("deviceUrn") String deviceUrn) {
+        log.info("getting commands for " + connectionId + " " + deviceUrn);
+        String restPath = "https://localhost:8000/pss/commands/" + connectionId + "/" + deviceUrn;
+        log.info("rest :" + restPath);
 
-        return "got it";
+        Map<String, String> commands = restTemplate.getForObject(restPath, Map.class);
+
+        return commands;
+    }
+
+
+    @RequestMapping(value = "/resv/minimal_hold", method = RequestMethod.POST)
+    @ResponseBody
+    public Map<String, String> resv_minimal_hold(@RequestBody MinimalRequest request) {
+        Connection c = minimalRequester.holdMinimal(request);
+        try {
+            Thread.sleep(500L);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        Map<String, String> res = new HashMap<>();
+        res.put("connectionId", c.getConnectionId());
+
+        return res;
 
     }
 

@@ -13,6 +13,7 @@ import net.es.oscars.resv.ent.ConnectionE;
 import net.es.oscars.resv.ent.RequestedBlueprintE;
 import net.es.oscars.resv.ent.ReservedBlueprintE;
 import net.es.oscars.resv.ent.ReservedVlanFlowE;
+import net.es.oscars.st.prov.ProvState;
 import net.es.oscars.st.resv.ResvState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -71,6 +72,11 @@ public class ResvService {
                 .filter(c -> (c.getSchedule().getSubmitted().getTime() + timeoutMs < new Date().getTime()));
 
     }
+    public Stream<ConnectionE> ofProvState(ProvState provState) {
+        return connRepo.findAll().stream().filter(c -> c.getStates().getProv().equals(provState));
+
+    }
+
 
     // business logic
 
@@ -94,6 +100,7 @@ public class ResvService {
     public void commit(ConnectionE c) {
         c.getStates().setResv(ResvState.IDLE_WAIT);
         pssResourceService.reserve(c);
+        c.getStates().setProv(ProvState.READY_TO_GENERATE);
 
         connRepo.save(c);
     }
@@ -111,7 +118,7 @@ public class ResvService {
 
             try {
                 String pretty = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(c);
-                //log.info(pretty);     // commented for output readability
+                log.info(pretty);     // commented for output readability
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
             }
