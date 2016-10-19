@@ -1,7 +1,6 @@
 #network_viz {
     border: 2px solid lightgray;
-    width: 80%;
-    height: 500px;
+    height: 450px;
 }
 #reservation_viz {
     border: 2px solid lightgray;
@@ -11,7 +10,10 @@
 #reservation_view_viz {
     border: 2px solid lightgray;
     width: 80%;
-    height: 500px;
+    height: 400px;
+}
+#add_junction_div {
+    right: 0;
 }
 
 

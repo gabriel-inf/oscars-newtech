@@ -323,7 +323,7 @@ var make_graphs = function() {
         // Parse JSON string into object
         var nv_cont = document.getElementById('network_viz');
         var nv_opts = {
-            height: '500px',
+            height: '450px',
             interaction: {
                 hover: false,
                 navigationButtons: true,
