@@ -1,12 +1,13 @@
 [
   {
     "urn": "pppl-rt5", 
-    "type": "ROUTER", 
-    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
+    "reservableVlans": [], 
+    "model": "JUNIPER_MX", 
+    "type": "ROUTER", 
     "ifces": [
       {
         "urn": "pppl-rt5:xe-0/2/0", 
@@ -131,12 +132,13 @@
   }, 
   {
     "urn": "chic-cr5", 
-    "type": "ROUTER", 
-    "model": "ALCATEL_SR7750", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
+    "reservableVlans": [], 
+    "model": "ALCATEL_SR7750", 
+    "type": "ROUTER", 
     "ifces": [
       {
         "urn": "chic-cr5:10/1/4", 
@@ -320,12 +322,13 @@
   }, 
   {
     "urn": "srs-rt3", 
-    "type": "ROUTER", 
-    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
+    "reservableVlans": [], 
+    "model": "JUNIPER_MX", 
+    "type": "ROUTER", 
     "ifces": [
       {
         "urn": "srs-rt3:ge-0/1/0", 
@@ -397,12 +400,13 @@
   }, 
   {
     "urn": "anl-mr2", 
-    "type": "ROUTER", 
-    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
+    "reservableVlans": [], 
+    "model": "JUNIPER_MX", 
+    "type": "ROUTER", 
     "ifces": [
       {
         "urn": "anl-mr2:xe-2/0/0", 
@@ -488,12 +492,13 @@
   }, 
   {
     "urn": "orau-rt3", 
-    "type": "ROUTER", 
-    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
+    "reservableVlans": [], 
+    "model": "JUNIPER_MX", 
+    "type": "ROUTER", 
     "ifces": [
       {
         "urn": "orau-rt3:ge-1/2/0", 
@@ -566,12 +571,13 @@
   }, 
   {
     "urn": "eqx-ash-rt1", 
-    "type": "ROUTER", 
-    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
+    "reservableVlans": [], 
+    "model": "JUNIPER_MX", 
+    "type": "ROUTER", 
     "ifces": [
       {
         "urn": "eqx-ash-rt1:xe-2/1/0", 
@@ -829,12 +835,13 @@
   }, 
   {
     "urn": "llnldc-rt4", 
-    "type": "ROUTER", 
-    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
+    "reservableVlans": [], 
+    "model": "JUNIPER_MX", 
+    "type": "ROUTER", 
     "ifces": [
       {
         "urn": "llnldc-rt4:t3-0/3/0", 
@@ -893,12 +900,13 @@
   }, 
   {
     "urn": "newy-cr5", 
-    "type": "ROUTER", 
-    "model": "ALCATEL_SR7750", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
+    "reservableVlans": [], 
+    "model": "ALCATEL_SR7750", 
+    "type": "ROUTER", 
     "ifces": [
       {
         "urn": "newy-cr5:4/1/1", 
@@ -1012,12 +1020,13 @@
   }, 
   {
     "urn": "sunn-cr5", 
-    "type": "ROUTER", 
-    "model": "ALCATEL_SR7750", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
+    "reservableVlans": [], 
+    "model": "ALCATEL_SR7750", 
+    "type": "ROUTER", 
     "ifces": [
       {
         "urn": "sunn-cr5:10/1/4", 
@@ -1295,12 +1304,13 @@
   }, 
   {
     "urn": "fnal-mr2", 
-    "type": "ROUTER", 
-    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
+    "reservableVlans": [], 
+    "model": "JUNIPER_MX", 
+    "type": "ROUTER", 
     "ifces": [
       {
         "urn": "fnal-mr2:xe-2/1/0", 
@@ -1387,12 +1397,13 @@
   }, 
   {
     "urn": "ornl-cr5", 
-    "type": "ROUTER", 
-    "model": "ALCATEL_SR7750", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
+    "reservableVlans": [], 
+    "model": "ALCATEL_SR7750", 
+    "type": "ROUTER", 
     "ifces": [
       {
         "urn": "ornl-cr5:9/1/4", 
@@ -1480,12 +1491,13 @@
   }, 
   {
     "urn": "wash-ar1", 
-    "type": "ROUTER", 
-    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
+    "reservableVlans": [], 
+    "model": "JUNIPER_MX", 
+    "type": "ROUTER", 
     "ifces": [
       {
         "urn": "wash-ar1:ae0", 
@@ -1546,12 +1558,13 @@
   }, 
   {
     "urn": "forr-rt2", 
-    "type": "ROUTER", 
-    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
+    "reservableVlans": [], 
+    "model": "JUNIPER_MX", 
+    "type": "ROUTER", 
     "ifces": [
       {
         "urn": "forr-rt2:ge-0/0/1", 
@@ -1650,12 +1663,13 @@
   }, 
   {
     "urn": "sacr-cr5", 
-    "type": "ROUTER", 
-    "model": "ALCATEL_SR7750", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
+    "reservableVlans": [], 
+    "model": "ALCATEL_SR7750", 
+    "type": "ROUTER", 
     "ifces": [
       {
         "urn": "sacr-cr5:10/1/3", 
@@ -1853,12 +1867,13 @@
   }, 
   {
     "urn": "paix-pa-rt3", 
-    "type": "ROUTER", 
-    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
+    "reservableVlans": [], 
+    "model": "JUNIPER_MX", 
+    "type": "ROUTER", 
     "ifces": [
       {
         "urn": "paix-pa-rt3:ae0", 
@@ -1891,12 +1906,13 @@
   }, 
   {
     "urn": "pantex-rt3", 
-    "type": "ROUTER", 
-    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
+    "reservableVlans": [], 
+    "model": "JUNIPER_MX", 
+    "type": "ROUTER", 
     "ifces": [
       {
         "urn": "pantex-rt3:ge-1/2/0", 
@@ -1955,12 +1971,13 @@
   }, 
   {
     "urn": "pnwg-cr5", 
-    "type": "ROUTER", 
-    "model": "ALCATEL_SR7750", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
+    "reservableVlans": [], 
+    "model": "ALCATEL_SR7750", 
+    "type": "ROUTER", 
     "ifces": [
       {
         "urn": "pnwg-cr5:2/2/1", 
@@ -2127,12 +2144,13 @@
   }, 
   {
     "urn": "elpa-cr5", 
-    "type": "ROUTER", 
-    "model": "ALCATEL_SR7750", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
+    "reservableVlans": [], 
+    "model": "ALCATEL_SR7750", 
+    "type": "ROUTER", 
     "ifces": [
       {
         "urn": "elpa-cr5:1/1/1", 
@@ -2206,12 +2224,13 @@
   }, 
   {
     "urn": "bois-cr1", 
-    "type": "ROUTER", 
-    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
+    "reservableVlans": [], 
+    "model": "JUNIPER_MX", 
+    "type": "ROUTER", 
     "ifces": [
       {
         "urn": "bois-cr1:xe-7/1/0", 
@@ -2323,12 +2342,13 @@
   }, 
   {
     "urn": "osti-rt2", 
-    "type": "ROUTER", 
-    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
+    "reservableVlans": [], 
+    "model": "JUNIPER_MX", 
+    "type": "ROUTER", 
     "ifces": [
       {
         "urn": "osti-rt2:xe-1/2/0", 
@@ -2362,12 +2382,13 @@
   }, 
   {
     "urn": "cern-272-cr5", 
-    "type": "ROUTER", 
-    "model": "ALCATEL_SR7750", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
+    "reservableVlans": [], 
+    "model": "ALCATEL_SR7750", 
+    "type": "ROUTER", 
     "ifces": [
       {
         "urn": "cern-272-cr5:1/1/1", 
@@ -2453,12 +2474,13 @@
   }, 
   {
     "urn": "snla-rt3", 
-    "type": "ROUTER", 
-    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
+    "reservableVlans": [], 
+    "model": "JUNIPER_MX", 
+    "type": "ROUTER", 
     "ifces": [
       {
         "urn": "snla-rt3:xe-1/2/0", 
@@ -2556,12 +2578,13 @@
   }, 
   {
     "urn": "slac-mr2", 
-    "type": "ROUTER", 
-    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
+    "reservableVlans": [], 
+    "model": "JUNIPER_MX", 
+    "type": "ROUTER", 
     "ifces": [
       {
         "urn": "slac-mr2:xe-1/2/0", 
@@ -2661,12 +2684,13 @@
   }, 
   {
     "urn": "ameslab-rt3", 
-    "type": "ROUTER", 
-    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
+    "reservableVlans": [], 
+    "model": "JUNIPER_MX", 
+    "type": "ROUTER", 
     "ifces": [
       {
         "urn": "ameslab-rt3:xe-0/0/0", 
@@ -2752,12 +2776,13 @@
   }, 
   {
     "urn": "snll-mr2", 
-    "type": "ROUTER", 
-    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
+    "reservableVlans": [], 
+    "model": "JUNIPER_MX", 
+    "type": "ROUTER", 
     "ifces": [
       {
         "urn": "snll-mr2:xe-0/2/0", 
@@ -2885,12 +2910,13 @@
   }, 
   {
     "urn": "hous-cr5", 
-    "type": "ROUTER", 
-    "model": "ALCATEL_SR7750", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
+    "reservableVlans": [], 
+    "model": "ALCATEL_SR7750", 
+    "type": "ROUTER", 
     "ifces": [
       {
         "urn": "hous-cr5:1/1/1", 
@@ -2964,12 +2990,13 @@
   }, 
   {
     "urn": "lsvn-cr1", 
-    "type": "ROUTER", 
-    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
+    "reservableVlans": [], 
+    "model": "JUNIPER_MX", 
+    "type": "ROUTER", 
     "ifces": [
       {
         "urn": "lsvn-cr1:ge-1/1/5", 
@@ -3081,12 +3108,13 @@
   }, 
   {
     "urn": "albq-cr5", 
-    "type": "ROUTER", 
-    "model": "ALCATEL_SR7750", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
+    "reservableVlans": [], 
+    "model": "ALCATEL_SR7750", 
+    "type": "ROUTER", 
     "ifces": [
       {
         "urn": "albq-cr5:2/1/1", 
@@ -3187,12 +3215,13 @@
   }, 
   {
     "urn": "eqx-sj-rt1", 
-    "type": "ROUTER", 
-    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
+    "reservableVlans": [], 
+    "model": "JUNIPER_MX", 
+    "type": "ROUTER", 
     "ifces": [
       {
         "urn": "eqx-sj-rt1:xe-0/2/0", 
@@ -3368,12 +3397,13 @@
   }, 
   {
     "urn": "lbl-mr2", 
-    "type": "ROUTER", 
-    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
+    "reservableVlans": [], 
+    "model": "JUNIPER_MX", 
+    "type": "ROUTER", 
     "ifces": [
       {
         "urn": "lbl-mr2:xe-1/3/0", 
@@ -3719,12 +3749,13 @@
   }, 
   {
     "urn": "denv-cr5", 
-    "type": "ROUTER", 
-    "model": "ALCATEL_SR7750", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
+    "reservableVlans": [], 
+    "model": "ALCATEL_SR7750", 
+    "type": "ROUTER", 
     "ifces": [
       {
         "urn": "denv-cr5:10/1/4", 
@@ -3933,12 +3964,13 @@
   }, 
   {
     "urn": "sdsc-sdn2", 
-    "type": "ROUTER", 
-    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
+    "reservableVlans": [], 
+    "model": "JUNIPER_MX", 
+    "type": "ROUTER", 
     "ifces": [
       {
         "urn": "sdsc-sdn2:xe-1/1/0", 
@@ -4011,12 +4043,13 @@
   }, 
   {
     "urn": "ga-rt2", 
-    "type": "ROUTER", 
-    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
+    "reservableVlans": [], 
+    "model": "JUNIPER_MX", 
+    "type": "ROUTER", 
     "ifces": [
       {
         "urn": "ga-rt2:ge-1/1/3", 
@@ -4102,12 +4135,13 @@
   }, 
   {
     "urn": "llnl-mr2", 
-    "type": "ROUTER", 
-    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
+    "reservableVlans": [], 
+    "model": "JUNIPER_MX", 
+    "type": "ROUTER", 
     "ifces": [
       {
         "urn": "llnl-mr2:xe-0/2/0", 
@@ -4299,12 +4333,13 @@
   }, 
   {
     "urn": "lond-cr5", 
-    "type": "ROUTER", 
-    "model": "ALCATEL_SR7750", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
+    "reservableVlans": [], 
+    "model": "ALCATEL_SR7750", 
+    "type": "ROUTER", 
     "ifces": [
       {
         "urn": "lond-cr5:4/1/1", 
@@ -4431,12 +4466,13 @@
   }, 
   {
     "urn": "snll-rt2", 
-    "type": "ROUTER", 
-    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
+    "reservableVlans": [], 
+    "model": "JUNIPER_MX", 
+    "type": "ROUTER", 
     "ifces": [
       {
         "urn": "snll-rt2:ge-0/1/0", 
@@ -4469,12 +4505,13 @@
   }, 
   {
     "urn": "wash-cr5", 
-    "type": "ROUTER", 
-    "model": "ALCATEL_SR7750", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
+    "reservableVlans": [], 
+    "model": "ALCATEL_SR7750", 
+    "type": "ROUTER", 
     "ifces": [
       {
         "urn": "wash-cr5:10/1/5", 
@@ -4658,12 +4695,13 @@
   }, 
   {
     "urn": "amst-cr5", 
-    "type": "ROUTER", 
-    "model": "ALCATEL_SR7750", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
+    "reservableVlans": [], 
+    "model": "ALCATEL_SR7750", 
+    "type": "ROUTER", 
     "ifces": [
       {
         "urn": "amst-cr5:4/1/1", 
@@ -4763,12 +4801,13 @@
   }, 
   {
     "urn": "doe-gtn-rt2", 
-    "type": "ROUTER", 
-    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
+    "reservableVlans": [], 
+    "model": "JUNIPER_MX", 
+    "type": "ROUTER", 
     "ifces": [
       {
         "urn": "doe-gtn-rt2:ge-0/1/0", 
@@ -4880,12 +4919,13 @@
   }, 
   {
     "urn": "eqx-chi-rt1", 
-    "type": "ROUTER", 
-    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
+    "reservableVlans": [], 
+    "model": "JUNIPER_MX", 
+    "type": "ROUTER", 
     "ifces": [
       {
         "urn": "eqx-chi-rt1:xe-5/0/0", 
@@ -5010,12 +5050,13 @@
   }, 
   {
     "urn": "aofa-cr5", 
-    "type": "ROUTER", 
-    "model": "ALCATEL_SR7750", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
+    "reservableVlans": [], 
+    "model": "ALCATEL_SR7750", 
+    "type": "ROUTER", 
     "ifces": [
       {
         "urn": "aofa-cr5:6/2/1", 
@@ -5252,12 +5293,13 @@
   }, 
   {
     "urn": "cern-513-cr5", 
-    "type": "ROUTER", 
-    "model": "ALCATEL_SR7750", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
+    "reservableVlans": [], 
+    "model": "ALCATEL_SR7750", 
+    "type": "ROUTER", 
     "ifces": [
       {
         "urn": "cern-513-cr5:1/2/1", 
@@ -5370,12 +5412,13 @@
   }, 
   {
     "urn": "nersc-mr2", 
-    "type": "ROUTER", 
-    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
+    "reservableVlans": [], 
+    "model": "JUNIPER_MX", 
+    "type": "ROUTER", 
     "ifces": [
       {
         "urn": "nersc-mr2:xe-2/2/0", 
@@ -5500,12 +5543,13 @@
   }, 
   {
     "urn": "star-cr5", 
-    "type": "ROUTER", 
-    "model": "ALCATEL_SR7750", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
+    "reservableVlans": [], 
+    "model": "ALCATEL_SR7750", 
+    "type": "ROUTER", 
     "ifces": [
       {
         "urn": "star-cr5:10/1/1", 
@@ -5780,12 +5824,13 @@
   }, 
   {
     "urn": "bnl-mr2", 
-    "type": "ROUTER", 
-    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
+    "reservableVlans": [], 
+    "model": "JUNIPER_MX", 
+    "type": "ROUTER", 
     "ifces": [
       {
         "urn": "bnl-mr2:xe-1/3/0", 
@@ -5926,12 +5971,13 @@
   }, 
   {
     "urn": "nash-cr5", 
-    "type": "ROUTER", 
-    "model": "ALCATEL_SR7750", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
+    "reservableVlans": [], 
+    "model": "ALCATEL_SR7750", 
+    "type": "ROUTER", 
     "ifces": [
       {
         "urn": "nash-cr5:10/1/4", 
@@ -6033,12 +6079,13 @@
   }, 
   {
     "urn": "ornl-rt4", 
-    "type": "ROUTER", 
-    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
+    "reservableVlans": [], 
+    "model": "JUNIPER_MX", 
+    "type": "ROUTER", 
     "ifces": [
       {
         "urn": "ornl-rt4:xe-0/2/0", 
@@ -6153,12 +6200,13 @@
   }, 
   {
     "urn": "bost-cr5", 
-    "type": "ROUTER", 
-    "model": "ALCATEL_SR7750", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
+    "reservableVlans": [], 
+    "model": "ALCATEL_SR7750", 
+    "type": "ROUTER", 
     "ifces": [
       {
         "urn": "bost-cr5:5/1/1", 
@@ -6271,12 +6319,13 @@
   }, 
   {
     "urn": "jgi-mr2", 
-    "type": "ROUTER", 
-    "model": "JUNIPER_MX", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
+    "reservableVlans": [], 
+    "model": "JUNIPER_MX", 
+    "type": "ROUTER", 
     "ifces": [
       {
         "urn": "jgi-mr2:xe-2/2/0", 
@@ -6336,12 +6385,13 @@
   }, 
   {
     "urn": "atla-cr5", 
-    "type": "ROUTER", 
-    "model": "ALCATEL_SR7750", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
+    "reservableVlans": [], 
+    "model": "ALCATEL_SR7750", 
+    "type": "ROUTER", 
     "ifces": [
       {
         "urn": "atla-cr5:2/1/1", 
@@ -6455,12 +6505,13 @@
   }, 
   {
     "urn": "kans-cr5", 
-    "type": "ROUTER", 
-    "model": "ALCATEL_SR7750", 
     "capabilities": [
       "ETHERNET", 
       "MPLS"
     ], 
+    "reservableVlans": [], 
+    "model": "ALCATEL_SR7750", 
+    "type": "ROUTER", 
     "ifces": [
       {
         "urn": "kans-cr5:1/1/1", 

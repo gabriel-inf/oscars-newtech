@@ -14,16 +14,14 @@
     <div class="panel panel-default">
         <div class="panel-heading">
             <h4 class="panel-title">
-                <a data-toggle="collapse" href="#network_viz">Show / hide network</a>
+                <a data-toggle="collapse" href="#network_panel">Show / hide network</a>
             </h4>
         </div>
-        <div id="network_viz" class="panel-body collapse in"></div>
-    </div>
-    <div class="panel panel-default">
-        <div class="panel-body">
-            <form class="form-inline">
+        <div id="network_panel" class="panel-body collapse in">
+            <div id="network_viz" class="col-md-10"></div>
+            <div id="add_junction_div" class="col-md-2" data-spy="affix" data-offset-top="30">
                 <button type="submit" id="add_junction_btn" class="btn btn-primary disabled">Add to request</button>
-            </form>
+            </div>
         </div>
     </div>
 </div>

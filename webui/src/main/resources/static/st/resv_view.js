@@ -13,7 +13,7 @@ var make_graphs = function() {
         // Parse JSON string into object
         var nv_cont = document.getElementById('reservation_view_viz');
         var nv_opts = {
-            height: '500px',
+            height: '400px',
             interaction: {
                 hover: false,
                 navigationButtons: true,

@@ -53,39 +53,54 @@ public class RouterCommandGenerator {
         rvj_set.addAll(rvf.getJunctions());
         Map<String, List<String>> isolatedJunctionCommands = isolatedJunctionCommands(rvj_set);
 
-        Map<String, List<String>> pipeCommands = new HashMap<>();
+        Map<String, List<String>> ethCommands = new HashMap<>();
         Map<String, List<String>> mplsCommands = new HashMap<>();
         for (ReservedEthPipeE rep : rvf.getEthPipes()) {
-            pipeCommands = this.ethPipeCommands(rep);
+            log.info("generating config for eth pipe "+rep.getId());
+            Map<String, List<String>> thisPipeCommands = this.ethPipeCommands(rep);
+            thisPipeCommands.forEach((urn, commands) -> {
+                if (!ethCommands.keySet().contains(urn)) {
+                    ethCommands.put(urn, new ArrayList<>());
+                }
+                ethCommands.get(urn).addAll(commands);
+
+            });
+
         }
 
         for (ReservedMplsPipeE rep : rvf.getMplsPipes()) {
-            mplsCommands = this.mplsPipeCommands(rep);
+            log.info("generating config for mpls pipe "+rep.getId());
+            Map<String, List<String>> thisPipeCommands  = this.mplsPipeCommands(rep);
+            thisPipeCommands.forEach((urn, commands) -> {
+                if (!mplsCommands.keySet().contains(urn)) {
+                    mplsCommands.put(urn, new ArrayList<>());
+                }
+                mplsCommands.get(urn).addAll(commands);
+
+            });
         }
         Map<String, List<String>> commandsByDevice = new HashMap<>();
 
         isolatedJunctionCommands.forEach((urn, commands) -> {
-            if (!commandsByDevice.keySet().contains(urn)) {
-                commandsByDevice.put(urn, commands);
-            } else {
-                commandsByDevice.get(urn).addAll(commands);
-            }
+            log.info("adding isolated junction commands for "+urn);
+            commandsByDevice.put(urn, commands);
+
         });
 
-        pipeCommands.forEach((urn, commands) -> {
+        ethCommands.forEach((urn, commands) -> {
+            log.info("adding ethernet commands for "+urn);
             if (!commandsByDevice.keySet().contains(urn)) {
-                commandsByDevice.put(urn, commands);
-            } else {
-                commandsByDevice.get(urn).addAll(commands);
+                commandsByDevice.put(urn, new ArrayList<>());
             }
+            commandsByDevice.get(urn).addAll(commands);
         });
 
         mplsCommands.forEach((urn, commands) -> {
+            log.info("adding mpls commands for "+urn);
             if (!commandsByDevice.keySet().contains(urn)) {
-                commandsByDevice.put(urn, commands);
-            } else {
-                commandsByDevice.get(urn).addAll(commands);
+                commandsByDevice.put(urn, new ArrayList<>());
             }
+            commandsByDevice.get(urn).addAll(commands);
         });
 
         for (String deviceUrn : commandsByDevice.keySet()) {
@@ -110,6 +125,7 @@ public class RouterCommandGenerator {
         Map<String, List<String>> result = new HashMap<>();
         for (ReservedVlanJunctionE rvj : rvj_set) {
             String deviceUrn = rvj.getDeviceUrn();
+            log.info("generating junction commands for "+deviceUrn);
             if (!result.containsKey(deviceUrn)) {
                 result.put(deviceUrn, new ArrayList<>());
             }
@@ -117,7 +133,6 @@ public class RouterCommandGenerator {
             switch (device.getDeviceModel()) {
                 case ALCATEL_SR7750:
                     result.get(deviceUrn).add(alcatelJunction(rvj));
-
                     break;
                 case JUNIPER_EX:
                     result.get(deviceUrn).add(juniperExJunction(rvj));
@@ -137,6 +152,7 @@ public class RouterCommandGenerator {
         Set<ReservedVlanJunctionE> rvjs = new HashSet<>();
         rvjs.add(rep.getAJunction());
         rvjs.add(rep.getZJunction());
+        // TODO: make this correct
         return isolatedJunctionCommands(rvjs);
     }
 
@@ -144,53 +160,50 @@ public class RouterCommandGenerator {
         Set<ReservedVlanJunctionE> rvjs = new HashSet<>();
         rvjs.add(rep.getAJunction());
         rvjs.add(rep.getZJunction());
+        // TODO: make this correct
         return isolatedJunctionCommands(rvjs);
     }
 
     private String alcatelJunction(ReservedVlanJunctionE rvj) {
+        // TODO: no samples
         String out = "Sample Alcatel router config for junction ; " + rvj.getDeviceUrn() + " \n";
         for (ReservedVlanFixtureE f : rvj.getFixtures()) {
             out += f.getIfceUrn();
             out += "  bw : " + f.getReservedBandwidth().getInBandwidth() + " / " + f.getReservedBandwidth().getEgBandwidth() + "\n";
-            List<String> vlans = f.getReservedVlans()
-                    .stream()
-                    .map(ReservedVlanE::getVlan)
-                    .map(Object::toString)
-                    .collect(Collectors.toList());
-            out += "  vlan : " + String.join(",", vlans);
+            out += "  vlan : " + vlanString(f);
         }
         return out;
 
     }
 
     private String juniperMxJunction(ReservedVlanJunctionE rvj) {
+        // TODO: no samples
         String out = "Sample Juniper MX router config for junction ; " + rvj.getDeviceUrn() + " \n";
         for (ReservedVlanFixtureE f : rvj.getFixtures()) {
             out += f.getIfceUrn();
             out += "  bw : " + f.getReservedBandwidth().getInBandwidth() + " / " + f.getReservedBandwidth().getEgBandwidth() + "\n";
-            List<String> vlans = f.getReservedVlans()
-                    .stream()
-                    .map(ReservedVlanE::getVlan)
-                    .map(Object::toString)
-                    .collect(Collectors.toList());
-            out += "  vlan : " + String.join(",", vlans);
+            out += "  vlan : " + vlanString(f);
         }
         return out;
     }
 
     private String juniperExJunction(ReservedVlanJunctionE rvj) {
+        // TODO: no samples
         String out = "Sample Juniper EX switch config for junction ; " + rvj.getDeviceUrn() + " \n";
         for (ReservedVlanFixtureE f : rvj.getFixtures()) {
             out += f.getIfceUrn();
             out += "  bw : " + f.getReservedBandwidth().getInBandwidth() + " / " + f.getReservedBandwidth().getEgBandwidth() + "\n";
-            List<String> vlans = f.getReservedVlans()
-                    .stream()
-                    .map(ReservedVlanE::getVlan)
-                    .map(Object::toString)
-                    .collect(Collectors.toList());
-            out += "  vlan : " + String.join(",", vlans);
+            out += "  vlan : " + vlanString(f);
         }
         return out;
+    }
+    private String vlanString(ReservedVlanFixtureE f) {
+        List<String> vlans = f.getReservedVlans()
+                .stream()
+                .map(ReservedVlanE::getVlan)
+                .map(Object::toString)
+                .collect(Collectors.toList());
+        return String.join(",", vlans);
     }
 
 }

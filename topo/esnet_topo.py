@@ -125,6 +125,7 @@ def transform_devices(in_devices=None):
             "type": "ROUTER",
             "capabilities": ["ETHERNET", "MPLS"],
             "ifces": [],
+            "reservableVlans": []
         }
         out_routers.append(out_router)
 
