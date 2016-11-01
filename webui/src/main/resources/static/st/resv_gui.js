@@ -376,24 +376,22 @@ var resv_precheck = function (e) {
             contentType: "application/json; charset=utf-8",
             dataType: "json",
             success: function (data) {
-                precheck_box.addClass("alert-success").removeClass("alert-info");
-                precheck_box.text("Precheck Complete.");
 
-                console.log("PRECHECK RESULT: " + data);
+                var connID = data["connectionId"];
+                var preCheckRes = data["preCheckResult"];
 
-                try
+                console.log("Precheck Result: " + preCheckRes);
+
+                if(preCheckRes == "UNSUCCESSFUL")
                 {
-                var preCheckResp = JSON.parse(data);
+                    precheck_box.addClass("alert-danger").removeClass("alert-info");
+                    precheck_box.text("Precheck Failed.");
                 }
-                catch(e){alert(e);}
-
-                console.log("RESP: " + preCheckResp);
-
-                var connID = preCheckResp["connectionId"];
-                var preCheckRes = preCheckResp["preCheckResult"];
-
-                console.log("PRECHECK ID: " + connID);
-                console.log("PRECHECK RESULT: " + preCheckRes);
+                else
+                {
+                    precheck_box.addClass("alert-success").removeClass("alert-info");
+                    precheck_box.text("Precheck Passed.");
+                }
 
                 need_review = false;
             }
