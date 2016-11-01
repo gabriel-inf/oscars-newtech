@@ -18,7 +18,9 @@ var reservation_request = {
 
 var resv_commit_btn;
 var resv_hold_btn;
+var resv_precheck_btn;
 var errors_box;
+var precheck_box;
 
 var doNothing = function (e) {
     console.log("doing nothing");
@@ -210,13 +212,26 @@ var review_ready = function () {
         resv_hold_btn.addClass("active").removeClass("disabled");
         resv_hold_btn.off();
         resv_hold_btn.on('click', resv_hold);
+
+        resv_precheck_btn.addClass("active").removeClass("disabled");
+        resv_precheck_btn.off();
+        resv_precheck_btn.on('click', resv_precheck);
     } else {
         errors_box.addClass("alert-danger");
         errors_box.removeClass("alert-success");
         errors_box.text(errors);
+
         resv_hold_btn.addClass("disabled").removeClass("active");
         resv_hold_btn.off();
         resv_hold_btn.on('click', doNothing);
+
+        resv_precheck_btn.addClass("disabled").removeClass("active");
+        resv_precheck_btn.off();
+        resv_precheck_btn.on('click', doNothing);
+
+        precheck_box.removeClass("alert-info").removeClass("alert-success").removeClass("alert-danger").removeClass("alert-warning");
+        precheck_box.text(" ");
+        precheck_box.hide();
     }
     setTimeout(review_ready, 1000);
 
@@ -285,6 +300,10 @@ var resv_hold = function (e) {
         var json = JSON.stringify(reservation_request);
         console.log(json);
 
+        precheck_box.removeClass("alert-info").removeClass("alert-success").removeClass("alert-danger").removeClass("alert-warning");
+        precheck_box.text(" ");
+        precheck_box.hide();
+
         // TODO: handle errors
         $.ajax({
             type: "POST",
@@ -304,6 +323,11 @@ var resv_hold = function (e) {
                 resv_hold_btn.addClass("disabled").removeClass("active");
                 resv_hold_btn.off();
                 resv_hold_btn.on('click', doNothing);
+
+                resv_precheck_btn.addClass("disabled").removeClass("active");
+                resv_precheck_btn.off();
+                resv_precheck_btn.on('click', doNothing);
+
                 need_review = false;
             }
         });
@@ -313,6 +337,72 @@ var resv_hold = function (e) {
     return false;
 };
 
+var resv_precheck = function (e) {
+    e.preventDefault();
+
+    precheck_box.show();
+    precheck_box.addClass("alert-info");
+    precheck_box.removeClass("alert-success");
+    precheck_box.removeClass("alert-danger");
+    precheck_box.text("Precheck Initialized.");
+
+    console.log("pre-checking a reservation");
+    reservation_request["description"] = $('#description').val();
+
+    var start_dtstring = $('#start_at').val();
+    var end_dtstring = $('#end_at').val();
+
+    var start_m = moment(start_dtstring);
+    var end_m = moment(end_dtstring);
+
+    reservation_request["startAt"] = parseInt(start_m.unix());
+    reservation_request["endAt"] = parseInt(end_m.unix());
+
+
+    loadJSON("/resv/newConnectionId", function (response) {
+        var json_data = JSON.parse(response);
+        console.log(json_data);
+        reservation_request["connectionId"] = json_data["connectionId"];
+        console.log("got a new connection id "+reservation_request["connectionId"]);
+
+        var json = JSON.stringify(reservation_request);
+        console.log(json);
+
+        // TODO: handle errors
+        $.ajax({
+            type: "POST",
+            url: "/resv/precheck",
+            data: json,
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+                precheck_box.addClass("alert-success").removeClass("alert-info");
+                precheck_box.text("Precheck Complete.");
+
+                console.log("PRECHECK RESULT: " + data);
+
+                try
+                {
+                var preCheckResp = JSON.parse(data);
+                }
+                catch(e){alert(e);}
+
+                console.log("RESP: " + preCheckResp);
+
+                var connID = preCheckResp["connectionId"];
+                var preCheckRes = preCheckResp["preCheckResult"];
+
+                console.log("PRECHECK ID: " + connID);
+                console.log("PRECHECK RESULT: " + preCheckRes);
+
+                need_review = false;
+            }
+        });
+
+    });
+
+    return false;
+};
 
 var make_graphs = function() {
 
@@ -409,7 +499,11 @@ $(document).ready(function () {
     resv_commit_btn = $('#resv_commit_btn');
     resv_commit_btn.on('click', doNothing);
 
+    resv_precheck_btn = $('#resv_precheck_btn');
+    resv_precheck_btn.on('click', doNothing);
+
     errors_box = $('#errors_box');
+    precheck_box = $('#precheck_box');
 
 
     $('#resv_buttons_form').on('submit', doNothing);

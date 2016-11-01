@@ -7,7 +7,8 @@ import net.es.oscars.dto.bwavail.BandwidthAvailabilityResponse;
 import net.es.oscars.dto.pss.EthFixtureType;
 import net.es.oscars.dto.pss.EthJunctionType;
 import net.es.oscars.dto.pss.EthPipeType;
-import net.es.oscars.dto.resv.*;
+import net.es.oscars.dto.resv.Connection;
+import net.es.oscars.dto.resv.ConnectionFilter;
 import net.es.oscars.dto.spec.*;
 import net.es.oscars.pce.PCEException;
 import net.es.oscars.pss.PSSException;
@@ -24,7 +25,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Controller
@@ -111,6 +111,7 @@ public class ResvController {
 
     }
 
+
     @RequestMapping(value = "/resv/basic_vlan/add", method = RequestMethod.POST)
     @ResponseBody
     public Connection basic_vlan_add(@RequestBody BasicVlanSpecification dtoSpec) throws PSSException, PCEException {
@@ -129,6 +130,7 @@ public class ResvController {
         return makeConnectionFromVlanSpec(spec);
     }
 
+    // Default endpoint for holding a new connection
     @RequestMapping(value = "/resv/connection/add", method = RequestMethod.POST)
     @ResponseBody
     public Connection submitConnection(@RequestBody Connection connection) throws PSSException, PCEException {
@@ -138,6 +140,17 @@ public class ResvController {
         return holdConnection(connection);
     }
 
+    // Endpoint for pre-check on a connection
+    @RequestMapping(value = "/resv/connection/precheck", method = RequestMethod.POST)
+    @ResponseBody
+    public Connection preCheck(@RequestBody Connection connection) throws PSSException, PCEException
+    {
+        log.info("Pre-check initialized for ConnectionID: " + connection.getConnectionId());
+
+        Connection connResult = preCheckConnection(connection);     // connResult may be null!
+
+        return connResult;
+    }
 
     @RequestMapping(value = "/resv/bwAvail/", method = RequestMethod.POST)
     @ResponseBody
@@ -194,6 +207,27 @@ public class ResvController {
 
         return conn;
 
+    }
+
+    private Connection preCheckConnection(Connection connection) throws PCEException, PSSException
+    {
+        log.info("Pre-checking ConnectionID: " + connection.getConnectionId());
+        ConnectionE connE = modelMapper.map(connection, ConnectionE.class);
+
+        Boolean successful = resvService.preCheck(connE);
+
+        Connection conn = modelMapper.map(connE, Connection.class);
+
+        if(successful)
+        {
+            log.info("Pre-check result: SUCCESS");
+            return conn;
+        }
+        else
+        {
+            log.info("Pre-check result: UNSUCCESSFUL");
+            return null;
+        }
     }
 
     private Connection makeConnectionFromBasic(BasicVlanSpecification dtoSpec) throws PCEException, PSSException {

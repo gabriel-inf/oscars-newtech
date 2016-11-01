@@ -8,27 +8,35 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-
+/**
+ * Created by jeremy on 11/1/16.
+ */
 @Slf4j
 @Component
-public class MinimalRequester {
+public class MinimalPreChecker
+{
     @Autowired
     private RestTemplate restTemplate;
 
 
-    public Connection holdMinimal(MinimalRequest minimalRequest) {
-        log.info("holding minimal " + minimalRequest.toString());
+    public Connection preCheckMinimal(MinimalRequest minimalRequest)
+    {
+        log.info("Pre-checking minimal " + minimalRequest.getConnectionId());
 
         MinimalConnectionBuilder minimalConnectionBuilder = new MinimalConnectionBuilder();
         Connection c = minimalConnectionBuilder.buildMinimalConnectionFromRequest(minimalRequest);
 
-        String submitUrl = "resv/connection/add";
+        String submitUrl = "/resv/connection/precheck";
         String restPath = "https://localhost:8000/" + submitUrl;
-        log.info("sending connection " + c.toString());
+
         Connection resultC = restTemplate.postForObject(restPath, c, Connection.class);
-        log.info("got connection " + resultC.toString());
-        return c;
+
+        if(resultC == null)
+            log.info("Pre-Check result: UNSUCCESSFUL");
+        else
+            log.info("Pre-Check result: SUCCESS");
+
+        //return c;
+        return resultC;
     }
-
-
 }
