@@ -6,6 +6,9 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.bwavail.BandwidthAvailabilityRequest;
 import net.es.oscars.dto.bwavail.BandwidthAvailabilityResponse;
+import net.es.oscars.dto.spec.PalindromicType;
+import net.es.oscars.dto.spec.SurvivabilityType;
+import net.es.oscars.dto.topo.enums.UrnType;
 import net.es.oscars.helpers.RequestedEntityBuilder;
 import net.es.oscars.helpers.ReservedEntityDecomposer;
 import net.es.oscars.pce.*;
@@ -15,6 +18,7 @@ import net.es.oscars.resv.ent.*;
 import net.es.oscars.dto.topo.TopoVertex;
 import net.es.oscars.dto.topo.Topology;
 import net.es.oscars.topo.dao.UrnRepository;
+import net.es.oscars.topo.ent.BidirectionalPathE;
 import net.es.oscars.topo.ent.UrnE;
 import net.es.oscars.topo.svc.TopoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +63,10 @@ public class BandwidthAvailabilityService {
     private final static String EGRESS = "EGRESS";
     private final static String AZ = "AZ";
     private final static String ZA = "ZA";
+    private final static String AZMIN = "AZMIN";
+    private final static String AZMAX = "AZMAX";
+    private final static String ZAMIN = "ZAMIN";
+    private final static String ZAMAX = "ZAMAX";
 
     /**
      * Given a bandwidth availability request, return a response that contains a mapping of the minimum
@@ -73,101 +81,152 @@ public class BandwidthAvailabilityService {
         // Confirm that the request involves nodes in the topology
         if (!validateRequest(request)) {
             log.info("Topology: " + topoService.getMultilayerTopology());
-            return buildResponse(request, -1, -1, -1, -1, new HashMap<>(), new HashMap<>());
+            return buildResponse(new HashMap<>(), new HashMap<>(), new HashMap<>());
         }
-
-        // Initialize storage for urns, and reserved elements
-        Set<UrnE> urns = new HashSet<>();
-        List<ReservedBandwidthE> rsvList = new ArrayList<>();
-        Map<String, List<ReservedBandwidthE>> rsvMap;
-        ReservedBlueprintE rsvBlueprint;
 
         // Create the requested schedule
         ScheduleSpecificationE reqSchSpec = entityBuilder.buildSchedule(request.getStartDate(), request.getEndDate());
-        // Create the request blueprint
-        RequestedBlueprintE reqBlueprint = entityBuilder.buildRequest(request.getSrcPort(), request.getSrcDevice(),
-                request.getDstPort(), request.getDstDevice(), request.getMinAzBandwidth(), request.getMinZaBandwidth(),
-                request.getPalindromicType(), request.getSurvivabilityType(), "any", "any", 1, 1, 1);
 
-        // Try to find a path using the PCE and the requested blueprint & schedule
-        try {
-            Optional<ReservedBlueprintE> optRsvBlueprint = topPCE.makeReserved(reqBlueprint, reqSchSpec);
-            // If a path could be found, store the URNs used
-            if (optRsvBlueprint.isPresent()) {
-                rsvBlueprint = optRsvBlueprint.get();
-                urns.addAll(entityDecomposer.decomposeReservedBlueprint(rsvBlueprint)
-                        .stream()
-                        .filter(urn -> urn.getReservableBandwidth() != null)
-                        .collect(Collectors.toList()));
+        // Maps for keeping track of statistics - will go into the response payload
+        Map<List<String>, Integer> minAvailableBwMap = new HashMap<>();
+        Map<List<String>, Map<Instant, Integer>> bwAvailabilityMap = new HashMap<>();
+        Map<List<String>, List<String>> pathPairMap = new HashMap<>();
+
+        // For each ERO, create a blueprint and get the response
+        List<RequestedBlueprintE> requestedBlueprints = generateRequestedBlueprints(request);
+
+        for(RequestedBlueprintE reqBlueprint : requestedBlueprints){
+            try {
+                Optional<ReservedBlueprintE> optRsvBlueprint = topPCE.makeReserved(reqBlueprint, reqSchSpec);
+                ReservedBlueprintE rsvBlueprint = null;
+                // If a path could be found, store the URNs used
+                if (optRsvBlueprint.isPresent()) {
+                    rsvBlueprint = optRsvBlueprint.get();
+                    processReservedBlueprint(rsvBlueprint, request, minAvailableBwMap, bwAvailabilityMap, pathPairMap);
+                }
+                // Otherwise, add empty/zero entries for a failed request
+                else {
+                    processFailedBlueprint(reqBlueprint, request, minAvailableBwMap, bwAvailabilityMap, pathPairMap);
+                }
+            } catch (PCEException | PSSException exception) {
+                log.info(exception.getMessage());
+                // Add empty/zero entries for a failed request
+                processFailedBlueprint(reqBlueprint, request, minAvailableBwMap, bwAvailabilityMap, pathPairMap);
             }
-            // Otherwise, return a response with 0 bandwidth available
-            else {
-                Map<Instant, Integer> azBwMap = new HashMap<>();
-                azBwMap.put(request.getStartDate().toInstant(), 0);
-                azBwMap.put(request.getEndDate().toInstant(), 0);
-                Map<Instant, Integer> zaBwMap = new HashMap<>();
-                zaBwMap.put(request.getStartDate().toInstant(), 0);
-                zaBwMap.put(request.getEndDate().toInstant(), 0);
-                return buildResponse(request, 0, 0, 0, 0, azBwMap, zaBwMap);
-            }
-        } catch (PCEException | PSSException exception) {
-            log.info(exception.getMessage());
-            return buildResponse(request, -1, -1, -1, -1, new HashMap<>(), new HashMap<>());
+
         }
 
+        return buildResponse(minAvailableBwMap, bwAvailabilityMap, pathPairMap);
+    }
 
-        Set<String> urnStrings = urns.stream().map(UrnE::getUrn).collect(Collectors.toSet());
-        // Retrieve the reserved bandwidths that overlap with the given start and end time
-        Optional<List<ReservedBandwidthE>> optRsvList = bwRepo.findOverlappingInterval(
-                request.getStartDate().toInstant(), request.getEndDate().toInstant());
-        if (optRsvList.isPresent())
-            rsvList.addAll(optRsvList.get());
-        // Filter out the reservations that do not involve this request's URNs
-        rsvList = rsvList.stream().filter(rsv -> urnStrings.contains(rsv.getUrn())).collect(Collectors.toList());
-        // Build a map from those reservations
-        rsvMap = bwService.buildReservedBandwidthMap(rsvList);
+    private void processReservedBlueprint(ReservedBlueprintE rsvBlueprint, BandwidthAvailabilityRequest request,
+                                          Map<List<String>, Integer> minAvailableBwMap,
+                                          Map<List<String>, Map<Instant, Integer>> bwAvailabilityMap,
+                                          Map<List<String>, List<String>> pathPairMap) {
 
-        // Create the AZ and ZA bandwidth maps given the reservations
-        Map<String, Map<Instant, Integer>> bwMaps = buildMaps(rsvMap, request.getStartDate().toInstant(), request.getEndDate().toInstant(), rsvBlueprint);
+        Set<BidirectionalPathE> paths = rsvBlueprint.getVlanFlow().getAllPaths();
+        for(BidirectionalPathE path : paths){
+            List<String> azPath = entityDecomposer.decomposeEdgeList(path.getAzPath());
+            List<String> zaPath = entityDecomposer.decomposeEdgeList(path.getZaPath());
 
-        // Find the Min and Max for both AZ and ZA directions
-        Map<String, Integer> minsAndMaxes = getMinimumsAndMaximums(bwMaps);
+            // Retrieve the reserved bandwidths that overlap with the given start and end time
+            Optional<List<ReservedBandwidthE>> optRsvList = bwRepo.findOverlappingInterval(
+                    request.getStartDate().toInstant(), request.getEndDate().toInstant());
 
-        return buildResponse(request, minsAndMaxes.get("minAZ"), minsAndMaxes.get("minZA"),
-                minsAndMaxes.get("maxAZ"), minsAndMaxes.get("maxZA"), bwMaps.get(AZ), bwMaps.get(ZA));
+            List<ReservedBandwidthE> rsvList = new ArrayList<>();
+
+            if (optRsvList.isPresent())
+                rsvList.addAll(optRsvList.get());
+            // Filter out the reservations that do not involve this request's URNs
+            Set<String> allElements = new HashSet<>(azPath);
+            allElements.addAll(zaPath);
+            rsvList = rsvList.stream().filter(rsv -> allElements.contains(rsv.getUrn())).collect(Collectors.toList());
+
+            // Build a map from those reservations
+            Map<String, List<ReservedBandwidthE>> rsvMap = bwService.buildReservedBandwidthMap(rsvList);
+
+            // Create the AZ and ZA bandwidth maps given the reservations
+            Map<String, Map<Instant, Integer>> bwMaps = buildMaps(rsvMap, request.getStartDate().toInstant(), request.getEndDate().toInstant(), azPath, zaPath);
+
+            // Find the Min and Max for both AZ and ZA directions
+            Map<String, Integer> minsAndMaxes = getMinimumsAndMaximums(bwMaps);
+
+            // Store the min values for the AZ and ZA path
+            minAvailableBwMap.put(azPath, minsAndMaxes.get(AZMIN));
+            minAvailableBwMap.put(zaPath, minsAndMaxes.get(ZAMIN));
+
+            // Store the <Instant, Bandwidth> time maps for each path
+            bwAvailabilityMap.put(azPath, bwMaps.get(AZ));
+            bwAvailabilityMap.put(zaPath, bwMaps.get(ZA));
+        }
+
+    }
+
+    private void processFailedBlueprint(RequestedBlueprintE reqBlueprint, BandwidthAvailabilityRequest request,
+                                        Map<List<String>, Integer> minAvailableBwMap,
+                                        Map<List<String>, Map<Instant, Integer>> bwAvailabilityMap,
+                                        Map<List<String>, List<String>> pathPairMap) {
+        Map<Instant, Integer> bwMap = new HashMap<>();
+        bwMap.put(request.getStartDate().toInstant(), 0);
+        bwMap.put(request.getEndDate().toInstant(), 0);
+        RequestedVlanPipeE reqPipe = reqBlueprint.getVlanFlow().getPipes().iterator().next();
+        List<String> azEro = reqPipe.getAzERO().size() > 0 ? reqPipe.getAzERO():
+                Arrays.asList(reqPipe.getAJunction().getDeviceUrn(), reqPipe.getZJunction().getDeviceUrn());
+        List<String> zaEro = reqPipe.getAzERO().size() > 0 ? reqPipe.getAzERO():
+                Arrays.asList(reqPipe.getZJunction().getDeviceUrn(), reqPipe.getAJunction().getDeviceUrn());
+
+        pathPairMap.put(azEro, zaEro);
+        pathPairMap.put(zaEro, azEro);
+
+        minAvailableBwMap.put(azEro, 0);
+        minAvailableBwMap.put(zaEro, 0);
+
+        bwAvailabilityMap.put(azEro, bwMap);
+        bwAvailabilityMap.put(zaEro, bwMap);
+    }
+
+    /**
+     * Given a BW avail request, generate a list of requested blueprints
+     */
+    private List<RequestedBlueprintE> generateRequestedBlueprints(BandwidthAvailabilityRequest request){
+        List<RequestedBlueprintE> blueprints = new ArrayList<>();
+
+        for(Integer index = 0; index < request.getAzEros().size(); index++){
+            List<String> azERO = request.getAzEros().get(index);
+            List<String> zaERO = request.getZaEros().get(index);
+
+            blueprints.add(entityBuilder.buildRequest(azERO, zaERO,
+                    request.getMinAzBandwidth(), request.getMinZaBandwidth()));
+        }
+        // Create one blueprint for the source, dest pair - PCE handles multiple paths
+        // Determine survivability type for request
+        //TODO: Support non-disjoint paths - Yen's Algorithm
+        SurvivabilityType sType = SurvivabilityType.SURVIVABILITY_NONE;
+        if(request.getDisjointPaths() || !request.getDisjointPaths()){
+            sType = SurvivabilityType.SURVIVABILITY_TOTAL;
+        }
+        blueprints.add(entityBuilder.buildRequest(request.getSrcPorts(), request.getSrcDevice(),
+                request.getDstPorts(), request.getDstDevice(), request.getMinAzBandwidth(), request.getMinZaBandwidth(),
+                PalindromicType.PALINDROME, sType, "any", request.getNumPaths(), 1, 1));
+
+        return blueprints;
     }
 
     /**
      * Build a response given the passed in parameters.
      *
-     * @param request - The original request
-     * @param minAZ   - The minimum available bandwidth in the AZ direction
-     * @param minZA   - The minimum available bandwidth in the ZA direction
-     * @param maxAZ   - The maximum available bandwidth in the AZ direction
-     * @param maxZA   - The maximum available bandwidth in the ZA direction
-     * @param azBwMap - A mapping of time instants to the minimum available bandwidth in the AZ direction
-     * @param zaBwMap - A mapping of time instants to the minimum available bandwidth in the ZA direciton
+     * @param minAvailableBwMap - Maps a path to the minimum available bandwidth value on that path.
+     * @param bwAvailabilityMap   - Maps a path to another map of time Instants --> min available bandwidth at that instant
+     * @param pathPairMap   - Maps a path to the matching reverse/forward path (i.e. AZ -> ZA, and ZA -> AZ)
      * @return A bandwidth availability response
      */
-    private BandwidthAvailabilityResponse buildResponse(BandwidthAvailabilityRequest request, Integer minAZ,
-                                                        Integer minZA, Integer maxAZ, Integer maxZA,
-                                                        Map<Instant, Integer> azBwMap, Map<Instant, Integer> zaBwMap) {
+    private BandwidthAvailabilityResponse buildResponse(Map<List<String>, Integer> minAvailableBwMap,
+                                                        Map<List<String>, Map<Instant, Integer>> bwAvailabilityMap,
+                                                        Map<List<String>, List<String>> pathPairMap) {
         return BandwidthAvailabilityResponse.builder()
-                .requestID(request.getRequestID())
-                .srcDevice(request.getSrcDevice())
-                .srcPort(request.getSrcPort())
-                .dstDevice(request.getDstDevice())
-                .dstPort(request.getDstPort())
-                .startDate(request.getStartDate())
-                .endDate(request.getEndDate())
-                .minRequestedAzBandwidth(request.getMinAzBandwidth())
-                .minRequestedZaBandwidth(request.getMinZaBandwidth())
-                .minAvailableAzBandwidth(minAZ)
-                .minAvailableZaBandwidth(minZA)
-                .maxAvailableAzBandwidth(maxAZ)
-                .maxAvailableZaBandwidth(maxZA)
-                .azBwAvailMap(azBwMap)
-                .zaBwAvailMap(zaBwMap)
+                .minAvailableBwMap(minAvailableBwMap)
+                .bwAvailabilityMap(bwAvailabilityMap)
+                .pathPairMap(pathPairMap)
                 .build();
     }
 
@@ -182,12 +241,30 @@ public class BandwidthAvailabilityService {
         // Confirm that src/dest devices/ports are actually in the topology
         Topology topo = topoService.getMultilayerTopology();
 
-        Optional<TopoVertex> srcDevice = topo.getVertexByUrn(request.getSrcDevice());
-        Optional<TopoVertex> srcPort = topo.getVertexByUrn(request.getSrcPort());
-        Optional<TopoVertex> dstDevice = topo.getVertexByUrn(request.getDstDevice());
-        Optional<TopoVertex> dstPort = topo.getVertexByUrn(request.getDstPort());
+        Boolean erosSpecified = request.getAzEros().size() > 0 && request.getZaEros().size() > 0
+                && request.getAzEros().size() == request.getZaEros().size();
 
-        return srcDevice.isPresent() && srcPort.isPresent() && dstDevice.isPresent() && dstPort.isPresent();
+        Boolean pairSpecified = request.getSrcDevice() != null && request.getDstDevice() != null
+                && request.getSrcPorts() != null && request.getDstPorts() != null && request.getDisjointPaths() != null
+                && request.getNumPaths() != null;
+        if(erosSpecified){
+            Boolean azValid = request.getAzEros()
+                    .stream()
+                    .map(path -> path.stream().allMatch(s -> topo.getVertexByUrn(s).isPresent()))
+                    .allMatch(status -> status);
+            Boolean zaValid = request.getZaEros()
+                    .stream()
+                    .map(path -> path.stream().allMatch(s -> topo.getVertexByUrn(s).isPresent()))
+                    .allMatch(status -> status);
+            return azValid && zaValid;
+        } else if(pairSpecified){
+            Boolean srcDevicePresent = topo.getVertexByUrn(request.getSrcDevice()).isPresent();
+            Boolean srcPortsPresent = request.getSrcPorts().stream().allMatch(p -> topo.getVertexByUrn(p).isPresent());
+            Boolean dstDevicePresent = topo.getVertexByUrn(request.getDstDevice()).isPresent();
+            Boolean dstPortsPresent = request.getDstPorts().stream().allMatch(p -> topo.getVertexByUrn(p).isPresent());
+            return srcDevicePresent && srcPortsPresent && dstDevicePresent && dstPortsPresent;
+        }
+        return false;
     }
 
     /**
@@ -196,13 +273,14 @@ public class BandwidthAvailabilityService {
      * @param rsvMap    Map of URNs to Reserved Bandwidths.
      * @param start     Start time for bandwidth maps.
      * @param end       End time for bandwidth maps.
-     * @param blueprint Reserved blueprint.
+     * @param azPath    All URN Strings in the A -> Z path
+     * @param zaPath    All URN strings in the Z -> A path
      * @return Maps of available bandwidth.
      */
     private Map<String, Map<Instant, Integer>> buildMaps(Map<String, List<ReservedBandwidthE>> rsvMap,
                                                          Instant start,
                                                          Instant end,
-                                                         ReservedBlueprintE blueprint) {
+                                                         List<String> azPath, List<String> zaPath) {
 
         // Initialize the container for currently available INGRESS and EGRESS at each URN
         Map<String, Map<String, Integer>> curUrnBw = new HashMap<>();     // Available ingress and egress at urn.
@@ -215,7 +293,7 @@ public class BandwidthAvailabilityService {
         bwMaps.put(ZA, new HashMap<>());
 
         // Map of path direction -> urns -> Ingress and/or Egress.
-        Map<String, Map<String, List<String>>> urnTables = buildUrnTables(blueprint);
+        Map<String, Map<String, List<String>>> urnTables = buildUrnTables(azPath, zaPath);
 
         // All URNs used in the URN tables
         Set<String> urns = urnTables.values().stream().map(Map::keySet).flatMap(Collection::stream).collect(Collectors.toSet());
@@ -363,115 +441,100 @@ public class BandwidthAvailabilityService {
     /**
      * Creates a map of which URNs are used for each path.
      *
-     * @param blueprint Reserved Blueprint.
+     * @param azPath - All URN strings in the A->Z Path
+     * @param zaPath - All URN strings in the Z->A path
      * @return Map of URNs used for each path.
      */
-    private Map<String, Map<String, List<String>>> buildUrnTables(ReservedBlueprintE blueprint) {
+    private Map<String, Map<String, List<String>>> buildUrnTables(List<String> azPath, List<String> zaPath) {
+
         boolean isIngress;
+        List<UrnE> azUrns = entityDecomposer.translateStringListToUrns(azPath);
+        List<UrnE> zaUrns = entityDecomposer.translateStringListToUrns(zaPath);
         Map<String, Map<String, List<String>>> urnTables = new HashMap<>();
+
         urnTables.put(AZ, new HashMap<>());
         urnTables.put(ZA, new HashMap<>());
 
-        // Handle MPLS pipes first.
-        for (ReservedMplsPipeE pipe : blueprint.getVlanFlow().getMplsPipes()) {
-            // Handle fixtures
-            for (ReservedVlanFixtureE fix : pipe.getAJunction().getFixtures()) {
-                String urn = fix.getIfceUrn();
-                urnTables.get(AZ).putIfAbsent(urn, new ArrayList<>());
-                urnTables.get(AZ).get(urn).add(INGRESS);
-                urnTables.get(ZA).putIfAbsent(urn, new ArrayList<>());
-                urnTables.get(ZA).get(urn).add(EGRESS);
-            }
-            for (ReservedVlanFixtureE fix : pipe.getZJunction().getFixtures()) {
-                String urn = fix.getIfceUrn();
-                urnTables.get(AZ).putIfAbsent(urn, new ArrayList<>());
-                urnTables.get(AZ).get(urn).add(EGRESS);
-                urnTables.get(ZA).putIfAbsent(urn, new ArrayList<>());
-                urnTables.get(ZA).get(urn).add(INGRESS);
-            }
+        Integer aDeviceIndex = -1;
+        UrnE aDevice = null;
+        Integer zDeviceIndex = -1;
+        UrnE zDevice = null;
 
-            // A->Z starts with egress.
-            isIngress = false;
 
-            for (UrnE urn : entityDecomposer.decomposeMplsPipeIntoAzEROList(pipe).stream().filter(u -> u.getReservableBandwidth() != null).collect(Collectors.toList())) {
-                urnTables.get(AZ).putIfAbsent(urn.getUrn(), new ArrayList<>());
 
-                if (isIngress)
+        for(Integer index = 0; index < azUrns.size(); index++){
+            UrnE urn = azUrns.get(index);
+            if(aDeviceIndex == -1){
+                if(urn.getUrnType().equals(UrnType.IFCE)){
+                    urnTables.get(AZ).putIfAbsent(urn.getUrn(), new ArrayList<>());
                     urnTables.get(AZ).get(urn.getUrn()).add(INGRESS);
-                else
-                    urnTables.get(AZ).get(urn.getUrn()).add(EGRESS);
-
-                // Alternate ingress/egress.
-                isIngress = Boolean.logicalXor(isIngress, true);
-            }
-
-            // Z-A starts with egress.
-            isIngress = false;
-
-            for (UrnE urn_e : entityDecomposer.decomposeMplsPipeIntoZaEROList(pipe).stream().filter(u -> u.getReservableBandwidth() != null).collect(Collectors.toList())) {
-                urnTables.get(ZA).putIfAbsent(urn_e.getUrn(), new ArrayList<>());
-
-                if (isIngress)
-                    urnTables.get(ZA).get(urn_e.getUrn()).add(INGRESS);
-                else
-                    urnTables.get(ZA).get(urn_e.getUrn()).add(EGRESS);
-
-                // Alternate ingress/egress.
-                isIngress = Boolean.logicalXor(isIngress, true);
+                    urnTables.get(ZA).putIfAbsent(urn.getUrn(), new ArrayList<>());
+                    urnTables.get(ZA).get(urn.getUrn()).add(EGRESS);
+                }
+                else{
+                    aDeviceIndex = index;
+                    aDevice = urn;
+                }
+            } else {
+                break;
             }
         }
 
-        // Handle ethernet pipes.
-        for (ReservedEthPipeE pipe : blueprint.getVlanFlow().getEthPipes()) {
-            // Handle fixtures
-            for (ReservedVlanFixtureE fix : pipe.getAJunction().getFixtures()) {
-                String  urn = fix.getIfceUrn();
-                urnTables.get(AZ).putIfAbsent(urn, new ArrayList<>());
-                urnTables.get(AZ).get(urn).add(INGRESS);
-                urnTables.get(ZA).putIfAbsent(urn, new ArrayList<>());
-                urnTables.get(ZA).get(urn).add(EGRESS);
-            }
-            for (ReservedVlanFixtureE fix : pipe.getZJunction().getFixtures()) {
-                String urn = fix.getIfceUrn();
-                urnTables.get(AZ).putIfAbsent(urn, new ArrayList<>());
-                urnTables.get(AZ).get(urn).add(EGRESS);
-                urnTables.get(ZA).putIfAbsent(urn, new ArrayList<>());
-                urnTables.get(ZA).get(urn).add(INGRESS);
-            }
-
-            // A->Z starts with egress.
-            isIngress = false;
-
-            for (UrnE urn : entityDecomposer.decomposeEthPipeIntoAzEROList(pipe)) {
-                urnTables.get(AZ).putIfAbsent(urn.getUrn(), new ArrayList<>());
-
-                if (isIngress)
-                    urnTables.get(AZ).get(urn.getUrn()).add(INGRESS);
-                else
+        for(Integer index = 0; index < zaUrns.size(); index++){
+            UrnE urn = zaUrns.get(index);
+            if(zDeviceIndex == -1){
+                if(urn.getUrnType().equals(UrnType.IFCE)){
+                    urnTables.get(AZ).putIfAbsent(urn.getUrn(), new ArrayList<>());
                     urnTables.get(AZ).get(urn.getUrn()).add(EGRESS);
-
-                // Alternate ingress/egress.
-                isIngress = Boolean.logicalXor(isIngress, true);
+                    urnTables.get(ZA).putIfAbsent(urn.getUrn(), new ArrayList<>());
+                    urnTables.get(ZA).get(urn.getUrn()).add(INGRESS);
+                }
+                else{
+                    zDeviceIndex = index;
+                    zDevice = urn;
+                }
+            } else {
+                break;
             }
+        }
 
-            // Z->A starts with egress.
-            isIngress = false;
+        List<UrnE> intermediateAzUrns = azUrns.subList(aDeviceIndex+1, azUrns.indexOf(zDevice)).stream()
+                .filter(u -> u.getReservableBandwidth() != null).collect(Collectors.toList());
+        List<UrnE> intermediateZaUrns = zaUrns.subList(zDeviceIndex+1, zaUrns.indexOf(aDevice)).stream()
+                .filter(u -> u.getReservableBandwidth() != null).collect(Collectors.toList());
 
-            for (UrnE urn_e : entityDecomposer.decomposeEthPipeIntoZaEROList(pipe)) {
-                urnTables.get(ZA).putIfAbsent(urn_e.getUrn(), new ArrayList<>());
+        // Go through the intermediate URNs
+        isIngress = false;
 
-                if (isIngress)
-                    urnTables.get(ZA).get(urn_e.getUrn()).add(INGRESS);
-                else
-                    urnTables.get(ZA).get(urn_e.getUrn()).add(EGRESS);
+        for (UrnE urn : intermediateAzUrns) {
+            urnTables.get(AZ).putIfAbsent(urn.getUrn(), new ArrayList<>());
 
-                // Alternate ingress/egress.
-                isIngress = Boolean.logicalXor(isIngress, true);
-            }
+            if (isIngress)
+                urnTables.get(AZ).get(urn.getUrn()).add(INGRESS);
+            else
+                urnTables.get(AZ).get(urn.getUrn()).add(EGRESS);
+
+            // Alternate ingress/egress.
+            isIngress = Boolean.logicalXor(isIngress, true);
+        }
+
+        isIngress = false;
+
+        for (UrnE urn_e : intermediateZaUrns) {
+            urnTables.get(ZA).putIfAbsent(urn_e.getUrn(), new ArrayList<>());
+
+            if (isIngress)
+                urnTables.get(ZA).get(urn_e.getUrn()).add(INGRESS);
+            else
+                urnTables.get(ZA).get(urn_e.getUrn()).add(EGRESS);
+
+            // Alternate ingress/egress.
+            isIngress = Boolean.logicalXor(isIngress, true);
         }
 
         return urnTables;
     }
+
 
     /**
      * Abstracts bandwidth events from a map of URNs to Reserved Bandwidths.
@@ -528,10 +591,10 @@ public class BandwidthAvailabilityService {
         }
 
         Map<String, Integer> minMaxMap = new HashMap<>();
-        minMaxMap.put("minAZ", minAZ);
-        minMaxMap.put("minZA", minZA);
-        minMaxMap.put("maxAZ", maxAZ);
-        minMaxMap.put("maxZA", maxZA);
+        minMaxMap.put(AZMIN, minAZ);
+        minMaxMap.put(ZAMIN, minZA);
+        minMaxMap.put(AZMAX, maxAZ);
+        minMaxMap.put(ZAMAX, maxZA);
 
         return minMaxMap;
     }

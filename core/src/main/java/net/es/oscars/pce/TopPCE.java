@@ -208,8 +208,8 @@ public class TopPCE {
 
                 // Store the paths
                 allPaths.add(BidirectionalPathE.builder()
-                        .azPath(convertTopoEdgePathToEdges(azEros))
-                        .zaPath(convertTopoEdgePathToEdges(zaEros))
+                        .azPath(includeFixtures(convertTopoEdgePathToEdges(azEros), pipe, true))
+                        .zaPath(includeFixtures(convertTopoEdgePathToEdges(zaEros), pipe, false))
                         .build());
 
                 // Try to get the reserved resources
@@ -240,8 +240,8 @@ public class TopPCE {
 
                     // Store the paths
                     allPaths.add(BidirectionalPathE.builder()
-                            .azPath(convertTopoEdgePathToEdges(eroMapForPipe.get("az" + i)))
-                            .zaPath(convertTopoEdgePathToEdges(eroMapForPipe.get("za" + i)))
+                            .azPath(includeFixtures(convertTopoEdgePathToEdges(eroMapForPipe.get("az" + i)), pipe, true))
+                            .zaPath(includeFixtures(convertTopoEdgePathToEdges(eroMapForPipe.get("za" + i)), pipe, false))
                             .build());
                 }
 
@@ -382,11 +382,62 @@ public class TopPCE {
         log.info("all junctions & pipes are ok");
     }
 
+
+    /**
+     * Construct a list of EdgeEs (simplified edges) from a list of TopoEdges.
+     * Note: This list does not contain every (fixture, device) edge used (as of 11/9/2016)
+     * @param topoEdges - List of TopoEdges
+     * @return A list of EdgeEs based on the TopoEdges
+     */
     private List<EdgeE> convertTopoEdgePathToEdges(List<TopoEdge> topoEdges) {
         return topoEdges
                 .stream()
                 .map(e -> EdgeE.builder().origin(e.getA().getUrn()).target(e.getZ().getUrn()).build())
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Given a list of EdgeEs, add all (Fixture, Device) edges that aren't already in the list.
+     * @param edges - The current list of EdgeEs
+     * @param reqPipe - THe requested pipe (contains requested fixtures)
+     * @return An update list of EdgeEs
+     */
+    private List<EdgeE> includeFixtures(List<EdgeE> edges, RequestedVlanPipeE reqPipe, Boolean isAzPath){
+        RequestedVlanJunctionE aJunction = reqPipe.getAJunction();
+        RequestedVlanJunctionE zJunction = reqPipe.getZJunction();
+
+        // Add the fixtures at the A junction: to the beginning if AZ path, to the end if ZA path
+        for(RequestedVlanFixtureE reqFix : aJunction.getFixtures()){
+            if(isAzPath){
+                EdgeE fixEdge = EdgeE.builder().origin(reqFix.getPortUrn()).target(aJunction.getDeviceUrn()).build();
+                if(!edges.contains(fixEdge)){
+                    edges.add(0, fixEdge);
+                }
+            }
+            if(!isAzPath){
+                EdgeE fixEdge = EdgeE.builder().origin(aJunction.getDeviceUrn()).target(reqFix.getPortUrn()).build();
+                if(!edges.contains(fixEdge)){
+                    edges.add(edges.size()-1, fixEdge);
+                }
+            }
+        }
+
+        // Add the fixtures at the Z junction: to the end if AZ path, to the beginning if ZA path
+        for(RequestedVlanFixtureE reqFix : zJunction.getFixtures()){
+            if(isAzPath){
+                EdgeE fixEdge = EdgeE.builder().origin(zJunction.getDeviceUrn()).target(reqFix.getPortUrn()).build();
+                if(!edges.contains(fixEdge)){
+                    edges.add(0, fixEdge);
+                }
+            }
+            if(!isAzPath){
+                EdgeE fixEdge = EdgeE.builder().origin(reqFix.getPortUrn()).target(zJunction.getDeviceUrn()).build();
+                if(!edges.contains(fixEdge)){
+                    edges.add(edges.size()-1, fixEdge);
+                }
+            }
+        }
+        return edges;
     }
 
     private void addJunctionPaths(Set<BidirectionalPathE> allPaths, Set<ReservedVlanJunctionE> reservedJunctions) {

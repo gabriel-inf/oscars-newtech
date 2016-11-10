@@ -1,8 +1,11 @@
 package net.es.oscars.helpers;
 
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.dto.topo.Edge;
+import net.es.oscars.dto.topo.enums.UrnType;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.topo.dao.UrnRepository;
+import net.es.oscars.topo.ent.EdgeE;
 import net.es.oscars.topo.ent.UrnE;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -296,5 +299,61 @@ public class ReservedEntityDecomposer {
      */
     private Map<String, UrnE> buildUrnMap(List<UrnE> urns) {
         return urns.stream().collect(Collectors.toMap(UrnE::getUrn, u -> u));
+    }
+
+
+    /*
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        Decomposing an Edge List into a List<String>
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+     */
+
+    public List<String> decomposeEdgeList(List<EdgeE> edges){
+        // ASSUMPTION: Edge list comes in the order of [(Fix, Device), (Fix, Device)..., (Device, Port), (Port, Device), ...)]
+        List<String> elements = new ArrayList<>();
+
+        // Find first and last device
+        String firstDeviceName = "";
+        String lastDeviceName = "";
+        for(EdgeE edge : edges){
+            Optional<UrnE> targetOpt = urnRepo.findByUrn(edge.getTarget());
+            if(targetOpt.isPresent() && targetOpt.get().getUrnType().equals(UrnType.DEVICE)){
+                if(firstDeviceName.equals("")){
+                    firstDeviceName = targetOpt.get().getUrn();
+                }
+                lastDeviceName = targetOpt.get().getUrn();
+            }
+        }
+
+        // With first and last device names, track when firstDevice becomes ORIGIN of an edge, and lastDevice becomes TARGET
+        Boolean destAdded = false;
+        for(EdgeE edge : edges){
+            if(edge.getOrigin().equals(lastDeviceName)){
+                if(!destAdded) {
+                    elements.add(edge.getOrigin());
+                    elements.add(edge.getTarget());
+                    destAdded = true;
+                }
+                else{
+                    elements.add(edge.getTarget());
+                }
+            } else{
+                elements.add(edge.getOrigin());
+            }
+        }
+
+        return elements;
+    }
+
+    public List<UrnE> translateStringListToUrns(List<String> pathElements){
+        List<UrnE> urns = new ArrayList<>();
+        for(String pathElement : pathElements){
+            Optional<UrnE> urnOpt = urnRepo.findByUrn(pathElement);
+            if(urnOpt.isPresent()){
+                urns.add(urnOpt.get());
+            }
+        }
+        return urns;
     }
 }

@@ -5,6 +5,7 @@ import net.es.oscars.dto.spec.PalindromicType;
 import net.es.oscars.dto.spec.SurvivabilityType;
 
 import java.util.Date;
+import java.util.List;
 
 
 @Data
@@ -14,35 +15,25 @@ import java.util.Date;
 public class BandwidthAvailabilityRequest {
 
     @NonNull
-    private Long requestID;
-
-    @NonNull
     private Date startDate;
-
     @NonNull
     private Date endDate;
 
     @NonNull
     private Integer minAzBandwidth;
-
     @NonNull
     private Integer minZaBandwidth;
 
     @NonNull
-    private PalindromicType palindromicType;
-
+    private List<List<String>> azEros;
     @NonNull
-    private SurvivabilityType survivabilityType;
+    private List<List<String>> zaEros;
 
-    @NonNull
     private String srcDevice;
-
-    @NonNull
-    private String srcPort;
-
-    @NonNull
+    private List<String> srcPorts;
     private String dstDevice;
+    private List<String> dstPorts;
 
-    @NonNull
-    private String dstPort;
+    private Boolean disjointPaths;
+    private Integer numPaths;
 }

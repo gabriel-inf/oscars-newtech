@@ -7,8 +7,10 @@ import net.es.oscars.dto.pss.EthJunctionType;
 import net.es.oscars.dto.pss.EthPipeType;
 import net.es.oscars.dto.spec.PalindromicType;
 import net.es.oscars.dto.spec.SurvivabilityType;
+import net.es.oscars.dto.topo.enums.UrnType;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.topo.dao.UrnRepository;
+import net.es.oscars.topo.ent.UrnE;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -141,6 +143,15 @@ public class RequestedEntityBuilder {
         return buildRequestedBlueprint(buildRequestedFlow(junctions, new HashSet<>(), 0, 0), Layer3FlowE.builder().build());
     }
 
+    public RequestedBlueprintE buildRequest(List<String> azERO, List<String> zaERO, Integer azBandwidth, Integer zaBandwidth) {
+        Set<RequestedVlanPipeE> pipes = new HashSet<>();
+        RequestedVlanPipeE pipe = buildRequestedPipe(azERO, zaERO, azBandwidth, zaBandwidth);
+        pipes.add(pipe);
+
+        return buildRequestedBlueprint(buildRequestedFlow(new HashSet<>(), pipes, 1, 1), Layer3FlowE.builder().build());
+    }
+
+
     public RequestedBlueprintE buildRequestedBlueprint(RequestedVlanFlowE vlanFlow, Layer3FlowE l3Flow){
         return RequestedBlueprintE.builder()
                 .vlanFlow(vlanFlow)
@@ -262,6 +273,66 @@ public class RequestedEntityBuilder {
                 .build();
     }
 
+    private RequestedVlanPipeE buildRequestedPipe(List<String> azERO, List<String> zaERO, Integer azMbps, Integer zaMbps) {
+        List<String> aPorts = new ArrayList<>();
+        List<String> zPorts = new ArrayList<>();
+        String aDevice = "";
+        String zDevice = "";
+        Integer aDeviceIndex = -1;
+        Integer zDeviceIndex = -1;
+        // Get the source/dest ports, and the first/last device
+        for(Integer index = 0; index < azERO.size(); index++){
+            String pathElement = azERO.get(index);
+            Optional<UrnE> elementUrnOpt = urnRepo.findByUrn(pathElement);
+            if(elementUrnOpt.isPresent()){
+                UrnE elementUrn = elementUrnOpt.get();
+                if(aDeviceIndex == -1){
+                    if(elementUrn.getUrnType().equals(UrnType.IFCE)){
+                        aPorts.add(pathElement);
+                    }
+                    else{
+                        aDevice = pathElement;
+                        aDeviceIndex = index;
+                    }
+                } else{
+                    break;
+                }
+            }
+        }
+
+        for(Integer index = azERO.size()-1; index > 0; index--){
+            String pathElement = azERO.get(index);
+            Optional<UrnE> elementUrnOpt = urnRepo.findByUrn(pathElement);
+            if(elementUrnOpt.isPresent()){
+                UrnE elementUrn = elementUrnOpt.get();
+                if(zDeviceIndex == -1){
+                    if(elementUrn.getUrnType().equals(UrnType.IFCE)){
+                        zPorts.add(pathElement);
+                    }
+                    else{
+                        zDevice = pathElement;
+                        zDeviceIndex = index;
+                    }
+                } else{
+                    break;
+                }
+            }
+        }
+
+        return RequestedVlanPipeE.builder()
+                .aJunction(buildRequestedJunction(aDevice, aPorts, azMbps, zaMbps, "any", true))
+                .zJunction(buildRequestedJunction(zDevice, zPorts, azMbps, zaMbps, "any", false))
+                .pipeType(EthPipeType.REQUESTED)
+                .azERO(azERO.subList(aDeviceIndex, zDeviceIndex+1))
+                .zaERO(zaERO.subList(aDeviceIndex, zDeviceIndex+1))
+                .azMbps(azMbps)
+                .zaMbps(zaMbps)
+                .eroPalindromic(PalindromicType.NON_PALINDROME)
+                .eroSurvivability(SurvivabilityType.SURVIVABILITY_NONE)
+                .numDisjoint(1)
+                .build();
+    }
+
     public RequestedVlanJunctionE buildRequestedJunction(String deviceName, List<String> fixtureNames,
                                                          Integer azMbps, Integer zaMbps, String vlanExp, boolean startJunc){
 
@@ -315,4 +386,5 @@ public class RequestedEntityBuilder {
                 .build();
 
     }
+
 }
