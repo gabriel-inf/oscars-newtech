@@ -1337,6 +1337,244 @@ public class BandwidthAvailabilityServiceTest {
         testResponse(response, minExpectedBwMap, expectedBwMap);
     }
 
+    @Test
+    public void specifiedEro(){
+
+        reservedBandwidthRepo.deleteAll();
+        topologyBuilder.buildTopoFourPaths();
+        List<UrnE> urns = urnRepo.findAll();
+        Map<String, UrnE> urnMap = urns.stream().collect(Collectors.toMap(UrnE::getUrn, urn -> urn));
+        Instant now = Instant.parse("1995-10-23T00:00:00Z");
+
+        List<String> reservedPortNames = Arrays.asList("nodeW:1", "nodeX:1", "nodeL:3", "nodeM:3");
+
+        List<Instant> reservedStartTimes = Arrays.asList(
+                now.plus(1L, ChronoUnit.HOURS),
+                now.plus(1L, ChronoUnit.HOURS),
+                now.plus(1L, ChronoUnit.HOURS),
+                now.plus(2L, ChronoUnit.HOURS));
+        List<Instant> reservedEndTimes = Arrays.asList(
+                now.plus(5L, ChronoUnit.HOURS),
+                now.plus(5L, ChronoUnit.HOURS),
+                now.plus(5L, ChronoUnit.HOURS),
+                now.plus(3L, ChronoUnit.HOURS));
+        List<Integer> inBandwidths = Arrays.asList(1000, 1000, 1000, 500);
+        List<Integer> egBandwidths = Arrays.asList(1000, 1000, 1000, 500);
+
+        Integer expectedMinAzBw = 500;
+        Integer expectedMaxAzBw = 1000;
+        Integer expectedMinZaBw = 500;
+        Integer expectedMaxZaBw = 1000;
+
+        List<String> path = Arrays.asList("portA", "nodeK", "nodeK:2", "nodeM:1", "nodeM", "nodeM:3", "nodeR:1", "nodeR", "nodeR:3", "nodeQ:2", "nodeQ", "portZ");
+        List<String> revPath = new ArrayList<>(path);
+        Collections.reverse(revPath);
+
+        List<List<String>> azEros = new ArrayList<>();
+        List<List<String>> zaEros = new ArrayList<>();
+
+        azEros.add(path);
+        zaEros.add(revPath);
+
+        Instant requestStartTime = now.plus(1L, ChronoUnit.HOURS);
+        Instant requestEndTime = now.plus(5L, ChronoUnit.HOURS);
+
+        Map<Instant, Integer> azGoalMap = new HashMap<>();
+        azGoalMap.put(now.plus(1L, ChronoUnit.HOURS), 1000);
+        azGoalMap.put(now.plus(2L, ChronoUnit.HOURS), 500);
+        azGoalMap.put(now.plus(3L, ChronoUnit.HOURS), 1000);
+        azGoalMap.put(now.plus(5L, ChronoUnit.HOURS), 1000);
+        Map<Instant, Integer> zaGoalMap = new HashMap<>();
+        zaGoalMap.put(now.plus(1L, ChronoUnit.HOURS), 1000);
+        zaGoalMap.put(now.plus(2L, ChronoUnit.HOURS), 500);
+        zaGoalMap.put(now.plus(3L, ChronoUnit.HOURS), 1000);
+        zaGoalMap.put(now.plus(5L, ChronoUnit.HOURS), 1000);
+        log.info("Start time: " + requestStartTime);
+        log.info("End time: " + requestEndTime);
+
+        Map<List<String>, Integer> minExpectedBwMap = new HashMap<>();
+        minExpectedBwMap.put(path, expectedMinAzBw);
+        minExpectedBwMap.put(revPath, expectedMinZaBw);
+
+        Map<List<String>, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
+        expectedBwMap.put(path, azGoalMap);
+        expectedBwMap.put(revPath, zaGoalMap);
+
+        //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
+        //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime, azEros, zaEros);
+        testResponse(response, minExpectedBwMap, expectedBwMap);
+    }
+
+    @Test
+    public void twoSpecifiedEros(){
+
+        reservedBandwidthRepo.deleteAll();
+        topologyBuilder.buildTopoFourPaths();
+        List<UrnE> urns = urnRepo.findAll();
+        Map<String, UrnE> urnMap = urns.stream().collect(Collectors.toMap(UrnE::getUrn, urn -> urn));
+        Instant now = Instant.parse("1995-10-23T00:00:00Z");
+
+        List<String> reservedPortNames = Arrays.asList("nodeM:3", "nodeW:1");
+
+        List<Instant> reservedStartTimes = Arrays.asList(
+                now.plus(2L, ChronoUnit.HOURS),
+                now.plus(1L, ChronoUnit.HOURS));
+        List<Instant> reservedEndTimes = Arrays.asList(
+                now.plus(3L, ChronoUnit.HOURS),
+                now.plus(5L, ChronoUnit.HOURS));
+        List<Integer> inBandwidths = Arrays.asList(500, 700);
+        List<Integer> egBandwidths = Arrays.asList(500, 700);
+
+        Integer expectedMinAzBw1 = 500;
+        Integer expectedMinZaBw1 = 500;
+        Integer expectedMinAzBw2 = 300;
+        Integer expectedMinZaBw2 = 300;
+
+        List<String> path1 = Arrays.asList("portA", "nodeK", "nodeK:2", "nodeM:1", "nodeM", "nodeM:3", "nodeR:1", "nodeR", "nodeR:3", "nodeQ:2", "nodeQ", "portZ");
+        List<String> revPath1 = new ArrayList<>(path1);
+        Collections.reverse(revPath1);
+
+        List<String> path2 = Arrays.asList("portA", "nodeK", "nodeK:3", "nodeW:1", "nodeW", "nodeW:2", "nodeQ:3", "nodeQ", "portZ");
+        List<String> revPath2 = new ArrayList<>(path2);
+        Collections.reverse(revPath2);
+
+        List<List<String>> azEros = new ArrayList<>();
+        List<List<String>> zaEros = new ArrayList<>();
+
+        azEros.add(path1);
+        azEros.add(path2);
+        zaEros.add(revPath1);
+        zaEros.add(revPath2);
+
+        Instant requestStartTime = now.plus(1L, ChronoUnit.HOURS);
+        Instant requestEndTime = now.plus(5L, ChronoUnit.HOURS);
+
+        Map<Instant, Integer> azGoalMap1 = new HashMap<>();
+        azGoalMap1.put(now.plus(1L, ChronoUnit.HOURS), 1000);
+        azGoalMap1.put(now.plus(2L, ChronoUnit.HOURS), 500);
+        azGoalMap1.put(now.plus(3L, ChronoUnit.HOURS), 1000);
+        azGoalMap1.put(now.plus(5L, ChronoUnit.HOURS), 1000);
+        Map<Instant, Integer> zaGoalMap1 = new HashMap<>();
+        zaGoalMap1.put(now.plus(1L, ChronoUnit.HOURS), 1000);
+        zaGoalMap1.put(now.plus(2L, ChronoUnit.HOURS), 500);
+        zaGoalMap1.put(now.plus(3L, ChronoUnit.HOURS), 1000);
+        zaGoalMap1.put(now.plus(5L, ChronoUnit.HOURS), 1000);
+
+        Map<Instant, Integer> azGoalMap2 = new HashMap<>();
+        azGoalMap2.put(now.plus(1L, ChronoUnit.HOURS), 300);
+        azGoalMap2.put(now.plus(5L, ChronoUnit.HOURS), 1000);
+        Map<Instant, Integer> zaGoalMap2 = new HashMap<>();
+        zaGoalMap2.put(now.plus(1L, ChronoUnit.HOURS), 300);
+        zaGoalMap2.put(now.plus(5L, ChronoUnit.HOURS), 1000);
+
+        log.info("Start time: " + requestStartTime);
+        log.info("End time: " + requestEndTime);
+
+        Map<List<String>, Integer> minExpectedBwMap = new HashMap<>();
+        minExpectedBwMap.put(path1, expectedMinAzBw1);
+        minExpectedBwMap.put(revPath1, expectedMinZaBw1);
+        minExpectedBwMap.put(path2, expectedMinAzBw2);
+        minExpectedBwMap.put(revPath2, expectedMinZaBw2);
+
+        Map<List<String>, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
+        expectedBwMap.put(path1, azGoalMap1);
+        expectedBwMap.put(revPath1, zaGoalMap1);
+        expectedBwMap.put(path2, azGoalMap2);
+        expectedBwMap.put(revPath2, zaGoalMap2);
+
+        //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
+        //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime, azEros, zaEros);
+        testResponse(response, minExpectedBwMap, expectedBwMap);
+    }
+
+    @Test
+    public void twoDisjointPaths(){
+
+        reservedBandwidthRepo.deleteAll();
+        topologyBuilder.buildTopoFourPaths();
+        List<UrnE> urns = urnRepo.findAll();
+        Map<String, UrnE> urnMap = urns.stream().collect(Collectors.toMap(UrnE::getUrn, urn -> urn));
+        Instant now = Instant.parse("1995-10-23T00:00:00Z");
+
+        List<String> reservedPortNames = Arrays.asList("nodeP:1", "nodeW:1");
+
+        List<Instant> reservedStartTimes = Arrays.asList(
+                now.plus(2L, ChronoUnit.HOURS),
+                now.plus(1L, ChronoUnit.HOURS));
+        List<Instant> reservedEndTimes = Arrays.asList(
+                now.plus(3L, ChronoUnit.HOURS),
+                now.plus(5L, ChronoUnit.HOURS));
+        List<Integer> inBandwidths = Arrays.asList(500, 700);
+        List<Integer> egBandwidths = Arrays.asList(500, 700);
+
+        Integer expectedMinAzBw1 = 500;
+        Integer expectedMinZaBw1 = 500;
+        Integer expectedMinAzBw2 = 300;
+        Integer expectedMinZaBw2 = 300;
+
+        List<String> path1 = Arrays.asList("portA", "nodeK", "nodeK:1", "nodeL:1", "nodeL", "nodeL:3", "nodeP:1", "nodeP", "nodeP:2", "nodeQ:1", "nodeQ", "portZ");
+        List<String> revPath1 = new ArrayList<>(path1);
+        Collections.reverse(revPath1);
+
+        List<String> path2 = Arrays.asList("portA", "nodeK", "nodeK:3", "nodeW:1", "nodeW", "nodeW:2", "nodeQ:3", "nodeQ", "portZ");
+        List<String> revPath2 = new ArrayList<>(path2);
+        Collections.reverse(revPath2);
+
+        List<List<String>> azEros = new ArrayList<>();
+        List<List<String>> zaEros = new ArrayList<>();
+
+        azEros.add(path1);
+        azEros.add(path2);
+        zaEros.add(revPath1);
+        zaEros.add(revPath2);
+
+        Instant requestStartTime = now.plus(1L, ChronoUnit.HOURS);
+        Instant requestEndTime = now.plus(5L, ChronoUnit.HOURS);
+
+        Map<Instant, Integer> azGoalMap1 = new HashMap<>();
+        azGoalMap1.put(now.plus(1L, ChronoUnit.HOURS), 1000);
+        azGoalMap1.put(now.plus(2L, ChronoUnit.HOURS), 500);
+        azGoalMap1.put(now.plus(3L, ChronoUnit.HOURS), 1000);
+        azGoalMap1.put(now.plus(5L, ChronoUnit.HOURS), 1000);
+        Map<Instant, Integer> zaGoalMap1 = new HashMap<>();
+        zaGoalMap1.put(now.plus(1L, ChronoUnit.HOURS), 1000);
+        zaGoalMap1.put(now.plus(2L, ChronoUnit.HOURS), 500);
+        zaGoalMap1.put(now.plus(3L, ChronoUnit.HOURS), 1000);
+        zaGoalMap1.put(now.plus(5L, ChronoUnit.HOURS), 1000);
+
+        Map<Instant, Integer> azGoalMap2 = new HashMap<>();
+        azGoalMap2.put(now.plus(1L, ChronoUnit.HOURS), 300);
+        azGoalMap2.put(now.plus(5L, ChronoUnit.HOURS), 1000);
+        Map<Instant, Integer> zaGoalMap2 = new HashMap<>();
+        zaGoalMap2.put(now.plus(1L, ChronoUnit.HOURS), 300);
+        zaGoalMap2.put(now.plus(5L, ChronoUnit.HOURS), 1000);
+
+        log.info("Start time: " + requestStartTime);
+        log.info("End time: " + requestEndTime);
+
+        Map<List<String>, Integer> minExpectedBwMap = new HashMap<>();
+        minExpectedBwMap.put(path1, expectedMinAzBw1);
+        minExpectedBwMap.put(revPath1, expectedMinZaBw1);
+        minExpectedBwMap.put(path2, expectedMinAzBw2);
+        minExpectedBwMap.put(revPath2, expectedMinZaBw2);
+
+        Map<List<String>, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
+        expectedBwMap.put(path1, azGoalMap1);
+        expectedBwMap.put(revPath1, zaGoalMap1);
+        expectedBwMap.put(path2, azGoalMap2);
+        expectedBwMap.put(revPath2, zaGoalMap2);
+
+        //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
+        //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime, 2, true);
+        testResponse(response, minExpectedBwMap, expectedBwMap);
+    }
+
 
     private void testResponse(BandwidthAvailabilityResponse response,
                               Map<List<String>, Integer> expectedMinAvailableBwMap,
@@ -1368,6 +1606,40 @@ public class BandwidthAvailabilityServiceTest {
                 .disjointPaths(true)
                 .azEros(new ArrayList<>())
                 .zaEros(new ArrayList<>())
+                .build();
+
+        return bwAvailService.getBandwidthAvailabilityMap(request);
+    }
+
+    private BandwidthAvailabilityResponse placeRequest(Instant requestStartTime, Instant requestEndTime,
+                                                       Integer numPaths, Boolean disjoint) {
+        BandwidthAvailabilityRequest request = BandwidthAvailabilityRequest.builder()
+                .startDate(new Date(requestStartTime.toEpochMilli()))
+                .endDate(new Date(requestEndTime.toEpochMilli()))
+                .minAzBandwidth(10)
+                .minZaBandwidth(10)
+                .srcDevice("nodeK")
+                .srcPorts(Collections.singletonList("portA"))
+                .dstDevice("nodeQ")
+                .dstPorts(Collections.singletonList("portZ"))
+                .numPaths(numPaths)
+                .disjointPaths(disjoint)
+                .azEros(new ArrayList<>())
+                .zaEros(new ArrayList<>())
+                .build();
+
+        return bwAvailService.getBandwidthAvailabilityMap(request);
+    }
+
+    private BandwidthAvailabilityResponse placeRequest(Instant requestStartTime, Instant requestEndTime,
+                                                       List<List<String>> azEROs, List<List<String>> zaEROs) {
+        BandwidthAvailabilityRequest request = BandwidthAvailabilityRequest.builder()
+                .startDate(new Date(requestStartTime.toEpochMilli()))
+                .endDate(new Date(requestEndTime.toEpochMilli()))
+                .minAzBandwidth(10)
+                .minZaBandwidth(10)
+                .azEros(azEROs)
+                .zaEros(zaEROs)
                 .build();
 
         return bwAvailService.getBandwidthAvailabilityMap(request);

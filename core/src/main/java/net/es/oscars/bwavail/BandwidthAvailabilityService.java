@@ -198,17 +198,20 @@ public class BandwidthAvailabilityService {
             blueprints.add(entityBuilder.buildRequest(azERO, zaERO,
                     request.getMinAzBandwidth(), request.getMinZaBandwidth()));
         }
-        // Create one blueprint for the source, dest pair - PCE handles multiple paths
-        // Determine survivability type for request
-        //TODO: Support non-disjoint paths - Yen's Algorithm
-        SurvivabilityType sType = SurvivabilityType.SURVIVABILITY_NONE;
-        if(request.getDisjointPaths() || !request.getDisjointPaths()){
-            sType = SurvivabilityType.SURVIVABILITY_TOTAL;
-        }
-        blueprints.add(entityBuilder.buildRequest(request.getSrcPorts(), request.getSrcDevice(),
-                request.getDstPorts(), request.getDstDevice(), request.getMinAzBandwidth(), request.getMinZaBandwidth(),
-                PalindromicType.PALINDROME, sType, "any", request.getNumPaths(), 1, 1));
+        if(request.getSrcDevice() != null && request.getSrcPorts() != null && request.getDstDevice() != null
+                && request.getDstPorts() != null && request.getNumPaths() != null) {
+            // Create one blueprint for the source, dest pair - PCE handles multiple paths
+            // Determine survivability type for request
+            //TODO: Support non-disjoint paths - Yen's Algorithm
+            SurvivabilityType sType = SurvivabilityType.SURVIVABILITY_NONE;
+            if (request.getDisjointPaths() == null || request.getDisjointPaths() || !request.getDisjointPaths()) {
+                sType = SurvivabilityType.SURVIVABILITY_TOTAL;
+            }
+            blueprints.add(entityBuilder.buildRequest(request.getSrcPorts(), request.getSrcDevice(),
+                    request.getDstPorts(), request.getDstDevice(), request.getMinAzBandwidth(), request.getMinZaBandwidth(),
+                    PalindromicType.PALINDROME, sType, "any", request.getNumPaths(), 1, 1));
 
+        }
         return blueprints;
     }
 
