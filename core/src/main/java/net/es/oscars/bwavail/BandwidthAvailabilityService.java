@@ -158,6 +158,10 @@ public class BandwidthAvailabilityService {
             // Store the <Instant, Bandwidth> time maps for each path
             bwAvailabilityMap.put(azPath, bwMaps.get(AZ));
             bwAvailabilityMap.put(zaPath, bwMaps.get(ZA));
+
+            // Store the path pair map
+            pathPairMap.put(azPath, zaPath);
+            pathPairMap.put(zaPath, azPath);
         }
 
     }
