@@ -45,6 +45,11 @@ public class BandwidthAvailabilityServiceTest {
     @Autowired
     private ReservedBandwidthRepository reservedBandwidthRepo;
 
+    private final String az1 = "Az1";
+    private final String za1 = "Za1";
+    private final String az2 = "Az2";
+    private final String za2 = "Za2";
+
     @Test
     public void noReservationsTest(){
 
@@ -80,13 +85,14 @@ public class BandwidthAvailabilityServiceTest {
         log.info("Start time: " + requestStartTime);
         log.info("End time: " + requestEndTime);
 
-        Map<List<String>, Integer> minExpectedBwMap = new HashMap<>();
-        minExpectedBwMap.put(path, expectedMinAzBw);
-        minExpectedBwMap.put(revPath, expectedMinZaBw);
 
-        Map<List<String>, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
-        expectedBwMap.put(path, azGoalMap);
-        expectedBwMap.put(revPath, zaGoalMap);
+        Map<String, Integer> minExpectedBwMap = new HashMap<>();
+        minExpectedBwMap.put(az1, expectedMinAzBw);
+        minExpectedBwMap.put(za1, expectedMinZaBw);
+
+        Map<String, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
+        expectedBwMap.put(az1, azGoalMap);
+        expectedBwMap.put(za1, zaGoalMap);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
@@ -136,13 +142,13 @@ public class BandwidthAvailabilityServiceTest {
         log.info("Start time: " + requestStartTime);
         log.info("End time: " + requestEndTime);
 
-        Map<List<String>, Integer> minExpectedBwMap = new HashMap<>();
-        minExpectedBwMap.put(path, expectedMinAzBw);
-        minExpectedBwMap.put(revPath, expectedMinZaBw);
+        Map<String, Integer> minExpectedBwMap = new HashMap<>();
+        minExpectedBwMap.put(az1, expectedMinAzBw);
+        minExpectedBwMap.put(za1, expectedMinZaBw);
 
-        Map<List<String>, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
-        expectedBwMap.put(path, azGoalMap);
-        expectedBwMap.put(revPath, zaGoalMap);
+        Map<String, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
+        expectedBwMap.put(az1, azGoalMap);
+        expectedBwMap.put(za1, zaGoalMap);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
@@ -192,13 +198,13 @@ public class BandwidthAvailabilityServiceTest {
         log.info("Start time: " + requestStartTime);
         log.info("End time: " + requestEndTime);
 
-        Map<List<String>, Integer> minExpectedBwMap = new HashMap<>();
-        minExpectedBwMap.put(path, expectedMinAzBw);
-        minExpectedBwMap.put(revPath, expectedMinZaBw);
+        Map<String, Integer> minExpectedBwMap = new HashMap<>();
+        minExpectedBwMap.put(az1, expectedMinAzBw);
+        minExpectedBwMap.put(za1, expectedMinZaBw);
 
-        Map<List<String>, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
-        expectedBwMap.put(path, azGoalMap);
-        expectedBwMap.put(revPath, zaGoalMap);
+        Map<String, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
+        expectedBwMap.put(az1, azGoalMap);
+        expectedBwMap.put(za1, zaGoalMap);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
@@ -247,13 +253,13 @@ public class BandwidthAvailabilityServiceTest {
         zaGoalMap.put(reservedEndTimes.get(0), expectedMaxZaBw);
         zaGoalMap.put(requestEndTime, expectedMaxZaBw);
 
-        Map<List<String>, Integer> minExpectedBwMap = new HashMap<>();
-        minExpectedBwMap.put(path, expectedMinAzBw);
-        minExpectedBwMap.put(revPath, expectedMinZaBw);
+        Map<String, Integer> minExpectedBwMap = new HashMap<>();
+        minExpectedBwMap.put(az1, expectedMinAzBw);
+        minExpectedBwMap.put(za1, expectedMinZaBw);
 
-        Map<List<String>, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
-        expectedBwMap.put(path, azGoalMap);
-        expectedBwMap.put(revPath, zaGoalMap);
+        Map<String, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
+        expectedBwMap.put(az1, azGoalMap);
+        expectedBwMap.put(za1, zaGoalMap);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
@@ -305,13 +311,13 @@ public class BandwidthAvailabilityServiceTest {
         zaGoalMap.put(reservedEndTimes.get(0), expectedMaxZaBw);
         zaGoalMap.put(requestEndTime, expectedMaxZaBw);
 
-        Map<List<String>, Integer> minExpectedBwMap = new HashMap<>();
-        minExpectedBwMap.put(path, expectedMinAzBw);
-        minExpectedBwMap.put(revPath, expectedMinZaBw);
+        Map<String, Integer> minExpectedBwMap = new HashMap<>();
+        minExpectedBwMap.put(az1, expectedMinAzBw);
+        minExpectedBwMap.put(za1, expectedMinZaBw);
 
-        Map<List<String>, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
-        expectedBwMap.put(path, azGoalMap);
-        expectedBwMap.put(revPath, zaGoalMap);
+        Map<String, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
+        expectedBwMap.put(az1, azGoalMap);
+        expectedBwMap.put(za1, zaGoalMap);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
@@ -363,13 +369,13 @@ public class BandwidthAvailabilityServiceTest {
         log.info("Start time: " + requestStartTime);
         log.info("End time: " + requestEndTime);
 
-        Map<List<String>, Integer> minExpectedBwMap = new HashMap<>();
-        minExpectedBwMap.put(path, expectedMinAzBw);
-        minExpectedBwMap.put(revPath, expectedMinZaBw);
+        Map<String, Integer> minExpectedBwMap = new HashMap<>();
+        minExpectedBwMap.put(az1, expectedMinAzBw);
+        minExpectedBwMap.put(za1, expectedMinZaBw);
 
-        Map<List<String>, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
-        expectedBwMap.put(path, azGoalMap);
-        expectedBwMap.put(revPath, zaGoalMap);
+        Map<String, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
+        expectedBwMap.put(az1, azGoalMap);
+        expectedBwMap.put(za1, zaGoalMap);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
@@ -419,13 +425,13 @@ public class BandwidthAvailabilityServiceTest {
         log.info("Start time: " + requestStartTime);
         log.info("End time: " + requestEndTime);
 
-        Map<List<String>, Integer> minExpectedBwMap = new HashMap<>();
-        minExpectedBwMap.put(path, expectedMinAzBw);
-        minExpectedBwMap.put(revPath, expectedMinZaBw);
+        Map<String, Integer> minExpectedBwMap = new HashMap<>();
+        minExpectedBwMap.put(az1, expectedMinAzBw);
+        minExpectedBwMap.put(za1, expectedMinZaBw);
 
-        Map<List<String>, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
-        expectedBwMap.put(path, azGoalMap);
-        expectedBwMap.put(revPath, zaGoalMap);
+        Map<String, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
+        expectedBwMap.put(az1, azGoalMap);
+        expectedBwMap.put(za1, zaGoalMap);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
@@ -475,13 +481,13 @@ public class BandwidthAvailabilityServiceTest {
         log.info("Start time: " + requestStartTime);
         log.info("End time: " + requestEndTime);
 
-        Map<List<String>, Integer> minExpectedBwMap = new HashMap<>();
-        minExpectedBwMap.put(path, expectedMinAzBw);
-        minExpectedBwMap.put(revPath, expectedMinZaBw);
+        Map<String, Integer> minExpectedBwMap = new HashMap<>();
+        minExpectedBwMap.put(az1, expectedMinAzBw);
+        minExpectedBwMap.put(za1, expectedMinZaBw);
 
-        Map<List<String>, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
-        expectedBwMap.put(path, azGoalMap);
-        expectedBwMap.put(revPath, zaGoalMap);
+        Map<String, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
+        expectedBwMap.put(az1, azGoalMap);
+        expectedBwMap.put(za1, zaGoalMap);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
@@ -531,13 +537,13 @@ public class BandwidthAvailabilityServiceTest {
         log.info("Start time: " + requestStartTime);
         log.info("End time: " + requestEndTime);
 
-        Map<List<String>, Integer> minExpectedBwMap = new HashMap<>();
-        minExpectedBwMap.put(path, expectedMinAzBw);
-        minExpectedBwMap.put(revPath, expectedMinZaBw);
+        Map<String, Integer> minExpectedBwMap = new HashMap<>();
+        minExpectedBwMap.put(az1, expectedMinAzBw);
+        minExpectedBwMap.put(za1, expectedMinZaBw);
 
-        Map<List<String>, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
-        expectedBwMap.put(path, azGoalMap);
-        expectedBwMap.put(revPath, zaGoalMap);
+        Map<String, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
+        expectedBwMap.put(az1, azGoalMap);
+        expectedBwMap.put(za1, zaGoalMap);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
@@ -599,13 +605,13 @@ public class BandwidthAvailabilityServiceTest {
         log.info("Start time: " + requestStartTime);
         log.info("End time: " + requestEndTime);
 
-        Map<List<String>, Integer> minExpectedBwMap = new HashMap<>();
-        minExpectedBwMap.put(path, expectedMinAzBw);
-        minExpectedBwMap.put(revPath, expectedMinZaBw);
+        Map<String, Integer> minExpectedBwMap = new HashMap<>();
+        minExpectedBwMap.put(az1, expectedMinAzBw);
+        minExpectedBwMap.put(za1, expectedMinZaBw);
 
-        Map<List<String>, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
-        expectedBwMap.put(path, azGoalMap);
-        expectedBwMap.put(revPath, zaGoalMap);
+        Map<String, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
+        expectedBwMap.put(az1, azGoalMap);
+        expectedBwMap.put(za1, zaGoalMap);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
@@ -660,13 +666,13 @@ public class BandwidthAvailabilityServiceTest {
         log.info("Start time: " + requestStartTime);
         log.info("End time: " + requestEndTime);
 
-        Map<List<String>, Integer> minExpectedBwMap = new HashMap<>();
-        minExpectedBwMap.put(path, expectedMinAzBw);
-        minExpectedBwMap.put(revPath, expectedMinZaBw);
+        Map<String, Integer> minExpectedBwMap = new HashMap<>();
+        minExpectedBwMap.put(az1, expectedMinAzBw);
+        minExpectedBwMap.put(za1, expectedMinZaBw);
 
-        Map<List<String>, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
-        expectedBwMap.put(path, azGoalMap);
-        expectedBwMap.put(revPath, zaGoalMap);
+        Map<String, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
+        expectedBwMap.put(az1, azGoalMap);
+        expectedBwMap.put(za1, zaGoalMap);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
@@ -721,13 +727,13 @@ public class BandwidthAvailabilityServiceTest {
         log.info("Start time: " + requestStartTime);
         log.info("End time: " + requestEndTime);
 
-        Map<List<String>, Integer> minExpectedBwMap = new HashMap<>();
-        minExpectedBwMap.put(path, expectedMinAzBw);
-        minExpectedBwMap.put(revPath, expectedMinZaBw);
+        Map<String, Integer> minExpectedBwMap = new HashMap<>();
+        minExpectedBwMap.put(az1, expectedMinAzBw);
+        minExpectedBwMap.put(za1, expectedMinZaBw);
 
-        Map<List<String>, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
-        expectedBwMap.put(path, azGoalMap);
-        expectedBwMap.put(revPath, zaGoalMap);
+        Map<String, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
+        expectedBwMap.put(az1, azGoalMap);
+        expectedBwMap.put(za1, zaGoalMap);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
@@ -782,13 +788,13 @@ public class BandwidthAvailabilityServiceTest {
         log.info("Start time: " + requestStartTime);
         log.info("End time: " + requestEndTime);
 
-        Map<List<String>, Integer> minExpectedBwMap = new HashMap<>();
-        minExpectedBwMap.put(path, expectedMinAzBw);
-        minExpectedBwMap.put(revPath, expectedMinZaBw);
+        Map<String, Integer> minExpectedBwMap = new HashMap<>();
+        minExpectedBwMap.put(az1, expectedMinAzBw);
+        minExpectedBwMap.put(za1, expectedMinZaBw);
 
-        Map<List<String>, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
-        expectedBwMap.put(path, azGoalMap);
-        expectedBwMap.put(revPath, zaGoalMap);
+        Map<String, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
+        expectedBwMap.put(az1, azGoalMap);
+        expectedBwMap.put(za1, zaGoalMap);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
@@ -843,13 +849,13 @@ public class BandwidthAvailabilityServiceTest {
         log.info("Start time: " + requestStartTime);
         log.info("End time: " + requestEndTime);
 
-        Map<List<String>, Integer> minExpectedBwMap = new HashMap<>();
-        minExpectedBwMap.put(path, expectedMinAzBw);
-        minExpectedBwMap.put(revPath, expectedMinZaBw);
+        Map<String, Integer> minExpectedBwMap = new HashMap<>();
+        minExpectedBwMap.put(az1, expectedMinAzBw);
+        minExpectedBwMap.put(za1, expectedMinZaBw);
 
-        Map<List<String>, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
-        expectedBwMap.put(path, azGoalMap);
-        expectedBwMap.put(revPath, zaGoalMap);
+        Map<String, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
+        expectedBwMap.put(az1, azGoalMap);
+        expectedBwMap.put(za1, zaGoalMap);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
@@ -904,13 +910,13 @@ public class BandwidthAvailabilityServiceTest {
         log.info("Start time: " + requestStartTime);
         log.info("End time: " + requestEndTime);
 
-        Map<List<String>, Integer> minExpectedBwMap = new HashMap<>();
-        minExpectedBwMap.put(path, expectedMinAzBw);
-        minExpectedBwMap.put(revPath, expectedMinZaBw);
+        Map<String, Integer> minExpectedBwMap = new HashMap<>();
+        minExpectedBwMap.put(az1, expectedMinAzBw);
+        minExpectedBwMap.put(za1, expectedMinZaBw);
 
-        Map<List<String>, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
-        expectedBwMap.put(path, azGoalMap);
-        expectedBwMap.put(revPath, zaGoalMap);
+        Map<String, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
+        expectedBwMap.put(az1, azGoalMap);
+        expectedBwMap.put(za1, zaGoalMap);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
@@ -965,13 +971,13 @@ public class BandwidthAvailabilityServiceTest {
         log.info("Start time: " + requestStartTime);
         log.info("End time: " + requestEndTime);
 
-        Map<List<String>, Integer> minExpectedBwMap = new HashMap<>();
-        minExpectedBwMap.put(path, expectedMinAzBw);
-        minExpectedBwMap.put(revPath, expectedMinZaBw);
+        Map<String, Integer> minExpectedBwMap = new HashMap<>();
+        minExpectedBwMap.put(az1, expectedMinAzBw);
+        minExpectedBwMap.put(za1, expectedMinZaBw);
 
-        Map<List<String>, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
-        expectedBwMap.put(path, azGoalMap);
-        expectedBwMap.put(revPath, zaGoalMap);
+        Map<String, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
+        expectedBwMap.put(az1, azGoalMap);
+        expectedBwMap.put(za1, zaGoalMap);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
@@ -1026,13 +1032,13 @@ public class BandwidthAvailabilityServiceTest {
         log.info("Start time: " + requestStartTime);
         log.info("End time: " + requestEndTime);
 
-        Map<List<String>, Integer> minExpectedBwMap = new HashMap<>();
-        minExpectedBwMap.put(path, expectedMinAzBw);
-        minExpectedBwMap.put(revPath, expectedMinZaBw);
+        Map<String, Integer> minExpectedBwMap = new HashMap<>();
+        minExpectedBwMap.put(az1, expectedMinAzBw);
+        minExpectedBwMap.put(za1, expectedMinZaBw);
 
-        Map<List<String>, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
-        expectedBwMap.put(path, azGoalMap);
-        expectedBwMap.put(revPath, zaGoalMap);
+        Map<String, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
+        expectedBwMap.put(az1, azGoalMap);
+        expectedBwMap.put(za1, zaGoalMap);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
@@ -1085,13 +1091,13 @@ public class BandwidthAvailabilityServiceTest {
         log.info("Start time: " + requestStartTime);
         log.info("End time: " + requestEndTime);
 
-        Map<List<String>, Integer> minExpectedBwMap = new HashMap<>();
-        minExpectedBwMap.put(path, expectedMinAzBw);
-        minExpectedBwMap.put(revPath, expectedMinZaBw);
+        Map<String, Integer> minExpectedBwMap = new HashMap<>();
+        minExpectedBwMap.put(az1, expectedMinAzBw);
+        minExpectedBwMap.put(za1, expectedMinZaBw);
 
-        Map<List<String>, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
-        expectedBwMap.put(path, azGoalMap);
-        expectedBwMap.put(revPath, zaGoalMap);
+        Map<String, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
+        expectedBwMap.put(az1, azGoalMap);
+        expectedBwMap.put(za1, zaGoalMap);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
@@ -1144,13 +1150,13 @@ public class BandwidthAvailabilityServiceTest {
         log.info("Start time: " + requestStartTime);
         log.info("End time: " + requestEndTime);
 
-        Map<List<String>, Integer> minExpectedBwMap = new HashMap<>();
-        minExpectedBwMap.put(path, expectedMinAzBw);
-        minExpectedBwMap.put(revPath, expectedMinZaBw);
+        Map<String, Integer> minExpectedBwMap = new HashMap<>();
+        minExpectedBwMap.put(az1, expectedMinAzBw);
+        minExpectedBwMap.put(za1, expectedMinZaBw);
 
-        Map<List<String>, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
-        expectedBwMap.put(path, azGoalMap);
-        expectedBwMap.put(revPath, zaGoalMap);
+        Map<String, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
+        expectedBwMap.put(az1, azGoalMap);
+        expectedBwMap.put(za1, zaGoalMap);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
@@ -1198,13 +1204,13 @@ public class BandwidthAvailabilityServiceTest {
         log.info("Start time: " + requestStartTime);
         log.info("End time: " + requestEndTime);
 
-        Map<List<String>, Integer> minExpectedBwMap = new HashMap<>();
-        minExpectedBwMap.put(path, expectedMinAzBw);
-        minExpectedBwMap.put(revPath, expectedMinZaBw);
+        Map<String, Integer> minExpectedBwMap = new HashMap<>();
+        minExpectedBwMap.put(az1, expectedMinAzBw);
+        minExpectedBwMap.put(za1, expectedMinZaBw);
 
-        Map<List<String>, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
-        expectedBwMap.put(path, azGoalMap);
-        expectedBwMap.put(revPath, zaGoalMap);
+        Map<String, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
+        expectedBwMap.put(az1, azGoalMap);
+        expectedBwMap.put(za1, zaGoalMap);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
@@ -1258,13 +1264,13 @@ public class BandwidthAvailabilityServiceTest {
         log.info("Start time: " + requestStartTime);
         log.info("End time: " + requestEndTime);
 
-        Map<List<String>, Integer> minExpectedBwMap = new HashMap<>();
-        minExpectedBwMap.put(path, expectedMinAzBw);
-        minExpectedBwMap.put(revPath, expectedMinZaBw);
+        Map<String, Integer> minExpectedBwMap = new HashMap<>();
+        minExpectedBwMap.put(az1, expectedMinAzBw);
+        minExpectedBwMap.put(za1, expectedMinZaBw);
 
-        Map<List<String>, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
-        expectedBwMap.put(path, azGoalMap);
-        expectedBwMap.put(revPath, zaGoalMap);
+        Map<String, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
+        expectedBwMap.put(az1, azGoalMap);
+        expectedBwMap.put(za1, zaGoalMap);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
@@ -1322,13 +1328,13 @@ public class BandwidthAvailabilityServiceTest {
         log.info("Start time: " + requestStartTime);
         log.info("End time: " + requestEndTime);
 
-        Map<List<String>, Integer> minExpectedBwMap = new HashMap<>();
-        minExpectedBwMap.put(path, expectedMinAzBw);
-        minExpectedBwMap.put(revPath, expectedMinZaBw);
+        Map<String, Integer> minExpectedBwMap = new HashMap<>();
+        minExpectedBwMap.put(az1, expectedMinAzBw);
+        minExpectedBwMap.put(za1, expectedMinZaBw);
 
-        Map<List<String>, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
-        expectedBwMap.put(path, azGoalMap);
-        expectedBwMap.put(revPath, zaGoalMap);
+        Map<String, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
+        expectedBwMap.put(az1, azGoalMap);
+        expectedBwMap.put(za1, zaGoalMap);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
@@ -1392,13 +1398,13 @@ public class BandwidthAvailabilityServiceTest {
         log.info("Start time: " + requestStartTime);
         log.info("End time: " + requestEndTime);
 
-        Map<List<String>, Integer> minExpectedBwMap = new HashMap<>();
-        minExpectedBwMap.put(path, expectedMinAzBw);
-        minExpectedBwMap.put(revPath, expectedMinZaBw);
+        Map<String, Integer> minExpectedBwMap = new HashMap<>();
+        minExpectedBwMap.put(az1, expectedMinAzBw);
+        minExpectedBwMap.put(za1, expectedMinZaBw);
 
-        Map<List<String>, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
-        expectedBwMap.put(path, azGoalMap);
-        expectedBwMap.put(revPath, zaGoalMap);
+        Map<String, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
+        expectedBwMap.put(az1, azGoalMap);
+        expectedBwMap.put(za1, zaGoalMap);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
@@ -1472,17 +1478,17 @@ public class BandwidthAvailabilityServiceTest {
         log.info("Start time: " + requestStartTime);
         log.info("End time: " + requestEndTime);
 
-        Map<List<String>, Integer> minExpectedBwMap = new HashMap<>();
-        minExpectedBwMap.put(path1, expectedMinAzBw1);
-        minExpectedBwMap.put(revPath1, expectedMinZaBw1);
-        minExpectedBwMap.put(path2, expectedMinAzBw2);
-        minExpectedBwMap.put(revPath2, expectedMinZaBw2);
+        Map<String, Integer> minExpectedBwMap = new HashMap<>();
+        minExpectedBwMap.put(az1, expectedMinAzBw1);
+        minExpectedBwMap.put(za1, expectedMinZaBw1);
+        minExpectedBwMap.put(az2, expectedMinAzBw2);
+        minExpectedBwMap.put(za2, expectedMinZaBw2);
 
-        Map<List<String>, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
-        expectedBwMap.put(path1, azGoalMap1);
-        expectedBwMap.put(revPath1, zaGoalMap1);
-        expectedBwMap.put(path2, azGoalMap2);
-        expectedBwMap.put(revPath2, zaGoalMap2);
+        Map<String, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
+        expectedBwMap.put(az1, azGoalMap1);
+        expectedBwMap.put(za1, zaGoalMap1);
+        expectedBwMap.put(az2, azGoalMap2);
+        expectedBwMap.put(za2, zaGoalMap2);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
@@ -1491,7 +1497,6 @@ public class BandwidthAvailabilityServiceTest {
         testResponse(response, minExpectedBwMap, expectedBwMap);
     }
 
-    @Test
     public void twoDisjointPaths(){
 
         reservedBandwidthRepo.deleteAll();
@@ -1556,17 +1561,17 @@ public class BandwidthAvailabilityServiceTest {
         log.info("Start time: " + requestStartTime);
         log.info("End time: " + requestEndTime);
 
-        Map<List<String>, Integer> minExpectedBwMap = new HashMap<>();
-        minExpectedBwMap.put(path1, expectedMinAzBw1);
-        minExpectedBwMap.put(revPath1, expectedMinZaBw1);
-        minExpectedBwMap.put(path2, expectedMinAzBw2);
-        minExpectedBwMap.put(revPath2, expectedMinZaBw2);
+        Map<String, Integer> minExpectedBwMap = new HashMap<>();
+        minExpectedBwMap.put(az1, expectedMinAzBw1);
+        minExpectedBwMap.put(za1, expectedMinZaBw1);
+        minExpectedBwMap.put(az2, expectedMinAzBw2);
+        minExpectedBwMap.put(za2, expectedMinZaBw2);
 
-        Map<List<String>, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
-        expectedBwMap.put(path1, azGoalMap1);
-        expectedBwMap.put(revPath1, zaGoalMap1);
-        expectedBwMap.put(path2, azGoalMap2);
-        expectedBwMap.put(revPath2, zaGoalMap2);
+        Map<String, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
+        expectedBwMap.put(az1, azGoalMap1);
+        expectedBwMap.put(za1, zaGoalMap1);
+        expectedBwMap.put(az2, azGoalMap2);
+        expectedBwMap.put(za2, zaGoalMap2);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
@@ -1577,11 +1582,11 @@ public class BandwidthAvailabilityServiceTest {
 
 
     private void testResponse(BandwidthAvailabilityResponse response,
-                              Map<List<String>, Integer> expectedMinAvailableBwMap,
-                              Map<List<String>, Map<Instant, Integer>> expectedBwMap) {
+                              Map<String, Integer> expectedMinAvailableBwMap,
+                              Map<String, Map<Instant, Integer>> expectedBwMap) {
 
-        Map<List<String>, Map<Instant, Integer>> bwMap = response.getBwAvailabilityMap();
-        Map<List<String>, Integer> minAvailableBwMap = response.getMinAvailableBwMap();
+        Map<String, Map<Instant, Integer>> bwMap = response.getBwAvailabilityMap();
+        Map<String, Integer> minAvailableBwMap = response.getMinAvailableBwMap();
 
         log.info("Expected Min BW Map: " + expectedMinAvailableBwMap);
         log.info("Actual Min BW Map: " + minAvailableBwMap);

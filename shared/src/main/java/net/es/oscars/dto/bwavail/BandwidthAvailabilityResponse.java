@@ -15,11 +15,14 @@ import java.util.Map;
 public class BandwidthAvailabilityResponse {
 
     @NonNull
-    private Map<List<String>, Integer> minAvailableBwMap;
+    private Map<String, Integer> minAvailableBwMap;
 
     @NonNull
-    private Map<List<String>, Map<Instant, Integer>> bwAvailabilityMap;
+    private Map<String, Map<Instant, Integer>> bwAvailabilityMap;
 
     @NonNull
-    private Map<List<String>, List<String>> pathPairMap;
+    private Map<String, String> pathPairMap;
+
+    @NonNull
+    private Map<String, List<String>> pathNameMap;
 }

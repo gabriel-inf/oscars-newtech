@@ -81,20 +81,22 @@ public class BandwidthAvailabilityService {
         // Confirm that the request involves nodes in the topology
         if (!validateRequest(request)) {
             log.info("Topology: " + topoService.getMultilayerTopology());
-            return buildResponse(new HashMap<>(), new HashMap<>(), new HashMap<>());
+            return buildResponse(new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>());
         }
 
         // Create the requested schedule
         ScheduleSpecificationE reqSchSpec = entityBuilder.buildSchedule(request.getStartDate(), request.getEndDate());
 
         // Maps for keeping track of statistics - will go into the response payload
-        Map<List<String>, Integer> minAvailableBwMap = new HashMap<>();
-        Map<List<String>, Map<Instant, Integer>> bwAvailabilityMap = new HashMap<>();
-        Map<List<String>, List<String>> pathPairMap = new HashMap<>();
+        Map<String, Integer> minAvailableBwMap = new HashMap<>();
+        Map<String, Map<Instant, Integer>> bwAvailabilityMap = new HashMap<>();
+        Map<String, String> pathPairMap = new HashMap<>();
+        Map<String, List<String>> pathNameMap = new HashMap<>();
 
         // For each ERO, create a blueprint and get the response
         List<RequestedBlueprintE> requestedBlueprints = generateRequestedBlueprints(request);
 
+        Integer pathNum = 1;
         for(RequestedBlueprintE reqBlueprint : requestedBlueprints){
             try {
                 Optional<ReservedBlueprintE> optRsvBlueprint = topPCE.makeReserved(reqBlueprint, reqSchSpec);
@@ -102,32 +104,41 @@ public class BandwidthAvailabilityService {
                 // If a path could be found, store the URNs used
                 if (optRsvBlueprint.isPresent()) {
                     rsvBlueprint = optRsvBlueprint.get();
-                    processReservedBlueprint(rsvBlueprint, request, minAvailableBwMap, bwAvailabilityMap, pathPairMap);
+                    pathNum = processReservedBlueprint(rsvBlueprint, request, minAvailableBwMap, bwAvailabilityMap,
+                            pathPairMap, pathNameMap, pathNum);
                 }
                 // Otherwise, add empty/zero entries for a failed request
                 else {
-                    processFailedBlueprint(reqBlueprint, request, minAvailableBwMap, bwAvailabilityMap, pathPairMap);
+                    pathNum = processFailedBlueprint(reqBlueprint, request, minAvailableBwMap, bwAvailabilityMap,
+                            pathPairMap, pathNameMap, pathNum);
                 }
             } catch (PCEException | PSSException exception) {
                 log.info(exception.getMessage());
                 // Add empty/zero entries for a failed request
-                processFailedBlueprint(reqBlueprint, request, minAvailableBwMap, bwAvailabilityMap, pathPairMap);
+                pathNum = processFailedBlueprint(reqBlueprint, request, minAvailableBwMap, bwAvailabilityMap,
+                        pathPairMap, pathNameMap, pathNum);
             }
 
         }
 
-        return buildResponse(minAvailableBwMap, bwAvailabilityMap, pathPairMap);
+        return buildResponse(minAvailableBwMap, bwAvailabilityMap, pathPairMap, pathNameMap);
     }
 
-    private void processReservedBlueprint(ReservedBlueprintE rsvBlueprint, BandwidthAvailabilityRequest request,
-                                          Map<List<String>, Integer> minAvailableBwMap,
-                                          Map<List<String>, Map<Instant, Integer>> bwAvailabilityMap,
-                                          Map<List<String>, List<String>> pathPairMap) {
+    private Integer processReservedBlueprint(ReservedBlueprintE rsvBlueprint, BandwidthAvailabilityRequest request,
+                                          Map<String, Integer> minAvailableBwMap,
+                                          Map<String, Map<Instant, Integer>> bwAvailabilityMap,
+                                          Map<String, String> pathPairMap,
+                                          Map<String, List<String>> pathNameMap, Integer pathNum) {
 
         Set<BidirectionalPathE> paths = rsvBlueprint.getVlanFlow().getAllPaths();
         for(BidirectionalPathE path : paths){
             List<String> azPath = entityDecomposer.decomposeEdgeList(path.getAzPath());
             List<String> zaPath = entityDecomposer.decomposeEdgeList(path.getZaPath());
+
+            //Name the paths and increment the count
+            String azPathName = "Az" + pathNum;
+            String zaPathName = "Za" + pathNum;
+            pathNum++;
 
             // Retrieve the reserved bandwidths that overlap with the given start and end time
             Optional<List<ReservedBandwidthE>> optRsvList = bwRepo.findOverlappingInterval(
@@ -152,24 +163,31 @@ public class BandwidthAvailabilityService {
             Map<String, Integer> minsAndMaxes = getMinimumsAndMaximums(bwMaps);
 
             // Store the min values for the AZ and ZA path
-            minAvailableBwMap.put(azPath, minsAndMaxes.get(AZMIN));
-            minAvailableBwMap.put(zaPath, minsAndMaxes.get(ZAMIN));
+            minAvailableBwMap.put(azPathName, minsAndMaxes.get(AZMIN));
+            minAvailableBwMap.put(zaPathName, minsAndMaxes.get(ZAMIN));
 
             // Store the <Instant, Bandwidth> time maps for each path
-            bwAvailabilityMap.put(azPath, bwMaps.get(AZ));
-            bwAvailabilityMap.put(zaPath, bwMaps.get(ZA));
+            bwAvailabilityMap.put(azPathName, bwMaps.get(AZ));
+            bwAvailabilityMap.put(zaPathName, bwMaps.get(ZA));
 
             // Store the path pair map
-            pathPairMap.put(azPath, zaPath);
-            pathPairMap.put(zaPath, azPath);
+            pathPairMap.put(azPathName, zaPathName);
+            pathPairMap.put(zaPathName, azPathName);
+
+            // Store the pathname to path map
+            pathNameMap.put(azPathName, azPath);
+            pathNameMap.put(zaPathName, zaPath);
         }
 
+        return pathNum;
     }
 
-    private void processFailedBlueprint(RequestedBlueprintE reqBlueprint, BandwidthAvailabilityRequest request,
-                                        Map<List<String>, Integer> minAvailableBwMap,
-                                        Map<List<String>, Map<Instant, Integer>> bwAvailabilityMap,
-                                        Map<List<String>, List<String>> pathPairMap) {
+    private Integer processFailedBlueprint(RequestedBlueprintE reqBlueprint, BandwidthAvailabilityRequest request,
+                                        Map<String, Integer> minAvailableBwMap,
+                                        Map<String, Map<Instant, Integer>> bwAvailabilityMap,
+                                        Map<String, String> pathPairMap,
+                                        Map<String, List<String>> pathNameMap, Integer pathNum) {
+
         Map<Instant, Integer> bwMap = new HashMap<>();
         bwMap.put(request.getStartDate().toInstant(), 0);
         bwMap.put(request.getEndDate().toInstant(), 0);
@@ -179,14 +197,23 @@ public class BandwidthAvailabilityService {
         List<String> zaEro = reqPipe.getAzERO().size() > 0 ? reqPipe.getAzERO():
                 Arrays.asList(reqPipe.getZJunction().getDeviceUrn(), reqPipe.getAJunction().getDeviceUrn());
 
-        pathPairMap.put(azEro, zaEro);
-        pathPairMap.put(zaEro, azEro);
+        String azPathName = "Az"+pathNum;
+        String zaPathName = "Za"+pathNum;
+        pathNum++;
 
-        minAvailableBwMap.put(azEro, 0);
-        minAvailableBwMap.put(zaEro, 0);
+        pathNameMap.put(azPathName, azEro);
+        pathNameMap.put(zaPathName, zaEro);
 
-        bwAvailabilityMap.put(azEro, bwMap);
-        bwAvailabilityMap.put(zaEro, bwMap);
+        pathPairMap.put(azPathName, zaPathName);
+        pathPairMap.put(zaPathName, azPathName);
+
+        minAvailableBwMap.put(azPathName, 0);
+        minAvailableBwMap.put(zaPathName, 0);
+
+        bwAvailabilityMap.put(azPathName, bwMap);
+        bwAvailabilityMap.put(zaPathName, bwMap);
+
+        return pathNum;
     }
 
     /**
@@ -222,18 +249,21 @@ public class BandwidthAvailabilityService {
     /**
      * Build a response given the passed in parameters.
      *
-     * @param minAvailableBwMap - Maps a path to the minimum available bandwidth value on that path.
-     * @param bwAvailabilityMap   - Maps a path to another map of time Instants --> min available bandwidth at that instant
-     * @param pathPairMap   - Maps a path to the matching reverse/forward path (i.e. AZ -> ZA, and ZA -> AZ)
+     * @param minAvailableBwMap - Maps a path name to the minimum available bandwidth value on that path.
+     * @param bwAvailabilityMap   - Maps a path name to another map of time Instants --> min available bandwidth at that instant
+     * @param pathPairMap   - Maps a path name to the matching reverse/forward path  name(i.e. AZ1 -> ZA1, and ZA1 -> AZ1)
+     * @param pathNameMap - Maps a path name to a path
      * @return A bandwidth availability response
      */
-    private BandwidthAvailabilityResponse buildResponse(Map<List<String>, Integer> minAvailableBwMap,
-                                                        Map<List<String>, Map<Instant, Integer>> bwAvailabilityMap,
-                                                        Map<List<String>, List<String>> pathPairMap) {
+    private BandwidthAvailabilityResponse buildResponse(Map<String, Integer> minAvailableBwMap,
+                                                        Map<String, Map<Instant, Integer>> bwAvailabilityMap,
+                                                        Map<String, String> pathPairMap,
+                                                        Map<String, List<String>> pathNameMap) {
         return BandwidthAvailabilityResponse.builder()
                 .minAvailableBwMap(minAvailableBwMap)
                 .bwAvailabilityMap(bwAvailabilityMap)
                 .pathPairMap(pathPairMap)
+                .pathNameMap(pathNameMap)
                 .build();
     }
 
