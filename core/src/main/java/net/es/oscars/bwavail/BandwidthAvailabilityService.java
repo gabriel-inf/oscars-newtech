@@ -78,9 +78,28 @@ public class BandwidthAvailabilityService {
      */
     public BandwidthAvailabilityResponse getBandwidthAvailabilityMap(BandwidthAvailabilityRequest request) {
 
+        log.info("Processing Bandwidth Availability Request");
+        //Set default values for numPaths and isDisjoint if they are null
+        if(request.getNumPaths() == null){
+            request.setNumPaths(1);
+        }
+        if(request.getDisjointPaths() == null){
+            request.setDisjointPaths(true);
+        }
+
         // Confirm that the request involves nodes in the topology
-        if (!validateRequest(request)) {
-            log.info("Topology: " + topoService.getMultilayerTopology());
+        Topology topo = topoService.getMultilayerTopology();
+        Boolean pairValid = validatePair(request, topo);
+        Boolean pathValid = validateEros(request, topo);
+        if(!pathValid){
+            log.info("Input paths are invalid: either null or elements in path are not in topology.");
+        }
+        if(!pairValid){
+            log.info("Input source/dest pair is invalid: Either Devices/Ports are null or not in topology");
+        }
+        if (!pathValid && !pairValid) {
+            log.info("Topology: " + topo);
+            log.info("Invalid Bandwidth Availability Request");
             return buildResponse(new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>());
         }
 
@@ -94,7 +113,7 @@ public class BandwidthAvailabilityService {
         Map<String, List<String>> pathNameMap = new HashMap<>();
 
         // For each ERO, create a blueprint and get the response
-        List<RequestedBlueprintE> requestedBlueprints = generateRequestedBlueprints(request);
+        List<RequestedBlueprintE> requestedBlueprints = generateRequestedBlueprints(request, pairValid, pathValid);
 
         Integer pathNum = 1;
         for(RequestedBlueprintE reqBlueprint : requestedBlueprints){
@@ -219,18 +238,20 @@ public class BandwidthAvailabilityService {
     /**
      * Given a BW avail request, generate a list of requested blueprints
      */
-    private List<RequestedBlueprintE> generateRequestedBlueprints(BandwidthAvailabilityRequest request){
+    private List<RequestedBlueprintE> generateRequestedBlueprints(BandwidthAvailabilityRequest request,
+                                                                  Boolean pairValid, Boolean pathValid){
         List<RequestedBlueprintE> blueprints = new ArrayList<>();
 
-        for(Integer index = 0; index < request.getAzEros().size(); index++){
-            List<String> azERO = request.getAzEros().get(index);
-            List<String> zaERO = request.getZaEros().get(index);
+        if(pathValid) {
+            for (Integer index = 0; index < request.getAzEros().size(); index++) {
+                List<String> azERO = request.getAzEros().get(index);
+                List<String> zaERO = request.getZaEros().get(index);
 
-            blueprints.add(entityBuilder.buildRequest(azERO, zaERO,
-                    request.getMinAzBandwidth(), request.getMinZaBandwidth()));
+                blueprints.add(entityBuilder.buildRequest(azERO, zaERO,
+                        request.getMinAzBandwidth(), request.getMinZaBandwidth()));
+            }
         }
-        if(request.getSrcDevice() != null && request.getSrcPorts() != null && request.getDstDevice() != null
-                && request.getDstPorts() != null && request.getNumPaths() != null) {
+        if(pairValid) {
             // Create one blueprint for the source, dest pair - PCE handles multiple paths
             // Determine survivability type for request
             //TODO: Support non-disjoint paths - Yen's Algorithm
@@ -269,39 +290,50 @@ public class BandwidthAvailabilityService {
 
 
     /**
+     * Given a request, confirm if the requested path is in the topology.
+     *
+     * @param request - The bandwidth availability request
+     * @return True if all requested nodes are in the system's topology, False otherwise.
+     */
+    private boolean validateEros(BandwidthAvailabilityRequest request, Topology topo) {
+        Boolean erosSpecified = request.getAzEros().size() > 0 && request.getZaEros().size() > 0
+                && request.getAzEros().size() == request.getZaEros().size();
+
+        Boolean erosValid = false;
+        if(erosSpecified){
+            Boolean azValid = request.getAzEros()
+                    .stream()
+                    .map(path -> path.stream().allMatch(s -> topo.getVertexByUrn(s).isPresent()) && path.size() > 0)
+                    .allMatch(status -> status);
+            Boolean zaValid = request.getZaEros()
+                    .stream()
+                    .map(path -> path.stream().allMatch(s -> topo.getVertexByUrn(s).isPresent()) && path.size() > 0)
+                    .allMatch(status -> status);
+            erosValid =  azValid && zaValid;
+        }
+        return erosValid;
+    }
+
+    /**
      * Given a request, confirm if the requested source/destination ports/devices are in the topology.
      *
      * @param request - The bandwidth availability request
      * @return True if all requested nodes are in the system's topology, False otherwise.
      */
-    private boolean validateRequest(BandwidthAvailabilityRequest request) {
-        // Confirm that src/dest devices/ports are actually in the topology
-        Topology topo = topoService.getMultilayerTopology();
-
-        Boolean erosSpecified = request.getAzEros().size() > 0 && request.getZaEros().size() > 0
-                && request.getAzEros().size() == request.getZaEros().size();
-
+    private boolean validatePair(BandwidthAvailabilityRequest request, Topology topo) {
         Boolean pairSpecified = request.getSrcDevice() != null && request.getDstDevice() != null
                 && request.getSrcPorts() != null && request.getDstPorts() != null && request.getDisjointPaths() != null
                 && request.getNumPaths() != null;
-        if(erosSpecified){
-            Boolean azValid = request.getAzEros()
-                    .stream()
-                    .map(path -> path.stream().allMatch(s -> topo.getVertexByUrn(s).isPresent()))
-                    .allMatch(status -> status);
-            Boolean zaValid = request.getZaEros()
-                    .stream()
-                    .map(path -> path.stream().allMatch(s -> topo.getVertexByUrn(s).isPresent()))
-                    .allMatch(status -> status);
-            return azValid && zaValid;
-        } else if(pairSpecified){
+
+        Boolean pairValid = false;
+        if(pairSpecified){
             Boolean srcDevicePresent = topo.getVertexByUrn(request.getSrcDevice()).isPresent();
             Boolean srcPortsPresent = request.getSrcPorts().stream().allMatch(p -> topo.getVertexByUrn(p).isPresent());
             Boolean dstDevicePresent = topo.getVertexByUrn(request.getDstDevice()).isPresent();
             Boolean dstPortsPresent = request.getDstPorts().stream().allMatch(p -> topo.getVertexByUrn(p).isPresent());
-            return srcDevicePresent && srcPortsPresent && dstDevicePresent && dstPortsPresent;
+            pairValid =  srcDevicePresent && srcPortsPresent && dstDevicePresent && dstPortsPresent;
         }
-        return false;
+        return pairValid;
     }
 
     /**

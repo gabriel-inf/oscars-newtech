@@ -24,9 +24,7 @@ public class BandwidthAvailabilityRequest {
     @NonNull
     private Integer minZaBandwidth;
 
-    @NonNull
     private List<List<String>> azEros;
-    @NonNull
     private List<List<String>> zaEros;
 
     private String srcDevice;
