@@ -161,7 +161,7 @@ public class TopPCE {
                     simpleJunctions.add(junction);
                 }
             } catch (PCEException | PSSException e) {
-                e.printStackTrace();
+                log.info(e.getMessage());
             }
         }
         return simpleJunctions;
@@ -219,7 +219,7 @@ public class TopPCE {
                 }
                 // If it failed, decrement the number reserved
                 catch (Exception e) {
-                    log.info(e.toString());
+                    log.info(e.getMessage());
                     e.printStackTrace();
                     numReserved--;
                 }
@@ -252,7 +252,7 @@ public class TopPCE {
                 }
                 // If it failed, decrement the number reserved
                 catch (Exception e) {
-                    log.info(e.toString());
+                    log.info(e.getMessage());
                     numReserved--;
                 }
             }
@@ -295,7 +295,7 @@ public class TopPCE {
                 log.info("Exiting NON-Palindromical PCE");
             }
         } catch (PCEException e) {
-            log.error("PCE Unsuccessful", e);
+            log.error("PCE Unsuccessful", e.getMessage());
         }
 
         return eroMap;

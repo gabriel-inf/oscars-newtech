@@ -36,7 +36,7 @@ public class BhandariPCE {
             log.info("No shortest path from " + source.getUrn() + " to " + dest.getUrn() + " found");
             return new ArrayList<>();
         }
-        logPath(shortestPath, "First Shortest Path");
+        //logPath(shortestPath, "First Shortest Path");
 
         List<List<TopoEdge>> paths = new ArrayList<>();
         paths.add(shortestPath);
@@ -69,7 +69,7 @@ public class BhandariPCE {
 
             // Find the new shortest path
             List<TopoEdge> modShortestPath = bellmanFordPCE.shortestPath(modifiedTopo, source, dest);
-            logPath(modShortestPath, "SP for (" + source.getUrn() + "," + dest.getUrn() + ")");
+            //logPath(modShortestPath, "SP for (" + source.getUrn() + "," + dest.getUrn() + ")");
             tempPaths.add(modShortestPath);
         }
         return combine(shortestPath, tempPaths, reversedToOriginalMap, modifiedTopo, source, dest, k);
@@ -97,7 +97,7 @@ public class BhandariPCE {
         combinedEdges.addAll(shortestPath);
 
         // Find the shortest paths given these combined edges
-        logPath(new ArrayList<>(combinedEdges), "Combined Edges");
+        //logPath(new ArrayList<>(combinedEdges), "Combined Edges");
         topo.setEdges(combinedEdges);
 
         for(Integer pIndex = 0; pIndex < k; pIndex++){
