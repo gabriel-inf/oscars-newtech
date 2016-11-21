@@ -292,6 +292,9 @@ function populate_junction(nodeId, fixtures) {
 
 
 function update_junction(nodeId, fixtures) {
+
+    stateChanged("Junction updated.");
+
     var i;
     var junctions = reservation_request["junctions"];
     junctions[nodeId] = {
@@ -509,13 +512,13 @@ $(document).ready(function () {
 
     make_graphs();
 
-   document.getElementById('description').addEventListener('keypress', function(){ stateChanged("Description Changed"); }, false);
-   document.getElementById('start_at').addEventListener('dp.change', function(){ cstateChanged("Start Time Changed"); }, false);
-   document.getElementById('start_at').addEventListener('keypress', function(){ stateChanged("Start Time Changed"); }, false);
-   document.getElementById('start_at').addEventListener('click', function(){ stateChanged("Start Time Changed"); }, false);
-   document.getElementById('end_at').addEventListener('dp.change', function(){ stateChanged("End Time Changed"); }, false);
-   document.getElementById('end_at').addEventListener('keypress', function(){ stateChanged("End Time Changed"); }, false);
-   document.getElementById('end_at').addEventListener('click', function(){ stateChanged("End Time Changed"); }, false);
+   document.getElementById('description').addEventListener('keypress', function(){ stateChanged("Description updated."); }, false);
+   document.getElementById('start_at').addEventListener('dp.change', function(){ cstateChanged("Start Time changed."); }, false);
+   document.getElementById('start_at').addEventListener('keypress', function(){ stateChanged("Start Time changed."); }, false);
+   document.getElementById('start_at').addEventListener('click', function(){ stateChanged("Start Time changed."); }, false);
+   document.getElementById('end_at').addEventListener('dp.change', function(){ stateChanged("End Time changed."); }, false);
+   document.getElementById('end_at').addEventListener('keypress', function(){ stateChanged("End Time changed"); }, false);
+   document.getElementById('end_at').addEventListener('click', function(){ stateChanged("End Time changed"); }, false);
 
 
     $('#dump_positions_btn').on('click', function (e) {
