@@ -18,7 +18,6 @@ var reservation_request = {
 
 var resv_commit_btn;
 var resv_hold_btn;
-var resv_precheck_btn;
 var errors_box;
 var precheck_box;
 
@@ -27,6 +26,24 @@ var doNothing = function (e) {
     e.preventDefault();
     return false;
 };
+
+function stateChanged(changeDescription)
+{
+    console.log("Reservation state changed: " + changeDescription);
+
+    var reviewPassed = review_ready();
+
+    if(reviewPassed)
+    {
+        console.log("Review Passed. Issuing Precheck analysis.");
+        resv_precheck();
+    }
+    else
+    {
+        console.log("Review Failed.");
+    }
+
+}
 
 function add_to_reservation(viz, name) {
     console.log("adding to reservation");
@@ -39,14 +56,18 @@ function add_to_reservation(viz, name) {
     }
 
     var junctions = reservation_request["junctions"];
-
-    for (var i = 0; i < selected_node_ids.name.length; i++) {
+    var nodeAlreadyPresent = false;
+    for (var i = 0; i < selected_node_ids.name.length; i++)
+    {
         var nodeId = selected_node_ids.name[i];
-        if (!(nodeId in junctions)) {
+        if (!(nodeId in junctions))
+        {
             junctions[nodeId] = {"fixtures": {}};
         }
-        if (!ds.nodes.get(nodeId)) {
+        if (!ds.nodes.get(nodeId))
+        {
             ds.nodes.add({id: nodeId, label: nodeId});
+
             if (last_added_node != null) {
                 var a = last_added_node.id;
                 var z = nodeId;
@@ -59,9 +80,17 @@ function add_to_reservation(viz, name) {
                 reservation_request["pipes"][newId] = {"bw": 0, "a": a, "z": z};
 
                 ds.edges.add(newEdge);
-
             }
         }
+        else
+        {
+            nodeAlreadyPresent = true;
+        }
+    }
+
+    if(!nodeAlreadyPresent)
+    {
+        stateChanged("Node added.");
     }
 
     viz.network.stabilize();
@@ -172,11 +201,16 @@ function show_junction_card(nodeId) {
     });
 }
 
-var review_ready = function () {
+//var review_ready = function () {
+//function review_ready()
+var review_ready = function ()
+ {
+    var passedReview = false;
+
     if (!need_review) {
         return;
     }
-    console.log("reviewing if reservation can be submitted");
+    console.log("Reviewing parameters to determine if reservation can be submitted");
     var errors = [];
 
     var junctions = reservation_request["junctions"];
@@ -204,7 +238,8 @@ var review_ready = function () {
     }
 
 
-    if (errors.length == 0) {
+    if (errors.length == 0)
+    {
         errors_box.removeClass("alert-danger");
         errors_box.addClass("alert-success");
         errors_box.text("ready to submit!");
@@ -213,10 +248,10 @@ var review_ready = function () {
         resv_hold_btn.off();
         resv_hold_btn.on('click', resv_hold);
 
-        resv_precheck_btn.addClass("active").removeClass("disabled");
-        resv_precheck_btn.off();
-        resv_precheck_btn.on('click', resv_precheck);
-    } else {
+        passedReview = true;
+    }
+    else
+    {
         errors_box.addClass("alert-danger");
         errors_box.removeClass("alert-success");
         errors_box.text(errors);
@@ -225,16 +260,15 @@ var review_ready = function () {
         resv_hold_btn.off();
         resv_hold_btn.on('click', doNothing);
 
-        resv_precheck_btn.addClass("disabled").removeClass("active");
-        resv_precheck_btn.off();
-        resv_precheck_btn.on('click', doNothing);
-
         precheck_box.removeClass("alert-info").removeClass("alert-success").removeClass("alert-danger").removeClass("alert-warning");
         precheck_box.text(" ");
         precheck_box.hide();
-    }
-    setTimeout(review_ready, 1000);
 
+        passedReview = false;
+    }
+    //setTimeout(review_ready, 1000);
+
+    return passedReview;
 };
 
 function populate_junction(nodeId, fixtures) {
@@ -324,10 +358,6 @@ var resv_hold = function (e) {
                 resv_hold_btn.off();
                 resv_hold_btn.on('click', doNothing);
 
-                resv_precheck_btn.addClass("disabled").removeClass("active");
-                resv_precheck_btn.off();
-                resv_precheck_btn.on('click', doNothing);
-
                 need_review = false;
             }
         });
@@ -337,9 +367,8 @@ var resv_hold = function (e) {
     return false;
 };
 
-var resv_precheck = function (e) {
-    e.preventDefault();
-
+var resv_precheck = function()
+{
     precheck_box.show();
     precheck_box.addClass("alert-info");
     precheck_box.removeClass("alert-success");
@@ -454,11 +483,19 @@ var make_graphs = function() {
                             "z": edgeData.to
                         }
                     }
+
+                    stateChanged("Edge added.");
                 },
                 deleteEdge: function (edgeData, callback) {
                     callback(edgeData);
 
                     delete(reservation_request["pipes"][edgeData.id]);
+
+                    stateChanged("Edge deleted.");
+                },
+                deleteNode: function (nodeData, callback)
+                {
+                    stateChanged("Node deleted.");
                 }
             }
         };
@@ -471,6 +508,15 @@ var make_graphs = function() {
 $(document).ready(function () {
 
     make_graphs();
+
+   document.getElementById('description').addEventListener('keypress', function(){ stateChanged("Description Changed"); }, false);
+   document.getElementById('start_at').addEventListener('dp.change', function(){ cstateChanged("Start Time Changed"); }, false);
+   document.getElementById('start_at').addEventListener('keypress', function(){ stateChanged("Start Time Changed"); }, false);
+   document.getElementById('start_at').addEventListener('click', function(){ stateChanged("Start Time Changed"); }, false);
+   document.getElementById('end_at').addEventListener('dp.change', function(){ stateChanged("End Time Changed"); }, false);
+   document.getElementById('end_at').addEventListener('keypress', function(){ stateChanged("End Time Changed"); }, false);
+   document.getElementById('end_at').addEventListener('click', function(){ stateChanged("End Time Changed"); }, false);
+
 
     $('#dump_positions_btn').on('click', function (e) {
         e.preventDefault();
@@ -497,16 +543,13 @@ $(document).ready(function () {
     resv_commit_btn = $('#resv_commit_btn');
     resv_commit_btn.on('click', doNothing);
 
-    resv_precheck_btn = $('#resv_precheck_btn');
-    resv_precheck_btn.on('click', doNothing);
-
     errors_box = $('#errors_box');
     precheck_box = $('#precheck_box');
 
 
     $('#resv_buttons_form').on('submit', doNothing);
 
-    setTimeout(review_ready, 1000);
+    //setTimeout(review_ready, 1000);
 
 
     $(function () {

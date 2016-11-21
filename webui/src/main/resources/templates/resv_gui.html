@@ -4,7 +4,7 @@
       xmlns:th="http://www.thymeleaf.org">
 
 
-<head th:include="shared :: headerFragment (pageTitle='Reservation')"/>
+<head th:include="shared :: headerFragment (pageTitle='New Reservation')"/>
 <head th:include="shared :: vizFragment"/>
 
 <body>
@@ -71,7 +71,6 @@
                         <div class="col-md-6">
                             <a href="#" id="resv_hold_btn" class="btn btn-primary disabled">Hold</a>
                             <a href="#" id="resv_commit_btn" class="btn btn-success disabled">Commit</a>
-                            <a href="#" id="resv_precheck_btn" class="btn btn-warning disabled">Precheck</a>
                         </div>
                         <div id="precheck_box" class="alert"/>
                     </form>
