@@ -9,7 +9,6 @@ import net.es.oscars.dto.spec.ReservedVlanJunction;
 import net.es.oscars.dto.topo.TopoEdge;
 import net.es.oscars.dto.topo.TopoVertex;
 import net.es.oscars.dto.topo.Topology;
-import net.es.oscars.dto.topo.enums.Layer;
 import net.es.oscars.dto.topo.enums.VertexType;
 import net.es.oscars.dto.viz.Position;
 import net.es.oscars.dto.viz.VizEdge;
@@ -203,7 +202,7 @@ public class VizExporter {
                 added.add(r_id);
                 VizEdge ve = VizEdge.builder()
                         .from(dev_a).to(dev_z).title("").label("").value(1)
-                        .id(null)
+                        .id(e_id)
                         .arrows(null).arrowStrikethrough(false).color(null)
                         .build();
 

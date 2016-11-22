@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.resv.Connection;
 import net.es.oscars.dto.resv.ConnectionFilter;
+import net.es.oscars.dto.topo.BidirectionalPath;
+import net.es.oscars.dto.topo.Edge;
 import net.es.oscars.webui.dto.MinimalRequest;
 import net.es.oscars.webui.ipc.ConnectionProvider;
 import net.es.oscars.webui.ipc.MinimalPreChecker;
@@ -14,10 +16,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Slf4j
 @Controller
@@ -144,6 +143,24 @@ public class ReservationController {
             res.put("preCheckResult", "UNSUCCESSFUL");
         else
             res.put("preCheckResult", "SUCCESS");
+
+        Set<BidirectionalPath> allPaths = c.getReserved().getVlanFlow().getAllPaths();
+
+        String pathList = new String();
+
+        for(BidirectionalPath biPath : allPaths)
+        {
+            List<Edge> oneAzPath = biPath.getAzPath();
+
+            for(Edge oneEdge : oneAzPath)
+            {
+                pathList += oneEdge.getOrigin() + "," + oneEdge.getTarget() + ",";
+            }
+
+            pathList += ";";
+        }
+
+        res.put("allAzPaths", pathList);
 
         return res;
     }

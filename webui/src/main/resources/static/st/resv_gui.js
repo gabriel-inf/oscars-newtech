@@ -10,6 +10,11 @@ var junction_card;
 
 var need_review = true;
 
+var mostRecentPrecheckID = "-1";
+
+var highlightedNodes = [];
+var highlightedEdges = [];
+
 var reservation_request = {
     "connectionId": "",
     "junctions": {},
@@ -19,7 +24,7 @@ var reservation_request = {
 var resv_commit_btn;
 var resv_hold_btn;
 var errors_box;
-var precheck_box;
+
 
 var doNothing = function (e) {
     console.log("doing nothing");
@@ -155,7 +160,10 @@ function show_pipe_card(edgeId) {
     $("#pipe_z").val(prev_z);
 
     // add new event handler
-    $("#pipe_bw").change(function () {
+    $("#pipe_bw").change(function ()
+    {
+        stateChanged("Pipe updated.");
+
         var bw = $("#pipe_bw").val();
         console.log("saving bw for pipe: " + edgeId + " : " + bw);
         pipes[edgeId]["bw"] = bw;
@@ -242,11 +250,13 @@ var review_ready = function ()
     {
         errors_box.removeClass("alert-danger");
         errors_box.addClass("alert-success");
-        errors_box.text("ready to submit!");
+        errors_box.text("Ready to submit!");
 
         resv_hold_btn.addClass("active").removeClass("disabled");
         resv_hold_btn.off();
         resv_hold_btn.on('click', resv_hold);
+
+        console.log("Review pass.");
 
         passedReview = true;
     }
@@ -260,9 +270,7 @@ var review_ready = function ()
         resv_hold_btn.off();
         resv_hold_btn.on('click', doNothing);
 
-        precheck_box.removeClass("alert-info").removeClass("alert-success").removeClass("alert-danger").removeClass("alert-warning");
-        precheck_box.text(" ");
-        precheck_box.hide();
+        console.log("Review fail.");
 
         passedReview = false;
     }
@@ -337,10 +345,6 @@ var resv_hold = function (e) {
         var json = JSON.stringify(reservation_request);
         console.log(json);
 
-        precheck_box.removeClass("alert-info").removeClass("alert-success").removeClass("alert-danger").removeClass("alert-warning");
-        precheck_box.text(" ");
-        precheck_box.hide();
-
         // TODO: handle errors
         $.ajax({
             type: "POST",
@@ -372,11 +376,15 @@ var resv_hold = function (e) {
 
 var resv_precheck = function()
 {
-    precheck_box.show();
-    precheck_box.addClass("alert-info");
-    precheck_box.removeClass("alert-success");
-    precheck_box.removeClass("alert-danger");
-    precheck_box.text("Precheck Initialized.");
+    display_viz.network.unselectAll();
+
+    highlight_devices(display_viz.datasource, highlightedNodes, false);
+    highlight_links(display_viz.datasource, highlightedEdges, false);
+
+    errors_box.addClass("alert-info");
+    errors_box.removeClass("alert-success");
+    errors_box.removeClass("alert-danger");
+    errors_box.text("Ready to submit! Precheck initialized!");
 
     console.log("pre-checking a reservation");
     reservation_request["description"] = $('#description').val();
@@ -397,6 +405,9 @@ var resv_precheck = function()
         reservation_request["connectionId"] = json_data["connectionId"];
         console.log("got a new connection id "+reservation_request["connectionId"]);
 
+        mostRecentPrecheckID = reservation_request["connectionId"];
+        console.log("Most recent Precheck ID: " + mostRecentPrecheckID);
+
         var json = JSON.stringify(reservation_request);
         console.log(json);
 
@@ -411,21 +422,30 @@ var resv_precheck = function()
 
                 var connID = data["connectionId"];
                 var preCheckRes = data["preCheckResult"];
+                var allAzPaths;
 
-                console.log("Precheck Result: " + preCheckRes);
-
-                if(preCheckRes == "UNSUCCESSFUL")
+                if(mostRecentPrecheckID !== reservation_request["connectionId"])
                 {
-                    precheck_box.addClass("alert-danger").removeClass("alert-info");
-                    precheck_box.text("Precheck Failed.");
+                    ;
                 }
                 else
                 {
-                    precheck_box.addClass("alert-success").removeClass("alert-info");
-                    precheck_box.text("Precheck Passed.");
-                }
+                    console.log("Precheck Result: " + preCheckRes);
 
-                need_review = false;
+                    if(preCheckRes == "UNSUCCESSFUL")
+                    {
+                        errors_box.addClass("alert-danger").removeClass("alert-info");
+                        errors_box.text("Precheck Failed: Cannot establish reservation with current parameters!");
+
+                    }
+                    else
+                    {
+                        errors_box.addClass("alert-success").removeClass("alert-info");
+                        errors_box.text("Precheck Passed: Prospective route(s) added to topology. Click Hold to reserve!");
+                        allAzPaths = data["allAzPaths"];
+                        drawPathOnNetwork(allAzPaths);      // Display computed path
+                    }
+                }
             }
         });
 
@@ -433,6 +453,66 @@ var resv_precheck = function()
 
     return false;
 };
+
+function drawPathOnNetwork(allAzPaths)
+{
+    var eachAzPath = allAzPaths.split(";");
+    var nodesToReserve = [];
+    var linksToReserve = [];
+
+    for(i = 0; i < eachAzPath.length-1; i++)
+    {
+        console.log("Path: " + eachAzPath[i]);
+
+        var eachAzNode = eachAzPath[i].split(",");
+        var prevNode = "";
+        var prevNodeIsDevice = false;
+        for(j = 0; j < eachAzNode.length-1; j++)
+        {
+            var nextNode = eachAzNode[j];
+
+            if(nextNode === prevNode)
+                continue;
+
+
+
+             var portNodes = nextNode.split(":");
+             var nextNodeIsDevice = false;
+             if(portNodes.length > 1)
+                nextNodeIsDevice = false;
+             else
+                nextNodeIsDevice = true;
+
+             if(nextNodeIsDevice)
+             {
+                nodesToReserve.push(nextNode);
+             }
+
+              if(!prevNodeIsDevice && !nextNodeIsDevice && j > 0)
+              {
+                var linkName = prevNode + " -- " + nextNode;
+                var reverseLinkName = nextNode + " -- " + prevNode;     // Not all links are bidirectional in the viz. Won't be colored properly.
+                linksToReserve.push(linkName);
+                linksToReserve.push(reverseLinkName);
+              }
+
+              prevNode = eachAzNode[j];
+              var prevPort = prevNode.split(":");
+              if(prevPort.length > 1)
+                prevNodeIsDevice = false;
+              else
+                prevNodeIsDevice = true;
+        }
+    }
+
+    display_viz.network.unselectAll();
+
+    highlight_devices(display_viz.datasource, nodesToReserve, true);
+    highlight_links(display_viz.datasource, linksToReserve, true);
+
+    highlightedNodes = nodesToReserve;
+    highlightedEdges = linksToReserve;
+}
 
 var make_graphs = function() {
 
@@ -512,14 +592,17 @@ $(document).ready(function () {
 
     make_graphs();
 
+    var newEndDate = $('#start_at').datetimepicker('getDate');
+       newEndDate.setDate(newEndDate.getDate() + 1);
+       $('#end_at').datetimepicker('setDate', newEndDate);
+
    document.getElementById('description').addEventListener('keypress', function(){ stateChanged("Description updated."); }, false);
-   document.getElementById('start_at').addEventListener('dp.change', function(){ cstateChanged("Start Time changed."); }, false);
+   document.getElementById('start_at').addEventListener('dp.change', function(){ stateChanged("Start Time changed."); }, false);
    document.getElementById('start_at').addEventListener('keypress', function(){ stateChanged("Start Time changed."); }, false);
    document.getElementById('start_at').addEventListener('click', function(){ stateChanged("Start Time changed."); }, false);
    document.getElementById('end_at').addEventListener('dp.change', function(){ stateChanged("End Time changed."); }, false);
    document.getElementById('end_at').addEventListener('keypress', function(){ stateChanged("End Time changed"); }, false);
    document.getElementById('end_at').addEventListener('click', function(){ stateChanged("End Time changed"); }, false);
-
 
     $('#dump_positions_btn').on('click', function (e) {
         e.preventDefault();
@@ -547,8 +630,6 @@ $(document).ready(function () {
     resv_commit_btn.on('click', doNothing);
 
     errors_box = $('#errors_box');
-    precheck_box = $('#precheck_box');
-
 
     $('#resv_buttons_form').on('submit', doNothing);
 
