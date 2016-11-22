@@ -23,8 +23,11 @@ public class MinimalConnectionBuilder
         Connection minConnection;
 
 
-        Date notBefore = new Date(minRequest.getStartAt());
-        Date notAfter = new Date(minRequest.getEndAt());
+        // Multiply start and end times by 1000
+        // Unix time was returned by resv_gui.js as the number of SECONDS since the epoch
+        // Date expects the number of MILLISECONDS
+        Date notBefore = new Date(minRequest.getStartAt() * 1000L);
+        Date notAfter = new Date(minRequest.getEndAt() * 1000L);
         String connectionId = minRequest.getConnectionId();
         String username = "some user";
 
