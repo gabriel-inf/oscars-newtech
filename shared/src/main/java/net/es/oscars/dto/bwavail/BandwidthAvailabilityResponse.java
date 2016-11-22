@@ -15,47 +15,14 @@ import java.util.Map;
 public class BandwidthAvailabilityResponse {
 
     @NonNull
-    private Long requestID;
+    private Map<String, Integer> minAvailableBwMap;
 
     @NonNull
-    private Date startDate;
+    private Map<String, Map<Instant, Integer>> bwAvailabilityMap;
 
     @NonNull
-    private Date endDate;
+    private Map<String, String> pathPairMap;
 
     @NonNull
-    private Integer minRequestedAzBandwidth;
-
-    @NonNull
-    private Integer minRequestedZaBandwidth;
-
-    @NonNull
-    private String srcDevice;
-
-    @NonNull
-    private String srcPort;
-
-    @NonNull
-    private String dstDevice;
-
-    @NonNull
-    private String dstPort;
-
-    @NonNull
-    private Integer minAvailableAzBandwidth;
-
-    @NonNull
-    private Integer maxAvailableAzBandwidth;
-
-    @NonNull
-    private Integer minAvailableZaBandwidth;
-
-    @NonNull
-    private Integer maxAvailableZaBandwidth;
-
-    @NonNull
-    private Map<Instant, Integer> azBwAvailMap;
-
-    @NonNull
-    private Map<Instant, Integer> zaBwAvailMap;
+    private Map<String, List<String>> pathNameMap;
 }

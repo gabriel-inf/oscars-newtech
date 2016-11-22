@@ -10,6 +10,11 @@ var junction_card;
 
 var need_review = true;
 
+var mostRecentPrecheckID = "-1";
+
+var highlightedNodes = [];
+var highlightedEdges = [];
+
 var reservation_request = {
     "connectionId": "",
     "junctions": {},
@@ -20,11 +25,30 @@ var resv_commit_btn;
 var resv_hold_btn;
 var errors_box;
 
+
 var doNothing = function (e) {
     console.log("doing nothing");
     e.preventDefault();
     return false;
 };
+
+function stateChanged(changeDescription)
+{
+    console.log("Reservation state changed: " + changeDescription);
+
+    var reviewPassed = review_ready();
+
+    if(reviewPassed)
+    {
+        console.log("Review Passed. Issuing Precheck analysis.");
+        resv_precheck();
+    }
+    else
+    {
+        console.log("Review Failed.");
+    }
+
+}
 
 function add_to_reservation(viz, name) {
     console.log("adding to reservation");
@@ -37,14 +61,18 @@ function add_to_reservation(viz, name) {
     }
 
     var junctions = reservation_request["junctions"];
-
-    for (var i = 0; i < selected_node_ids.name.length; i++) {
+    var nodeAlreadyPresent = false;
+    for (var i = 0; i < selected_node_ids.name.length; i++)
+    {
         var nodeId = selected_node_ids.name[i];
-        if (!(nodeId in junctions)) {
+        if (!(nodeId in junctions))
+        {
             junctions[nodeId] = {"fixtures": {}};
         }
-        if (!ds.nodes.get(nodeId)) {
+        if (!ds.nodes.get(nodeId))
+        {
             ds.nodes.add({id: nodeId, label: nodeId});
+
             if (last_added_node != null) {
                 var a = last_added_node.id;
                 var z = nodeId;
@@ -57,9 +85,17 @@ function add_to_reservation(viz, name) {
                 reservation_request["pipes"][newId] = {"bw": 0, "a": a, "z": z};
 
                 ds.edges.add(newEdge);
-
             }
         }
+        else
+        {
+            nodeAlreadyPresent = true;
+        }
+    }
+
+    if(!nodeAlreadyPresent)
+    {
+        stateChanged("Node added.");
     }
 
     viz.network.stabilize();
@@ -124,7 +160,10 @@ function show_pipe_card(edgeId) {
     $("#pipe_z").val(prev_z);
 
     // add new event handler
-    $("#pipe_bw").change(function () {
+    $("#pipe_bw").change(function ()
+    {
+        stateChanged("Pipe updated.");
+
         var bw = $("#pipe_bw").val();
         console.log("saving bw for pipe: " + edgeId + " : " + bw);
         pipes[edgeId]["bw"] = bw;
@@ -170,11 +209,16 @@ function show_junction_card(nodeId) {
     });
 }
 
-var review_ready = function () {
+//var review_ready = function () {
+//function review_ready()
+var review_ready = function ()
+ {
+    var passedReview = false;
+
     if (!need_review) {
         return;
     }
-    console.log("reviewing if reservation can be submitted");
+    console.log("Reviewing parameters to determine if reservation can be submitted");
     var errors = [];
 
     var junctions = reservation_request["junctions"];
@@ -202,24 +246,37 @@ var review_ready = function () {
     }
 
 
-    if (errors.length == 0) {
+    if (errors.length == 0)
+    {
         errors_box.removeClass("alert-danger");
         errors_box.addClass("alert-success");
-        errors_box.text("ready to submit!");
+        errors_box.text("Ready to submit!");
 
         resv_hold_btn.addClass("active").removeClass("disabled");
         resv_hold_btn.off();
         resv_hold_btn.on('click', resv_hold);
-    } else {
+
+        console.log("Review pass.");
+
+        passedReview = true;
+    }
+    else
+    {
         errors_box.addClass("alert-danger");
         errors_box.removeClass("alert-success");
         errors_box.text(errors);
+
         resv_hold_btn.addClass("disabled").removeClass("active");
         resv_hold_btn.off();
         resv_hold_btn.on('click', doNothing);
-    }
-    setTimeout(review_ready, 1000);
 
+        console.log("Review fail.");
+
+        passedReview = false;
+    }
+    //setTimeout(review_ready, 1000);
+
+    return passedReview;
 };
 
 function populate_junction(nodeId, fixtures) {
@@ -243,6 +300,9 @@ function populate_junction(nodeId, fixtures) {
 
 
 function update_junction(nodeId, fixtures) {
+
+    stateChanged("Junction updated.");
+
     var i;
     var junctions = reservation_request["junctions"];
     junctions[nodeId] = {
@@ -304,6 +364,7 @@ var resv_hold = function (e) {
                 resv_hold_btn.addClass("disabled").removeClass("active");
                 resv_hold_btn.off();
                 resv_hold_btn.on('click', doNothing);
+
                 need_review = false;
             }
         });
@@ -313,6 +374,145 @@ var resv_hold = function (e) {
     return false;
 };
 
+var resv_precheck = function()
+{
+    display_viz.network.unselectAll();
+
+    highlight_devices(display_viz.datasource, highlightedNodes, false);
+    highlight_links(display_viz.datasource, highlightedEdges, false);
+
+    errors_box.addClass("alert-info");
+    errors_box.removeClass("alert-success");
+    errors_box.removeClass("alert-danger");
+    errors_box.text("Ready to submit! Precheck initialized!");
+
+    console.log("pre-checking a reservation");
+    reservation_request["description"] = $('#description').val();
+
+    var start_dtstring = $('#start_at').val();
+    var end_dtstring = $('#end_at').val();
+
+    var start_m = moment(start_dtstring);
+    var end_m = moment(end_dtstring);
+
+    reservation_request["startAt"] = parseInt(start_m.unix());
+    reservation_request["endAt"] = parseInt(end_m.unix());
+
+
+    loadJSON("/resv/newConnectionId", function (response) {
+        var json_data = JSON.parse(response);
+        console.log(json_data);
+        reservation_request["connectionId"] = json_data["connectionId"];
+        console.log("got a new connection id "+reservation_request["connectionId"]);
+
+        mostRecentPrecheckID = reservation_request["connectionId"];
+        console.log("Most recent Precheck ID: " + mostRecentPrecheckID);
+
+        var json = JSON.stringify(reservation_request);
+        console.log(json);
+
+        // TODO: handle errors
+        $.ajax({
+            type: "POST",
+            url: "/resv/precheck",
+            data: json,
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+
+                var connID = data["connectionId"];
+                var preCheckRes = data["preCheckResult"];
+                var allAzPaths;
+
+                if(mostRecentPrecheckID !== reservation_request["connectionId"])
+                {
+                    ;
+                }
+                else
+                {
+                    console.log("Precheck Result: " + preCheckRes);
+
+                    if(preCheckRes == "UNSUCCESSFUL")
+                    {
+                        errors_box.addClass("alert-danger").removeClass("alert-info");
+                        errors_box.text("Precheck Failed: Cannot establish reservation with current parameters!");
+
+                    }
+                    else
+                    {
+                        errors_box.addClass("alert-success").removeClass("alert-info");
+                        errors_box.text("Precheck Passed: Prospective route(s) added to topology. Click Hold to reserve!");
+                        allAzPaths = data["allAzPaths"];
+                        drawPathOnNetwork(allAzPaths);      // Display computed path
+                    }
+                }
+            }
+        });
+
+    });
+
+    return false;
+};
+
+function drawPathOnNetwork(allAzPaths)
+{
+    var eachAzPath = allAzPaths.split(";");
+    var nodesToReserve = [];
+    var linksToReserve = [];
+
+    for(i = 0; i < eachAzPath.length-1; i++)
+    {
+        console.log("Path: " + eachAzPath[i]);
+
+        var eachAzNode = eachAzPath[i].split(",");
+        var prevNode = "";
+        var prevNodeIsDevice = false;
+        for(j = 0; j < eachAzNode.length-1; j++)
+        {
+            var nextNode = eachAzNode[j];
+
+            if(nextNode === prevNode)
+                continue;
+
+
+
+             var portNodes = nextNode.split(":");
+             var nextNodeIsDevice = false;
+             if(portNodes.length > 1)
+                nextNodeIsDevice = false;
+             else
+                nextNodeIsDevice = true;
+
+             if(nextNodeIsDevice)
+             {
+                nodesToReserve.push(nextNode);
+             }
+
+              if(!prevNodeIsDevice && !nextNodeIsDevice && j > 0)
+              {
+                var linkName = prevNode + " -- " + nextNode;
+                var reverseLinkName = nextNode + " -- " + prevNode;     // Not all links are bidirectional in the viz. Won't be colored properly.
+                linksToReserve.push(linkName);
+                linksToReserve.push(reverseLinkName);
+              }
+
+              prevNode = eachAzNode[j];
+              var prevPort = prevNode.split(":");
+              if(prevPort.length > 1)
+                prevNodeIsDevice = false;
+              else
+                prevNodeIsDevice = true;
+        }
+    }
+
+    display_viz.network.unselectAll();
+
+    highlight_devices(display_viz.datasource, nodesToReserve, true);
+    highlight_links(display_viz.datasource, linksToReserve, true);
+
+    highlightedNodes = nodesToReserve;
+    highlightedEdges = linksToReserve;
+}
 
 var make_graphs = function() {
 
@@ -366,11 +566,19 @@ var make_graphs = function() {
                             "z": edgeData.to
                         }
                     }
+
+                    stateChanged("Edge added.");
                 },
                 deleteEdge: function (edgeData, callback) {
                     callback(edgeData);
 
                     delete(reservation_request["pipes"][edgeData.id]);
+
+                    stateChanged("Edge deleted.");
+                },
+                deleteNode: function (nodeData, callback)
+                {
+                    stateChanged("Node deleted.");
                 }
             }
         };
@@ -383,6 +591,18 @@ var make_graphs = function() {
 $(document).ready(function () {
 
     make_graphs();
+
+    var newEndDate = $('#start_at').datetimepicker('getDate');
+       newEndDate.setDate(newEndDate.getDate() + 1);
+       $('#end_at').datetimepicker('setDate', newEndDate);
+
+   document.getElementById('description').addEventListener('keypress', function(){ stateChanged("Description updated."); }, false);
+   document.getElementById('start_at').addEventListener('dp.change', function(){ stateChanged("Start Time changed."); }, false);
+   document.getElementById('start_at').addEventListener('keypress', function(){ stateChanged("Start Time changed."); }, false);
+   document.getElementById('start_at').addEventListener('click', function(){ stateChanged("Start Time changed."); }, false);
+   document.getElementById('end_at').addEventListener('dp.change', function(){ stateChanged("End Time changed."); }, false);
+   document.getElementById('end_at').addEventListener('keypress', function(){ stateChanged("End Time changed"); }, false);
+   document.getElementById('end_at').addEventListener('click', function(){ stateChanged("End Time changed"); }, false);
 
     $('#dump_positions_btn').on('click', function (e) {
         e.preventDefault();
@@ -411,10 +631,9 @@ $(document).ready(function () {
 
     errors_box = $('#errors_box');
 
-
     $('#resv_buttons_form').on('submit', doNothing);
 
-    setTimeout(review_ready, 1000);
+    //setTimeout(review_ready, 1000);
 
 
     $(function () {

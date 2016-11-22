@@ -1,24 +1,21 @@
 package net.es.oscars.webui.cont;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.dto.pss.EthJunctionType;
 import net.es.oscars.dto.resv.Connection;
 import net.es.oscars.dto.resv.ConnectionFilter;
-import net.es.oscars.dto.spec.*;
-import net.es.oscars.dto.topo.Urn;
+import net.es.oscars.dto.topo.BidirectionalPath;
+import net.es.oscars.dto.topo.Edge;
 import net.es.oscars.webui.dto.MinimalRequest;
 import net.es.oscars.webui.ipc.ConnectionProvider;
+import net.es.oscars.webui.ipc.MinimalPreChecker;
 import net.es.oscars.webui.ipc.MinimalRequester;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 @Slf4j
@@ -30,6 +27,9 @@ public class ReservationController {
 
     @Autowired
     private MinimalRequester minimalRequester;
+
+    @Autowired
+    private MinimalPreChecker minimalPreChecker;
 
     @Autowired
     private ConnectionProvider connectionProvider;
@@ -125,6 +125,44 @@ public class ReservationController {
 
         return res;
 
+    }
+
+
+    @RequestMapping(value = "/resv/precheck", method = RequestMethod.POST)
+    @ResponseBody
+    public Map<String, String> resv_preCheck(@RequestBody MinimalRequest request)
+    {
+        Connection c = minimalPreChecker.preCheckMinimal(request);
+
+        Map<String, String> res = new HashMap<>();
+
+        res.put("connectionId", request.getConnectionId());
+
+        //TODO: Pass back reservation with all details
+        if(c == null)
+            res.put("preCheckResult", "UNSUCCESSFUL");
+        else
+            res.put("preCheckResult", "SUCCESS");
+
+        Set<BidirectionalPath> allPaths = c.getReserved().getVlanFlow().getAllPaths();
+
+        String pathList = new String();
+
+        for(BidirectionalPath biPath : allPaths)
+        {
+            List<Edge> oneAzPath = biPath.getAzPath();
+
+            for(Edge oneEdge : oneAzPath)
+            {
+                pathList += oneEdge.getOrigin() + "," + oneEdge.getTarget() + ",";
+            }
+
+            pathList += ";";
+        }
+
+        res.put("allAzPaths", pathList);
+
+        return res;
     }
 
 }

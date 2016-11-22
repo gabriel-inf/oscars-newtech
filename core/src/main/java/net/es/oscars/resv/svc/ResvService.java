@@ -3,26 +3,19 @@ package net.es.oscars.resv.svc;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.dto.spec.ReservedBlueprint;
 import net.es.oscars.pce.PCEException;
 import net.es.oscars.pce.TopPCE;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.pss.svc.PssResourceService;
 import net.es.oscars.resv.dao.ConnectionRepository;
-import net.es.oscars.resv.ent.ConnectionE;
-import net.es.oscars.resv.ent.RequestedBlueprintE;
-import net.es.oscars.resv.ent.ReservedBlueprintE;
-import net.es.oscars.resv.ent.ReservedVlanFlowE;
+import net.es.oscars.resv.ent.*;
 import net.es.oscars.st.prov.ProvState;
 import net.es.oscars.st.resv.ResvState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 @Service
@@ -145,6 +138,25 @@ public class ResvService {
         ReservedBlueprintE reserved = ReservedBlueprintE.builder().vlanFlow(emptyFlow).build();
         c.setReserved(reserved);
         return c;
+    }
+
+    // Submits connection request to TopPCE but does NOT trigger persistence!
+    public Boolean preCheck(ConnectionE c) throws PSSException, PCEException
+    {
+        RequestedBlueprintE req = c.getSpecification().getRequested();
+
+        Optional<ReservedBlueprintE> res = topPCE.makeReserved(req, c.getSpecification().getScheduleSpec());
+
+        if (res.isPresent())
+        {
+            log.info("Pre-check on ConnectionID: " + c.getConnectionId() + " Successful");
+
+            c.setReserved(res.get());
+            return Boolean.TRUE;
+        }
+
+        log.info("Pre-check on ConnectionID: " + c.getConnectionId() + " Unsuccessful");
+        return Boolean.FALSE;
     }
 
 }

@@ -115,3 +115,33 @@ function attach_handlers(vis_js_network, vis_js_datasets, name) {
         trigger_form_changes(is_resv, clickedEdge, clickedNode, clickedPlain, nodeId, edgeId);
     });
 }
+
+
+
+function highlight_devices(network, deviceIDs, isSelected)
+{
+    var newColor = "green";
+    var normalNodeColor = "white";
+
+    for(var d = 0; d < deviceIDs.length; d++)
+    {
+        if(isSelected)
+            network.nodes.update([{id: deviceIDs[d], color: {background: newColor}}]);
+        else
+            network.nodes.update([{id: deviceIDs[d], color: {background: normalNodeColor}}]);
+    }
+}
+
+function highlight_links(network, linkIDs, isSelected)
+{
+    var newColor = "green";
+    var normalEdgeColor = "#848484";
+
+    for(var l = 0; l < linkIDs.length; l++)
+    {
+        if(isSelected)
+            network.edges.update([{id: linkIDs[l], color: {color: newColor}}]);
+        else
+            network.edges.update([{id: linkIDs[l], color: {color: normalEdgeColor}}]);
+    }
+}
