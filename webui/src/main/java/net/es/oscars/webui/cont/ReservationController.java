@@ -60,6 +60,7 @@ public class ReservationController {
     public String resv_list(Model model) {
         ConnectionFilter f = ConnectionFilter.builder().build();
         Set<Connection> connections = connectionProvider.filtered(f);
+
         model.addAttribute("connections", connections);
 
         return "resv_list";

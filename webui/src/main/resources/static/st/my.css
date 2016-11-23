@@ -16,6 +16,21 @@
     right: 0;
 }
 
+#listTable {
+    margin-left: 20px;
+    margin-right: 20px;
+    border-collapse: collapse;
+}
+
+.hiddenRow {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    border: none !important;
+}
+
+.accordion-toggle{
+    border-bottom: none !important;
+}
 
 .typeahead,
 .tt-query,
