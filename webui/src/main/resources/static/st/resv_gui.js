@@ -12,8 +12,16 @@ var need_review = true;
 
 var mostRecentPrecheckID = "-1";
 
-var highlightedNodes = [];
-var highlightedEdges = [];
+var allJunctions = [];
+var allFixtures = [];
+var allPipes = [];
+var highlightedNodes = [];      // Set of nodes drawn (or to draw) green
+var highlightedEdges = [];      // Set of links drawn (or to draw) green
+var insufficientNodes = [];     // Set of nodes drawn (or to draw) red based on fixture port b/w
+var insufficientEdges = [];     // Set of links drawn (or to draw) red based on b/w
+
+var vizLinks = [];
+var netPorts = [];
 
 var reservation_request = {
     "connectionId": "",
@@ -83,7 +91,6 @@ function add_to_reservation(viz, name) {
                     to: z
                 };
                 reservation_request["pipes"][newId] = {"bw": 0, "a": a, "z": z};
-
                 ds.edges.add(newEdge);
             }
         }
@@ -252,9 +259,9 @@ var review_ready = function ()
         errors_box.addClass("alert-success");
         errors_box.text("Ready to submit!");
 
-        resv_hold_btn.addClass("active").removeClass("disabled");
-        resv_hold_btn.off();
-        resv_hold_btn.on('click', resv_hold);
+        //resv_hold_btn.addClass("active").removeClass("disabled");
+        //resv_hold_btn.off();
+        //resv_hold_btn.on('click', resv_hold);
 
         console.log("Review pass.");
 
@@ -378,15 +385,48 @@ var resv_precheck = function()
 {
     display_viz.network.unselectAll();
 
-    highlight_devices(display_viz.datasource, highlightedNodes, false);
-    highlight_links(display_viz.datasource, highlightedEdges, false);
+    highlight_devices(display_viz.datasource, highlightedNodes, false, "");
+    highlight_devices(display_viz.datasource, insufficientNodes, false, "")
+    highlight_links(display_viz.datasource, highlightedEdges, false, "");
+    highlight_links(display_viz.datasource, insufficientEdges, false, "");
 
     errors_box.addClass("alert-info");
     errors_box.removeClass("alert-success");
     errors_box.removeClass("alert-danger");
-    errors_box.text("Ready to submit! Precheck initialized!");
+    errors_box.text("Input parameters ready! Precheck initialized!");
 
     console.log("pre-checking a reservation");
+
+    allJunctions = [];
+    allFixtures = [];
+    allPipes = [];
+    // Identify junctions and fixture names //
+    var allRequestedJunctions = reservation_request["junctions"];
+    var juncKeys = Object.keys(allRequestedJunctions);
+    for(j = 0; j < juncKeys.length; j++)
+    {
+        var oneJuncName = juncKeys[j];
+        allJunctions.push(oneJuncName);
+
+        var jFixtures = allRequestedJunctions[oneJuncName]["fixtures"];
+        var fixKeys = Object.keys(jFixtures);
+        for(f = 0; f < fixKeys.length; f++)
+        {
+            var oneFixName = fixKeys[f];
+            allFixtures.push(oneFixName);
+        }
+    }
+
+    // Identify pipe names //
+    var allRequestedPipes = reservation_request["pipes"];
+    var pipeKeys = Object.keys(allRequestedPipes);
+    for(p = 0; p < pipeKeys.length; p++)
+    {
+        var onePipeName = pipeKeys[p];
+        allPipes.push(onePipeName);
+    }
+
+
     reservation_request["description"] = $('#description').val();
 
     var start_dtstring = $('#start_at').val();
@@ -436,6 +476,11 @@ var resv_precheck = function()
                     {
                         errors_box.addClass("alert-danger").removeClass("alert-info");
                         errors_box.text("Precheck Failed: Cannot establish reservation with current parameters!");
+                        resv_hold_btn.addClass("disabled").removeClass("active");
+                        resv_hold_btn.off();
+                        resv_hold_btn.on('click', doNothing);
+
+                        drawFailedLinksOnNetwork(json);
 
                     }
                     else
@@ -444,6 +489,10 @@ var resv_precheck = function()
                         errors_box.text("Precheck Passed: Prospective route(s) added to topology. Click Hold to reserve!");
                         allAzPaths = data["allAzPaths"];
                         drawPathOnNetwork(allAzPaths);      // Display computed path
+
+                        resv_hold_btn.addClass("active").removeClass("disabled");
+                        resv_hold_btn.off();
+                        resv_hold_btn.on('click', resv_hold);
                     }
                 }
             }
@@ -507,18 +556,135 @@ function drawPathOnNetwork(allAzPaths)
 
     display_viz.network.unselectAll();
 
-    highlight_devices(display_viz.datasource, nodesToReserve, true);
-    highlight_links(display_viz.datasource, linksToReserve, true);
+    highlight_devices(display_viz.datasource, nodesToReserve, true, "green");
+    highlight_links(display_viz.datasource, linksToReserve, true, "green");
 
     highlightedNodes = nodesToReserve;
     highlightedEdges = linksToReserve;
 }
 
-var make_graphs = function() {
+function drawFailedLinksOnNetwork(resRequest)
+{
+    console.log("Updating Topology with bandwidth-restricted links");
+    errors_box.text("Precheck Failed: Cannot establish reservation with current parameters! Updating topology. Please wait...");
+
+
+    // Compute Maximum requested B/W from requested pipes //
+    var maxPipeBW = 0;
+
+    for(var p = 0; p < allPipes.length; p++)
+    {
+        var oneBW = parseInt(reservation_request["pipes"][allPipes[p]]["bw"]);
+        console.log("oneBW: " + oneBW);
+
+        if(oneBW > maxPipeBW)
+            maxPipeBW = oneBW;
+    }
+
+    console.log("Max pipe B/W: " + maxPipeBW);
+
+    // Request B/W availability at each port
+    $.ajax({
+        type: "POST",
+        url: "/resv/topo/bwAvailAllPorts/",
+        data: resRequest,
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function (response)
+        {
+            var fullPortMap = response["bwAvailabilityMap"];
+            var problemPorts = [];
+            insufficientNodes = [];
+            insufficientEdges = [];
+
+            for(var p = 0; p < netPorts.length; p++)
+            {
+                var onePort = netPorts[p];              // 1. Get b/w for each port from Map.
+                var inBW = fullPortMap[onePort][0];
+                var egBW = fullPortMap[onePort][1];
+
+                var minBW = inBW;                       // 2. Take minimum of ingress and egress.
+
+                if(egBW < minBW)
+                    minBW = egBW;
+
+                if(minBW >= maxPipeBW)                  // 3. If minimum >= b/w requested, continue.
+                {
+                    continue;
+                }
+                else
+                {
+                    problemPorts.push(onePort);         // 4. Otherwise, track problematic ports.
+
+                    if(insufficientNodes.length === allJunctions.length)
+                        continue;
+
+                    for(var j = 0; j < allJunctions.length; j++)
+                    {
+                        // Need to color nodes if fixture bandwidth is insufficient
+                        if(onePort in reservation_request["junctions"][allJunctions[j]]["fixtures"])
+                            insufficientNodes.push(allJunctions[j]);
+                    }
+                }
+            }
+
+            console.log("Insufficient Nodes: " + insufficientNodes);
+
+            // 5. Find all links terminating at each problematic port.
+            for(var p = 0; p < problemPorts.length; p++)
+            {
+                var badPort = problemPorts[p];
+
+                for(var l = 0; l < vizLinks.length; l++)
+                {
+                    var oneLink = vizLinks[l];
+                    var endPoints = oneLink.id.split(" -- ");
+
+                    if(badPort === endPoints[0] || badPort === endPoints[1])
+                    {
+                        insufficientEdges.push(oneLink.id);
+                    }
+                }
+            }
+
+
+
+            // 6. Color all problematic links and nodes red.
+            display_viz.network.unselectAll();
+            highlight_devices(display_viz.datasource, insufficientNodes, true, "red");
+            highlight_links(display_viz.datasource, insufficientEdges, true, "red");
+
+            console.log("Failed links drawn");
+            errors_box.text("Precheck Failed: Cannot establish reservation with current parameters! Topology elements with insufficient bandwidth colored red.");
+        }
+    });
+}
+
+var make_graphs = function()
+{
+    netPorts = [];
+    vizLinks = [];
+
+    // Identify the network ports
+    loadJSON("/viz/listPorts", function (response)
+    {
+        var ports = JSON.parse(response);
+        netPorts = ports;
+    });
 
     loadJSON("/viz/topology/multilayer", function (response) {
 
         var json_data = JSON.parse(response);
+
+        var allLinks = json_data["edges"];
+
+        for(var e = 0; e < allLinks.length; e++)
+        {
+            var edge = allLinks[e];
+
+            if(edge.from !== null && edge.to !== null)
+                vizLinks.push(edge);
+        }
 
         // Parse JSON string into object
         var nv_cont = document.getElementById('network_viz');
@@ -569,7 +735,8 @@ var make_graphs = function() {
 
                     stateChanged("Edge added.");
                 },
-                deleteEdge: function (edgeData, callback) {
+                deleteEdge: function (edgeData, callback)
+                {
                     callback(edgeData);
 
                     delete(reservation_request["pipes"][edgeData.id]);
@@ -596,7 +763,8 @@ $(document).ready(function () {
        newEndDate.setDate(newEndDate.getDate() + 1);
        $('#end_at').datetimepicker('setDate', newEndDate);
 
-   document.getElementById('description').addEventListener('keypress', function(){ stateChanged("Description updated."); }, false);
+   //document.getElementById('description').addEventListener('keypress', function(){ stateChanged("Description updated."); }, false);
+   document.getElementById('description').addEventListener('change', function(){ stateChanged("Description updated."); }, false);
    document.getElementById('start_at').addEventListener('dp.change', function(){ stateChanged("Start Time changed."); }, false);
    document.getElementById('start_at').addEventListener('keypress', function(){ stateChanged("Start Time changed."); }, false);
    document.getElementById('start_at').addEventListener('click', function(){ stateChanged("Start Time changed."); }, false);
@@ -634,7 +802,6 @@ $(document).ready(function () {
     $('#resv_buttons_form').on('submit', doNothing);
 
     //setTimeout(review_ready, 1000);
-
 
     $(function () {
         var token = $("meta[name='_csrf']").attr("content");

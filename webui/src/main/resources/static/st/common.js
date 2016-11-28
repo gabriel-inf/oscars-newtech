@@ -118,9 +118,9 @@ function attach_handlers(vis_js_network, vis_js_datasets, name) {
 
 
 
-function highlight_devices(network, deviceIDs, isSelected)
+function highlight_devices(network, deviceIDs, isSelected, color)
 {
-    var newColor = "green";
+    var newColor = color;
     var normalNodeColor = "white";
 
     for(var d = 0; d < deviceIDs.length; d++)
@@ -132,10 +132,10 @@ function highlight_devices(network, deviceIDs, isSelected)
     }
 }
 
-function highlight_links(network, linkIDs, isSelected)
+function highlight_links(network, linkIDs, isSelected, color)
 {
-    var newColor = "green";
-    var normalEdgeColor = "#848484";
+    var newColor = color;
+    var normalEdgeColor = "#2F7FED";
 
     for(var l = 0; l < linkIDs.length; l++)
     {
