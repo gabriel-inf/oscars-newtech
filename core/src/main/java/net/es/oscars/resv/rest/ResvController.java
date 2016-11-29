@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.bwavail.BandwidthAvailabilityService;
 import net.es.oscars.dto.bwavail.BandwidthAvailabilityRequest;
 import net.es.oscars.dto.bwavail.BandwidthAvailabilityResponse;
+import net.es.oscars.dto.bwavail.PortBandwidthAvailabilityRequest;
+import net.es.oscars.dto.bwavail.PortBandwidthAvailabilityResponse;
 import net.es.oscars.dto.pss.EthFixtureType;
 import net.es.oscars.dto.pss.EthJunctionType;
 import net.es.oscars.dto.pss.EthPipeType;
@@ -84,15 +86,19 @@ public class ResvController {
 
     @RequestMapping(value = "/resv/filter", method = RequestMethod.POST)
     @ResponseBody
-    public Set<Connection> resvFilter(@RequestBody ConnectionFilter filter) {
+    public Set<Connection> resvFilter(@RequestBody ConnectionFilter filter)
+    {
         Set<Connection> result = new HashSet<>();
-        if (filter.getConnectionId() != null) {
+        if (filter.getConnectionId() != null)
+        {
 
             Optional<ConnectionE> c = resvService.findByConnectionId(filter.getConnectionId());
             if (c.isPresent()) {
                 result.add(this.convertConnToDto(c.get()));
             }
-        } else if (filter.getResvStates() != null) {
+        }
+        else if (filter.getResvStates() != null)
+        {
             filter.getResvStates().forEach(st -> {
                 resvService.ofResvState(st).forEach(ce -> {
                     Connection c = this.convertConnToDto(ce);
@@ -101,14 +107,16 @@ public class ResvController {
 
             });
 
-        } else {
-            for (ConnectionE eItem : resvService.findAll()) {
+        }
+        else
+        {
+            for (ConnectionE eItem : resvService.findAll())
+            {
                 Connection dtoItem = convertConnToDto(eItem);
                 result.add(dtoItem);
             }
         }
         return result;
-
     }
 
 
@@ -162,6 +170,18 @@ public class ResvController {
         log.info("Response Details: " + response.toString());
         return response;
     }
+
+    @RequestMapping(value = "/resv/bwAvailAllPorts/", method = RequestMethod.POST)
+    @ResponseBody
+    public PortBandwidthAvailabilityResponse getAllPortBandwidthAvailability(@RequestBody PortBandwidthAvailabilityRequest bwRequest)
+    {
+        log.info("Retrieving Bandwidth Availability for all Network Ports");
+
+        PortBandwidthAvailabilityResponse response = bwAvailService.getBandwidthAvailabilityOnAllPorts(bwRequest);
+
+        return response;
+    }
+
 
     @RequestMapping(value = "/resv/commit/{connectionId}", method = RequestMethod.GET)
     @ResponseBody

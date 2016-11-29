@@ -3,24 +3,29 @@
       xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org">
 
-<head th:include="shared :: headerFragment (pageTitle='List reservations')"/>
+<head th:include="shared :: headerFragment (pageTitle='Reservation List')"/>
+<head th:include="shared :: resvListFragment"/>
 
 <body>
     <div th:include="shared :: navbar"></div>
 
-    <table class="table table-striped">
+    <table id="listTable" class="table table-hover">
         <thead>
+        <h4 id="tester" style="margin-left: 40px; color: #2c5699"> Expand a connection to view additional reservation details.</h4>
         <tr>
-            <th style="width: 150px;">GRI</th>
+            <th style="width: 150px;">Connection ID</th>
             <th style="width: 200px;">Description</th>
             <th style="width: 200px;">Status</th>
+            <th style="width: 200px;">Request Details</th>
+            <th style="width: 200px;">User</th>
+            <th style="width: 200px;">Submission Time</th>
         </tr>
         </thead>
         <tbody>
-        <tr th:each="connection : ${connections}">
-            <td>
-                <a th:href="@{|/resv/view/${connection.connectionId}|}"
-                   th:text="|${connection.connectionId}|"/>
+        <div th:each="connection : ${connections}">
+        <tr class="accordion-toggle" data-toggle="collapse" th:attr="data-target='#accordion_'+${connection.connectionId}">
+            <td th:text="|${connection.connectionId}|">
+                <!--<a th:href="@{|/resv/view/${connection.connectionId}|}"-->
             </td>
             <td th:text="${connection.specification.description}"/>
             <td>
@@ -28,10 +33,33 @@
                 <div th:text="${connection.states.prov}" />
                 <div th:text="${connection.states.oper}" />
             </td>
+            <td>
+                <div th:text="'Start: ' + ${connection.specification.scheduleSpec.notBefore}" />
+                <div th:text="'End: ' + ${connection.specification.scheduleSpec.notAfter}" />
+                <div th:each="pipe : ${connection.specification.requested.vlanFlow.pipes}">
+                    <div>Requested Pipe:</div>
+                    <div th:text="'A-Z Bandwidth: ' + ${pipe.azMbps} + ' Mbps'" />
+                    <div th:text="'Z-A Bandwidth: ' + ${pipe.zaMbps} + ' Mbps'" />
+                    <div th:text="'Palindromicity: ' + ${pipe.eroPalindromic}" />
+                    <div th:text="'Survivability: ' + ${pipe.eroSurvivability}" />
+                    <div th:text="'Survivable Path Count: ' + ${pipe.numDisjoint}" />
+                </div>
+            </td>
+            <td th:text="${connection.specification.username}"/>
+            <td>Still Need to figure this out</td>
         </tr>
+        <tr>
+            <td colspan="6" class="hiddenRow">
+                <div class="accordion-body collapse" th:id="'accordion_'+${connection.connectionId}" onshow="showDetails(this)">
+                    <b>Reservation Details:</b>
+                    <div th:id="'resViz_'+${connection.connectionId}" class="panel-body collapse collapse in"></div>
+                    <h5 th:id="'emptyViz_'+${connection.connectionId}" style="color: #600000">No route information to display.</h5>
+                </div>
+            </td>
+        </tr>
+        </div>
         </tbody>
     </table>
-
 
 </body>
 </html>

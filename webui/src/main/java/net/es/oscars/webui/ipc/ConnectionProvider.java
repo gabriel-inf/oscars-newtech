@@ -1,24 +1,17 @@
 package net.es.oscars.webui.ipc;
 
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.dto.pss.EthFixtureType;
-import net.es.oscars.dto.pss.EthJunctionType;
-import net.es.oscars.dto.pss.EthPipeType;
 import net.es.oscars.dto.resv.Connection;
 import net.es.oscars.dto.resv.ConnectionFilter;
-import net.es.oscars.dto.resv.Schedule;
-import net.es.oscars.dto.resv.States;
-import net.es.oscars.dto.spec.*;
-import net.es.oscars.st.oper.OperState;
-import net.es.oscars.st.prov.ProvState;
-import net.es.oscars.st.resv.ResvState;
-import net.es.oscars.webui.dto.MinimalFixture;
-import net.es.oscars.webui.dto.MinimalRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.*;
+import java.util.Set;
 
 
 @Slf4j
@@ -34,7 +27,14 @@ public class ConnectionProvider {
         String submitUrl = "resv/filter";
         String restPath = "https://localhost:8000/" + submitUrl;
         log.info("sending filter " + filter.toString());
-        Set<Connection> result = restTemplate.postForObject(restPath, filter, Set.class);
+        //Set<Connection> result = restTemplate.postForObject(restPath, filter, Set.class);
+
+        HttpEntity<ConnectionFilter> requestEntity = new HttpEntity<>(filter);
+        ParameterizedTypeReference<Set<Connection>> typeRef = new ParameterizedTypeReference<Set<Connection>>() {};
+        ResponseEntity<Set<Connection>> response = restTemplate.exchange(restPath, HttpMethod.POST, requestEntity, typeRef);
+
+        Set<Connection> result = response.getBody();
+
         return result;
     }
 

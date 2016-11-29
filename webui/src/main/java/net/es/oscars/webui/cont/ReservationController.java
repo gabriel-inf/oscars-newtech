@@ -2,6 +2,8 @@ package net.es.oscars.webui.cont;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.dto.bwavail.PortBandwidthAvailabilityRequest;
+import net.es.oscars.dto.bwavail.PortBandwidthAvailabilityResponse;
 import net.es.oscars.dto.resv.Connection;
 import net.es.oscars.dto.resv.ConnectionFilter;
 import net.es.oscars.dto.topo.BidirectionalPath;
@@ -60,6 +62,7 @@ public class ReservationController {
     public String resv_list(Model model) {
         ConnectionFilter f = ConnectionFilter.builder().build();
         Set<Connection> connections = connectionProvider.filtered(f);
+
         model.addAttribute("connections", connections);
 
         return "resv_list";
@@ -140,29 +143,54 @@ public class ReservationController {
 
         //TODO: Pass back reservation with all details
         if(c == null)
-            res.put("preCheckResult", "UNSUCCESSFUL");
-        else
-            res.put("preCheckResult", "SUCCESS");
-
-        Set<BidirectionalPath> allPaths = c.getReserved().getVlanFlow().getAllPaths();
-
-        String pathList = new String();
-
-        for(BidirectionalPath biPath : allPaths)
         {
-            List<Edge> oneAzPath = biPath.getAzPath();
+            res.put("preCheckResult", "UNSUCCESSFUL");
+            log.info("Pre-Check Result: UNSUCCESSFUL");
+        }
+        else
+        {
+            res.put("preCheckResult", "SUCCESS");
+            log.info("Pre-Check Result: SUCCESS");
 
-            for(Edge oneEdge : oneAzPath)
+            Set<BidirectionalPath> allPaths = c.getReserved().getVlanFlow().getAllPaths();
+
+            String pathList = new String();
+
+            for(BidirectionalPath biPath : allPaths)
             {
-                pathList += oneEdge.getOrigin() + "," + oneEdge.getTarget() + ",";
+                List<Edge> oneAzPath = biPath.getAzPath();
+
+                for(Edge oneEdge : oneAzPath)
+                {
+                    pathList += oneEdge.getOrigin() + "," + oneEdge.getTarget() + ",";
+                }
+
+                pathList += ";";
             }
 
-            pathList += ";";
+            res.put("allAzPaths", pathList);
         }
-
-        res.put("allAzPaths", pathList);
 
         return res;
     }
 
+    @RequestMapping(value = "/resv/topo/bwAvailAllPorts/", method = RequestMethod.POST)
+    @ResponseBody
+    public PortBandwidthAvailabilityResponse queryPortBwAvailability(@RequestBody MinimalRequest request)
+    {
+        log.info("Querying for Port Bandwdidth Availability");
+        PortBandwidthAvailabilityRequest bwRequest = new PortBandwidthAvailabilityRequest();
+        Date startDate = new Date(request.getStartAt() * 1000L);
+        Date endDate = new Date(request.getEndAt() * 1000L);
+
+        bwRequest.setStartDate(startDate);
+        bwRequest.setEndDate(endDate);
+
+        String submitUrl = "/resv/bwAvailAllPorts/";
+        String restPath = "https://localhost:8000/" + submitUrl;
+
+        PortBandwidthAvailabilityResponse bwResponse = restTemplate.postForObject(restPath, bwRequest, PortBandwidthAvailabilityResponse.class);
+
+        return bwResponse;
+    }
 }

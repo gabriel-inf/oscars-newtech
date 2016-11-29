@@ -23,6 +23,7 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -274,6 +275,20 @@ public class VizExporter {
         }
 
 
+    }
+
+    public List<String> listTopologyPorts()
+    {
+        Topology multilayer = topologyProvider.getTopology();
+        Set<TopoVertex> topoPorts = multilayer.getVertices().stream().filter(v -> v.getVertexType().equals(VertexType.PORT)).collect(Collectors.toSet());
+        List<String> portURNs = new ArrayList<>();
+
+        for(TopoVertex onePort : topoPorts)
+        {
+            portURNs.add(onePort.getUrn());
+        }
+
+        return portURNs;
     }
 
 }
