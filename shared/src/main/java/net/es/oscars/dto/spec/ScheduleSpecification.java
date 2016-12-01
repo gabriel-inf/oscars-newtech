@@ -17,9 +17,6 @@ public class ScheduleSpecification {
     @NonNull
     private List<Date> endDates;
 
-    @NonNull
-    private List<Long> durationMinutes;
-
     private Long minimumDuration;
 
 }

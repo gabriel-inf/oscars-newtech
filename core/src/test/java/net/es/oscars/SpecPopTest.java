@@ -131,7 +131,6 @@ public class SpecPopTest {
         ScheduleSpecificationE sse = ScheduleSpecificationE.builder()
                 .startDates(Collections.singletonList(notBefore))
                 .endDates(Collections.singletonList(notAfter))
-                .durationMinutes(Collections.singletonList(30L))
                 .minimumDuration(30L)
                 .build();
 

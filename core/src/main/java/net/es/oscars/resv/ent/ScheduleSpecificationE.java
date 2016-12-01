@@ -22,10 +22,6 @@ public class ScheduleSpecificationE {
     @ElementCollection(targetClass=Date.class)
     private List<Date> endDates;
 
-    @NonNull
-    @ElementCollection(targetClass=Long.class)
-    private List<Long> durationMinutes;
-
     private Long minimumDuration;
 
 }

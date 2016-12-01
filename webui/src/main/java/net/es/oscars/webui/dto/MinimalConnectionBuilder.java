@@ -31,14 +31,9 @@ public class MinimalConnectionBuilder
         Date notAfter = new Date(minRequest.getEndAt() * 1000L);
         List<Date> startDates = Collections.singletonList(notBefore);
         List<Date> endDates = Collections.singletonList(notAfter);
-        List<Long> durations = new ArrayList<>();
-        for(Integer index = 0; index < startDates.size(); index++){
-            ChronoUnit.MINUTES.between(startDates.get(0).toInstant(), endDates.get(0).toInstant());
-        }
 
         //TODO: Pull this minimum duration from the user
         Long minimumDuration = 0L;
-
 
         String connectionId = minRequest.getConnectionId();
         String username = "some user";
@@ -63,7 +58,6 @@ public class MinimalConnectionBuilder
                 .build();
 
         ScheduleSpecification ss = ScheduleSpecification.builder()
-                .durationMinutes(durations)
                 .startDates(startDates)
                 .endDates(endDates)
                 .minimumDuration(minimumDuration)

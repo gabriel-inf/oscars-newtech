@@ -177,13 +177,10 @@ public class RequestedEntityBuilder {
         startDates.add(start);
         List<Date> endDates = new ArrayList<>();
         endDates.add(end);
-        List<Long> durations = new ArrayList<>();
-        durations.add(duration);
 
         return ScheduleSpecificationE.builder()
                 .startDates(startDates)
                 .endDates(endDates)
-                .durationMinutes(durations)
                 .minimumDuration(duration)
                 .build();
     }

@@ -1564,7 +1564,6 @@ public class ServiceLayerEROTest
         requestedSched = ScheduleSpecificationE.builder()
                 .startDates(Collections.singletonList(start))
                 .endDates(Collections.singletonList(end))
-                .durationMinutes(Collections.singletonList(30L))
                 .minimumDuration(30L)
                 .build();
     }

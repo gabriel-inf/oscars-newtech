@@ -369,7 +369,6 @@ public class ResvController {
         ScheduleSpecification ss = bvs.getScheduleSpec();
         Long minimumDuration = ss.getMinimumDuration() != null ? ss.getMinimumDuration() : 0L;
         ScheduleSpecificationE sse = ScheduleSpecificationE.builder()
-                .durationMinutes(ss.getDurationMinutes())
                 .startDates(ss.getStartDates())
                 .endDates(ss.getEndDates())
                 .minimumDuration(minimumDuration)
@@ -447,7 +446,6 @@ public class ResvController {
 
         ScheduleSpecification ss = spec.getScheduleSpec();
         ScheduleSpecificationE sse = ScheduleSpecificationE.builder()
-                .durationMinutes(ss.getDurationMinutes())
                 .startDates(ss.getStartDates())
                 .endDates(ss.getEndDates())
                 .minimumDuration(ss.getMinimumDuration())
