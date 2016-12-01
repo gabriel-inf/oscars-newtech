@@ -3,6 +3,7 @@ package net.es.oscars.dto.spec;
 import lombok.*;
 
 import java.util.Date;
+import java.util.List;
 
 @Data
 @Builder
@@ -11,12 +12,11 @@ import java.util.Date;
 public class ScheduleSpecification {
 
     @NonNull
-    private Date notBefore;
+    private List<Date> startDates;
 
     @NonNull
-    private Date notAfter;
+    private List<Date> endDates;
 
-    @NonNull
-    private Long durationMinutes;
+    private Long minimumDuration;
 
 }

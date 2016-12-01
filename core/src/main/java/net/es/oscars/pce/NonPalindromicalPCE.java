@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.resv.ent.RequestedVlanPipeE;
 import net.es.oscars.resv.ent.ReservedBandwidthE;
 import net.es.oscars.resv.ent.ReservedVlanE;
-import net.es.oscars.resv.ent.ScheduleSpecificationE;
 import net.es.oscars.servicetopo.ServiceLayerTopology;
 import net.es.oscars.dto.topo.TopoEdge;
 import net.es.oscars.dto.topo.TopoVertex;
@@ -45,12 +44,10 @@ public class NonPalindromicalPCE {
      * Depends on DijkstraPCE and ServiceLayerTopology to construct and build the Service-Layer EROs, and then map them to Physical-Layer EROs
      *
      * @param requestPipe  Requested pipe with required reservation parameters
-     * @param requestSched Requested schedule parameters
      * @return A two-element Map containing both the forward-direction (A->Z) ERO and the reverse-direction (Z->A) ERO
      * @throws PCEException
      */
     public Map<String, List<TopoEdge>> computeNonPalindromicERO(RequestedVlanPipeE requestPipe,
-                                                                ScheduleSpecificationE requestSched,
                                                                 List<ReservedBandwidthE> rsvBwList,
                                                                 List<ReservedVlanE> rsvVlanList) throws PCEException {
         Topology ethTopo = topoService.layer(Layer.ETHERNET);
@@ -114,13 +111,13 @@ public class NonPalindromicalPCE {
         serviceLayerTopology.buildLogicalLayerDstNodes(dstDevice, dstPort);
 
         // Performs shortest path routing on MPLS-layer to properly assign weights to each logical link on Service-Layer
-        serviceLayerTopology.calculateLogicalLinkWeights(requestPipe, requestSched, urnRepo.findAll(), rsvBwList, rsvVlanList);
+        serviceLayerTopology.calculateLogicalLinkWeights(requestPipe, urnRepo.findAll(), rsvBwList, rsvVlanList);
 
         Topology slTopo;
 
         slTopo = serviceLayerTopology.getSLTopology();
 
-        Topology prunedSlTopo = pruningService.pruneWithPipe(slTopo, requestPipe, requestSched, rsvBwList, rsvVlanList);
+        Topology prunedSlTopo = pruningService.pruneWithPipe(slTopo, requestPipe, rsvBwList, rsvVlanList);
 
         TopoVertex serviceLayerSrcNode;
         TopoVertex serviceLayerDstNode;

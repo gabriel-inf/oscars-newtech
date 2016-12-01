@@ -175,7 +175,7 @@ public class BlacklistPruningTest {
 
         log.info("Beginning test: 'pceSubmitBlacklistAllTest'.");
         try{
-            Optional<ReservedBlueprintE> opt = topPCE.makeReserved(requestedBlueprint, requestedSched);
+            Optional<ReservedBlueprintE> opt = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
             assert(!opt.isPresent());
         } catch (Exception e){
             log.error(e.toString());
@@ -202,7 +202,7 @@ public class BlacklistPruningTest {
         log.info("Beginning test: 'pceSubmitBlacklistAllTest'.");
         ReservedBlueprintE resBlueprint = null;
         try{
-            Optional<ReservedBlueprintE> opt = topPCE.makeReserved(requestedBlueprint, requestedSched);
+            Optional<ReservedBlueprintE> opt = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
             assert(opt.isPresent());
             resBlueprint = opt.get();
         } catch (Exception e){
@@ -253,7 +253,7 @@ public class BlacklistPruningTest {
     public void pruneTest(RequestedBlueprintE requestedBlueprint, Topology topo, ScheduleSpecificationE requestedSched,
                         Set<TopoEdge> origEdges, Set<TopoVertex> origVerts, Set<String> blacklist){
         RequestedVlanPipeE reqPipe = requestedBlueprint.getVlanFlow().getPipes().iterator().next();
-        topo = pruningService.pruneWithPipe(topo, reqPipe, requestedSched);
+        topo = pruningService.pruneWithPipe(topo, reqPipe, requestedSched.getStartDates().get(0), requestedSched.getEndDates().get(0));
         Set<TopoEdge> newEdges = topo.getEdges();
         Set<TopoVertex> newVerts = topo.getVertices();
 

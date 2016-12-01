@@ -48,13 +48,14 @@ public class PruningService {
      * querying the attached junctions/fixtures). The URNs are pulled from the URN repository.
      * @param topo - The topology to be pruned.
      * @param pipe - The logical pipe, from which the requested bandwidth and VLANs are retrieved.
+     * @param rsvBwList - A list of Reserved Bandwidth to be considered when pruning (along with Bandwidth in the Repo)
+     * @param rsvVlanList - A list of Reserved VLAN tags to be considered when pruning (along with VLANs in the Repo)
      * @return The topology with ineligible edges removed.
      */
-    public Topology pruneWithPipe(Topology topo, RequestedVlanPipeE pipe, ScheduleSpecificationE sched){
-        Date start = sched.getNotBefore();
-        Date end = sched.getNotAfter();
+    public Topology pruneWithPipe(Topology topo, RequestedVlanPipeE pipe,
+                                  List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList){
         return pruneWithPipe(topo, pipe, urnRepo.findAll(),
-                bwSvc.getReservedBandwidthFromRepo(start, end), vlanSvc.getReservedVlansFromRepo(start, end));
+                rsvBwList, rsvVlanList);
     }
 
     /**
@@ -62,15 +63,13 @@ public class PruningService {
      * querying the attached junctions/fixtures). The URNs are pulled from the URN repository.
      * @param topo - The topology to be pruned.
      * @param pipe - The logical pipe, from which the requested bandwidth and VLANs are retrieved.
-     * @param sched - The requested schedule, containing the start and end Dates
-     * @param rsvBwList - A list of Reserved Bandwidth to be considered when pruning (along with Bandwidth in the Repo)
-     * @param rsvVlanList - A list of Reserved VLAN tags to be considered when pruning (along with VLANs in the Repo)
+     * @param start - The start date of the request
+     * @param end - The end date of the request
      * @return The topology with ineligible edges removed.
      */
-    public Topology pruneWithPipe(Topology topo, RequestedVlanPipeE pipe, ScheduleSpecificationE sched,
-                                  List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList){
+    public Topology pruneWithPipe(Topology topo, RequestedVlanPipeE pipe, Date start, Date end){
         return pruneWithPipe(topo, pipe, urnRepo.findAll(),
-                rsvBwList, rsvVlanList);
+                bwSvc.getReservedBandwidthFromRepo(start, end), vlanSvc.getReservedVlansFromRepo(start, end));
     }
 
     /**
@@ -78,13 +77,12 @@ public class PruningService {
      * querying the attached junctions/fixtures). The URNs are pulled from the URN repository.
      * @param topo - The topology to be pruned.
      * @param pipe - The logical pipe, from which the requested bandwidth and VLANs are retrieved.
-     * @param sched - The requested schedule, containing the start and end Dates
      * @param rsvBwList - A list of Reserved Bandwidth to be considered when pruning (along with Bandwidth in the Repo)
      * @param rsvVlanList - A list of Reserved VLAN tags to be considered when pruning (along with VLANs in the Repo)
      * @return The topology with ineligible edges removed.
      */
-    public Topology pruneWithPipeAZ(Topology topo, RequestedVlanPipeE pipe, ScheduleSpecificationE sched,
-                                  List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList){
+    public Topology pruneWithPipeAZ(Topology topo, RequestedVlanPipeE pipe,
+                                    List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList){
         return pruneWithPipeAZ(topo, pipe, urnRepo.findAll(), rsvBwList, rsvVlanList);
     }
 
@@ -93,12 +91,11 @@ public class PruningService {
      * querying the attached junctions/fixtures). The URNs are pulled from the URN repository.
      * @param topo - The topology to be pruned.
      * @param pipe - The logical pipe, from which the requested bandwidth and VLANs are retrieved.
-     * @param sched - The requested schedule, containing the start and end Dates
      * @param rsvBwList - A list of Reserved Bandwidth to be considered when pruning (along with Bandwidth in the Repo)
      * @param rsvVlanList - A list of Reserved VLAN tags to be considered when pruning (along with VLANs in the Repo)
      * @return The topology with ineligible edges removed.
      */
-    public Topology pruneWithPipeZA(Topology topo, RequestedVlanPipeE pipe, ScheduleSpecificationE sched,
+    public Topology pruneWithPipeZA(Topology topo, RequestedVlanPipeE pipe,
                                     List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList){
         return pruneWithPipeZA(topo, pipe, urnRepo.findAll(), rsvBwList, rsvVlanList);
     }
@@ -134,7 +131,7 @@ public class PruningService {
      * @param urns - The URNs that will be used to match available resources with elements of the topology.
      * @return The topology with ineligible edges removed.
      */
-    private Topology pruneWithPipeAZ(Topology topo, RequestedVlanPipeE pipe, List<UrnE> urns,
+    public Topology pruneWithPipeAZ(Topology topo, RequestedVlanPipeE pipe, List<UrnE> urns,
                                   List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList){
         Integer azBw = pipe.getAzMbps();
         List<IntRange> vlans = new ArrayList<>();
@@ -155,7 +152,7 @@ public class PruningService {
      * @param urns - The URNs that will be used to match available resources with elements of the topology.
      * @return The topology with ineligible edges removed.
      */
-    private Topology  pruneWithPipeZA(Topology topo, RequestedVlanPipeE pipe, List<UrnE> urns,
+    public Topology  pruneWithPipeZA(Topology topo, RequestedVlanPipeE pipe, List<UrnE> urns,
                                      List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList){
         Integer zaBw = pipe.getZaMbps();
         List<IntRange> vlans = new ArrayList<>();
@@ -167,86 +164,6 @@ public class PruningService {
         return pruneTopologyUni(topo, zaBw, vlans, urns, rsvBwList, rsvVlanList, urnBlacklist);
     }
 
-    /**
-     * Prune the topology using a logical pipe. The pipe contains the requested bandwidth and VLANs (through
-     * querying the attached junctions/fixtures). A list of URNs is passed into match devices/interfaces to
-     * topology elements.
-     * @param topo - The topology to be pruned.
-     * @param pipe - The logical pipe, from which the requested bandwidth and VLANs are retrieved.
-     * @param urns - The URNs that will be used to match available resources with elements of the topology.
-     * @param sched - The requested schedule, containing the start and end Dates
-     * @return The topology with ineligible edges removed.
-     */
-    public Topology pruneWithPipe(Topology topo, RequestedVlanPipeE pipe, List<UrnE> urns, ScheduleSpecificationE sched){
-        Integer azBw = pipe.getAzMbps();
-        Integer zaBw = pipe.getZaMbps();
-        List<IntRange> vlans = new ArrayList<>();
-        vlans.addAll(vlanSvc.getVlansFromJunction(pipe.getAJunction()));
-        vlans.addAll(vlanSvc.getVlansFromJunction(pipe.getZJunction()));
-
-        Date start = sched.getNotBefore();
-        Date end = sched.getNotAfter();
-
-        Set<String> urnBlacklist = pipe.getUrnBlacklist();
-
-        return pruneTopology(topo, azBw, zaBw, vlans, urns,
-                bwSvc.getReservedBandwidthFromRepo(start, end), vlanSvc.getReservedVlansFromRepo(start, end), urnBlacklist);
-    }
-
-    /**
-     * Prune the topology using a logical pipe. The pipe contains the requested bandwidth and VLANs (through
-     * querying the attached junctions/fixtures). The URNs are pulled from the URN repository.
-     * @param topo - The topology to be pruned.
-     * @param pipe - The logical pipe, from which the requested bandwidth and VLANs are retrieved.
-     * @param sched - The requested schedule, containing the start and end Dates
-     * @param rsvBwList - A list of Reserved Bandwidth to be considered when pruning (along with Bandwidth in the Repo)
-     * @param rsvVlanList - A list of Reserved VLAN tags to be considered when pruning (along with VLANs in the Repo)
-     * @return The topology with ineligible edges removed.
-     */
-    public Topology pruneWithPipe(Topology topo, RequestedVlanPipeE pipe, ScheduleSpecificationE sched, List<UrnE> urns,
-                                  List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList){
-        Date start = sched.getNotBefore();
-        Date end = sched.getNotAfter();
-
-
-        return pruneWithPipe(topo, pipe, urns, rsvBwList, rsvVlanList);
-    }
-
-    /**
-     * Prune the topology based on A->Z bandwidth using a logical pipe. The pipe contains the requested bandwidth and VLANs (through
-     * querying the attached junctions/fixtures). The URNs are pulled from the URN repository.
-     * @param topo - The topology to be pruned.
-     * @param pipe - The logical pipe, from which the requested bandwidth and VLANs are retrieved.
-     * @param sched - The requested schedule, containing the start and end Dates
-     * @param rsvBwList - A list of Reserved Bandwidth to be considered when pruning (along with Bandwidth in the Repo)
-     * @param rsvVlanList - A list of Reserved VLAN tags to be considered when pruning (along with VLANs in the Repo)
-     * @return The topology with ineligible edges removed.
-     */
-    public Topology pruneWithPipeAZ(Topology topo, RequestedVlanPipeE pipe, ScheduleSpecificationE sched, List<UrnE> urns,
-                                  List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList){
-        Date start = sched.getNotBefore();
-        Date end = sched.getNotAfter();
-
-        return pruneWithPipeAZ(topo, pipe, urns, rsvBwList, rsvVlanList);
-    }
-
-    /**
-     * Prune the topology based on Z->A bandwidth using a logical pipe. The pipe contains the requested bandwidth and VLANs (through
-     * querying the attached junctions/fixtures). The URNs are pulled from the URN repository.
-     * @param topo - The topology to be pruned.
-     * @param pipe - The logical pipe, from which the requested bandwidth and VLANs are retrieved.
-     * @param sched - The requested schedule, containing the start and end Dates
-     * @param rsvBwList - A list of Reserved Bandwidth to be considered when pruning (along with Bandwidth in the Repo)
-     * @param rsvVlanList - A list of Reserved VLAN tags to be considered when pruning (along with VLANs in the Repo)
-     * @return The topology with ineligible edges removed.
-     */
-    public Topology pruneWithPipeZA(Topology topo, RequestedVlanPipeE pipe, ScheduleSpecificationE sched, List<UrnE> urns,
-                                    List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList){
-        Date start = sched.getNotBefore();
-        Date end = sched.getNotAfter();
-
-        return pruneWithPipeZA(topo, pipe, urns, rsvBwList, rsvVlanList);
-    }
 
     /**
      * Prune the topology Called by all outward facing methods to actually perform the pruning. Given the parameters,

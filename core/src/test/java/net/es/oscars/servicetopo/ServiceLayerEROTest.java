@@ -563,10 +563,10 @@ public class ServiceLayerEROTest
         serviceLayerTopo.buildLogicalLayerDstNodes(dstDevice, dstPort);     // should create VIRTUAL nodes
 
         // Performs shortest path routing on MPLS-layer to properly assign weights to each logical link on Service-Layer
-        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, requestedSched, urnList, resvBW, resvVLAN);
+        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, urnList, resvBW, resvVLAN);
 
         Topology slTopo = serviceLayerTopo.getSLTopology();
-        Topology prunedSlTopo = pruningService.pruneWithPipe(slTopo, requestedPipe, requestedSched);
+        Topology prunedSlTopo = pruningService.pruneWithPipe(slTopo, requestedPipe, requestedSched.getStartDates().get(0), requestedSched.getEndDates().get(0));
 
         TopoVertex serviceLayerSrcNode;
         TopoVertex serviceLayerDstNode;
@@ -1562,9 +1562,9 @@ public class ServiceLayerEROTest
         Date end = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
 
         requestedSched = ScheduleSpecificationE.builder()
-                .notBefore(start)
-                .notAfter(end)
-                .durationMinutes(30L)
+                .startDates(Collections.singletonList(start))
+                .endDates(Collections.singletonList(end))
+                .minimumDuration(30L)
                 .build();
     }
 
@@ -1575,8 +1575,7 @@ public class ServiceLayerEROTest
         Set<TopoVertex> allVertices = ethernetTopoVertices.stream()
                 .collect(Collectors.toSet());
 
-        mplsTopoVertices.stream()
-                .forEach(allVertices::add);
+        mplsTopoVertices.forEach(allVertices::add);
 
         for(TopoVertex oneVert : allVertices)
         {

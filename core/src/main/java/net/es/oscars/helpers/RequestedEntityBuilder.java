@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @Slf4j
@@ -171,10 +172,16 @@ public class RequestedEntityBuilder {
 
     public ScheduleSpecificationE buildSchedule(Date start, Date end){
 
+        Long duration = ChronoUnit.MINUTES.between(start.toInstant(), end.toInstant());
+        List<Date> startDates = new ArrayList<>();
+        startDates.add(start);
+        List<Date> endDates = new ArrayList<>();
+        endDates.add(end);
+
         return ScheduleSpecificationE.builder()
-                .notBefore(start)
-                .notAfter(end)
-                .durationMinutes(Duration.between(start.toInstant(), end.toInstant()).toMinutes())
+                .startDates(startDates)
+                .endDates(endDates)
+                .minimumDuration(duration)
                 .build();
     }
 
@@ -383,6 +390,7 @@ public class RequestedEntityBuilder {
                 .connectionId(connectionID)
                 .specification(requestSpec)
                 .states(new StatesE())
+                .reservedSchedule(new ArrayList<>())
                 .build();
 
     }

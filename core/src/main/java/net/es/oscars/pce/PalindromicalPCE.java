@@ -34,12 +34,10 @@ public class PalindromicalPCE {
      * Depends on DijkstraPCE to construct the Physical-Layer EROs for a request
      *
      * @param requestPipe  Requested pipe with required reservation parameters
-     * @param requestSched Requested schedule parameters
      * @return A two-element Map containing both the forward-direction (A->Z) ERO and the reverse-direction (Z->A) ERO
      * @throws PCEException
      */
     public Map<String, List<TopoEdge>> computePalindromicERO(RequestedVlanPipeE requestPipe,
-                                                             ScheduleSpecificationE requestSched,
                                                              List<ReservedBandwidthE> rsvBwList,
                                                              List<ReservedVlanE> rsvVlanList) throws PCEException {
         Topology multiLayerTopo = topoService.getMultilayerTopology();
@@ -51,7 +49,7 @@ public class PalindromicalPCE {
         TopoVertex dstPort = new TopoVertex(dstPortURN, VertexType.PORT);
 
         // Bandwidth and Vlan pruning
-        Topology prunedTopo = pruningService.pruneWithPipe(multiLayerTopo, requestPipe, requestSched, rsvBwList, rsvVlanList);
+        Topology prunedTopo = pruningService.pruneWithPipe(multiLayerTopo, requestPipe, rsvBwList, rsvVlanList);
 
         // Shortest path routing
         List<TopoEdge> azERO = dijkstraPCE.computeShortestPathEdges(prunedTopo, srcPort, dstPort);

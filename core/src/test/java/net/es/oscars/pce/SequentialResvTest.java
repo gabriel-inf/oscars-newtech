@@ -71,7 +71,6 @@ public class SequentialResvTest {
         bwRepo.deleteAll();
 
         RequestedBlueprintE requestedBlueprint;
-        ScheduleSpecificationE requestedSched;
         Set<RequestedVlanPipeE> reqPipes = new HashSet<>();
         ConnectionE connection1;
         ConnectionE connection2;
@@ -96,11 +95,13 @@ public class SequentialResvTest {
         reqPipes.add(pipeAZ);
 
         requestedBlueprint = testBuilder.buildRequest(reqPipes, 1, 1);
-        requestedSched = testBuilder.buildSchedule(startDate, endDate);
 
-        connection1 = testBuilder.buildConnection(requestedBlueprint, requestedSched, "conn1", "First Connection");
-        connection2 = testBuilder.buildConnection(requestedBlueprint, requestedSched, "conn2", "Next Connection");
-        connection3 = testBuilder.buildConnection(requestedBlueprint, requestedSched, "conn3", "Last Connection");
+        connection1 = testBuilder.buildConnection(requestedBlueprint, testBuilder.buildSchedule(startDate, endDate),
+                "conn1", "First Connection");
+        connection2 = testBuilder.buildConnection(requestedBlueprint, testBuilder.buildSchedule(startDate, endDate),
+                "conn2", "Next Connection");
+        connection3 = testBuilder.buildConnection(requestedBlueprint, testBuilder.buildSchedule(startDate, endDate),
+                "conn3", "Last Connection");
 
         allConnections.add(connection1);
         allConnections.add(connection2);
@@ -198,11 +199,10 @@ public class SequentialResvTest {
         reqPipes.add(pipeAZ);
 
         requestedBlueprint = testBuilder.buildRequest(reqPipes, 1, 1);
-        requestedSched = testBuilder.buildSchedule(startDate, endDate);
 
-        connection1 = testBuilder.buildConnection(requestedBlueprint, requestedSched, "conn1", "First Connection");
-        connection2 = testBuilder.buildConnection(requestedBlueprint, requestedSched, "conn2", "Next Connection");
-        connection3 = testBuilder.buildConnection(requestedBlueprint, requestedSched, "conn3", "Last Connection");
+        connection1 = testBuilder.buildConnection(requestedBlueprint, testBuilder.buildSchedule(startDate, endDate), "conn1", "First Connection");
+        connection2 = testBuilder.buildConnection(requestedBlueprint, testBuilder.buildSchedule(startDate, endDate), "conn2", "Next Connection");
+        connection3 = testBuilder.buildConnection(requestedBlueprint, testBuilder.buildSchedule(startDate, endDate), "conn3", "Last Connection");
 
         allConnections.add(connection1);
         allConnections.add(connection2);
@@ -316,7 +316,7 @@ public class SequentialResvTest {
         for (int conn = 1; conn <= numConnections; conn++) {
             String connID = "conn" + conn;
 
-            connection = testBuilder.buildConnection(requestedBlueprint, requestedSched, connID, "A Connection");
+            connection = testBuilder.buildConnection(requestedBlueprint, testBuilder.buildSchedule(startDate, endDate), connID, "A Connection");
 
             allConnections.add(connection);
         }
@@ -437,14 +437,14 @@ public class SequentialResvTest {
         reqPipes.add(pipeAZ);
 
         requestedBlueprint = testBuilder.buildRequest(reqPipes, 1, 1);
-        requestedSched = testBuilder.buildSchedule(startDate, endDate);
 
         int numConnections = 6; // Enough to run out of VLANS
 
         for (int conn = 1; conn <= numConnections; conn++) {
             String connID = "conn" + conn;
 
-            connection = testBuilder.buildConnection(requestedBlueprint, requestedSched, connID, "A Connection");
+            connection = testBuilder.buildConnection(requestedBlueprint, testBuilder.buildSchedule(startDate, endDate),
+                    connID, "A Connection");
 
             allConnections.add(connection);
         }
@@ -569,13 +569,16 @@ public class SequentialResvTest {
         reqPipes.add(pipeAZ);
 
         requestedBlueprint = testBuilder.buildRequest(reqPipes, 1, 1);
-        requestedSched = testBuilder.buildSchedule(startDate, endDate);
-
-        connection1 = testBuilder.buildConnection(requestedBlueprint, requestedSched, "conn1", "First Connection");
-        connection2 = testBuilder.buildConnection(requestedBlueprint, requestedSched, "conn2", "Second Connection");
-        connection3 = testBuilder.buildConnection(requestedBlueprint, requestedSched, "conn3", "Third Connection");
-        connection4 = testBuilder.buildConnection(requestedBlueprint, requestedSched, "conn4", "Fourth Connection");
-        connection5 = testBuilder.buildConnection(requestedBlueprint, requestedSched, "conn5", "Failed Connection");
+        connection1 = testBuilder.buildConnection(requestedBlueprint, testBuilder.buildSchedule(startDate, endDate),
+                "conn1", "First Connection");
+        connection2 = testBuilder.buildConnection(requestedBlueprint, testBuilder.buildSchedule(startDate, endDate),
+                "conn2", "Second Connection");
+        connection3 = testBuilder.buildConnection(requestedBlueprint, testBuilder.buildSchedule(startDate, endDate),
+                "conn3", "Third Connection");
+        connection4 = testBuilder.buildConnection(requestedBlueprint, testBuilder.buildSchedule(startDate, endDate),
+                "conn4", "Fourth Connection");
+        connection5 = testBuilder.buildConnection(requestedBlueprint, testBuilder.buildSchedule(startDate, endDate),
+                "conn5", "Failed Connection");
 
         allConnections.add(connection1);
         allConnections.add(connection2);
@@ -689,10 +692,14 @@ public class SequentialResvTest {
         requestedBlueprint = testBuilder.buildRequest(reqPipes, 1, 1);
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
 
-        connection1 = testBuilder.buildConnection(requestedBlueprint, requestedSched, "conn1", "First Connection");
-        connection2 = testBuilder.buildConnection(requestedBlueprint, requestedSched, "conn2", "Second Connection");
-        connection3 = testBuilder.buildConnection(requestedBlueprint, requestedSched, "conn3", "NonPal Connection");
-        connection4 = testBuilder.buildConnection(requestedBlueprint, requestedSched, "conn4", "Failed Connection");
+        connection1 = testBuilder.buildConnection(requestedBlueprint, testBuilder.buildSchedule(startDate, endDate),
+                "conn1", "First Connection");
+        connection2 = testBuilder.buildConnection(requestedBlueprint, testBuilder.buildSchedule(startDate, endDate),
+                "conn2", "Second Connection");
+        connection3 = testBuilder.buildConnection(requestedBlueprint, testBuilder.buildSchedule(startDate, endDate),
+                "conn3", "NonPal Connection");
+        connection4 = testBuilder.buildConnection(requestedBlueprint, testBuilder.buildSchedule(startDate, endDate),
+                "conn4", "Failed Connection");
 
         allConnections.add(connection1);
         allConnections.add(connection2);
@@ -807,12 +814,10 @@ public class SequentialResvTest {
         reqPipes.add(pipeAZ);
 
         requestedBlueprint = testBuilder.buildRequest(reqPipes, 1, 1);
-        requestedSched1 = testBuilder.buildSchedule(startDate1, endDate1);
-        requestedSched2 = testBuilder.buildSchedule(startDate2, endDate2);
 
-        connection1 = testBuilder.buildConnection(requestedBlueprint, requestedSched1, "conn1", "First Connection");
-        connection2 = testBuilder.buildConnection(requestedBlueprint, requestedSched1, "conn2", "Next Connection");
-        connection3 = testBuilder.buildConnection(requestedBlueprint, requestedSched2, "conn3", "Independent Connection");
+        connection1 = testBuilder.buildConnection(requestedBlueprint, testBuilder.buildSchedule(startDate1, endDate1), "conn1", "First Connection");
+        connection2 = testBuilder.buildConnection(requestedBlueprint, testBuilder.buildSchedule(startDate1, endDate1), "conn2", "Next Connection");
+        connection3 = testBuilder.buildConnection(requestedBlueprint, testBuilder.buildSchedule(startDate2, endDate2), "conn3", "Independent Connection");
 
         allConnections.add(connection1);
         allConnections.add(connection2);
@@ -915,16 +920,16 @@ public class SequentialResvTest {
         reqPipes.add(pipeAZ);
 
         requestedBlueprint = testBuilder.buildRequest(reqPipes, 1, 1);
-        requestedSched1 = testBuilder.buildSchedule(startDate1, endDate1);
-        requestedSched2 = testBuilder.buildSchedule(startDate2, endDate2);
 
         int numConnections = 12; // Enough to run out of VLANS in two different time-intervals
 
         for (int conn = 1; conn <= numConnections / 2; conn++) {
             String connID1 = "connT1-" + conn;
             String connID2 = "connT2-" + conn;
-            connection1 = testBuilder.buildConnection(requestedBlueprint, requestedSched1, connID1, "T1 Connection");
-            connection2 = testBuilder.buildConnection(requestedBlueprint, requestedSched2, connID2, "T2 Connection");
+            connection1 = testBuilder.buildConnection(requestedBlueprint, testBuilder.buildSchedule(startDate1, endDate1),
+                    connID1, "T1 Connection");
+            connection2 = testBuilder.buildConnection(requestedBlueprint, testBuilder.buildSchedule(startDate2, endDate2),
+                    connID2, "T2 Connection");
             allConnections.add(connection1);
             allConnections.add(connection2);
         }
@@ -959,7 +964,7 @@ public class SequentialResvTest {
 
             assert (reservedBlueprint != null);
 
-            Date connectionStartDate = oneConnection.getSpecification().getScheduleSpec().getNotBefore();
+            Date connectionStartDate = oneConnection.getSpecification().getScheduleSpec().getStartDates().get(0);
 
             ReservedVlanFlowE reservedFlow = reservedBlueprint.getVlanFlow();
             assert (reservedFlow != null);
@@ -1063,11 +1068,13 @@ public class SequentialResvTest {
         reqPipes.add(pipeAZ2);
 
         requestedBlueprint = testBuilder.buildRequest(reqPipes, 1, 1);
-        requestedSched = testBuilder.buildSchedule(startDate, endDate);
 
-        connection1 = testBuilder.buildConnection(requestedBlueprint, requestedSched, "conn1", "First Multipipe Connection");
-        connection2 = testBuilder.buildConnection(requestedBlueprint, requestedSched, "conn2", "Next Multipipe Connection");
-        connection3 = testBuilder.buildConnection(requestedBlueprint, requestedSched, "conn3", "Failed Multipipe Connection");
+        connection1 = testBuilder.buildConnection(requestedBlueprint, testBuilder.buildSchedule(startDate, endDate),
+                "conn1", "First Multipipe Connection");
+        connection2 = testBuilder.buildConnection(requestedBlueprint, testBuilder.buildSchedule(startDate, endDate),
+                "conn2", "Next Multipipe Connection");
+        connection3 = testBuilder.buildConnection(requestedBlueprint, testBuilder.buildSchedule(startDate, endDate),
+                "conn3", "Failed Multipipe Connection");
 
         allConnections.add(connection1);
         allConnections.add(connection2);

@@ -11,6 +11,7 @@ import net.es.oscars.st.oper.OperState;
 import net.es.oscars.st.prov.ProvState;
 import net.es.oscars.st.resv.ResvState;
 
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 /**
@@ -28,6 +29,12 @@ public class MinimalConnectionBuilder
         // Date expects the number of MILLISECONDS
         Date notBefore = new Date(minRequest.getStartAt() * 1000L);
         Date notAfter = new Date(minRequest.getEndAt() * 1000L);
+        List<Date> startDates = Collections.singletonList(notBefore);
+        List<Date> endDates = Collections.singletonList(notAfter);
+
+        //TODO: Pull this minimum duration from the user
+        Long minimumDuration = 0L;
+
         String connectionId = minRequest.getConnectionId();
         String username = "some user";
 
@@ -51,9 +58,9 @@ public class MinimalConnectionBuilder
                 .build();
 
         ScheduleSpecification ss = ScheduleSpecification.builder()
-                .durationMinutes(0L)
-                .notAfter(notAfter)
-                .notBefore(notBefore)
+                .startDates(startDates)
+                .endDates(endDates)
+                .minimumDuration(minimumDuration)
                 .build();
 
         Layer3Flow layer3Flow = Layer3Flow.builder()
@@ -142,6 +149,7 @@ public class MinimalConnectionBuilder
                 .reserved(rbp)
                 .schedule(sch)
                 .states(states)
+                .reservedSchedule(new ArrayList<>())
                 .build();
 
         return minConnection;

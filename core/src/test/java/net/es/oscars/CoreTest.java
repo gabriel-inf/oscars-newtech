@@ -22,6 +22,7 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 
 @Slf4j
@@ -53,7 +54,7 @@ public class CoreTest {
             this.populateTopo(spec);
 
 
-            topPCE.makeReserved(spec.getRequested(), spec.getScheduleSpec());
+            topPCE.makeReserved(spec.getRequested(), spec.getScheduleSpec(), new ArrayList<>());
             log.info("got schematic");
 
 

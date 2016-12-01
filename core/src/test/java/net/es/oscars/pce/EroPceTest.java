@@ -121,7 +121,7 @@ public class EroPceTest
 
         try
         {
-            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, requestedSched, new ArrayList<>(), new ArrayList<>());
+            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, new ArrayList<>(), new ArrayList<>());
         }
         catch(PCEException pceE){ log.error("", pceE); }
 
@@ -210,7 +210,7 @@ public class EroPceTest
 
         try
         {
-            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, requestedSched, new ArrayList<>(), new ArrayList<>());
+            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, new ArrayList<>(), new ArrayList<>());
         }
         catch(PCEException pceE){ log.error("", pceE); }
 
@@ -300,7 +300,7 @@ public class EroPceTest
 
         try
         {
-            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, requestedSched, new ArrayList<>(), new ArrayList<>());
+            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, new ArrayList<>(), new ArrayList<>());
         }
         catch(PCEException pceE){ log.error("", pceE); }
 
@@ -366,7 +366,7 @@ public class EroPceTest
 
         try
         {
-            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, requestedSched, new ArrayList<>(), new ArrayList<>());
+            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, new ArrayList<>(), new ArrayList<>());
         }
         catch(PCEException pceE){ log.error("", pceE); }
 
@@ -431,7 +431,7 @@ public class EroPceTest
 
         try
         {
-            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, requestedSched, new ArrayList<>(), new ArrayList<>());
+            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, new ArrayList<>(), new ArrayList<>());
         }
         catch(PCEException pceE){ log.error("", pceE); }
 
@@ -517,7 +517,7 @@ public class EroPceTest
 
         try
         {
-            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, requestedSched, new ArrayList<>(), new ArrayList<>());
+            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, new ArrayList<>(), new ArrayList<>());
         }
         catch(PCEException pceE){ log.error("", pceE); }
 
@@ -821,7 +821,7 @@ public class EroPceTest
 
         try
         {
-            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, requestedSched, new ArrayList<>(), new ArrayList<>());
+            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, new ArrayList<>(), new ArrayList<>());
         }
         catch(PCEException pceE){ log.error("", pceE); }
 
@@ -895,7 +895,7 @@ public class EroPceTest
 
         try
         {
-            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, requestedSched, new ArrayList<>(), new ArrayList<>());
+            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, new ArrayList<>(), new ArrayList<>());
         }
         catch(PCEException pceE){ log.error("", pceE); }
 
@@ -1141,7 +1141,7 @@ public class EroPceTest
 
         try
         {
-            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
         }
         catch(PCEException | PSSException pceE)
         {
@@ -1327,7 +1327,7 @@ public class EroPceTest
 
         try
         {
-            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, requestedSched, new ArrayList<>(), new ArrayList<>());
+            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, new ArrayList<>(), new ArrayList<>());
         }
         catch(PCEException pceE){ log.error("", pceE); }
 
@@ -1404,7 +1404,7 @@ public class EroPceTest
 
         try
         {
-            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, requestedSched, new ArrayList<>(), new ArrayList<>());
+            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, new ArrayList<>(), new ArrayList<>());
         }
         catch(PCEException pceE){ log.error("", pceE); }
 
@@ -1483,7 +1483,7 @@ public class EroPceTest
 
         try
         {
-            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, requestedSched, new ArrayList<>(), new ArrayList<>());
+            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, new ArrayList<>(), new ArrayList<>());
         }
         catch(PCEException pceE){ log.error("", pceE); }
 
@@ -1560,7 +1560,7 @@ public class EroPceTest
 
         ReservedBlueprintE resBlueprint = null;
         try{
-            Optional<ReservedBlueprintE> opt = topPCE.makeReserved(reqBlueprint, requestedSched);
+            Optional<ReservedBlueprintE> opt = topPCE.makeReserved(reqBlueprint, requestedSched, new ArrayList<>());
             assert(opt.isPresent());
             resBlueprint = opt.get();
         } catch (Exception e){

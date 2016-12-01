@@ -3,6 +3,8 @@ package net.es.oscars.resv.ent;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.Date;
+import java.util.List;
 
 @Data
 @Entity
@@ -25,9 +27,12 @@ public class ConnectionE {
     @Embedded
     private ScheduleE schedule;
 
+    @NonNull
+    @ElementCollection(targetClass=Date.class)
+    private List<Date> reservedSchedule;
+
     @OneToOne (cascade = CascadeType.ALL)
     private SpecificationE specification;
-
 
     @OneToOne (cascade = CascadeType.ALL)
     private ReservedBlueprintE reserved;

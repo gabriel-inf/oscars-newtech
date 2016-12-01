@@ -41,18 +41,19 @@ public class BandwidthService {
      * @param reservedJunctions - Set of reserved ethernet junctions
      * @param reservedMplsPipes - Set of reserved MPLS pipes
      * @param reservedEthPipes  - Set of reserved Ethernet pipes
-     * @param sched             - The requested schedule (start and end date)
+     * @param start             - The requested start date
+     * @param end               - The requested end date
      * @return List of all reserved bandwidth contained within reserved pipes and the reserved repository.
      */
     public List<ReservedBandwidthE> createReservedBandwidthList(Set<ReservedVlanJunctionE> reservedJunctions,
                                                                 Set<ReservedMplsPipeE> reservedMplsPipes,
                                                                 Set<ReservedEthPipeE> reservedEthPipes,
-                                                                ScheduleSpecificationE sched) {
+                                                                Date start, Date end) {
         // Retrieve all bandwidth reserved so far from pipes & junctions
         List<ReservedBandwidthE> rsvBandwidths = getReservedBandwidthsFromJunctions(reservedJunctions);
         rsvBandwidths.addAll(getReservedBandwidthsFromMplsPipes(reservedMplsPipes));
         rsvBandwidths.addAll(getReservedBandwidthsFromEthPipes(reservedEthPipes));
-        rsvBandwidths.addAll(getReservedBandwidthFromRepo(sched.getNotBefore(), sched.getNotAfter()));
+        rsvBandwidths.addAll(getReservedBandwidthFromRepo(start, end));
 
         return rsvBandwidths;
     }
