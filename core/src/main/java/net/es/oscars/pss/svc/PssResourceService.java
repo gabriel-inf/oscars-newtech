@@ -56,8 +56,8 @@ public class PssResourceService {
             rvj_set.add(mp.getZJunction());
         });
         reservePssJunction(rvj_set,
-                conn.getSpecification().getScheduleSpec().getNotBefore().toInstant(),
-                conn.getSpecification().getScheduleSpec().getNotAfter().toInstant());
+                conn.getReservedSchedule().get(0).toInstant(),
+                conn.getReservedSchedule().get(1).toInstant());
         connRepo.save(conn);
         log.info("saved PSS resources, connection is now:");
         try {

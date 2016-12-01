@@ -101,7 +101,7 @@ public class ServiceLayerTopoLogicalLinkTest
 
         serviceLayerTopo.buildLogicalLayerSrcNodes(srcDevice, srcPort);
         serviceLayerTopo.buildLogicalLayerDstNodes(dstDevice, dstPort);
-        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, requestedSched, urnList, resvBW, resvVLAN);
+        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, urnList, resvBW, resvVLAN);
 
         log.info("Beginning test: 'verifyLogicalLinksLinear'.");
 
@@ -206,7 +206,7 @@ public class ServiceLayerTopoLogicalLinkTest
 
         serviceLayerTopo.buildLogicalLayerSrcNodes(srcDevice, srcPort);
         serviceLayerTopo.buildLogicalLayerDstNodes(dstDevice, dstPort);
-        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, requestedSched, urnList, resvBW, resvVLAN);
+        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, urnList, resvBW, resvVLAN);
 
         log.info("Beginning test: 'verifyLogicalLinksMultipath'.");
 
@@ -328,7 +328,7 @@ public class ServiceLayerTopoLogicalLinkTest
         
         serviceLayerTopo.buildLogicalLayerSrcNodes(srcDevice, srcPort);
         serviceLayerTopo.buildLogicalLayerDstNodes(dstDevice, dstPort);
-        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, requestedSched, urnList, resvBW, resvVLAN);
+        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, urnList, resvBW, resvVLAN);
 
         log.info("Beginning test: 'verifyLogicalLinksLongerPath'.");
 
@@ -451,7 +451,7 @@ public class ServiceLayerTopoLogicalLinkTest
 
         serviceLayerTopo.buildLogicalLayerSrcNodes(srcDevice, srcPort);
         serviceLayerTopo.buildLogicalLayerDstNodes(dstDevice, dstPort);
-        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, requestedSched, urnList, resvBW, resvVLAN);
+        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, urnList, resvBW, resvVLAN);
 
         log.info("Beginning test: 'verifyLogicalLinksAsymmetric'.");
 
@@ -564,7 +564,7 @@ public class ServiceLayerTopoLogicalLinkTest
 
         serviceLayerTopo.buildLogicalLayerSrcNodes(srcDevice, srcPort);
         serviceLayerTopo.buildLogicalLayerDstNodes(dstDevice, dstPort);
-        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, requestedSched, urnList, resvBW, resvVLAN);
+        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, urnList, resvBW, resvVLAN);
 
         log.info("Beginning test: 'verifyLogicalLinksDisjointMpls'.");
 
@@ -728,7 +728,7 @@ public class ServiceLayerTopoLogicalLinkTest
                     assert false;
             });
 
-        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, requestedSched, urnList, resvBW, resvVLAN);
+        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, urnList, resvBW, resvVLAN);
 
         logicalLinks = serviceLayerTopo.getLogicalLinks();
         llBackup = serviceLayerTopo.getLlBackup();
@@ -916,7 +916,7 @@ public class ServiceLayerTopoLogicalLinkTest
                         assert false;
                 });
 
-        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, requestedSched, urnList, resvBW, resvVLAN);
+        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, urnList, resvBW, resvVLAN);
 
         logicalLinks = serviceLayerTopo.getLogicalLinks();
         llBackup = serviceLayerTopo.getLlBackup();
@@ -1103,7 +1103,7 @@ public class ServiceLayerTopoLogicalLinkTest
                         assert false;
                 });
 
-        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, requestedSched, urnList, resvBW, resvVLAN);
+        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, urnList, resvBW, resvVLAN);
 
         logicalLinks = serviceLayerTopo.getLogicalLinks();
         llBackup = serviceLayerTopo.getLlBackup();
@@ -1835,9 +1835,10 @@ public class ServiceLayerTopoLogicalLinkTest
         Date end = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
 
         requestedSched = ScheduleSpecificationE.builder()
-                .notBefore(start)
-                .notAfter(end)
-                .durationMinutes(30L)
+                .startDates(Collections.singletonList(start))
+                .endDates(Collections.singletonList(end))
+                .durationMinutes(Collections.singletonList(30L))
+                .minimumDuration(30L)
                 .build();
     }
 
@@ -1848,8 +1849,7 @@ public class ServiceLayerTopoLogicalLinkTest
         Set<TopoVertex> allVertices = ethernetTopoVertices.stream()
                 .collect(Collectors.toSet());
 
-        mplsTopoVertices.stream()
-                .forEach(allVertices::add);
+        mplsTopoVertices.forEach(allVertices::add);
 
         for(TopoVertex oneVert : allVertices)
         {

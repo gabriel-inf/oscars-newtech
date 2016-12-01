@@ -40,17 +40,15 @@ public class VlanService {
      *
      * @param reservedJunctions - Set of reserved junctions
      * @param reservedEthPipes  - Set of reserved ethernet pipes
-     * @param sched             - Requested schedule
      * @return
      */
     public List<ReservedVlanE> createReservedVlanList(Set<ReservedVlanJunctionE> reservedJunctions,
-                                                      Set<ReservedEthPipeE> reservedEthPipes,
-                                                      ScheduleSpecificationE sched) {
+                                                      Set<ReservedEthPipeE> reservedEthPipes, Date start, Date end) {
 
         // Retrieve all VLAN IDs reserved so far from junctions & pipes
         List<ReservedVlanE> rsvVlans = getReservedVlansFromJunctions(reservedJunctions);
         rsvVlans.addAll(getReservedVlansFromEthernetPipes(reservedEthPipes));
-        rsvVlans.addAll(getReservedVlansFromRepo(sched.getNotBefore(), sched.getNotAfter()));
+        rsvVlans.addAll(getReservedVlansFromRepo(start, end));
 
         return rsvVlans;
     }

@@ -102,7 +102,12 @@ public class ResvService {
 
         RequestedBlueprintE req = c.getSpecification().getRequested();
 
-        Optional<ReservedBlueprintE> res = topPCE.makeReserved(req, c.getSpecification().getScheduleSpec());
+        List<Date> reservedSched = new ArrayList<>();
+        Optional<ReservedBlueprintE> res = topPCE.makeReserved(req, c.getSpecification().getScheduleSpec(), reservedSched);
+
+        // Reserved schedule list will contain [startDate, endDate]
+        // Will be empty if the reservation failed
+        c.setReservedSchedule(reservedSched);
 
         if (res.isPresent()) {
             c.setReserved(res.get());
@@ -145,7 +150,8 @@ public class ResvService {
     {
         RequestedBlueprintE req = c.getSpecification().getRequested();
 
-        Optional<ReservedBlueprintE> res = topPCE.makeReserved(req, c.getSpecification().getScheduleSpec());
+        List<Date> chosenDates = new ArrayList<>();
+        Optional<ReservedBlueprintE> res = topPCE.makeReserved(req, c.getSpecification().getScheduleSpec(), chosenDates);
 
         if (res.isPresent())
         {

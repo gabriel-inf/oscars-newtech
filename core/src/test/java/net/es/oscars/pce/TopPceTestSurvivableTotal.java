@@ -70,7 +70,7 @@ public class TopPceTestSurvivableTotal
         log.info("Beginning test: 'survivablePceTest1'.");
 
         try {
-            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
         } catch (PCEException | PSSException pceE) {
             log.error("", pceE);
         }
@@ -108,7 +108,7 @@ public class TopPceTestSurvivableTotal
         log.info("Beginning test: 'survivablePceTest2'.");
 
         try {
-            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
         } catch (PCEException | PSSException pceE) {
             log.error("", pceE);
         }
@@ -146,7 +146,7 @@ public class TopPceTestSurvivableTotal
         log.info("Beginning test: 'survivablePceTest3'.");
 
         try {
-            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
         } catch (PCEException | PSSException pceE) {
             log.error("", pceE);
         }
@@ -184,7 +184,7 @@ public class TopPceTestSurvivableTotal
         log.info("Beginning test: 'survivablePceTest4'.");
 
         try {
-            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
         } catch (PCEException | PSSException pceE) {
             log.error("", pceE);
         }
@@ -376,7 +376,7 @@ public class TopPceTestSurvivableTotal
         log.info("Beginning test: 'survivablePceTest4_2'.");
 
         try {
-            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
         } catch (PCEException | PSSException pceE) {
             log.error("", pceE);
         }
@@ -477,7 +477,7 @@ public class TopPceTestSurvivableTotal
         log.info("Beginning test: 'survivablePceTest5'.");
 
         try {
-            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
         } catch (PCEException | PSSException pceE) {
             log.error("", pceE);
         }
@@ -515,7 +515,7 @@ public class TopPceTestSurvivableTotal
         log.info("Beginning test: 'survivablePceTest6'.");
 
         try {
-            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
         } catch (PCEException | PSSException pceE) {
             log.error("", pceE);
         }
@@ -553,7 +553,7 @@ public class TopPceTestSurvivableTotal
         log.info("Beginning test: 'survivablePceTest7'.");
 
         try {
-            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
         } catch (PCEException | PSSException pceE) {
             log.error("", pceE);
         }
@@ -591,7 +591,7 @@ public class TopPceTestSurvivableTotal
         log.info("Beginning test: 'survivablePceTest8'.");
 
         try {
-            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
         } catch (PCEException | PSSException pceE) {
             log.error("", pceE);
         }
@@ -629,7 +629,7 @@ public class TopPceTestSurvivableTotal
         log.info("Beginning test: 'survivablePceTest9'.");
 
         try {
-            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
         } catch (PCEException | PSSException pceE) {
             log.error("", pceE);
         }
@@ -667,7 +667,7 @@ public class TopPceTestSurvivableTotal
         log.info("Beginning test: 'survivablePceTest10'.");
 
         try {
-            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
         } catch (PCEException | PSSException pceE) {
             log.error("", pceE);
         }
@@ -705,7 +705,7 @@ public class TopPceTestSurvivableTotal
         log.info("Beginning test: 'survivablePceTest11'.");
 
         try {
-            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
         } catch (PCEException | PSSException pceE) {
             log.error("", pceE);
         }
@@ -742,7 +742,7 @@ public class TopPceTestSurvivableTotal
         log.info("Beginning test: 'survivablePceTest12'.");
 
         try {
-            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
         } catch (PCEException | PSSException pceE) {
             log.error("", pceE);
         }
@@ -922,7 +922,7 @@ public class TopPceTestSurvivableTotal
         log.info("Beginning test: 'survivablePceTest13'.");
 
         try {
-            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
         } catch (PCEException | PSSException pceE) {
             log.error("", pceE);
         }
@@ -1024,7 +1024,7 @@ public class TopPceTestSurvivableTotal
 
         try
         {
-            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
         }
         catch(PCEException | PSSException pceE)
         {
@@ -1066,7 +1066,7 @@ public class TopPceTestSurvivableTotal
 
         try
         {
-            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
         }
         catch(PCEException | PSSException pceE)
         {

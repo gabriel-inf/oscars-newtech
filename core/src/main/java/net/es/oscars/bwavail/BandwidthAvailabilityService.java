@@ -116,10 +116,12 @@ public class BandwidthAvailabilityService {
         // For each ERO, create a blueprint and get the response
         List<RequestedBlueprintE> requestedBlueprints = generateRequestedBlueprints(request, pairValid, pathValid);
 
+        List<Date> chosenDates = new ArrayList<>();
+
         Integer pathNum = 1;
         for(RequestedBlueprintE reqBlueprint : requestedBlueprints){
             try {
-                Optional<ReservedBlueprintE> optRsvBlueprint = topPCE.makeReserved(reqBlueprint, reqSchSpec);
+                Optional<ReservedBlueprintE> optRsvBlueprint = topPCE.makeReserved(reqBlueprint, reqSchSpec, chosenDates);
                 ReservedBlueprintE rsvBlueprint = null;
                 // If a path could be found, store the URNs used
                 if (optRsvBlueprint.isPresent()) {

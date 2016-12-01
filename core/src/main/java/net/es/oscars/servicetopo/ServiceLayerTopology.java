@@ -10,7 +10,6 @@ import net.es.oscars.pce.PruningService;
 import net.es.oscars.resv.ent.RequestedVlanPipeE;
 import net.es.oscars.resv.ent.ReservedBandwidthE;
 import net.es.oscars.resv.ent.ReservedVlanE;
-import net.es.oscars.resv.ent.ScheduleSpecificationE;
 import net.es.oscars.dto.topo.TopoEdge;
 import net.es.oscars.dto.topo.TopoVertex;
 import net.es.oscars.dto.topo.Topology;
@@ -234,17 +233,16 @@ public class ServiceLayerTopology
      * Managing method - Determines whether to perform logical edge weight computation Symmetrically or Asymmetrically.
      * This method may no longer be necessary, since the Symmetric subroutine was too naive to work in general cases.
      * @param requestedVlanPipe - Request pipe
-     * @param requestedSchedule - Request schedule
      * @param urnList - List of URNs in the network; Necessary for passing to PruningService methods
      * @param rsvBwList - List of currently reserved Bandwidth elements (during request schedule)
      * @param rsvVlanList - List of currently reserved VLAN elements (during request schedule)
      */
-    public void calculateLogicalLinkWeights(RequestedVlanPipeE requestedVlanPipe, ScheduleSpecificationE requestedSchedule, List<UrnE> urnList, List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList)
+    public void calculateLogicalLinkWeights(RequestedVlanPipeE requestedVlanPipe, List<UrnE> urnList, List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList)
     {
         //if(requestedVlanPipe.getAzMbps() == requestedVlanPipe.getZaMbps())
         //    this.calculateLogicalLinkWeightsSymmetric(requestedVlanPipe, requestedSchedule, urnList, rsvBwList, rsvVlanList);
         //else
-            this.calculateLogicalLinkWeightsAsymmetric(requestedVlanPipe, requestedSchedule, urnList, rsvBwList, rsvVlanList);
+            this.calculateLogicalLinkWeightsAsymmetric(requestedVlanPipe, urnList, rsvBwList, rsvVlanList);
     }
 
 
@@ -252,12 +250,11 @@ public class ServiceLayerTopology
      * Calls PruningService and DijkstraPCE methods to compute shortest MPLS-layer paths, calculates the combined weight of each path, and maps them to the appropriate logical links.
      * This method may no longer be worth keeping since it was too naive to handle a number of general cases.
      * @param requestedVlanPipe - Request pipe
-     * @param requestedSchedule - Request schedule
      * @param urnList - List of URNs in the network; Necessary for passing to PruningService methods
      * @param rsvBwList - List of currently reserved Bandwidth elements (during request schedule)
      * @param rsvVlanList - List of currently reserved VLAN elements (during request schedule)
      */
-    private void calculateLogicalLinkWeightsSymmetric(RequestedVlanPipeE requestedVlanPipe, ScheduleSpecificationE requestedSchedule, List<UrnE> urnList, List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList)
+    private void calculateLogicalLinkWeightsSymmetric(RequestedVlanPipeE requestedVlanPipe, List<UrnE> urnList, List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList)
     {
         Set<LogicalEdge> logicalLinksToRemoveFromServiceLayer = new HashSet<>();
 
@@ -267,7 +264,7 @@ public class ServiceLayerTopology
         mplsLayerTopo.getEdges().addAll(mplsLayerLinks);
 
         // Step 1: Prune MPLS-Layer topology once before considering any logical links.
-        Topology prunedMPLSTopo = pruningService.pruneWithPipe(mplsLayerTopo, requestedVlanPipe, requestedSchedule, urnList, rsvBwList, rsvVlanList);
+        Topology prunedMPLSTopo = pruningService.pruneWithPipe(mplsLayerTopo, requestedVlanPipe, urnList, rsvBwList, rsvVlanList);
 
         for(LogicalEdge oneLogicalLink : logicalLinks)
         {
@@ -342,7 +339,7 @@ public class ServiceLayerTopology
             adaptationTopo.setVertices(adaptationPorts);
             adaptationTopo.setEdges(adaptationEdges);
 
-            Topology prunedAdaptationTopo = pruningService.pruneWithPipe(adaptationTopo, requestedVlanPipe, requestedSchedule, rsvBwList, rsvVlanList);
+            Topology prunedAdaptationTopo = pruningService.pruneWithPipe(adaptationTopo, requestedVlanPipe, rsvBwList, rsvVlanList);
 
             if(!prunedAdaptationTopo.equals(adaptationTopo))
             {
@@ -395,12 +392,11 @@ public class ServiceLayerTopology
      * If A->Z b/w =/= Z->A b/w, then the physical MPLS-layer EROs will differ.
      * Weights are set according to sum of weights of the underlying MPLS-layer edges.
      * @param requestedVlanPipe - Request pipe
-     * @param requestedSchedule - Request schedule
      * @param urnList - List of URNs in the network; Necessary for passing to PruningService methods
      * @param rsvBwList - List of currently reserved Bandwidth elements (during request schedule)
      * @param rsvVlanList - List of currently reserved VLAN elements (during request schedule)
      */
-    private void calculateLogicalLinkWeightsAsymmetric(RequestedVlanPipeE requestedVlanPipe, ScheduleSpecificationE requestedSchedule, List<UrnE> urnList, List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList)
+    private void calculateLogicalLinkWeightsAsymmetric(RequestedVlanPipeE requestedVlanPipe, List<UrnE> urnList, List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList)
     {
         Set<LogicalEdge> logicalLinksToRemoveFromServiceLayer = new HashSet<>();
 
@@ -410,8 +406,8 @@ public class ServiceLayerTopology
         mplsLayerTopo.getEdges().addAll(mplsLayerLinks);
 
         // Step 1: Prune MPLS-Layer topology once before considering any logical links.
-        Topology prunedMPLSTopoAZ = pruningService.pruneWithPipeAZ(mplsLayerTopo, requestedVlanPipe, requestedSchedule, urnList, rsvBwList, rsvVlanList);
-        Topology prunedMPLSTopoZA = pruningService.pruneWithPipeZA(mplsLayerTopo, requestedVlanPipe, requestedSchedule, urnList, rsvBwList, rsvVlanList);
+        Topology prunedMPLSTopoAZ = pruningService.pruneWithPipeAZ(mplsLayerTopo, requestedVlanPipe, urnList, rsvBwList, rsvVlanList);
+        Topology prunedMPLSTopoZA = pruningService.pruneWithPipeZA(mplsLayerTopo, requestedVlanPipe, urnList, rsvBwList, rsvVlanList);
 
         for(LogicalEdge oneLogicalLink : logicalLinks)
         {
@@ -488,7 +484,7 @@ public class ServiceLayerTopology
             adaptationTopo.setVertices(adaptationPorts);
             adaptationTopo.setEdges(adaptationEdges);
 
-            Topology prunedAdaptationTopo = pruningService.pruneWithPipe(adaptationTopo, requestedVlanPipe, requestedSchedule, rsvBwList, rsvVlanList);
+            Topology prunedAdaptationTopo = pruningService.pruneWithPipe(adaptationTopo, requestedVlanPipe, rsvBwList, rsvVlanList);
 
             if(!prunedAdaptationTopo.equals(adaptationTopo))
             {

@@ -129,9 +129,10 @@ public class SpecPopTest {
         Date notAfter = new Date(nowInstant.plus(1L, ChronoUnit.DAYS).getEpochSecond());
 
         ScheduleSpecificationE sse = ScheduleSpecificationE.builder()
-                .notBefore(notBefore)
-                .notAfter(notAfter)
-                .durationMinutes(30L)
+                .startDates(Collections.singletonList(notBefore))
+                .endDates(Collections.singletonList(notAfter))
+                .durationMinutes(Collections.singletonList(30L))
+                .minimumDuration(30L)
                 .build();
 
         RequestedVlanFlowE flow = RequestedVlanFlowE.builder()

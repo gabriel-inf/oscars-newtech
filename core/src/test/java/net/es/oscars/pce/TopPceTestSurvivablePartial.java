@@ -19,10 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -73,7 +70,7 @@ public class TopPceTestSurvivablePartial
 
         try
         {
-            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
         }
         catch(PCEException | PSSException pceE)
         {
@@ -115,7 +112,7 @@ public class TopPceTestSurvivablePartial
 
         try
         {
-            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
         }
         catch(PCEException | PSSException pceE)
         {
@@ -157,7 +154,7 @@ public class TopPceTestSurvivablePartial
 
         try
         {
-            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
         }
         catch(PCEException | PSSException pceE)
         {
@@ -315,7 +312,7 @@ public class TopPceTestSurvivablePartial
 
         try
         {
-            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
         }
         catch(PCEException | PSSException pceE)
         {
@@ -526,7 +523,7 @@ public class TopPceTestSurvivablePartial
 
         try
         {
-            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
         }
         catch(PCEException | PSSException pceE)
         {
@@ -642,7 +639,7 @@ public class TopPceTestSurvivablePartial
 
         try
         {
-            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
         }
         catch(PCEException | PSSException pceE)
         {
@@ -815,7 +812,7 @@ public class TopPceTestSurvivablePartial
 
         try
         {
-            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
         }
         catch(PCEException | PSSException pceE)
         {
@@ -857,7 +854,7 @@ public class TopPceTestSurvivablePartial
 
         try
         {
-            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
         }
         catch(PCEException | PSSException pceE)
         {
@@ -954,7 +951,7 @@ public class TopPceTestSurvivablePartial
 
         try
         {
-            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
         }
         catch(PCEException | PSSException pceE)
         {
@@ -996,7 +993,7 @@ public class TopPceTestSurvivablePartial
 
         try
         {
-            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
         }
         catch(PCEException | PSSException pceE)
         {
@@ -1038,7 +1035,7 @@ public class TopPceTestSurvivablePartial
 
         try
         {
-            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
         }
         catch(PCEException | PSSException pceE)
         {
@@ -1155,7 +1152,7 @@ public class TopPceTestSurvivablePartial
 
         try
         {
-            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
         }
         catch(PCEException | PSSException pceE)
         {
@@ -1197,7 +1194,7 @@ public class TopPceTestSurvivablePartial
 
         try
         {
-            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
         }
         catch(PCEException | PSSException pceE)
         {
@@ -1239,7 +1236,7 @@ public class TopPceTestSurvivablePartial
 
         try
         {
-            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
         }
         catch(PCEException | PSSException pceE)
         {
@@ -1357,7 +1354,7 @@ public class TopPceTestSurvivablePartial
 
         try
         {
-            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
         }
         catch(PCEException | PSSException pceE)
         {
@@ -1399,7 +1396,7 @@ public class TopPceTestSurvivablePartial
 
         try
         {
-            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched);
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
         }
         catch(PCEException | PSSException pceE)
         {

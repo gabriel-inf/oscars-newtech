@@ -367,10 +367,12 @@ public class ResvController {
                 .build();
 
         ScheduleSpecification ss = bvs.getScheduleSpec();
+        Long minimumDuration = ss.getMinimumDuration() != null ? ss.getMinimumDuration() : 0L;
         ScheduleSpecificationE sse = ScheduleSpecificationE.builder()
                 .durationMinutes(ss.getDurationMinutes())
-                .notAfter(ss.getNotAfter())
-                .notBefore(ss.getNotBefore())
+                .startDates(ss.getStartDates())
+                .endDates(ss.getEndDates())
+                .minimumDuration(minimumDuration)
                 .build();
 
         return SpecificationE.builder()
@@ -446,8 +448,9 @@ public class ResvController {
         ScheduleSpecification ss = spec.getScheduleSpec();
         ScheduleSpecificationE sse = ScheduleSpecificationE.builder()
                 .durationMinutes(ss.getDurationMinutes())
-                .notAfter(ss.getNotAfter())
-                .notBefore(ss.getNotBefore())
+                .startDates(ss.getStartDates())
+                .endDates(ss.getEndDates())
+                .minimumDuration(ss.getMinimumDuration())
                 .build();
 
         return SpecificationE.builder()
