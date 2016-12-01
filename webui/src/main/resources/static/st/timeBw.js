@@ -6,6 +6,7 @@ var startTime;
 var endTime;
 
 var whichPicker = 0;
+var currWindow;
 
 function initializeBandwidthMap()
 {
@@ -62,11 +63,16 @@ function initializeBandwidthMap()
     document.getElementById('start-time').innerHTML = new Date(startTime);
     document.getElementById('end-time').innerHTML = new Date(endTime);
 
+    currWindow = bwAvailMap.getWindow();
+
     // Listener for changing start/end times
     bwAvailMap.on('timechange', function (properties) { changeTime(properties, startBarID, endBarID); });
 
     // Listener for double-click event
     bwAvailMap.on('doubleClick', function (properties) { moveDatePicker(properties, startBarID, endBarID); });
+
+    // Listener for range-change event
+    bwAvailMap.on('rangechange', function (properties) { currWindow = bwAvailMap.getWindow(); });
 
     // Listener to redraw map as time progresses
     bwAvailMap.on('currentTimeTick', function (properties) { refreshMap(); });
@@ -256,6 +262,9 @@ function refreshMap()
     bwAvailMap.options.min = newNow;
     bwAvailMap.options.max = newFurthest;
 
+    if(currWindow.start > bwAvailMap.getCurrentTime())      // Don't redraw if not all the way left, or the map will slide automatically ruining the experience
+            return;
+
     var window = bwAvailMap.getWindow();
     var newDiff = window.end - window.start;
 
@@ -263,9 +272,9 @@ function refreshMap()
 
     newEnd.setTime(nowAsMillis + newDiff);
 
-    // IMPROVE THIS BY GETTING THE NEW WINDOW HERE AND SAVING IT AS GLOBAL. CHECK IF CURRENT TIME IS GREATER THAN PREV WINDOW START. IT NOT, DON'T NEED TO REDRAW OTHERWISE IT'LL SHIFT EVERYTHHING TO THE LEFT!!!!
-
     bwAvailMap.setWindow(newNow, newEnd);
+    bwAvailMap.getWindow();
+
 }
 
 $(document).ready(function ()
