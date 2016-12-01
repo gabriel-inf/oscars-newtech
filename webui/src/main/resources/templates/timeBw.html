@@ -1,0 +1,28 @@
+<!DOCTYPE HTML>
+<html xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+
+<head th:include="shared :: headerFragment (pageTitle='What-If')"/>
+<head th:include="shared :: timeBwFragment"/>
+
+<body>
+    <div th:include="shared :: navbar" style="clear:both"></div>
+
+    <div style="clear:both">
+        <div style="float:left" >
+            <input id = "bwSlider" type="range" class="verticalSlider" orient="vertical" min="0" max="30" value="10" step="1" height="400px" width="5px"/>
+        </div>
+        <div id="bwVisualization"></div>
+    </div>
+
+<p>Bandwidth: </p>
+<p id="bandwidth"></p>
+<p>Start Time:</p>
+<p id="start-time"></p>
+<p>End Time:</p>
+<p id="end-time"></p>
+
+</body>
+</html>

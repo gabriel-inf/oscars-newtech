@@ -193,4 +193,10 @@ public class ReservationController {
 
         return bwResponse;
     }
+
+
+    @RequestMapping("/resv/timebw")
+    public String resv_timebar(Model model) {
+        return "timeBw";
+    }
 }
