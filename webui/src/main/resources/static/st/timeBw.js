@@ -2,11 +2,252 @@ var bwViz;          // Bandwidth-Availability HTML container
 var bwAvailMap;     // Bandwidth-Availability Bar Graph element
 var bwData;         // Data in the map
 
+var netViz;         // Network map HTML container
+var networkMap;     // Network map element
+var netData;        // Data in the map
+
 var startTime;
 var endTime;
 
 var whichPicker = 0;
 var currWindow;
+
+var netPorts = [];      // All network ports
+var vizLinks = [];      // All network links
+
+var selectedERO = [];       // Updated ERO (nodes only) selected by user
+var selectedLinks = [];     // Updated ERO (links only) selected by user
+var adjacentLinks = [];
+
+var button_clearERO;
+
+
+function initializeNetwork()
+{
+    netViz = document.getElementById('networkVisualization');
+    netPorts = [];
+    vizLinks = [];
+
+    // Identify the network ports
+    loadJSON("/viz/listPorts", function (response)
+    {
+        var ports = JSON.parse(response);
+        netPorts = ports;
+    });
+
+    loadJSON("/viz/topology/multilayer", function (response)
+    {
+        var json_data = JSON.parse(response);
+        var allLinks = json_data["edges"];
+
+        for(var e = 0; e < allLinks.length; e++)
+        {
+            var edge = allLinks[e];
+
+            if(edge.from !== null && edge.to !== null)
+                vizLinks.push(edge);
+        }
+
+        var netOptions = {
+            autoResize: true,
+            width: '90%',
+            height: '400px',
+            interaction: {
+                hover: false,
+                navigationButtons: false,
+                zoomView: false,
+                dragView: true,
+                multiselect: false,
+                selectable: true,
+            },
+            physics: {
+                stabilization: true,
+            },
+            nodes: {
+                shape: 'dot',
+                color: {background: "white"},
+            }
+        };
+
+        // create an array with nodes
+        var nodes = new vis.DataSet(json_data['nodes']);
+        var edges = new vis.DataSet(json_data['edges']);
+
+        // create a network
+        netData = {
+            nodes: nodes,
+            edges: edges,
+        };
+
+        networkMap = new vis.Network(netViz, netData, netOptions);
+
+        // Listener for click events
+        networkMap.on('click', function (properties) { nodeSelection(properties); });
+
+        // Listener for when network is loading and stabilizing
+        networkMap.on("stabilizationProgress", function(params) {
+            var maxWidth = 100;
+            var minWidth = 0;
+            var widthFactor = params.iterations/params.total;
+            var width = Math.max(minWidth,maxWidth * widthFactor);
+
+            document.getElementById('progressBar').style.width = width + '%';
+            document.getElementById('progressVal').innerHTML = Math.round(widthFactor*100) + '%';
+        });
+
+        networkMap.once("stabilizationIterationsDone", function() {
+            document.getElementById('progressVal').innerHTML = '100%';
+            document.getElementById('progressBar').style.width = '496px';
+            document.getElementById('loadingBarDiv').style.opacity = 0;
+
+            // really clean the dom element
+            setTimeout(function () {document.getElementById('loadingBarDiv').style.display = 'none';}, 500);
+        });
+    });
+}
+
+// Behavior of clicking the "Clear Path" button
+function clearERO()
+{
+    networkMap.unselectAll();
+    highlight_devices(netData, selectedERO, false, '');
+    highlight_links(netData, selectedLinks, false, '');
+    selectedERO = [];
+    selectedLinks = [];
+    adjacentLinks = [];
+
+    resetBandwidthAvailabilityMap();
+
+    button_clearERO.removeClass("active").addClass("disabled");
+}
+
+// This function builds and updates the selected ERO //
+function nodeSelection(properties)
+{
+    if(properties.nodes.length === 0)       // Only consider node clicks
+        return;
+
+    var theNode = properties.nodes[0];
+    var theAdjLinks = vizLinks.filter(function (link){ return ($.inArray(link.id, properties.edges) !== -1) });
+
+    var index = $.inArray(theNode, selectedERO);
+
+    var connectingLink;
+
+    var removedERO = [];
+    var removedLinks = [];
+
+    // First node in the ERO
+    if($.isEmptyObject(selectedERO))
+    {
+        selectedERO.push(theNode);
+        // Update links for next node
+        adjacentLinks = [];
+        adjacentLinks = theAdjLinks.slice();
+    }
+    // Subsequent nodes in the ERO
+    else if(index === -1)
+    {
+        var isAdjacentNode = false;
+        // Only add to ERO if the node is adjacent to previous
+        for(var e = 0; e < adjacentLinks.length; e++)
+        {
+            var oneLink = adjacentLinks[e];
+
+            if(oneLink.from === theNode || oneLink.to === theNode)
+            {
+                isAdjacentNode = true;
+                connectingLink = oneLink;
+                break;
+            }
+        }
+
+        if(isAdjacentNode)
+        {
+            selectedERO.push(theNode);
+            selectedLinks.push(connectingLink.id);
+            // Update adjacent links for next node
+            adjacentLinks = [];
+            adjacentLinks = theAdjLinks.slice();
+        }
+        else
+        {
+            alert("Selected node must be directly connected to previous node!");
+        }
+    }
+    else if(index === 0)
+    {
+        removedERO = selectedERO.slice();
+        removedLinks = selectedLinks.slice();
+        selectedERO = [];
+        selectedLinks = [];
+        adjacentLinks = [];
+    }
+    else
+    {
+        adjacentLinks = [];
+        var updatedERO = [];
+        var updatedLinks = [];
+
+        for(var i = 0; i < index; i++)
+        {
+            updatedERO.push(selectedERO[i]);
+        }
+
+        for(var i = index; i < selectedERO.length; i++)
+        {
+            removedERO.push(selectedERO[i]);
+        }
+
+        var lastNode = selectedERO[index-1];
+        var lastRemovedNode = selectedERO[index];
+
+        selectedERO = [];
+        selectedERO = updatedERO;
+
+        // Update the adjacent links for last remaining element in the ERO
+        if(!$.isEmptyObject(selectedERO))
+        {
+            theAdjLinks = networkMap.getConnectedEdges(lastNode);
+            adjacentLinks = vizLinks.filter(function (link){ return ($.inArray(link.id, theAdjLinks) !== -1) });
+        }
+
+        for(var e = 1; e < selectedERO.length; e++)
+        {
+            var srcNode = selectedERO[e-1];
+            var dstNode = selectedERO[e];
+
+            var linkToKeep = vizLinks.filter(function (link){ return ((link.from === srcNode && link.to === dstNode) || (link.to === srcNode && link.from === dstNode))});
+            updatedLinks.push(linkToKeep[0].id);
+        }
+
+        selectedLinks = [];
+        selectedLinks = updatedLinks;
+
+        for(var r = 1; r < removedERO.length; r++)
+        {
+            var srcNode = removedERO[r-1];
+            var dstNode = removedERO[r];
+
+            var linkToRemove = vizLinks.filter(function (link){ return ((link.from === srcNode && link.to === dstNode) || (link.to === srcNode && link.from === dstNode))});
+            removedLinks.push(linkToRemove[0].id);
+        }
+
+        var linkToRemove = vizLinks.filter(function (link){ return ((link.from === lastNode && link.to === lastRemovedNode) || (link.to === lastNode && link.from === lastRemovedNode))});
+        removedLinks.push(linkToRemove[0].id);
+    }
+
+    networkMap.unselectAll();
+    highlight_devices(netData, removedERO, false, '');
+    highlight_devices(netData, selectedERO, true, 'green');
+    highlight_links(netData, removedLinks, false, '');
+    highlight_links(netData, selectedLinks, true, 'green');
+
+    if(!$.isEmptyObject(selectedERO))
+        button_clearERO.removeClass("disabled").addClass("active");
+    else
+        button_clearERO.removeClass("active").addClass("disabled");
+}
 
 function initializeBandwidthMap()
 {
@@ -256,7 +497,7 @@ function moveDatePicker(properties, startBarID, endBarID)
 function refreshMap()
 {
     var newNow = bwAvailMap.getCurrentTime();
-    var newFurthest = newNow + 1000 * 60 * 60 * 24 * 365 * 2  // 2 years in the future
+    var newFurthest = newNow + 1000 * 60 * 60 * 24 * 365 * 2;  // 2 years in the future
     var newEnd = new Date();
 
     bwAvailMap.options.min = newNow;
@@ -277,9 +518,34 @@ function refreshMap()
 
 }
 
+function getBandwidthAvailability()
+{
+    ; // To be implemented by Anand!!!
+}
+
+// Clears data from existing map - Triggered by clearERO() - May not be necessary
+function resetBandwidthAvailabilityMap()
+{
+    ; // To be implemented by Anand!!!
+}
+
+function drawBandwidthAvailabilityMap()
+{
+    ; // To be implemented by Anand!!!
+}
+
+function submitRequestedReservation()
+{
+    ; // To be implemented by Anand!!!
+}
+
+
 $(document).ready(function ()
 {
+    initializeNetwork();
     initializeBandwidthMap();
 
-    $('#bwSlider').on('change', updateBandwidth)
+    $('#bwSlider').on('change', updateBandwidth);
+
+    button_clearERO = $('#buttonCancelERO');
 });
