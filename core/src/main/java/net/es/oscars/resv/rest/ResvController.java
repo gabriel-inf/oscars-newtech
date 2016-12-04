@@ -1,23 +1,12 @@
 package net.es.oscars.resv.rest;
 
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.bwavail.BandwidthAvailabilityService;
-import net.es.oscars.dto.bwavail.BandwidthAvailabilityRequest;
-import net.es.oscars.dto.bwavail.BandwidthAvailabilityResponse;
-import net.es.oscars.dto.bwavail.PortBandwidthAvailabilityRequest;
-import net.es.oscars.dto.bwavail.PortBandwidthAvailabilityResponse;
-import net.es.oscars.dto.pss.EthFixtureType;
-import net.es.oscars.dto.pss.EthJunctionType;
-import net.es.oscars.dto.pss.EthPipeType;
 import net.es.oscars.dto.resv.Connection;
 import net.es.oscars.dto.resv.ConnectionFilter;
-import net.es.oscars.dto.spec.*;
 import net.es.oscars.pce.PCEException;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.resv.svc.ResvService;
-import net.es.oscars.st.oper.OperState;
-import net.es.oscars.st.prov.ProvState;
 import net.es.oscars.st.resv.ResvState;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,9 +29,6 @@ public class ResvController {
 
 
     private ResvService resvService;
-
-    @Autowired
-    private BandwidthAvailabilityService bwAvailService;
 
 
     @ExceptionHandler(NoSuchElementException.class)
@@ -137,28 +123,6 @@ public class ResvController {
         log.info("Pre-check initialized for ConnectionID: " + connection.getConnectionId());
 
         return preCheckConnection(connection); // may be null
-    }
-
-    @RequestMapping(value = "/resv/bwAvail/", method = RequestMethod.POST)
-    @ResponseBody
-    public BandwidthAvailabilityResponse getBandwidthAvailability(@RequestBody BandwidthAvailabilityRequest request) {
-        log.info("Retrieving Bandwidth Availability Map");
-        log.info("Request Details: " + request.toString());
-
-        BandwidthAvailabilityResponse response = bwAvailService.getBandwidthAvailabilityMap(request);
-        log.info("Response Details: " + response.toString());
-        return response;
-    }
-
-    @RequestMapping(value = "/resv/bwAvailAllPorts/", method = RequestMethod.POST)
-    @ResponseBody
-    public PortBandwidthAvailabilityResponse getAllPortBandwidthAvailability(@RequestBody PortBandwidthAvailabilityRequest bwRequest)
-    {
-        log.info("Retrieving Bandwidth Availability for all Network Ports");
-
-        PortBandwidthAvailabilityResponse response = bwAvailService.getBandwidthAvailabilityOnAllPorts(bwRequest);
-
-        return response;
     }
 
 

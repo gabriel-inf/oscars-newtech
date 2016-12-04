@@ -1,4 +1,4 @@
-package net.es.oscars.bwavail;
+package net.es.oscars.bwavail.svc;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -47,12 +47,6 @@ public class BandwidthAvailabilityService {
 
     @Autowired
     private UrnRepository urnRepo;
-
-    @Autowired
-    private PruningService pruningService;
-
-    @Autowired
-    private DijkstraPCE dijkstraPCE;
 
     @Autowired
     private TopoService topoService;

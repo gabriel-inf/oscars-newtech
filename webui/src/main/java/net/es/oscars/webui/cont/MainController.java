@@ -33,12 +33,14 @@ public class MainController {
         return "login";
     }
 
+    private final String oscarsUrl = "https://localhost:8000";
+
 
     @RequestMapping(value = "/info/institutions", method = RequestMethod.GET)
     @ResponseBody
     public List<String> institution_suggestions() {
         log.info("giving suggestions");
-        String restPath = "https://localhost:8000/users/institutions";
+        String restPath = oscarsUrl + "/users/institutions";
 
         String[] all_insts = restTemplate.getForObject(restPath, String[].class);
         List<String> institutions = new ArrayList<>();
@@ -51,7 +53,7 @@ public class MainController {
     @ResponseBody
     public List<String> vlanEdge_suggestions() {
         log.info("giving vlanEdge suggestions");
-        String restPath = "https://localhost:8000/topo/vlanEdges";
+        String restPath = oscarsUrl + "/topo/vlanEdges";
 
         String[] all_vlan_edges = restTemplate.getForObject(restPath, String[].class);
         List<String> vlan_edges = new ArrayList<>();
@@ -64,7 +66,7 @@ public class MainController {
     @ResponseBody
     public List<String> vlanEdge_device_suggestions(@PathVariable("device") String device) {
         log.info("giving vlanEdge suggestions for device " + device);
-        String restPath = "https://localhost:8000/topo/device/" + device + "/vlanEdges";
+        String restPath = oscarsUrl + "/topo/device/" + device + "/vlanEdges";
 
         String[] all_vlan_edges = restTemplate.getForObject(restPath, String[].class);
         List<String> vlan_edges = new ArrayList<>();
@@ -77,7 +79,7 @@ public class MainController {
     @ResponseBody
     public List<String> device_suggestions() {
         log.info("giving device suggestions");
-        String restPath = "https://localhost:8000/topo/devices";
+        String restPath = oscarsUrl + "/topo/devices";
 
         String[] all_devices = restTemplate.getForObject(restPath, String[].class);
         List<String> devices = new ArrayList<>();

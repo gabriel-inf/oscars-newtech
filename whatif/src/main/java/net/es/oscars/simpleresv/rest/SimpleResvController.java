@@ -1,29 +1,23 @@
-package net.es.oscars.resv.rest;
+package net.es.oscars.simpleresv.rest;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.resv.BasicCircuitSpecification;
 import net.es.oscars.dto.resv.CircuitSpecification;
 import net.es.oscars.dto.resv.Connection;
 import net.es.oscars.dto.resv.ReservationDetails;
-import net.es.oscars.pce.PCEException;
-import net.es.oscars.pss.PSSException;
-import net.es.oscars.resv.ent.ConnectionE;
-import net.es.oscars.resv.svc.ConnectionGenerationService;
-import net.es.oscars.resv.svc.ConnectionSimplificationService;
+import net.es.oscars.oscarsapi.RequestController;
+import net.es.oscars.simpleresv.svc.ConnectionGenerationService;
+import net.es.oscars.simpleresv.svc.ConnectionSimplificationService;
 import net.es.oscars.st.resv.ResvState;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.NoSuchElementException;
-
-@Slf4j
-@Controller
 /**
  * Provides a simplified endpoint for submitting and committing circuit reservations.
  */
+@Slf4j
+@Controller
 public class SimpleResvController {
 
     @Autowired
@@ -33,88 +27,88 @@ public class SimpleResvController {
     private ConnectionGenerationService connectionGenerationService;
 
     @Autowired
-    private ResvController resvController;
+    private RequestController requestController;
 
-    @RequestMapping(value = "/resv/get_simple/{connectionId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/whatif/resv_simple/get/{connectionId}", method = RequestMethod.GET)
     @ResponseBody
-    public ReservationDetails getDetails(@PathVariable("connectionId") String connectionId) throws JsonProcessingException {
+    public ReservationDetails getDetails(@PathVariable("connectionId") String connectionId){
         log.info("Retrieving reservation information...");
 
-        Connection conn = resvController.getResv(connectionId);
-        return simplifyResponse(conn);
+        Connection conn = requestController.query(connectionId);
+        return simplifyResponse(conn, connectionId);
     }
 
-    @RequestMapping(value = "/resv/connection/add_simple", method = RequestMethod.POST)
+    @RequestMapping(value = "/whatif/resv_simple/connection/add", method = RequestMethod.POST)
     @ResponseBody
-    public ReservationDetails submitSpec(@RequestBody CircuitSpecification spec) throws PSSException, PCEException {
+    public ReservationDetails submitSpec(@RequestBody CircuitSpecification spec){
 
         log.info("Received Specification from Client. Submitting (must commit later).");
         log.info("Specification Params: " + spec);
 
         Connection conn = connectionGenerationService.generateConnection(spec);
         // Submit, do not commit
-        conn = resvController.submitConnection(conn);
-        return simplifyResponse(conn);
+        conn = requestController.submit(conn);
+        return simplifyResponse(conn, spec.getConnectionId());
     }
 
-    @RequestMapping(value = "/resv/commit_simple/{connectionId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/whatif/resv_simple/commit/{connectionId}", method = RequestMethod.GET)
     @ResponseBody
     public ReservationDetails commit(@PathVariable("connectionId") String connectionId) {
         log.info("Committing Reservation " + connectionId);
 
         // Commit
-        Connection conn = resvController.commit(connectionId);
-        return simplifyResponse(conn);
+        Connection conn = requestController.commit(connectionId);
+        return simplifyResponse(conn, connectionId);
     }
 
-    @RequestMapping(value = "/resv/connection/add_commit_simple", method = RequestMethod.POST)
+    @RequestMapping(value = "/whatif/resv_simple/connection/add_commit", method = RequestMethod.POST)
     @ResponseBody
-    public ReservationDetails submitCommitSpec(@RequestBody CircuitSpecification spec) throws PSSException, PCEException {
+    public ReservationDetails submitCommitSpec(@RequestBody CircuitSpecification spec){
 
         log.info("Received Specification from Client. Submitting and committing (on success).");
         log.info("Specification Params: " + spec);
 
         Connection conn = connectionGenerationService.generateConnection(spec);
         // Submit
-        conn = resvController.submitConnection(conn);
+        conn = requestController.submit(conn);
         // Commit if submit was successful
         if(conn.getStates().getResv().equals(ResvState.HELD)) {
-            conn = resvController.commit(conn.getConnectionId());
+            conn = requestController.commit(conn.getConnectionId());
         }
-        return simplifyResponse(conn);
+        return simplifyResponse(conn, spec.getConnectionId());
     }
 
-    @RequestMapping(value = "/resv/connection/add_commit_b_simple/", method = RequestMethod.POST)
+    @RequestMapping(value = "/whatif/resv_simple/connection/add_commit_basic/", method = RequestMethod.POST)
     @ResponseBody
-    public ReservationDetails submitCommitBasicSpec(@RequestBody BasicCircuitSpecification spec) throws PSSException, PCEException {
+    public ReservationDetails submitCommitBasicSpec(@RequestBody BasicCircuitSpecification spec){
 
         log.info("Received Basic Specification from Client. Submitting and committing (on success).");
         log.info("Specification Params: " + spec);
 
         Connection conn = connectionGenerationService.generateConnection(spec);
         // Submit
-        conn = resvController.submitConnection(conn);
+        conn = requestController.submit(conn);
         // Commit if submit was successful
         if(conn.getStates().getResv().equals(ResvState.HELD)) {
-            conn = resvController.commit(conn.getConnectionId());
+            conn = requestController.commit(conn.getConnectionId());
         }
-        return simplifyResponse(conn);
+        return simplifyResponse(conn, spec.getConnectionId());
     }
 
-    @RequestMapping(value = "/resv/abort_simple/{connectionId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/whatif/resv_simple/abort/{connectionId}", method = RequestMethod.GET)
     @ResponseBody
     public ReservationDetails abort(@PathVariable("connectionId") String connectionId) {
         log.info("Aborting Reservation " + connectionId);
 
         // Abort
-        Connection conn = resvController.abort(connectionId);
-        return simplifyResponse(conn);
+        Connection conn = requestController.abort(connectionId);
+        return simplifyResponse(conn, connectionId);
 
     }
 
-    private ReservationDetails simplifyResponse(Connection conn){
+    private ReservationDetails simplifyResponse(Connection conn, String connectionId){
         ReservationDetails resDetails = connectionSimplificationService.simplifyConnection(conn);
-        resDetails.setConnectionId(conn.getConnectionId());
+        resDetails.setConnectionId(connectionId);
         log.info("Response Details: " + resDetails.toString());
         return resDetails;
     }

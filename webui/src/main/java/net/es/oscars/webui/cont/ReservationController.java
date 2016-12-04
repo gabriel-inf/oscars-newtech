@@ -36,9 +36,11 @@ public class ReservationController {
     @Autowired
     private ConnectionProvider connectionProvider;
 
+    private final String oscarsUrl = "https://localhost:8000";
+
     @RequestMapping("/resv/view/{connectionId}")
     public String resv_view(@PathVariable String connectionId, Model model) {
-        String restPath = "https://localhost:8000/resv/get/" + connectionId;
+        String restPath = oscarsUrl + "/resv/get/" + connectionId;
 
         Connection conn = restTemplate.getForObject(restPath, Connection.class);
         ObjectMapper mapper = new ObjectMapper();
@@ -77,7 +79,7 @@ public class ReservationController {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        String restPath = "https://localhost:8000/resv/commit/" + connectionId;
+        String restPath = oscarsUrl + "/resv/commit/" + connectionId;
         Connection c = restTemplate.getForObject(restPath, Connection.class);
         return "redirect:/resv/view/" + c.getConnectionId();
 
@@ -105,7 +107,7 @@ public class ReservationController {
     public Map<String, String> commands(@PathVariable("connectionId") String connectionId,
                                         @PathVariable("deviceUrn") String deviceUrn) {
         log.info("getting commands for " + connectionId + " " + deviceUrn);
-        String restPath = "https://localhost:8000/pss/commands/" + connectionId + "/" + deviceUrn;
+        String restPath = oscarsUrl + "/pss/commands/" + connectionId + "/" + deviceUrn;
         log.info("rest :" + restPath);
 
         Map<String, String> commands = restTemplate.getForObject(restPath, Map.class);
@@ -186,8 +188,8 @@ public class ReservationController {
         bwRequest.setStartDate(startDate);
         bwRequest.setEndDate(endDate);
 
-        String submitUrl = "/resv/bwAvailAllPorts/";
-        String restPath = "https://localhost:8000/" + submitUrl;
+        String submitUrl = "/bwavail/ports";
+        String restPath = oscarsUrl  + submitUrl;
 
         PortBandwidthAvailabilityResponse bwResponse = restTemplate.postForObject(restPath, bwRequest, PortBandwidthAvailabilityResponse.class);
 

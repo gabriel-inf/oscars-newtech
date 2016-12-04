@@ -19,11 +19,13 @@ public class AdminUserController {
     @Autowired
     private RestTemplate restTemplate;
 
+    private final String oscarsUrl = "https://localhost:8000";
+
 
     @RequestMapping(value = "/admin/user_list", method = RequestMethod.GET)
     public String admin_user_list(Model model) {
 
-        String restPath = "https://localhost:8000/users/";
+        String restPath = oscarsUrl + "/users/";
         User[] users = restTemplate.getForObject(restPath, User[].class);
 
         model.addAttribute("users", users);
@@ -35,7 +37,7 @@ public class AdminUserController {
     public String admin_user_edit(@PathVariable String username, Model model) {
 
 
-        String restPath = "https://localhost:8000/users/get/" + username;
+        String restPath = oscarsUrl + "/users/get/" + username;
         User user = restTemplate.getForObject(restPath, User.class);
 
         model.addAttribute("user", user);
@@ -55,12 +57,12 @@ public class AdminUserController {
         String encodedPassword = new RestAuthProvider().passwordEncoder().encode(updatedUser.getPassword());
         log.info("changing pwd for " + username);
 
-        String restPath = "https://localhost:8000/users/get/" + username;
+        String restPath = oscarsUrl + "/users/get/" + username;
         User existingUser = restTemplate.getForObject(restPath, User.class);
         existingUser.setPassword(encodedPassword);
 
         // only update the password
-        restPath = "https://localhost:8000/users/update";
+        restPath = oscarsUrl + "/users/update";
         restTemplate.postForObject(restPath, existingUser, User.class);
 
         return "redirect:/admin/user_edit/" + username;
@@ -77,7 +79,7 @@ public class AdminUserController {
         String encodedPassword = new RestAuthProvider().passwordEncoder().encode(addedUser.getPassword());
         addedUser.setPassword(encodedPassword);
 
-        String restPath = "https://localhost:8000/users/add";
+        String restPath = oscarsUrl + "/users/add";
         restTemplate.postForObject(restPath, addedUser, User.class);
         log.info("added " + username);
 
@@ -92,7 +94,7 @@ public class AdminUserController {
         String username = userToDelete.getUsername();
         log.info("deleting " + username);
 
-        String restPath = "https://localhost:8000/users/delete/" + username;
+        String restPath = oscarsUrl + "/users/delete/" + username;
         restTemplate.getForObject(restPath, String.class);
 
         return "redirect:/admin/user_list";
@@ -103,14 +105,14 @@ public class AdminUserController {
         String username = updatedUser.getUsername();
         log.info("updating " + username);
 
-        String restPath = "https://localhost:8000/users/get/" + username;
+        String restPath = oscarsUrl + "/users/get/" + username;
         User existingUser = restTemplate.getForObject(restPath, User.class);
 
         // do NOT update the password
         String password = existingUser.getPassword();
         updatedUser.setPassword(password);
 
-        restPath = "https://localhost:8000/users/update";
+        restPath = oscarsUrl + "/users/update";
         restTemplate.postForObject(restPath, updatedUser, User.class);
 
         return "redirect:/admin/user_edit/" + username;

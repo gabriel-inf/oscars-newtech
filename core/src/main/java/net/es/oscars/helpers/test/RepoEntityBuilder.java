@@ -1,4 +1,4 @@
-package net.es.oscars.pce;
+package net.es.oscars.helpers.test;
 
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.topo.TopoEdge;
@@ -18,10 +18,10 @@ import java.util.*;
 public class RepoEntityBuilder {
 
     @Autowired
-    UrnRepository urnRepo;
+    private UrnRepository urnRepo;
 
     @Autowired
-    UrnAdjcyRepository adjcyRepo;
+    private UrnAdjcyRepository adjcyRepo;
 
 
     public void populateRepos(Collection<TopoVertex> vertices, Collection<TopoEdge> edges, Map<TopoVertex,TopoVertex> portToDeviceMap){

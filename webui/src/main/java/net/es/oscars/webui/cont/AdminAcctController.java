@@ -19,10 +19,12 @@ public class AdminAcctController {
     @Autowired
     private RestTemplate restTemplate;
 
+    private final String oscarsUrl = "https://localhost:8000";
+
     @RequestMapping(value = "/admin/cust_list", method = RequestMethod.GET)
     public String admin_comp_list(Model model) {
 
-        String restPath = "https://localhost:8000/acct/customers/";
+        String restPath = oscarsUrl + "/acct/customers/";
         Customer[] customers = restTemplate.getForObject(restPath, Customer[].class);
 
         model.addAttribute("customers", customers);
@@ -33,7 +35,7 @@ public class AdminAcctController {
     public String admin_cust_edit(@PathVariable String name, Model model) {
 
 
-        String restPath = "https://localhost:8000/acct/customers/" + name;
+        String restPath = oscarsUrl + "/acct/customers/" + name;
         Customer customer = restTemplate.getForObject(restPath, Customer.class);
         log.info(customer.toString());
 

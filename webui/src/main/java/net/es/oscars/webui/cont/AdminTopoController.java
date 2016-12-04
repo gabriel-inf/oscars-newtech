@@ -13,6 +13,7 @@ import org.springframework.web.client.RestTemplate;
 @Slf4j
 public class AdminTopoController {
 
+    private final String oscarsUrl = "https://localhost:8000";
 
     @Autowired
     private RestTemplate restTemplate;
@@ -21,7 +22,7 @@ public class AdminTopoController {
     @RequestMapping(value = "/admin/group_list", method = RequestMethod.GET)
     public String admin_group_list(Model model) {
 
-        String restPath = "https://localhost:8000/grp/";
+        String restPath = oscarsUrl + "/grp/";
         String[] groups = restTemplate.getForObject(restPath, String[].class);
 
         model.addAttribute("groups", groups);
