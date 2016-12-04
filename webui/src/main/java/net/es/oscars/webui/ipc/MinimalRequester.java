@@ -15,6 +15,7 @@ public class MinimalRequester {
     @Autowired
     private RestTemplate restTemplate;
 
+    private final String oscarsUrl = "https://localhost:8000/";
 
     public Connection holdMinimal(MinimalRequest minimalRequest) {
         log.info("holding minimal " + minimalRequest.toString());
@@ -23,7 +24,7 @@ public class MinimalRequester {
         Connection c = minimalConnectionBuilder.buildMinimalConnectionFromRequest(minimalRequest);
 
         String submitUrl = "resv/connection/add";
-        String restPath = "https://localhost:8000/" + submitUrl;
+        String restPath = oscarsUrl + submitUrl;
         log.info("sending connection " + c.toString());
         Connection resultC = restTemplate.postForObject(restPath, c, Connection.class);
         log.info("got connection " + resultC.toString());
