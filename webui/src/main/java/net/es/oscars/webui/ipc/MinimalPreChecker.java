@@ -18,7 +18,7 @@ public class MinimalPreChecker
     @Autowired
     private RestTemplate restTemplate;
 
-    private final String oscarsUrl = "https://localhost:8000/";
+    private final String oscarsUrl = "https://localhost:8000";
 
 
     public Connection preCheckMinimal(MinimalRequest minimalRequest)

@@ -19,9 +19,11 @@ public class TopologyProvider {
     private Map<String, Position> positions = null;
     private Map<String, Set<String>> devicePortMap = null;
 
+    private final String oscarsUrl = "https://localhost:8000";
+
     public Topology getTopology() {
         if (topology == null) {
-            String restPath = "https://localhost:8000/topo/multilayer";
+            String restPath = oscarsUrl + "/topo/multilayer";
             topology = restTemplate.getForObject(restPath, Topology.class);
         }
 
@@ -31,7 +33,7 @@ public class TopologyProvider {
     public Map<String, Set<String>> devicePortMap() {
         if (devicePortMap == null) {
             devicePortMap = new HashMap<>();
-            String restPath = "https://localhost:8000/topo/device_port_map";
+            String restPath = oscarsUrl + "/topo/device_port_map";
 
             Map<String, List<String>> receivedMap = restTemplate.getForObject(restPath, Map.class);
             receivedMap.keySet().forEach(d -> {
@@ -52,7 +54,7 @@ public class TopologyProvider {
     public Map<String, Position> getPositions() {
         if (positions == null) {
             positions = new HashMap<>();
-            String restPath = "https://localhost:8000/ui/positions";
+            String restPath = oscarsUrl + "/ui/positions";
             Map<String, Map<String,Integer>> rcvd = restTemplate.getForObject(restPath, Map.class);
 
             rcvd.keySet().forEach(d -> {
