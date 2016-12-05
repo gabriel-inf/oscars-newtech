@@ -14,11 +14,11 @@ import java.util.Set;
 @AllArgsConstructor
 public class CircuitFlow {
 
-    String sourcePort;
+    Set<String> sourcePorts;
 
     String sourceDevice;
 
-    String destPort;
+    Set<String> destPorts;
 
     String destDevice;
 
