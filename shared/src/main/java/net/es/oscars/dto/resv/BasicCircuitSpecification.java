@@ -13,6 +13,8 @@ import lombok.NoArgsConstructor;
 public class BasicCircuitSpecification {
     String connectionId;
 
+    String description;
+
     String start;
 
     String end;

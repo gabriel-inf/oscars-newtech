@@ -58,7 +58,7 @@ public class ConnectionGenerationService {
         return  Specification.builder()
                 .scheduleSpec(generateScheduleSpecification(bcs.getStart(), bcs.getEnd()))
                 .connectionId(bcs.getConnectionId())
-                .description("What-if Connection")
+                .description(bcs.getDescription())
                 .requested(reqBlueprint)
                 .username("What-If")
                 .version(0)
