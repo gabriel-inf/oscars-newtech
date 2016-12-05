@@ -2,6 +2,7 @@ package net.es.oscars.webui.viz;
 
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.resv.Connection;
+import net.es.oscars.dto.rsrc.ReservableBandwidth;
 import net.es.oscars.dto.spec.ReservedEthPipe;
 import net.es.oscars.dto.spec.ReservedMplsPipe;
 import net.es.oscars.dto.spec.ReservedVlanFlow;
@@ -122,7 +123,7 @@ public class VizExporter {
                     added.add(r_id);
 
                     VizEdge ve = VizEdge.builder()
-                            .from(a).to(z).title("").label("").value(1)
+                            .from(a).to(z).title(e_id).label("").value(1)
                             .id(UUID.randomUUID().toString())
                             .arrows(null).arrowStrikethrough(false).color(color)
                             .build();
@@ -202,7 +203,7 @@ public class VizExporter {
                 added.add(e_id);
                 added.add(r_id);
                 VizEdge ve = VizEdge.builder()
-                        .from(dev_a).to(dev_z).title("").label("").value(1)
+                        .from(dev_a).to(dev_z).title(e_id).label("").value(1)
                         .id(e_id)
                         .arrows(null).arrowStrikethrough(false).color(null)
                         .build();
@@ -220,6 +221,142 @@ public class VizExporter {
         return g;
 
     }
+
+    // Same as multilayerGraph() but with individual links drawn for each direction
+    public VizGraph multilayerGraphUnidirectional()
+    {
+        VizGraph g = VizGraph.builder().edges(new ArrayList<>()).nodes(new ArrayList<>()).build();
+        Map<String, Set<String>> portMap = topologyProvider.devicePortMap();
+        Map<String, String> portToDeviceMap = new HashMap<>();
+
+        // Map ports to devices //
+        for (String device : portMap.keySet())
+        {
+            for (String port : portMap.get(device))
+            {
+               portToDeviceMap.put(port, device);
+            }
+        }
+
+        // Retrieve bandwidth capacity for each port //
+        List<ReservableBandwidth> portCapacities = topologyProvider.getPortCapacities();
+
+        //log.info("A capacity: " + aCap.getBandwidth() + " Mbps");
+        //log.info("Z capacity: " + zCap.getBandwidth() + " Mbps");
+
+        Topology multilayer = topologyProvider.getTopology();
+        List<String> added = new ArrayList<>();
+
+        for (TopoEdge topoEdge : multilayer.getEdges())
+        {
+
+            String aPort = topoEdge.getA().getUrn();        // Src port ID
+            String zPort = topoEdge.getZ().getUrn();        // Dst port ID
+            String aDevice = portToDeviceMap.get(aPort);
+            String zDevice = portToDeviceMap.get(zPort);
+
+            // Ignore all edges between devices and ports. Only display Port-to-Port links //
+            if(topoEdge.getA().getVertexType().equals(VertexType.PORT) && topoEdge.getZ().getVertexType().equals(VertexType.PORT))
+            {
+                String edge_id = aPort + " -- " + zPort;
+                String reverse_id = zPort + " -- " + aPort;
+                if (!added.contains(reverse_id))
+                {
+                    added.add(edge_id);
+                    added.add(reverse_id);
+
+                    // Compute link capacities from port capacities //
+                    List<ReservableBandwidth> portCaps = portCapacities.stream()
+                            .filter(p -> p.getTopoVertexUrn().equals(aPort) || p.getTopoVertexUrn().equals(zPort))
+                            .collect(Collectors.toList());
+
+                    assert(portCaps.size() == 2);
+
+                    ReservableBandwidth bw1 = portCaps.get(0);
+                    ReservableBandwidth bw2 = portCaps.get(1);
+                    Integer aCapIn;
+                    Integer aCapEg;
+                    Integer zCapIn;
+                    Integer zCapEg;
+
+                    Integer minCapAZ;
+                    Integer minCapZA;
+
+                    String capacityStringAZ = ", Capacity: ";
+                    String capacityStringZA = ", Capacity: ";
+
+                    if(bw1.getTopoVertexUrn().equals(aPort))
+                    {
+                        aCapIn = bw1.getIngressBw();
+                        aCapEg = bw1.getEgressBw();
+                        zCapIn = bw2.getIngressBw();
+                        zCapEg = bw2.getEgressBw();
+                    }
+                    else
+                    {
+                        aCapIn = bw2.getIngressBw();
+                        aCapEg = bw2.getEgressBw();
+                        zCapIn = bw1.getIngressBw();
+                        zCapEg = bw1.getEgressBw();
+                    }
+
+                    minCapAZ = aCapEg;
+                    if(zCapIn < minCapAZ)
+                        minCapAZ = zCapIn;
+
+                    minCapZA = aCapIn;
+                    if(zCapEg < minCapZA)
+                        minCapZA = zCapEg;
+
+                    if(minCapAZ > 1000)
+                    {
+                        minCapAZ = minCapAZ / 1000;
+                        capacityStringAZ += minCapAZ + " Gbps";
+                    }
+                    else
+                    {
+                        capacityStringAZ += minCapAZ + " Mbps";
+                    }
+
+                    if(minCapZA > 1000)
+                    {
+                        minCapZA = minCapZA / 1000;
+                        capacityStringZA += minCapZA + " Gbps";
+                    }
+                    else
+                    {
+                        capacityStringZA += minCapZA + " Mbps";
+                    }
+
+
+
+
+                    VizEdge forwardEdge = VizEdge.builder()
+                            .from(aDevice).to(zDevice).title(edge_id + capacityStringAZ).label("").value(1)
+                            .id(edge_id)
+                            .arrows(null).arrowStrikethrough(false).color(null)
+                            .build();
+
+                    VizEdge reverseEdge = VizEdge.builder()
+                            .from(zDevice).to(aDevice).title(reverse_id + capacityStringZA).label("").value(1)
+                            .id(reverse_id)
+                            .arrows(null).arrowStrikethrough(false).color("darkgrey")
+                            .build();
+
+                    g.getEdges().add(forwardEdge);
+                    g.getEdges().add(reverseEdge);
+                }
+            }
+
+        }
+
+        for (String deviceUrn : portMap.keySet()) {
+            this.makeNode(deviceUrn, g);
+        }
+
+        return g;
+    }
+
 
 
     private void makeNode(String node, VizGraph g) {

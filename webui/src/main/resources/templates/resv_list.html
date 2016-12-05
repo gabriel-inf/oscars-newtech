@@ -9,6 +9,28 @@
 <body>
     <div th:include="shared :: navbar"></div>
 
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" href="#network_panel">Show / hide network</a>
+                </h4>
+            </div>
+            <div id="network_panel" class="panel-body collapse in">
+                <div id="loadingBarDiv" class="loadingBarDiv">
+                    <div class="loadingBarBorder">
+                        <div id="progressVal" class="loadingBarProgress">0%</div>
+                        <div class="loadingBarRunner">
+                            <div id="progressBar" class="loadingBar" />
+                        </div>
+                    </div>
+                    <div class="loadingBarMessage">Loading Network Topology...</div>
+                </div>
+                <div id="networkVisualization"/>
+            </div>
+        </div>
+    </div>
+
     <table id="listTable" class="table table-hover">
         <thead>
         <h4 id="tester" style="margin-left: 40px; color: #2c5699"> Expand a connection to view additional reservation details.</h4>

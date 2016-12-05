@@ -1,6 +1,7 @@
 package net.es.oscars.webui.ipc;
 
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.dto.rsrc.ReservableBandwidth;
 import net.es.oscars.dto.topo.Topology;
 import net.es.oscars.dto.viz.Position;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,6 +67,15 @@ public class TopologyProvider {
         }
 
         return positions;
+    }
+
+    public List<ReservableBandwidth> getPortCapacities()
+    {
+        String restPath = oscarsUrl + "/topo/allport/bwcapacity";
+        log.info("REST PATH: " + restPath);
+        ReservableBandwidth[] portBW = restTemplate.getForObject(restPath, ReservableBandwidth[].class);
+
+        return Arrays.asList(portBW);
     }
 
 
