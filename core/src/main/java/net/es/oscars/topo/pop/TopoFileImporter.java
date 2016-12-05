@@ -168,6 +168,14 @@ public class TopoFileImporter implements TopoImporter {
                     .capabilities(d.getCapabilities())
                     .build();
 
+            ReservableBandwidthE drbw = ReservableBandwidthE.builder()
+                    .bandwidth(Integer.MAX_VALUE)
+                    .ingressBw(Integer.MAX_VALUE)
+                    .egressBw(Integer.MAX_VALUE)
+                    .urn(deviceUrn)
+                    .build();
+            deviceUrn.setReservableBandwidth(drbw);
+
             if (null != d.getReservableVlans() && !d.getReservableVlans().isEmpty()) {
 
                 ReservableVlanE resvVlan = ReservableVlanE.builder()
@@ -175,6 +183,9 @@ public class TopoFileImporter implements TopoImporter {
                         .build();
                 deviceUrn.setReservableVlans(resvVlan);
             }
+
+
+
             urns.add(deviceUrn);
 
 
@@ -188,12 +199,13 @@ public class TopoFileImporter implements TopoImporter {
                         .build();
 
                 if (null != i.getReservableBw()) {
-                    ReservableBandwidthE rbw = ReservableBandwidthE.builder()
+                    ReservableBandwidthE irbw = ReservableBandwidthE.builder()
                             .bandwidth(i.getReservableBw())
                             .ingressBw(i.getReservableBw())
                             .egressBw(i.getReservableBw())
+                            .urn(ifceUrn)
                             .build();
-                    ifceUrn.setReservableBandwidth(rbw);
+                    ifceUrn.setReservableBandwidth(irbw);
                 }
 
                 if (null != i.getReservableVlans() && !i.getReservableVlans().isEmpty()) {
