@@ -29,6 +29,7 @@
         <module>shared</module>
         <module>webui</module>
         <module>check</module>
+        <module>whatif</module>
     </modules>
     <profiles>
         <profile>

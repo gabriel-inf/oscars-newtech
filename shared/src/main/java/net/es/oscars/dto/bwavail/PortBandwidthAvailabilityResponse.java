@@ -13,5 +13,5 @@ import java.util.Map;
 public class PortBandwidthAvailabilityResponse
 {
     @NonNull
-    private Map<String, List<Integer>> bwAvailabilityMap;   //URN-><inBW,egBW>
+    private Map<String, List<Integer>> bwAvailabilityMap;   //URN-> [inBW, egBW]
 }

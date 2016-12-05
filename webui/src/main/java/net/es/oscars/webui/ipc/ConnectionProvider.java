@@ -20,12 +20,13 @@ public class ConnectionProvider {
     @Autowired
     private RestTemplate restTemplate;
 
+    private final String oscarsUrl = "https://localhost:8000";
 
     public Set<Connection> filtered(ConnectionFilter filter) {
         log.info("Listing connections");
 
-        String submitUrl = "resv/filter";
-        String restPath = "https://localhost:8000/" + submitUrl;
+        String submitUrl = "/resv/filter";
+        String restPath = oscarsUrl + submitUrl;
         log.info("sending filter " + filter.toString());
         //Set<Connection> result = restTemplate.postForObject(restPath, filter, Set.class);
 

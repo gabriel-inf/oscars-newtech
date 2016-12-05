@@ -18,14 +18,15 @@ import java.io.IOException;
 @Controller
 public class AdminConfController {
 
-
     @Autowired
     private RestTemplate restTemplate;
+
+    private final String oscarsUrl = "https://localhost:8000";
 
     @RequestMapping(value = "/admin/comp_list", method = RequestMethod.GET)
     public String admin_comp_list(Model model) {
 
-        String restPath = "https://localhost:8000/configs/all";
+        String restPath = oscarsUrl + "/configs/all";
         String[] components = restTemplate.getForObject(restPath, String[].class);
 
         model.addAttribute("components", components);
@@ -35,7 +36,7 @@ public class AdminConfController {
     @RequestMapping(value = "/admin/comp_edit/{comp_name}", method = RequestMethod.GET)
     public String admin_comp_edit(@PathVariable String comp_name, Model model) throws IOException {
 
-        String restPath = "https://localhost:8000/configs/get/" + comp_name;
+        String restPath = oscarsUrl + "/configs/get/" + comp_name;
         String uglyJson = restTemplate.getForObject(restPath, String.class);
 
         ObjectMapper mapper = new ObjectMapper();
@@ -60,7 +61,7 @@ public class AdminConfController {
         log.info("updating " + name);
 
 
-        String restPath = "https://localhost:8000/configs/update";
+        String restPath = oscarsUrl + "/configs/update";
         restTemplate.postForObject(restPath, updatedConfig, StartupConfig.class);
 
         return "redirect:/admin/comp_edit/" + name;

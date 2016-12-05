@@ -8,8 +8,8 @@ import net.es.oscars.dto.spec.SurvivabilityType;
 import net.es.oscars.helpers.RequestedEntityBuilder;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.ent.*;
-import net.es.oscars.topo.AsymmTopologyBuilder;
-import net.es.oscars.topo.TopologyBuilder;
+import net.es.oscars.helpers.test.AsymmTopologyBuilder;
+import net.es.oscars.helpers.test.TopologyBuilder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Slf4j
 @RunWith(SpringJUnit4ClassRunner.class)

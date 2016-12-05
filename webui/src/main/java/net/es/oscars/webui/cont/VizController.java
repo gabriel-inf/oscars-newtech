@@ -24,6 +24,8 @@ public class VizController {
     @Autowired
     private RestTemplate restTemplate;
 
+    private final String oscarsUrl = "https://localhost:8000";
+
     @RequestMapping(value = "/viz/topology/{classifier}", method = RequestMethod.GET)
     @ResponseBody
     public VizGraph viz_topology(@PathVariable String classifier) {
@@ -42,7 +44,7 @@ public class VizController {
     @RequestMapping(value = "/viz/connection/{connectionId}", method = RequestMethod.GET)
     @ResponseBody
     public VizGraph viz_connection(@PathVariable String connectionId) {
-        String restPath = "https://localhost:8000/resv/get/" + connectionId;
+        String restPath = oscarsUrl + "/resv/get/" + connectionId;
 
         Connection conn = restTemplate.getForObject(restPath, Connection.class);
 

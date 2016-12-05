@@ -34,8 +34,8 @@
                 <div th:text="${connection.states.oper}" />
             </td>
             <td>
-                <div th:text="'Start: ' + ${connection.specification.scheduleSpec.notBefore}" />
-                <div th:text="'End: ' + ${connection.specification.scheduleSpec.notAfter}" />
+                <div th:text="'Start: ' + ${connection.specification.scheduleSpec.startDates}" />
+                <div th:text="'End: ' + ${connection.specification.scheduleSpec.endDates}" />
                 <div th:each="pipe : ${connection.specification.requested.vlanFlow.pipes}">
                     <div>Requested Pipe:</div>
                     <div th:text="'A-Z Bandwidth: ' + ${pipe.azMbps} + ' Mbps'" />

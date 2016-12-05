@@ -123,6 +123,9 @@ function highlight_devices(network, deviceIDs, isSelected, color)
     var newColor = color;
     var normalNodeColor = "white";
 
+    if($.isEmptyObject(deviceIDs))
+        return;
+
     for(var d = 0; d < deviceIDs.length; d++)
     {
         if(isSelected)
@@ -136,6 +139,9 @@ function highlight_links(network, linkIDs, isSelected, color)
 {
     var newColor = color;
     var normalEdgeColor = "#2F7FED";
+
+    if($.isEmptyObject(linkIDs))
+        return;
 
     for(var l = 0; l < linkIDs.length; l++)
     {

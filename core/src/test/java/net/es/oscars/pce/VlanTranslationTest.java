@@ -7,9 +7,7 @@ import net.es.oscars.dto.spec.SurvivabilityType;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.helpers.RequestedEntityBuilder;
 import net.es.oscars.resv.ent.*;
-import net.es.oscars.topo.VlanTranslationTopologyBuilder;
-import net.es.oscars.topo.ent.UrnE;
-import net.es.oscars.dto.spec.PalindromicType;
+import net.es.oscars.helpers.test.VlanTranslationTopologyBuilder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RunWith(SpringJUnit4ClassRunner.class)

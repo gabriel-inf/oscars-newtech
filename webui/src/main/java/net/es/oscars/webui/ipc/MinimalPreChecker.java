@@ -18,6 +18,8 @@ public class MinimalPreChecker
     @Autowired
     private RestTemplate restTemplate;
 
+    private final String oscarsUrl = "https://localhost:8000";
+
 
     public Connection preCheckMinimal(MinimalRequest minimalRequest)
     {
@@ -27,7 +29,7 @@ public class MinimalPreChecker
         Connection c = minimalConnectionBuilder.buildMinimalConnectionFromRequest(minimalRequest);
 
         String submitUrl = "/resv/connection/precheck";
-        String restPath = "https://localhost:8000/" + submitUrl;
+        String restPath = oscarsUrl + submitUrl;
 
         Connection resultC = restTemplate.postForObject(restPath, c, Connection.class);
 
