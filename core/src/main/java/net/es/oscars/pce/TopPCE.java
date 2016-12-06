@@ -122,7 +122,7 @@ public class TopPCE {
             // If we reached the minimum duration threshold, break
             if(isValid){
                 chosenRangeIndex = rangeIndex;
-                if(durations.get(rangeIndex) >= schedSpec.getMinimumDuration()){
+                if(schedSpec.getMinimumDuration() == null || durations.get(rangeIndex) >= schedSpec.getMinimumDuration()){
                     break;
                 }
             }
