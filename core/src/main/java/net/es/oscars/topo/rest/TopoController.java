@@ -1,24 +1,26 @@
 package net.es.oscars.topo.rest;
 
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.dto.rsrc.ReservableBandwidth;
 import net.es.oscars.dto.topo.Topology;
 import net.es.oscars.dto.topo.enums.Layer;
+import net.es.oscars.topo.ent.ReservableBandwidthE;
 import net.es.oscars.topo.svc.TopoService;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 @Controller
 public class TopoController {
     private TopoService topoService;
+
+    private ModelMapper modelMapper = new ModelMapper();
 
     @Autowired
     public TopoController(TopoService topoService) {
@@ -85,4 +87,28 @@ public class TopoController {
         return topoService.getMultilayerTopology();
     }
 
+    @RequestMapping(value = "/topo/allport/bwcapacity", method = RequestMethod.GET)
+    @ResponseBody
+    public List<ReservableBandwidth> portCapacity()
+    {
+        List<ReservableBandwidthE> portCapacity = topoService.reservableBandwidths();
+        List<ReservableBandwidth> portCapDTO = new ArrayList<>();
+
+        for(ReservableBandwidthE oneCap : portCapacity)
+        {
+            //log.info("URN: " + oneCap.getUrn().getUrn());
+            log.info("CAP: " + oneCap.getBandwidth());
+            log.info("CAP-IN: " + oneCap.getIngressBw());
+            log.info("CAP-EG: " + oneCap.getEgressBw());
+            ReservableBandwidth oneDTO = ReservableBandwidth.builder()
+                    .ingressBw(oneCap.getIngressBw())
+                    .egressBw(oneCap.getEgressBw())
+                    .topoVertexUrn(oneCap.getUrn().getUrn())
+                    .build();
+
+            portCapDTO.add(oneDTO);
+        }
+
+        return portCapDTO;
+    }
 }

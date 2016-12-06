@@ -5,12 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import net.es.oscars.dto.IntRange;
-import net.es.oscars.dto.resv.ResourceType;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -18,5 +12,10 @@ import java.util.Set;
 @Builder
 public class ReservableBandwidth {
     private String topoVertexUrn;
+
     private Integer bandwidth;
+
+    private Integer ingressBw;
+
+    private Integer egressBw;
 }

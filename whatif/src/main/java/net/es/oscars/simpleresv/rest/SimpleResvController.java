@@ -78,7 +78,7 @@ public class SimpleResvController {
         return simplifyResponse(conn, spec.getConnectionId());
     }
 
-    @RequestMapping(value = "/whatif/resv_simple/connection/add_commit_basic/", method = RequestMethod.POST)
+    @RequestMapping(value = "/whatif/resv_simple/connection/add_commit_basic", method = RequestMethod.POST)
     @ResponseBody
     public ReservationDetails submitCommitBasicSpec(@RequestBody BasicCircuitSpecification spec){
 

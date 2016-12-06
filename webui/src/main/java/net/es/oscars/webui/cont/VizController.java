@@ -34,6 +34,10 @@ public class VizController {
             return vizExporter.multilayerGraph();
 
         }
+        else if(classifier.equals("unidirectional"))
+        {
+            return vizExporter.multilayerGraphUnidirectional();
+        }
         else
         {
             throw new NoSuchElementException("bad classifier " + classifier);
@@ -58,10 +62,6 @@ public class VizController {
     {
         Object[] portObjects = vizExporter.listTopologyPorts().toArray();
         String[] portStrings = Arrays.copyOf(portObjects, portObjects.length, String[].class);
-
-        log.info("Ports[0] = " + portStrings[0]);
-        log.info("Ports[1] = " + portStrings[1]);
-        log.info("Ports[2] = " + portStrings[2]);
 
         return portStrings;
     }

@@ -118,12 +118,13 @@ public class TopPCE {
 
             validRanges.set(rangeIndex, isValid);
 
-            // If not possible, then no larger ranges can be valid, as they include this current range
-            if(!isValid){
-                break;
-            }
-            else{
+            // If valid, mark this as the next chosen index
+            // If we reached the minimum duration threshold, break
+            if(isValid){
                 chosenRangeIndex = rangeIndex;
+                if(schedSpec.getMinimumDuration() == null || durations.get(rangeIndex) >= schedSpec.getMinimumDuration()){
+                    break;
+                }
             }
         }
 

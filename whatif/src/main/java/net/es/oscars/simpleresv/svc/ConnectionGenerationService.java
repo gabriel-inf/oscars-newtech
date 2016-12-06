@@ -48,8 +48,8 @@ public class ConnectionGenerationService {
 
     public Specification generateSpecification(BasicCircuitSpecification bcs){
         Set<CircuitFlow> flows = new HashSet<>();
-        CircuitFlow flow = generateCircuitFlow(bcs.getSourceDevice(), bcs.getSourcePort(), "any",
-                bcs.getDestDevice(), bcs.getDestPort(), "any", bcs.getAzMbps(),
+        CircuitFlow flow = generateCircuitFlow(bcs.getSourceDevice(), Collections.singleton(bcs.getSourcePort()), "any",
+                bcs.getDestDevice(), Collections.singleton(bcs.getDestPort()), "any", bcs.getAzMbps(),
                 bcs.getZaMbps(), new ArrayList<>(), new ArrayList<>(),
                 new HashSet<>(), "palindrome", "none", 1);
         flows.add(flow);
@@ -58,7 +58,7 @@ public class ConnectionGenerationService {
         return  Specification.builder()
                 .scheduleSpec(generateScheduleSpecification(bcs.getStart(), bcs.getEnd()))
                 .connectionId(bcs.getConnectionId())
-                .description("What-if Connection")
+                .description(bcs.getDescription())
                 .requested(reqBlueprint)
                 .username("What-If")
                 .version(0)
@@ -91,20 +91,20 @@ public class ConnectionGenerationService {
             List<String> zaRoute = flow.getZaRoute();
             Set<String> blacklist = flow.getBlacklist();
             String destDevice = flow.getDestDevice();
-            String destPort = flow.getDestPort();
+            Set<String> destPorts = flow.getDestPorts();
             String destVlan = flow.getDestVlan();
             String sourceDevice = flow.getSourceDevice();
-            String sourcePort = flow.getSourcePort();
+            Set<String> sourcePorts = flow.getSourcePorts();
             String sourceVlan = flow.getSourceVlan();
             String palindromic = flow.getPalindromic();
             String survivability = flow.getSurvivability();
             Integer numDisjointPaths = flow.getNumDisjointPaths();
 
             if(sourceDevice.equals(destDevice)){
-                junctions.add(generateRequestedJunction(sourceDevice, sourcePort, sourceVlan, azMbps, zaMbps));
+                junctions.add(generateRequestedJunction(sourceDevice, sourcePorts, sourceVlan, azMbps, zaMbps));
             }
             else{
-                pipes.add(generateRequestedPipe(sourceDevice, sourcePort, sourceVlan, destDevice, destPort, destVlan,
+                pipes.add(generateRequestedPipe(sourceDevice, sourcePorts, sourceVlan, destDevice, destPorts, destVlan,
                         azMbps, zaMbps, azRoute, zaRoute, blacklist, palindromic, survivability, numDisjointPaths));
             }
         }
@@ -127,15 +127,15 @@ public class ConnectionGenerationService {
                 .build();
     }
 
-    private RequestedVlanPipe generateRequestedPipe(String sourceDevice, String sourcePort, String sourceVlan,
-                                                    String destDevice, String destPort, String destVlan,
+    private RequestedVlanPipe generateRequestedPipe(String sourceDevice, Set<String> sourcePorts, String sourceVlan,
+                                                    String destDevice, Set<String> destPorts, String destVlan,
                                                     Integer azMbps, Integer zaMbps, List<String> azRoute,
                                                     List<String> zaRoute, Set<String> blacklist, String palindromic,
                                                     String survivability, Integer numDisjointPaths) {
 
         return RequestedVlanPipe.builder()
-                .aJunction(generateRequestedJunction(sourceDevice, sourcePort, sourceVlan, azMbps, zaMbps))
-                .zJunction(generateRequestedJunction(destDevice, destPort, destVlan, azMbps, zaMbps))
+                .aJunction(generateRequestedJunction(sourceDevice, sourcePorts, sourceVlan, azMbps, zaMbps))
+                .zJunction(generateRequestedJunction(destDevice, destPorts, destVlan, azMbps, zaMbps))
                 .azMbps(azMbps)
                 .zaMbps(zaMbps)
                 .azERO(azRoute)
@@ -148,11 +148,11 @@ public class ConnectionGenerationService {
                 .build();
     }
 
-    public RequestedVlanJunction generateRequestedJunction(String name, String port, String vlan, Integer inMbps,
+    public RequestedVlanJunction generateRequestedJunction(String name, Set<String> ports, String vlan, Integer inMbps,
                                                            Integer egMbps){
 
         List<String> portNames = new ArrayList<>();
-        portNames.add(port);
+        portNames.addAll(ports);
         List<String> vlans = new ArrayList<>();
         vlans.add(vlan);
         List<Integer> inBws = new ArrayList<>();
@@ -221,18 +221,18 @@ public class ConnectionGenerationService {
                 .build();
     }
 
-    public CircuitFlow generateCircuitFlow(String sourceDevice, String sourcePort, String sourceVlan,
-                                           String destDevice, String destPort, String destVlan, Integer azMbps,
+    public CircuitFlow generateCircuitFlow(String sourceDevice, Set<String> sourcePorts, String sourceVlan,
+                                           String destDevice, Set<String> destPorts, String destVlan, Integer azMbps,
                                            Integer zaMbps, List<String> azRoute, List<String> zaRoute,
                                            Set<String> blacklist, String palindromic, String survivability,
                                            Integer numDisjointPaths){
 
         return CircuitFlow.builder()
                 .sourceDevice(sourceDevice)
-                .sourcePort(sourcePort)
+                .sourcePorts(sourcePorts)
                 .sourceVlan(sourceVlan)
                 .destDevice(destDevice)
-                .destPort(destPort)
+                .destPorts(destPorts)
                 .destVlan(destVlan)
                 .azMbps(azMbps)
                 .zaMbps(zaMbps)
