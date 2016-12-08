@@ -2,8 +2,6 @@ package net.es.oscars.dto.spec;
 
 import lombok.*;
 
-import java.util.Date;
-
 @Data
 @Builder
 @NoArgsConstructor
@@ -22,7 +20,7 @@ public class Specification {
     private String description;
 
     @NonNull
-    private String connectionId;
+    private String containerConnectionId;       // Unique ID of the containing Connection
 
     @NonNull
     private ScheduleSpecification scheduleSpec;

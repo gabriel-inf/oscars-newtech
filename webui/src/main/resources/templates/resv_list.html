@@ -43,43 +43,8 @@
             <th style="width: 200px;">Submission Time</th>
         </tr>
         </thead>
-        <tbody>
-        <div th:each="connection : ${connections}">
-        <tr class="accordion-toggle" data-toggle="collapse" th:attr="data-target='#accordion_'+${connection.connectionId}">
-            <td th:text="|${connection.connectionId}|">
-                <!--<a th:href="@{|/resv/view/${connection.connectionId}|}"-->
-            </td>
-            <td th:text="${connection.specification.description}"/>
-            <td>
-                <div th:text="${connection.states.resv}" />
-                <div th:text="${connection.states.prov}" />
-                <div th:text="${connection.states.oper}" />
-            </td>
-            <td>
-                <div th:text="'Start: ' + ${connection.specification.scheduleSpec.startDates}" />
-                <div th:text="'End: ' + ${connection.specification.scheduleSpec.endDates}" />
-                <div th:each="pipe : ${connection.specification.requested.vlanFlow.pipes}">
-                    <div>Requested Pipe:</div>
-                    <div th:text="'A-Z Bandwidth: ' + ${pipe.azMbps} + ' Mbps'" />
-                    <div th:text="'Z-A Bandwidth: ' + ${pipe.zaMbps} + ' Mbps'" />
-                    <div th:text="'Palindromicity: ' + ${pipe.eroPalindromic}" />
-                    <div th:text="'Survivability: ' + ${pipe.eroSurvivability}" />
-                    <div th:text="'Survivable Path Count: ' + ${pipe.numDisjoint}" />
-                </div>
-            </td>
-            <td th:text="${connection.specification.username}"/>
-            <td>Still Need to figure this out</td>
-        </tr>
-        <tr>
-            <td colspan="6" class="hiddenRow">
-                <div class="accordion-body collapse" th:id="'accordion_'+${connection.connectionId}" onshow="showDetails(this)">
-                    <b>Reservation Details:</b>
-                    <div th:id="'resViz_'+${connection.connectionId}" class="panel-body collapse collapse in"></div>
-                    <h5 th:id="'emptyViz_'+${connection.connectionId}" style="color: #600000">No route information to display.</h5>
-                </div>
-            </td>
-        </tr>
-        </div>
+        <tbody id="listBody">
+            <!-- RESERVATION LIST DYNAMICALLY GENERATED HERE -->
         </tbody>
     </table>
 

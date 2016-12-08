@@ -72,7 +72,7 @@ public class TopologyProvider {
     public List<ReservableBandwidth> getPortCapacities()
     {
         String restPath = oscarsUrl + "/topo/allport/bwcapacity";
-        log.info("REST PATH: " + restPath);
+
         ReservableBandwidth[] portBW = restTemplate.getForObject(restPath, ReservableBandwidth[].class);
 
         return Arrays.asList(portBW);

@@ -1659,6 +1659,7 @@ public class BandwidthAvailabilityServiceTest {
                     .ending(reservedEndTimes.get(index))
                     .inBandwidth(inBandwidths.get(index))
                     .egBandwidth(egBandwidths.get(index))
+                    .containerConnectionId("testConenctionID")
                     .build());
         }
         reservedBandwidthRepo.save(reservedBandwidths);

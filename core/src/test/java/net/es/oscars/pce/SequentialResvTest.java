@@ -94,7 +94,7 @@ public class SequentialResvTest {
                 palindrome, survivability, vlan, 1);
         reqPipes.add(pipeAZ);
 
-        requestedBlueprint = testBuilder.buildRequest(reqPipes, 1, 1);
+        requestedBlueprint = testBuilder.buildRequest(reqPipes, 1, 1, "reusedBlueprint");
 
         connection1 = testBuilder.buildConnection(requestedBlueprint, testBuilder.buildSchedule(startDate, endDate),
                 "conn1", "First Connection");
@@ -198,7 +198,7 @@ public class SequentialResvTest {
                 palindrome, survivability, vlan, 1);
         reqPipes.add(pipeAZ);
 
-        requestedBlueprint = testBuilder.buildRequest(reqPipes, 1, 1);
+        requestedBlueprint = testBuilder.buildRequest(reqPipes, 1, 1, "reusedBlueprint");
 
         connection1 = testBuilder.buildConnection(requestedBlueprint, testBuilder.buildSchedule(startDate, endDate), "conn1", "First Connection");
         connection2 = testBuilder.buildConnection(requestedBlueprint, testBuilder.buildSchedule(startDate, endDate), "conn2", "Next Connection");
@@ -308,7 +308,7 @@ public class SequentialResvTest {
                 palindrome, survivability, vlan, 1);
         reqPipes.add(pipeAZ);
 
-        requestedBlueprint = testBuilder.buildRequest(reqPipes, 1, 1);
+        requestedBlueprint = testBuilder.buildRequest(reqPipes, 1, 1, "reusedBlueprint");
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
 
         int numConnections = 6; // Enough to run out of VLANS
@@ -436,7 +436,7 @@ public class SequentialResvTest {
                 palindrome, survivability, vlan, 1);
         reqPipes.add(pipeAZ);
 
-        requestedBlueprint = testBuilder.buildRequest(reqPipes, 1, 1);
+        requestedBlueprint = testBuilder.buildRequest(reqPipes, 1, 1, "reusedBlueprint");
 
         int numConnections = 6; // Enough to run out of VLANS
 
@@ -568,7 +568,7 @@ public class SequentialResvTest {
                 palindrome, survivability, vlan, 1);
         reqPipes.add(pipeAZ);
 
-        requestedBlueprint = testBuilder.buildRequest(reqPipes, 1, 1);
+        requestedBlueprint = testBuilder.buildRequest(reqPipes, 1, 1, "reusedBlueprint");
         connection1 = testBuilder.buildConnection(requestedBlueprint, testBuilder.buildSchedule(startDate, endDate),
                 "conn1", "First Connection");
         connection2 = testBuilder.buildConnection(requestedBlueprint, testBuilder.buildSchedule(startDate, endDate),
@@ -689,7 +689,7 @@ public class SequentialResvTest {
                 palindrome, survivability, vlan, 1);
         reqPipes.add(pipeAZ);
 
-        requestedBlueprint = testBuilder.buildRequest(reqPipes, 1, 1);
+        requestedBlueprint = testBuilder.buildRequest(reqPipes, 1, 1, "reusedBlueprint");
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
 
         connection1 = testBuilder.buildConnection(requestedBlueprint, testBuilder.buildSchedule(startDate, endDate),
@@ -813,7 +813,7 @@ public class SequentialResvTest {
                 palindrome, survivability, vlan, 1);
         reqPipes.add(pipeAZ);
 
-        requestedBlueprint = testBuilder.buildRequest(reqPipes, 1, 1);
+        requestedBlueprint = testBuilder.buildRequest(reqPipes, 1, 1, "reusedBlueprint");
 
         connection1 = testBuilder.buildConnection(requestedBlueprint, testBuilder.buildSchedule(startDate1, endDate1), "conn1", "First Connection");
         connection2 = testBuilder.buildConnection(requestedBlueprint, testBuilder.buildSchedule(startDate1, endDate1), "conn2", "Next Connection");
@@ -919,7 +919,7 @@ public class SequentialResvTest {
                 palindrome, survivability, vlan, 1);
         reqPipes.add(pipeAZ);
 
-        requestedBlueprint = testBuilder.buildRequest(reqPipes, 1, 1);
+        requestedBlueprint = testBuilder.buildRequest(reqPipes, 1, 1, "reusedBlueprint");
 
         int numConnections = 12; // Enough to run out of VLANS in two different time-intervals
 
@@ -1067,7 +1067,7 @@ public class SequentialResvTest {
         reqPipes.add(pipeAZ1);
         reqPipes.add(pipeAZ2);
 
-        requestedBlueprint = testBuilder.buildRequest(reqPipes, 1, 1);
+        requestedBlueprint = testBuilder.buildRequest(reqPipes, 1, 1, "reusedBlueprint");
 
         connection1 = testBuilder.buildConnection(requestedBlueprint, testBuilder.buildSchedule(startDate, endDate),
                 "conn1", "First Multipipe Connection");

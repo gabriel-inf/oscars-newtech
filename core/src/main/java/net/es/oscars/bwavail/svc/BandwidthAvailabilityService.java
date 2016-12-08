@@ -244,8 +244,7 @@ public class BandwidthAvailabilityService {
                 List<String> azERO = request.getAzEros().get(index);
                 List<String> zaERO = request.getZaEros().get(index);
 
-                blueprints.add(entityBuilder.buildRequest(azERO, zaERO,
-                        request.getMinAzBandwidth(), request.getMinZaBandwidth()));
+                blueprints.add(entityBuilder.buildRequest(azERO, zaERO, request.getMinAzBandwidth(), request.getMinZaBandwidth(), "bwReq"));
             }
         }
         if(pairValid) {
@@ -258,7 +257,7 @@ public class BandwidthAvailabilityService {
             }
             blueprints.add(entityBuilder.buildRequest(request.getSrcPorts(), request.getSrcDevice(),
                     request.getDstPorts(), request.getDstDevice(), request.getMinAzBandwidth(), request.getMinZaBandwidth(),
-                    PalindromicType.PALINDROME, sType, "any", request.getNumPaths(), 1, 1));
+                    PalindromicType.PALINDROME, sType, "any", request.getNumPaths(), 1, 1, "bwReq"));
 
         }
         return blueprints;

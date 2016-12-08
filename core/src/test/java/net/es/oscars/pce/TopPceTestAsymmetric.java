@@ -63,7 +63,7 @@ public class TopPceTestAsymmetric
 
         topologyBuilder.buildTopo1();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcDevice, portNames, azBW, zaBW, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcDevice, portNames, azBW, zaBW, vlan, "asymTest");
 
         log.info("Beginning test: 'asymmPceTest1'.");
 
@@ -145,7 +145,7 @@ public class TopPceTestAsymmetric
         topologyBuilder.buildTopo2();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
         requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome,
-                survivability, vlan, 1, 1, 1);
+                survivability, vlan, 1, 1, 1, "asymTest");
 
         log.info("Beginning test: 'asymmPceTest2'.");
 
@@ -253,7 +253,7 @@ public class TopPceTestAsymmetric
         topologyBuilder.buildTopo3();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
         requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome,
-                survivability, vlan, 1, 1, 1);
+                survivability, vlan, 1, 1, 1, "asymTest");
 
         log.info("Beginning test: 'asymmPceTest3'.");
 
@@ -378,7 +378,7 @@ public class TopPceTestAsymmetric
         topologyBuilder.buildTopo4();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
         requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome,
-                survivability, vlan, 1, 1, 1);
+                survivability, vlan, 1, 1, 1, "asymTest");
 
         log.info("Beginning test: 'asymmPceTest4'.");
 
@@ -554,7 +554,7 @@ public class TopPceTestAsymmetric
         topologyBuilder.buildTopo5();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
         requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome,
-                survivability, vlan, 1, 1, 1);
+                survivability, vlan, 1, 1, 1, "asymTest");
 
         log.info("Beginning test: 'asymmPceTest5'.");
 
@@ -689,7 +689,7 @@ public class TopPceTestAsymmetric
 
         topologyBuilder.buildTopo6();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
-        requestedBlueprint = testBuilder.buildRequest(srcDevice, portNames, azBW, zaBW, vlan);
+        requestedBlueprint = testBuilder.buildRequest(srcDevice, portNames, azBW, zaBW, vlan, "asymTest");
 
         log.info("Beginning test: 'asymmPceTest6'.");
 
@@ -767,7 +767,7 @@ public class TopPceTestAsymmetric
         topologyBuilder.buildTopo7();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
         requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome,
-                survivability, vlan, 1, 1, 1);
+                survivability, vlan, 1, 1, 1, "asymTest");
 
         log.info("Beginning test: 'asymmPceTest7'.");
 
@@ -858,7 +858,7 @@ public class TopPceTestAsymmetric
         topologyBuilder.buildTopo8();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
         requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome,
-                survivability, vlan, 1, 1, 1);
+                survivability, vlan, 1, 1, 1, "asymTest");
 
         log.info("Beginning test: 'asymmPceTest8'.");
 
@@ -949,7 +949,7 @@ public class TopPceTestAsymmetric
         topologyBuilder.buildTopo9();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
         requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome,
-                survivability, vlan, 1, 1, 1);
+                survivability, vlan, 1, 1, 1, "asymTest");
 
         log.info("Beginning test: 'asymmPceTest9'.");
 
@@ -1040,7 +1040,7 @@ public class TopPceTestAsymmetric
         topologyBuilder.buildTopo10();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
         requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome,
-                survivability, vlan, 1, 1, 1);
+                survivability, vlan, 1, 1, 1, "asymTest");
 
         log.info("Beginning test: 'asymmPceTest10'.");
 
@@ -1149,7 +1149,7 @@ public class TopPceTestAsymmetric
         topologyBuilder.buildTopo11();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
         requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome,
-                survivability, vlan, 1, 1, 1);
+                survivability, vlan, 1, 1, 1, "asymTest");
 
         log.info("Beginning test: 'asymmPceTest11'.");
 
@@ -1240,7 +1240,7 @@ public class TopPceTestAsymmetric
         topologyBuilder.buildTopo12();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
         requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome,
-                survivability, vlan, 1, 1, 1);
+                survivability, vlan, 1, 1, 1, "asymTest");
 
         log.info("Beginning test: 'asymmPceTest12'.");
 
@@ -1349,7 +1349,7 @@ public class TopPceTestAsymmetric
         topologyBuilder.buildTopo7MultiFix();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
         requestedBlueprint = testBuilder.buildRequest(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome,
-                survivability, vlan, 1, 1, 1);
+                survivability, vlan, 1, 1, 1, "asymTest");
 
         log.info("Beginning test: 'multiFixtureTest'.");
 

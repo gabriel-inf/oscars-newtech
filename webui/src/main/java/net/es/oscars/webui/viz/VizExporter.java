@@ -187,31 +187,41 @@ public class VizExporter {
             }
         }
 
+        // Retrieve bandwidth capacity for each port //
+        List<ReservableBandwidth> portCapacities = topologyProvider.getPortCapacities();
 
         Topology multilayer = topologyProvider.getTopology();
         List<String> added = new ArrayList<>();
 
-        for (TopoEdge topoEdge : multilayer.getEdges()) {
-            String a = topoEdge.getA().getUrn();
-            String z = topoEdge.getZ().getUrn();
-            String dev_a = reverseMap.get(a);
-            String dev_z = reverseMap.get(z);
-            String e_id = a + " -- " + z;
-            String r_id = z + " -- " + a;
-            if (!added.contains(r_id)) {
+        for (TopoEdge topoEdge : multilayer.getEdges())
+        {
+            String aPort = topoEdge.getA().getUrn();
+            String zPort = topoEdge.getZ().getUrn();
+            String aDevice = reverseMap.get(aPort);
+            String zDevice = reverseMap.get(zPort);
 
-                added.add(e_id);
-                added.add(r_id);
-                VizEdge ve = VizEdge.builder()
-                        .from(dev_a).to(dev_z).title(e_id).label("").value(1)
-                        .id(e_id)
-                        .arrows(null).arrowStrikethrough(false).color(null)
-                        .build();
+            // Ignore all edges between devices and ports. Only display Port-to-Port links //
+            if(topoEdge.getA().getVertexType().equals(VertexType.PORT) && topoEdge.getZ().getVertexType().equals(VertexType.PORT))
+            {
+                String edgeID = aPort + " -- " + zPort;
+                String reverseID = zPort + " -- " + aPort;
 
-                g.getEdges().add(ve);
+                if(!added.contains(reverseID))
+                {
+                    String linkTitle = edgeID + "," + System.lineSeparator() + this.computeLinkCapacity(aPort, zPort, portCapacities);
 
+                    added.add(edgeID);
+                    added.add(reverseID);
+                    VizEdge ve = VizEdge.builder()
+                            .from(aDevice).to(zDevice).title(linkTitle).label("").value(1)
+                            .id(edgeID)
+                            .arrows(null).arrowStrikethrough(false).color(null)
+                            .build();
+
+                    g.getEdges().add(ve);
+
+                }
             }
-
         }
 
         for (String deviceUrn : portMap.keySet()) {
@@ -240,9 +250,6 @@ public class VizExporter {
 
         // Retrieve bandwidth capacity for each port //
         List<ReservableBandwidth> portCapacities = topologyProvider.getPortCapacities();
-
-        //log.info("A capacity: " + aCap.getBandwidth() + " Mbps");
-        //log.info("Z capacity: " + zCap.getBandwidth() + " Mbps");
 
         Topology multilayer = topologyProvider.getTopology();
         List<String> added = new ArrayList<>();
@@ -355,6 +362,62 @@ public class VizExporter {
         }
 
         return g;
+    }
+
+    private String computeLinkCapacity(String portA, String portZ, List<ReservableBandwidth> portCapacities)
+    {
+        // Compute link capacities from port capacities //
+        List<ReservableBandwidth> portCaps = portCapacities.stream()
+                .filter(p -> p.getTopoVertexUrn().equals(portA) || p.getTopoVertexUrn().equals(portZ))
+                .collect(Collectors.toList());
+
+        assert(portCaps.size() == 2);
+
+        ReservableBandwidth bw1 = portCaps.get(0);
+        ReservableBandwidth bw2 = portCaps.get(1);
+        Integer aCapIn;
+        Integer aCapEg;
+        Integer zCapIn;
+        Integer zCapEg;
+
+        Integer minCap;
+
+        String capacityString = "Capacity: ";
+
+        if(bw1.getTopoVertexUrn().equals(portA))
+        {
+            aCapIn = bw1.getIngressBw();
+            aCapEg = bw1.getEgressBw();
+            zCapIn = bw2.getIngressBw();
+            zCapEg = bw2.getEgressBw();
+        }
+        else
+        {
+            aCapIn = bw2.getIngressBw();
+            aCapEg = bw2.getEgressBw();
+            zCapIn = bw1.getIngressBw();
+            zCapEg = bw1.getEgressBw();
+        }
+
+        Set<Integer> bwCapSet = new HashSet<>();
+        bwCapSet.add(aCapIn);
+        bwCapSet.add(aCapEg);
+        bwCapSet.add(zCapIn);
+        bwCapSet.add(zCapEg);
+
+        minCap = bwCapSet.stream().min(Integer::compare).get();
+
+        if(minCap > 1000)
+        {
+            minCap = minCap / 1000;
+            capacityString += minCap + " Gbps";
+        }
+        else
+        {
+            capacityString += minCap + " Mbps";
+        }
+
+        return capacityString;
     }
 
 

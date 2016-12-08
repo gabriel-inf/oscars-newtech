@@ -62,7 +62,7 @@ public class VlanTranslationTest {
         vlanTopologyBuilder.buildVlanTransTopo1();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
         requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome,
-                survivability, srcVlan, dstVlan, 1, 1, 1);
+                survivability, srcVlan, dstVlan, 1, 1, 1, "test");
 
         log.info("Beginning test: 'vlanTransTest1'.");
 
@@ -153,7 +153,7 @@ public class VlanTranslationTest {
         vlanTopologyBuilder.buildVlanTransTopo1();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
         requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome,
-                survivability, srcVlan, dstVlan, 1, 1, 1);
+                survivability, srcVlan, dstVlan, 1, 1, 1, "test");
 
         log.info("Beginning test: 'vlanTransTest2'.");
 
@@ -242,7 +242,7 @@ public class VlanTranslationTest {
         vlanTopologyBuilder.buildVlanTransTopo1();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
         requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome,
-                survivability, srcVlan, dstVlan, 1, 1, 1);
+                survivability, srcVlan, dstVlan, 1, 1, 1, "test");
 
         log.info("Beginning test: 'vlanTransTest3'.");
 
@@ -331,7 +331,7 @@ public class VlanTranslationTest {
         vlanTopologyBuilder.buildVlanTransTopo2();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
         requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome,
-                survivability, srcVlan, dstVlan, 1, 1, 1);
+                survivability, srcVlan, dstVlan, 1, 1, 1, "test");
 
         log.info("Beginning test: 'vlanTransTest4'.");
 
@@ -375,7 +375,7 @@ public class VlanTranslationTest {
         vlanTopologyBuilder.buildVlanTransTopo3();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
         requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome,
-                survivability, srcVlan, dstVlan, 1, 1, 1);
+                survivability, srcVlan, dstVlan, 1, 1, 1, "test");
 
         log.info("Beginning test: 'vlanTransTest5'.");
 
@@ -419,7 +419,7 @@ public class VlanTranslationTest {
         vlanTopologyBuilder.buildVlanTransTopo3();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
         requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome,
-                survivability, srcVlan, dstVlan, 1, 1, 1);
+                survivability, srcVlan, dstVlan, 1, 1, 1, "test");
 
         log.info("Beginning test: 'vlanTransTest6'.");
 
@@ -463,7 +463,7 @@ public class VlanTranslationTest {
         vlanTopologyBuilder.buildVlanTransTopo3();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
         requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome,
-                survivability, srcVlan, dstVlan, 1, 1, 1);
+                survivability, srcVlan, dstVlan, 1, 1, 1, "test");
 
         log.info("Beginning test: 'vlanTransTest7'.");
 
@@ -508,7 +508,7 @@ public class VlanTranslationTest {
         vlanTopologyBuilder.buildVlanTransTopo1();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
         requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome,
-                survivability, srcVlan, dstVlan, 1, 1, 1);
+                survivability, srcVlan, dstVlan, 1, 1, 1, "test");
 
         // Now add the junction
         RequestedVlanJunctionE reqJunction = testBuilder.buildRequestedJunction("B", Arrays.asList("B:0", "B:1", "B:2"), 25, 25, "5", true);
@@ -614,7 +614,7 @@ public class VlanTranslationTest {
         RequestedVlanPipeE pipeC = testBuilder.buildRequestedPipe("B:0", "B", "C:1", "C", azBW, zaBW, palindrome,
                 survivability, "2", "2", 1);
 
-        requestedBlueprint = testBuilder.buildRequest(new HashSet<>(Arrays.asList(pipeA, pipeB, pipeC)), 3, 3);
+        requestedBlueprint = testBuilder.buildRequest(new HashSet<>(Arrays.asList(pipeA, pipeB, pipeC)), 3, 3, "test");
 
         log.info("Beginning test: 'vlanTransTest8'.");
 

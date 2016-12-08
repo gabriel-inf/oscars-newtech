@@ -332,7 +332,7 @@ public class TopPceTestMultipoint
         reqPipes.add(pipeAZ);
         reqPipes.add(pipeBZ);
 
-        requestedBlueprint = testBuilder.buildRequest(reqPipes, 2, 2);
+        requestedBlueprint = testBuilder.buildRequest(reqPipes, 2, 2, "mcTest");
 
         log.info("Beginning test: " + testName + ".");
 
@@ -499,7 +499,7 @@ public class TopPceTestMultipoint
         reqPipes.add(pipeAZ);
         reqPipes.add(pipeBZ);
 
-        requestedBlueprint = testBuilder.buildRequest(reqPipes, 2, 2);
+        requestedBlueprint = testBuilder.buildRequest(reqPipes, 2, 2, "mcTest");
 
         log.info("Beginning test: " + testName + ".");
 
@@ -739,7 +739,7 @@ public class TopPceTestMultipoint
         reqPipes.add(pipeAZ);
         reqPipes.add(pipeBZ);
 
-        requestedBlueprint = testBuilder.buildRequest(reqPipes, 2, 2);
+        requestedBlueprint = testBuilder.buildRequest(reqPipes, 2, 2, "mcTest");
 
         log.info("Beginning test: " + testName + ".");
 
@@ -895,7 +895,7 @@ public class TopPceTestMultipoint
         reqPipes.add(pipeAB);
         reqPipes.add(pipeBZ);
 
-        requestedBlueprint = testBuilder.buildRequest(reqPipes, 3, 3);
+        requestedBlueprint = testBuilder.buildRequest(reqPipes, 3, 3, "mcTest");
 
         log.info("Beginning test: " + testName + ".");
 
@@ -1100,7 +1100,7 @@ public class TopPceTestMultipoint
         reqPipes.add(pipeAB);
         reqPipes.add(pipeBZ);
 
-        requestedBlueprint = testBuilder.buildRequest(reqPipes, 3, 3);
+        requestedBlueprint = testBuilder.buildRequest(reqPipes, 3, 3, "mcTest");
 
         log.info("Beginning test: " + testName + ".");
 
@@ -1321,7 +1321,7 @@ public class TopPceTestMultipoint
         reqPipes.add(pipeBZ1);
         reqPipes.add(pipeBZ2);
 
-        requestedBlueprint = testBuilder.buildRequest(reqPipes, 4, 4);
+        requestedBlueprint = testBuilder.buildRequest(reqPipes, 4, 4, "mcTest");
 
         log.info("Beginning test: " + testName + ".");
 
@@ -1387,7 +1387,7 @@ public class TopPceTestMultipoint
         reqPipes.add(pipeBZ1);
         reqPipes.add(pipeBZ2);
 
-        requestedBlueprint = testBuilder.buildRequest(reqPipes, 4, 4);
+        requestedBlueprint = testBuilder.buildRequest(reqPipes, 4, 4, "mcTest");
 
         log.info("Beginning test: " + testName + ".");
 

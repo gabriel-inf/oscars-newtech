@@ -19,6 +19,9 @@ public class ReservedBandwidthE {
     @NonNull
     private String urn;
 
+    @NonNull
+    private String containerConnectionId;       // Unique ID of the containing Connection
+
     //private Integer bandwidth;
 
     private Integer inBandwidth;

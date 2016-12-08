@@ -28,6 +28,7 @@ public class RequestController {
         } catch(Exception e){
             c = handleException(e, "Submission", conn.getConnectionId());
         }
+
         return c;
     }
 

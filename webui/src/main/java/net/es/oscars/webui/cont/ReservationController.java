@@ -61,14 +61,19 @@ public class ReservationController {
 
 
     @RequestMapping("/resv/list")
-    public String resv_list(Model model) {
+    public String resv_list(Model model) { return "resv_list"; }
+
+
+    @RequestMapping(value = "/resv/list/allconnections", method = RequestMethod.GET)
+    @ResponseBody
+    public Set<Connection> resv_list_connections()
+    {
         ConnectionFilter f = ConnectionFilter.builder().build();
-        Set<Connection> connections = connectionProvider.filtered(f);
+        Set<Connection> filteredConnections = connectionProvider.filtered(f);
 
-        model.addAttribute("connections", connections);
-
-        return "resv_list";
+        return filteredConnections;
     }
+
 
     @RequestMapping(value = "/resv/commit/{connectionId}", method = RequestMethod.GET)
     public String connection_commit(@PathVariable String connectionId, Model model) {
