@@ -47,6 +47,24 @@ public class TopologyProvider {
 
         return devicePortMap;
     }
+
+    // Reverse of devicePortMap: Key = port, Value = corresponding device
+    public Map<String, String> portDeviceMap()
+    {
+        Map<String, String> p2d = new HashMap<>();
+        Map<String, Set<String>> d2p = devicePortMap();
+
+        for (String d : d2p.keySet())
+        {
+            for (String p : d2p.get(d))
+            {
+                p2d.put(p, d);
+            }
+        }
+
+        return p2d;
+    }
+
     public Map<String, Set<String>> getHubs() {
         Map<String, Set<String>> result = new HashMap<>();
         return result;

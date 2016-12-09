@@ -114,6 +114,7 @@ public class TopoController {
     @ResponseBody
     public List<ReservedBandwidth> reservedBandwidth(@RequestBody List<String> resUrns)
     {
+        log.info("HERE IN TOPO_CONTROLLER!!!");
         List<ReservedBandwidthE> allResBwE = topoService.reservedBandwidths();
 
         List<ReservedBandwidth> allResBwDTO = new ArrayList<>();
