@@ -4,18 +4,11 @@ import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.spec.ReservedBandwidth;
 import net.es.oscars.webui.ipc.TopologyProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 @Controller
@@ -36,13 +29,14 @@ public class TopologyController
         log.info("HERE IN TOPOLOGY CONTROLLER!!!!");
         String restPath = oscarsUrl + "/topo/reservedbw";
 
-        HttpEntity<List<String>> requestEntity = new HttpEntity<>(resUrns);
-        ParameterizedTypeReference<List<ReservedBandwidth>> typeRef = new ParameterizedTypeReference<List<ReservedBandwidth>>() {};
-        ResponseEntity<List<ReservedBandwidth>> response = restTemplate.exchange(restPath, HttpMethod.POST, requestEntity, typeRef);
+        //HttpEntity<List<String>> requestEntity = new HttpEntity<>(resUrns);
+        //ParameterizedTypeReference<List<ReservedBandwidth>> typeRef = new ParameterizedTypeReference<List<ReservedBandwidth>>() {};
+        //ResponseEntity<List<ReservedBandwidth>> response = restTemplate.exchange(restPath, HttpMethod.POST, requestEntity, typeRef);
 
-        List<ReservedBandwidth> relevantBwItems = response.getBody();
+        //List<ReservedBandwidth> relevantBwItems = response.getBody();
 
-        return relevantBwItems;
+        //return relevantBwItems;
+        return new ArrayList<ReservedBandwidth>();
     }
 
     @RequestMapping(value = "/topology/deviceportmap/full", method = RequestMethod.GET)

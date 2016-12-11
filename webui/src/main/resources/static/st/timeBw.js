@@ -14,6 +14,7 @@ var currWindow;
 
 var netPorts = [];      // All network ports
 var vizLinks = [];      // All network links
+var portDeviceMap;
 
 var selectedERO = [];       // Updated ERO (nodes only) selected by user
 var selectedLinks = [];     // Updated ERO (links only) selected by user
@@ -104,6 +105,13 @@ function initializeNetwork()
             // really clean the dom element
             setTimeout(function () {document.getElementById('loadingBarDiv').style.display = 'none';}, 500);
         });
+
+        // Populate Port2Device Map //
+        loadJSON("/topology/portdevicemap/full", function (response)
+        {
+            var p2dMap = JSON.parse(response);
+            portDeviceMap = p2dMap;
+        });
     });
 }
 
@@ -120,6 +128,8 @@ function clearERO()
     resetBandwidthAvailabilityMap();
 
     button_clearERO.removeClass("active").addClass("disabled");
+
+    computeFullERO();
 }
 
 // This function builds and updates the selected ERO //
@@ -248,6 +258,8 @@ function nodeSelection(properties)
         button_clearERO.removeClass("disabled").addClass("active");
     else
         button_clearERO.removeClass("active").addClass("disabled");
+
+    computeFullERO();
 }
 
 function initializeBandwidthMap()
@@ -564,40 +576,32 @@ function computeFullERO()
             if(n === (numNodes - 1))        // Final node, no next link
                 break;
 
-            var thisLink = [];
             var thisLink = selectedLinks[n].split(" -- ");
-            var nextNode = selectedERO[n];  // Used to map link ports correctly, not added to fullERO.
+            var nextNode = selectedERO[n+1];  // Used to map link ports correctly, not added to fullERO.
 
-            loadJSON("/topology/portdevicemap/full", function (response)
+            var portX = thisLink[0];
+            var portY = thisLink[1];
+            var deviceX = portDeviceMap[portX];
+            var deviceY = portDeviceMap[portY];
+
+            if(deviceX === thisNode && deviceY === nextNode)        // Use ports in default order
             {
-                var portMap = JSON.parse(response);
-
-                var portX = thisLink[0];
-                var portY = thisLink[1];
-
-                var deviceX = portMap.get(portX);
-                var deviceY = portMap.get(portY);
-
-                if(deviceX === thisNode && deviceY === nextNode)        // Use ports in default order
-                {
-                    fullERO.push(portX);
-                    fullERO.push(portY);
-                }
-                else if(deviceY === thisNode && deviceX === nextNode)   // Reverse port order
-                {
-                    fullERO.push(portY);
-                    fullERO.push(portX);
-                }
-                else
-                {
-                    console.error("ERROR BUILDING FULL ERO!");
-                }
-            });
+                fullERO.push(portX);
+                fullERO.push(portY);
+            }
+            else if(deviceY === thisNode && deviceX === nextNode)   // Reverse port order
+            {
+                fullERO.push(portY);
+                fullERO.push(portX);
+            }
+            else
+            {
+                console.error("ERROR BUILDING FULL ERO!");
+            }
         }
-
-        console.log(fullERO);
     }
 
+    console.log("Full ERO: " + fullERO);
 }
 
 
