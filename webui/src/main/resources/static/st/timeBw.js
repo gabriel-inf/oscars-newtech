@@ -18,6 +18,7 @@ var vizLinks = [];      // All network links
 var selectedERO = [];       // Updated ERO (nodes only) selected by user
 var selectedLinks = [];     // Updated ERO (links only) selected by user
 var adjacentLinks = [];
+var fullERO = [];
 
 var button_clearERO;
 
@@ -537,6 +538,66 @@ function drawBandwidthAvailabilityMap()
 function submitRequestedReservation()
 {
     ; // To be implemented by Anand!!!
+}
+
+function computeFullERO()
+{
+    fullERO = [];
+    var numNodes = selectedERO.length;
+
+    if(numNodes === 0)          // Empty
+    {
+        ;
+    }
+    else if(numNodes === 1)     // Single Device
+    {
+        fullERO.push(selectedERO[0]);
+    }
+    else                        // Devices and Links
+    {
+        for(var n = 0; n < numNodes; n++)
+        {
+            var thisNode = selectedERO[n];
+
+            fullERO.push(thisNode);
+
+            if(n === (numNodes - 1))        // Final node, no next link
+                break;
+
+            var thisLink = [];
+            var thisLink = selectedLinks[n].split(" -- ");
+            var nextNode = selectedERO[n];  // Used to map link ports correctly, not added to fullERO.
+
+            loadJSON("/topology/portdevicemap/full", function (response)
+            {
+                var portMap = JSON.parse(response);
+
+                var portX = thisLink[0];
+                var portY = thisLink[1];
+
+                var deviceX = portMap.get(portX);
+                var deviceY = portMap.get(portY);
+
+                if(deviceX === thisNode && deviceY === nextNode)        // Use ports in default order
+                {
+                    fullERO.push(portX);
+                    fullERO.push(portY);
+                }
+                else if(deviceY === thisNode && deviceX === nextNode)   // Reverse port order
+                {
+                    fullERO.push(portY);
+                    fullERO.push(portX);
+                }
+                else
+                {
+                    console.error("ERROR BUILDING FULL ERO!");
+                }
+            });
+        }
+
+        console.log(fullERO);
+    }
+
 }
 
 
