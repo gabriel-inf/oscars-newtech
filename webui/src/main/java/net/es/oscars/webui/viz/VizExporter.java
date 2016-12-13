@@ -208,7 +208,20 @@ public class VizExporter {
 
                 if(!added.contains(reverseID))
                 {
-                    String linkTitle = edgeID + "," + System.lineSeparator() + this.computeLinkCapacity(aPort, zPort, portCapacities);
+                    Integer minCap = topologyProvider.computeLinkCapacity(aPort, zPort, portCapacities);
+                    String capString = new String();
+
+                    if(minCap >= 1000)
+                    {
+                        double minCapDub = (double)minCap / 1000;
+                        capString = minCapDub + " Gbps";
+                    }
+                    else
+                    {
+                        capString += minCap + " Mbps";
+                    }
+
+                    String linkTitle = edgeID + ", Capacity: " + System.lineSeparator() + capString;
 
                     added.add(edgeID);
                     added.add(reverseID);
@@ -363,63 +376,6 @@ public class VizExporter {
 
         return g;
     }
-
-    private String computeLinkCapacity(String portA, String portZ, List<ReservableBandwidth> portCapacities)
-    {
-        // Compute link capacities from port capacities //
-        List<ReservableBandwidth> portCaps = portCapacities.stream()
-                .filter(p -> p.getTopoVertexUrn().equals(portA) || p.getTopoVertexUrn().equals(portZ))
-                .collect(Collectors.toList());
-
-        assert(portCaps.size() == 2);
-
-        ReservableBandwidth bw1 = portCaps.get(0);
-        ReservableBandwidth bw2 = portCaps.get(1);
-        Integer aCapIn;
-        Integer aCapEg;
-        Integer zCapIn;
-        Integer zCapEg;
-
-        Integer minCap;
-
-        String capacityString = "Capacity: ";
-
-        if(bw1.getTopoVertexUrn().equals(portA))
-        {
-            aCapIn = bw1.getIngressBw();
-            aCapEg = bw1.getEgressBw();
-            zCapIn = bw2.getIngressBw();
-            zCapEg = bw2.getEgressBw();
-        }
-        else
-        {
-            aCapIn = bw2.getIngressBw();
-            aCapEg = bw2.getEgressBw();
-            zCapIn = bw1.getIngressBw();
-            zCapEg = bw1.getEgressBw();
-        }
-
-        Set<Integer> bwCapSet = new HashSet<>();
-        bwCapSet.add(aCapIn);
-        bwCapSet.add(aCapEg);
-        bwCapSet.add(zCapIn);
-        bwCapSet.add(zCapEg);
-
-        minCap = bwCapSet.stream().min(Integer::compare).get();
-
-        if(minCap > 1000)
-        {
-            minCap = minCap / 1000;
-            capacityString += minCap + " Gbps";
-        }
-        else
-        {
-            capacityString += minCap + " Mbps";
-        }
-
-        return capacityString;
-    }
-
 
 
     private void makeNode(String node, VizGraph g) {

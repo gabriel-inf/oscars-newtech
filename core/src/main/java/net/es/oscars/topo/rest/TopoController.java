@@ -114,7 +114,6 @@ public class TopoController {
     @ResponseBody
     public List<ReservedBandwidth> reservedBandwidth(@RequestBody List<String> resUrns)
     {
-        log.info("HERE IN TOPO_CONTROLLER!!!");
         List<ReservedBandwidthE> allResBwE = topoService.reservedBandwidths();
 
         List<ReservedBandwidth> allResBwDTO = new ArrayList<>();
@@ -124,7 +123,6 @@ public class TopoController {
             ReservedBandwidth oneBwDTO = new ReservedBandwidth();
             modelMapper.map(oneBwE, oneBwDTO);
 
-            log.info("BW URN: " + oneBwDTO.getUrn() + ", ConnID: " + oneBwDTO.getContainerConnectionId());
             allResBwDTO.add(oneBwDTO);
         }
 

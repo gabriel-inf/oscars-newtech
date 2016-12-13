@@ -1,14 +1,20 @@
 package net.es.oscars.webui.cont;
 
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.dto.rsrc.ReservableBandwidth;
 import net.es.oscars.dto.spec.ReservedBandwidth;
 import net.es.oscars.webui.ipc.TopologyProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Controller
@@ -26,18 +32,39 @@ public class TopologyController
     @ResponseBody
     public List<ReservedBandwidth> get_reserved_bw(@RequestBody List<String> resUrns)
     {
-        log.info("HERE IN TOPOLOGY CONTROLLER!!!!");
         String restPath = oscarsUrl + "/topo/reservedbw";
 
-        //HttpEntity<List<String>> requestEntity = new HttpEntity<>(resUrns);
-        //ParameterizedTypeReference<List<ReservedBandwidth>> typeRef = new ParameterizedTypeReference<List<ReservedBandwidth>>() {};
-        //ResponseEntity<List<ReservedBandwidth>> response = restTemplate.exchange(restPath, HttpMethod.POST, requestEntity, typeRef);
+        HttpEntity<List<String>> requestEntity = new HttpEntity<>(resUrns);
+        ParameterizedTypeReference<List<ReservedBandwidth>> typeRef = new ParameterizedTypeReference<List<ReservedBandwidth>>() {};
+        ResponseEntity<List<ReservedBandwidth>> response = restTemplate.exchange(restPath, HttpMethod.POST, requestEntity, typeRef);
 
-        //List<ReservedBandwidth> relevantBwItems = response.getBody();
+        List<ReservedBandwidth> relevantBwItems = response.getBody();
 
-        //return relevantBwItems;
-        return new ArrayList<ReservedBandwidth>();
+        return relevantBwItems;
     }
+
+    @RequestMapping(value = "/topology/bwcapacity", method = RequestMethod.POST)
+    @ResponseBody
+    public Map<String, Integer> get_port_capacity(@RequestBody List<String> ports)
+    {
+        Map urn2CapMap = new HashMap<>();
+
+        List<ReservableBandwidth> bwCapList = topologyProvider.getPortCapacities();
+
+        bwCapList = bwCapList.stream()
+                .filter(bwCap -> ports.contains(bwCap.getTopoVertexUrn()))
+                .collect(Collectors.toList());
+
+        for(int p = 0; p < bwCapList.size(); p++)
+        {
+            ReservableBandwidth oneBW = bwCapList.get(p);
+            Integer minCap = Math.min(oneBW.getIngressBw(), oneBW.getEgressBw());
+            urn2CapMap.put(oneBW.getTopoVertexUrn(), minCap);
+        }
+
+        return urn2CapMap;
+    }
+
 
     @RequestMapping(value = "/topology/deviceportmap/full", method = RequestMethod.GET)
     @ResponseBody
