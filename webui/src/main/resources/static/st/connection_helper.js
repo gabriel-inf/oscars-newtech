@@ -413,6 +413,20 @@ function sameReservedPipe(oldResPipe, newResPipe, pipeType)
     return true;
 }
 
+
+function connectionIndex(theConnection, theSet)
+{
+    for(var c = 0; c < theSet.length; c++)
+    {
+        var oneConn = theSet[c];
+
+        if(sameConnection(theConnection, oneConn))
+            return c;
+    }
+
+    return -1;
+}
+
 /** Simple helper function to determine array equality by value **/
 function arraysEqual(arr1, arr2)
 {

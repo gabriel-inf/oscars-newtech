@@ -324,48 +324,22 @@ function listHasChanged(oldConnectionList, newConnectionList)
     if(oldConnectionList.length !== newConnectionList.length)
         return true;
 
-
-    var oldUUIDs = [];
-    var newUUIDs = [];
-
-    for(var o = 0; o < oldConnectionList.length; o++)
-        oldUUIDs.push(oldConnectionList[o].connectionId);
-
-    for(var n = 0; n < newConnectionList.length; n++)
-        newUUIDs.push(newConnectionList[n].connectionId);
-
-    // Same reservation IDs
-    var diffUUID = oldUUIDs.filter(function(oneID){ return $.inArray(oneID, newUUIDs) === -1; });
-    if(!$.isEmptyObject(diffUUID))
-    {
-        return true;
-    }
-
-    diffUUID = [];
-    var diffUUID = newUUIDs.filter(function(oneID){ return $.inArray(oneID, oldUUIDs) === -1; });
-    if(!$.isEmptyObject(diffUUID))
-    {
-        return true;
-    }
-
-    // Same reservation objects
+    // Same Reservations - All properties unchanged
     for(var o = 0; o < oldConnectionList.length; o++)
     {
-        var newIndex = $.inArray(oldUUIDs[o], newUUIDs);
         var oldConn = oldConnectionList[o];
-        var newConn = newConnectionList[newIndex];
 
-        if(!sameConnection(oldConn, newConn))
-        {
-            console.log("Connection Changed: " + oldConn.connectionId);
+        var newIndex = connectionIndex(oldConn, newConnectionList);
+
+        if(newIndex === -1)
             return true;
-        }
     }
 
     return false;
 }
 
 
+/* Identify outdated connections and remove them from Reservation List DOM Table */
 function removeOldConnections(oldConnectionList, newConnectionList)
 {
     var connsToRemove = [];
@@ -373,9 +347,13 @@ function removeOldConnections(oldConnectionList, newConnectionList)
     for(var o = 0; o < oldConnectionList.length; o++)
     {
         var oldConn = oldConnectionList[o];
-        if($.inArray(oldConn, newConnectionList) === -1)
+
+        var newIndex = connectionIndex(oldConn, newConnectionList);
+
+        if(newIndex === -1)
             connsToRemove.push(oldConn);
     }
+
     console.log("ConnsToRemove Size: " + connsToRemove.length);
 
     for(var c = 0; c < connsToRemove.length; c++)
@@ -390,6 +368,25 @@ function removeOldConnections(oldConnectionList, newConnectionList)
         listBody.removeChild(hiddenRow);
     }
 }
+
+/* Disregards any unchanged connections and returns a set of exclusively new or updated connections -- Used to prevent complete renewal of connection list table */
+function getNewConnections(oldConnectionList, newConnectionList)
+{
+    var newConnections = [];
+
+    for(var n = 0; n < newConnectionList.length; n++)
+    {
+        var newConn = newConnectionList[n];
+
+        var oldIndex = connectionIndex(newConn, oldConnectionList);
+
+        if(oldIndex === -1)
+            newConnections.push(newConn);
+    }
+
+    return newConnections;
+}
+
 
 function initializeConnectionList()
 {
@@ -411,15 +408,14 @@ function initializeConnectionList()
             return;
         }
 
-        //removeOldConnections(previousConnections, filteredConnections);
+        removeOldConnections(previousConnections, filteredConnections);
 
-        //var newConnections = disregardExistingConnections(previousConnections, filteredConnections);
-        var newConnections = filteredConnections.slice(); // DELETE AFTER TESTING
-
-        var listBody = document.getElementById('listBody');
+        var newConnections = getNewConnections(previousConnections, filteredConnections);
 
         for(var c = 0; c < newConnections.length; c++)
         {
+            console.log("New/Updated " + newConnections[c].connectionId);
+            var listBody = document.getElementById('listBody');
             var theConnection = newConnections[c];
 
             var tr = document.createElement('tr');
