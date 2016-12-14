@@ -6,6 +6,7 @@ import net.es.oscars.dto.bwavail.PortBandwidthAvailabilityRequest;
 import net.es.oscars.dto.bwavail.PortBandwidthAvailabilityResponse;
 import net.es.oscars.dto.resv.Connection;
 import net.es.oscars.dto.resv.ConnectionFilter;
+import net.es.oscars.dto.spec.RequestedVlanPipe;
 import net.es.oscars.dto.topo.BidirectionalPath;
 import net.es.oscars.dto.topo.Edge;
 import net.es.oscars.webui.dto.MinimalRequest;
@@ -70,6 +71,11 @@ public class ReservationController {
     {
         ConnectionFilter f = ConnectionFilter.builder().build();
         Set<Connection> filteredConnections = connectionProvider.filtered(f);
+
+        for(Connection c : filteredConnections)
+        {
+            Set<RequestedVlanPipe> pipes = c.getSpecification().getRequested().getVlanFlow().getPipes();
+        }
 
         return filteredConnections;
     }

@@ -111,9 +111,6 @@ function initializeNetwork()
 // Retrieves and stores the full set of ReservedBW
 function getAllReservedBWs()
 {
-    console.log("Updating Topology Links");
-    setTimeout(getAllReservedBWs, 30000);   // Updates every 30 seconds
-
     var connectionIds = [];
     for(var c = 0; c < filteredConnections.length; c++)
         connectionIds.push(filteredConnections[c].connectionId);
@@ -227,7 +224,6 @@ function updateResvPortBW(resvBwMap)
         }
     }
 
-    // 5. Get link utilization as percentage of capacity
     var allLinkDetails = new Map();
 
     for(var l = 0; l < vizLinks.length; l++)
@@ -238,27 +234,24 @@ function updateResvPortBW(resvBwMap)
         if(linkConsumptionMap.has(linkID))
             linkBW = linkConsumptionMap.get(linkID);
 
-        var linkCap = calculateLinkCapacity(linkID);
+        var linkCap = calculateLinkCapacity(linkID); // 5. Get link utilization as percentage of capacity
         var linkUtil = linkBW / linkCap;
-        //var linkColor = pickColor(linkUtil);
+        var linkColor = pickColor(linkUtil);      // 6. Select link color based on utilization
 
         allLinkDetails.set(linkID, {
             id: linkID,
             consumed: linkBW,
             capacity: linkCap,
             utilization: linkUtil,
-            //color: linkColor,
+            color: linkColor,
         });
     }
 
-    // 6. Color links
-    //colorLinkConsumption(allLinkDetails);
-
-    // 7. Update link labels
-    retitleLinks(allLinkDetails);
+    // 7. Update and color links
+    updateTopologyLinks(allLinkDetails);
 }
 
-function retitleLinks(linkMap)
+function updateTopologyLinks(linkMap)
 {
     for(var e = 0; e < vizLinks.length; e++)
     {
@@ -287,41 +280,25 @@ function retitleLinks(linkMap)
         var linkBwString = ", Consumed: " + linkBw + units;
 
         var newTitle = oneEdge.id + linkCapString + linkBwString;
+        var newColor = linkDeets.color;
 
-        console.log("Title: " + newTitle);
-
-        netData.edges.update([{id: oneEdge.id, title: newTitle}]);
+        netData.edges.update([{id: oneEdge.id, title: newTitle, color: newColor}]);
     }
 }
 
 function pickColor(utilization)
 {
-    ;
+    if(utilization === 0.0)
+        return "#2F7FED";
+    else
+    {
+        var redMax = 255;
+        var goldVal = 215;
+        var greenVal = goldVal - (utilization * goldVal);
+
+        return "rgb(255," + Math.floor(greenVal) + ",0)";
+    }
 }
-
-function colorLinkConsumption(linkMap)
-{
-    ;
-}
-
-
-    /* Potentially use this to identify colors for links */
-      /*java.awt.image.IndexColorModel icm = ColorMap.JET;
-         ColorMap ecm = new ColorMap(minBw, maxBw, icm); 
-         utilization.keySet().forEach(edge -> {
-             Long value = utilization.get(edge); 
-
-            String rgb = this.toWeb(ecm.getColor(value.doubleValue())); 
-            VizEdge ve = VizEdge.builder()                 .from(a).to(z).title(title).label(label).value(value.intValue())
-                     .arrows("to").arrowStrikethrough(false).color(rgb) 
-                    .build(); 
-
-    private String toWeb(Color c) { 
-      String rgb = Integer.toHexString(c.getRGB()); 
-      rgb = "#" + rgb.substring(2, rgb.length()); 
-      return rgb;
-*/
-
 
 
 function calculateLinkCapacity(linkID)
@@ -336,8 +313,89 @@ function calculateLinkCapacity(linkID)
     return Math.min(aPortCap, zPortCap);
 }
 
+// Used to determine if reservations from previous refresh have changed //
+function listHasChanged(oldConnectionList, newConnectionList)
+{
+    // Won't slow things down if newConnectionList is also empty
+    if($.isEmptyObject(oldConnectionList))
+        return true;
+
+    // Same size
+    if(oldConnectionList.length !== newConnectionList.length)
+        return true;
+
+
+    var oldUUIDs = [];
+    var newUUIDs = [];
+
+    for(var o = 0; o < oldConnectionList.length; o++)
+        oldUUIDs.push(oldConnectionList[o].connectionId);
+
+    for(var n = 0; n < newConnectionList.length; n++)
+        newUUIDs.push(newConnectionList[n].connectionId);
+
+    // Same reservation IDs
+    var diffUUID = oldUUIDs.filter(function(oneID){ return $.inArray(oneID, newUUIDs) === -1; });
+    if(!$.isEmptyObject(diffUUID))
+    {
+        return true;
+    }
+
+    diffUUID = [];
+    var diffUUID = newUUIDs.filter(function(oneID){ return $.inArray(oneID, oldUUIDs) === -1; });
+    if(!$.isEmptyObject(diffUUID))
+    {
+        return true;
+    }
+
+    // Same reservation objects
+    for(var o = 0; o < oldConnectionList.length; o++)
+    {
+        var newIndex = $.inArray(oldUUIDs[o], newUUIDs);
+        var oldConn = oldConnectionList[o];
+        var newConn = newConnectionList[newIndex];
+
+        if(!sameConnection(oldConn, newConn))
+        {
+            console.log("Connection Changed: " + oldConn.connectionId);
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+function removeOldConnections(oldConnectionList, newConnectionList)
+{
+    var connsToRemove = [];
+
+    for(var o = 0; o < oldConnectionList.length; o++)
+    {
+        var oldConn = oldConnectionList[o];
+        if($.inArray(oldConn, newConnectionList) === -1)
+            connsToRemove.push(oldConn);
+    }
+    console.log("ConnsToRemove Size: " + connsToRemove.length);
+
+    for(var c = 0; c < connsToRemove.length; c++)
+    {
+        var deadConn = connsToRemove[c];
+
+        var listBody = document.getElementById('listBody');
+        var connectionRow = document.getElementById("row_" + deadConn.connectionId);
+        var hiddenRow = document.getElementById("hidden_" + deadConn.connectionId);
+
+        listBody.removeChild(connectionRow);
+        listBody.removeChild(hiddenRow);
+    }
+}
+
 function initializeConnectionList()
 {
+    console.log("Refreshing Connections...");
+
+    var previousConnections = filteredConnections.slice();
     filteredConnections = [];
     filteredConnectionIDs = [];
 
@@ -345,18 +403,30 @@ function initializeConnectionList()
     {
         filteredConnections = JSON.parse(response);
 
+        filteredConnections.forEach(function(conn){ filteredConnectionIDs.push(conn.connectionId); });
+
+        if(!listHasChanged(previousConnections, filteredConnections))
+        {
+            console.log("NO CHANGE");
+            return;
+        }
+
+        //removeOldConnections(previousConnections, filteredConnections);
+
+        //var newConnections = disregardExistingConnections(previousConnections, filteredConnections);
+        var newConnections = filteredConnections.slice(); // DELETE AFTER TESTING
+
         var listBody = document.getElementById('listBody');
 
-        for(var c = 0; c < filteredConnections.length; c++)
+        for(var c = 0; c < newConnections.length; c++)
         {
-            var theConnection = filteredConnections[c];
-
-            filteredConnectionIDs.push(theConnection.connectionId);
+            var theConnection = newConnections[c];
 
             var tr = document.createElement('tr');
             tr.setAttribute("class", "accordion-toggle");
             tr.setAttribute("data-toggle", "collapse");
             tr.setAttribute("data-target", "#accordion_" + theConnection.connectionId);
+            tr.setAttribute("id", "row_" + theConnection.connectionId);
 
             for(var col = 1; col <= 6; col++)
             {
@@ -401,10 +471,15 @@ function initializeConnectionList()
                 else if(col === 5)
                     td.innerHTML = theConnection.specification.username;
                 else
-                    td.innerHTML = "Feature not yet supported";
+                {
+                    var submitDate = new Date();
+                    submitDate.setTime(theConnection.schedule.submitted);
+                    td.innerHTML = "" + submitDate;
+                }
             }
 
             var trHidden = document.createElement('tr');
+            trHidden.setAttribute("id", "hidden_" + theConnection.connectionId);
             var tdHidden = document.createElement('td');
             tdHidden.setAttribute("colspan", "6");
             tdHidden.setAttribute("class", "hiddenRow");
@@ -434,6 +509,8 @@ function initializeConnectionList()
 
         getAllReservedBWs();
     });
+
+    setTimeout(initializeConnectionList, 10000);   // Updates every 30 seconds
 }
 
 function showDetails(connectionToShow)
@@ -519,8 +596,6 @@ function trigger_form_changes(is_resv, selected_an_edge, selected_a_node, is_sel
 $(document).ready(function ()
 {
     initializeNetwork();
-
-    //initializeConnectionList();
 
     $(function ()
     {

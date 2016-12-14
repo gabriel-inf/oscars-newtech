@@ -1,5 +1,6 @@
 package net.es.oscars.dto.spec;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import net.es.oscars.dto.pss.EthPipeType;
 
@@ -15,8 +16,10 @@ import java.util.UUID;
 public class ReservedEthPipe {
     private Long id;
 
+    @JsonProperty("aJunction")
     private ReservedVlanJunction aJunction;
 
+    @JsonProperty("zJunction")
     private ReservedVlanJunction zJunction;
 
     private Set<ReservedBandwidth> reservedBandwidths;

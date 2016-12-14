@@ -223,11 +223,23 @@ public class VizExporter {
 
                     String linkTitle = edgeID + ", Capacity: " + System.lineSeparator() + capString;
 
+                    int lineWidth = 1;
+
+                    if(minCap <= 1000)
+                        lineWidth = 4;
+                    else if(minCap <= 10000)
+                        lineWidth = 4;
+                    else if(minCap <= 100000)
+                        lineWidth = 4;
+
                     added.add(edgeID);
                     added.add(reverseID);
                     VizEdge ve = VizEdge.builder()
-                            .from(aDevice).to(zDevice).title(linkTitle).label("").value(1)
+                            .from(aDevice).to(zDevice)
                             .id(edgeID)
+                            .title(linkTitle)
+                            .label("")
+                            .value(lineWidth)
                             .arrows(null).arrowStrikethrough(false).color(null)
                             .build();
 

@@ -1,5 +1,6 @@
 package net.es.oscars.dto.spec;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import net.es.oscars.dto.pss.EthPipeType;
 
@@ -14,9 +15,11 @@ public class RequestedVlanPipe {
 
     private Long id;
 
+    @JsonProperty("aJunction")
     @NonNull
     private RequestedVlanJunction aJunction;
 
+    @JsonProperty("zJunction")
     @NonNull
     private RequestedVlanJunction zJunction;
 

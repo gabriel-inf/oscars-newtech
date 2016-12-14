@@ -2,12 +2,10 @@ package net.es.oscars.dto.topo;
 
 
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -17,4 +15,7 @@ public class BidirectionalPath {
 
     private List<Edge> azPath;
     private List<Edge> zaPath;
+
+    @NonNull
+    private final String uniqueID = UUID.randomUUID().toString();
 }

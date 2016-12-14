@@ -9,8 +9,8 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RequestedVlanFlow {
-    private Long id;
 
+    private Long id;
 
     private Set<RequestedVlanJunction> junctions;
 
