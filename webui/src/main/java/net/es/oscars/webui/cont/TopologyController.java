@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+import net.es.oscars.dto.bwavail.BandwidthAvailabilityRequest;
+import net.es.oscars.dto.bwavail.BandwidthAvailabilityResponse;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -63,6 +65,38 @@ public class TopologyController
         }
 
         return urn2CapMap;
+    }
+
+
+
+    @RequestMapping( value = "/topology/getbwavl" , method = RequestMethod.POST)
+
+    @ResponseBody
+    public BandwidthAvailabilityResponse getBwdata(@RequestBody List<String> theERO, List<String> therERO, Date startTime, Date endTime)
+    {
+
+        String restPath = oscarsUrl +  "/bwavail/path" ;
+        BandwidthAvailabilityRequest bwRequest = new BandwidthAvailabilityRequest();
+        {
+            bwRequest.setStartDate(startTime);
+            bwRequest.setEndDate(endTime);
+            bwRequest.setMinAzBandwidth(0);
+            bwRequest.setMinAzBandwidth(0);
+
+            List<List<String>> eroList = new ArrayList<>();
+            eroList.add(theERO);
+            bwRequest.setAzEros(eroList);
+
+            List<List<String>> eroListr = new ArrayList<>();
+            eroListr.add(therERO);
+            bwRequest.setZaEros(eroListr);
+
+        }
+
+        BandwidthAvailabilityResponse bwResponse = restTemplate.postForObject(restPath, bwRequest, BandwidthAvailabilityResponse.class);
+
+        return bwResponse;
+
     }
 
 
