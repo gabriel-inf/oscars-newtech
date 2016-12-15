@@ -511,6 +511,8 @@ function refreshMap()
 {
     var newNow = bwAvailMap.getCurrentTime();
     var newFurthest = newNow + 1000 * 60 * 60 * 24 * 365 * 2;  // 2 years in the future
+
+
     var newEnd = new Date();
 
     bwAvailMap.options.min = newNow;
@@ -531,11 +533,6 @@ function refreshMap()
 
 }
 
-function getBandwidthAvailability()
-{
-    ; // To be implemented by Anand!!!
-}
-
 // Clears data from existing map - Triggered by clearERO() - May not be necessary
 function resetBandwidthAvailabilityMap()
 {
@@ -551,6 +548,12 @@ function submitRequestedReservation()
 {
     ; // To be implemented by Anand!!!
 }
+
+
+
+
+
+
 
 function computeFullERO()
 {
@@ -602,7 +605,40 @@ function computeFullERO()
     }
 
     console.log("Full ERO: " + fullERO);
+
+    var reverseERO = fullERO.reverse();
+        console.log("Reverse ERO: " + reverseERO);
+
+        var nowTime = bwAvailMap.getCurrentTime();
+        var windowTime = nowTime + 1000 * 60 * 60 * 24 * 365 * 2;
+
+
+
+var newarray = new Array(nowTime, windowTime, fullERO, reverseERO);
+
+var jsonString = JSON.stringify(newarray);
+console.log(jsonString);
+
+$.ajax({
+            type: "POST",
+            url: "/topology/getbwavl",
+            data: {}
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response)
+            {
+                console.log(response);
+            }
+    });
+
+
+
+
+
 }
+
+
+
 
 
 $(document).ready(function ()
