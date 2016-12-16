@@ -387,7 +387,7 @@ function getNewConnections(oldConnectionList, newConnectionList)
     return newConnections;
 }
 
-
+/* Populates and Refreshes list of connections in the DOM table -- Refreshes automatically */
 function initializeConnectionList()
 {
     console.log("Refreshing Connections...");
@@ -402,19 +402,21 @@ function initializeConnectionList()
 
         filteredConnections.forEach(function(conn){ filteredConnectionIDs.push(conn.connectionId); });
 
+        // Do nothing if no connections have been added/removed/updated since last refresh //
         if(!listHasChanged(previousConnections, filteredConnections))
         {
             console.log("NO CHANGE");
             return;
         }
 
+        // Delete rows from DOM Table for removed/outdated connections //
         removeOldConnections(previousConnections, filteredConnections);
 
+        // Add rows to DOM Table only for added/updated connections //
         var newConnections = getNewConnections(previousConnections, filteredConnections);
 
         for(var c = 0; c < newConnections.length; c++)
         {
-            console.log("New/Updated " + newConnections[c].connectionId);
             var listBody = document.getElementById('listBody');
             var theConnection = newConnections[c];
 
@@ -506,7 +508,7 @@ function initializeConnectionList()
         getAllReservedBWs();
     });
 
-    setTimeout(initializeConnectionList, 10000);   // Updates every 30 seconds
+    setTimeout(initializeConnectionList, 30000);   // Updates every 30 seconds
 }
 
 function showDetails(connectionToShow)

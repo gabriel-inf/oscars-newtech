@@ -34,6 +34,20 @@
                     <div>
                         <button type="reset" id="buttonCancelERO" class="btn btn-danger disabled" onclick="clearERO()">Clear Path</button>
                     </div>
+                    <div class="dropdown">
+                        <button type="button" id="startPortDrop" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown">
+                            Select Source Port
+                            <span class="caret" />
+                        </button>
+                        <ul class="dropdown-menu" id="srcPortList"></ul>
+                    </div>
+                    <div class="dropdown">
+                        <button type="button" id="startPortDrop" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown">
+                            Select Destination Port
+                            <span class="caret" />
+                        </button>
+                        <ul class="dropdown-menu" id="dstPortList"></ul>
+                    </div>
                 </div>
             </div>
         </div>
@@ -47,7 +61,7 @@
             </div>
             <div id="availability_panel" class="panel-body collapse  collapse in">
                 <div style="float:left" >
-                    <input id = "bwSlider" type="range" class="verticalSlider" orient="vertical" min="0" max="30" value="10" step="1" height="400px" width="5px"/>
+                    <input id = "bwSlider" type="range" class="verticalSlider" orient="vertical" min="0" max="10000" value="2500" step="1" height="400px" width="5px"/>
                 </div>
                 <div id="bwVisualization"></div>
             </div>

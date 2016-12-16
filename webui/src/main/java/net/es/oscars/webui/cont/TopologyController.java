@@ -1,9 +1,13 @@
 package net.es.oscars.webui.cont;
 
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.dto.bwavail.BandwidthAvailabilityRequest;
+import net.es.oscars.dto.bwavail.BandwidthAvailabilityResponse;
 import net.es.oscars.dto.rsrc.ReservableBandwidth;
 import net.es.oscars.dto.spec.ReservedBandwidth;
+import net.es.oscars.webui.dto.MinimalBwAvailRequest;
 import net.es.oscars.webui.ipc.TopologyProvider;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -12,8 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
-import net.es.oscars.dto.bwavail.BandwidthAvailabilityRequest;
-import net.es.oscars.dto.bwavail.BandwidthAvailabilityResponse;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -68,35 +70,32 @@ public class TopologyController
     }
 
 
-
-    @RequestMapping( value = "/topology/getbwavl" , method = RequestMethod.POST)
-
+    @RequestMapping( value = "/topology/bwavailability/path" , method = RequestMethod.POST)
     @ResponseBody
-    public BandwidthAvailabilityResponse getBwdata(@RequestBody List<String> theERO, List<String> therERO, Date startTime, Date endTime)
+    public BandwidthAvailabilityResponse getBwAvailability(@RequestBody MinimalBwAvailRequest minReq)
     {
-
         String restPath = oscarsUrl +  "/bwavail/path" ;
+
+        List<List<String>> eroListAZ = new ArrayList<>();
+        List<List<String>> eroListZA = new ArrayList<>();
+        eroListAZ.add(minReq.getAzERO());
+        eroListZA.add(minReq.getZaERO());
+
+        Date startDate = new DateTime(minReq.getStartTime()).toDate();
+        Date endDate = new DateTime(minReq.getEndTime()).toDate();
+
+
         BandwidthAvailabilityRequest bwRequest = new BandwidthAvailabilityRequest();
-        {
-            bwRequest.setStartDate(startTime);
-            bwRequest.setEndDate(endTime);
-            bwRequest.setMinAzBandwidth(0);
-            bwRequest.setMinAzBandwidth(0);
-
-            List<List<String>> eroList = new ArrayList<>();
-            eroList.add(theERO);
-            bwRequest.setAzEros(eroList);
-
-            List<List<String>> eroListr = new ArrayList<>();
-            eroListr.add(therERO);
-            bwRequest.setZaEros(eroListr);
-
-        }
+        bwRequest.setAzEros(eroListAZ);
+        bwRequest.setZaEros(eroListZA);
+        bwRequest.setMinAzBandwidth(minReq.getAzBandwidth());
+        bwRequest.setMinZaBandwidth(minReq.getZaBandwidth());
+        bwRequest.setStartDate(startDate);
+        bwRequest.setEndDate(endDate);
 
         BandwidthAvailabilityResponse bwResponse = restTemplate.postForObject(restPath, bwRequest, BandwidthAvailabilityResponse.class);
 
         return bwResponse;
-
     }
 
 

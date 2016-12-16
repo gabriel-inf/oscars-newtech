@@ -20,6 +20,8 @@ var selectedERO = [];       // Updated ERO (nodes only) selected by user
 var selectedLinks = [];     // Updated ERO (links only) selected by user
 var adjacentLinks = [];
 var fullERO = [];
+var sourcePort;
+var destPort;
 
 var button_clearERO;
 
@@ -288,20 +290,29 @@ function initializeBandwidthMap()
         maxHeight: '400px',
         legend: {enabled: false, icons: false},
         interpolation: {enabled: false},
-        dataAxis: {left: {range: {min: 0, max: 30},},},
+        dataAxis: {left: {range: {min: 0, max: 10000},},},
     }
 
     bwData = new vis.DataSet();
 
-    bwData.add({x: nowDate + 1000 * 60 * 60, y: 25, group: 1});
-    bwData.add({x: nowDate + 7000 * 60 * 60, y: 10, group: 1});
-    bwData.add({x: nowDate + 7000 * 60 * 60, y: 25, group: 1});
-    bwData.add({x: nowDate + 15000 * 60 * 60, y: 15, group: 1});
-    bwData.add({x: nowDate + 15000 * 60 * 60, y: 10, group: 1});
-    bwData.add({x: nowDate + 18000 * 60 * 60, y: 15, group: 1});
+    // Set up the look of the availability data points
+    var groupSettings = {
+        id: 0,
+        content: 'avail',
+        style: 'stroke-width: 1; stroke: #709FE0;',
+        options: {
+            shaded: {enabled: true, orientation: 'bottom', style: 'fill-opacity: 0.5; fill: #709FE0;'},
+        }
+    };
+
+    var groupData = new vis.DataSet();
+    groupData.add(groupSettings);
 
     // Create the Bar Graph
-    bwAvailMap = new vis.Graph2d(bwViz, bwData, bwOptions);
+    bwAvailMap = new vis.Graph2d(bwViz, bwData, groupData, bwOptions);
+
+    bwData.add({x: nowDate, y: 5000, group: 'avail'});
+    bwData.add({x: furthestDate, y: 5000, group: 'avail'});
 
     // Set first time bar: Start Time
     startTime =  nowDate + 50000 * 60;
@@ -427,18 +438,21 @@ function inspectAvailability(bandwidth)
 {
     var isReservable = true;
 
-    var allAvailabilityValues = bwData.getIds({ filter: function (item)
+    var allAvailabilityValues = bwData.get({ filter: function (item)
     {
-        if(item.x >= startTime && item.x <= endTime && item.group !== 'bwBar')
-            return item;
-    }});
+        if(item.group !== 'bwBar')
+        {
+            var itemDate = new Date(item.x);
+            var itemTime = itemDate.getTime();
 
+            if(itemTime >= startTime && itemTime <= endTime)
+                return item;
+        }
+    }});
 
     for(var b = 0; b < allAvailabilityValues.length; b++)
     {
-        var oneItem = bwData.get(allAvailabilityValues[b]);
-
-        //console.log("ID: " + oneItem.id + ", X: " + oneItem.x + ", Y: " + oneItem.y);
+        var oneItem = allAvailabilityValues[b];
 
         if(oneItem.y < bandwidth)   // Cannot reserve
         {
@@ -452,16 +466,23 @@ function inspectAvailability(bandwidth)
     {
         var nearestItem = null;
 
-        allAvailabilityValues = bwData.getIds({ filter: function (item)
+        allAvailabilityValues = bwData.get({ filter: function (item)
         {
-                if(item.x < startTime && item.group !== 'bwBar')
+            if(item.group !== 'bwBar')
+            {
+                var itemDate = new Date(item.x);
+                var itemTime = itemDate.getTime();
+
+                if(itemTime < startTime)
                     return item;
+            }
         }});
 
         for(var b = 0; b < allAvailabilityValues.length; b++)
         {
-            var oneItem = bwData.get(allAvailabilityValues[b]);
-            var timeDiff = startTime - oneItem.x;
+            var oneItem = allAvailabilityValues[b];
+            var itemTime = new Date(oneItem.x).getTime();
+            var timeDiff = startTime - itemTime;
 
             if(nearestItem === null && timeDiff > 0)
             {
@@ -471,7 +492,8 @@ function inspectAvailability(bandwidth)
 
             if(nearestItem !== null)
             {
-                if(timeDiff > 0 && timeDiff < (startTime - nearestItem.x))
+                var nearestTime = new Date(nearestItem.x).getTime();
+                if(timeDiff > 0 && timeDiff < (startTime - nearestTime))
                 {
                     nearestItem = oneItem;
                 }
@@ -539,21 +561,108 @@ function resetBandwidthAvailabilityMap()
     ; // To be implemented by Anand!!!
 }
 
-function drawBandwidthAvailabilityMap()
+
+/* Plots B/W Availability on the Map */
+function drawBandwidthAvailabilityMap(azBW, zaBW)
 {
-    ; // To be implemented by Anand!!!
+    var oldBwValues = bwData.getIds({ filter: function (item) { return item.group === 'avail'; }});
+    bwData.remove(oldBwValues);
+
+    var theDates = Object.keys(azBW);
+
+    for(var d = 0; d < theDates.length; d++)
+    {
+        var theTime = theDates[d];
+        var theBW = azBW[theTime];
+
+        bwData.add({x: theTime, y: theBW, group: 'avail'});
+
+        if(d !== 0)
+        {
+            bwData.add({x: theTime, y: lastBW, group: 'avail'});
+        }
+
+        lastBW = theBW;
+    }
+
+    updateBandwidth();
 }
+
+function getPathMinAvailability()
+{
+    // DELETE AFTER TESTING
+    fullERO.splice(0,0,"kans-cr5:10/1/1");
+    fullERO.push("chic-cr5:10/1/1");
+
+    var reverseERO = fullERO.slice();
+    reverseERO.reverse();
+
+    var nowTime = bwAvailMap.getCurrentTime();
+    var furthestMillis = nowTime.getTime() + 1000 * 60 * 60 * 24 * 365 * 2;
+    var furthestTime = new Date(furthestMillis);   // 2 years in the future
+
+    var bwAvailRequest = new Map();
+
+    var bwAvailRequest = {
+        "startTime": nowTime,
+        "endTime": furthestTime,
+        "azERO": fullERO,
+        "zaERO": reverseERO,
+        "azBandwidth": 0,
+        "zaBandwidth": 0,
+    };
+
+    var stringifiedInput = JSON.stringify(bwAvailRequest);
+
+    $.ajax({
+        type: "POST",
+        url: "/topology/bwavailability/path",
+        data: stringifiedInput,
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function (bwAvailResponse)
+        {
+            var mapData = bwAvailResponse.bwAvailabilityMap;
+            var azData = mapData.Az1;
+            var zaData = mapData.Za1;
+
+            var azKeys = Object.keys(azData);
+            var zaKeys = Object.keys(zaData);
+
+            azKeys.sort();
+            zaKeys.sort();
+
+            var azChanges = new Map();
+            var zaChanges = new Map();
+
+            for(var azk = 0; azk < azKeys.length; azk++)
+            {
+                var azKey = azKeys[azk];
+                var keyAsDate  = new Date(Date.parse(azKey));
+                var bwValue = azData[azKey];
+
+                azChanges[keyAsDate] = bwValue;
+            }
+
+            for(var zak = 0; zak < zaKeys.length; zak++)
+            {
+                var zaKey = zaKeys[zak];
+                var keyAsDate  = new Date(Date.parse(zaKey));
+                var bwValue = zaData[zaKey];
+
+                zaChanges[keyAsDate] = bwValue;
+            }
+
+            drawBandwidthAvailabilityMap(azChanges, zaChanges);
+        }
+    });
+}
+
 
 function submitRequestedReservation()
 {
     ; // To be implemented by Anand!!!
 }
-
-
-
-
-
-
 
 function computeFullERO()
 {
@@ -605,40 +714,87 @@ function computeFullERO()
     }
 
     console.log("Full ERO: " + fullERO);
-
-    var reverseERO = fullERO.reverse();
-        console.log("Reverse ERO: " + reverseERO);
-
-        var nowTime = bwAvailMap.getCurrentTime();
-        var windowTime = nowTime + 1000 * 60 * 60 * 24 * 365 * 2;
-
-
-
-var newarray = new Array(nowTime, windowTime, fullERO, reverseERO);
-
-var jsonString = JSON.stringify(newarray);
-console.log(jsonString);
-
-$.ajax({
-            type: "POST",
-            url: "/topology/getbwavl",
-            data: {}
-            contentType: "application/json; charset=utf-8",
-            dataType: "json",
-            success: function (response)
-            {
-                console.log(response);
-            }
-    });
-
-
-
-
-
+    updatePorts();
+    getPathMinAvailability();     // Update availability map
 }
 
+function updatePorts()
+{
+    var srcList = document.getElementById('srcPortList');
+    var dstList = document.getElementById('dstPortList');
 
+    while(srcList.firstChild)
+        srcList.removeChild(srcList.firstChild);
 
+    while(dstList.firstChild)
+        dstList.removeChild(dstList.firstChild);
+
+    if(fullERO.length === 0)
+    {
+        sourcePort = '';
+        destPort = '';
+    }
+    else if(fullERO.length === 1)
+    {
+        var firstDevice = fullERO[0];
+
+        loadJSON("/info/device/" + firstDevice + "/vlanEdges", function (response)
+        {
+            var srcPortList = JSON.parse(response);
+
+            for(var p = 0; p < srcPortList.length; p++)
+            {
+                var portID = srcPortList[p];
+                var liS = document.createElement('li');
+                liS.setAttribute("id", "srcList-" + portID);
+                liS.innerHTML = portID;
+                srcList.appendChild(liS);
+
+                var liD = document.createElement('li');
+                liD.setAttribute("id", "dstList-" + portID);
+                liD.innerHTML = portID;
+                dstList.appendChild(liD);
+            }
+        });
+
+        destPort = '';
+    }
+    else
+    {
+        var firstDevice = fullERO[0];
+        var lastDevice = fullERO[fullERO.length-1];
+
+        loadJSON("/info/device/" + firstDevice + "/vlanEdges", function (response)
+        {
+            var srcPortList = JSON.parse(response);
+
+            for(var p = 0; p < srcPortList.length; p++)
+            {
+                var portID = srcPortList[p];
+                var li = document.createElement('li');
+                li.setAttribute("id", "srcList-" + portID);
+                li.innerHTML = portID;
+                srcList.appendChild(li);
+            }
+        });
+
+        loadJSON("/info/device/" + lastDevice + "/vlanEdges", function (response)
+        {
+            var dstPortList = JSON.parse(response);
+
+            for(var p = 0; p < dstPortList.length; p++)
+            {
+                var portID = dstPortList[p];
+                var li = document.createElement('li');
+                li.setAttribute("id", "dstList-" + portID);
+                li.innerHTML = portID;
+                dstList.appendChild(li);
+            }
+        });
+
+        destPort = '';
+    }
+}
 
 
 $(document).ready(function ()
@@ -649,4 +805,13 @@ $(document).ready(function ()
     $('#bwSlider').on('change', updateBandwidth);
 
     button_clearERO = $('#buttonCancelERO');
+
+    $(function ()
+    {
+        var token = $("meta[name='_csrf']").attr("content");
+        var header = $("meta[name='_csrf_header']").attr("content");
+        $(document).ajaxSend(function (e, xhr, options) {
+            xhr.setRequestHeader(header, token);
+        });
+    });
 });
