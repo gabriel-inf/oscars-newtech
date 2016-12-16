@@ -20,10 +20,13 @@ var selectedERO = [];       // Updated ERO (nodes only) selected by user
 var selectedLinks = [];     // Updated ERO (links only) selected by user
 var adjacentLinks = [];
 var fullERO = [];
-var sourcePort;
-var destPort;
+var sourcePort = '--';
+var destPort = '--';
 
 var button_clearERO;
+var button_hold;
+var button_commit;
+var errorsBox;
 
 
 function initializeNetwork()
@@ -115,6 +118,8 @@ function initializeNetwork()
             portDeviceMap = p2dMap;
         });
     });
+
+    updatePorts();
 }
 
 // Behavior of clicking the "Clear Path" button
@@ -311,8 +316,8 @@ function initializeBandwidthMap()
     // Create the Bar Graph
     bwAvailMap = new vis.Graph2d(bwViz, bwData, groupData, bwOptions);
 
-    bwData.add({x: nowDate, y: 5000, group: 'avail'});
-    bwData.add({x: furthestDate, y: 5000, group: 'avail'});
+    bwData.add({x: nowDate, y: -10, group: 'avail'});
+    bwData.add({x: furthestDate, y: -10, group: 'avail'});
 
     // Set first time bar: Start Time
     startTime =  nowDate + 50000 * 60;
@@ -431,6 +436,8 @@ function updateBandwidth()
     bwData.remove(oldBwValues);
     bwData.add(newBwValueLeft);
     bwData.add(newBwValueRight);
+
+    updateSubmissionPanel(isAvailable);
 }
 
 // This function determines whether to draw the reservation selection red or green. Red if bandwidth availability cannot support it, green otherwise. //
@@ -558,7 +565,16 @@ function refreshMap()
 // Clears data from existing map - Triggered by clearERO() - May not be necessary
 function resetBandwidthAvailabilityMap()
 {
-    ; // To be implemented by Anand!!!
+    var oldBwValues = bwData.getIds({ filter: function (item) { return item.group === 'avail'; }});
+    bwData.remove(oldBwValues);
+
+    var nowDate = Date.now();
+    var furthestDate = nowDate + 1000 * 60 * 60 * 24 * 365 * 2  // 2 years in the future
+
+    bwData.add({x: nowDate, y: -10, group: 'avail'});
+    bwData.add({x: furthestDate, y: -10, group: 'avail'});
+
+    updateBandwidth();
 }
 
 
@@ -590,9 +606,34 @@ function drawBandwidthAvailabilityMap(azBW, zaBW)
 
 function getPathMinAvailability()
 {
-    // DELETE AFTER TESTING
-    fullERO.splice(0,0,"kans-cr5:10/1/1");
-    fullERO.push("chic-cr5:10/1/1");
+    console.log("Src Port: " + sourcePort);
+    console.log("Dst Port: " + destPort);
+    if(sourcePort === '--' || destPort === '--')
+    {
+        errorsBox.addClass("alert-danger");
+        errorsBox.removeClass("alert-success");
+        errorsBox.text("Select a both a source and destination port to display the bandwidth availability of your selected route! ");
+
+        resetBandwidthAvailabilityMap();
+        return;
+    }
+
+    if(sourcePort === destPort)
+    {
+        errorsBox.addClass("alert-danger");
+        errorsBox.removeClass("alert-success");
+        errorsBox.text("Source and Destination ports cannot be the same!");
+
+        resetBandwidthAvailabilityMap();
+        return;
+    }
+
+    errorsBox.addClass("alert-success");
+    errorsBox.removeClass("alert-danger");
+    errorsBox.text("Displaying the bandwidth availability of your selected route over time. Move the time and bandwidth sliders to specify your desired connection parameters. ");
+
+    fullERO.splice(0, 0, sourcePort);
+    fullERO.push(destPort);
 
     var reverseERO = fullERO.slice();
     reverseERO.reverse();
@@ -659,10 +700,6 @@ function getPathMinAvailability()
 }
 
 
-function submitRequestedReservation()
-{
-    ; // To be implemented by Anand!!!
-}
 
 function computeFullERO()
 {
@@ -715,7 +752,6 @@ function computeFullERO()
 
     console.log("Full ERO: " + fullERO);
     updatePorts();
-    getPathMinAvailability();     // Update availability map
 }
 
 function updatePorts()
@@ -729,10 +765,30 @@ function updatePorts()
     while(dstList.firstChild)
         dstList.removeChild(dstList.firstChild);
 
+    var liEmpty1 = document.createElement('li');
+    var liDivider1 = document.createElement('li');
+    liDivider1.setAttribute("class", "divider");
+    var aEmpty1 = document.createElement('a');
+    aEmpty1.setAttribute("href", "#");
+    aEmpty1.innerHTML = "--";
+    liEmpty1.appendChild(aEmpty1);
+    srcList.appendChild(liEmpty1);
+    srcList.appendChild(liDivider1);
+
+    var liEmpty2 = document.createElement('li');
+    var liDivider2 = document.createElement('li');
+    liDivider2.setAttribute("class", "divider");
+    var aEmpty2 = document.createElement('a');
+    aEmpty2.setAttribute("href", "#");
+    aEmpty2.innerHTML = "--";
+    liEmpty2.appendChild(aEmpty2);
+    dstList.appendChild(liEmpty2);
+    dstList.appendChild(liDivider2);
+
     if(fullERO.length === 0)
     {
-        sourcePort = '';
-        destPort = '';
+        updateSrcPort(aEmpty1.innerHTML);
+        updateDstPort(aEmpty2.innerHTML);
     }
     else if(fullERO.length === 1)
     {
@@ -745,19 +801,24 @@ function updatePorts()
             for(var p = 0; p < srcPortList.length; p++)
             {
                 var portID = srcPortList[p];
+
                 var liS = document.createElement('li');
-                liS.setAttribute("id", "srcList-" + portID);
-                liS.innerHTML = portID;
+                var aS = document.createElement('a');
+                aS.setAttribute("href", "#");
+                aS.innerHTML = portID;
+                liS.appendChild(aS);
                 srcList.appendChild(liS);
 
                 var liD = document.createElement('li');
-                liD.setAttribute("id", "dstList-" + portID);
-                liD.innerHTML = portID;
+                var aD = document.createElement('a');
+                aD.setAttribute("href", "#");
+                aD.innerHTML = portID;
+                liD.appendChild(aD);
                 dstList.appendChild(liD);
             }
         });
 
-        destPort = '';
+        updateDstPort(aEmpty2.innerHTML);
     }
     else
     {
@@ -771,9 +832,12 @@ function updatePorts()
             for(var p = 0; p < srcPortList.length; p++)
             {
                 var portID = srcPortList[p];
+
                 var li = document.createElement('li');
-                li.setAttribute("id", "srcList-" + portID);
-                li.innerHTML = portID;
+                var a = document.createElement('a');
+                a.setAttribute("href", "#");
+                a.innerHTML = portID;
+                li.appendChild(a)
                 srcList.appendChild(li);
             }
         });
@@ -785,26 +849,96 @@ function updatePorts()
             for(var p = 0; p < dstPortList.length; p++)
             {
                 var portID = dstPortList[p];
+
                 var li = document.createElement('li');
-                li.setAttribute("id", "dstList-" + portID);
-                li.innerHTML = portID;
+                var a = document.createElement('a');
+                a.setAttribute("href", "#");
+                a.innerHTML = portID;
+                li.appendChild(a)
                 dstList.appendChild(li);
             }
         });
 
-        destPort = '';
+        updateDstPort(aEmpty2.innerHTML);
     }
+}
+
+function updateSrcPort(selection)
+{
+
+    sourcePort = selection;
+    document.getElementById('srcPortDrop').innerHTML = sourcePort + "<span class=\"caret\" />";
+
+    getPathMinAvailability();     // Update availability map
+}
+
+function updateDstPort(selection)
+{
+    destPort = selection;
+    document.getElementById('dstPortDrop').innerHTML = destPort + "<span class=\"caret\" />";
+
+    getPathMinAvailability();     // Update availability map
+}
+
+function updateSubmissionPanel(submissionAllowed)
+{
+    if(!submissionAllowed)
+    {
+        button_hold.addClass("disabled").removeClass("enabled");
+    }
+    else
+    {
+        button_hold.addClass("enabled").removeClass("disabled");
+        button_hold.off();
+        button_hold.on('click', submitRequestedReservation);
+    }
+}
+
+var submitRequestedReservation = function(e)
+{
+    e.preventDefault();
+    console.log("HOLDING");
+
+
+    return false;
 }
 
 
 $(document).ready(function ()
 {
-    initializeNetwork();
+    // Assign DOM variables //
+    button_clearERO = $('#buttonCancelERO');
+    button_hold = $('#buttonHold');
+    button_commit = $('#buttonCommit');
+    errorsBox = $('#errors_box');
+
+    errorsBox.addClass("alert-danger");
+    errorsBox.removeClass("alert-success");
+    errorsBox.text("Click on the nodes in the above topology to specify a circuit route!");
+
+
     initializeBandwidthMap();
 
+    // Listener events //
     $('#bwSlider').on('change', updateBandwidth);
 
-    button_clearERO = $('#buttonCancelERO');
+    $('body').on('click', '#srcPortList li a', function()
+    {
+        var selection = $(this).text();
+        updateSrcPort(selection);
+    });
+
+    $('body').on('click', '#dstPortList li a', function()
+    {
+        console.log("Destination Port Selected");
+        var selection = $(this).text();
+        updateDstPort(selection);
+    });
+
+
+
+    initializeNetwork();
+
 
     $(function ()
     {

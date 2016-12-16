@@ -35,15 +35,17 @@
                         <button type="reset" id="buttonCancelERO" class="btn btn-danger disabled" onclick="clearERO()">Clear Path</button>
                     </div>
                     <div class="dropdown">
-                        <button type="button" id="startPortDrop" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown">
-                            Select Source Port
+                        <p style="font-size:16px">Select Source Port</p>
+                        <button type="button" id="srcPortDrop" class="btn dropdown-toggle" data-toggle="dropdown" data-target="#">
+                            --
                             <span class="caret" />
                         </button>
                         <ul class="dropdown-menu" id="srcPortList"></ul>
                     </div>
                     <div class="dropdown">
-                        <button type="button" id="startPortDrop" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown">
-                            Select Destination Port
+                        <p style="font-size:16px">Select Destination Port</p>
+                        <button type="button" id="dstPortDrop" class="btn dropdown-toggle" data-toggle="dropdown" data-target="#">
+                            --
                             <span class="caret" />
                         </button>
                         <ul class="dropdown-menu" id="dstPortList"></ul>
@@ -60,6 +62,7 @@
                 </h4>
             </div>
             <div id="availability_panel" class="panel-body collapse  collapse in">
+            <div id="errors_box" class="alert"/>
                 <div style="float:left" >
                     <input id = "bwSlider" type="range" class="verticalSlider" orient="vertical" min="0" max="10000" value="2500" step="1" height="400px" width="5px"/>
                 </div>
@@ -67,13 +70,19 @@
             </div>
         </div>
     </div>
+    <div>
+        <p>Bandwidth: </p>
+        <p id="bandwidth"></p>
+        <p>Start Time:</p>
+        <p id="start-time"></p>
+        <p>End Time:</p>
+        <p id="end-time"></p>
+    </div>
+    <div style="width:50%; margin:auto">
+        <button id="buttonHold" class="btn btn-primary disabled">Hold</button>
+        <button id="buttonCommit" class="btn btn-success disabled">Commit</button>
+    </div>
 
-<p>Bandwidth: </p>
-<p id="bandwidth"></p>
-<p>Start Time:</p>
-<p id="start-time"></p>
-<p>End Time:</p>
-<p id="end-time"></p>
 
 </body>
 </html>
