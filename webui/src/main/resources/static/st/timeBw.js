@@ -5,6 +5,7 @@ var bwData;         // Data in the map
 var netViz;         // Network map HTML container
 var networkMap;     // Network map element
 var netData;        // Data in the map
+var netOptions;     // Options of the map
 
 var startTime;
 var endTime;
@@ -25,8 +26,9 @@ var destPort = '--';
 
 var button_clearERO;
 var button_hold;
-var button_commit;
 var errorsBox;
+
+mostRecentPrecheckID = "";
 
 
 function initializeNetwork()
@@ -55,7 +57,7 @@ function initializeNetwork()
                 vizLinks.push(edge);
         }
 
-        var netOptions = {
+        netOptions = {
             autoResize: true,
             width: '90%',
             height: '400px',
@@ -403,7 +405,17 @@ function changeTime(properties, startBarID, endBarID)
 function updateBandwidth()
 {
     var bwSlider = document.getElementById('bwSlider');
-    document.getElementById('bandwidth').innerHTML = bwSlider.value;
+
+    if(bwSlider.value > 1000)
+    {
+        document.getElementById('bandwidthVal').innerHTML = bwSlider.value / 1000;
+        document.getElementById('bandwidthUnit').innerHTML = "Gb/s";
+    }
+    else
+    {
+       document.getElementById('bandwidthVal').innerHTML = bwSlider.value;
+       document.getElementById('bandwidthUnit').innerHTML = "Mb/s";
+    }
 
     var isAvailable = inspectAvailability(bwSlider.value);
 
@@ -612,7 +624,7 @@ function getPathMinAvailability()
     {
         errorsBox.addClass("alert-danger");
         errorsBox.removeClass("alert-success");
-        errorsBox.text("Select a both a source and destination port to display the bandwidth availability of your selected route! ");
+        errorsBox.text("Select both a source and destination port to display the bandwidth availability of your selected route! ");
 
         resetBandwidthAvailabilityMap();
         return;
@@ -634,6 +646,8 @@ function getPathMinAvailability()
 
     fullERO.splice(0, 0, sourcePort);
     fullERO.push(destPort);
+
+    console.log("Full ERO: " + fullERO);
 
     var reverseERO = fullERO.slice();
     reverseERO.reverse();
@@ -863,22 +877,6 @@ function updatePorts()
     }
 }
 
-function updateSrcPort(selection)
-{
-
-    sourcePort = selection;
-    document.getElementById('srcPortDrop').innerHTML = sourcePort + "<span class=\"caret\" />";
-
-    getPathMinAvailability();     // Update availability map
-}
-
-function updateDstPort(selection)
-{
-    destPort = selection;
-    document.getElementById('dstPortDrop').innerHTML = destPort + "<span class=\"caret\" />";
-
-    getPathMinAvailability();     // Update availability map
-}
 
 function updateSubmissionPanel(submissionAllowed)
 {
@@ -888,20 +886,151 @@ function updateSubmissionPanel(submissionAllowed)
     }
     else
     {
-        button_hold.addClass("enabled").removeClass("disabled");
-        button_hold.off();
-        button_hold.on('click', submitRequestedReservation);
+        precheckRequestedReservation();     // Automatically precheck when bwAvailability turns green
     }
 }
 
-var submitRequestedReservation = function(e)
+
+function precheckRequestedReservation()
 {
-    e.preventDefault();
-    console.log("HOLDING");
+    // Server expects seconds, not milliseconds
+    var startSeconds = startTime / 1000;
+    var endSeconds = endTime / 1000;
+
+    var request = {
+        "connectionId": "",
+        "startAt": startSeconds,
+        "endAt": endSeconds,
+        "description": "What-If UI Reservation",
+        "junctions": {},        //fixtures: bw,vlan
+        "pipes": {},            //bw, a, z
+    }
+
+    var forwardERO = fullERO.slice();
+    forwardERO.shift();     // Remove source port
+    forwardERO.pop();       // Remove dest port
+    var reverseERO = forwardERO.slice();
+    reverseERO.reverse();
+
+    var bandwidth = document.getElementById('bwSlider').value;
+
+    loadJSON("/resv/newConnectionId", function (response)
+    {
+        var connID = JSON.parse(response)["connectionId"];
+        request["connectionId"] = connID;
+
+        mostRecentPrecheckID = connID;
+
+        var eroLength = forwardERO.length;
+        if(eroLength > 1)
+        {
+            var srcNode = forwardERO[0];
+            var dstNode = reverseERO[0];
+
+            console.log("SRC NODE: " + srcNode);
+            console.log("DST NODE: " + dstNode);
+
+            request["junctions"][srcNode] = {"fixtures": {}};
+            request["junctions"][dstNode] = {"fixtures": {}};
+
+            request["junctions"][srcNode]["fixtures"][sourcePort] = {"bw": bandwidth, "vlan": "any"};
+            request["junctions"][dstNode]["fixtures"][destPort] = {"bw": bandwidth, "vlan": "any"};
+
+            console.log("Src Fixtures: " + request["junctions"][srcNode]["fixtures"]);
+            console.log("Dst Fixtures: " + request["junctions"][dstNode]["fixtures"]);
+
+            request["pipes"]["unicastPipe"] = {"a": srcNode, "z": dstNode, "bw": bandwidth, "azERO": forwardERO, "zaERO": reverseERO};
+        }
 
 
-    return false;
+        var stringifiedRequest = JSON.stringify(request);
+        console.log(stringifiedRequest);
+
+        // Precheck first; If successful, Enable Hold & Commit
+        $.ajax({
+            type: "POST",
+            url: "/resv/precheck",
+            data: stringifiedRequest,
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (precheckResponse)
+            {
+                var preCheckRes = precheckResponse["preCheckResult"];
+                console.log("Pre-Check Result: " + preCheckRes);
+
+                if(mostRecentPrecheckID !== connID)
+                {
+                    return;     // Do nothing
+                }
+
+                if(preCheckRes === "SUCCESS")
+                {
+                    button_hold.addClass("active").removeClass("disabled");
+                    button_hold.on('click', function(e){e.preventDefault(); submitRequestedReservation(stringifiedRequest, connID)});
+                }
+            }
+        });
+    });
 }
+
+function submitRequestedReservation(jsonRequest, connID)
+{
+    if(mostRecentPrecheckID !== connID)
+    {
+        return;     // Do nothing
+    }
+
+    button_hold.addClass("disabled").removeClass("active");
+
+    // Hold & Commit reservation
+    $.ajax({
+        type: "POST",
+        url: "/resv/minimal_hold",
+        data: jsonRequest,
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function (response)
+        {
+            console.log(response);
+
+            loadJSON("/resv/commit/" + connID, function(){ window.location.href = "/resv/view/" + connID; });// Commit reservation
+        }
+    });
+}
+
+function updateSrcPort(selection)
+{
+    sourcePort = selection;
+    document.getElementById('srcPortDrop').innerHTML = sourcePort + "<span class=\"caret\" />";
+
+    removeOutdatedPortsFromERO();
+
+    getPathMinAvailability();     // Update availability map
+}
+
+function updateDstPort(selection)
+{
+    destPort = selection;
+    document.getElementById('dstPortDrop').innerHTML = destPort + "<span class=\"caret\" />";
+
+    removeOutdatedPortsFromERO();
+
+    getPathMinAvailability();     // Update availability map
+}
+
+/* Removes ports from fullERO in the case that the user has selected different ports. Updates the ERO properly */
+function removeOutdatedPortsFromERO()
+{
+    var firstNode = fullERO[0];
+    var lastNode = fullERO[fullERO.length-1];
+
+    if($.inArray(firstNode, netPorts) !== -1)
+        fullERO.shift();
+
+    if($.inArray(lastNode, netPorts) !== -1)
+        fullERO.pop();
+}
+
 
 
 $(document).ready(function ()
@@ -909,7 +1038,6 @@ $(document).ready(function ()
     // Assign DOM variables //
     button_clearERO = $('#buttonCancelERO');
     button_hold = $('#buttonHold');
-    button_commit = $('#buttonCommit');
     errorsBox = $('#errors_box');
 
     errorsBox.addClass("alert-danger");
@@ -936,9 +1064,7 @@ $(document).ready(function ()
     });
 
 
-
     initializeNetwork();
-
 
     $(function ()
     {

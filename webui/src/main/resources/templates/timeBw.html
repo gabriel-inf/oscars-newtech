@@ -70,19 +70,23 @@
             </div>
         </div>
     </div>
-    <div>
-        <p>Bandwidth: </p>
-        <p id="bandwidth"></p>
-        <p>Start Time:</p>
-        <p id="start-time"></p>
-        <p>End Time:</p>
-        <p id="end-time"></p>
+    <div style="width:50%; margin:auto;">
+        <div class = "paramdisplay">
+            <p class="paramdisplay">Bandwidth: </p>
+            <p id="bandwidthVal" class="paramdisplay" />
+            <p id="bandwidthUnit" class="paramdisplay">Mb/s</p>
+        </div>
+        <div class = "paramdisplay">
+            <p class="paramdisplay">Start Time:</p>
+            <p id="start-time" class="paramdisplay" />
+            <p />
+            <p class="paramdisplay">End Time:</p>
+            <p id="end-time" class="paramdisplay" />
+        </div>
     </div>
-    <div style="width:50%; margin:auto">
-        <button id="buttonHold" class="btn btn-primary disabled">Hold</button>
-        <button id="buttonCommit" class="btn btn-success disabled">Commit</button>
+    <div style="width:40%; margin:auto; padding:auto">
+        <button id="buttonHold" class="btn btn-primary disabled" style="font-size:25px;border:none;cursor:pointer;min-width:300px;">Place Reservation</button>
     </div>
-
-
+    <div style="margin-bottom:20px;" />
 </body>
 </html>

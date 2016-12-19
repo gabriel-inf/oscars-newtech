@@ -84,6 +84,9 @@ public class TopologyController
         Date startDate = new DateTime(minReq.getStartTime()).toDate();
         Date endDate = new DateTime(minReq.getEndTime()).toDate();
 
+        if(minReq.getAzERO().size() == 3)       // Single-node request
+            log.info("SINLGE DEVICE");
+
 
         BandwidthAvailabilityRequest bwRequest = new BandwidthAvailabilityRequest();
         bwRequest.setAzEros(eroListAZ);

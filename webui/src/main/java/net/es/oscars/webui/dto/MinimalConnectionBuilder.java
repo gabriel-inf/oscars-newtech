@@ -111,14 +111,23 @@ public class MinimalConnectionBuilder
             inPipes.add(aJ);
             inPipes.add(zJ);
             Integer bw = Integer.parseInt(minRequest.getPipes().get(pipeId).getBw());
+
+            if(minRequest.getPipes().get(pipeId).getAzERO() == null)
+                minRequest.getPipes().get(pipeId).setAzERO(new ArrayList<String>());
+
+            if(minRequest.getPipes().get(pipeId).getZaERO() == null)
+                minRequest.getPipes().get(pipeId).setZaERO(new ArrayList<String>());
+
             RequestedVlanPipe rvp = RequestedVlanPipe.builder()
                     .aJunction(aJ)
                     .zJunction(zJ)
                     .numDisjoint(1)
                     .azMbps(bw)
                     .zaMbps(bw)
-                    .azERO(new ArrayList<>())
-                    .zaERO(new ArrayList<>())
+                    //.azERO(new ArrayList<>())
+                    //.zaERO(new ArrayList<>())
+                    .azERO(minRequest.getPipes().get(pipeId).getAzERO())
+                    .zaERO(minRequest.getPipes().get(pipeId).getZaERO())
                     .urnBlacklist(new HashSet<>())
                     .eroPalindromic(PalindromicType.PALINDROME)
                     .eroSurvivability(SurvivabilityType.SURVIVABILITY_NONE)

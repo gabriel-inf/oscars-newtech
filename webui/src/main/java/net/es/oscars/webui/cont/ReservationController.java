@@ -140,7 +140,6 @@ public class ReservationController {
         res.put("connectionId", c.getConnectionId());
 
         return res;
-
     }
 
 
@@ -149,6 +148,7 @@ public class ReservationController {
     public Map<String, String> resv_preCheck(@RequestBody MinimalRequest request)
     {
         Connection c = minimalPreChecker.preCheckMinimal(request);
+        log.info("Request Details: " + request.toString());
 
         Map<String, String> res = new HashMap<>();
 
