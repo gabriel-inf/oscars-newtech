@@ -553,7 +553,7 @@ public class TopPCE {
             azPath.add(0, fixToJunctionEdges.get(0));
             // Reverse above list
             List<TopoEdge> zaPath = fixToJunctionEdges.subList(1, fixToJunctionEdges.size());
-            zaPath.add(0, junctionToFixEdges.get(0));
+            zaPath.add(junctionToFixEdges.get(0));
             allPaths.add(BidirectionalPathE.builder()
                     .azPath(convertTopoEdgePathToEdges(azPath))
                     .zaPath(convertTopoEdgePathToEdges(zaPath))

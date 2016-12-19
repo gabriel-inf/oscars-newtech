@@ -10,8 +10,10 @@ import net.es.oscars.dto.bwavail.PortBandwidthAvailabilityRequest;
 import net.es.oscars.dto.bwavail.PortBandwidthAvailabilityResponse;
 import net.es.oscars.dto.spec.PalindromicType;
 import net.es.oscars.dto.spec.SurvivabilityType;
+import net.es.oscars.dto.topo.TopoVertex;
 import net.es.oscars.dto.topo.Topology;
 import net.es.oscars.dto.topo.enums.UrnType;
+import net.es.oscars.dto.topo.enums.VertexType;
 import net.es.oscars.helpers.RequestedEntityBuilder;
 import net.es.oscars.helpers.ReservedEntityDecomposer;
 import net.es.oscars.pce.*;
@@ -108,7 +110,7 @@ public class BandwidthAvailabilityService {
         Map<String, List<String>> pathNameMap = new HashMap<>();
 
         // For each ERO, create a blueprint and get the response
-        List<RequestedBlueprintE> requestedBlueprints = generateRequestedBlueprints(request, pairValid, pathValid);
+        List<RequestedBlueprintE> requestedBlueprints = generateRequestedBlueprints(request, pairValid, pathValid, topo);
 
         List<Date> chosenDates = new ArrayList<>();
 
@@ -236,7 +238,8 @@ public class BandwidthAvailabilityService {
      * Given a BW avail request, generate a list of requested blueprints
      */
     private List<RequestedBlueprintE> generateRequestedBlueprints(BandwidthAvailabilityRequest request,
-                                                                  Boolean pairValid, Boolean pathValid){
+                                                                  Boolean pairValid, Boolean pathValid,
+                                                                  Topology topo){
         List<RequestedBlueprintE> blueprints = new ArrayList<>();
 
         if(pathValid) {
@@ -244,23 +247,61 @@ public class BandwidthAvailabilityService {
                 List<String> azERO = request.getAzEros().get(index);
                 List<String> zaERO = request.getZaEros().get(index);
 
-                blueprints.add(entityBuilder.buildRequest(azERO, zaERO, request.getMinAzBandwidth(), request.getMinZaBandwidth(), "bwReq"));
+                // Build a junction instead if ERO is just: port -> device -> port
+                if(isJunction(azERO, topo) && isJunction(zaERO, topo)){
+                    log.info("Is a junction");
+                    List<String> fixtures = new ArrayList<>(azERO);
+                    fixtures.remove(1);
+                    blueprints.add(entityBuilder.buildRequest(azERO.get(1), fixtures, request.getMinAzBandwidth(),
+                            request.getMinZaBandwidth(), "any", "bwReq"));
+                    log.info(blueprints.toString());
+                }
+                else {
+                    blueprints.add(entityBuilder.buildRequest(azERO, zaERO, request.getMinAzBandwidth(),
+                            request.getMinZaBandwidth(), "bwReq"));
+                }
             }
         }
         if(pairValid) {
-            // Create one blueprint for the source, dest pair - PCE handles multiple paths
-            // Determine survivability type for request
-            //TODO: Support non-disjoint paths - Yen's Algorithm
-            SurvivabilityType sType = SurvivabilityType.SURVIVABILITY_NONE;
-            if (request.getDisjointPaths() == null || request.getDisjointPaths() || !request.getDisjointPaths()) {
-                sType = SurvivabilityType.SURVIVABILITY_TOTAL;
+            //If source == dest, build a junction request instead
+            if(request.getSrcDevice().equals(request.getDstDevice())){
+                List<String> fixtures = new ArrayList<>(request.getSrcPorts());
+                fixtures.addAll(request.getDstPorts());
+
+                blueprints.add(entityBuilder.buildRequest(request.getSrcDevice(), fixtures, request.getMinAzBandwidth(),
+                        request.getMinZaBandwidth(), "any", "bwReq"));
             }
-            blueprints.add(entityBuilder.buildRequest(request.getSrcPorts(), request.getSrcDevice(),
-                    request.getDstPorts(), request.getDstDevice(), request.getMinAzBandwidth(), request.getMinZaBandwidth(),
-                    PalindromicType.PALINDROME, sType, "any", request.getNumPaths(), 1, 1, "bwReq"));
+            else{
+                // Create one blueprint for the source, dest pair - PCE handles multiple paths
+                // Determine survivability type for request
+                //TODO: Support non-disjoint paths - Yen's Algorithm
+                SurvivabilityType sType = SurvivabilityType.SURVIVABILITY_NONE;
+                if (request.getDisjointPaths() == null || request.getDisjointPaths() || !request.getDisjointPaths()) {
+                    sType = SurvivabilityType.SURVIVABILITY_TOTAL;
+                }
+                blueprints.add(entityBuilder.buildRequest(request.getSrcPorts(), request.getSrcDevice(),
+                        request.getDstPorts(), request.getDstDevice(), request.getMinAzBandwidth(), request.getMinZaBandwidth(),
+                        PalindromicType.PALINDROME, sType, "any", request.getNumPaths(), 1, 1, "bwReq"));
+            }
+
 
         }
         return blueprints;
+    }
+
+    private boolean isJunction(List<String> path, Topology topo) {
+        if(path.size() == 3){
+            Optional<TopoVertex> fixOne = topo.getVertexByUrn(path.get(0));
+            Optional<TopoVertex> device = topo.getVertexByUrn(path.get(1));
+            Optional<TopoVertex> fixTwo = topo.getVertexByUrn(path.get(2));
+
+            if(fixOne.isPresent() && device.isPresent() && fixTwo.isPresent()){
+                return fixOne.get().getVertexType().equals(VertexType.PORT) &&
+                        (device.get().getVertexType().equals(VertexType.ROUTER) || device.get().getVertexType().equals(VertexType.SWITCH)) &&
+                        fixTwo.get().getVertexType().equals(VertexType.PORT);
+            }
+        }
+        return false;
     }
 
     /**
@@ -563,38 +604,40 @@ public class BandwidthAvailabilityService {
             }
         }
 
-        List<UrnE> intermediateAzUrns = azUrns.subList(aDeviceIndex+1, azUrns.indexOf(zDevice)).stream()
-                .filter(u -> u.getReservableBandwidth() != null).collect(Collectors.toList());
-        List<UrnE> intermediateZaUrns = zaUrns.subList(zDeviceIndex+1, zaUrns.indexOf(aDevice)).stream()
-                .filter(u -> u.getReservableBandwidth() != null).collect(Collectors.toList());
+        if(azUrns.size() > 3 && zaUrns.size() > 3) {
+            List<UrnE> intermediateAzUrns = azUrns.subList(aDeviceIndex + 1, azUrns.indexOf(zDevice)).stream()
+                    .filter(u -> u.getReservableBandwidth() != null).collect(Collectors.toList());
+            List<UrnE> intermediateZaUrns = zaUrns.subList(zDeviceIndex + 1, zaUrns.indexOf(aDevice)).stream()
+                    .filter(u -> u.getReservableBandwidth() != null).collect(Collectors.toList());
 
-        // Go through the intermediate URNs
-        isIngress = false;
+            // Go through the intermediate URNs
+            isIngress = false;
 
-        for (UrnE urn : intermediateAzUrns) {
-            urnTables.get(AZ).putIfAbsent(urn.getUrn(), new ArrayList<>());
+            for (UrnE urn : intermediateAzUrns) {
+                urnTables.get(AZ).putIfAbsent(urn.getUrn(), new ArrayList<>());
 
-            if (isIngress)
-                urnTables.get(AZ).get(urn.getUrn()).add(INGRESS);
-            else
-                urnTables.get(AZ).get(urn.getUrn()).add(EGRESS);
+                if (isIngress)
+                    urnTables.get(AZ).get(urn.getUrn()).add(INGRESS);
+                else
+                    urnTables.get(AZ).get(urn.getUrn()).add(EGRESS);
 
-            // Alternate ingress/egress.
-            isIngress = Boolean.logicalXor(isIngress, true);
-        }
+                // Alternate ingress/egress.
+                isIngress = Boolean.logicalXor(isIngress, true);
+            }
 
-        isIngress = false;
+            isIngress = false;
 
-        for (UrnE urn_e : intermediateZaUrns) {
-            urnTables.get(ZA).putIfAbsent(urn_e.getUrn(), new ArrayList<>());
+            for (UrnE urn_e : intermediateZaUrns) {
+                urnTables.get(ZA).putIfAbsent(urn_e.getUrn(), new ArrayList<>());
 
-            if (isIngress)
-                urnTables.get(ZA).get(urn_e.getUrn()).add(INGRESS);
-            else
-                urnTables.get(ZA).get(urn_e.getUrn()).add(EGRESS);
+                if (isIngress)
+                    urnTables.get(ZA).get(urn_e.getUrn()).add(INGRESS);
+                else
+                    urnTables.get(ZA).get(urn_e.getUrn()).add(EGRESS);
 
-            // Alternate ingress/egress.
-            isIngress = Boolean.logicalXor(isIngress, true);
+                // Alternate ingress/egress.
+                isIngress = Boolean.logicalXor(isIngress, true);
+            }
         }
 
         return urnTables;

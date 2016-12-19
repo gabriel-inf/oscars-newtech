@@ -559,7 +559,6 @@ public class VlanService {
                                                          Map<String, Set<String>> deviceToPortMap,
                                                          Map<String, String> portToDeviceMap,
                                                          RequestedVlanPipeE reqPipe) {
-        Map<String, Set<Integer>> chosenVlanMap = new HashMap<>();
 
         // Retrive port URNs for pipe from the AZ and ZA EROs
 
@@ -571,6 +570,8 @@ public class VlanService {
         // AND - If there are any switches, add their ports as well
         Set<String> pipeUrns = getUrnsFromListOfEdges(azERO, urnMap, deviceToPortMap);
         pipeUrns.addAll(getUrnsFromListOfEdges(zaERO, urnMap, deviceToPortMap));
+        pipeUrns.remove(aJunctionUrn);
+        pipeUrns.remove(zJunctionUrn);
 
         // Get the VLANs available across the AZ/ZA path
         Set<Integer> availableVlansAcrossPath = findAvailableVlansBidirectional(pipeUrns, availableVlanMap);
@@ -586,6 +587,9 @@ public class VlanService {
         Map<String, Set<String>> nonFixPortUrnMap = new HashMap<>();
         Map<String, Set<Integer>> nonFixPortVlansMap = new HashMap<>();
         populateDeviceVlanMaps(deviceToPortMap, aJunctionUrn, zJunctionUrn, urnMap, validVlanMap, availableVlanMap, nonFixPortUrnMap, nonFixPortVlansMap);
+
+        //Initialize chosen VLAN map
+        Map<String, Set<Integer>> chosenVlanMap = initializeChosenVlanMap(pipeUrns, nonFixPortUrnMap);
 
 
         // If there is any overlap between these sets, use this ID for everything
@@ -623,9 +627,10 @@ public class VlanService {
         // Otherwise, iterate through the valid vlans per fixture
         // For each valid VLAN, see if it is available across the path
         // If so, use that for the path
-        // Either way, choose an arbitrary VLAN for the fixture
+        // Either way, choose a valid VLAN for the fixture
         else {
             boolean pipeVlansAssigned = false;
+            Integer numFixturesAssigned = 0;
 
             Map<String, Set<Integer>> vlansAssignedJunctionMap = new HashMap<>();
             vlansAssignedJunctionMap.put(aJunctionUrn, new HashSet<>());
@@ -636,6 +641,7 @@ public class VlanService {
                     .sorted(String::compareToIgnoreCase)
                     .collect(Collectors.toList());
 
+            //Attempt to assign VLANs to the fixtures
             for (String fixUrn : sortedFixtureUrns) {
                 UrnE parentDeviceUrn_e = urnMap.get(portToDeviceMap.get(fixUrn));
 
@@ -657,19 +663,20 @@ public class VlanService {
                     Integer chosenVlan = options.get(0);
                     // Assign this VLAN to every URN in the pipe
                     for (String pipeUrn : pipeUrns) {
-                        chosenVlanMap.putIfAbsent(pipeUrn, new HashSet<>());
                         chosenVlanMap.get(pipeUrn).add(chosenVlan);
                     }
                     // Assign this VLAN to other ports on the switch (if junction is a switch)
                     if (isSwitch(parentDeviceUrn_e)) {
                         vlansAssignedJunctionMap.get(parentDeviceUrn_e.getUrn()).add(chosenVlan);
                         for (String portUrn : nonFixPortUrnMap.get(parentDeviceUrn_e.getUrn())) {
-                            chosenVlanMap.putIfAbsent(portUrn, new HashSet<>());
                             chosenVlanMap.get(portUrn).add(chosenVlan);
                         }
                     }
+
+                    //Increment the number of fixtures assigned
+                    numFixturesAssigned++;
                 }
-                // If there's at least one VLAN that can work for this fixture, reserve if
+                // If there's at least one VLAN that can work for this fixture, reserve it
                 // (ONLY if it is also available on the other ports on the device, if the device is a switch)
                 if (!validVlanMap.get(fixUrn).isEmpty()) {
                     List<Integer> options = validVlanMap.get(fixUrn).stream().sorted().collect(Collectors.toList());
@@ -678,38 +685,25 @@ public class VlanService {
                         Set<Integer> nfpvm = nonFixPortVlansMap.getOrDefault(parentDeviceUrn_e.getUrn(), new HashSet<>());
                         options.retainAll(nfpvm);
                     }
-                    // If there are no options for VLAN assignment, assign empty sets
-                    if (options.isEmpty()) {
-                        chosenVlanMap.put(fixUrn, new HashSet<>());
-                        if (isSwitch(parentDeviceUrn_e)) {
-                            for (String portUrn : nonFixPortUrnMap.get(parentDeviceUrn_e.getUrn())) {
-                                chosenVlanMap.putIfAbsent(portUrn, new HashSet<>());
-                            }
-                        }
-                    }
-                    // Otherwise, choose a VLAN and assign it to the fixture and the port URNs (if device is a switch)
-                    else {
+                    // If available options, choose a VLAN and assign it to the fixture and the port URNs (if device is a switch)
+                    if (!options.isEmpty()) {
                         Integer chosenVlan = options.get(0);
-                        chosenVlanMap.putIfAbsent(fixUrn, new HashSet<>());
                         chosenVlanMap.get(fixUrn).add(chosenVlan);
                         if (isSwitch(parentDeviceUrn_e)) {
                             vlansAssignedJunctionMap.get(parentDeviceUrn_e.getUrn()).add(chosenVlan);
                             for (String portUrn : nonFixPortUrnMap.get(parentDeviceUrn_e.getUrn())) {
-                                chosenVlanMap.putIfAbsent(portUrn, new HashSet<>());
                                 chosenVlanMap.get(portUrn).add(chosenVlan);
                             }
                         }
+                        //Increment the number of fixtures assigned
+                        numFixturesAssigned++;
                     }
-                }
-                // If there is no option for the fixture, assign it an empty set
-                else {
-                    chosenVlanMap.put(fixUrn, new HashSet<>());
                 }
             }
 
             // If no VLAN tags available at fixtures could be used, assign any VLAN available across the path
             // To every port in the path (excluding fixtures)
-            if (!pipeVlansAssigned) {
+            if (!pipeVlansAssigned && numFixturesAssigned == sortedFixtureUrns.size()) {
                 // If there's at least one VLAN ID available across the path
                 if (!availableVlansAcrossPath.isEmpty()) {
                     // Choose VLAN ID
@@ -721,7 +715,6 @@ public class VlanService {
                         if (nonFixPortUrnMap.get(aJunctionUrn).contains(pipeUrn) && isSwitch(aJunctionUrn_e)) {
                             vlansAssignedJunctionMap.get(aJunctionUrn).add(chosenVlan);
                             for (String portUrn : nonFixPortUrnMap.get(aJunctionUrn)) {
-                                chosenVlanMap.putIfAbsent(portUrn, new HashSet<>());
                                 chosenVlanMap.get(portUrn).add(chosenVlan);
                             }
                         }
@@ -729,16 +722,10 @@ public class VlanService {
                         if (nonFixPortUrnMap.get(zJunctionUrn).contains(pipeUrn) && isSwitch(zJunctionUrn_e)) {
                             vlansAssignedJunctionMap.get(zJunctionUrn).add(chosenVlan);
                             for (String portUrn : nonFixPortUrnMap.get(zJunctionUrn)) {
-                                chosenVlanMap.putIfAbsent(portUrn, new HashSet<>());
                                 chosenVlanMap.get(portUrn).add(chosenVlan);
                             }
                         }
-                        chosenVlanMap.putIfAbsent(pipeUrn, new HashSet<>());
                         chosenVlanMap.get(pipeUrn).add(chosenVlan);
-                    }
-                } else {
-                    for (String pipeUrn : pipeUrns) {
-                        chosenVlanMap.put(pipeUrn, new HashSet<>());
                     }
                 }
             }
@@ -751,6 +738,21 @@ public class VlanService {
             }
         }
 
+
+        return chosenVlanMap;
+    }
+
+    private Map<String,Set<Integer>> initializeChosenVlanMap(Set<String> pipeUrns, Map<String, Set<String>> nonFixPortUrnMap) {
+
+        Map<String, Set<Integer>> chosenVlanMap = new HashMap<>();
+        for(String pipeUrn : pipeUrns){
+            chosenVlanMap.put(pipeUrn, new HashSet<>());
+        }
+        for(Set<String> nonFixturePorts : nonFixPortUrnMap.values()){
+            for(String nonFixturePort : nonFixturePorts){
+                chosenVlanMap.put(nonFixturePort, new HashSet<>());
+            }
+        }
 
         return chosenVlanMap;
     }
@@ -1014,8 +1016,8 @@ public class VlanService {
 
         Set<String> urns = new HashSet<>();
 
-        List<TopoEdge> interEdges = edges.subList(2, edges.size() - 2);
-        for (TopoEdge edge : interEdges) {
+        //List<TopoEdge> interEdges = edges.size() > edges.subList(2, edges.size() - 2);
+        for (TopoEdge edge : edges) {
             String aUrnString = edge.getA().getUrn();
             String zUrnString = edge.getZ().getUrn();
             List<String> urnStrings = new ArrayList<>();
