@@ -228,8 +228,7 @@ public class TranslationPCE {
                                                                              RequestedVlanPipeE reqPipe,
                                                                              Map<String, UrnE> urnMap) throws PCEException {
         // Get map of "Ingress" and "Egress" bandwidth availability
-        Map<String, Map<String, Integer>> availBwMap;
-        availBwMap = bwService.buildBandwidthAvailabilityMap(reservedBandwidths);
+        Map<String, Map<String, Integer>> availBwMap = bwService.buildBandwidthAvailabilityMap(reservedBandwidths);
 
         // Returns a mapping from topovertices (ports) to an "Ingress"/"Egress" map of the total Ingress/Egress
         // Requested bandwidth at that port across both the azERO and the zaERO
