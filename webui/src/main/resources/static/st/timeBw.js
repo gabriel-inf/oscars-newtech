@@ -597,11 +597,15 @@ function drawBandwidthAvailabilityMap(azBW, zaBW)
     bwData.remove(oldBwValues);
 
     var theDates = Object.keys(azBW);
+    var maxBW = 100;
 
     for(var d = 0; d < theDates.length; d++)
     {
         var theTime = theDates[d];
         var theBW = azBW[theTime];
+
+        if(theBW > maxBW)
+            maxBW = theBW;
 
         bwData.add({x: theTime, y: theBW, group: 'avail'});
 
@@ -612,6 +616,13 @@ function drawBandwidthAvailabilityMap(azBW, zaBW)
 
         lastBW = theBW;
     }
+
+    if(maxBW < 100)
+        maxBW = 100;
+
+    console.log("Max B/W: " + maxBW);
+
+    //bwAvailMap.options.dataAxis.left.range.max = maxBW;
 
     updateBandwidth();
 }
@@ -882,7 +893,8 @@ function updateSubmissionPanel(submissionAllowed)
 {
     if(!submissionAllowed)
     {
-        button_hold.addClass("disabled").removeClass("enabled");
+        button_hold.addClass("disabled").removeClass("active");
+        button_hold.on('click', function(e){e.preventDefault();});
     }
     else
     {
@@ -893,6 +905,9 @@ function updateSubmissionPanel(submissionAllowed)
 
 function precheckRequestedReservation()
 {
+    button_hold.addClass("disabled").removeClass("active");
+    button_hold.on('click', function(e){e.preventDefault();});
+
     // Server expects seconds, not milliseconds
     var startSeconds = startTime / 1000;
     var endSeconds = endTime / 1000;
@@ -941,7 +956,13 @@ function precheckRequestedReservation()
 
             request["pipes"]["unicastPipe"] = {"a": srcNode, "z": dstNode, "bw": bandwidth, "azERO": forwardERO, "zaERO": reverseERO};
         }
-
+        else
+        {
+            var onlyNode = forwardERO[0];
+            request["junctions"][onlyNode] = {"fixtures": {}};
+            request["junctions"][onlyNode]["fixtures"][sourcePort] = {"bw": bandwidth, "vlan": "any"};
+            request["junctions"][onlyNode]["fixtures"][destPort] = {"bw": bandwidth, "vlan": "any"};
+        }
 
         var stringifiedRequest = JSON.stringify(request);
         console.log(stringifiedRequest);

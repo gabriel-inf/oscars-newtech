@@ -84,10 +84,6 @@ public class TopologyController
         Date startDate = new DateTime(minReq.getStartTime()).toDate();
         Date endDate = new DateTime(minReq.getEndTime()).toDate();
 
-        if(minReq.getAzERO().size() == 3)       // Single-node request
-            log.info("SINLGE DEVICE");
-
-
         BandwidthAvailabilityRequest bwRequest = new BandwidthAvailabilityRequest();
         bwRequest.setAzEros(eroListAZ);
         bwRequest.setZaEros(eroListZA);
@@ -95,6 +91,13 @@ public class TopologyController
         bwRequest.setMinZaBandwidth(minReq.getZaBandwidth());
         bwRequest.setStartDate(startDate);
         bwRequest.setEndDate(endDate);
+
+        log.info("AZ EROs: " + bwRequest.getAzEros());
+        log.info("ZA EROs: " + bwRequest.getZaEros());
+        log.info("AZ B/W: " + bwRequest.getMinAzBandwidth());
+        log.info("ZA B/W: " + bwRequest.getMinZaBandwidth());
+        log.info("Start: " + bwRequest.getStartDate());
+        log.info("End: " + bwRequest.getEndDate());
 
         BandwidthAvailabilityResponse bwResponse = restTemplate.postForObject(restPath, bwRequest, BandwidthAvailabilityResponse.class);
 
