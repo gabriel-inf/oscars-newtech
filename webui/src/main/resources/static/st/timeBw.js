@@ -28,6 +28,8 @@ var button_clearERO;
 var button_hold;
 var errorsBox;
 
+var timer;
+
 mostRecentPrecheckID = "";
 
 
@@ -895,10 +897,14 @@ function updateSubmissionPanel(submissionAllowed)
     {
         button_hold.addClass("disabled").removeClass("active");
         button_hold.on('click', function(e){e.preventDefault();});
+
+        clearTimer();
     }
     else
     {
-        precheckRequestedReservation();     // Automatically precheck when bwAvailability turns green
+        resetTimer();
+
+        //precheckRequestedReservation();     // Automatically precheck when bwAvailability turns green
     }
 }
 
@@ -1050,6 +1056,17 @@ function removeOutdatedPortsFromERO()
 
     if($.inArray(lastNode, netPorts) !== -1)
         fullERO.pop();
+}
+
+function resetTimer()
+{
+    clearTimeout(timer);
+    timer = setTimeout(precheckRequestedReservation, 2000);
+}
+
+function clearTimer()
+{
+    clearTimeout(timer);
 }
 
 
