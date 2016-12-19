@@ -895,8 +895,8 @@ function updateSubmissionPanel(submissionAllowed)
 {
     if(!submissionAllowed)
     {
-        button_hold.addClass("disabled").removeClass("active");
-        button_hold.on('click', function(e){e.preventDefault();});
+        button_hold.removeClass("active").addClass("disabled");
+        button_hold.off('click');
 
         clearTimer();
     }
@@ -911,8 +911,8 @@ function updateSubmissionPanel(submissionAllowed)
 
 function precheckRequestedReservation()
 {
-    button_hold.addClass("disabled").removeClass("active");
-    button_hold.on('click', function(e){e.preventDefault();});
+    button_hold.removeClass("active").addClass("disabled");
+    button_hold.off('click');
 
     // Server expects seconds, not milliseconds
     var startSeconds = startTime / 1000;
@@ -1061,7 +1061,7 @@ function removeOutdatedPortsFromERO()
 function resetTimer()
 {
     clearTimeout(timer);
-    timer = setTimeout(precheckRequestedReservation, 2000);
+    timer = setTimeout(precheckRequestedReservation, 1000);     // Wait 1 second of idle time before submitting Pre-check
 }
 
 function clearTimer()
