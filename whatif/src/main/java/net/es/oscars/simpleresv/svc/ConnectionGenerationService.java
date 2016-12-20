@@ -37,8 +37,8 @@ public class ConnectionGenerationService {
 
     public Connection buildConnection(Specification spec){
         return Connection.builder()
-                .connectionId(spec.getConnectionId())
-                .reserved(ReservedBlueprint.builder().vlanFlow(generateReservedVlanFlow()).build())
+                .connectionId(spec.getContainerConnectionId())
+                .reserved(ReservedBlueprint.builder().vlanFlow(generateReservedVlanFlow(spec.getContainerConnectionId())).containerConnectionId(spec.getContainerConnectionId()).build())
                 .schedule(generateSchedule())
                 .specification(spec)
                 .states(generateStates())
@@ -54,10 +54,10 @@ public class ConnectionGenerationService {
                 new HashSet<>(), "palindrome", "none", 1);
         flows.add(flow);
 
-        RequestedBlueprint reqBlueprint = generateRequestedBlueprint(flows, 1, 1);
+        RequestedBlueprint reqBlueprint = generateRequestedBlueprint(flows, 1, 1, bcs.getConnectionId());
         return  Specification.builder()
                 .scheduleSpec(generateScheduleSpecification(bcs.getStart(), bcs.getEnd()))
-                .connectionId(bcs.getConnectionId())
+                .containerConnectionId(bcs.getConnectionId())
                 .description(bcs.getDescription())
                 .requested(reqBlueprint)
                 .username("What-If")
@@ -67,11 +67,11 @@ public class ConnectionGenerationService {
 
     public Specification generateSpecification(CircuitSpecification cs){
 
-        RequestedBlueprint reqBlueprint = generateRequestedBlueprint(cs.getFlows(), cs.getMaxNumFlows(), cs.getMinNumFlows());
+        RequestedBlueprint reqBlueprint = generateRequestedBlueprint(cs.getFlows(), cs.getMaxNumFlows(), cs.getMinNumFlows(), cs.getConnectionId());
 
         return  Specification.builder()
                 .scheduleSpec(generateScheduleSpecification(cs.getStart(), cs.getEnd()))
-                .connectionId(cs.getConnectionId())
+                .containerConnectionId(cs.getConnectionId())
                 .description(cs.getDescription())
                 .requested(reqBlueprint)
                 .username(cs.getUsername())
@@ -79,7 +79,7 @@ public class ConnectionGenerationService {
                 .build();
     }
 
-    public RequestedBlueprint generateRequestedBlueprint(Set<CircuitFlow> flows, Integer maxNumFlows, Integer minNumFlows){
+    public RequestedBlueprint generateRequestedBlueprint(Set<CircuitFlow> flows, Integer maxNumFlows, Integer minNumFlows, String connectionId){
 
         Set<RequestedVlanJunction> junctions = new HashSet<>();
         Set<RequestedVlanPipe> pipes = new HashSet<>();
@@ -114,6 +114,7 @@ public class ConnectionGenerationService {
                 .pipes(pipes)
                 .maxPipes(maxNumFlows)
                 .minPipes(minNumFlows)
+                .containerConnectionId(connectionId)
                 .build();
 
         Layer3Flow layer3Flow = Layer3Flow.builder()
@@ -124,6 +125,7 @@ public class ConnectionGenerationService {
         return RequestedBlueprint.builder()
                 .vlanFlow(reqvf)
                 .layer3Flow(layer3Flow)
+                .containerConnectionId(connectionId)
                 .build();
     }
 
@@ -205,11 +207,12 @@ public class ConnectionGenerationService {
                 .build();
     }
 
-    public ReservedVlanFlow generateReservedVlanFlow(){
+    public ReservedVlanFlow generateReservedVlanFlow(String connectionId){
         return ReservedVlanFlow.builder()
                 .ethPipes(new HashSet<>())
                 .junctions(new HashSet<>())
                 .mplsPipes(new HashSet<>())
+                .containerConnectionId(connectionId)
                 .build();
     }
 

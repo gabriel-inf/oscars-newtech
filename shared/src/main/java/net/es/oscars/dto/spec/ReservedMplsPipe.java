@@ -1,5 +1,6 @@
 package net.es.oscars.dto.spec;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import net.es.oscars.dto.pss.MplsPipeType;
 
@@ -14,8 +15,10 @@ import java.util.UUID;
 public class ReservedMplsPipe {
     private Long id;
 
+    @JsonProperty("aJunction")
     private ReservedVlanJunction aJunction;
 
+    @JsonProperty("zJunction")
     private ReservedVlanJunction zJunction;
 
     private Set<ReservedBandwidth> reservedBandwidths;

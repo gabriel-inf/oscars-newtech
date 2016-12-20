@@ -12,7 +12,6 @@ import java.util.Set;
 public class ReservedVlanFlow {
     private Long id;
 
-
     private Set<ReservedVlanJunction> junctions;
 
     private Set<ReservedEthPipe> ethPipes;
@@ -20,4 +19,7 @@ public class ReservedVlanFlow {
     private Set<ReservedMplsPipe> mplsPipes;
 
     private Set<BidirectionalPath> allPaths;
+
+    @NonNull
+    private String containerConnectionId;       // Unique ID of the containing Connection
 }

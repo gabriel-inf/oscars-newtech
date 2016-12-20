@@ -11,10 +11,12 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class MinimalPipe {
-    private String bw;
-    private String a;
-    private String z;
+public class MinimalBwAvailRequest
+{
+    private String startTime;
+    private String endTime;
     private List<String> azERO;
     private List<String> zaERO;
+    private Integer azBandwidth;
+    private Integer zaBandwidth;
 }

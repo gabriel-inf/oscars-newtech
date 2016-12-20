@@ -1,9 +1,6 @@
 package net.es.oscars.resv.ent;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import net.es.oscars.topo.ent.BidirectionalPathE;
 
 import javax.persistence.*;
@@ -31,5 +28,8 @@ public class ReservedVlanFlowE {
 
     @OneToMany(cascade = CascadeType.ALL)
     private Set<BidirectionalPathE> allPaths;
+
+    @NonNull
+    private String containerConnectionId;       // Unique ID of the containing Connection
 
 }

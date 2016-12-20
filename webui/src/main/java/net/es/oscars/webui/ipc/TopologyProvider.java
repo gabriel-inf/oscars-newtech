@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -47,6 +48,24 @@ public class TopologyProvider {
 
         return devicePortMap;
     }
+
+    // Reverse of devicePortMap: Key = port, Value = corresponding device
+    public Map<String, String> portDeviceMap()
+    {
+        Map<String, String> p2d = new HashMap<>();
+        Map<String, Set<String>> d2p = devicePortMap();
+
+        for (String d : d2p.keySet())
+        {
+            for (String p : d2p.get(d))
+            {
+                p2d.put(p, d);
+            }
+        }
+
+        return p2d;
+    }
+
     public Map<String, Set<String>> getHubs() {
         Map<String, Set<String>> result = new HashMap<>();
         return result;
@@ -72,10 +91,55 @@ public class TopologyProvider {
     public List<ReservableBandwidth> getPortCapacities()
     {
         String restPath = oscarsUrl + "/topo/allport/bwcapacity";
-        log.info("REST PATH: " + restPath);
+
         ReservableBandwidth[] portBW = restTemplate.getForObject(restPath, ReservableBandwidth[].class);
 
         return Arrays.asList(portBW);
+    }
+
+
+    public Integer computeLinkCapacity(String portA, String portZ, List<ReservableBandwidth> portCapacities)
+    {
+        // Compute link capacities from port capacities //
+        List<ReservableBandwidth> portCaps = portCapacities.stream()
+                .filter(p -> p.getTopoVertexUrn().equals(portA) || p.getTopoVertexUrn().equals(portZ))
+                .collect(Collectors.toList());
+
+        assert(portCaps.size() == 2);
+
+        ReservableBandwidth bw1 = portCaps.get(0);
+        ReservableBandwidth bw2 = portCaps.get(1);
+        Integer aCapIn;
+        Integer aCapEg;
+        Integer zCapIn;
+        Integer zCapEg;
+
+        Integer minCap;
+
+        if(bw1.getTopoVertexUrn().equals(portA))
+        {
+            aCapIn = bw1.getIngressBw();
+            aCapEg = bw1.getEgressBw();
+            zCapIn = bw2.getIngressBw();
+            zCapEg = bw2.getEgressBw();
+        }
+        else
+        {
+            aCapIn = bw2.getIngressBw();
+            aCapEg = bw2.getEgressBw();
+            zCapIn = bw1.getIngressBw();
+            zCapEg = bw1.getEgressBw();
+        }
+
+        Set<Integer> bwCapSet = new HashSet<>();
+        bwCapSet.add(aCapIn);
+        bwCapSet.add(aCapEg);
+        bwCapSet.add(zCapIn);
+        bwCapSet.add(zCapEg);
+
+        minCap = bwCapSet.stream().min(Integer::compare).get();
+
+        return minCap;
     }
 
 

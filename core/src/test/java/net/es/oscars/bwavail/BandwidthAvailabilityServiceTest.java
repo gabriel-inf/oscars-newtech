@@ -101,6 +101,108 @@ public class BandwidthAvailabilityServiceTest {
     }
 
     @Test
+    public void noReservationsTestJunction(){
+
+        reservedBandwidthRepo.deleteAll();
+        topologyBuilder.buildTopoFourPaths();
+        List<UrnE> urns = urnRepo.findAll();
+        Map<String, UrnE> urnMap = urns.stream().collect(Collectors.toMap(UrnE::getUrn, urn -> urn));
+        Instant now = Instant.parse("1995-10-23T00:00:00Z");
+
+        List<String> reservedPortNames = new ArrayList<>();
+        List<Instant> reservedStartTimes = new ArrayList<>();
+        List<Instant> reservedEndTimes = new ArrayList<>();
+        List<Integer> inBandwidths = new ArrayList<>();
+        List<Integer> egBandwidths = new ArrayList<>();
+
+        Integer expectedMinAzBw = 1000;
+        Integer expectedMinZaBw = 1000;
+
+        List<String> path = Arrays.asList("portA", "nodeK", "nodeK:3");
+        List<String> revPath = new ArrayList<>(path);
+        Collections.reverse(revPath);
+
+        Instant requestStartTime = now.plus(1L, ChronoUnit.HOURS);
+        Instant requestEndTime = now.plus(5L, ChronoUnit.HOURS);
+
+        Map<Instant, Integer> azGoalMap = new HashMap<>();
+        azGoalMap.put(now.plus(1L, ChronoUnit.HOURS), 1000);
+        azGoalMap.put(now.plus(5L, ChronoUnit.HOURS), 1000);
+        Map<Instant, Integer> zaGoalMap = new HashMap<>();
+        zaGoalMap.put(now.plus(1L, ChronoUnit.HOURS), 1000);
+        zaGoalMap.put(now.plus(5L, ChronoUnit.HOURS), 1000);
+
+        log.info("Start time: " + requestStartTime);
+        log.info("End time: " + requestEndTime);
+
+
+        Map<String, Integer> minExpectedBwMap = new HashMap<>();
+        minExpectedBwMap.put(az1, expectedMinAzBw);
+        minExpectedBwMap.put(za1, expectedMinZaBw);
+
+        Map<String, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
+        expectedBwMap.put(az1, azGoalMap);
+        expectedBwMap.put(za1, zaGoalMap);
+
+        //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
+        //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        BandwidthAvailabilityResponse response = placeRequestJunction(requestStartTime, requestEndTime);
+        testResponse(response, minExpectedBwMap, expectedBwMap);
+    }
+
+    @Test
+    public void noReservationsTestJunctionPath(){
+
+        reservedBandwidthRepo.deleteAll();
+        topologyBuilder.buildTopoFourPaths();
+        List<UrnE> urns = urnRepo.findAll();
+        Map<String, UrnE> urnMap = urns.stream().collect(Collectors.toMap(UrnE::getUrn, urn -> urn));
+        Instant now = Instant.parse("1995-10-23T00:00:00Z");
+
+        List<String> reservedPortNames = new ArrayList<>();
+        List<Instant> reservedStartTimes = new ArrayList<>();
+        List<Instant> reservedEndTimes = new ArrayList<>();
+        List<Integer> inBandwidths = new ArrayList<>();
+        List<Integer> egBandwidths = new ArrayList<>();
+
+        Integer expectedMinAzBw = 1000;
+        Integer expectedMinZaBw = 1000;
+
+        List<String> path = Arrays.asList("portA", "nodeK", "nodeK:3");
+        List<String> revPath = new ArrayList<>(path);
+        Collections.reverse(revPath);
+
+        Instant requestStartTime = now.plus(1L, ChronoUnit.HOURS);
+        Instant requestEndTime = now.plus(5L, ChronoUnit.HOURS);
+
+        Map<Instant, Integer> azGoalMap = new HashMap<>();
+        azGoalMap.put(now.plus(1L, ChronoUnit.HOURS), 1000);
+        azGoalMap.put(now.plus(5L, ChronoUnit.HOURS), 1000);
+        Map<Instant, Integer> zaGoalMap = new HashMap<>();
+        zaGoalMap.put(now.plus(1L, ChronoUnit.HOURS), 1000);
+        zaGoalMap.put(now.plus(5L, ChronoUnit.HOURS), 1000);
+
+        log.info("Start time: " + requestStartTime);
+        log.info("End time: " + requestEndTime);
+
+
+        Map<String, Integer> minExpectedBwMap = new HashMap<>();
+        minExpectedBwMap.put(az1, expectedMinAzBw);
+        minExpectedBwMap.put(za1, expectedMinZaBw);
+
+        Map<String, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
+        expectedBwMap.put(az1, azGoalMap);
+        expectedBwMap.put(za1, zaGoalMap);
+
+        //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
+        //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        BandwidthAvailabilityResponse response = placeRequestJunctionPath(requestStartTime, requestEndTime);
+        testResponse(response, minExpectedBwMap, expectedBwMap);
+    }
+
+    @Test
     public void reservationsOffPathTest(){
 
         reservedBandwidthRepo.deleteAll();
@@ -1615,6 +1717,51 @@ public class BandwidthAvailabilityServiceTest {
         return bwAvailService.getBandwidthAvailabilityMap(request);
     }
 
+    private BandwidthAvailabilityResponse placeRequestJunction(Instant requestStartTime, Instant requestEndTime) {
+        BandwidthAvailabilityRequest request = BandwidthAvailabilityRequest.builder()
+                .startDate(new Date(requestStartTime.toEpochMilli()))
+                .endDate(new Date(requestEndTime.toEpochMilli()))
+                .minAzBandwidth(10)
+                .minZaBandwidth(10)
+                .srcDevice("nodeK")
+                .srcPorts(Collections.singletonList("portA"))
+                .dstDevice("nodeK")
+                .dstPorts(Collections.singletonList("nodeK:3"))
+                .numPaths(1)
+                .disjointPaths(true)
+                .azEros(new ArrayList<>())
+                .zaEros(new ArrayList<>())
+                .build();
+
+        return bwAvailService.getBandwidthAvailabilityMap(request);
+    }
+
+    private BandwidthAvailabilityResponse placeRequestJunctionPath(Instant requestStartTime, Instant requestEndTime) {
+        ArrayList<String> azERO = new ArrayList<>();
+        azERO.add("portA");
+        azERO.add("nodeK");
+        azERO.add("nodeK:3");
+        ArrayList<String> zaERO = new ArrayList<>(azERO);
+        Collections.reverse(zaERO);
+
+        BandwidthAvailabilityRequest request = BandwidthAvailabilityRequest.builder()
+                .startDate(new Date(requestStartTime.toEpochMilli()))
+                .endDate(new Date(requestEndTime.toEpochMilli()))
+                .minAzBandwidth(10)
+                .minZaBandwidth(10)
+                .srcDevice("")
+                .srcPorts(Collections.singletonList(""))
+                .dstDevice("")
+                .dstPorts(Collections.singletonList(""))
+                .numPaths(1)
+                .disjointPaths(true)
+                .azEros(Collections.singletonList(azERO))
+                .zaEros(Collections.singletonList(zaERO))
+                .build();
+
+        return bwAvailService.getBandwidthAvailabilityMap(request);
+    }
+
     private BandwidthAvailabilityResponse placeRequest(Instant requestStartTime, Instant requestEndTime,
                                                        Integer numPaths, Boolean disjoint) {
         BandwidthAvailabilityRequest request = BandwidthAvailabilityRequest.builder()
@@ -1659,6 +1806,7 @@ public class BandwidthAvailabilityServiceTest {
                     .ending(reservedEndTimes.get(index))
                     .inBandwidth(inBandwidths.get(index))
                     .egBandwidth(egBandwidths.get(index))
+                    .containerConnectionId("testConenctionID")
                     .build());
         }
         reservedBandwidthRepo.save(reservedBandwidths);

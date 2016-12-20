@@ -25,7 +25,7 @@ public class SpecificationE {
     private String description;
 
     @NonNull
-    private String connectionId;
+    private String containerConnectionId;       // Unique ID of the containing Connection
 
     @Embedded
     private ScheduleSpecificationE scheduleSpec;

@@ -88,6 +88,7 @@ public class BandwidthService {
         // Build a map, allowing us to retrieve a list of ReservedBandwidth given the associated URN
         Map<String, List<ReservedBandwidthE>> resvBwMap = buildReservedBandwidthMap(rsvBandwidths);
 
+        log.info(resvBwMap.toString());
         // Build a map, allowing us to retrieve the available "Ingress" and "Egress" bandwidth at each associated URN
         Map<String, Map<String, Integer>> availBwMap = new HashMap<>();
         urnRepository.findAll()
@@ -136,16 +137,98 @@ public class BandwidthService {
         availBw.put("Egress", bandwidth.getEgressBw());
         if (resvBwMap.containsKey(urn)) {
             List<ReservedBandwidthE> resvBwList = resvBwMap.get(urn);
-            Integer sumIngress = 0;
-            Integer sumEgress = 0;
-            for (ReservedBandwidthE resv : resvBwList) {
-                sumIngress += resv.getInBandwidth();
-                sumEgress += resv.getEgBandwidth();
+            Integer maxIngress = 0;
+            Integer maxEgress = 0;
+
+            // Find all overlapping bandwidth tuples
+            // Find the max ingress and egress consumed during any time period
+            Set<Set<ReservedBandwidthE>> overlappingReservations = findOverlappingBandwidthReservations(resvBwList);
+            for(Set<ReservedBandwidthE> overlap : overlappingReservations){
+                // Sum up the ingress and egress used by these overlapping reservations
+                Integer sumIngress = 0;
+                Integer sumEgress = 0;
+                for (ReservedBandwidthE resv : overlap) {
+                    sumIngress += resv.getInBandwidth();
+                    sumEgress += resv.getEgBandwidth();
+                }
+                // If either metric is greater than the current max, it's the new max
+                maxIngress = Math.max(sumIngress, maxIngress);
+                maxEgress = Math.max(sumEgress, maxEgress);
             }
-            availBw.put("Ingress", Math.max(bandwidth.getIngressBw() - sumIngress, 0));
-            availBw.put("Egress", Math.max(bandwidth.getEgressBw() - sumEgress, 0));
+            // Remove the maximum reserved bandwidth from the available ingress/egress
+            availBw.put("Ingress", Math.max(bandwidth.getIngressBw() - maxIngress, 0));
+            availBw.put("Egress", Math.max(bandwidth.getEgressBw() - maxEgress, 0));
         }
         return availBw;
+    }
+
+    /**
+     * Find all subsets of reserved bandwidth, where all members of each subset overlap entirely with each other
+     * @param resvBwList - List of reserved bandwidths.
+     * @return Every subset of pairwise overlapping bandwidth reservations.
+     */
+    private Set<Set<ReservedBandwidthE>> findOverlappingBandwidthReservations(List<ReservedBandwidthE> resvBwList) {
+        Set<Set<ReservedBandwidthE>> powerSet = new HashSet<>();
+        powerSet.add(new HashSet<>());
+
+        // For each reserved bandwidth, add it to all existing subsets in the power set
+        for(ReservedBandwidthE resvBw : resvBwList){
+            // Store the new subsets
+            Set<Set<ReservedBandwidthE>> newSets = new HashSet<>();
+            // For each existing subset, add the current reserved bandwidth
+            for(Set<ReservedBandwidthE> subset : powerSet){
+                Set<ReservedBandwidthE> newSubset = new HashSet<>(subset);
+                newSubset.add(resvBw);
+                newSets.add(newSubset);
+            }
+            powerSet.addAll(newSets);
+        }
+
+        // Filter out the subsets where all members do not overlap
+        return powerSet.stream().filter(this::allOverlap).collect(Collectors.toSet());
+    }
+
+
+    /**
+     * Given a subset of reserved bandwidth, determine if ALL of them overlap with each other (pairwise)
+     * @param subset - A set of reserved bandwidth.
+     * @return True if they all overlap, False otherwise (or if there is nothing in the subset)
+     */
+    private boolean allOverlap(Set<ReservedBandwidthE> subset) {
+        List<ReservedBandwidthE> reservedList = new ArrayList<>(subset);
+
+        // Can only have an overlap if there's at least one item
+        boolean doesOverlap = reservedList.size() > 0;
+
+        // If you have more than one item, ALL of them most overlap in time with each other
+        if(reservedList.size() > 1) {
+            // Get the "first" bandwidth
+            for (Integer firstIndex = 0; firstIndex < reservedList.size(); firstIndex++) {
+                ReservedBandwidthE firstBw = reservedList.get(firstIndex);
+                // Get each "following" bandwidth in the list
+                for (Integer secondIndex = firstIndex + 1; secondIndex < reservedList.size(); secondIndex++) {
+                    ReservedBandwidthE otherBw = reservedList.get(secondIndex);
+                    // If they don't overlap, this subset is no good
+                    if (!determineOverlap(firstBw, otherBw)) {
+                        doesOverlap = false;
+                        break;
+                    }
+                }
+            }
+        }
+        return doesOverlap;
+
+    }
+
+    /**
+     * Given two reserved bandwidth, determine if they overlap in time.
+     * @param aBw - One of the bandwidths.
+     * @param bBw - The other bandwidth.
+     * @return True if they do overlap, False otherwise.
+     */
+    private boolean determineOverlap(ReservedBandwidthE aBw, ReservedBandwidthE bBw){
+        // If a.start <= b.end && b.start <= a.end
+        return aBw.getBeginning().isBefore(bBw.getEnding()) && bBw.getBeginning().isBefore(aBw.getEnding());
     }
 
     /**

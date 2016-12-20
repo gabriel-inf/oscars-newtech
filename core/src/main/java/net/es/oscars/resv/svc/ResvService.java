@@ -128,7 +128,9 @@ public class ResvService {
                             .mplsPipes(new HashSet<>())
                             .ethPipes(new HashSet<>())
                             .allPaths(new HashSet<>())
+                            .containerConnectionId(c.getConnectionId())
                             .build())
+                    .containerConnectionId(c.getConnectionId())
                     .build());
             c.getStates().setResv(ResvState.ABORTING);
             connRepo.save(c);
@@ -139,8 +141,8 @@ public class ResvService {
     // internal convenience
 
     private ConnectionE deleteReserved(ConnectionE c) {
-        ReservedVlanFlowE emptyFlow = ReservedVlanFlowE.builder().build();
-        ReservedBlueprintE reserved = ReservedBlueprintE.builder().vlanFlow(emptyFlow).build();
+        ReservedVlanFlowE emptyFlow = ReservedVlanFlowE.builder().containerConnectionId(c.getConnectionId()).build();
+        ReservedBlueprintE reserved = ReservedBlueprintE.builder().vlanFlow(emptyFlow).containerConnectionId(c.getConnectionId()).build();
         c.setReserved(reserved);
         return c;
     }

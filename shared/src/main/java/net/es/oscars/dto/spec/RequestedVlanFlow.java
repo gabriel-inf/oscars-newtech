@@ -9,8 +9,8 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RequestedVlanFlow {
-    private Long id;
 
+    private Long id;
 
     private Set<RequestedVlanJunction> junctions;
 
@@ -21,4 +21,7 @@ public class RequestedVlanFlow {
 
     @NonNull
     private Integer maxPipes;
+
+    @NonNull
+    private String containerConnectionId;       // Unique ID of the containing Connection
 }

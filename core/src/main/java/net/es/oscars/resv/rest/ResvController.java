@@ -5,7 +5,7 @@ import net.es.oscars.dto.resv.Connection;
 import net.es.oscars.dto.resv.ConnectionFilter;
 import net.es.oscars.pce.PCEException;
 import net.es.oscars.pss.PSSException;
-import net.es.oscars.resv.ent.*;
+import net.es.oscars.resv.ent.ConnectionE;
 import net.es.oscars.resv.svc.ResvService;
 import net.es.oscars.st.resv.ResvState;
 import org.modelmapper.ModelMapper;
@@ -102,6 +102,7 @@ public class ResvController {
                 result.add(dtoItem);
             }
         }
+
         return result;
     }
 

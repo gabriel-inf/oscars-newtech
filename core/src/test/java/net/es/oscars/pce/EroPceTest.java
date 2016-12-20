@@ -601,7 +601,7 @@ public class EroPceTest
         pipeAZTest.setAzERO(azERO);
         pipeAZTest.setZaERO(zaERO);
         pipesTest.add(pipeAZTest);
-        blueprintTest = testBuilder.buildRequest(pipesTest, 2, 2);
+        blueprintTest = testBuilder.buildRequest(pipesTest, 2, 2, "eroTest");
         connectionTest = testBuilder.buildConnection(blueprintTest, requestedSched, "connTest", "End-to-End Connection");
 
         // Initial request which allows us to avoid altering BandwidthRepo -- Reserves a bunch of critical B/W
@@ -619,7 +619,7 @@ public class EroPceTest
         RequestedVlanPipeE pipeAZBig = testBuilder.buildRequestedPipe(srcPortsBig, srcDeviceBig, dstPortsBig, dstDeviceBig,
                 azBWBig, zaBWBig, palindrome, survivability, vlan, 1);
         pipesBig.add(pipeAZBig);
-        blueprintBig = testBuilder.buildRequest(pipesBig, 1, 1);
+        blueprintBig = testBuilder.buildRequest(pipesBig, 1, 1, "eroTest");
         connectionBig = testBuilder.buildConnection(blueprintBig, requestedSched, "connBig", "Big Single-link Connection");
 
 
@@ -714,7 +714,7 @@ public class EroPceTest
         pipeAZTest.setAzERO(azERO);
         pipeAZTest.setZaERO(zaERO);
         pipesTest.add(pipeAZTest);
-        blueprintTest = testBuilder.buildRequest(pipesTest, 1, 1);
+        blueprintTest = testBuilder.buildRequest(pipesTest, 1, 1, "eroTest");
         connectionTest = testBuilder.buildConnection(blueprintTest, requestedSched, "connTest", "End-to-End Connection");
 
         // Initial request which allows us to avoid altering BandwidthRepo -- Reserves a bunch of critical B/W
@@ -732,7 +732,7 @@ public class EroPceTest
         RequestedVlanPipeE pipeAZBig = testBuilder.buildRequestedPipe(srcPortsBig, srcDeviceBig, dstPortsBig, dstDeviceBig,
                 azBWBig, zaBWBig, palindrome, survivability, vlan, 1);
         pipesBig.add(pipeAZBig);
-        blueprintBig = testBuilder.buildRequest(pipesBig, 1, 1);
+        blueprintBig = testBuilder.buildRequest(pipesBig, 1, 1, "eroTest");
         connectionBig = testBuilder.buildConnection(blueprintBig, requestedSched, "connBig", "Big Single-link Connection");
 
 
@@ -955,7 +955,7 @@ public class EroPceTest
         pipeAZ.setZaERO(zaERO);
 
         pipes.add(pipeAZ);
-        requestedBlueprint = testBuilder.buildRequest(pipes, 1, 1);
+        requestedBlueprint = testBuilder.buildRequest(pipes, 1, 1, "eroTest");
         connection = testBuilder.buildConnection(requestedBlueprint, requestedSched, "connBig", "Big Single-link Connection");
 
         log.info("Beginning test: \'" + testName + "\'.");
@@ -1033,7 +1033,7 @@ public class EroPceTest
         pipeAZ.setZaERO(zaERO);
 
         pipes.add(pipeAZ);
-        requestedBlueprint = testBuilder.buildRequest(pipes, 1, 1);
+        requestedBlueprint = testBuilder.buildRequest(pipes, 1, 1, "eroTest");
         connection = testBuilder.buildConnection(requestedBlueprint, requestedSched, "connBig", "Big Single-link Connection");
 
         log.info("Beginning test: \'" + testName + "\'.");
@@ -1135,7 +1135,7 @@ public class EroPceTest
         pipeAZ.setZaERO(zaRequested);
 
         pipes.add(pipeAZ);
-        requestedBlueprint = testBuilder.buildRequest(pipes, 1, 1);
+        requestedBlueprint = testBuilder.buildRequest(pipes, 1, 1, "eroTest");
 
         log.info("Beginning test: 'multiMplsPipeTestNonPal'.");
 
@@ -1554,7 +1554,7 @@ public class EroPceTest
 
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
 
-        RequestedBlueprintE reqBlueprint = testBuilder.buildRequest(new HashSet<>(Collections.singletonList(pipeAZ)), 1, 1);
+        RequestedBlueprintE reqBlueprint = testBuilder.buildRequest(new HashSet<>(Collections.singletonList(pipeAZ)), 1, 1, "eroTest");
 
         log.info("Beginning test: \'" + testName + "\'.");
 

@@ -142,10 +142,11 @@ public class TopPCE {
                 .ethPipes(ethPipesPerRange.get(chosenRangeIndex))
                 .mplsPipes(mplsPipesPerRange.get(chosenRangeIndex))
                 .allPaths(allPathsPerRange.get(chosenRangeIndex))
+                .containerConnectionId(requested.getContainerConnectionId())
                 .build();
 
         // Build the reserved Blueprint
-        reserved = Optional.of(ReservedBlueprintE.builder().vlanFlow(res_f).build());
+        reserved = Optional.of(ReservedBlueprintE.builder().vlanFlow(res_f).containerConnectionId(res_f.getContainerConnectionId()).build());
 
         // Store the chosen dates
         reservedSched.add(ranges.get(chosenRangeIndex).get(0));
@@ -193,8 +194,7 @@ public class TopPCE {
         // Keep track of the number of successfully reserved pipes (numReserved)
         // Attempt to reserve all requested pipes
         log.info("Starting to handle pipes");
-        Integer numReserved = handleRequestedPipes(pipes, start, end, simpleJunctions, reservedMplsPipes,
-                reservedEthPipes, deviceToPortMap, portToDeviceMap, allPaths);
+        Integer numReserved = handleRequestedPipes(pipes, start, end, simpleJunctions, reservedMplsPipes, reservedEthPipes, deviceToPortMap, portToDeviceMap, allPaths, req_f.getContainerConnectionId());
 
         // If pipes were not able to be reserved in the original order, try reversing the order pipes are attempted
         if ((numReserved != pipes.size()) && (pipes.size() > 1)) {
@@ -203,8 +203,7 @@ public class TopPCE {
             reservedMplsPipes = new HashSet<>();
             reservedEthJunctions = new HashSet<>();
             allPaths = new HashSet<>();
-            numReserved = handleRequestedPipes(pipes, start, end, simpleJunctions, reservedMplsPipes,
-                    reservedEthPipes, deviceToPortMap, portToDeviceMap, allPaths);
+            numReserved = handleRequestedPipes(pipes, start, end, simpleJunctions, reservedMplsPipes, reservedEthPipes, deviceToPortMap, portToDeviceMap, allPaths, req_f.getContainerConnectionId());
         }
 
         // If the pipes still cannot be reserved, no later range can work
@@ -247,8 +246,7 @@ public class TopPCE {
             List<ReservedVlanE> rsvVlans = vlanService.createReservedVlanList(simpleJunctions, new HashSet<>(), start, end);
 
             try {
-                ReservedVlanJunctionE junction = transPCE.reserveSimpleJunction(reqJunction,
-                        rsvBandwidths, rsvVlans, deviceToPortMap, portToDeviceMap, start, end);
+                ReservedVlanJunctionE junction = transPCE.reserveSimpleJunction(reqJunction, rsvBandwidths, rsvVlans, deviceToPortMap, portToDeviceMap, start, end, req_f.getContainerConnectionId());
                 if (junction != null) {
                     simpleJunctions.add(junction);
                 }
@@ -269,12 +267,14 @@ public class TopPCE {
      * @param reservedMplsPipes - The currently reserved MPLS pipes
      * @param reservedEthPipes  - The currently reserved Ethernet pipes
      * @param deviceToPortMap
-     * @param portToDeviceMap   @return The number of requested pipes which were able to be reserved
+     * @param portToDeviceMap
+     * @param connectionId      - The unique ID of the connection containing the requested pipes
+     * @return The number of requested pipes which were able to be reserved
      */
     private Integer handleRequestedPipes(List<RequestedVlanPipeE> pipes, Date start, Date end,
                                          Set<ReservedVlanJunctionE> simpleJunctions, Set<ReservedMplsPipeE> reservedMplsPipes,
                                          Set<ReservedEthPipeE> reservedEthPipes, Map<String, Set<String>> deviceToPortMap,
-                                         Map<String, String> portToDeviceMap, Set<BidirectionalPathE> allPaths) {
+                                         Map<String, String> portToDeviceMap, Set<BidirectionalPathE> allPaths, String connectionId) {
         // The number of requested pipes successfully reserved
         Integer numReserved = 0;
 
@@ -307,8 +307,7 @@ public class TopPCE {
 
                 // Try to get the reserved resources
                 try {
-                    transPCE.reserveRequestedPipe(pipe, azEros, zaEros, rsvBandwidths, rsvVlans,
-                            reservedMplsPipes, reservedEthPipes, deviceToPortMap, portToDeviceMap, start, end);
+                    transPCE.reserveRequestedPipe(pipe, azEros, zaEros, rsvBandwidths, rsvVlans, reservedMplsPipes, reservedEthPipes, deviceToPortMap, portToDeviceMap, start, end, connectionId);
                 }
                 // If it failed, decrement the number reserved
                 catch (Exception e) {
@@ -340,8 +339,7 @@ public class TopPCE {
 
                 // Try to get the reserved resources
                 try {
-                    transPCE.reserveRequestedPipeWithPairs(pipe, azEROs, zaEROs, rsvBandwidths,
-                            rsvVlans, reservedMplsPipes, reservedEthPipes, deviceToPortMap, portToDeviceMap, start, end);
+                    transPCE.reserveRequestedPipeWithPairs(pipe, azEROs, zaEROs, rsvBandwidths, rsvVlans, reservedMplsPipes, reservedEthPipes, deviceToPortMap, portToDeviceMap, start, end, connectionId);
                 }
                 // If it failed, decrement the number reserved
                 catch (Exception e) {
@@ -555,7 +553,7 @@ public class TopPCE {
             azPath.add(0, fixToJunctionEdges.get(0));
             // Reverse above list
             List<TopoEdge> zaPath = fixToJunctionEdges.subList(1, fixToJunctionEdges.size());
-            zaPath.add(0, junctionToFixEdges.get(0));
+            zaPath.add(junctionToFixEdges.get(0));
             allPaths.add(BidirectionalPathE.builder()
                     .azPath(convertTopoEdgePathToEdges(azPath))
                     .zaPath(convertTopoEdgePathToEdges(zaPath))

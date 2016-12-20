@@ -187,31 +187,66 @@ public class VizExporter {
             }
         }
 
+        // Retrieve bandwidth capacity for each port //
+        List<ReservableBandwidth> portCapacities = topologyProvider.getPortCapacities();
 
         Topology multilayer = topologyProvider.getTopology();
         List<String> added = new ArrayList<>();
 
-        for (TopoEdge topoEdge : multilayer.getEdges()) {
-            String a = topoEdge.getA().getUrn();
-            String z = topoEdge.getZ().getUrn();
-            String dev_a = reverseMap.get(a);
-            String dev_z = reverseMap.get(z);
-            String e_id = a + " -- " + z;
-            String r_id = z + " -- " + a;
-            if (!added.contains(r_id)) {
+        for (TopoEdge topoEdge : multilayer.getEdges())
+        {
+            String aPort = topoEdge.getA().getUrn();
+            String zPort = topoEdge.getZ().getUrn();
+            String aDevice = reverseMap.get(aPort);
+            String zDevice = reverseMap.get(zPort);
 
-                added.add(e_id);
-                added.add(r_id);
-                VizEdge ve = VizEdge.builder()
-                        .from(dev_a).to(dev_z).title(e_id).label("").value(1)
-                        .id(e_id)
-                        .arrows(null).arrowStrikethrough(false).color(null)
-                        .build();
+            // Ignore all edges between devices and ports. Only display Port-to-Port links //
+            if(topoEdge.getA().getVertexType().equals(VertexType.PORT) && topoEdge.getZ().getVertexType().equals(VertexType.PORT))
+            {
+                String edgeID = aPort + " -- " + zPort;
+                String reverseID = zPort + " -- " + aPort;
 
-                g.getEdges().add(ve);
+                if(!added.contains(reverseID))
+                {
+                    Integer minCap = topologyProvider.computeLinkCapacity(aPort, zPort, portCapacities);
+                    String capString = new String();
 
+                    if(minCap >= 1000)
+                    {
+                        double minCapDub = (double)minCap / 1000;
+                        capString = minCapDub + " Gbps";
+                    }
+                    else
+                    {
+                        capString += minCap + " Mbps";
+                    }
+
+                    String linkTitle = edgeID + ", Capacity: " + System.lineSeparator() + capString;
+
+                    int lineWidth = 1;
+
+                    if(minCap <= 1000)
+                        lineWidth = 4;
+                    else if(minCap <= 10000)
+                        lineWidth = 4;
+                    else if(minCap <= 100000)
+                        lineWidth = 4;
+
+                    added.add(edgeID);
+                    added.add(reverseID);
+                    VizEdge ve = VizEdge.builder()
+                            .from(aDevice).to(zDevice)
+                            .id(edgeID)
+                            .title(linkTitle)
+                            .label("")
+                            .value(lineWidth)
+                            .arrows(null).arrowStrikethrough(false).color(null)
+                            .build();
+
+                    g.getEdges().add(ve);
+
+                }
             }
-
         }
 
         for (String deviceUrn : portMap.keySet()) {
@@ -240,9 +275,6 @@ public class VizExporter {
 
         // Retrieve bandwidth capacity for each port //
         List<ReservableBandwidth> portCapacities = topologyProvider.getPortCapacities();
-
-        //log.info("A capacity: " + aCap.getBandwidth() + " Mbps");
-        //log.info("Z capacity: " + zCap.getBandwidth() + " Mbps");
 
         Topology multilayer = topologyProvider.getTopology();
         List<String> added = new ArrayList<>();
@@ -356,7 +388,6 @@ public class VizExporter {
 
         return g;
     }
-
 
 
     private void makeNode(String node, VizGraph g) {

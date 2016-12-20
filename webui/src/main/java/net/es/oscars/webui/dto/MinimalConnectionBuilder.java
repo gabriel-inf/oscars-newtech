@@ -11,7 +11,6 @@ import net.es.oscars.st.oper.OperState;
 import net.es.oscars.st.prov.ProvState;
 import net.es.oscars.st.resv.ResvState;
 
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 /**
@@ -42,10 +41,14 @@ public class MinimalConnectionBuilder
                 .ethPipes(new HashSet<>())
                 .junctions(new HashSet<>())
                 .mplsPipes(new HashSet<>())
+                .containerConnectionId(connectionId)
                 .build();
 
         ReservedBlueprint rbp = ReservedBlueprint.builder()
-                .vlanFlow(resvf).build();
+                .vlanFlow(resvf)
+                .containerConnectionId(connectionId)
+                .build();
+
         Schedule sch = Schedule.builder()
                 .setup(new Date())
                 .teardown(new Date())
@@ -73,6 +76,7 @@ public class MinimalConnectionBuilder
                 .pipes(new HashSet<>())
                 .maxPipes(1)
                 .minPipes(1)
+                .containerConnectionId(connectionId)
                 .build();
 
         Map<String, RequestedVlanJunction> junctionMap = new HashMap<>();
@@ -107,14 +111,23 @@ public class MinimalConnectionBuilder
             inPipes.add(aJ);
             inPipes.add(zJ);
             Integer bw = Integer.parseInt(minRequest.getPipes().get(pipeId).getBw());
+
+            if(minRequest.getPipes().get(pipeId).getAzERO() == null)
+                minRequest.getPipes().get(pipeId).setAzERO(new ArrayList<String>());
+
+            if(minRequest.getPipes().get(pipeId).getZaERO() == null)
+                minRequest.getPipes().get(pipeId).setZaERO(new ArrayList<String>());
+
             RequestedVlanPipe rvp = RequestedVlanPipe.builder()
                     .aJunction(aJ)
                     .zJunction(zJ)
                     .numDisjoint(1)
                     .azMbps(bw)
                     .zaMbps(bw)
-                    .azERO(new ArrayList<>())
-                    .zaERO(new ArrayList<>())
+                    //.azERO(new ArrayList<>())
+                    //.zaERO(new ArrayList<>())
+                    .azERO(minRequest.getPipes().get(pipeId).getAzERO())
+                    .zaERO(minRequest.getPipes().get(pipeId).getZaERO())
                     .urnBlacklist(new HashSet<>())
                     .eroPalindromic(PalindromicType.PALINDROME)
                     .eroSurvivability(SurvivabilityType.SURVIVABILITY_NONE)
@@ -132,11 +145,12 @@ public class MinimalConnectionBuilder
         RequestedBlueprint reqbp = RequestedBlueprint.builder()
                 .layer3Flow(layer3Flow)
                 .vlanFlow(reqvf)
+                .containerConnectionId(connectionId)
                 .build();
 
         Specification spec = Specification.builder()
                 .scheduleSpec(ss)
-                .connectionId(connectionId)
+                .containerConnectionId(connectionId)
                 .description(minRequest.getDescription())
                 .requested(reqbp)
                 .username(username)

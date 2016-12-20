@@ -69,8 +69,10 @@ public class SimpleResvController {
         log.info("Specification Params: " + spec);
 
         Connection conn = connectionGenerationService.generateConnection(spec);
+
         // Submit
         conn = requestController.submit(conn);
+
         // Commit if submit was successful
         if(conn.getStates().getResv().equals(ResvState.HELD)) {
             conn = requestController.commit(conn.getConnectionId());

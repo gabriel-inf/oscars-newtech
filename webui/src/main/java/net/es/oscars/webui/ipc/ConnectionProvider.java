@@ -28,7 +28,6 @@ public class ConnectionProvider {
         String submitUrl = "/resv/filter";
         String restPath = oscarsUrl + submitUrl;
         log.info("sending filter " + filter.toString());
-        //Set<Connection> result = restTemplate.postForObject(restPath, filter, Set.class);
 
         HttpEntity<ConnectionFilter> requestEntity = new HttpEntity<>(filter);
         ParameterizedTypeReference<Set<Connection>> typeRef = new ParameterizedTypeReference<Set<Connection>>() {};

@@ -1,7 +1,6 @@
 package net.es.oscars.dto.spec;
 
 import lombok.*;
-import net.es.oscars.dto.topo.Urn;
 
 import java.time.Instant;
 
@@ -14,6 +13,9 @@ public class ReservedBandwidth {
 
     @NonNull
     private String urn;
+
+    @NonNull
+    private String containerConnectionId;       // Unique ID of the containing Connection
 
     //private Integer bandwidth;
 

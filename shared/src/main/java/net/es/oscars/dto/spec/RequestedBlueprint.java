@@ -2,8 +2,6 @@ package net.es.oscars.dto.spec;
 
 import lombok.*;
 
-import java.util.Set;
-
 @Data
 @Builder
 @NoArgsConstructor
@@ -17,4 +15,7 @@ public class RequestedBlueprint {
 
     @NonNull
     private Layer3Flow layer3Flow;
+
+    @NonNull
+    private String containerConnectionId;       // Unique ID of the containing Connection
 }

@@ -6,6 +6,7 @@ import net.es.oscars.dto.bwavail.PortBandwidthAvailabilityRequest;
 import net.es.oscars.dto.bwavail.PortBandwidthAvailabilityResponse;
 import net.es.oscars.dto.resv.Connection;
 import net.es.oscars.dto.resv.ConnectionFilter;
+import net.es.oscars.dto.spec.RequestedVlanPipe;
 import net.es.oscars.dto.topo.BidirectionalPath;
 import net.es.oscars.dto.topo.Edge;
 import net.es.oscars.webui.dto.MinimalRequest;
@@ -61,14 +62,24 @@ public class ReservationController {
 
 
     @RequestMapping("/resv/list")
-    public String resv_list(Model model) {
+    public String resv_list(Model model) { return "resv_list"; }
+
+
+    @RequestMapping(value = "/resv/list/allconnections", method = RequestMethod.GET)
+    @ResponseBody
+    public Set<Connection> resv_list_connections()
+    {
         ConnectionFilter f = ConnectionFilter.builder().build();
-        Set<Connection> connections = connectionProvider.filtered(f);
+        Set<Connection> filteredConnections = connectionProvider.filtered(f);
 
-        model.addAttribute("connections", connections);
+        for(Connection c : filteredConnections)
+        {
+            Set<RequestedVlanPipe> pipes = c.getSpecification().getRequested().getVlanFlow().getPipes();
+        }
 
-        return "resv_list";
+        return filteredConnections;
     }
+
 
     @RequestMapping(value = "/resv/commit/{connectionId}", method = RequestMethod.GET)
     public String connection_commit(@PathVariable String connectionId, Model model) {
@@ -129,7 +140,6 @@ public class ReservationController {
         res.put("connectionId", c.getConnectionId());
 
         return res;
-
     }
 
 
@@ -138,6 +148,7 @@ public class ReservationController {
     public Map<String, String> resv_preCheck(@RequestBody MinimalRequest request)
     {
         Connection c = minimalPreChecker.preCheckMinimal(request);
+        log.info("Request Details: " + request.toString());
 
         Map<String, String> res = new HashMap<>();
 

@@ -28,5 +28,6 @@ public class RequestedVlanFlowE {
     @NonNull
     private Integer maxPipes;
 
-
+    @NonNull
+    private String containerConnectionId;       // Unique ID of the containing Connection
 }

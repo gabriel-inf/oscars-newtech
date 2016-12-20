@@ -1,20 +1,17 @@
 package net.es.oscars;
 
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.dto.spec.PalindromicType;
-import net.es.oscars.dto.spec.SurvivabilityType;
-import net.es.oscars.topo.dao.UrnRepository;
-import net.es.oscars.pce.PCEException;
-import net.es.oscars.pss.PSSException;
 import net.es.oscars.dto.pss.EthFixtureType;
 import net.es.oscars.dto.pss.EthJunctionType;
 import net.es.oscars.dto.pss.EthPipeType;
-import net.es.oscars.resv.ent.*;
+import net.es.oscars.dto.spec.PalindromicType;
+import net.es.oscars.dto.spec.SurvivabilityType;
+import net.es.oscars.pce.PCEException;
+import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.dao.SpecificationRepository;
-import net.es.oscars.topo.ent.UrnE;
-import net.es.oscars.topo.pop.TopoFileImporter;
+import net.es.oscars.resv.ent.*;
+import net.es.oscars.topo.dao.UrnRepository;
 import net.es.oscars.topo.pop.TopoImporter;
-import net.es.oscars.topo.prop.TopoProperties;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,11 +20,13 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
 
 @Slf4j
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -128,6 +127,8 @@ public class SpecPopTest {
         Date notBefore = new Date(nowInstant.plus(15L, ChronoUnit.MINUTES).getEpochSecond());
         Date notAfter = new Date(nowInstant.plus(1L, ChronoUnit.DAYS).getEpochSecond());
 
+        String connID = "UFAWE";
+
         ScheduleSpecificationE sse = ScheduleSpecificationE.builder()
                 .startDates(Collections.singletonList(notBefore))
                 .endDates(Collections.singletonList(notAfter))
@@ -139,18 +140,20 @@ public class SpecPopTest {
                 .pipes(new HashSet<>())
                 .minPipes(1)
                 .maxPipes(1)
+                .containerConnectionId(connID)
                 .build();
 
         RequestedBlueprintE bp = RequestedBlueprintE.builder()
                 .vlanFlow(flow)
                 .layer3Flow(Layer3FlowE.builder().build())
+                .containerConnectionId(connID)
                 .build();
 
         SpecificationE spec = SpecificationE.builder()
                 .scheduleSpec(sse)
                 .version(1)
                 .requested(bp)
-                .connectionId("UFAWE")
+                .containerConnectionId(connID)
                 .description("a description")
                 .username("some user")
                 .build();

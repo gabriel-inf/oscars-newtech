@@ -11,6 +11,8 @@ import net.es.oscars.dto.topo.enums.DeviceModel;
 import net.es.oscars.dto.topo.enums.DeviceType;
 import net.es.oscars.dto.topo.enums.Layer;
 import net.es.oscars.dto.topo.enums.UrnType;
+import net.es.oscars.resv.dao.ReservedBandwidthRepository;
+import net.es.oscars.resv.ent.ReservedBandwidthE;
 import net.es.oscars.topo.dao.ReservableBandwidthRepository;
 import net.es.oscars.topo.dao.ReservableVlanRepository;
 import net.es.oscars.topo.dao.UrnAdjcyRepository;
@@ -38,6 +40,8 @@ public class TopoService {
 
     private ReservableBandwidthRepository bwRepo;
 
+    private ReservedBandwidthRepository bwResRepo;
+
     public UrnE getUrn(String urn) throws NoSuchElementException {
         return urnRepo.findByUrn(urn).orElseThrow(NoSuchElementException::new);
     }
@@ -45,11 +49,12 @@ public class TopoService {
 
     @Autowired
     public TopoService(UrnAdjcyRepository adjcyRepo, UrnRepository urnRepo,
-                       ReservableVlanRepository vlanRepo, ReservableBandwidthRepository bwRepo) {
+                       ReservableVlanRepository vlanRepo, ReservableBandwidthRepository bwRepo, ReservedBandwidthRepository bwResRepo) {
         this.adjcyRepo = adjcyRepo;
         this.urnRepo = urnRepo;
         this.vlanRepo = vlanRepo;
         this.bwRepo = bwRepo;
+        this.bwResRepo = bwResRepo;
     }
 
     public Topology layer(Layer layer) throws NoSuchElementException {
@@ -247,5 +252,10 @@ public class TopoService {
             deviceToPortMap.get(device).forEach(port -> portToDeviceMap.put(port, device));
         }
         return portToDeviceMap;
+    }
+
+    public List<ReservedBandwidthE> reservedBandwidths()
+    {
+        return bwResRepo.findAll();
     }
 }

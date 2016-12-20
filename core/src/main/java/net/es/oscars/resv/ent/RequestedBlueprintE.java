@@ -3,7 +3,6 @@ package net.es.oscars.resv.ent;
 import lombok.*;
 
 import javax.persistence.*;
-import java.util.Set;
 
 @Data
 @Entity
@@ -22,5 +21,6 @@ public class RequestedBlueprintE {
     @OneToOne (cascade = CascadeType.ALL)
     private Layer3FlowE layer3Flow;
 
-
+    @NonNull
+    private String containerConnectionId;       // Unique ID of the containing Connection
 }

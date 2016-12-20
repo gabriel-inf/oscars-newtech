@@ -34,6 +34,22 @@
                     <div>
                         <button type="reset" id="buttonCancelERO" class="btn btn-danger disabled" onclick="clearERO()">Clear Path</button>
                     </div>
+                    <div class="dropdown">
+                        <p style="font-size:16px">Select Source Port</p>
+                        <button type="button" id="srcPortDrop" class="btn dropdown-toggle" data-toggle="dropdown" data-target="#">
+                            --
+                            <span class="caret" />
+                        </button>
+                        <ul class="dropdown-menu" id="srcPortList"></ul>
+                    </div>
+                    <div class="dropdown">
+                        <p style="font-size:16px">Select Destination Port</p>
+                        <button type="button" id="dstPortDrop" class="btn dropdown-toggle" data-toggle="dropdown" data-target="#">
+                            --
+                            <span class="caret" />
+                        </button>
+                        <ul class="dropdown-menu" id="dstPortList"></ul>
+                    </div>
                 </div>
             </div>
         </div>
@@ -46,20 +62,31 @@
                 </h4>
             </div>
             <div id="availability_panel" class="panel-body collapse  collapse in">
+            <div id="errors_box" class="alert"/>
                 <div style="float:left" >
-                    <input id = "bwSlider" type="range" class="verticalSlider" orient="vertical" min="0" max="30" value="10" step="1" height="400px" width="5px"/>
+                    <input id = "bwSlider" type="range" class="verticalSlider" orient="vertical" min="0" max="10000" value="2500" step="1" height="400px" width="5px"/>
                 </div>
                 <div id="bwVisualization"></div>
             </div>
         </div>
     </div>
-
-<p>Bandwidth: </p>
-<p id="bandwidth"></p>
-<p>Start Time:</p>
-<p id="start-time"></p>
-<p>End Time:</p>
-<p id="end-time"></p>
-
+    <div style="width:50%; margin:auto;">
+        <div class = "paramdisplay">
+            <p class="paramdisplay">Bandwidth: </p>
+            <p id="bandwidthVal" class="paramdisplay" />
+            <p id="bandwidthUnit" class="paramdisplay">Mb/s</p>
+        </div>
+        <div class = "paramdisplay">
+            <p class="paramdisplay">Start Time:</p>
+            <p id="start-time" class="paramdisplay" />
+            <p />
+            <p class="paramdisplay">End Time:</p>
+            <p id="end-time" class="paramdisplay" />
+        </div>
+    </div>
+    <div style="width:40%; margin:auto; padding:auto">
+        <button id="buttonHold" class="btn btn-primary disabled" style="font-size:25px;border:none;cursor:pointer;min-width:300px;">Place Reservation</button>
+    </div>
+    <div style="margin-bottom:20px;" />
 </body>
 </html>
