@@ -1,6 +1,8 @@
 var bwViz;          // Bandwidth-Availability HTML container
 var bwAvailMap;     // Bandwidth-Availability Bar Graph element
 var bwData;         // Data in the map
+var bwGroups;       // Set of datapoint groups in the map (only 2 groups)
+var bwOptions;      // Default options of map
 
 var netViz;         // Network map HTML container
 var networkMap;     // Network map element
@@ -28,7 +30,8 @@ var button_clearERO;
 var button_hold;
 var errorsBox;
 
-var timer;
+var pcTimer;              // Used to prevent excessive precheck triggers: Allows precheck after 1 second of idle time
+var refTimer;             // Used to automatically refresh bandwidth availability map every 30 seconds
 
 mostRecentPrecheckID = "";
 
@@ -280,7 +283,7 @@ function initializeBandwidthMap()
     var nowDate = Date.now();
     var furthestDate = nowDate + 1000 * 60 * 60 * 24 * 365 * 2  // 2 years in the future
 
-    var bwOptions = {
+    bwOptions = {
         style:'line',
         drawPoints: false,
         dataAxis: { icons:true },
@@ -304,21 +307,32 @@ function initializeBandwidthMap()
 
     bwData = new vis.DataSet();
 
-    // Set up the look of the availability data points
-    var groupSettings = {
-        id: 0,
-        content: 'avail',
-        style: 'stroke-width: 1; stroke: #709FE0;',
+    // Set up the look of the availability data points //
+    var groupSettingsAvail = {
+        id: "avail",
+        content: "Group Name",
+        style: 'stroke-width:1;stroke:#709FE0;',
         options: {
-            shaded: {enabled: true, orientation: 'bottom', style: 'fill-opacity: 0.5; fill: #709FE0;'},
+            shaded: {enabled: true, orientation: 'bottom', style: 'fill-opacity:0.5;fill:#709FE0;'},
         }
     };
 
-    var groupData = new vis.DataSet();
-    groupData.add(groupSettings);
+    // Set up the look of the reservation window data points //
+    var groupSettingsBar = {
+            id: "bwBar",
+            content: "Group Name",
+            style: 'stroke-width:5;stroke:red;',
+            options: {
+                shaded: {enabled: true, orientation: 'bottom', style: 'fill-opacity:0.7;fill:red;',},
+            }
+    };
+
+    bwGroups = new vis.DataSet();
+    bwGroups.add(groupSettingsAvail);
+    bwGroups.add(groupSettingsBar);
 
     // Create the Bar Graph
-    bwAvailMap = new vis.Graph2d(bwViz, bwData, groupData, bwOptions);
+    bwAvailMap = new vis.Graph2d(bwViz, bwData, bwGroups, bwOptions);
 
     bwData.add({x: nowDate, y: -10, group: 'avail'});
     bwData.add({x: furthestDate, y: -10, group: 'avail'});
@@ -421,28 +435,21 @@ function updateBandwidth()
 
     var isAvailable = inspectAvailability(bwSlider.value);
 
+
+    // Updated Color of area under reservation window //
     var color = 'red';
     if(isAvailable)
-    {
         color = 'green';
-    }
 
-    var linestyle = 'stroke-width:5;' + ' stroke:' + color + ';';
-    var fillstyle = 'fill-opacity:0.7;' + ' fill:' + color + ';';
+    var linestyle = 'stroke-width:5;stroke:' + color + ';';
+    var fillstyle = 'fill-opacity:0.7;fill:' + color + ';';
 
-    var groupData = {
-            id: "bwBar",
-            content: "Group Name",
-            style: linestyle,
-            options: {
-                shaded: {enabled: true, orientation: 'bottom', style: fillstyle,},
-            }
-    };
+    var bwBarGroup = bwGroups.get('bwBar');
+    bwBarGroup.style = linestyle;
+    bwBarGroup.options.shaded.style = fillstyle;
+    bwGroups.update(bwBarGroup);
 
-    var groups = new vis.DataSet();
-    groups.add(groupData);
-    bwAvailMap.setGroups(groups);
-
+    // Update values of reservation window //
     var oldBwValues = bwData.getIds({ filter: function (item) { return item.group === 'bwBar'; }});
     var newBwValueLeft  = {x: startTime, y: bwSlider.value, group: 'bwBar'};
     var newBwValueRight = {x: endTime, y: bwSlider.value, group: 'bwBar'};
@@ -588,6 +595,28 @@ function resetBandwidthAvailabilityMap()
     bwData.add({x: nowDate, y: -10, group: 'avail'});
     bwData.add({x: furthestDate, y: -10, group: 'avail'});
 
+    var currWindow = bwAvailMap.getWindow();
+    var currStart = currWindow.start;
+    var currEnd = currWindow.end;
+
+    console.log("currStart: " + currStart);
+    console.log("currEnd: " + currEnd);
+
+    // Set Map and Slider to range 0 - 100 //
+    var bwSlider = document.getElementById('bwSlider');
+    var oldMax = bwSlider.max;
+    var oldVal = bwSlider.value;
+    var newMax = 100;
+    var newVal = Math.floor(oldVal * newMax / oldMax);
+    bwSlider.max = newMax;
+    bwSlider.value = newVal;
+    bwOptions.dataAxis.left.range.max = newMax;
+    bwOptions.start = currStart;        // Don't reset window view of b/w availability map
+    bwOptions.end = currEnd;
+    bwAvailMap.setOptions(bwOptions);
+
+    clearRefreshTimer();
+
     updateBandwidth();
 }
 
@@ -599,15 +628,11 @@ function drawBandwidthAvailabilityMap(azBW, zaBW)
     bwData.remove(oldBwValues);
 
     var theDates = Object.keys(azBW);
-    var maxBW = 100;
 
     for(var d = 0; d < theDates.length; d++)
     {
         var theTime = theDates[d];
         var theBW = azBW[theTime];
-
-        if(theBW > maxBW)
-            maxBW = theBW;
 
         bwData.add({x: theTime, y: theBW, group: 'avail'});
 
@@ -619,20 +644,62 @@ function drawBandwidthAvailabilityMap(azBW, zaBW)
         lastBW = theBW;
     }
 
-    if(maxBW < 100)
-        maxBW = 100;
+    // Get minimum reservable bandwidth along this path as the upper bound for the y-axis //
+    var portsOnPath = [];
+    for(var n = 0; n < fullERO.length; n++)
+    {
+        var oneNode = fullERO[n];
 
-    console.log("Max B/W: " + maxBW);
+        if($.inArray(oneNode,netPorts) !== -1)
+            portsOnPath.push(oneNode);
+    }
 
-    //bwAvailMap.options.dataAxis.left.range.max = maxBW;
+    var stringifiedInput = JSON.stringify(portsOnPath);
 
-    updateBandwidth();
+    $.ajax({
+        type: "POST",
+        url: "/topology/bwcapacity",
+        data: stringifiedInput,
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function (portCaps)
+        {
+            var minPortCap = 999999999;
+            for(var p = 0; p < portsOnPath.length; p++)
+            {
+                var onePortName = portsOnPath[p];
+                var onePortCap = portCaps[onePortName];
+
+                if(onePortCap < minPortCap)
+                    minPortCap = onePortCap;
+            }
+
+            var currWindow = bwAvailMap.getWindow();
+            var currStart = currWindow.start;
+            var currEnd = currWindow.end;
+
+            // Set Map and Slider to range 0 - Min Reservable B/W for this path //
+            var bwSlider = document.getElementById('bwSlider');
+            var oldMax = bwSlider.max;
+            var oldVal = bwSlider.value;
+            var newMax = minPortCap;
+            var newVal = Math.floor(oldVal * newMax / oldMax);
+            bwSlider.max = newMax;
+            bwSlider.value = newVal;
+            bwOptions.dataAxis.left.range.max = newMax;
+            bwOptions.start = currStart;        // Don't reset window view of b/w availability map
+            bwOptions.end = currEnd;
+            bwAvailMap.setOptions(bwOptions);
+
+            updateBandwidth();
+        }
+    });
+
+    resetRefreshTimer();
 }
 
 function getPathMinAvailability()
 {
-    console.log("Src Port: " + sourcePort);
-    console.log("Dst Port: " + destPort);
     if(sourcePort === '--' || destPort === '--')
     {
         errorsBox.addClass("alert-danger");
@@ -898,11 +965,11 @@ function updateSubmissionPanel(submissionAllowed)
         button_hold.removeClass("active").addClass("disabled");
         button_hold.off('click');
 
-        clearTimer();
+        clearPrecheckTimer();
     }
     else
     {
-        resetTimer();
+        resetPrecheckTimer();
 
         //precheckRequestedReservation();     // Automatically precheck when bwAvailability turns green
     }
@@ -1058,15 +1125,32 @@ function removeOutdatedPortsFromERO()
         fullERO.pop();
 }
 
-function resetTimer()
+function resetPrecheckTimer()
 {
-    clearTimeout(timer);
-    timer = setTimeout(precheckRequestedReservation, 1000);     // Wait 1 second of idle time before submitting Pre-check
+    clearTimeout(pcTimer);
+    pcTimer = setTimeout(precheckRequestedReservation, 1000);     // Wait 1 second of idle time before submitting Pre-check
 }
 
-function clearTimer()
+function clearPrecheckTimer()
 {
-    clearTimeout(timer);
+    clearTimeout(pcTimer);
+}
+
+function resetRefreshTimer()
+{
+    clearTimeout(refTimer);
+    refTimer = setTimeout(function()
+    {
+        console.log("Refreshing Availability...");
+        removeOutdatedPortsFromERO();
+        getPathMinAvailability();
+    }, 30000);     // Wait 30 seconds of idle time before refreshing bw/availability map
+}
+
+
+function clearRefreshTimer()
+{
+    clearTimeout(refTimer);
 }
 
 
