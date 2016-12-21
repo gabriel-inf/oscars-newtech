@@ -188,7 +188,6 @@ public class BandwidthService {
         }
 
         // Filter out the subsets where all members do not overlap
-        //return powerSet.stream().filter(this::allOverlap).collect(Collectors.toSet());
         return powerSet;
     }
 
