@@ -23,6 +23,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 // development!
                     .antMatchers("/resv/**").permitAll()
                     .antMatchers("/topology/**").permitAll()
+                    .antMatchers("/react").permitAll()
 
                 // index page and REST endpoints:
                     .antMatchers("/").permitAll()
