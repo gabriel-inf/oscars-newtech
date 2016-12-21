@@ -9,6 +9,7 @@ import net.es.oscars.dto.spec.ReservedVlanFlow;
 import net.es.oscars.dto.spec.ReservedVlanJunction;
 import net.es.oscars.dto.topo.enums.DeviceModel;
 import net.es.oscars.pce.TopPCE;
+import net.es.oscars.pss.PSSException;
 import net.es.oscars.pss.tpl.Assembler;
 import net.es.oscars.pss.tpl.Stringifier;
 import net.es.oscars.resv.dao.ConnectionRepository;
@@ -38,7 +39,7 @@ public class PssResourceService {
     @Autowired
     private RouterCommandGenerator rcg;
 
-    public void generateConfig(ConnectionE conn) {
+    public void generateConfig(ConnectionE conn) throws PSSException {
         rcg.generateConfig(conn);
     }
 

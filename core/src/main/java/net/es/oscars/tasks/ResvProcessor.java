@@ -61,7 +61,11 @@ public class ResvProcessor {
         // process committing reservations
         resvService.ofProvState(ProvState.READY_TO_GENERATE).forEach(c -> {
                     log.info("ready to generate config for " + c.getConnectionId());
-                    pssResourceService.generateConfig(c);
+                    try {
+                        pssResourceService.generateConfig(c);
+                    } catch (PSSException e) {
+                        e.printStackTrace();
+                    }
                 }
         );
 
