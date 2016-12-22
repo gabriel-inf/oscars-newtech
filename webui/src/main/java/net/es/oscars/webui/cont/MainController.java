@@ -36,6 +36,12 @@ public class MainController {
     private final String oscarsUrl = "https://localhost:8000";
 
 
+    @RequestMapping("/react")
+    public String reactPage(Model model) {
+        return "react";
+    }
+
+
     @RequestMapping(value = "/info/institutions", method = RequestMethod.GET)
     @ResponseBody
     public List<String> institution_suggestions() {

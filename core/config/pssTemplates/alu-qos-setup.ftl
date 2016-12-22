@@ -55,7 +55,7 @@
 /configure qos ${sapType} ${qosId} queue 3 best-effort create
 
 <#-- egress only,when protect is set TODO: check w chin -->
-<#if protect>
+<#if protect??>
 /configure qos ${sapType} ${qosId} queue 3 rate max cir 1000
 </#if>
 
