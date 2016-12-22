@@ -37,6 +37,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 // only admins for this one
                     .antMatchers("/admin/**").hasAuthority("ADMIN")
 
+                //built
+                    .antMatchers("/built/**").permitAll()
+
                 // only admins
                     .anyRequest().authenticated()
                     .and()
