@@ -2,27 +2,57 @@ const React = require('react');
 const ReservationMap = require('./reservationMap');
 const NavBar = require('./navbar');
 const loadJSON = require('./client');
+const connHelper = require('./connection_helper');
+const networkVis = require('./networkVis');
 
 class ReservationListApp extends React.Component{
 
     constructor(props){
         super(props);
-        this.state = {reservations: [], previousReservations: []};
+        this.state = {reservations: []};
         this.setState = this.setState.bind(this);
         this.componentDidMount = this.componentDidMount.bind(this);
+        this.updateReservations = this.updateReservations.bind(this);
+        this.listHasChanged = this.listHasChanged.bind(this);
     }
 
     componentDidMount(){
-        let resvs = [];
+        return this.updateReservations();
+    }
+
+    updateReservations(){
         loadJSON('/resv/list/allconnections', (response) =>
         {
-            resvs = JSON.parse(response);
-            this.setState({reservations: resvs, previousReservations: resvs});
-        });
-        /*client({method: 'GET', path: '/resv/list/allconnections'}).done(response => {
             let resvs = JSON.parse(response);
-            this.setState({reservations: resvs, previousReservations: resvs})
-        });*/
+            if(this.listHasChanged(this.state.reservations, resvs)){
+                this.setState({reservations: resvs});
+            }
+        });
+
+        setTimeout(this.updateReservations, 30000);   // Updates every 30 seconds
+    }
+
+    listHasChanged(oldConnectionList, newConnectionList) {
+        // Won't slow things down if newConnectionList is also empty
+        if($.isEmptyObject(oldConnectionList))
+            return true;
+
+        // Same size
+        if(oldConnectionList.length !== newConnectionList.length)
+            return true;
+
+        // Same Reservations - All properties unchanged
+        for(let o = 0; o < oldConnectionList.length; o++)
+        {
+            let oldConn = oldConnectionList[o];
+
+            let newIndex = connHelper.connectionIndex(oldConn, newConnectionList);
+
+            if(newIndex === -1)
+                return true;
+        }
+
+        return false;
     }
 
     render() {
@@ -35,8 +65,6 @@ class ReservationListApp extends React.Component{
         );
     }
 }
-
-module.exports = ReservationListApp;
 
 class ReservationList extends React.Component{
 
@@ -107,116 +135,6 @@ class ReservationListItem extends React.Component{
     }
 }
 
-
-// Used to determine if reservations from previous refresh have changed //
-function listHasChanged(oldConnectionList, newConnectionList)
-{
-    // Won't slow things down if newConnectionList is also empty
-    if($.isEmptyObject(oldConnectionList))
-        return true;
-
-    // Same size
-    if(oldConnectionList.length !== newConnectionList.length)
-        return true;
-
-    // Same Reservations - All properties unchanged
-    for(let o = 0; o < oldConnectionList.length; o++)
-    {
-        let oldConn = oldConnectionList[o];
-
-        let newIndex = connectionIndex(oldConn, newConnectionList);
-
-        if(newIndex === -1)
-            return true;
-    }
-
-    return false;
-}
-
-
-/* Identify outdated connections and remove them from Reservation List DOM Table */
-function removeOldConnections(oldConnectionList, newConnectionList)
-{
-    let connsToRemove = [];
-
-    for(let o = 0; o < oldConnectionList.length; o++)
-    {
-        let oldConn = oldConnectionList[o];
-
-        let newIndex = connectionIndex(oldConn, newConnectionList);
-
-        if(newIndex === -1)
-            connsToRemove.push(oldConn);
-    }
-
-    console.log("ConnsToRemove Size: " + connsToRemove.length);
-
-    for(let c = 0; c < connsToRemove.length; c++)
-    {
-        let deadConn = connsToRemove[c];
-
-        let listBody = document.getElementById('listBody');
-        let connectionRow = document.getElementById("row_" + deadConn.connectionId);
-        let hiddenRow = document.getElementById("hidden_" + deadConn.connectionId);
-
-        listBody.removeChild(connectionRow);
-        listBody.removeChild(hiddenRow);
-    }
-}
-
-/* Disregards any unchanged connections and returns a set of exclusively new or updated connections -- Used to prevent complete renewal of connection list table */
-function getNewConnections(oldConnectionList, newConnectionList)
-{
-    let newConnections = [];
-
-    for(let n = 0; n < newConnectionList.length; n++)
-    {
-        let newConn = newConnectionList[n];
-
-        let oldIndex = connectionIndex(newConn, oldConnectionList);
-
-        if(oldIndex === -1)
-            newConnections.push(newConn);
-    }
-
-    return newConnections;
-}
-
-/* Populates and Refreshes list of connections in the DOM table -- Refreshes automatically */
-function initializeConnectionList()
-{
-    console.log("Refreshing Connections...");
-
-    let previousConnections = filteredConnections.slice();
-    filteredConnections = [];
-    filteredConnectionIDs = [];
-
-    loadJSON("/resv/list/allconnections", function (response)
-    {
-        filteredConnections = JSON.parse(response);
-
-        filteredConnections.forEach(function(conn){ filteredConnectionIDs.push(conn.connectionId); });
-
-        // Do nothing if no connections have been added/removed/updated since last refresh //
-        if(!listHasChanged(previousConnections, filteredConnections))
-        {
-            console.log("NO CHANGE");
-            return;
-        }
-
-        // Delete rows from DOM Table for removed/outdated connections //
-        removeOldConnections(previousConnections, filteredConnections);
-
-        // Add rows to DOM Table only for added/updated connections //
-        let newConnections = getNewConnections(previousConnections, filteredConnections);
-
-
-        getAllReservedBWs();
-    });
-
-    setTimeout(initializeConnectionList, 30000);   // Updates every 30 seconds
-}
-
 function showDetails(connectionToShow)
 {
     let connID = connectionToShow.id.split("accordion_");
@@ -281,15 +199,8 @@ function drawReservation (connectionID)
             }
         };
 
-        reservation_viz = make_network(json_data, vizElement, resOptions, vizName);
+        reservation_viz = networkVis.make_network(json_data, vizElement, resOptions, vizName);
     });
 }
 
-$(function ()
-{
-    let token = $("meta[name='_csrf']").attr("content");
-    let header = $("meta[name='_csrf_header']").attr("content");
-    $(document).ajaxSend(function (e, xhr, options) {
-        xhr.setRequestHeader(header, token);
-    });
-});
+module.exports = ReservationListApp;
