@@ -1,4 +1,5 @@
 const React = require('react');
+const Link = require('react-router').Link;
 
 // tag::navbar[]
 class NavBar extends React.Component{
@@ -10,9 +11,9 @@ class NavBar extends React.Component{
                         <button type="button" className="navbar-toggle collapsed" data-toggle="collapse"
                                 data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
                             <span className="sr-only">Toggle navigation</span>
-                            <span className="icon-bar"></span>
-                            <span className="icon-bar"></span>
-                            <span className="icon-bar"></span>
+                            <span className="icon-bar"> </span>
+                            <span className="icon-bar"> </span>
+                            <span className="icon-bar"> </span>
                         </button>
                         <a className="navbar-brand" href="#">OSCARS</a>
                     </div>
@@ -43,6 +44,10 @@ class NavBar extends React.Component{
     }
 }
 
+// <li><Link to="/">Reservation List</Link></li>
+// <li><Link to="/resv/gui">New Reservation</Link></li>
+// <li><Link to="/resv/timebw">What-If?</Link></li>
+
 class AuthenticatedNavBarElement extends React.Component{
 
     render(){
@@ -50,7 +55,7 @@ class AuthenticatedNavBarElement extends React.Component{
             <li className="dropdown">
                 <a href="#" className="dropdown-toggle" data-toggle="dropdown"
                    role="button" aria-haspopup="true" aria-expanded="false">
-                    Reservations<span className="caret"></span></a>
+                    Reservations<span className="caret"> </span></a>
 
                 <ul className="dropdown-menu">
                     <li><a href="/resv/list">List</a></li>
@@ -68,7 +73,7 @@ class AdminNavBarElement extends React.Component{
             <li className="dropdown">
                 <a href="#" className="dropdown-toggle" data-toggle="dropdown"
                    role="button" aria-haspopup="true" aria-expanded="false">Administration
-                    <span className="caret"></span></a>
+                    <span className="caret"> </span></a>
                 <ul className="dropdown-menu">
                     <li><a href="/admin/user_list">User List</a></li>
                     <li><a href="/admin/user_add">Add a user</a></li>
