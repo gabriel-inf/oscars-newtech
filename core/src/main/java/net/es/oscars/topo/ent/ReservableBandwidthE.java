@@ -26,4 +26,8 @@ public class ReservableBandwidthE {
 
     private Integer egressBw;
 
+    public String toString(){
+        return super.toString();
+    }
+
 }
