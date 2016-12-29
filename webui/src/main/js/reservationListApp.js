@@ -29,7 +29,7 @@ class ReservationListApp extends React.Component{
             }
         });
 
-        setTimeout(this.updateReservations, 30000);   // Updates every 30 seconds
+        setTimeout(this.updateReservations, 10000);   // Updates every 30 seconds
     }
 
     listHasChanged(oldConnectionList, newConnectionList) {
@@ -69,25 +69,35 @@ class ReservationListApp extends React.Component{
 class ReservationList extends React.Component{
     constructor(props){
         super(props);
-        this.renderReservations = this.renderReservations.bind(this);
+
+        let resExpanded = {};
+        for(let resv of this.props.reservations){
+            resExpanded[resv.connectionId] = false;
+        }
+
+        this.state = {resExpanded: resExpanded};
+        this.handleClick = this.handleClick.bind(this);
     }
 
-    renderReservations(){
-        const rows = [];
-        for(let resv of this.props.reservations){
-            rows.push(
-                <ReservationDetails reservation={resv} key={resv.connectionId} />
-            );
-            let graphKey = "graph_" + resv.connectionId;
-            rows.push(
-                <ReservationGraph reservation={resv} key={graphKey} connId={resv.connectionId}/>
-            );
-        }
-        return rows;
-
+    handleClick(id){
+        let resExpanded = this.state.resExpanded;
+        resExpanded[id] = !resExpanded[id];
+        this.setState({resExpanded: resExpanded});
     }
 
     render(){
+        const rows = [];
+        for(let resv of this.props.reservations){
+            rows.push(
+                <ReservationDetails reservation={resv} key={resv.connectionId} onClick={(id) => this.handleClick(id)}/>
+            );
+            if(this.state.resExpanded[resv.connectionId]){
+                let graphKey = "graph_" + resv.connectionId;
+                rows.push(
+                    <ReservationGraph connId={resv.connectionId} key={graphKey}/>
+                );
+            }
+        }
         return (
             <table id="listTable" className="table table-hover">
                 <thead>
@@ -104,7 +114,7 @@ class ReservationList extends React.Component{
                 </tr>
                 </thead>
                 <tbody id="listBody">
-                {this.renderReservations()}
+                {rows}
                 </tbody>
             </table>
         )
@@ -115,7 +125,7 @@ class ReservationList extends React.Component{
 class ReservationDetails extends React.Component{
     constructor(props){
         super(props);
-        this.state = {startDate: new Date(), endDate: new Date(), submitDate: new Date()};
+        this.state = {startDate: new Date(), endDate: new Date(), submitDate: new Date(), graphHidden: true};
     }
 
     componentDidMount(){
@@ -128,9 +138,10 @@ class ReservationDetails extends React.Component{
         this.setState({startDate: start, endDate: end, submitDate: submit});
     }
 
+
     render(){
         return(
-            <tr className="accordion-toggle">
+            <tr className="accordion-toggle" onClick={() => this.props.onClick(this.props.reservation.connectionId)} >
                 <td>{this.props.reservation.connectionId}</td>
                 <td>{this.props.reservation.specification.description}</td>
                 <td>
@@ -161,7 +172,6 @@ class ReservationGraph extends React.Component{
         loadJSON("/viz/connection/" + this.props.connId, (response) =>
         {
             let json_data = JSON.parse(response);
-            console.log(json_data);
 
             let edges = json_data.edges;
             let nodes = json_data.nodes;
@@ -201,18 +211,20 @@ class ReservationGraph extends React.Component{
     }
 
     render(){
-        let trId = "hidden_"  + this.props.connId;
         let resVizId = "resViz_" + this.props.connId;
         let resVizClass = "panel-body in" + this.props.connId;
         return (
-            <tr id={trId}>
-                <td className="hiddenRow" colSpan={6}>
+            <tr>
+                <td colSpan={6}>
                     {this.state.edges.length > 0 && this.state.nodes.length > 0 ?
                         <div>
-                            <b>Reservation Details</b>
+                            <b>Reservation Path:</b> {this.props.connId}
                             <div id={resVizId} className={resVizClass} style={{display:"block"}}></div>
                         </div> :
-                        <div>No reservation details to show.</div>
+                        <div>
+                            <b>Reservation Path:</b> {this.props.connId}
+                            <div>No path data found.</div>
+                        </div>
                     }
                 </td>
             </tr>
@@ -220,72 +232,5 @@ class ReservationGraph extends React.Component{
     }
 }
 
-function showDetails(connectionToShow)
-{
-    let connID = connectionToShow.id.split("accordion_");
-
-    drawReservation(connID[1]);
-}
-
-function clearDetails(connectionToShow)
-{
-    let connID = connectionToShow.id.split("accordion_");
-
-    clearReservation(connID[1]);
-}
-
-function drawReservation (connectionID)
-{
-    let vizName = "resViz_" + connectionID;
-    let emptyVizName = "emptyViz_" + connectionID;
-
-    let vizElement = document.getElementById(vizName);
-    let emptyVizElement = document.getElementById(emptyVizName);
-
-    loadJSON("/viz/connection/" + connectionID, function (response)
-    {
-        let json_data = JSON.parse(response);
-        console.log(json_data);
-
-        edges = json_data.edges;
-        nodes = json_data.nodes;
-
-        if(edges.length === 0 || nodes.length === 0)
-        {
-            $(vizElement).hide();
-            $(emptyVizElement).show();
-            return;
-        }
-        else
-        {
-            $(vizElement).show();
-            $(emptyVizElement).hide();
-        }
-
-        // Parse JSON string into object
-        let resOptions = {
-            autoResize: true,
-            width: '100%',
-            height: '100%',
-            interaction: {
-                hover: true,
-                navigationButtons: false,
-                zoomView: false,
-                dragView: false,
-                multiselect: false,
-                selectable: true,
-            },
-            physics: {
-                stabilization: true,
-            },
-            nodes: {
-                shape: 'dot',
-                color: {background: "white"},
-            }
-        };
-
-        reservation_viz = networkVis.make_network(json_data, vizElement, resOptions, vizName);
-    });
-}
 
 module.exports = ReservationListApp;
