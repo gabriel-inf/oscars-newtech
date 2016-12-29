@@ -132,4 +132,10 @@ function highlight_links(network, linkIDs, isSelected, color)
     }
 }
 
+function trigger_form_changes(is_resv, selected_an_edge, selected_a_node, is_selected_node_plain, nodeId, edgeId)
+{
+    //TODO: Implement some actions when parts of reservation viz are selected
+    ;
+}
+
 module.exports = {make_network};
