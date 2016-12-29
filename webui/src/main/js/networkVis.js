@@ -1,10 +1,9 @@
-const vis = require('../resources/static/st/vis/vis');
+const vis = require('../../../node_modules/vis/dist/vis');
 let selected_node_ids = {};
 
 let resv_viz_name = "reservation_viz";
 
 function make_network(json_data, container, options, name) {
-
     // create an array with nodes
     let nodes = new vis.DataSet(json_data['nodes']);
     let edges = new vis.DataSet(json_data['edges']);
@@ -60,7 +59,6 @@ function attach_handlers(vis_js_network, vis_js_datasets, name) {
         if (name == resv_viz_name) {
             is_resv = true;
         }
-        trigger_form_changes(is_resv, false, true, draggedPlain);
 
     });
 
@@ -134,4 +132,4 @@ function highlight_links(network, linkIDs, isSelected, color)
     }
 }
 
-module.exports = make_network;
+module.exports = {make_network};

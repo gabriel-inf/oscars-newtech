@@ -2,7 +2,7 @@ const React = require('react');
 const ReservationMap = require('./reservationMap');
 const NavBar = require('./navbar');
 const loadJSON = require('./client');
-const connHelper = require('./connection_helper');
+const connHelper = require('./connectionHelper');
 const networkVis = require('./networkVis');
 
 class ReservationListApp extends React.Component{
@@ -67,12 +67,27 @@ class ReservationListApp extends React.Component{
 }
 
 class ReservationList extends React.Component{
+    constructor(props){
+        super(props);
+        this.renderReservations = this.renderReservations.bind(this);
+    }
 
+    renderReservations(){
+        const rows = [];
+        for(let resv of this.props.reservations){
+            rows.push(
+                <ReservationDetails reservation={resv} key={resv.connectionId} />
+            );
+            let graphKey = "graph_" + resv.connectionId;
+            rows.push(
+                <ReservationGraph reservation={resv} key={graphKey} connId={resv.connectionId}/>
+            );
+        }
+        return rows;
+
+    }
 
     render(){
-        let reservations = this.props.reservations.map(resv =>
-            <ReservationListItem reservation={resv} key={resv.connectionId}/>
-        );
         return (
             <table id="listTable" className="table table-hover">
                 <thead>
@@ -89,15 +104,15 @@ class ReservationList extends React.Component{
                 </tr>
                 </thead>
                 <tbody id="listBody">
-                {reservations}
+                {this.renderReservations()}
                 </tbody>
             </table>
         )
     }
 }
 
-class ReservationListItem extends React.Component{
 
+class ReservationDetails extends React.Component{
     constructor(props){
         super(props);
         this.state = {startDate: new Date(), endDate: new Date(), submitDate: new Date()};
@@ -132,6 +147,76 @@ class ReservationListItem extends React.Component{
             </tr>
         )
 
+    }
+}
+
+class ReservationGraph extends React.Component{
+
+    constructor(props){
+        super(props);
+        this.state = {edges: [], nodes: []}
+    }
+
+    componentDidMount(){
+        loadJSON("/viz/connection/" + this.props.connId, (response) =>
+        {
+            let json_data = JSON.parse(response);
+            console.log(json_data);
+
+            let edges = json_data.edges;
+            let nodes = json_data.nodes;
+            this.setState({edges: edges, nodes: nodes});
+
+            if(edges.length == 0 || nodes.length === 0){
+                return;
+            }
+
+            // Parse JSON string into object
+            let resOptions = {
+                autoResize: true,
+                width: '100%',
+                height: '100%',
+                interaction: {
+                    hover: true,
+                    navigationButtons: false,
+                    zoomView: false,
+                    dragView: false,
+                    multiselect: false,
+                    selectable: true,
+                },
+                physics: {
+                    stabilization: true,
+                },
+                nodes: {
+                    shape: 'dot',
+                    color: {background: "white"},
+                }
+            };
+
+            let vizName = "resViz_" + this.props.connId;
+
+            let vizElement = document.getElementById(vizName);
+            let reservation_viz = networkVis.make_network(json_data, vizElement, resOptions, vizName);
+        });
+    }
+
+    render(){
+        let trId = "hidden_"  + this.props.connId;
+        let resVizId = "resViz_" + this.props.connId;
+        let resVizClass = "panel-body in" + this.props.connId;
+        return (
+            <tr id={trId}>
+                <td className="hiddenRow" colSpan={6}>
+                    {this.state.edges.length > 0 && this.state.nodes.length > 0 ?
+                        <div>
+                            <b>Reservation Details</b>
+                            <div id={resVizId} className={resVizClass} style={{display:"block"}}></div>
+                        </div> :
+                        <div>No reservation details to show.</div>
+                    }
+                </td>
+            </tr>
+        );
     }
 }
 

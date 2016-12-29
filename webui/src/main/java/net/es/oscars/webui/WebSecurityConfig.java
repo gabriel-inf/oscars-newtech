@@ -53,6 +53,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                     .logoutSuccessUrl("/login")
                     .deleteCookies("remember-me")
                 .and().rememberMe();
+        //TODO: Remove when done with webpack-dev-server development
+        http.headers().httpStrictTransportSecurity().disable();
 
     }
 
