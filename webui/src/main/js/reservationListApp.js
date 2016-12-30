@@ -1,7 +1,7 @@
 const React = require('react');
 const ReservationMap = require('./reservationMap');
 const NavBar = require('./navbar');
-const loadJSON = require('./client');
+const client = require('./client');
 const connHelper = require('./connectionHelper');
 const networkVis = require('./networkVis');
 
@@ -21,7 +21,7 @@ class ReservationListApp extends React.Component{
     }
 
     updateReservations(){
-        loadJSON('/resv/list/allconnections', (response) =>
+        client.loadJSON('/resv/list/allconnections', (response) =>
         {
             let resvs = JSON.parse(response);
             if(this.listHasChanged(this.state.reservations, resvs)){
@@ -33,9 +33,11 @@ class ReservationListApp extends React.Component{
     }
 
     listHasChanged(oldConnectionList, newConnectionList) {
-        // Won't slow things down if newConnectionList is also empty
-        if($.isEmptyObject(oldConnectionList))
-            return true;
+        // If new list is empty, list has only changed if old was not empty
+        if($.isEmptyObject(newConnectionList)){
+            return !$.isEmptyObject(oldConnectionList);
+
+        }
 
         // Same size
         if(oldConnectionList.length !== newConnectionList.length)
@@ -169,7 +171,7 @@ class ReservationGraph extends React.Component{
     }
 
     componentDidMount(){
-        loadJSON("/viz/connection/" + this.props.connId, (response) =>
+        client.loadJSON("/viz/connection/" + this.props.connId, (response) =>
         {
             let json_data = JSON.parse(response);
 

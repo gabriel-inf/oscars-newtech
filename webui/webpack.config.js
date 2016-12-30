@@ -38,6 +38,10 @@ module.exports = {
             "/viz/*": {
                 secure: false,
                 target: "https://localhost:8001/"
+            },
+            "/topology/*": {
+                secure: false,
+                target: "https://localhost:8001/"
             }
         },
         watchOptions: {

@@ -15,4 +15,4 @@ function loadJSON(url, callback) {
     xobj.send(null);
 }
 
-module.exports = loadJSON;
+module.exports = {loadJSON};
