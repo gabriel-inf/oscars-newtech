@@ -26,10 +26,20 @@ module.exports = {
         port: 8181,
         contentBase: 'src/main/resources/static/built/',
         proxy: {
-            "/react": {
+            "/react/resv/list": {
                 secure: false,
                 target: "http://localhost:8181/",
-                pathRewrite: { '/react': 'index.html' }
+                pathRewrite: { '/react/resv/list': 'index.html' }
+            },
+            "/react/resv/gui": {
+                secure: false,
+                target: "http://localhost:8181/",
+                pathRewrite: { '/react/resv/gui': 'index.html' }
+            },
+            "/react/resv/whatif": {
+                secure: false,
+                target: "http://localhost:8181/",
+                pathRewrite: { '/react/resv/whatif': 'index.html' }
             },
             "/resv/*": {
                 secure: false,

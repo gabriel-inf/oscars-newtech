@@ -20,9 +20,9 @@ class NavBar extends React.Component{
 
                     <div className="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                         <ul className="nav navbar-nav">
-                            <li><a href="/">Reservation List</a></li>
-                            <li><a href="/resv/gui">New Reservation</a></li>
-                            <li><a href="/resv/timebw">What-If?</a></li>
+                            <li><Link to="/react/resv/list">Reservation List</Link></li>
+                            <li><Link to="/react/resv/gui">New Reservation</Link></li>
+                            <li><Link to="/react/resv/whatif">What-If?</Link></li>
                             {this.props.isAuthenticated ?
                                 <AuthenticatedNavBarElement /> :
                                 <div></div>
@@ -47,6 +47,10 @@ class NavBar extends React.Component{
 // <li><Link to="/">Reservation List</Link></li>
 // <li><Link to="/resv/gui">New Reservation</Link></li>
 // <li><Link to="/resv/timebw">What-If?</Link></li>
+
+// <li><a href="/">Reservation List</a></li>
+// <li><a href="/resv/gui">New Reservation</a></li>
+// <li><a href="/resv/timebw">What-If?</a></li>
 
 class AuthenticatedNavBarElement extends React.Component{
 

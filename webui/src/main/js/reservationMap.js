@@ -30,7 +30,7 @@ class ReservationMap extends React.Component{
                 <div className="panel panel-default">
                     <div className="panel-heading">
                         <h4 className="panel-title">
-                            <a href="#network_panel">Show / hide network</a>
+                            Network Reservation Heatmap
                         </h4>
                     </div>
                     <div id="network_panel" className="panel-body collapse in">
