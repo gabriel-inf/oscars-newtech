@@ -179,13 +179,16 @@ public class BandwidthService {
             for(Set<ReservedBandwidthE> subset : powerSet){
                 Set<ReservedBandwidthE> newSubset = new HashSet<>(subset);
                 newSubset.add(resvBw);
-                newSets.add(newSubset);
+                // Only store this new subset if all members overlap
+                if(allOverlap(newSubset)) {
+                    newSets.add(newSubset);
+                }
             }
             powerSet.addAll(newSets);
         }
 
         // Filter out the subsets where all members do not overlap
-        return powerSet.stream().filter(this::allOverlap).collect(Collectors.toSet());
+        return powerSet;
     }
 
 

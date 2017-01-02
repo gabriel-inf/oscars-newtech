@@ -26,5 +26,7 @@ public class ReservableVlanE {
     @CollectionTable
     private Set<IntRangeE> vlanRanges;
 
-
+    public String toString(){
+        return super.toString();
+    }
 }

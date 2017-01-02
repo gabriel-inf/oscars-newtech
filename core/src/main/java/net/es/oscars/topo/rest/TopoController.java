@@ -130,4 +130,23 @@ public class TopoController {
 
         return allResBwDTO;
     }
+
+    @RequestMapping(value = "/topo/reservedbw", method = RequestMethod.GET)
+    @ResponseBody
+    public List<ReservedBandwidth> getAllReservedBandwidth()
+    {
+        List<ReservedBandwidthE> allResBwE = topoService.reservedBandwidths();
+
+        List<ReservedBandwidth> allResBwDTO = new ArrayList<>();
+
+        for(ReservedBandwidthE oneBwE : allResBwE)
+        {
+            ReservedBandwidth oneBwDTO = new ReservedBandwidth();
+            modelMapper.map(oneBwE, oneBwDTO);
+
+            allResBwDTO.add(oneBwDTO);
+        }
+
+        return allResBwDTO;
+    }
 }

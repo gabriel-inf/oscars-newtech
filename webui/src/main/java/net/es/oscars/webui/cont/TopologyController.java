@@ -32,6 +32,15 @@ public class TopologyController
 
     private final String oscarsUrl = "https://localhost:8000";
 
+    @RequestMapping(value="/topology/reservedbw", method = RequestMethod.GET)
+    @ResponseBody
+    public List<ReservedBandwidth> getAllReservedBw()
+    {
+        String restPath = oscarsUrl + "/topo/reservedbw";
+
+        return restTemplate.getForObject(restPath, List.class);
+    }
+
     @RequestMapping(value = "/topology/reservedbw", method = RequestMethod.POST)
     @ResponseBody
     public List<ReservedBandwidth> get_reserved_bw(@RequestBody List<String> resUrns)
@@ -45,6 +54,18 @@ public class TopologyController
         List<ReservedBandwidth> relevantBwItems = response.getBody();
 
         return relevantBwItems;
+    }
+
+    @RequestMapping(value="/topology/bwcapacity", method = RequestMethod.GET)
+    @ResponseBody
+    public Map<String, Integer> getAllPortCapacity()
+    {
+        List<ReservableBandwidth> bwCapList = topologyProvider.getPortCapacities();
+
+        return bwCapList
+                .stream()
+                .collect(Collectors.toMap(ReservableBandwidth::getTopoVertexUrn,
+                        bw -> Math.min(bw.getIngressBw(), bw.getEgressBw())));
     }
 
     @RequestMapping(value = "/topology/bwcapacity", method = RequestMethod.POST)

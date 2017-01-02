@@ -23,6 +23,8 @@ public class MainController {
     @Autowired
     private TopologyProvider topologyProvider;
 
+    private final String oscarsUrl = "https://localhost:8000";
+
     @RequestMapping("/")
     public String home(Model model) {
         return "redirect:/resv/list";
@@ -33,12 +35,25 @@ public class MainController {
         return "login";
     }
 
-    private final String oscarsUrl = "https://localhost:8000";
 
+    @RequestMapping("/react/resv/list")
+    public String reactListPage(Model model) {
+        return "react";
+    }
+
+    @RequestMapping("/react/resv/gui")
+    public String reactResvPage(Model model) {
+        return "react";
+    }
+
+    @RequestMapping("/react/resv/whatif")
+    public String reactWhatifPage(Model model) {
+        return "react";
+    }
 
     @RequestMapping("/react")
     public String reactPage(Model model) {
-        return "react";
+        return "redirect:/react/resv/list";
     }
 
 

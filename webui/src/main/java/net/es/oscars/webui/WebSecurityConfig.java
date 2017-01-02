@@ -23,7 +23,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 // development!
                     .antMatchers("/resv/**").permitAll()
                     .antMatchers("/topology/**").permitAll()
-                    .antMatchers("/react").permitAll()
+                    .antMatchers("/react/**").permitAll()
 
                 // index page and REST endpoints:
                     .antMatchers("/").permitAll()
@@ -36,6 +36,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
                 // only admins for this one
                     .antMatchers("/admin/**").hasAuthority("ADMIN")
+
+                //built
+                    .antMatchers("/built/**").permitAll()
 
                 // only admins
                     .anyRequest().authenticated()
@@ -50,6 +53,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                     .logoutSuccessUrl("/login")
                     .deleteCookies("remember-me")
                 .and().rememberMe();
+        //TODO: Remove when done with webpack-dev-server development
+        http.headers().httpStrictTransportSecurity().disable();
 
     }
 
