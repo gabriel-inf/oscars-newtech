@@ -4,14 +4,10 @@ let selected_node_ids = {};
 let resv_viz_name = "reservation_viz";
 
 function make_network(json_data, container, options, name) {
-    // create an array with nodes
-    let nodes = new vis.DataSet(json_data['nodes']);
-    let edges = new vis.DataSet(json_data['edges']);
-
     // create a network
     let datasource = {
-        nodes: nodes,
-        edges: edges
+        nodes: json_data['nodes'],
+        edges: json_data['edges']
     };
 
     let network = new vis.Network(container, datasource, options);

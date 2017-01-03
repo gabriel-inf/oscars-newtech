@@ -1,6 +1,7 @@
 const React = require('react');
 const vis = require('../../../node_modules/vis/dist/vis');
 const client = require('./client');
+const networkVis = require('./networkVis');
 
 class ReservationMap extends React.Component{
 
@@ -109,7 +110,8 @@ class ReservationMap extends React.Component{
 
             this.getAllReservedBWs(netData, portCaps);
 
-            networkMap = new vis.Network(netViz, netData, netOptions);
+            let result = networkVis.make_network(netData, netViz, netOptions, "networkHeatmap");
+            networkMap = result.network;
 
             // Listener for when network is loading and stabilizing
             networkMap.on("stabilizationProgress", function(params) {
