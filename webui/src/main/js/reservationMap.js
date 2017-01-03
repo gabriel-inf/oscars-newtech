@@ -129,8 +129,6 @@ class ReservationMap extends React.Component{
                 document.getElementById('progressBar').style.width = '496px';
                 document.getElementById('loadingBarDiv').style.opacity = 0;
 
-                // really clean the dom element
-                setTimeout(function () {document.getElementById('loadingBarDiv').style.display = 'none';}, 500);
             });
         });
     }
