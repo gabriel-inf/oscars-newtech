@@ -110,7 +110,7 @@ class ReservationMap extends React.Component{
 
             this.getAllReservedBWs(netData, portCaps);
 
-            let result = networkVis.make_network(netData, netViz, netOptions, "networkHeatmap");
+            let result = networkVis.make_network_with_datasource(netData, netViz, netOptions, "networkHeatmap");
             networkMap = result.network;
 
             // Listener for when network is loading and stabilizing

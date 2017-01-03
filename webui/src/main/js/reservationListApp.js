@@ -4,6 +4,7 @@ const NavBar = require('./navbar');
 const client = require('./client');
 const connHelper = require('./connectionHelper');
 const networkVis = require('./networkVis');
+const vis = require('../../../node_modules/vis/dist/vis');
 
 class ReservationListApp extends React.Component{
 
@@ -208,7 +209,7 @@ class ReservationGraph extends React.Component{
             let vizName = "resViz_" + this.props.connId;
 
             let vizElement = document.getElementById(vizName);
-            let reservation_viz = networkVis.make_network(json_data, vizElement, resOptions, vizName);
+            let reservation_viz = networkVis.make_network(nodes, edges, vizElement, resOptions, vizName);
         });
     }
 

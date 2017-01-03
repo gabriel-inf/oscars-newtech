@@ -1,14 +1,23 @@
 const vis = require('../../../node_modules/vis/dist/vis');
-let selected_node_ids = {};
 
 let resv_viz_name = "reservation_viz";
 
-function make_network(json_data, container, options, name) {
-    // create a network
+function make_network(nodes, edges, container, options, name) {
+    // datasource{ nodes: vis.DataSet(nodes), edges -> vis.DataSet(edges) }
+
+    let nodeDataset = new vis.DataSet(nodes);
+    let edgeDataset = new vis.DataSet(edges);
     let datasource = {
-        nodes: json_data['nodes'],
-        edges: json_data['edges']
+        nodes: nodeDataset,
+        edges: edgeDataset
     };
+
+    return make_network(datasource, container, options, name);
+}
+
+function make_network_with_datasource(datasource, container, options, name) {
+    // datasource{ nodes: vis.DataSet(nodes), edges -> vis.DataSet(edges) }
+
 
     let network = new vis.Network(container, datasource, options);
 
@@ -22,6 +31,7 @@ function make_network(json_data, container, options, name) {
 
 function attach_handlers(vis_js_network, vis_js_datasets, name) {
 
+    let selected_node_ids = {};
     vis_js_network.on('dragEnd', function (params) {
         selected_node_ids.name = [];
         for (let i = 0; i < params.nodes.length; i++) {
@@ -134,4 +144,4 @@ function trigger_form_changes(is_resv, selected_an_edge, selected_a_node, is_sel
     ;
 }
 
-module.exports = {make_network};
+module.exports = {make_network, make_network_with_datasource};
