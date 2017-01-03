@@ -29,7 +29,7 @@ class ReservationListApp extends React.Component{
             }
         });
 
-        setTimeout(this.updateReservations, 10000);   // Updates every 30 seconds
+        setTimeout(this.updateReservations, 10000);   // Updates every 10 seconds
     }
 
     listHasChanged(oldConnectionList, newConnectionList) {
@@ -132,9 +132,9 @@ class ReservationDetails extends React.Component{
 
     componentDidMount(){
         let start = this.state.startDate;
-        start.setTime(this.props.reservation.reservedSchedule[0]);
+        start.setTime(this.props.reservation.specification.scheduleSpec.startDates[0]);
         let end = this.state.endDate;
-        end.setTime(this.props.reservation.reservedSchedule[1]);
+        end.setTime(this.props.reservation.specification.scheduleSpec.startDates[0]);
         let submit = this.state.submitDate;
         submit.setTime(this.props.reservation.schedule.submitted);
         this.setState({startDate: start, endDate: end, submitDate: submit});
