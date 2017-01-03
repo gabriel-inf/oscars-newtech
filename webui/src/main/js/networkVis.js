@@ -12,7 +12,7 @@ function make_network(nodes, edges, container, options, name) {
         edges: edgeDataset
     };
 
-    return make_network(datasource, container, options, name);
+    return make_network_with_datasource(datasource, container, options, name);
 }
 
 function make_network_with_datasource(datasource, container, options, name) {
