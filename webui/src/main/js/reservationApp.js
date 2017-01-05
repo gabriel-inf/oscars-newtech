@@ -22,16 +22,33 @@ class ReservationApp extends React.Component{
     handleAddJunction(){
         let newJunctions = this.state.networkVis.getSelectedNodes();
         let reservation = this.state.reservation;
+
         let currJunctions = reservation.junctions.slice();
+        let currPipes = reservation.pipes.slice();
+
         for (let i = 0; i < newJunctions.length; i++) {
-            let node = newJunctions[i];
-            if (currJunctions.indexOf(node) === -1) {
-                currJunctions.push(node);
-                console.log("Adding " + node);
+            let newNode = newJunctions[i];
+            // Only add this node if it's not currently in the list
+            if (currJunctions.indexOf(newNode) === -1) {
+                // Add a new pipe if there's at least one current junction before addition
+                // Connect previous last junction to new junction
+                if(currJunctions.length > 0){
+                    let lastNode = currJunctions[currJunctions.length - 1];
+                    let newPipe = {
+                        id: lastNode + " -- " + newNode,
+                        from: lastNode,
+                        to: newNode
+                    };
+                    currPipes.push(newPipe);
+                    console.log("Adding pipe: " + newPipe.id);
+                }
+                currJunctions.push(newNode);
+                console.log("Adding junction: " + newNode);
             }
         }
         if(currJunctions.length > reservation.junctions.length){
             reservation.junctions = currJunctions;
+            reservation.pipes = currPipes;
             this.setState({reservation: reservation});
         }
         this.state.networkVis.unselectAll();
