@@ -1,6 +1,8 @@
 const React = require('react');
 const NavBar = require('./navbar');
 const client = require('./client');
+const networkVis = require('./networkVis');
+const vis = require('../../../node_modules/vis/dist/vis');
 
 class ReservationApp extends React.Component{
 
@@ -24,13 +26,69 @@ class NetworkPanel extends React.Component{
 
     constructor(props){
         super(props);
-        this.state = {showPanel: true}
+
+        this.state = {showPanel: true, networkVis: {}, junctions: []};
+        this.setState = this.setState.bind(this);
+        this.componentDidMount = this.componentDidMount.bind(this);
         this.handleHeadingClick = this.handleHeadingClick.bind(this);
+        this.initializeNetwork = this.initializeNetwork.bind(this);
+        this.updateNetworkVis = this.updateNetworkVis.bind(this);
+        this.handleAddJunction = this.handleAddJunction.bind(this);
     }
 
     handleHeadingClick(){
         this.setState({showPanel: !this.state.showPanel});
     }
+
+    handleAddJunction(){
+        let newJunctions = this.state.networkVis.getSelectedNodes();
+        let currJunctions = this.state.junctions.slice();
+        for (let i = 0; i < newJunctions.length; i++) {
+            let node = newJunctions[i];
+            if (currJunctions.indexOf(node) === -1) {
+                currJunctions.push(node);
+                console.log("Adding " + node);
+            }
+        }
+        if(currJunctions.length > this.state.junctions.length){
+            this.setState({junctions: currJunctions});
+        }
+        this.state.networkVis.unselectAll();
+    }
+
+    componentDidMount(){
+        this.initializeNetwork();
+    }
+
+    initializeNetwork(){
+        client.loadJSON("/viz/topology/multilayer", this.updateNetworkVis);
+    }
+
+    updateNetworkVis(response){
+        let jsonData = JSON.parse(response);
+        let nodes = jsonData.nodes;
+        let edges = jsonData.edges;
+        let networkElement = document.getElementById('network_viz');
+        let networkOptions = {
+            height: '450px',
+            interaction: {
+                hover: false,
+                navigationButtons: true,
+                zoomView: true,
+                dragView: true
+            },
+            physics: {
+                stabilization: true
+            },
+            nodes: {
+                shape: 'dot',
+                color: {background: "white"}
+            }
+        };
+        let displayViz = networkVis.make_network(nodes, edges, networkElement, networkOptions, "network_viz");
+        this.setState({networkVis: displayViz.network})
+    }
+
 
     render(){
         return(
@@ -40,7 +98,7 @@ class NetworkPanel extends React.Component{
                     {this.state.showPanel ?
                         <div id="network_panel" className="panel-body collapse in">
                             <NetworkMap />
-                            <AddNodeButton />
+                            <AddNodeButton onClick={this.handleAddJunction}/>
                         </div> : <div />
                     }
                 </div>
@@ -51,10 +109,14 @@ class NetworkPanel extends React.Component{
 
 class NetworkMap extends React.Component{
 
+    constructor(props){
+        super(props);
+    }
+
     render(){
         return(
             <div id="network_viz" className="col-md-10">
-                <div className="vix-network">Network map</div>
+                <div className="viz-network">Network map</div>
             </div>
         );
     }
@@ -65,7 +127,7 @@ class AddNodeButton extends React.Component{
     render(){
         return(
             <div id="add_junction_div" className="col-md-2 affix-top">
-                <button type="submit" id="add_junction_btn" className="btn btn-primary active">Add to request</button>
+                <input type="button" id="add_junction_btn" className="btn btn-primary active" onClick={this.props.onClick} value="Add to request" />
             </div>
         );
     }
