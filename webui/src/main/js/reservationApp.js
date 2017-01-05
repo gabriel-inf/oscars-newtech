@@ -8,41 +8,21 @@ class ReservationApp extends React.Component{
 
     constructor(props){
         super(props);
-        this.state = {reservation: {}}
-    }
-
-    render(){
-        return(
-            <div>
-                <NavBar isAuthenticated={this.props.route.isAuthenticated} isAdmin={this.props.route.isAdmin}/>
-                <NetworkPanel />
-                <ReservationDetailsPanel reservation={this.state.reservation}/>
-            </div>
-        );
-    }
-}
-
-class NetworkPanel extends React.Component{
-
-    constructor(props){
-        super(props);
-
-        this.state = {showPanel: true, networkVis: {}, junctions: []};
-        this.setState = this.setState.bind(this);
-        this.componentDidMount = this.componentDidMount.bind(this);
-        this.handleHeadingClick = this.handleHeadingClick.bind(this);
+        let reservation = {
+            junctions: [],
+            pipes: []
+        };
+        this.state = {reservation: reservation, networkVis: {}};
         this.initializeNetwork = this.initializeNetwork.bind(this);
         this.updateNetworkVis = this.updateNetworkVis.bind(this);
         this.handleAddJunction = this.handleAddJunction.bind(this);
-    }
-
-    handleHeadingClick(){
-        this.setState({showPanel: !this.state.showPanel});
+        this.componentDidMount = this.componentDidMount.bind(this);
     }
 
     handleAddJunction(){
         let newJunctions = this.state.networkVis.getSelectedNodes();
-        let currJunctions = this.state.junctions.slice();
+        let reservation = this.state.reservation;
+        let currJunctions = reservation.junctions.slice();
         for (let i = 0; i < newJunctions.length; i++) {
             let node = newJunctions[i];
             if (currJunctions.indexOf(node) === -1) {
@@ -50,8 +30,9 @@ class NetworkPanel extends React.Component{
                 console.log("Adding " + node);
             }
         }
-        if(currJunctions.length > this.state.junctions.length){
-            this.setState({junctions: currJunctions});
+        if(currJunctions.length > reservation.junctions.length){
+            reservation.junctions = currJunctions;
+            this.setState({reservation: reservation});
         }
         this.state.networkVis.unselectAll();
     }
@@ -89,6 +70,29 @@ class NetworkPanel extends React.Component{
         this.setState({networkVis: displayViz.network})
     }
 
+    render(){
+        return(
+            <div>
+                <NavBar isAuthenticated={this.props.route.isAuthenticated} isAdmin={this.props.route.isAdmin}/>
+                <NetworkPanel handleAddJunction={this.handleAddJunction}/>
+                <ReservationDetailsPanel reservation={this.state.reservation}/>
+            </div>
+        );
+    }
+}
+
+class NetworkPanel extends React.Component{
+
+    constructor(props){
+        super(props);
+
+        this.state = {showPanel: true, networkVis: {}, junctions: []};
+        this.handleHeadingClick = this.handleHeadingClick.bind(this);
+    }
+
+    handleHeadingClick(){
+        this.setState({showPanel: !this.state.showPanel});
+    }
 
     render(){
         return(
@@ -98,7 +102,7 @@ class NetworkPanel extends React.Component{
                     {this.state.showPanel ?
                         <div id="network_panel" className="panel-body collapse in">
                             <NetworkMap />
-                            <AddNodeButton onClick={this.handleAddJunction}/>
+                            <AddNodeButton onClick={this.props.handleAddJunction}/>
                         </div> : <div />
                     }
                 </div>
@@ -146,8 +150,8 @@ class ReservationDetailsPanel extends React.Component{
     }
 
     render(){
+        console.log(this.props.reservation);
         return(
-
             <div className="panel-group">
                 <div className="panel panel-default">
                     <Heading title={"Show / hide reservation"} onClick={() => this.handleHeadingClick()}/>
