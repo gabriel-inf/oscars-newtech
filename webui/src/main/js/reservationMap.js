@@ -1,6 +1,7 @@
 const React = require('react');
 const vis = require('../../../node_modules/vis/dist/vis');
 const client = require('./client');
+const networkVis = require('./networkVis');
 
 class ReservationMap extends React.Component{
 
@@ -109,7 +110,8 @@ class ReservationMap extends React.Component{
 
             this.getAllReservedBWs(netData, portCaps);
 
-            networkMap = new vis.Network(netViz, netData, netOptions);
+            let result = networkVis.make_network_with_datasource(netData, netViz, netOptions, "networkHeatmap");
+            networkMap = result.network;
 
             // Listener for when network is loading and stabilizing
             networkMap.on("stabilizationProgress", function(params) {
@@ -127,8 +129,6 @@ class ReservationMap extends React.Component{
                 document.getElementById('progressBar').style.width = '496px';
                 document.getElementById('loadingBarDiv').style.opacity = 0;
 
-                // really clean the dom element
-                setTimeout(function () {document.getElementById('loadingBarDiv').style.display = 'none';}, 500);
             });
         });
     }

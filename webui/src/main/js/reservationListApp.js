@@ -4,6 +4,7 @@ const NavBar = require('./navbar');
 const client = require('./client');
 const connHelper = require('./connectionHelper');
 const networkVis = require('./networkVis');
+const vis = require('../../../node_modules/vis/dist/vis');
 
 class ReservationListApp extends React.Component{
 
@@ -29,7 +30,7 @@ class ReservationListApp extends React.Component{
             }
         });
 
-        setTimeout(this.updateReservations, 10000);   // Updates every 30 seconds
+        setTimeout(this.updateReservations, 10000);   // Updates every 10 seconds
     }
 
     listHasChanged(oldConnectionList, newConnectionList) {
@@ -132,9 +133,9 @@ class ReservationDetails extends React.Component{
 
     componentDidMount(){
         let start = this.state.startDate;
-        start.setTime(this.props.reservation.reservedSchedule[0]);
+        start.setTime(this.props.reservation.specification.scheduleSpec.startDates[0]);
         let end = this.state.endDate;
-        end.setTime(this.props.reservation.reservedSchedule[1]);
+        end.setTime(this.props.reservation.specification.scheduleSpec.startDates[0]);
         let submit = this.state.submitDate;
         submit.setTime(this.props.reservation.schedule.submitted);
         this.setState({startDate: start, endDate: end, submitDate: submit});
@@ -208,7 +209,7 @@ class ReservationGraph extends React.Component{
             let vizName = "resViz_" + this.props.connId;
 
             let vizElement = document.getElementById(vizName);
-            let reservation_viz = networkVis.make_network(json_data, vizElement, resOptions, vizName);
+            let reservation_viz = networkVis.make_network(nodes, edges, vizElement, resOptions, vizName);
         });
     }
 
