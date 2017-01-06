@@ -12,19 +12,41 @@ class ReservationApp extends React.Component{
             junctions: [],
             pipes: []
         };
-        this.state = {reservation: reservation, networkVis: {}};
+        this.state = {
+            reservation: reservation,
+            networkVis: {},
+            resVis: {},
+            showPipePanel: false,
+            showJunctionPanel: false
+        };
+        this.componentDidMount = this.componentDidMount.bind(this);
         this.initializeNetwork = this.initializeNetwork.bind(this);
+        this.initializeResGraph = this.initializeResGraph.bind(this);
         this.updateNetworkVis = this.updateNetworkVis.bind(this);
         this.handleAddJunction = this.handleAddJunction.bind(this);
-        this.componentDidMount = this.componentDidMount.bind(this);
+        this.addToResGraph = this.addToResGraph.bind(this);
+        this.addResGraphElements = this.addResGraphElements.bind(this);
+        this.deleteResGraphElements = this.deleteResGraphElements.bind(this);
+        this.handleSandboxSelection = this.handleSandboxSelection.bind(this);
+    }
+
+    componentDidMount(){
+        this.initializeNetwork();
+        this.initializeResGraph();
+    }
+
+    initializeNetwork(){
+        client.loadJSON("/viz/topology/multilayer", this.updateNetworkVis);
     }
 
     handleAddJunction(){
-        let newJunctions = this.state.networkVis.getSelectedNodes();
+        let newJunctions = this.state.networkVis.network.getSelectedNodes();
         let reservation = this.state.reservation;
 
         let currJunctions = reservation.junctions.slice();
         let currPipes = reservation.pipes.slice();
+
+        let newPipes = [];
 
         for (let i = 0; i < newJunctions.length; i++) {
             let newNode = newJunctions[i];
@@ -40,6 +62,7 @@ class ReservationApp extends React.Component{
                         to: newNode
                     };
                     currPipes.push(newPipe);
+                    newPipes.push(newPipe);
                     console.log("Adding pipe: " + newPipe.id);
                 }
                 currJunctions.push(newNode);
@@ -50,16 +73,9 @@ class ReservationApp extends React.Component{
             reservation.junctions = currJunctions;
             reservation.pipes = currPipes;
             this.setState({reservation: reservation});
+            this.addToResGraph(newJunctions, newPipes);
         }
-        this.state.networkVis.unselectAll();
-    }
-
-    componentDidMount(){
-        this.initializeNetwork();
-    }
-
-    initializeNetwork(){
-        client.loadJSON("/viz/topology/multilayer", this.updateNetworkVis);
+        this.state.networkVis.network.unselectAll();
     }
 
     updateNetworkVis(response){
@@ -84,7 +100,108 @@ class ReservationApp extends React.Component{
             }
         };
         let displayViz = networkVis.make_network(nodes, edges, networkElement, networkOptions, "network_viz");
-        this.setState({networkVis: displayViz.network})
+        this.setState({networkVis: displayViz});
+    }
+
+    addResGraphElements(data, callback){
+        if (data.from != data.to) {
+            callback(data);
+
+            let newPipe = {
+                id: edgeData.from + " -- " + edgeData.to,
+                from: edgeData.from,
+                to: edgeData.to
+            };
+
+            let pipes = this.state.reservation.pipes.slice();
+            pipes.push(newPipe);
+
+            let reservation = this.state.reservation;
+            reservation.pipes = pipes;
+            this.setState({reservation: reservation});
+        }
+    }
+
+    deleteResGraphElements(data, callback){
+        callback(data);
+        let pipes = this.state.reservation.pipes.slice();
+        for(let i = 0; i < data.edges.length; i++){
+            let edgeId = data.edges[i];
+            let matchingPipes = $.grep(pipes, function(e){ return e.id == edgeId; });
+            if(matchingPipes.length > 0){
+                pipes.pop();
+            }
+        }
+
+        let res = this.state.reservation;
+        res.pipes = pipes;
+        this.setState({reservation: res});
+    }
+
+    initializeResGraph(){
+        let networkElement = document.getElementById('reservation_viz');
+        let nodes = this.state.reservation.junctions;
+        let edges = this.state.reservation.pipes;
+
+        let networkOptions = {
+            height: '300px',
+            interaction: {
+                zoomView: true,
+                dragView: true
+            },
+            physics: {
+                stabilization: true
+            },
+            nodes: {
+                shape: 'dot',
+                color: {background: "white"}
+            },
+            manipulation: {
+                addNode: false,
+                addEdge: this.addResGraphElements,
+                deleteEdge: this.deleteResGraphElements,
+                deleteNode: function (nodeData, callback)
+                {
+                    stateChanged("Node deleted.");
+                }
+            }
+        };
+        let resVis = networkVis.make_network(nodes, edges, networkElement, networkOptions, "reservation_viz");
+        resVis.network.on('select', this.handleSandboxSelection);
+
+        this.setState({resVis: resVis});
+    }
+
+    addToResGraph(newJunctions, newPipes){
+        let resVis = this.state.resVis;
+        resVis.datasource.edges.add(newPipes);
+
+        let formattedJunctions = [];
+        for(let i = 0; i < newJunctions.length; i++){
+            let junctionName = newJunctions[i];
+            let junction = {id: junctionName, label: junctionName};
+            formattedJunctions.push(junction);
+        }
+        resVis.datasource.nodes.add(formattedJunctions);
+    }
+
+    handleSandboxSelection(params){
+        let edges = params.edges;
+        let nodes = params.nodes;
+
+        if(edges.length == 0){
+            this.setState({showPipePanel: false});
+        }
+        else{
+            this.setState({showPipePanel: true});
+        }
+        if(nodes.length == 0){
+            this.setState({showJunctionPanel: false});
+        }
+        else{
+            this.setState({showJunctionPanel: true});
+        }
+
     }
 
     render(){
@@ -92,7 +209,7 @@ class ReservationApp extends React.Component{
             <div>
                 <NavBar isAuthenticated={this.props.route.isAuthenticated} isAdmin={this.props.route.isAdmin}/>
                 <NetworkPanel handleAddJunction={this.handleAddJunction}/>
-                <ReservationDetailsPanel reservation={this.state.reservation}/>
+                <ReservationDetailsPanel reservation={this.state.reservation} showPipePanel={this.state.showPipePanel} showJunctionPanel={this.state.showJunctionPanel}/>
             </div>
         );
     }
@@ -158,7 +275,9 @@ class ReservationDetailsPanel extends React.Component{
 
     constructor(props){
         super(props);
-        this.state = {showReservationPanel: true};
+        this.state = {
+            showReservationPanel: true,
+        };
         this.handleHeadingClick = this.handleHeadingClick.bind(this);
     }
 
@@ -181,8 +300,8 @@ class ReservationDetailsPanel extends React.Component{
                 </div>
                 {this.state.showReservationPanel ?
                 <div>
-                    <PipePanel />
-                    <JunctionPanel />
+                    {this.props.showPipePanel ? <PipePanel /> : <div />}
+                    {this.props.showJunctionPanel ? <JunctionPanel /> : <div />}
                 </div> : <div />
                 }
             </div>
