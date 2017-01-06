@@ -147,7 +147,8 @@ class ReservationApp extends React.Component{
             height: '300px',
             interaction: {
                 zoomView: true,
-                dragView: true
+                dragView: true,
+                selectConnectedEdges: false
             },
             physics: {
                 stabilization: true
@@ -164,7 +165,7 @@ class ReservationApp extends React.Component{
                 {
                     stateChanged("Node deleted.");
                 }
-            }
+            },
         };
         let resVis = networkVis.make_network(nodes, edges, networkElement, networkOptions, "reservation_viz");
         resVis.network.on('select', this.handleSandboxSelection);
