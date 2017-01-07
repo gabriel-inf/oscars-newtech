@@ -14,7 +14,7 @@ class ReservationApp extends React.Component{
         };
         this.state = {
             reservation: reservation,
-            lastNode: null,
+            nodeOrder: [],
             networkVis: {},
             resVis: {},
             showPipePanel: false,
@@ -25,19 +25,17 @@ class ReservationApp extends React.Component{
         this.initializeResGraph = this.initializeResGraph.bind(this);
         this.updateNetworkVis = this.updateNetworkVis.bind(this);
         this.handleAddJunction = this.handleAddJunction.bind(this);
-        this.addToResGraph = this.addToResGraph.bind(this);
-        this.addResGraphElements = this.addResGraphElements.bind(this);
+        this.addElementsToResGraph = this.addElementsToResGraph.bind(this);
+        this.addPipeThroughResGraph = this.addPipeThroughResGraph.bind(this);
         this.deleteResGraphElements = this.deleteResGraphElements.bind(this);
         this.handleSandboxSelection = this.handleSandboxSelection.bind(this);
+        this.deleteJunction = this.deleteJunction.bind(this);
+        this.deletePipe = this.deletePipe.bind(this);
     }
 
     componentDidMount(){
         this.initializeNetwork();
         this.initializeResGraph();
-    }
-
-    initializeNetwork(){
-        client.loadJSON("/viz/topology/multilayer", this.updateNetworkVis);
     }
 
     handleAddJunction(){
@@ -48,7 +46,7 @@ class ReservationApp extends React.Component{
         let newJunctions = [];
 
         let changeMade = false;
-
+        let nodeOrder = this.state.nodeOrder.slice();
         // loop through all the selected junctions
         for (let i = 0; i < selectedJunctions.length; i++) {
             let newNodeName = selectedJunctions[i];
@@ -57,11 +55,9 @@ class ReservationApp extends React.Component{
                 // Add a new pipe if there's at least one current junction before addition
                 // Connect previous last junction to new junction
                 if(Object.keys(reservation.junctions).length > 0){
-                    let newPipe = {
-                        id: this.state.lastNode + " -- " + newNodeName,
-                        from: this.state.lastNode,
-                        to: newNodeName
-                    };
+                    let lastNodeName = nodeOrder[nodeOrder.length-1];
+                    //TODO: Give all pipes a unique id
+                    let newPipe = {id: lastNodeName + " -- " + newNodeName, from: lastNodeName, to: newNodeName};
                     reservation.pipes[newPipe.id] = newPipe;
                     newPipes.push(newPipe);
                 }
@@ -72,14 +68,19 @@ class ReservationApp extends React.Component{
 
                 // A new junction has been added, update flags
                 changeMade = true;
-                this.setState({lastNode: newNodeName});
+                nodeOrder.push(newNodeName);
             }
         }
         if(changeMade){
-            this.setState({reservation: reservation});
-            this.addToResGraph(newJunctions, newPipes);
+            this.setState({reservation: reservation, nodeOrder: nodeOrder});
+            this.addElementsToResGraph(newJunctions, newPipes);
+            this.setState({nodeOrder: nodeOrder});
         }
         this.state.networkVis.network.unselectAll();
+    }
+
+    initializeNetwork(){
+        client.loadJSON("/viz/topology/multilayer", this.updateNetworkVis);
     }
 
     updateNetworkVis(response){
@@ -107,36 +108,6 @@ class ReservationApp extends React.Component{
         this.setState({networkVis: displayViz});
     }
 
-    addResGraphElements(data, callback){
-        if (data.from != data.to) {
-            callback(data);
-
-            let newPipe = {
-                id: edgeData.from + " -- " + edgeData.to,
-                from: edgeData.from,
-                to: edgeData.to
-            };
-
-
-            let reservation = this.state.reservation;
-            reservation.pipes[newPipe.id] = newPipe;
-            this.setState({reservation: reservation});
-        }
-    }
-
-    deleteResGraphElements(data, callback){
-        callback(data);
-        let res = this.state.reservation;
-        for(let i = 0; i < data.edges.length; i++){
-            let edgeId = data.edges[i];
-            if(res.pipes.hasOwnProperty(edgeId)){
-                delete(res.pipes[edgeId]);
-            }
-        }
-
-        this.setState({reservation: res});
-    }
-
     initializeResGraph(){
         let networkElement = document.getElementById('reservation_viz');
         let nodes = [];
@@ -158,12 +129,9 @@ class ReservationApp extends React.Component{
             },
             manipulation: {
                 addNode: false,
-                addEdge: this.addResGraphElements,
+                addEdge: this.addPipeThroughResGraph,
                 deleteEdge: this.deleteResGraphElements,
-                deleteNode: function (nodeData, callback)
-                {
-                    stateChanged("Node deleted.");
-                }
+                deleteNode: this.deleteResGraphElements
             },
         };
         let resVis = networkVis.make_network(nodes, edges, networkElement, networkOptions, "reservation_viz");
@@ -172,10 +140,86 @@ class ReservationApp extends React.Component{
         this.setState({resVis: resVis});
     }
 
-    addToResGraph(newJunctions, newPipes){
+    addElementsToResGraph(newJunctions, newPipes){
         let resVis = this.state.resVis;
         resVis.datasource.edges.add(newPipes);
         resVis.datasource.nodes.add(newJunctions);
+    }
+
+    addPipeThroughResGraph(data, callback){
+        //TODO: Implement pipe addition through graph
+        if (data.from != data.to) {
+            callback(data);
+
+            let newPipe = {
+                id: edgeData.from + " -- " + edgeData.to,
+                from: edgeData.from,
+                to: edgeData.to
+            };
+
+
+            let reservation = this.state.reservation;
+            reservation.pipes[newPipe.id] = newPipe;
+            this.setState({reservation: reservation});
+        }
+    }
+
+    deleteResGraphElements(data, callback){
+        callback(data);
+        let res = this.state.reservation;
+        let datasource = this.state.resVis.datasource;
+
+        // Delete all selected pipes
+        for(let i = 0; i < data.edges.length; i++){
+            let edgeId = data.edges[i];
+            if(res.pipes.hasOwnProperty(edgeId)) {
+                this.deletePipe(res, datasource, edgeId);
+            }
+        }
+
+        // Delete all selected junctions & connecting pipes
+        let junctionDeleted = false;
+        let nodeOrder = this.state.nodeOrder.slice();
+
+        for(let i = 0; i < data.nodes.length; i++){
+            let nodeId = data.nodes[i];
+
+            if(res.junctions.hasOwnProperty(nodeId)){
+                // Delete the junction
+                this.deleteJunction(res, datasource, nodeId);
+
+                // Delete all pipes connected to this junction
+                let pipes = Object.keys(res.pipes);
+                for(let j = 0; j < pipes.length; j++){
+                    let edgeId = pipes[j];
+                    if(edgeId.includes(nodeId)){
+                        this.deletePipe(res, datasource, edgeId);
+                    }
+                }
+                junctionDeleted = true;
+                // Remove this junction from the node ordering
+                let nodeIndex = nodeOrder.indexOf(nodeId);
+                if(nodeIndex != -1){
+                    nodeOrder.splice(nodeIndex, 1);
+                }
+            }
+        }
+
+        // Clear selected elements
+        this.state.networkVis.network.unselectAll();
+        this.handleSandboxSelection(this.state.networkVis.network.getSelection());
+
+        this.setState({reservation: res, nodeOrder: nodeOrder});
+    }
+
+    deletePipe(res, datasource, edgeId){
+        delete(res.pipes[edgeId]);
+        datasource.edges.remove(edgeId);
+    }
+
+    deleteJunction(res, datasource, nodeId){
+        delete(res.junctions[nodeId]);
+        datasource.nodes.remove(nodeId);
     }
 
     handleSandboxSelection(params){
@@ -279,7 +323,6 @@ class ReservationDetailsPanel extends React.Component{
     }
 
     render(){
-        console.log(this.props.reservation);
         return(
             <div className="panel-group">
                 <div className="panel panel-default">
