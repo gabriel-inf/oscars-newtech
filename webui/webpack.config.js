@@ -52,6 +52,10 @@ module.exports = {
             "/topology/*": {
                 secure: false,
                 target: "https://localhost:8001/"
+            },
+            "/info/*": {
+                secure: false,
+                target: "https://localhost:8001/"
             }
         },
         watchOptions: {

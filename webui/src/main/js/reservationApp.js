@@ -8,6 +8,9 @@ class ReservationApp extends React.Component{
 
     constructor(props){
         super(props);
+        // Junction: {id: ~~, label: ~~, fixtures: {}}
+        // fixtures: {id: {id: ~~, bandwidth: ~~, vlan: ~~}, id: ~~, ....}
+        // Pipe: {id: ~~, from: ~~, to: ~~, bw: ~~}
         let reservation = {
             junctions: {},
             pipes: {}
@@ -19,7 +22,8 @@ class ReservationApp extends React.Component{
             resVis: {},
             showPipePanel: false,
             showJunctionPanel: false,
-            pipeIdNumberDict: {}
+            pipeIdNumberDict: {},
+            junctionFixtureDict: {}
         };
         this.componentDidMount = this.componentDidMount.bind(this);
         this.initializeNetwork = this.initializeNetwork.bind(this);
@@ -30,6 +34,7 @@ class ReservationApp extends React.Component{
         this.addPipeThroughResGraph = this.addPipeThroughResGraph.bind(this);
         this.deleteResGraphElements = this.deleteResGraphElements.bind(this);
         this.handleSandboxSelection = this.handleSandboxSelection.bind(this);
+        this.getJunctionFixtures = this.getJunctionFixtures.bind(this);
         this.deleteJunction = this.deleteJunction.bind(this);
         this.deletePipe = this.deletePipe.bind(this);
     }
@@ -54,35 +59,43 @@ class ReservationApp extends React.Component{
         for (let i = 0; i < selectedJunctions.length; i++) {
             let newNodeName = selectedJunctions[i];
             // Only add this node if it's not currently in the list
-            if (!reservation.junctions.hasOwnProperty(newNodeName)) {
+            if (!(newNodeName in reservation.junctions)) {
                 // Add a new pipe if there's at least one current junction before addition
                 // Connect previous last junction to new junction
                 if(Object.keys(reservation.junctions).length > 0){
                     let lastNodeName = nodeOrder[nodeOrder.length-1];
                     let pipeId = lastNodeName + " -- " + newNodeName;
                     // If this is the first pipe of its type, give it an id of _1
-                    if(!pipeIdNumberDict.hasOwnProperty(pipeId)){
+                    if(!(pipeId in pipeIdNumberDict)){
                         pipeIdNumberDict[pipeId] = 0;
                     }
                     // Add a number of to the pipe ID to make them uniqueh
-                    let newPipe = {id: pipeId + "_" + pipeIdNumberDict[pipeId], from: lastNodeName, to: newNodeName};
+                    let newPipe = {id: pipeId + "_" + pipeIdNumberDict[pipeId], from: lastNodeName, to: newNodeName, bw: 0};
                     // Increment the counter
                     pipeIdNumberDict[pipeId] += 1;
                     reservation.pipes[pipeId] = newPipe;
                     newPipes.push(newPipe);
                 }
                 // Add the new junction
-                let newJunction = {id: newNodeName, label: newNodeName};
+                let newJunction = {id: newNodeName, label: newNodeName, fixtures: {}};
                 reservation.junctions[newJunction.id] = newJunction;
                 newJunctions.push(newJunction);
 
-                // A new junction has been added, update flags
+                // A new junction has been added, update flags/storage
                 changeMade = true;
                 nodeOrder.push(newNodeName);
+                if(!(newJunction.id in this.state.junctionFixtureDict)){
+                    let url = "/info/device/" + newJunction.id + "/vlanEdges";
+                    client.loadJSON(url, (response) => this.getJunctionFixtures(response, newJunction.id));
+                }
             }
         }
         if(changeMade){
-            this.setState({reservation: reservation, nodeOrder: nodeOrder, pipeIdNumberDict: pipeIdNumberDict});
+            this.setState({
+                reservation: reservation,
+                nodeOrder: nodeOrder,
+                pipeIdNumberDict: pipeIdNumberDict
+            });
             this.addElementsToResGraph(newJunctions, newPipes);
         }
         this.state.networkVis.network.unselectAll();
@@ -161,7 +174,7 @@ class ReservationApp extends React.Component{
             let pipeIdNumberDict = this.state.pipeIdNumberDict;
 
             // If this is the first pipe of its type, give it an id of _1
-            if(!pipeIdNumberDict.hasOwnProperty(pipeId)){
+            if(!(pipeId in pipeIdNumberDict)){
                 pipeIdNumberDict[pipeId] = 0;
             }
 
@@ -191,7 +204,7 @@ class ReservationApp extends React.Component{
         // Delete all selected pipes
         for(let i = 0; i < data.edges.length; i++){
             let edgeId = data.edges[i];
-            if(res.pipes.hasOwnProperty(edgeId)) {
+            if(edgeId in res.pipes) {
                 this.deletePipe(res, datasource, edgeId);
             }
         }
@@ -203,7 +216,7 @@ class ReservationApp extends React.Component{
         for(let i = 0; i < data.nodes.length; i++){
             let nodeId = data.nodes[i];
 
-            if(res.junctions.hasOwnProperty(nodeId)){
+            if(nodeId in res.junctions){
                 // Delete the junction
                 this.deleteJunction(res, datasource, nodeId);
 
@@ -241,6 +254,12 @@ class ReservationApp extends React.Component{
         datasource.nodes.remove(nodeId);
     }
 
+    getJunctionFixtures(response, junctionId){
+        let junctionDict = this.state.junctionFixtureDict;
+        junctionDict[junctionId] = JSON.parse(response);
+        this.setState({junctionFixtureDict: junctionDict});
+    }
+
     handleSandboxSelection(params){
         let edges = params.edges;
         let nodes = params.nodes;
@@ -265,7 +284,11 @@ class ReservationApp extends React.Component{
             <div>
                 <NavBar isAuthenticated={this.props.route.isAuthenticated} isAdmin={this.props.route.isAdmin}/>
                 <NetworkPanel handleAddJunction={this.handleAddJunction}/>
-                <ReservationDetailsPanel reservation={this.state.reservation} showPipePanel={this.state.showPipePanel} showJunctionPanel={this.state.showJunctionPanel}/>
+                <ReservationDetailsPanel reservation={this.state.reservation}
+                                         showPipePanel={this.state.showPipePanel}
+                                         showJunctionPanel={this.state.showJunctionPanel}
+                                         junctionFixtureDict={this.state.junctionFixtureDict}
+                />
             </div>
         );
     }
