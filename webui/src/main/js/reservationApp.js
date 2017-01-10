@@ -18,7 +18,8 @@ class ReservationApp extends React.Component{
             networkVis: {},
             resVis: {},
             showPipePanel: false,
-            showJunctionPanel: false
+            showJunctionPanel: false,
+            pipeIdNumberDict: {}
         };
         this.componentDidMount = this.componentDidMount.bind(this);
         this.initializeNetwork = this.initializeNetwork.bind(this);
@@ -47,6 +48,8 @@ class ReservationApp extends React.Component{
 
         let changeMade = false;
         let nodeOrder = this.state.nodeOrder.slice();
+
+        let pipeIdNumberDict = this.state.pipeIdNumberDict;
         // loop through all the selected junctions
         for (let i = 0; i < selectedJunctions.length; i++) {
             let newNodeName = selectedJunctions[i];
@@ -56,9 +59,16 @@ class ReservationApp extends React.Component{
                 // Connect previous last junction to new junction
                 if(Object.keys(reservation.junctions).length > 0){
                     let lastNodeName = nodeOrder[nodeOrder.length-1];
-                    //TODO: Give all pipes a unique id
-                    let newPipe = {id: lastNodeName + " -- " + newNodeName, from: lastNodeName, to: newNodeName};
-                    reservation.pipes[newPipe.id] = newPipe;
+                    let pipeId = lastNodeName + " -- " + newNodeName;
+                    // If this is the first pipe of its type, give it an id of _1
+                    if(!pipeIdNumberDict.hasOwnProperty(pipeId)){
+                        pipeIdNumberDict[pipeId] = 0;
+                    }
+                    // Add a number of to the pipe ID to make them uniqueh
+                    let newPipe = {id: pipeId + "_" + pipeIdNumberDict[pipeId], from: lastNodeName, to: newNodeName};
+                    // Increment the counter
+                    pipeIdNumberDict[pipeId] += 1;
+                    reservation.pipes[pipeId] = newPipe;
                     newPipes.push(newPipe);
                 }
                 // Add the new junction
@@ -72,9 +82,8 @@ class ReservationApp extends React.Component{
             }
         }
         if(changeMade){
-            this.setState({reservation: reservation, nodeOrder: nodeOrder});
+            this.setState({reservation: reservation, nodeOrder: nodeOrder, pipeIdNumberDict: pipeIdNumberDict});
             this.addElementsToResGraph(newJunctions, newPipes);
-            this.setState({nodeOrder: nodeOrder});
         }
         this.state.networkVis.network.unselectAll();
     }
@@ -147,20 +156,30 @@ class ReservationApp extends React.Component{
     }
 
     addPipeThroughResGraph(data, callback){
-        //TODO: Implement pipe addition through graph
         if (data.from != data.to) {
-            callback(data);
+            let pipeId = data.from + " -- " + data.to;
+            let pipeIdNumberDict = this.state.pipeIdNumberDict;
+
+            // If this is the first pipe of its type, give it an id of _1
+            if(!pipeIdNumberDict.hasOwnProperty(pipeId)){
+                pipeIdNumberDict[pipeId] = 0;
+            }
 
             let newPipe = {
-                id: edgeData.from + " -- " + edgeData.to,
-                from: edgeData.from,
-                to: edgeData.to
+                id: pipeId + "_" + pipeIdNumberDict[pipeId],
+                from: data.from,
+                to: data.to
             };
 
+            // Change the Viz edge ID to match the pipe ID
+            data.id = pipeId + "_" + pipeIdNumberDict[pipeId];
+            pipeIdNumberDict[pipeId] += 1;
 
             let reservation = this.state.reservation;
             reservation.pipes[newPipe.id] = newPipe;
-            this.setState({reservation: reservation});
+
+            callback(data);
+            this.setState({reservation: reservation, pipeIdNumberDict: pipeIdNumberDict});
         }
     }
 
