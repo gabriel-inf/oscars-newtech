@@ -169,6 +169,7 @@ class ReservationApp extends React.Component{
         let resVis = this.state.resVis;
         resVis.datasource.edges.add(newPipes);
         resVis.datasource.nodes.add(newJunctions);
+        resVis.network.stabilize();
     }
 
     addPipeThroughResGraph(data, callback){
