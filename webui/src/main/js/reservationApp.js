@@ -9,7 +9,7 @@ class ReservationApp extends React.Component{
     constructor(props){
         super(props);
         // Junction: {id: ~~, label: ~~, fixtures: {}}
-        // fixtures: {id: {id: ~~, bandwidth: ~~, vlan: ~~}, id: ~~, ....}
+        // fixtures: {id: {id: ~~, selected: true or false, bandwidth: ~~, vlan: ~~}, id: ~~, ....}
         // Pipe: {id: ~~, from: ~~, to: ~~, bw: ~~}
         let reservation = {
             junctions: {},
@@ -28,10 +28,10 @@ class ReservationApp extends React.Component{
             junctionFixtureDict: {}
         };
         this.componentDidMount = this.componentDidMount.bind(this);
-        this.initializeNetwork = this.initializeNetwork.bind(this);
         this.initializeResGraph = this.initializeResGraph.bind(this);
-        this.updateNetworkVis = this.updateNetworkVis.bind(this);
+        this.initializeNetwork = this.initializeNetwork.bind(this);
         this.handleAddJunction = this.handleAddJunction.bind(this);
+        this.completeJunctionAddition = this.completeJunctionAddition.bind(this);
         this.addElementsToResGraph = this.addElementsToResGraph.bind(this);
         this.addPipeThroughResGraph = this.addPipeThroughResGraph.bind(this);
         this.deleteResGraphElements = this.deleteResGraphElements.bind(this);
@@ -43,7 +43,7 @@ class ReservationApp extends React.Component{
     }
 
     componentDidMount(){
-        this.initializeNetwork();
+        client.loadJSON({method: "GET", url: "/viz/topology/multilayer"}).then(this.initializeNetwork);
         this.initializeResGraph();
     }
 
@@ -54,13 +54,12 @@ class ReservationApp extends React.Component{
         let newPipes = [];
         let newJunctions = [];
 
-        let changeMade = false;
         let nodeOrder = this.state.nodeOrder.slice();
-
         let pipeIdNumberDict = this.state.pipeIdNumberDict;
+
         // loop through all the selected junctions
-        for (let i = 0; i < selectedJunctions.length; i++) {
-            let newNodeName = selectedJunctions[i];
+        if(selectedJunctions.length > 0){
+            let newNodeName = selectedJunctions[0];
             // Only add this node if it's not currently in the list
             if (!(newNodeName in reservation.junctions)) {
                 // Add a new pipe if there's at least one current junction before addition
@@ -79,36 +78,54 @@ class ReservationApp extends React.Component{
                     pipeIdNumberDict[pipeId] += 1;
                     newPipes.push(newPipe);
                 }
-                // Add the new junction
-                let newJunction = {id: newNodeName, label: newNodeName, fixtures: {}};
-                reservation.junctions[newJunction.id] = newJunction;
-                newJunctions.push(newJunction);
 
-                // A new junction has been added, update flags/storage
-                changeMade = true;
-                nodeOrder.push(newNodeName);
-                if(!(newJunction.id in this.state.junctionFixtureDict)){
-                    let url = "/info/device/" + newJunction.id + "/vlanEdges";
-                    client.loadJSON(url, (response) => this.getJunctionFixtures(response, newJunction.id));
+                // Get list of fixture names if not retrieved already
+                if(!(newNodeName in this.state.junctionFixtureDict)){
+                    client.loadJSON({method: "GET", url: "/info/device/" + newNodeName+ "/vlanEdges"})
+                        .then((response) => {
+                            this.getJunctionFixtures(response, newNodeName);
+                            this.completeJunctionAddition(newNodeName, reservation, newJunctions, newPipes, nodeOrder, pipeIdNumberDict);
+                        }
+                    );
+                }
+                // Already have all possible fixtures for this junction
+                else{
+                    // Add the new junction
+                    this.completeJunctionAddition(newNodeName, reservation, newJunctions, newPipes, nodeOrder, pipeIdNumberDict);
                 }
             }
+            this.state.networkVis.network.unselectAll();
         }
-        if(changeMade){
-            this.setState({
-                reservation: reservation,
-                nodeOrder: nodeOrder,
-                pipeIdNumberDict: pipeIdNumberDict
-            });
-            this.addElementsToResGraph(newJunctions, newPipes);
-        }
-        this.state.networkVis.network.unselectAll();
     }
 
-    initializeNetwork(){
-        client.loadJSON("/viz/topology/multilayer", this.updateNetworkVis);
+    completeJunctionAddition(newNodeName, reservation, newJunctions, newPipes, nodeOrder, pipeIdNumberDict){
+        // Add the new junction
+        let newJunction = {id: newNodeName, label: newNodeName, fixtures: this.createFixtureSet(newNodeName)};
+        reservation.junctions[newJunction.id] = newJunction;
+        newJunctions.push(newJunction);
+        nodeOrder.push(newNodeName);
+        this.setState({
+            reservation: reservation,
+            nodeOrder: nodeOrder,
+            pipeIdNumberDict: pipeIdNumberDict
+        });
+        this.addElementsToResGraph(newJunctions, newPipes);
+        console.log(reservation);
     }
 
-    updateNetworkVis(response){
+    // Each fixture looks like this:
+    // {id: ~~, selected: true or false, bandwidth: ~~, vlan: ~~}
+    createFixtureSet(junctionName){
+        let fixtureNames = this.state.junctionFixtureDict[junctionName];
+        let fixtureSet = {};
+        for(let i = 0; i < fixtureNames.length; i++){
+            let fixtureName = fixtureNames[i];
+            fixtureSet[fixtureName] = {id: fixtureName, selected: false, bandwidth: 0, vlan: "2-4094"};
+        }
+        return fixtureSet;
+    }
+
+    initializeNetwork(response){
         let jsonData = JSON.parse(response);
         let nodes = jsonData.nodes;
         let edges = jsonData.edges;
@@ -289,8 +306,16 @@ class ReservationApp extends React.Component{
         let reservation = this.state.reservation;
         reservation.pipes[pipe.id] = pipe;
         this.setState({reservation: reservation});
-        console.log(this.state.reservation.pipes);
     }
+
+    handleFixtureSelection(junction, fixture, event){
+        fixture.selected = !fixture.selected;
+        junction.fixtures[fixture.name] = fixture;
+        let reservation = this.state.reservation;
+        reservation.junctions[junction.id] = junction;
+        this.setState({reservation: reservation});
+    }
+
 
     render(){
         return(

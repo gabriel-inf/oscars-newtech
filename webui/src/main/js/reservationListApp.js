@@ -15,6 +15,7 @@ class ReservationListApp extends React.Component{
         this.componentDidMount = this.componentDidMount.bind(this);
         this.updateReservations = this.updateReservations.bind(this);
         this.listHasChanged = this.listHasChanged.bind(this);
+        this.evaluateReservationList = this.evaluateReservationList.bind(this);
     }
 
     componentDidMount(){
@@ -22,15 +23,17 @@ class ReservationListApp extends React.Component{
     }
 
     updateReservations(){
-        client.loadJSON('/resv/list/allconnections', (response) =>
-        {
-            let resvs = JSON.parse(response);
-            if(this.listHasChanged(this.state.reservations, resvs)){
-                this.setState({reservations: resvs});
-            }
-        });
+        client.loadJSON({method: "GET", url: '/resv/list/allconnections'})
+            .then(this.evaluateReservationList);
 
         setTimeout(this.updateReservations, 10000);   // Updates every 10 seconds
+    }
+
+    evaluateReservationList(response){
+        let resvs = JSON.parse(response);
+        if(this.listHasChanged(this.state.reservations, resvs)){
+            this.setState({reservations: resvs});
+        }
     }
 
     listHasChanged(oldConnectionList, newConnectionList) {
@@ -168,11 +171,15 @@ class ReservationGraph extends React.Component{
 
     constructor(props){
         super(props);
-        this.state = {edges: [], nodes: []}
+        this.state = {edges: [], nodes: []};
+        this.displayGraph = this.displayGraph.bind(this);
     }
 
     componentDidMount(){
-        client.loadJSON("/viz/connection/" + this.props.connId, (response) =>
+        client.loadJSON({method: "GET", url: "/viz/connection/" + this.props.connId})
+            .then(this.displayGraph);
+        /*
+        client.loadJSON("GET", "/viz/connection/" + this.props.connId, (response) =>
         {
             let json_data = JSON.parse(response);
 
@@ -211,6 +218,47 @@ class ReservationGraph extends React.Component{
             let vizElement = document.getElementById(vizName);
             let reservation_viz = networkVis.make_network(nodes, edges, vizElement, resOptions, vizName);
         });
+        */
+    }
+
+    displayGraph(response){
+        let json_data = JSON.parse(response);
+
+        let edges = json_data.edges;
+        let nodes = json_data.nodes;
+        this.setState({edges: edges, nodes: nodes});
+
+        if(edges.length == 0 || nodes.length === 0){
+            return;
+        }
+
+        // Parse JSON string into object
+        let resOptions = {
+            autoResize: true,
+            width: '100%',
+            height: '100%',
+            interaction: {
+                hover: true,
+                navigationButtons: false,
+                zoomView: false,
+                dragView: false,
+                multiselect: false,
+                selectable: true,
+            },
+            physics: {
+                stabilization: true,
+            },
+            nodes: {
+                shape: 'dot',
+                color: {background: "white"},
+            }
+        };
+
+        let vizName = "resViz_" + this.props.connId;
+
+        let vizElement = document.getElementById(vizName);
+        let reservation_viz = networkVis.make_network(nodes, edges, vizElement, resOptions, vizName);
+
     }
 
     render(){

@@ -15,6 +15,7 @@ class ReservationMap extends React.Component{
         this.updateTopologyLinks = this.updateTopologyLinks.bind(this);
         this.pickColor = this.pickColor.bind(this);
         this.calculateLinkCapacity = this.calculateLinkCapacity.bind(this);
+        this.buildMap = this.buildMap.bind(this);
     }
 
     componentDidMount(){
@@ -52,96 +53,98 @@ class ReservationMap extends React.Component{
     }
 
     initializeNetwork() {
-        let netViz = document.getElementById('networkVisualization');
-        let netPorts = [];
-        let vizLinks = [];
         let portCaps = {};
-        let netData = {};
-        let netOptions = {};
-        let networkMap = {};
 
         // Identify the network ports
-        client.loadJSON("/viz/listPorts", (response) => {netPorts = JSON.parse(response)});
+        client.loadJSON({method: "GET", url: "/topology/bwcapacity"}).then(function(response) {
+            portCaps = JSON.parse(response);
+        });
 
-        client.loadJSON("/topology/bwcapacity", (response) => {portCaps = JSON.parse(response)});
+        client.loadJSON({method: "GET", url: "/viz/topology/multilayer"}).then(
+            (response) => this.buildMap(response, portCaps));
+    }
 
-        client.loadJSON("/viz/topology/multilayer", (response) => {
-            let json_data = JSON.parse(response);
-            let allLinks = json_data["edges"];
+    buildMap(response, portCaps){
+        let netViz = document.getElementById('networkVisualization');
+        let vizLinks = [];
+        let json_data = JSON.parse(response);
+        let allLinks = json_data["edges"];
 
-            for(let e = 0; e < allLinks.length; e++)
-            {
-                let edge = allLinks[e];
+        for(let e = 0; e < allLinks.length; e++)
+        {
+            let edge = allLinks[e];
 
-                if(edge.from !== null && edge.to !== null)
-                    vizLinks.push(edge);
+            if(edge.from !== null && edge.to !== null)
+                vizLinks.push(edge);
+        }
+
+        let netOptions = {
+            autoResize: true,
+            width: '100%',
+            height: '400px',
+            interaction: {
+                hover: false,
+                navigationButtons: false,
+                zoomView: false,
+                dragView: false,
+                multiselect: false,
+                selectable: false,
+            },
+            physics: {
+                stabilization: true,
+            },
+            nodes: {
+                shape: 'dot',
+                color: {background: "white"},
             }
+        };
 
-            netOptions = {
-                autoResize: true,
-                width: '100%',
-                height: '400px',
-                interaction: {
-                    hover: false,
-                    navigationButtons: false,
-                    zoomView: false,
-                    dragView: false,
-                    multiselect: false,
-                    selectable: false,
-                },
-                physics: {
-                    stabilization: true,
-                },
-                nodes: {
-                    shape: 'dot',
-                    color: {background: "white"},
-                }
-            };
+        // create an array with nodes
+        let nodes = new vis.DataSet(json_data['nodes']);
+        let edges = new vis.DataSet(vizLinks);
 
-            // create an array with nodes
-            let nodes = new vis.DataSet(json_data['nodes']);
-            let edges = new vis.DataSet(vizLinks);
+        // create a network
+        let netData = {
+            nodes: nodes,
+            edges: edges,
+        };
 
-            // create a network
-            netData = {
-                nodes: nodes,
-                edges: edges,
-            };
+        this.getAllReservedBWs(netData, portCaps);
 
-            this.getAllReservedBWs(netData, portCaps);
+        let result = networkVis.make_network_with_datasource(netData, netViz, netOptions, "networkHeatmap");
+        let networkMap = result.network;
 
-            let result = networkVis.make_network_with_datasource(netData, netViz, netOptions, "networkHeatmap");
-            networkMap = result.network;
+        // Listener for when network is loading and stabilizing
+        networkMap.on("stabilizationProgress", function(params) {
+            let maxWidth = 100;
+            let minWidth = 0;
+            let widthFactor = params.iterations/params.total;
+            let width = Math.max(minWidth,maxWidth * widthFactor);
 
-            // Listener for when network is loading and stabilizing
-            networkMap.on("stabilizationProgress", function(params) {
-                let maxWidth = 100;
-                let minWidth = 0;
-                let widthFactor = params.iterations/params.total;
-                let width = Math.max(minWidth,maxWidth * widthFactor);
+            document.getElementById('progressBar').style.width = width + '%';
+            document.getElementById('progressVal').innerHTML = Math.round(widthFactor*100) + '%';
+        });
 
-                document.getElementById('progressBar').style.width = width + '%';
-                document.getElementById('progressVal').innerHTML = Math.round(widthFactor*100) + '%';
-            });
+        networkMap.once("stabilizationIterationsDone", function() {
+            document.getElementById('progressVal').innerHTML = '100%';
+            document.getElementById('progressBar').style.width = '496px';
+            document.getElementById('loadingBarDiv').style.opacity = 0;
 
-            networkMap.once("stabilizationIterationsDone", function() {
-                document.getElementById('progressVal').innerHTML = '100%';
-                document.getElementById('progressBar').style.width = '496px';
-                document.getElementById('loadingBarDiv').style.opacity = 0;
-
-            });
         });
     }
 
     // Retrieves and stores the full set of ReservedBW
     getAllReservedBWs(netData, portCaps) {
-        let reservedBwList = [];
-        client.loadJSON("/topology/reservedbw", (response) => {
-            reservedBwList = JSON.parse(response);
-            if(reservedBwList.length > 0 ){
-                this.updateResvPortBW(reservedBwList, netData, portCaps);
-            }
-        });
+        client.loadJSON({method: "GET", url: "/topology/reservedbw"}).then(
+            (response) => this.updateReservedBw(response, netData, portCaps)
+        );
+    }
+
+    updateReservedBw(response, netData, portCaps){
+        let reservedBwList = JSON.parse(response);
+        if(reservedBwList.length > 0 ){
+            this.updateResvPortBW(reservedBwList, netData, portCaps);
+        }
     }
 
     updateResvPortBW(resvBwList, netData, portCaps) {
