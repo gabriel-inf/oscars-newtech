@@ -39,7 +39,10 @@ class ReservationApp extends React.Component{
         this.getJunctionFixtures = this.getJunctionFixtures.bind(this);
         this.deleteJunction = this.deleteJunction.bind(this);
         this.deletePipe = this.deletePipe.bind(this);
-        this.handlePipeBw = this.handlePipeBw.bind(this);
+        this.handlePipeBwChange = this.handlePipeBwChange.bind(this);
+        this.handleFixtureSelection = this.handleFixtureSelection.bind(this);
+        this.handleFixtureVlanChange = this.handleFixtureVlanChange.bind(this);
+        this.handleFixtureBwChange = this.handleFixtureBwChange.bind(this);
     }
 
     componentDidMount(){
@@ -110,7 +113,6 @@ class ReservationApp extends React.Component{
             pipeIdNumberDict: pipeIdNumberDict
         });
         this.addElementsToResGraph(newJunctions, newPipes);
-        console.log(reservation);
     }
 
     // Each fixture looks like this:
@@ -301,16 +303,32 @@ class ReservationApp extends React.Component{
         this.setState({selectedPipes: edges, selectedJunctions: nodes})
     }
 
-    handlePipeBw(pipe, event){
+    handlePipeBwChange(pipe, event){
         pipe.bw = event.target.value;
         let reservation = this.state.reservation;
         reservation.pipes[pipe.id] = pipe;
         this.setState({reservation: reservation});
     }
 
-    handleFixtureSelection(junction, fixture, event){
+    handleFixtureSelection(fixture, junction, event){
         fixture.selected = !fixture.selected;
-        junction.fixtures[fixture.name] = fixture;
+        junction.fixtures[fixture.id] = fixture;
+        let reservation = this.state.reservation;
+        reservation.junctions[junction.id] = junction;
+        this.setState({reservation: reservation});
+    }
+
+    handleFixtureBwChange(fixture, junction, event){
+        fixture.bandwidth = event.target.value;
+        junction.fixtures[fixture.id] = fixture;
+        let reservation = this.state.reservation;
+        reservation.junctions[junction.id] = junction;
+        this.setState({reservation: reservation});
+    }
+
+    handleFixtureVlanChange(fixture, junction, event){
+        fixture.vlan = event.target.value;
+        junction.fixtures[fixture.id] = fixture;
         let reservation = this.state.reservation;
         reservation.junctions[junction.id] = junction;
         this.setState({reservation: reservation});
@@ -325,10 +343,12 @@ class ReservationApp extends React.Component{
                 <ReservationDetailsPanel reservation={this.state.reservation}
                                          showPipePanel={this.state.showPipePanel}
                                          showJunctionPanel={this.state.showJunctionPanel}
-                                         junctionFixtureDict={this.state.junctionFixtureDict}
                                          selectedPipes={this.state.selectedPipes}
                                          selectedJunctions={this.state.selectedJunctions}
-                                         handlePipeBw={this.handlePipeBw}
+                                         handlePipeBw={this.handlePipeBwChange}
+                                         handleFixtureSelection={this.handleFixtureSelection}
+                                         handleFixtureBwChange={this.handleFixtureBwChange}
+                                         handleFixtureVlanChange={this.handleFixtureVlanChange}
                 />
             </div>
         );
@@ -404,28 +424,15 @@ class ReservationDetailsPanel extends React.Component{
     }
 
     render(){
-        const pipePanels = [];
-        for(let pipeName of this.props.selectedPipes){
-            let pipe = this.props.reservation.pipes[pipeName];
-            pipePanels.push(
-                <PipePanel
-                    pipe={pipe}
-                    key={pipeName}
-                    style={(this.props.showPipePanel) ? {} : { display: "none" }}
-                    handlePipeBw={this.props.handlePipeBw}
-                />
-            );
+        let selectedPipe = null;
+        let selectedJunction = null;
+        if(this.props.selectedPipes.length > 0){
+            selectedPipe = this.props.reservation.pipes[this.props.selectedPipes[0]];
         }
-        const junctionPanels = [];
-        for(let junction of this.props.selectedJunctions){
-            junctionPanels.push(
-                <JunctionPanel
-                    junctionName={junction}
-                    key={junction}
-                    style={(this.props.showJunctionPanel) ? {} : { display: "none" }}
-                />
-            );
+        if(this.props.selectedJunctions.length > 0){
+            selectedJunction = this.props.reservation.junctions[this.props.selectedJunctions[0]];
         }
+
         return(
             <div className="panel-group">
                 <div className="panel panel-default">
@@ -436,8 +443,24 @@ class ReservationDetailsPanel extends React.Component{
                     </div> : <div />
                 </div>
                 <div style={this.state.showReservationPanel ? {} : { display: "none" }}>
-                    {pipePanels}
-                    {junctionPanels}
+                    {selectedPipe != null ?
+                        <PipePanel
+                            pipe={selectedPipe}
+                            key={selectedPipe.id}
+                            style={(this.props.showPipePanel) ? {} : { display: "none" }}
+                            handlePipeBw={this.props.handlePipeBw}
+                        /> : null
+                    }
+                    {selectedJunction != null ?
+                        <JunctionPanel
+                            junction={selectedJunction}
+                            key={selectedJunction.id}
+                            style={(this.props.showJunctionPanel) ? {} : { display: "none" }}
+                            handleFixtureSelection={this.props.handleFixtureSelection}
+                            handleFixtureBwChange={this.props.handleFixtureBwChange}
+                            handleFixtureVlanChange={this.props.handleFixtureVlanChange}
+                        /> : null
+                    }
                 </div>
             </div>
         );
@@ -512,12 +535,94 @@ class PipePanel extends React.Component{
 class JunctionPanel extends React.Component{
 
     render(){
+        const rows = [];
+        let fixtureIds = Object.keys(this.props.junction.fixtures).sort();
+        for(let i = 0; i < fixtureIds.length; i++){
+            let fixture = this.props.junction.fixtures[fixtureIds[i]];
+            rows.push(
+                <FixtureRow
+                    fixture={fixture}
+                    junction={this.props.junction}
+                    key={fixture.id}
+                    handleFixtureSelection={this.props.handleFixtureSelection}
+                    handleFixtureBwChange={this.props.handleFixtureBwChange}
+                    handleFixtureVlanChange={this.props.handleFixtureVlanChange}
+                />
+            );
+        }
         return(
             <div id="junction_card" className="panel panel-default">
-                Junction details.
+                <div className="panel-heading">
+                    <h4 className="panel-title">Junction parameters: {this.props.junction.id}</h4>
+                </div>
+                <div className="panel-body">
+                    <form className="form-inline" id="junction_form">
+                        <table id="resv_node_table" className="table table-striped table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <td>URN</td>
+                                    <td>Use</td>
+                                    <td>Bandwidth</td>
+                                    <td>VLAN</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {rows}
+                            </tbody>
+                        </table>
+                    </form>
+                </div>
             </div>
         );
     }
 }
+
+class FixtureRow extends React.Component{
+    // Each fixture looks like this:
+    // {id: ~~, selected: true or false, bandwidth: ~~, vlan: ~~}
+    render(){
+        let checkboxId = "use_" + this.props.fixture.id;
+        let bwInputId = "bw_" + this.props.fixture.bw;
+        let vlanInputId = "vlan_" + this.props.fixture.vlan;
+        return(
+            <tr>
+                <td>{this.props.fixture.id}</td>
+                <td>
+                    <div className="form-check">
+                        <label className="form-check-label">
+                            <input
+                                id={checkboxId}
+                                type="checkbox"
+                                className="form-check-input"
+                                checked={this.props.fixture.selected}
+                                onChange={this.props.handleFixtureSelection.bind(this, this.props.fixture, this.props.junction)}
+                            />
+                        </label>
+                    </div>
+                </td>
+                <td>
+                    <input id={bwInputId}
+                           type="text"
+                           disabled={!this.props.fixture.selected}
+                           value={this.props.fixture.bandwidth}
+                           className="form-control input-sm"
+                           onChange={this.props.handleFixtureBwChange.bind(this, this.props.fixture, this.props.junction)}
+                    />
+                </td>
+                <td>
+                    <input
+                        id={vlanInputId}
+                        type="text"
+                        disabled={!this.props.fixture.selected}
+                        value={this.props.fixture.vlan}
+                        className="form-control input-sm"
+                        onChange={this.props.handleFixtureVlanChange.bind(this, this.props.fixture, this.props.junction)}
+                    />
+                </td>
+            </tr>
+        );
+    }
+}
+
 
 module.exports = ReservationApp;
