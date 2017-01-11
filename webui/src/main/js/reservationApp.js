@@ -22,6 +22,8 @@ class ReservationApp extends React.Component{
             resVis: {},
             showPipePanel: false,
             showJunctionPanel: false,
+            selectedJunctions: [],
+            selectedPipes: [],
             pipeIdNumberDict: {},
             junctionFixtureDict: {}
         };
@@ -37,6 +39,7 @@ class ReservationApp extends React.Component{
         this.getJunctionFixtures = this.getJunctionFixtures.bind(this);
         this.deleteJunction = this.deleteJunction.bind(this);
         this.deletePipe = this.deletePipe.bind(this);
+        this.handlePipeBw = this.handlePipeBw.bind(this);
     }
 
     componentDidMount(){
@@ -71,9 +74,9 @@ class ReservationApp extends React.Component{
                     }
                     // Add a number of to the pipe ID to make them uniqueh
                     let newPipe = {id: pipeId + "_" + pipeIdNumberDict[pipeId], from: lastNodeName, to: newNodeName, bw: 0};
+                    reservation.pipes[newPipe.id] = newPipe;
                     // Increment the counter
                     pipeIdNumberDict[pipeId] += 1;
-                    reservation.pipes[pipeId] = newPipe;
                     newPipes.push(newPipe);
                 }
                 // Add the new junction
@@ -277,6 +280,15 @@ class ReservationApp extends React.Component{
             this.setState({showJunctionPanel: true});
         }
 
+        this.setState({selectedPipes: edges, selectedJunctions: nodes})
+    }
+
+    handlePipeBw(pipe, event){
+        pipe.bw = event.target.value;
+        let reservation = this.state.reservation;
+        reservation.pipes[pipe.id] = pipe;
+        this.setState({reservation: reservation});
+        console.log(this.state.reservation.pipes);
     }
 
     render(){
@@ -288,6 +300,9 @@ class ReservationApp extends React.Component{
                                          showPipePanel={this.state.showPipePanel}
                                          showJunctionPanel={this.state.showJunctionPanel}
                                          junctionFixtureDict={this.state.junctionFixtureDict}
+                                         selectedPipes={this.state.selectedPipes}
+                                         selectedJunctions={this.state.selectedJunctions}
+                                         handlePipeBw={this.handlePipeBw}
                 />
             </div>
         );
@@ -312,12 +327,10 @@ class NetworkPanel extends React.Component{
             <div className="panel-group">
                 <div className="panel panel-default">
                     <Heading title={"Show / hide network"} onClick={() => this.handleHeadingClick()}/>
-                    {this.state.showPanel ?
-                        <div id="network_panel" className="panel-body collapse in">
-                            <NetworkMap />
-                            <AddNodeButton onClick={this.props.handleAddJunction}/>
-                        </div> : <div />
-                    }
+                    <div id="network_panel" className="panel-body collapse in" style={this.state.showPanel ? {} : { display: "none" }}>
+                        <NetworkMap />
+                        <AddNodeButton onClick={this.props.handleAddJunction}/>
+                    </div> : <div />
                 </div>
             </div>
         );
@@ -365,23 +378,41 @@ class ReservationDetailsPanel extends React.Component{
     }
 
     render(){
+        const pipePanels = [];
+        for(let pipeName of this.props.selectedPipes){
+            let pipe = this.props.reservation.pipes[pipeName];
+            pipePanels.push(
+                <PipePanel
+                    pipe={pipe}
+                    key={pipeName}
+                    style={(this.props.showPipePanel) ? {} : { display: "none" }}
+                    handlePipeBw={this.props.handlePipeBw}
+                />
+            );
+        }
+        const junctionPanels = [];
+        for(let junction of this.props.selectedJunctions){
+            junctionPanels.push(
+                <JunctionPanel
+                    junctionName={junction}
+                    key={junction}
+                    style={(this.props.showJunctionPanel) ? {} : { display: "none" }}
+                />
+            );
+        }
         return(
             <div className="panel-group">
                 <div className="panel panel-default">
                     <Heading title={"Show / hide reservation"} onClick={() => this.handleHeadingClick()}/>
-                    {this.state.showReservationPanel ?
-                        <div id="reservation_panel" className="panel-body collapse collapse in">
-                            <Sandbox />
-                            <ParameterForm />
-                        </div> : <div />
-                    }
+                    <div id="reservation_panel" className="panel-body collapse collapse in" style={this.state.showReservationPanel ? {} : { display: "none" }}>
+                        <Sandbox />
+                        <ParameterForm />
+                    </div> : <div />
                 </div>
-                {this.state.showReservationPanel ?
-                <div>
-                    {this.props.showPipePanel ? <PipePanel /> : <div />}
-                    {this.props.showJunctionPanel ? <JunctionPanel /> : <div />}
-                </div> : <div />
-                }
+                <div style={this.state.showReservationPanel ? {} : { display: "none" }}>
+                    {pipePanels}
+                    {junctionPanels}
+                </div>
             </div>
         );
     }
@@ -427,7 +458,26 @@ class PipePanel extends React.Component{
     render(){
         return(
             <div id="pipe_card" className="panel panel-default">
-                Pipe details.
+                <div className="panel-heading">
+                    <h4 className="panel-title">Pipe Parameters: {this.props.pipe.id.split("_")[0]}</h4>
+                </div>
+                <div className="panel-body">
+                    <form className="form-inline" id="pipe_form">
+                        <table className="table table-striped table-bordered table-hover">
+                            <thead>
+                            <tr><td>From</td>
+                                <td>Bandwidth</td>
+                                <td>To</td>
+                            </tr></thead>
+                            <tbody>
+                            <tr><td><input id="pipe_a" type="text"  readOnly={true} className="form-control input-md" value={this.props.pipe.from}/></td>
+                                <td><input id="pipe_bw" type="text" className="form-control input-md" value={this.props.pipe.bw}
+                                           onChange={this.props.handlePipeBw.bind(this, this.props.pipe)}/></td>
+                                <td><input id="pipe_z" type="text" readOnly={true} className="form-control input-md" value={this.props.pipe.to} /></td>
+                            </tr></tbody>
+                        </table>
+                    </form>
+                </div>
             </div>
         );
     }
