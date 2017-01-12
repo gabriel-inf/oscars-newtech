@@ -4,7 +4,7 @@ const client = require('./client');
 const networkVis = require('./networkVis');
 const vis = require('../../../node_modules/vis/dist/vis');
 const DateTime = require('react-datetime');
-const preChecker = require('./preChecker');
+const validator = require('./validator');
 const deepEqual = require('deep-equal')
 
 class ReservationApp extends React.Component{
@@ -13,7 +13,7 @@ class ReservationApp extends React.Component{
         super(props);
         // Junction: {id: ~~, label: ~~, fixtures: {}}
         // fixtures: {id: {id: ~~, selected: true or false, bandwidth: ~~, vlan: ~~}, id: ~~, ....}
-        // Pipe: {id: ~~, from: ~~, to: ~~, bw: ~~}
+        // Pipe: {id: ~~, a: ~~, z: ~~, bw: ~~}
 
         // Initialize default start/end date times
         let startAt = new Date();
@@ -51,6 +51,7 @@ class ReservationApp extends React.Component{
         };
         this.componentDidMount = this.componentDidMount.bind(this);
         this.componentDidUpdate = this.componentDidUpdate.bind(this);
+        this.processPrecheck = this.processPrecheck.bind(this);
         this.initializeResGraph = this.initializeResGraph.bind(this);
         this.initializeNetwork = this.initializeNetwork.bind(this);
         this.handleAddJunction = this.handleAddJunction.bind(this);
@@ -78,10 +79,34 @@ class ReservationApp extends React.Component{
     componentDidUpdate(prevProps, prevState){
         // Only do verification and precheck if the reservation has changed
         if(!deepEqual(prevState.reservation, this.state.reservation)){
-            let reservationIsValid = preChecker.validateReservation(this.state.reservation);
+            let reservationIsValid = validator.validateReservation(this.state.reservation);
             if(reservationIsValid){
-                let preCheckResponse = preChecker.preCheck(this.state.reservation);
+                console.log("Valid reservation");
+                let preCheckResponse = client.submitReservation("/resv/precheck", this.state.reservation);
+                preCheckResponse.then(
+                    (successResponse) => {
+                        this.processPrecheck(successResponse);
+                    },
+                    (failResponse) => {
+                        console.log("Error: " + failResponse.status + " - " + failResponse.statusText);
+                    }
+                );
             }
+        }
+    }
+
+    processPrecheck(response){
+        let data = JSON.parse(response);
+        let connID = data["connectionId"];
+        let preCheckRes = data["preCheckResult"];
+        if(preCheckRes === "UNSUCCESSFUL"){
+            console.log("Unsuccessful precheck.")
+        }
+        else{
+            let azPaths = data["allAzPaths"];
+            console.log(connID);
+            console.log(preCheckRes);
+            console.log(azPaths);
         }
     }
 
@@ -142,12 +167,8 @@ class ReservationApp extends React.Component{
         this.setState({resVis: resVis});
     }
 
-    handleAddJunction(){
+    handleAddJunction(reservation){
         let selectedJunctions = this.state.networkVis.network.getSelectedNodes();
-        let reservation = jQuery.extend(true, {}, this.state.reservation);
-
-        let newPipes = [];
-        let newJunctions = [];
 
         let nodeOrder = this.state.nodeOrder.slice();
         let pipeIdNumberDict = this.state.pipeIdNumberDict;
@@ -159,6 +180,7 @@ class ReservationApp extends React.Component{
             if (!(newNodeName in reservation.junctions)) {
                 // Add a new pipe if there's at least one current junction before addition
                 // Connect previous last junction to new junction
+                let newPipe = null;
                 if(Object.keys(reservation.junctions).length > 0){
                     let lastNodeName = nodeOrder[nodeOrder.length-1];
                     let pipeId = lastNodeName + " -- " + newNodeName;
@@ -167,32 +189,37 @@ class ReservationApp extends React.Component{
                         pipeIdNumberDict[pipeId] = 0;
                     }
                     // Add a number of to the pipe ID to make them uniqueh
-                    let newPipe = {id: pipeId + "_" + pipeIdNumberDict[pipeId], from: lastNodeName, to: newNodeName, bw: 0};
+                    newPipe = {
+                        id: pipeId + "_" + pipeIdNumberDict[pipeId],
+                        a: lastNodeName,
+                        from: lastNodeName,
+                        z: newNodeName,
+                        to: newNodeName,
+                        bw: 0};
                     reservation.pipes[newPipe.id] = newPipe;
                     // Increment the counter
                     pipeIdNumberDict[pipeId] += 1;
-                    newPipes.push(newPipe);
                 }
 
                 // Get list of fixture names if not retrieved already
                 if(!(newNodeName in this.state.junctionFixtureDict)){
                     client.loadJSON({method: "GET", url: "/info/device/" + newNodeName+ "/vlanEdges"})
                         .then((response) => {
-                            this.completeJunctionAddition(newNodeName, reservation, newJunctions, newPipes, nodeOrder, pipeIdNumberDict, response);
+                            this.completeJunctionAddition(newNodeName, newPipe, reservation,  nodeOrder, pipeIdNumberDict, response);
                         }
                     );
                 }
                 // Already have all possible fixtures for this junction
                 else{
                     // Add the new junction
-                    this.completeJunctionAddition(newNodeName, reservation, newJunctions, newPipes, nodeOrder, pipeIdNumberDict, null);
+                    this.completeJunctionAddition(newNodeName, newPipe, reservation, nodeOrder, pipeIdNumberDict, null);
                 }
             }
             this.state.networkVis.network.unselectAll();
         }
     }
 
-    completeJunctionAddition(newNodeName, reservation, newJunctions, newPipes, nodeOrder, pipeIdNumberDict, response){
+    completeJunctionAddition(newNodeName, newPipe, reservation, nodeOrder, pipeIdNumberDict, response){
         // Get the fixtures for this junction
         let junctionDict = this.state.junctionFixtureDict;
         // Add the new junction
@@ -202,7 +229,6 @@ class ReservationApp extends React.Component{
         }
         newJunction.fixtures = this.createFixtureSet(newNodeName, junctionDict);
         reservation.junctions[newJunction.id] = newJunction;
-        newJunctions.push(newJunction);
         nodeOrder.push(newNodeName);
         this.setState({
             reservation: reservation,
@@ -210,17 +236,23 @@ class ReservationApp extends React.Component{
             pipeIdNumberDict: pipeIdNumberDict,
             junctionFixtureDict: junctionDict
         });
-        this.addElementsToResGraph(newJunctions, newPipes);
+
+        // Add these elements to the graph
+        let newEdges = [];
+        if(newPipe != null){
+            newEdges.push(newPipe);
+        }
+        this.addElementsToResGraph([newJunction], newEdges);
     }
 
     // Each fixture looks like this:
-    // {id: ~~, selected: true or false, bandwidth: ~~, vlan: ~~}
+    // {id: ~~, selected: true or false, bw: ~~, vlan: ~~}
     createFixtureSet(junctionName, junctionDict){
         let fixtureNames = junctionDict[junctionName];
         let fixtureSet = {};
         for(let i = 0; i < fixtureNames.length; i++){
             let fixtureName = fixtureNames[i];
-            fixtureSet[fixtureName] = {id: fixtureName, selected: false, bandwidth: 0, vlan: "2-4094"};
+            fixtureSet[fixtureName] = {id: fixtureName, selected: false, bw: 0, vlan: "2-4094"};
         }
         return fixtureSet;
     }
@@ -244,8 +276,8 @@ class ReservationApp extends React.Component{
 
             let newPipe = {
                 id: pipeId + "_" + pipeIdNumberDict[pipeId],
-                from: data.from,
-                to: data.to
+                a: data.from,
+                z: data.to
             };
 
             // Change the Viz edge ID to match the pipe ID
@@ -339,51 +371,44 @@ class ReservationApp extends React.Component{
         this.setState({selectedPipes: edges, selectedJunctions: nodes})
     }
 
-    handlePipeBwChange(pipe, event){
+    handlePipeBwChange(pipe, reservation, event){
         pipe.bw = event.target.value;
-        let reservation = jQuery.extend(true, {}, this.state.reservation);
         reservation.pipes[pipe.id] = pipe;
         this.setState({reservation: reservation});
     }
 
-    handleFixtureSelection(fixture, junction, event){
+    handleFixtureSelection(fixture, junction, reservation, event){
         fixture.selected = !fixture.selected;
         junction.fixtures[fixture.id] = fixture;
-        let reservation = jQuery.extend(true, {}, this.state.reservation);
         reservation.junctions[junction.id] = junction;
         this.setState({reservation: reservation});
     }
 
-    handleFixtureBwChange(fixture, junction, event){
-        fixture.bandwidth = event.target.value;
+    handleFixtureBwChange(fixture, junction, reservation, event){
+        fixture.bw = event.target.value;
         junction.fixtures[fixture.id] = fixture;
-        let reservation = jQuery.extend(true, {}, this.state.reservation);
         reservation.junctions[junction.id] = junction;
         this.setState({reservation: reservation});
     }
 
-    handleFixtureVlanChange(fixture, junction, event){
+    handleFixtureVlanChange(fixture, junction, reservation, event){
         fixture.vlan = event.target.value;
         junction.fixtures[fixture.id] = fixture;
-        let reservation = jQuery.extend(true, {}, this.state.reservation);
         reservation.junctions[junction.id] = junction;
         this.setState({reservation: reservation});
     }
 
-    handleStartDateChange(newMoment){
-        let reservation = jQuery.extend(true, {}, this.state.reservation);
+    handleStartDateChange(reservation, newMoment){
         reservation.startAt = newMoment.toDate();
         this.setState({reservation: reservation});
     }
 
-    handleEndDateChange(newMoment){
-        let reservation = jQuery.extend(true, {}, this.state.reservation);
+    handleEndDateChange(reservation, newMoment){
         reservation.endAt = newMoment.toDate();
         this.setState({reservation: reservation});
     }
 
-    handleDescriptionChange(event){
-        let reservation = jQuery.extend(true, {}, this.state.reservation);
+    handleDescriptionChange(reservation, event){
         reservation.description = event.target.value;
         this.setState({reservation: reservation})
     }
@@ -393,7 +418,7 @@ class ReservationApp extends React.Component{
         return(
             <div>
                 <NavBar isAuthenticated={this.props.route.isAuthenticated} isAdmin={this.props.route.isAdmin}/>
-                <NetworkPanel handleAddJunction={this.handleAddJunction}/>
+                <NetworkPanel reservation={reservation} handleAddJunction={this.handleAddJunction}/>
                 <ReservationDetailsPanel reservation={reservation}
                                          showPipePanel={this.state.showPipePanel}
                                          showJunctionPanel={this.state.showJunctionPanel}
@@ -432,7 +457,7 @@ class NetworkPanel extends React.Component{
                     <Heading title={"Show / hide network"} onClick={() => this.handleHeadingClick()}/>
                     <div id="network_panel" className="panel-body collapse in" style={this.state.showPanel ? {} : { display: "none" }}>
                         <NetworkMap />
-                        <AddNodeButton onClick={this.props.handleAddJunction}/>
+                        <AddNodeButton onClick={this.props.handleAddJunction.bind(this, this.props.reservation)}/>
                     </div> : <div />
                 </div>
             </div>
@@ -507,6 +532,7 @@ class ReservationDetailsPanel extends React.Component{
                 <div style={this.state.showReservationPanel ? {} : { display: "none" }}>
                     {selectedPipe != null ?
                         <PipePanel
+                            reservation={this.props.reservation}
                             pipe={selectedPipe}
                             key={selectedPipe.id}
                             style={(this.props.showPipePanel) ? {} : { display: "none" }}
@@ -515,6 +541,7 @@ class ReservationDetailsPanel extends React.Component{
                     }
                     {selectedJunction != null ?
                         <JunctionPanel
+                            reservation={this.props.reservation}
                             junction={selectedJunction}
                             key={selectedJunction.id}
                             style={(this.props.showJunctionPanel) ? {} : { display: "none" }}
@@ -546,10 +573,10 @@ class PipePanel extends React.Component{
                                 <td>To</td>
                             </tr></thead>
                             <tbody>
-                            <tr><td><input id="pipe_a" type="text"  readOnly={true} className="form-control input-md" value={this.props.pipe.from}/></td>
+                            <tr><td><input id="pipe_a" type="text"  readOnly={true} className="form-control input-md" value={this.props.pipe.a}/></td>
                                 <td><input id="pipe_bw" type="text" className="form-control input-md" value={this.props.pipe.bw}
-                                           onChange={this.props.handlePipeBw.bind(this, this.props.pipe)}/></td>
-                                <td><input id="pipe_z" type="text" readOnly={true} className="form-control input-md" value={this.props.pipe.to} /></td>
+                                           onChange={this.props.handlePipeBw.bind(this, this.props.pipe, this.props.reservation)}/></td>
+                                <td><input id="pipe_z" type="text" readOnly={true} className="form-control input-md" value={this.props.pipe.z} /></td>
                             </tr></tbody>
                         </table>
                     </form>
@@ -568,6 +595,7 @@ class JunctionPanel extends React.Component{
             let fixture = this.props.junction.fixtures[fixtureIds[i]];
             rows.push(
                 <FixtureRow
+                    reservation={this.props.reservation}
                     fixture={fixture}
                     junction={this.props.junction}
                     key={fixture.id}
@@ -622,7 +650,7 @@ class FixtureRow extends React.Component{
                                 type="checkbox"
                                 className="form-check-input"
                                 checked={this.props.fixture.selected}
-                                onChange={this.props.handleFixtureSelection.bind(this, this.props.fixture, this.props.junction)}
+                                onChange={this.props.handleFixtureSelection.bind(this, this.props.fixture, this.props.junction, this.props.reservation)}
                             />
                         </label>
                     </div>
@@ -631,9 +659,9 @@ class FixtureRow extends React.Component{
                     <input id={bwInputId}
                            type="text"
                            disabled={!this.props.fixture.selected}
-                           value={this.props.fixture.bandwidth}
+                           value={this.props.fixture.bw}
                            className="form-control input-sm"
-                           onChange={this.props.handleFixtureBwChange.bind(this, this.props.fixture, this.props.junction)}
+                           onChange={this.props.handleFixtureBwChange.bind(this, this.props.fixture, this.props.junction, this.props.reservation)}
                     />
                 </td>
                 <td>
@@ -643,7 +671,7 @@ class FixtureRow extends React.Component{
                         disabled={!this.props.fixture.selected}
                         value={this.props.fixture.vlan}
                         className="form-control input-sm"
-                        onChange={this.props.handleFixtureVlanChange.bind(this, this.props.fixture, this.props.junction)}
+                        onChange={this.props.handleFixtureVlanChange.bind(this, this.props.fixture, this.props.junction, this.props.reservation)}
                     />
                 </td>
             </tr>
@@ -692,7 +720,7 @@ class ParameterForm extends React.Component{
                                     id="description"
                                     placeholder="Description"
                                     className="form-control input-md"
-                                    onChange={this.props.handleDescriptionChange}
+                                    onChange={this.props.handleDescriptionChange.bind(this, this.props.reservation)}
                                 />
                             </div>
                         </div>
@@ -700,12 +728,12 @@ class ParameterForm extends React.Component{
                         <CalendarForm
                             name="Start"
                             date={this.props.reservation.startAt}
-                            handleDateChange={this.props.handleStartDateChange}
+                            handleDateChange={this.props.handleStartDateChange.bind(this, this.props.reservation)}
                         />
                         <CalendarForm
                             name="End"
                             date={this.props.reservation.endAt}
-                            handleDateChange={this.props.handleEndDateChange}
+                            handleDateChange={this.props.handleEndDateChange.bind(this, this.props.reservation)}
                         />
 
                         <div id="errors_box" className="alert"></div>
@@ -729,7 +757,7 @@ class CalendarForm extends React.Component{
             <div className="form-group">
                 <label className="col-md-2 control-label">{this.props.name} at</label>
                 <div className="col-md-4 input-group" id={divId}>
-                    <DateTime value={this.props.date} onChange={this.props.handleDateChange}/>
+                    <DateTime value={this.props.date} onChange={this.props.handleDateChange.bind(this, this.props.reservation)}/>
                 </div>
             </div>
         );

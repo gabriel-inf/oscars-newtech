@@ -1,23 +1,17 @@
-const client = require('./client');
-
 /*
 reservation = {
     junctions: {},
     pipes: {},
-    startDate: startDate,
-    endDate: endDate,
-    description: ""
+    startAt: Date(),
+    endAt: Date(),
+    description: "",
+    connectionId: ""
 };
 Junction: {id: ~~, label: ~~, fixtures: {}}
 fixtures: {id: {id: ~~, selected: true or false, bandwidth: ~~, vlan: ~~}, id: ~~, ....}
 Pipe: {id: ~~, from: ~~, to: ~~, bw: ~~}
 */
 
-function preCheck(reservation){
-    let response = {};
-
-    return response;
-}
 
 function validateReservation(reservation){
     let junctions = reservation.junctions;
@@ -33,18 +27,21 @@ function validateReservation(reservation){
 }
 
 function validateJunctions(junctions){
-    let numValid = 0;
+    let totalValid = 0;
+    let totalValidFixtures = 0;
     let junctionNameList = Object.keys(junctions);
     for(let index = 0; index < junctionNameList.length; index++){
         let junction = junctions[junctionNameList[index]];
-        if(validateJunction(junction)){
-            numValid++;
+        let numValidFixtures = countValidFixtures(junction);
+        if(numValidFixtures > 0){
+            totalValid++;
+            totalValidFixtures += numValidFixtures;
         }
     }
-    return numValid > 0 && numValid == junctionNameList.length;
+    return totalValid > 0 && totalValid == junctionNameList.length && totalValidFixtures > 1;
 }
 
-function validateJunction(junction){
+function countValidFixtures(junction){
     let numValidSelectedFixtures = 0;
     let fixtures = junction.fixtures;
     let fixtureNameList = Object.keys(fixtures);
@@ -54,12 +51,12 @@ function validateJunction(junction){
             numValidSelectedFixtures++;
         }
     }
-    return numValidSelectedFixtures > 1;
+    return numValidSelectedFixtures;
 }
 
 // fixture: {id: ~~, selected: true or false, bandwidth: ~~, vlan: ~~}
 function validateFixture(fixture){
-    return fixture.selected && fixture.bandwidth > 0 && fixture.vlan.length > 0;
+    return fixture.selected && fixture.bw > 0 && fixture.vlan.length > 0;
 }
 
-module.exports = {validateReservation, preCheck};
+module.exports = {validateReservation};

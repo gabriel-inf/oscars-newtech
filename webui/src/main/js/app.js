@@ -18,15 +18,6 @@ let isAuthenticated = false;
 let isAdmin = false;
 // end::vars[]
 
-$(function ()
-{
-    var token = $("meta[name='_csrf']").attr("content");
-    var header = $("meta[name='_csrf_header']").attr("content");
-    $(document).ajaxSend(function (e, xhr, options) {
-        xhr.setRequestHeader(header, token);
-    });
-});
-
 // tag::render[]
 ReactDOM.render(<Router history={browserHistory}>
                     <Route path="/react/resv/list" isAuthenticated={isAuthenticated} isAdmin={isAdmin} component={ReservationListApp}> </Route>
