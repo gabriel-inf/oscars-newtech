@@ -109,8 +109,6 @@ function add_to_reservation(viz, name) {
 
 }
 
-
-
 function trigger_form_changes(is_resv, selected_an_edge, selected_a_node, is_selected_node_plain, nodeId, edgeId) {
     if (is_resv) {
         add_junction_btn.addClass("disabled").removeClass("active");

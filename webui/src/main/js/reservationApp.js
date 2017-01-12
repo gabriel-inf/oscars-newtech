@@ -3,6 +3,7 @@ const NavBar = require('./navbar');
 const client = require('./client');
 const networkVis = require('./networkVis');
 const vis = require('../../../node_modules/vis/dist/vis');
+const DateTime = require('react-datetime');
 
 class ReservationApp extends React.Component{
 
@@ -11,9 +12,18 @@ class ReservationApp extends React.Component{
         // Junction: {id: ~~, label: ~~, fixtures: {}}
         // fixtures: {id: {id: ~~, selected: true or false, bandwidth: ~~, vlan: ~~}, id: ~~, ....}
         // Pipe: {id: ~~, from: ~~, to: ~~, bw: ~~}
+
+        // Initialize default start/end date times
+        let startDate = new Date();
+        startDate.setTime(startDate.getTime() + 5000 * 60);
+        let endDate = new Date();
+        endDate.setDate(endDate.getDate() + 1);
+        endDate.setTime(endDate.getTime() + 15000 * 60);
         let reservation = {
             junctions: {},
-            pipes: {}
+            pipes: {},
+            startDate: startDate,
+            endDate: endDate
         };
         this.state = {
             reservation: reservation,
@@ -43,12 +53,72 @@ class ReservationApp extends React.Component{
         this.handleFixtureSelection = this.handleFixtureSelection.bind(this);
         this.handleFixtureVlanChange = this.handleFixtureVlanChange.bind(this);
         this.handleFixtureBwChange = this.handleFixtureBwChange.bind(this);
+        this.handleStartDateChange = this.handleStartDateChange.bind(this);
+        this.handleEndDateChange = this.handleEndDateChange.bind(this);
     }
 
     componentDidMount(){
         client.loadJSON({method: "GET", url: "/viz/topology/multilayer"}).then(this.initializeNetwork);
         this.initializeResGraph();
     }
+
+    initializeNetwork(response){
+        let jsonData = JSON.parse(response);
+        let nodes = jsonData.nodes;
+        let edges = jsonData.edges;
+        let networkElement = document.getElementById('network_viz');
+        let networkOptions = {
+            height: '450px',
+            interaction: {
+                hover: false,
+                navigationButtons: true,
+                zoomView: true,
+                dragView: true
+            },
+            physics: {
+                stabilization: true
+            },
+            nodes: {
+                shape: 'dot',
+                color: {background: "white"}
+            }
+        };
+        let displayViz = networkVis.make_network(nodes, edges, networkElement, networkOptions, "network_viz");
+        this.setState({networkVis: displayViz});
+    }
+
+    initializeResGraph(){
+        let networkElement = document.getElementById('reservation_viz');
+        let nodes = [];
+        let edges = [];
+
+        let networkOptions = {
+            height: '300px',
+            interaction: {
+                zoomView: true,
+                dragView: true,
+                selectConnectedEdges: false
+            },
+            physics: {
+                stabilization: true
+            },
+            nodes: {
+                shape: 'dot',
+                color: {background: "white"}
+            },
+            manipulation: {
+                addNode: false,
+                addEdge: this.addPipeThroughResGraph,
+                deleteEdge: this.deleteResGraphElements,
+                deleteNode: this.deleteResGraphElements
+            },
+        };
+        let resVis = networkVis.make_network(nodes, edges, networkElement, networkOptions, "reservation_viz");
+        resVis.network.on('select', this.handleSandboxSelection);
+
+        this.setState({resVis: resVis});
+    }
+
 
     handleAddJunction(){
         let selectedJunctions = this.state.networkVis.network.getSelectedNodes();
@@ -127,62 +197,6 @@ class ReservationApp extends React.Component{
         return fixtureSet;
     }
 
-    initializeNetwork(response){
-        let jsonData = JSON.parse(response);
-        let nodes = jsonData.nodes;
-        let edges = jsonData.edges;
-        let networkElement = document.getElementById('network_viz');
-        let networkOptions = {
-            height: '450px',
-            interaction: {
-                hover: false,
-                navigationButtons: true,
-                zoomView: true,
-                dragView: true
-            },
-            physics: {
-                stabilization: true
-            },
-            nodes: {
-                shape: 'dot',
-                color: {background: "white"}
-            }
-        };
-        let displayViz = networkVis.make_network(nodes, edges, networkElement, networkOptions, "network_viz");
-        this.setState({networkVis: displayViz});
-    }
-
-    initializeResGraph(){
-        let networkElement = document.getElementById('reservation_viz');
-        let nodes = [];
-        let edges = [];
-
-        let networkOptions = {
-            height: '300px',
-            interaction: {
-                zoomView: true,
-                dragView: true,
-                selectConnectedEdges: false
-            },
-            physics: {
-                stabilization: true
-            },
-            nodes: {
-                shape: 'dot',
-                color: {background: "white"}
-            },
-            manipulation: {
-                addNode: false,
-                addEdge: this.addPipeThroughResGraph,
-                deleteEdge: this.deleteResGraphElements,
-                deleteNode: this.deleteResGraphElements
-            },
-        };
-        let resVis = networkVis.make_network(nodes, edges, networkElement, networkOptions, "reservation_viz");
-        resVis.network.on('select', this.handleSandboxSelection);
-
-        this.setState({resVis: resVis});
-    }
 
     addElementsToResGraph(newJunctions, newPipes){
         let resVis = this.state.resVis;
@@ -334,6 +348,18 @@ class ReservationApp extends React.Component{
         this.setState({reservation: reservation});
     }
 
+    handleStartDateChange(newMoment){
+        debugger;
+        let reservation = this.state.reservation;
+        reservation.startDate = newMoment.toDate();
+        this.setState({reservation: reservation});
+    }
+
+    handleEndDateChange(newMoment){
+        let reservation = this.state.reservation;
+        reservation.endDate = newMoment.toDate();
+        this.setState({reservation: reservation});
+    }
 
     render(){
         return(
@@ -349,6 +375,8 @@ class ReservationApp extends React.Component{
                                          handleFixtureSelection={this.handleFixtureSelection}
                                          handleFixtureBwChange={this.handleFixtureBwChange}
                                          handleFixtureVlanChange={this.handleFixtureVlanChange}
+                                         handleStartDateChange={this.handleStartDateChange}
+                                         handleEndDateChange={this.handleEndDateChange}
                 />
             </div>
         );
@@ -439,7 +467,11 @@ class ReservationDetailsPanel extends React.Component{
                     <Heading title={"Show / hide reservation"} onClick={() => this.handleHeadingClick()}/>
                     <div id="reservation_panel" className="panel-body collapse collapse in" style={this.state.showReservationPanel ? {} : { display: "none" }}>
                         <Sandbox />
-                        <ParameterForm />
+                        <ParameterForm
+                            reservation={this.props.reservation}
+                            handleStartDateChange={this.props.handleStartDateChange}
+                            handleEndDateChange={this.props.handleEndDateChange}
+                        />
                     </div> : <div />
                 </div>
                 <div style={this.state.showReservationPanel ? {} : { display: "none" }}>
@@ -462,41 +494,6 @@ class ReservationDetailsPanel extends React.Component{
                         /> : null
                     }
                 </div>
-            </div>
-        );
-    }
-}
-
-class Heading extends React.Component{
-
-    render(){
-        return(
-            <div className="panel-heading">
-                <h4 className="panel-title">
-                    <a href="#" onClick={() => this.props.onClick()}>{this.props.title}</a>
-                </h4>
-            </div>
-        );
-    }
-}
-
-class Sandbox extends React.Component{
-
-    render(){
-        return(
-            <div id="reservation_viz" className="panel-body collapse collapse in col-md-6">
-                Sandbox
-            </div>
-        );
-    }
-}
-
-class ParameterForm extends React.Component{
-
-    render(){
-        return(
-            <div id="resv_common_params_form" className="panel panel-default col-md-6">
-                Parameter Form
             </div>
         );
     }
@@ -559,12 +556,12 @@ class JunctionPanel extends React.Component{
                     <form className="form-inline" id="junction_form">
                         <table id="resv_node_table" className="table table-striped table-bordered table-hover">
                             <thead>
-                                <tr>
-                                    <td>URN</td>
-                                    <td>Use</td>
-                                    <td>Bandwidth</td>
-                                    <td>VLAN</td>
-                                </tr>
+                            <tr>
+                                <td>URN</td>
+                                <td>Use</td>
+                                <td>Bandwidth</td>
+                                <td>VLAN</td>
+                            </tr>
                             </thead>
                             <tbody>
                             {rows}
@@ -624,5 +621,93 @@ class FixtureRow extends React.Component{
     }
 }
 
+class Heading extends React.Component{
+
+    render(){
+        return(
+            <div className="panel-heading">
+                <h4 className="panel-title">
+                    <a href="#" onClick={() => this.props.onClick()}>{this.props.title}</a>
+                </h4>
+            </div>
+        );
+    }
+}
+
+class Sandbox extends React.Component{
+
+    render(){
+        return(
+            <div id="reservation_viz" className="panel-body collapse collapse in col-md-6">
+                Sandbox
+            </div>
+        );
+    }
+}
+
+class ParameterForm extends React.Component{
+
+    render(){
+        return(
+            <div id="resv_common_params_form" className="panel panel-default col-md-6 ">
+                <div className="panel-heading">
+                    <h4 className="panel-title">Reservation parameters</h4>
+                </div>
+                <div className="panel-body">
+                    <form className="form-horizontal" id="resv_shared_form">
+                        <div className="form-group">
+                            <label className="col-md-2 control-label">Description</label>
+                            <div className="col-md-4">
+                                <input id="description" placeholder="Description" className="form-control input-md" />
+                            </div>
+                        </div>
+
+                        <CalendarForm
+                            name="Start"
+                            date={this.props.reservation.startDate}
+                            handleDateChange={this.props.handleStartDateChange}
+                        />
+                        <CalendarForm
+                            name="End"
+                            date={this.props.reservation.endDate}
+                            handleDateChange={this.props.handleEndDateChange}
+                        />
+
+                        <div id="errors_box" className="alert"></div>
+                        <div className="col-md-6">
+                            <ParameterFormButton id="resv_hold_btn" className="btn btn-primary disabled" value="Hold"/>
+                            <ParameterFormButton id="resv_commit_btn" className="btn btn-success disabled" value="Commit"/>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        );
+    }
+}
+
+class CalendarForm extends React.Component{
+
+    render(){
+        let divId = this.props.name + "_at_dtp";
+        return(
+            <div className="form-group">
+                <label className="col-md-2 control-label">{this.props.name} at</label>
+                <div className="col-md-4 input-group" id={divId}>
+                    <DateTime value={this.props.date} onChange={this.props.handleDateChange}/>
+                </div>
+            </div>
+        );
+    }
+}
+
+class ParameterFormButton extends React.Component{
+
+    render(){
+        return(
+            <input type="button" id={this.props.buttonId} className={this.props.className}  value={this.props.value} />
+        );
+    }
+}
 
 module.exports = ReservationApp;
