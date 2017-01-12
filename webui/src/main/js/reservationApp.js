@@ -23,7 +23,8 @@ class ReservationApp extends React.Component{
             junctions: {},
             pipes: {},
             startDate: startDate,
-            endDate: endDate
+            endDate: endDate,
+            description: ""
         };
         this.state = {
             reservation: reservation,
@@ -55,6 +56,7 @@ class ReservationApp extends React.Component{
         this.handleFixtureBwChange = this.handleFixtureBwChange.bind(this);
         this.handleStartDateChange = this.handleStartDateChange.bind(this);
         this.handleEndDateChange = this.handleEndDateChange.bind(this);
+        this.handleDescriptionChange = this.handleDescriptionChange.bind(this);
     }
 
     componentDidMount(){
@@ -118,7 +120,6 @@ class ReservationApp extends React.Component{
 
         this.setState({resVis: resVis});
     }
-
 
     handleAddJunction(){
         let selectedJunctions = this.state.networkVis.network.getSelectedNodes();
@@ -196,7 +197,6 @@ class ReservationApp extends React.Component{
         }
         return fixtureSet;
     }
-
 
     addElementsToResGraph(newJunctions, newPipes){
         let resVis = this.state.resVis;
@@ -349,7 +349,6 @@ class ReservationApp extends React.Component{
     }
 
     handleStartDateChange(newMoment){
-        debugger;
         let reservation = this.state.reservation;
         reservation.startDate = newMoment.toDate();
         this.setState({reservation: reservation});
@@ -359,6 +358,12 @@ class ReservationApp extends React.Component{
         let reservation = this.state.reservation;
         reservation.endDate = newMoment.toDate();
         this.setState({reservation: reservation});
+    }
+
+    handleDescriptionChange(event){
+        let reservation = this.state.reservation;
+        reservation.description = event.target.value;
+        this.setState({reservation: reservation})
     }
 
     render(){
@@ -377,6 +382,7 @@ class ReservationApp extends React.Component{
                                          handleFixtureVlanChange={this.handleFixtureVlanChange}
                                          handleStartDateChange={this.handleStartDateChange}
                                          handleEndDateChange={this.handleEndDateChange}
+                                         handleDescriptionChange={this.handleDescriptionChange}
                 />
             </div>
         );
@@ -469,6 +475,7 @@ class ReservationDetailsPanel extends React.Component{
                         <Sandbox />
                         <ParameterForm
                             reservation={this.props.reservation}
+                            handleDescriptionChange={this.props.handleDescriptionChange}
                             handleStartDateChange={this.props.handleStartDateChange}
                             handleEndDateChange={this.props.handleEndDateChange}
                         />
@@ -658,7 +665,12 @@ class ParameterForm extends React.Component{
                         <div className="form-group">
                             <label className="col-md-2 control-label">Description</label>
                             <div className="col-md-4">
-                                <input id="description" placeholder="Description" className="form-control input-md" />
+                                <input
+                                    id="description"
+                                    placeholder="Description"
+                                    className="form-control input-md"
+                                    onChange={this.props.handleDescriptionChange}
+                                />
                             </div>
                         </div>
 
