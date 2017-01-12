@@ -447,7 +447,7 @@ var resv_precheck = function()
         console.log("Most recent Precheck ID: " + mostRecentPrecheckID);
 
         var json = JSON.stringify(reservation_request);
-        console.log(json);
+        console.log("Prechecked request: " + json);
 
         // TODO: handle errors
         $.ajax({

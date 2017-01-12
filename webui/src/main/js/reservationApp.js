@@ -4,6 +4,8 @@ const client = require('./client');
 const networkVis = require('./networkVis');
 const vis = require('../../../node_modules/vis/dist/vis');
 const DateTime = require('react-datetime');
+const preChecker = require('./preChecker');
+const deepEqual = require('deep-equal')
 
 class ReservationApp extends React.Component{
 
@@ -14,18 +16,27 @@ class ReservationApp extends React.Component{
         // Pipe: {id: ~~, from: ~~, to: ~~, bw: ~~}
 
         // Initialize default start/end date times
-        let startDate = new Date();
-        startDate.setTime(startDate.getTime() + 5000 * 60);
-        let endDate = new Date();
-        endDate.setDate(endDate.getDate() + 1);
-        endDate.setTime(endDate.getTime() + 15000 * 60);
+        let startAt = new Date();
+        startAt.setTime(startAt.getTime() + 5000 * 60);
+        let endAt = new Date();
+        endAt.setDate(endAt.getDate() + 1);
+        endAt.setTime(endAt.getTime() + 15000 * 60);
         let reservation = {
             junctions: {},
             pipes: {},
-            startDate: startDate,
-            endDate: endDate,
-            description: ""
+            startAt: startAt,
+            endAt: endAt,
+            description: "",
+            connectionId: ""
         };
+
+        client.loadJSON({method: "GET", url: "/resv/newConnectionId"})
+            .then((response) => {
+                    let json_data = JSON.parse(response);
+                    reservation["connectionId"] = json_data["connectionId"];
+                }
+            );
+
         this.state = {
             reservation: reservation,
             nodeOrder: [],
@@ -39,6 +50,7 @@ class ReservationApp extends React.Component{
             junctionFixtureDict: {}
         };
         this.componentDidMount = this.componentDidMount.bind(this);
+        this.componentDidUpdate = this.componentDidUpdate.bind(this);
         this.initializeResGraph = this.initializeResGraph.bind(this);
         this.initializeNetwork = this.initializeNetwork.bind(this);
         this.handleAddJunction = this.handleAddJunction.bind(this);
@@ -47,7 +59,6 @@ class ReservationApp extends React.Component{
         this.addPipeThroughResGraph = this.addPipeThroughResGraph.bind(this);
         this.deleteResGraphElements = this.deleteResGraphElements.bind(this);
         this.handleSandboxSelection = this.handleSandboxSelection.bind(this);
-        this.getJunctionFixtures = this.getJunctionFixtures.bind(this);
         this.deleteJunction = this.deleteJunction.bind(this);
         this.deletePipe = this.deletePipe.bind(this);
         this.handlePipeBwChange = this.handlePipeBwChange.bind(this);
@@ -62,6 +73,16 @@ class ReservationApp extends React.Component{
     componentDidMount(){
         client.loadJSON({method: "GET", url: "/viz/topology/multilayer"}).then(this.initializeNetwork);
         this.initializeResGraph();
+    }
+
+    componentDidUpdate(prevProps, prevState){
+        // Only do verification and precheck if the reservation has changed
+        if(!deepEqual(prevState.reservation, this.state.reservation)){
+            let reservationIsValid = preChecker.validateReservation(this.state.reservation);
+            if(reservationIsValid){
+                let preCheckResponse = preChecker.preCheck(this.state.reservation);
+            }
+        }
     }
 
     initializeNetwork(response){
@@ -123,7 +144,7 @@ class ReservationApp extends React.Component{
 
     handleAddJunction(){
         let selectedJunctions = this.state.networkVis.network.getSelectedNodes();
-        let reservation = this.state.reservation;
+        let reservation = jQuery.extend(true, {}, this.state.reservation);
 
         let newPipes = [];
         let newJunctions = [];
@@ -157,39 +178,45 @@ class ReservationApp extends React.Component{
                 if(!(newNodeName in this.state.junctionFixtureDict)){
                     client.loadJSON({method: "GET", url: "/info/device/" + newNodeName+ "/vlanEdges"})
                         .then((response) => {
-                            this.getJunctionFixtures(response, newNodeName);
-                            this.completeJunctionAddition(newNodeName, reservation, newJunctions, newPipes, nodeOrder, pipeIdNumberDict);
+                            this.completeJunctionAddition(newNodeName, reservation, newJunctions, newPipes, nodeOrder, pipeIdNumberDict, response);
                         }
                     );
                 }
                 // Already have all possible fixtures for this junction
                 else{
                     // Add the new junction
-                    this.completeJunctionAddition(newNodeName, reservation, newJunctions, newPipes, nodeOrder, pipeIdNumberDict);
+                    this.completeJunctionAddition(newNodeName, reservation, newJunctions, newPipes, nodeOrder, pipeIdNumberDict, null);
                 }
             }
             this.state.networkVis.network.unselectAll();
         }
     }
 
-    completeJunctionAddition(newNodeName, reservation, newJunctions, newPipes, nodeOrder, pipeIdNumberDict){
+    completeJunctionAddition(newNodeName, reservation, newJunctions, newPipes, nodeOrder, pipeIdNumberDict, response){
+        // Get the fixtures for this junction
+        let junctionDict = this.state.junctionFixtureDict;
         // Add the new junction
-        let newJunction = {id: newNodeName, label: newNodeName, fixtures: this.createFixtureSet(newNodeName)};
+        let newJunction = {id: newNodeName, label: newNodeName, fixtures: {}};
+        if(response != null){
+            junctionDict[newNodeName] = JSON.parse(response);
+        }
+        newJunction.fixtures = this.createFixtureSet(newNodeName, junctionDict);
         reservation.junctions[newJunction.id] = newJunction;
         newJunctions.push(newJunction);
         nodeOrder.push(newNodeName);
         this.setState({
             reservation: reservation,
             nodeOrder: nodeOrder,
-            pipeIdNumberDict: pipeIdNumberDict
+            pipeIdNumberDict: pipeIdNumberDict,
+            junctionFixtureDict: junctionDict
         });
         this.addElementsToResGraph(newJunctions, newPipes);
     }
 
     // Each fixture looks like this:
     // {id: ~~, selected: true or false, bandwidth: ~~, vlan: ~~}
-    createFixtureSet(junctionName){
-        let fixtureNames = this.state.junctionFixtureDict[junctionName];
+    createFixtureSet(junctionName, junctionDict){
+        let fixtureNames = junctionDict[junctionName];
         let fixtureSet = {};
         for(let i = 0; i < fixtureNames.length; i++){
             let fixtureName = fixtureNames[i];
@@ -225,7 +252,7 @@ class ReservationApp extends React.Component{
             data.id = pipeId + "_" + pipeIdNumberDict[pipeId];
             pipeIdNumberDict[pipeId] += 1;
 
-            let reservation = this.state.reservation;
+            let reservation = jQuery.extend(true, {}, this.state.reservation);
             reservation.pipes[newPipe.id] = newPipe;
 
             callback(data);
@@ -235,7 +262,8 @@ class ReservationApp extends React.Component{
 
     deleteResGraphElements(data, callback){
         callback(data);
-        let res = this.state.reservation;
+
+        let res = jQuery.extend(true, {}, this.state.reservation);
         let datasource = this.state.resVis.datasource;
 
         // Delete all selected pipes
@@ -291,12 +319,6 @@ class ReservationApp extends React.Component{
         datasource.nodes.remove(nodeId);
     }
 
-    getJunctionFixtures(response, junctionId){
-        let junctionDict = this.state.junctionFixtureDict;
-        junctionDict[junctionId] = JSON.parse(response);
-        this.setState({junctionFixtureDict: junctionDict});
-    }
-
     handleSandboxSelection(params){
         let edges = params.edges;
         let nodes = params.nodes;
@@ -319,7 +341,7 @@ class ReservationApp extends React.Component{
 
     handlePipeBwChange(pipe, event){
         pipe.bw = event.target.value;
-        let reservation = this.state.reservation;
+        let reservation = jQuery.extend(true, {}, this.state.reservation);
         reservation.pipes[pipe.id] = pipe;
         this.setState({reservation: reservation});
     }
@@ -327,7 +349,7 @@ class ReservationApp extends React.Component{
     handleFixtureSelection(fixture, junction, event){
         fixture.selected = !fixture.selected;
         junction.fixtures[fixture.id] = fixture;
-        let reservation = this.state.reservation;
+        let reservation = jQuery.extend(true, {}, this.state.reservation);
         reservation.junctions[junction.id] = junction;
         this.setState({reservation: reservation});
     }
@@ -335,7 +357,7 @@ class ReservationApp extends React.Component{
     handleFixtureBwChange(fixture, junction, event){
         fixture.bandwidth = event.target.value;
         junction.fixtures[fixture.id] = fixture;
-        let reservation = this.state.reservation;
+        let reservation = jQuery.extend(true, {}, this.state.reservation);
         reservation.junctions[junction.id] = junction;
         this.setState({reservation: reservation});
     }
@@ -343,35 +365,36 @@ class ReservationApp extends React.Component{
     handleFixtureVlanChange(fixture, junction, event){
         fixture.vlan = event.target.value;
         junction.fixtures[fixture.id] = fixture;
-        let reservation = this.state.reservation;
+        let reservation = jQuery.extend(true, {}, this.state.reservation);
         reservation.junctions[junction.id] = junction;
         this.setState({reservation: reservation});
     }
 
     handleStartDateChange(newMoment){
-        let reservation = this.state.reservation;
-        reservation.startDate = newMoment.toDate();
+        let reservation = jQuery.extend(true, {}, this.state.reservation);
+        reservation.startAt = newMoment.toDate();
         this.setState({reservation: reservation});
     }
 
     handleEndDateChange(newMoment){
-        let reservation = this.state.reservation;
-        reservation.endDate = newMoment.toDate();
+        let reservation = jQuery.extend(true, {}, this.state.reservation);
+        reservation.endAt = newMoment.toDate();
         this.setState({reservation: reservation});
     }
 
     handleDescriptionChange(event){
-        let reservation = this.state.reservation;
+        let reservation = jQuery.extend(true, {}, this.state.reservation);
         reservation.description = event.target.value;
         this.setState({reservation: reservation})
     }
 
     render(){
+        let reservation = jQuery.extend(true, {}, this.state.reservation);
         return(
             <div>
                 <NavBar isAuthenticated={this.props.route.isAuthenticated} isAdmin={this.props.route.isAdmin}/>
                 <NetworkPanel handleAddJunction={this.handleAddJunction}/>
-                <ReservationDetailsPanel reservation={this.state.reservation}
+                <ReservationDetailsPanel reservation={reservation}
                                          showPipePanel={this.state.showPipePanel}
                                          showJunctionPanel={this.state.showJunctionPanel}
                                          selectedPipes={this.state.selectedPipes}
@@ -676,12 +699,12 @@ class ParameterForm extends React.Component{
 
                         <CalendarForm
                             name="Start"
-                            date={this.props.reservation.startDate}
+                            date={this.props.reservation.startAt}
                             handleDateChange={this.props.handleStartDateChange}
                         />
                         <CalendarForm
                             name="End"
-                            date={this.props.reservation.endDate}
+                            date={this.props.reservation.endAt}
                             handleDateChange={this.props.handleEndDateChange}
                         />
 
