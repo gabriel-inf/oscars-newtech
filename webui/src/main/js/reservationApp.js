@@ -48,7 +48,7 @@ class ReservationApp extends React.Component{
             selectedPipes: [],
             pipeIdNumberDict: {},
             junctionFixtureDict: {},
-            messageBoxStyle: {},
+            messageBoxClass: "alert-info",
             message: "Add a node to your reservation to get started!"
         };
         this.componentDidMount = this.componentDidMount.bind(this);
@@ -83,7 +83,7 @@ class ReservationApp extends React.Component{
         if(!deepEqual(prevState.reservation, this.state.reservation)){
             let reservationStatus = validator.validateReservation(this.state.reservation);
             if(reservationStatus.isValid){
-                this.setState({message: "Reservation format valid. Prechecking resource availability..."});
+                this.setState({message: "Reservation format valid. Prechecking resource availability...", messageBoxClass: "alert-success"});
                 let preCheckResponse = client.submitReservation("/resv/precheck", this.state.reservation);
                 preCheckResponse.then(
                     (successResponse) => {
@@ -95,7 +95,7 @@ class ReservationApp extends React.Component{
                 );
             }
             else{
-                this.setState({message: reservationStatus.errorMessages[0]});
+                this.setState({message: reservationStatus.errorMessages[0], messageBoxClass: "alert-info"});
             }
         }
     }
@@ -104,14 +104,20 @@ class ReservationApp extends React.Component{
         let data = JSON.parse(response);
         let preCheckRes = data["preCheckResult"];
         if(preCheckRes === "UNSUCCESSFUL"){
-            this.setState({message: "Precheck Failed: Cannot establish reservation with current parameters! Updating topology. Please wait..."});
+            this.setState({
+                    message: "Precheck Failed: Cannot establish reservation with current parameters! Updating topology. Please wait...",
+                    messageBoxClass: "alert-danger"
+            });
             networkVis.drawFailedLinksOnNetwork(this.state.networkVis, this.state.reservation);
             this.setState({message: "Precheck Failed: Cannot establish reservation with current parameters! Topology elements with insufficient bandwidth colored red."});
         }
         else{
             let azPaths = data["allAzPaths"];
             networkVis.drawPathOnNetwork(this.state.networkVis, azPaths);
-            this.setState({message: "Precheck Passed: Prospective route(s) added to topology. Click Hold to reserve!"});
+            this.setState({
+                message: "Precheck Passed: Prospective route(s) added to topology. Click Hold to reserve!",
+                messageBoxClass: "alert-success"
+            });
         }
     }
 
@@ -436,7 +442,7 @@ class ReservationApp extends React.Component{
                                          handleStartDateChange={this.handleStartDateChange}
                                          handleEndDateChange={this.handleEndDateChange}
                                          handleDescriptionChange={this.handleDescriptionChange}
-                                         messageBoxStyle={this.state.messageBoxStyle}
+                                         messageBoxClass={this.state.messageBoxClass}
                                          message={this.state.message}
                 />
             </div>
@@ -533,7 +539,7 @@ class ReservationDetailsPanel extends React.Component{
                             handleDescriptionChange={this.props.handleDescriptionChange}
                             handleStartDateChange={this.props.handleStartDateChange}
                             handleEndDateChange={this.props.handleEndDateChange}
-                            messageBoxStyle={this.props.messageBoxStyle}
+                            messageBoxClass={this.props.messageBoxClass}
                             message={this.props.message}
                         />
                     </div> : <div />
@@ -745,7 +751,7 @@ class ParameterForm extends React.Component{
                             handleDateChange={this.props.handleEndDateChange.bind(this, this.props.reservation)}
                         />
 
-                        <div id="errors_box" className="alert" style={this.props.messageBoxStyle}>{this.props.message}</div>
+                        <div id="errors_box" className={this.props.messageBoxClass}>{this.props.message}</div>
                         <div className="col-md-6">
                             <ParameterFormButton id="resv_hold_btn" className="btn btn-primary disabled" value="Hold"/>
                             <ParameterFormButton id="resv_commit_btn" className="btn btn-success disabled" value="Commit"/>

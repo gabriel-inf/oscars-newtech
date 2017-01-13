@@ -54,9 +54,16 @@ function validateJunctions(junctions){
             totalValidFixtures += numValidFixtures;
         }
     }
-    if(totalValidFixtures < 2){
-        errorMessages.push("Select node in Sandbox to add at least two end points (fixtures) across reservation and assign bandwidth > 0.");
+
+    if(totalValid != junctionNameList.length){
+        errorMessages.push("Make sure that all Sandbox nodes have at least one end point (fixture) with bandwidth > 0. Select node in Sandbox to add fixtures.");
     }
+
+    if(totalValidFixtures < 2){
+        errorMessages.push("There must be at least two end points (fixtures) with bandwidth > 0 across reservation. Select node in Sandbox to add fixtures.");
+    }
+
+
 
     return {isValid: totalValid > 0 && totalValid == junctionNameList.length && totalValidFixtures > 1, errorMessages: errorMessages};
 }
