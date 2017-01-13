@@ -1,4 +1,5 @@
 const vis = require('../../../node_modules/vis/dist/vis');
+const client = require('./client');
 
 let resv_viz_name = "reservation_viz";
 
@@ -106,6 +107,9 @@ function attach_handlers(vis_js_network, vis_js_datasets, name) {
 
 function drawPathOnNetwork(vizNetwork, allAzPaths)
 {
+    highlight_devices(vizNetwork.datasource, Object.keys(vizNetwork.datasource.nodes._data), true, "white");
+    highlight_links(vizNetwork.datasource, Object.keys(vizNetwork.datasource.edges._data), true, "blue");
+
     let eachAzPath = allAzPaths.split(";");
     let nodesToReserve = [];
     let linksToReserve = [];
@@ -158,6 +162,106 @@ function drawPathOnNetwork(vizNetwork, allAzPaths)
     //let highlightedEdges = linksToReserve;
 }
 
+function drawFailedLinksOnNetwork(vizNetwork, resRequest)
+{
+    console.log("Updating Topology with bandwidth-restricted links");
+    highlight_devices(vizNetwork.datasource, Object.keys(vizNetwork.datasource.nodes._data), true, "white");
+    highlight_links(vizNetwork.datasource, Object.keys(vizNetwork.datasource.edges._data), true, "blue");
+
+    // Compute Maximum requested B/W from requested pipes //
+    let maxPipeBW = 0;
+
+    let pipeIds = Object.keys(resRequest.pipes);
+    for(let p = 0; p < pipeIds.length; p++)
+    {
+        let oneBW = parseInt(resRequest.pipes[pipeIds[p]].bw);
+
+        if(oneBW > maxPipeBW)
+            maxPipeBW = oneBW;
+    }
+
+    console.log("Max pipe B/W: " + maxPipeBW);
+
+    // Identify the network ports
+    client.loadJSON({method: "GET", url:"/viz/listPorts"}).then(
+        (portsResponse) => {
+            let netPorts = JSON.parse(portsResponse);
+            client.submitReservation("/resv/topo/bwAvailAllPorts/", resRequest).then(
+                (response) => {
+                    let parsedResponse = JSON.parse(response);
+                    let fullPortMap = parsedResponse["bwAvailabilityMap"];
+                    let problemPorts = [];
+                    let insufficientNodes = [];
+                    let insufficientEdges = [];
+
+                    let junctionKeys = Object.keys(resRequest["junctions"]);
+                    for(let p = 0; p < netPorts.length; p++)
+                    {
+                        let onePort = netPorts[p];              // 1. Get b/w for each port from Map.
+                        let inBW = fullPortMap[onePort][0];
+                        let egBW = fullPortMap[onePort][1];
+
+                        let minBW = inBW;                       // 2. Take minimum of ingress and egress.
+
+                        if(egBW < minBW)
+                            minBW = egBW;
+
+                        if(minBW < maxPipeBW)                  // 3. If minimum >= b/w requested, continue.
+                        {
+                            problemPorts.push(onePort);         // 4. Otherwise, track problematic ports.
+
+                            if(insufficientNodes.length === junctionKeys.length)
+                                continue;
+
+                            for(let j = 0; j < junctionKeys.length; j++)
+                            {
+                                // Need to color nodes if fixture bandwidth is insufficient
+                                if(onePort in resRequest["junctions"][junctionKeys[j]]["fixtures"])
+                                    insufficientNodes.push(junctionKeys[j]);
+                            }
+                        }
+                    }
+
+                    console.log("Insufficient Nodes: " + insufficientNodes);
+
+                    // 5. Find all links terminating at each problematic port.
+                    for(let p = 0; p < problemPorts.length; p++)
+                    {
+                        let badPort = problemPorts[p];
+
+                        let edgeKeys = Object.keys(vizNetwork.datasource.edges._data);
+                        for(let l = 0; l < edgeKeys.length; l++)
+                        {
+                            let key = edgeKeys[l];
+                            let oneLink = vizNetwork.datasource.edges._data[key];
+                            let endPoints = oneLink.id.split(" -- ");
+
+                            if(badPort === endPoints[0] || badPort === endPoints[1])
+                            {
+                                insufficientEdges.push(oneLink.id);
+                            }
+                        }
+                    }
+
+
+
+                    // 6. Color all problematic links and nodes red.
+                    vizNetwork.network.unselectAll();
+                    highlight_devices(vizNetwork.datasource, insufficientNodes, true, "red");
+                    highlight_links(vizNetwork.datasource, insufficientEdges, true, "red");
+
+                    console.log("Failed links drawn");
+                }
+            );
+        }
+    );
+
+
+
+}
+
+
+
 function highlight_devices(network, deviceIDs, isSelected, color)
 {
     let newColor = color;
@@ -198,4 +302,4 @@ function trigger_form_changes(is_resv, selected_an_edge, selected_a_node, is_sel
     ;
 }
 
-module.exports = {make_network, make_network_with_datasource, drawPathOnNetwork};
+module.exports = {make_network, make_network_with_datasource, drawPathOnNetwork, drawFailedLinksOnNetwork};

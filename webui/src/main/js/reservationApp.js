@@ -101,6 +101,7 @@ class ReservationApp extends React.Component{
         let preCheckRes = data["preCheckResult"];
         if(preCheckRes === "UNSUCCESSFUL"){
             console.log("Unsuccessful precheck.")
+            networkVis.drawFailedLinksOnNetwork(this.state.networkVis, this.state.reservation);
         }
         else{
             let azPaths = data["allAzPaths"];
