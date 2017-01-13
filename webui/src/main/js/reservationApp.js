@@ -27,7 +27,8 @@ class ReservationApp extends React.Component{
             startAt: startAt,
             endAt: endAt,
             description: "",
-            connectionId: ""
+            connectionId: "",
+            status: "UNHELD"
         };
 
         client.loadJSON({method: "GET", url: "/resv/newConnectionId"})
@@ -49,7 +50,9 @@ class ReservationApp extends React.Component{
             pipeIdNumberDict: {},
             junctionFixtureDict: {},
             messageBoxClass: "alert-info",
-            message: "Add a node to your reservation to get started!"
+            message: "Add a node to your reservation to get started!",
+            enableHold: false,
+            enableCommit: false
         };
         this.componentDidMount = this.componentDidMount.bind(this);
         this.componentDidUpdate = this.componentDidUpdate.bind(this);
@@ -71,6 +74,8 @@ class ReservationApp extends React.Component{
         this.handleStartDateChange = this.handleStartDateChange.bind(this);
         this.handleEndDateChange = this.handleEndDateChange.bind(this);
         this.handleDescriptionChange = this.handleDescriptionChange.bind(this);
+        this.handleHold = this.handleHold.bind(this);
+        this.handleCommit = this.handleCommit.bind(this);
     }
 
     componentDidMount(){
@@ -80,7 +85,7 @@ class ReservationApp extends React.Component{
 
     componentDidUpdate(prevProps, prevState){
         // Only do verification and precheck if the reservation has changed
-        if(!deepEqual(prevState.reservation, this.state.reservation)){
+        if(this.state.reservation.status === "UNHELD" && !deepEqual(prevState.reservation, this.state.reservation)){
             let reservationStatus = validator.validateReservation(this.state.reservation);
             if(reservationStatus.isValid){
                 this.setState({message: "Reservation format valid. Prechecking resource availability...", messageBoxClass: "alert-success"});
@@ -95,7 +100,12 @@ class ReservationApp extends React.Component{
                 );
             }
             else{
-                this.setState({message: reservationStatus.errorMessages[0], messageBoxClass: "alert-info"});
+                this.setState({
+                    message: reservationStatus.errorMessages[0],
+                    messageBoxClass: "alert-info",
+                    enableHold: false,
+                    enableCommit: false
+                });
             }
         }
     }
@@ -116,7 +126,9 @@ class ReservationApp extends React.Component{
             networkVis.drawPathOnNetwork(this.state.networkVis, azPaths);
             this.setState({
                 message: "Precheck Passed: Prospective route(s) added to topology. Click Hold to reserve!",
-                messageBoxClass: "alert-success"
+                messageBoxClass: "alert-success",
+                enableHold: true,
+                enableCommit: false
             });
         }
     }
@@ -424,6 +436,16 @@ class ReservationApp extends React.Component{
         this.setState({reservation: reservation})
     }
 
+    handleHold(reservation){
+        reservation.status = "HELD";
+        this.setState({reservation: reservation, enableHold: false, enableCommit: true})
+    }
+
+    handleCommit(reservation){
+        reservation.status = "COMMITTED";
+        this.setState({reservation: reservation, enableHold: false, enableCommit: false})
+    }
+
     render(){
         let reservation = jQuery.extend(true, {}, this.state.reservation);
         return(
@@ -444,6 +466,10 @@ class ReservationApp extends React.Component{
                                          handleDescriptionChange={this.handleDescriptionChange}
                                          messageBoxClass={this.state.messageBoxClass}
                                          message={this.state.message}
+                                         enableHold={this.state.enableHold}
+                                         enableCommit={this.state.enableCommit}
+                                         handleHold={this.handleHold}
+                                         handleCommit={this.handleCommit}
                 />
             </div>
         );
@@ -541,6 +567,10 @@ class ReservationDetailsPanel extends React.Component{
                             handleEndDateChange={this.props.handleEndDateChange}
                             messageBoxClass={this.props.messageBoxClass}
                             message={this.props.message}
+                            enableHold={this.props.enableHold}
+                            enableCommit={this.props.enableCommit}
+                            handleHold={this.props.handleHold}
+                            handleCommit={this.props.handleCommit}
                         />
                     </div> : <div />
                 </div>
@@ -753,8 +783,18 @@ class ParameterForm extends React.Component{
 
                         <div id="errors_box" className={this.props.messageBoxClass}>{this.props.message}</div>
                         <div className="col-md-6">
-                            <ParameterFormButton id="resv_hold_btn" className="btn btn-primary disabled" value="Hold"/>
-                            <ParameterFormButton id="resv_commit_btn" className="btn btn-success disabled" value="Commit"/>
+                            <ParameterFormButton
+                                id="resv_hold_btn"
+                                className="btn btn-primary"
+                                value="Hold"
+                                enabled={this.props.enableHold}
+                                onClick={this.props.handleHold.bind(this, this.props.reservation)}/>
+                            <ParameterFormButton
+                                id="resv_commit_btn"
+                                className="btn btn-success"
+                                value="Commit"
+                                enabled={this.props.enableCommit}
+                                onClick={this.props.handleCommit.bind(this, this.props.reservation)}/>
                         </div>
                     </form>
 
@@ -783,7 +823,14 @@ class ParameterFormButton extends React.Component{
 
     render(){
         return(
-            <input type="button" id={this.props.buttonId} className={this.props.className}  value={this.props.value} />
+            <input
+                type="button"
+                id={this.props.buttonId}
+                className={this.props.className}
+                value={this.props.value}
+                onClick={this.props.onClick}
+                disabled={!this.props.enabled}
+            />
         );
     }
 }
