@@ -107,6 +107,7 @@ class ReservationApp extends React.Component{
             console.log(connID);
             console.log(preCheckRes);
             console.log(azPaths);
+            networkVis.drawPathOnNetwork(this.state.networkVis, azPaths);
         }
     }
 

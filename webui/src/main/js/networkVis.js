@@ -104,6 +104,60 @@ function attach_handlers(vis_js_network, vis_js_datasets, name) {
     });
 }
 
+function drawPathOnNetwork(vizNetwork, allAzPaths)
+{
+    let eachAzPath = allAzPaths.split(";");
+    let nodesToReserve = [];
+    let linksToReserve = [];
+
+    for(let i = 0; i < eachAzPath.length-1; i++)
+    {
+        console.log("Path: " + eachAzPath[i]);
+
+        let eachAzNode = eachAzPath[i].split(",");
+        let prevNode = "";
+        let prevNodeIsDevice = false;
+        for(let j = 0; j < eachAzNode.length-1; j++)
+        {
+            let nextNode = eachAzNode[j];
+
+            if(nextNode === prevNode)
+                continue;
+
+
+
+            let portNodes = nextNode.split(":");
+            let nextNodeIsDevice = false;
+            nextNodeIsDevice = portNodes.length <= 1;
+
+            if(nextNodeIsDevice)
+            {
+                nodesToReserve.push(nextNode);
+            }
+
+            if(!prevNodeIsDevice && !nextNodeIsDevice && j > 0)
+            {
+                let linkName = prevNode + " -- " + nextNode;
+                let reverseLinkName = nextNode + " -- " + prevNode;     // Not all links are bidirectional in the viz. Won't be colored properly.
+                linksToReserve.push(linkName);
+                linksToReserve.push(reverseLinkName);
+            }
+
+            prevNode = eachAzNode[j];
+            let prevPort = prevNode.split(":");
+            prevNodeIsDevice = prevPort.length <= 1;
+        }
+    }
+
+    vizNetwork.network.unselectAll();
+
+    highlight_devices(vizNetwork.datasource, nodesToReserve, true, "green");
+    highlight_links(vizNetwork.datasource, linksToReserve, true, "green");
+
+    //let highlightedNodes = nodesToReserve;
+    //let highlightedEdges = linksToReserve;
+}
+
 function highlight_devices(network, deviceIDs, isSelected, color)
 {
     let newColor = color;
@@ -144,4 +198,4 @@ function trigger_form_changes(is_resv, selected_an_edge, selected_a_node, is_sel
     ;
 }
 
-module.exports = {make_network, make_network_with_datasource};
+module.exports = {make_network, make_network_with_datasource, drawPathOnNetwork};
