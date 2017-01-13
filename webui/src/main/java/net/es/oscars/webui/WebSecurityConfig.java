@@ -24,6 +24,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                     .antMatchers("/resv/**").permitAll()
                     .antMatchers("/topology/**").permitAll()
                     .antMatchers("/react/**").permitAll()
+                    .antMatchers("/webpack-dev-server/**").permitAll()
 
                 // index page and REST endpoints:
                     .antMatchers("/").permitAll()
@@ -53,8 +54,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                     .logoutSuccessUrl("/login")
                     .deleteCookies("remember-me")
                 .and().rememberMe();
-        //TODO: Remove when done with webpack-dev-server development
+
+        //TODO: Remove the following statements when done with webpack-dev-server development
         http.headers().httpStrictTransportSecurity().disable();
+        http.csrf().disable();
 
     }
 
