@@ -68,14 +68,34 @@ function submit(method, url, payload){
 }
 
 function formatReservation(reservation){
+
+    let filteredJunctions = {};
+    let junctionKeys = Object.keys(reservation.junctions);
+    for(let index = 0; index < junctionKeys.length; index++){
+        let junction = reservation.junctions[junctionKeys[index]];
+        let filteredJunction = {id: junction.id, label: junction.label, fixtures: filterFixtures(junction.fixtures)};
+        filteredJunctions[filteredJunction.id] = filteredJunction;
+    }
     return {
-        junctions: reservation.junctions,
+        junctions: filteredJunctions,
         pipes: reservation.pipes,
         startAt: parseInt(moment(reservation.startAt).unix()),
         endAt: parseInt(moment(reservation.endAt).unix()),
         description: reservation.description,
         connectionId: reservation.connectionId
     };
+}
+
+function filterFixtures(fixtures){
+    let filteredFixtures = {};
+    let fixtureKeys = Object.keys(fixtures);
+    for(let index = 0; index < fixtureKeys.length; index++){
+        let fixture = fixtures[fixtureKeys[index]];
+        if(fixture.selected){
+            filteredFixtures[fixture.id] = fixture;
+        }
+    }
+    return filteredFixtures;
 }
 
 module.exports = {loadJSON, submitReservation, submit};
