@@ -53,11 +53,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                     .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
                     .logoutSuccessUrl("/login")
                     .deleteCookies("remember-me")
-                .and().rememberMe();
-
-        //TODO: Remove the following statements when done with webpack-dev-server development
+                .and()
+                .rememberMe()
+                //TODO: Remove the following statements when done with webpack-dev-server development
+                .and()
+                .csrf().ignoringAntMatchers("/**");
+        //TODO: Remove the following statement when done with webpack-dev-server development
         http.headers().httpStrictTransportSecurity().disable();
-        http.csrf().disable();
+
 
     }
 

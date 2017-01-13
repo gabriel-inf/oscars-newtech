@@ -116,8 +116,6 @@ function drawPathOnNetwork(vizNetwork, allAzPaths)
 
     for(let i = 0; i < eachAzPath.length-1; i++)
     {
-        console.log("Path: " + eachAzPath[i]);
-
         let eachAzNode = eachAzPath[i].split(",");
         let prevNode = "";
         let prevNodeIsDevice = false;
@@ -164,7 +162,6 @@ function drawPathOnNetwork(vizNetwork, allAzPaths)
 
 function drawFailedLinksOnNetwork(vizNetwork, resRequest)
 {
-    console.log("Updating Topology with bandwidth-restricted links");
     highlight_devices(vizNetwork.datasource, Object.keys(vizNetwork.datasource.nodes._data), true, "white");
     highlight_links(vizNetwork.datasource, Object.keys(vizNetwork.datasource.edges._data), true, "blue");
 
@@ -180,7 +177,7 @@ function drawFailedLinksOnNetwork(vizNetwork, resRequest)
             maxPipeBW = oneBW;
     }
 
-    console.log("Max pipe B/W: " + maxPipeBW);
+
 
     // Identify the network ports
     client.loadJSON({method: "GET", url:"/viz/listPorts"}).then(
@@ -194,37 +191,51 @@ function drawFailedLinksOnNetwork(vizNetwork, resRequest)
                     let insufficientNodes = [];
                     let insufficientEdges = [];
 
+
                     let junctionKeys = Object.keys(resRequest["junctions"]);
-                    for(let p = 0; p < netPorts.length; p++)
-                    {
-                        let onePort = netPorts[p];              // 1. Get b/w for each port from Map.
+
+                    // Build map of bandwidth requested per fixture
+                    // Also build map of fixture --> junction
+                    let junctionFixtureBwMap = {};
+                    let fixtureJunctionMap = {};
+                    for(let j = 0; j < junctionKeys.length; j++){
+                        let junctionName = junctionKeys[j];
+                        let junction = resRequest["junctions"][junctionName];
+                        let fixtures = junction["fixtures"];
+                        let fixtureKeys = Object.keys(fixtures);
+                        junctionFixtureBwMap[junctionName] = {};
+                        for(let f = 0; f < fixtureKeys.length; f++){
+                            let fixtureName = fixtureKeys[f];
+                            let fixture = fixtures[fixtureName];
+                            junctionFixtureBwMap[junctionName][fixtureName] = fixture.bw;
+                            fixtureJunctionMap[fixtureName] = junctionName;
+                        }
+                    }
+
+                    // Mark every port that has insufficient BW as a problem port
+                    // Also mark junctions
+                    for(let p = 0; p < netPorts.length; p++) {
+                        let onePort = netPorts[p];
                         let inBW = fullPortMap[onePort][0];
                         let egBW = fullPortMap[onePort][1];
-
-                        let minBW = inBW;                       // 2. Take minimum of ingress and egress.
-
-                        if(egBW < minBW)
-                            minBW = egBW;
-
-                        if(minBW < maxPipeBW)                  // 3. If minimum >= b/w requested, continue.
-                        {
-                            problemPorts.push(onePort);         // 4. Otherwise, track problematic ports.
-
-                            if(insufficientNodes.length === junctionKeys.length)
-                                continue;
-
-                            for(let j = 0; j < junctionKeys.length; j++)
-                            {
-                                // Need to color nodes if fixture bandwidth is insufficient
-                                if(onePort in resRequest["junctions"][junctionKeys[j]]["fixtures"])
-                                    insufficientNodes.push(junctionKeys[j]);
+                        let minBW = Math.min(inBW, egBW);
+                        if(onePort in fixtureJunctionMap){
+                            let parentJunctionName = fixtureJunctionMap[onePort];
+                            let requestedBW = junctionFixtureBwMap[parentJunctionName][onePort];
+                            if(requestedBW > minBW){
+                                problemPorts.push(onePort);
+                                insufficientNodes.push(parentJunctionName);
+                            }
+                        }
+                        else{
+                            if(minBW < maxPipeBW){
+                                problemPorts.push(onePort);
                             }
                         }
                     }
 
-                    console.log("Insufficient Nodes: " + insufficientNodes);
 
-                    // 5. Find all links terminating at each problematic port.
+                    // Find all links terminating at each problematic port.
                     for(let p = 0; p < problemPorts.length; p++)
                     {
                         let badPort = problemPorts[p];
@@ -234,9 +245,7 @@ function drawFailedLinksOnNetwork(vizNetwork, resRequest)
                         {
                             let key = edgeKeys[l];
                             let oneLink = vizNetwork.datasource.edges._data[key];
-                            let endPoints = oneLink.id.split(" -- ");
-
-                            if(badPort === endPoints[0] || badPort === endPoints[1])
+                            if(oneLink.id.includes(badPort))
                             {
                                 insufficientEdges.push(oneLink.id);
                             }
@@ -250,7 +259,6 @@ function drawFailedLinksOnNetwork(vizNetwork, resRequest)
                     highlight_devices(vizNetwork.datasource, insufficientNodes, true, "red");
                     highlight_links(vizNetwork.datasource, insufficientEdges, true, "red");
 
-                    console.log("Failed links drawn");
                 }
             );
         }
@@ -259,8 +267,6 @@ function drawFailedLinksOnNetwork(vizNetwork, resRequest)
 
 
 }
-
-
 
 function highlight_devices(network, deviceIDs, isSelected, color)
 {

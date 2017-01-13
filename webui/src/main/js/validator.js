@@ -19,17 +19,33 @@ function validateReservation(reservation){
     let endAt = reservation.endAt;
     let description = reservation.description;
 
-    let junctionsValid = validateJunctions(junctions);
-    let datesValid = startAt < endAt;
-    let descriptionValid = description.length > 0;
+    let errorMessages = [];
 
-    return junctionsValid && datesValid && descriptionValid;
+    let descriptionValid = description.length > 0;
+    if(!descriptionValid){
+        errorMessages.push("Description must be provided.");
+    }
+    let datesValid = startAt < endAt;
+    if(!datesValid){
+        errorMessages.push("Start date/time must be before end date/time.");
+    }
+
+    let junctionStatus = validateJunctions(junctions);
+    errorMessages = errorMessages.concat(junctionStatus.errorMessages);
+
+    return {isValid: junctionStatus.isValid && datesValid && descriptionValid, errorMessages: errorMessages};
 }
 
 function validateJunctions(junctions){
     let totalValid = 0;
     let totalValidFixtures = 0;
     let junctionNameList = Object.keys(junctions);
+    let errorMessages = [];
+
+    if(junctionNameList === 0){
+        errorMessages.push("Add at least one network node (junction) to reservation.");
+    }
+
     for(let index = 0; index < junctionNameList.length; index++){
         let junction = junctions[junctionNameList[index]];
         let numValidFixtures = countValidFixtures(junction);
@@ -38,7 +54,11 @@ function validateJunctions(junctions){
             totalValidFixtures += numValidFixtures;
         }
     }
-    return totalValid > 0 && totalValid == junctionNameList.length && totalValidFixtures > 1;
+    if(totalValidFixtures < 2){
+        errorMessages.push("Select node in Sandbox to add at least two end points (fixtures) across reservation and assign bandwidth > 0.");
+    }
+
+    return {isValid: totalValid > 0 && totalValid == junctionNameList.length && totalValidFixtures > 1, errorMessages: errorMessages};
 }
 
 function countValidFixtures(junction){
