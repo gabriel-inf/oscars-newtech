@@ -1,10 +1,11 @@
 const React = require('react');
-const ReservationMap = require('./reservationMap');
+const ReservationHeatMap = require('./reservationHeatMap');
 const NavBar = require('./navbar');
 const client = require('./client');
 const connHelper = require('./connectionHelper');
 const networkVis = require('./networkVis');
 const vis = require('../../../node_modules/vis/dist/vis');
+const deepEqual = require('deep-equal');
 
 class ReservationListApp extends React.Component{
 
@@ -65,7 +66,7 @@ class ReservationListApp extends React.Component{
         return (
             <div>
                 <NavBar isAuthenticated={this.props.route.isAuthenticated} isAdmin={this.props.route.isAdmin}/>
-                <ReservationMap reservations={this.state.reservations}/>
+                <ReservationHeatMap reservations={this.state.reservations}/>
                 <ReservationList reservations={this.state.reservations}/>
             </div>
         );
@@ -127,7 +128,6 @@ class ReservationList extends React.Component{
     }
 }
 
-
 class ReservationDetails extends React.Component{
     constructor(props){
         super(props);
@@ -178,47 +178,6 @@ class ReservationGraph extends React.Component{
     componentDidMount(){
         client.loadJSON({method: "GET", url: "/viz/connection/" + this.props.connId})
             .then(this.displayGraph);
-        /*
-        client.loadJSON("GET", "/viz/connection/" + this.props.connId, (response) =>
-        {
-            let json_data = JSON.parse(response);
-
-            let edges = json_data.edges;
-            let nodes = json_data.nodes;
-            this.setState({edges: edges, nodes: nodes});
-
-            if(edges.length == 0 || nodes.length === 0){
-                return;
-            }
-
-            // Parse JSON string into object
-            let resOptions = {
-                autoResize: true,
-                width: '100%',
-                height: '100%',
-                interaction: {
-                    hover: true,
-                    navigationButtons: false,
-                    zoomView: false,
-                    dragView: false,
-                    multiselect: false,
-                    selectable: true,
-                },
-                physics: {
-                    stabilization: true,
-                },
-                nodes: {
-                    shape: 'dot',
-                    color: {background: "white"},
-                }
-            };
-
-            let vizName = "resViz_" + this.props.connId;
-
-            let vizElement = document.getElementById(vizName);
-            let reservation_viz = networkVis.make_network(nodes, edges, vizElement, resOptions, vizName);
-        });
-        */
     }
 
     displayGraph(response){
@@ -228,7 +187,7 @@ class ReservationGraph extends React.Component{
         let nodes = json_data.nodes;
         this.setState({edges: edges, nodes: nodes});
 
-        if(edges.length == 0 || nodes.length === 0){
+        if(edges.length == 0 && nodes.length === 0){
             return;
         }
 
@@ -267,7 +226,7 @@ class ReservationGraph extends React.Component{
         return (
             <tr>
                 <td colSpan={6}>
-                    {this.state.edges.length > 0 && this.state.nodes.length > 0 ?
+                    {this.state.edges.length > 0 || this.state.nodes.length > 0 ?
                         <div>
                             <b>Reservation Path:</b> {this.props.connId}
                             <div id={resVizId} className={resVizClass} style={{display:"block"}}></div>

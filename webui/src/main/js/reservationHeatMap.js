@@ -3,7 +3,7 @@ const vis = require('../../../node_modules/vis/dist/vis');
 const client = require('./client');
 const networkVis = require('./networkVis');
 
-class ReservationMap extends React.Component{
+class ReservationHeatMap extends React.Component{
 
     constructor(props){
         super(props);
@@ -329,5 +329,5 @@ class ReservationMap extends React.Component{
 
 }
 
-module.exports = ReservationMap;
+module.exports = ReservationHeatMap;
 

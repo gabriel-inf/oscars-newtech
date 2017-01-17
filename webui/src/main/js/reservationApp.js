@@ -5,7 +5,7 @@ const networkVis = require('./networkVis');
 const vis = require('../../../node_modules/vis/dist/vis');
 const DateTime = require('react-datetime');
 const validator = require('./validator');
-const deepEqual = require('deep-equal')
+const deepEqual = require('deep-equal');
 
 class ReservationApp extends React.Component{
 
@@ -438,12 +438,42 @@ class ReservationApp extends React.Component{
 
     handleHold(reservation){
         reservation.status = "HELD";
-        this.setState({reservation: reservation, enableHold: false, enableCommit: true})
+        let holdResponse = client.submitReservation( "/resv/minimal_hold", reservation);
+        holdResponse.then(
+            (successResponse) => {
+                this.setState(
+                    {
+                        reservation: reservation,
+                        enableHold: false,
+                        enableCommit: true,
+                        message: "Resources held. Hit commit to complete your reservation!"
+                    })
+            },
+            (failResponse) => {
+                console.log("Error: " + failResponse.status + " - " + failResponse.statusText);
+                this.setState({message: "Failed to hold resources. Error: " + failResponse.statusText});
+            }
+        );
     }
 
     handleCommit(reservation){
         reservation.status = "COMMITTED";
-        this.setState({reservation: reservation, enableHold: false, enableCommit: false})
+        let commitResponse = client.submit("GET", "/resv/commit/" + reservation.connectionId, null);
+        commitResponse.then(
+            (successResponse) => {
+                this.setState(
+                    {
+                        reservation: reservation,
+                        enableHold: false,
+                        enableCommit: false,
+                        message: "Reservation committed. Redirected to show reservation details..."
+                    });
+            },
+            (failResponse) => {
+                console.log("Error: " + failResponse.status + " - " + failResponse.statusText);
+                this.setState({message: "Failed to hold resources. Error: " + failResponse.statusText});
+            }
+        );
     }
 
     render(){

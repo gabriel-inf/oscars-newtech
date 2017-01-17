@@ -7,7 +7,7 @@ function make_network(nodes, edges, container, options, name) {
     // datasource{ nodes: vis.DataSet(nodes), edges -> vis.DataSet(edges) }
 
     let nodeDataset = new vis.DataSet(nodes);
-    let edgeDataset = new vis.DataSet(edges);
+    let edgeDataset = edges.length > 0 ? new vis.DataSet(edges) : new vis.DataSet();
     let datasource = {
         nodes: nodeDataset,
         edges: edgeDataset
@@ -18,7 +18,6 @@ function make_network(nodes, edges, container, options, name) {
 
 function make_network_with_datasource(datasource, container, options, name) {
     // datasource{ nodes: vis.DataSet(nodes), edges -> vis.DataSet(edges) }
-
 
     let network = new vis.Network(container, datasource, options);
 
