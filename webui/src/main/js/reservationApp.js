@@ -142,8 +142,8 @@ class ReservationApp extends React.Component{
             height: '450px',
             interaction: {
                 hover: false,
-                navigationButtons: true,
-                zoomView: true,
+                navigationButtons: false,
+                zoomView: false,
                 dragView: true
             },
             physics: {
