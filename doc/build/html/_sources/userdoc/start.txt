@@ -6,7 +6,7 @@ Here you'll find instructions on obtaining, installing, and initializing OSCARS 
 
 Download the sourcecode
 -----------------------
-The latest version of OSCARS can be downloaded via the project Github_:
+The latest version of OSCARS can be downloaded via the project Github_.
 
 .. _Github: https://github.com/esnet/oscars-newtech
 
