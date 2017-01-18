@@ -458,7 +458,7 @@ class ReservationApp extends React.Component{
 
     handleCommit(reservation){
         reservation.status = "COMMITTED";
-        let commitResponse = client.submit("GET", "/resv/commit/" + reservation.connectionId, null);
+        let commitResponse = client.submit("POST", "/resv/commit/", reservation.connectionId);
         commitResponse.then(
             (successResponse) => {
                 this.setState(
@@ -466,8 +466,9 @@ class ReservationApp extends React.Component{
                         reservation: reservation,
                         enableHold: false,
                         enableCommit: false,
-                        message: "Reservation committed. Redirected to show reservation details..."
+                        message: "Reservation committed. Redirecting to show reservation details..."
                     });
+                this.context.router.push("/react/resv/view/"+ reservation.connectionId);
             },
             (failResponse) => {
                 console.log("Error: " + failResponse.status + " - " + failResponse.statusText);
@@ -505,6 +506,10 @@ class ReservationApp extends React.Component{
         );
     }
 }
+
+ReservationApp.contextTypes = {
+    router: React.PropTypes.object
+};
 
 class NetworkPanel extends React.Component{
 

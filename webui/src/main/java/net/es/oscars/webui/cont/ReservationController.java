@@ -96,6 +96,21 @@ public class ReservationController {
 
     }
 
+    @RequestMapping(value = "/resv/commit", method = RequestMethod.POST)
+    @ResponseBody
+    public String connection_commit_react(@RequestBody String connectionId) {
+
+        try {
+            Thread.sleep(500L);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        String restPath = oscarsUrl + "/resv/commit/" + connectionId;
+        Connection c = restTemplate.getForObject(restPath, Connection.class);
+        return c.getConnectionId();
+
+    }
+
 
     @RequestMapping("/resv/newConnectionId")
     @ResponseBody

@@ -39,9 +39,6 @@ function loadJSON(opts) {
         if(params){
             if(typeof params === 'object'){
                 params = JSON.stringify(params);
-                /*params = Object.keys(params).map(function (key){
-                    return encodeURIComponent(key) + "=" + encodeURIComponent(params[key]);
-                }).join('&');*/
             }
             xhr.send(params);
         }
