@@ -25,22 +25,10 @@ module.exports = {
     devServer: {
         port: 8181,
         contentBase: 'src/main/resources/static/built/',
+        historyApiFallback: {
+            index: 'index.html'
+        },
         proxy: {
-            "/react/resv/list": {
-                secure: false,
-                target: "http://localhost:8181/",
-                pathRewrite: { '/react/resv/list': 'index.html' }
-            },
-            "/react/resv/gui": {
-                secure: false,
-                target: "http://localhost:8181/",
-                pathRewrite: { '/react/resv/gui': 'index.html' }
-            },
-            "/react/resv/whatif": {
-                secure: false,
-                target: "http://localhost:8181/",
-                pathRewrite: { '/react/resv/whatif': 'index.html' }
-            },
             "/resv/*": {
                 secure: false,
                 target: "https://localhost:8001/"
@@ -50,6 +38,10 @@ module.exports = {
                 target: "https://localhost:8001/"
             },
             "/topology/*": {
+                secure: false,
+                target: "https://localhost:8001/"
+            },
+            "/info/*": {
                 secure: false,
                 target: "https://localhost:8001/"
             }

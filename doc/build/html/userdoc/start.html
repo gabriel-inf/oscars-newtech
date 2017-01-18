@@ -1,0 +1,172 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Getting Started &mdash; OSCARS 1.0 1.0.2017 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0.2017',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="OSCARS 1.0 1.0.2017 documentation" href="../index.html" />
+    <link rel="up" title="User Documentation" href="index.html" />
+    <link rel="next" title="Code Documentation" href="../codedoc/index.html" />
+    <link rel="prev" title="User Documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../codedoc/index.html" title="Code Documentation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="User Documentation"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">OSCARS 1.0 1.0.2017 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">User Documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="getting-started">
+<h1>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
+<p>Here you&#8217;ll find instructions on obtaining, installing, and initializing OSCARS 1.0.</p>
+<div class="section" id="download-the-sourcecode">
+<h2>Download the sourcecode<a class="headerlink" href="#download-the-sourcecode" title="Permalink to this headline">¶</a></h2>
+<p>The latest version of OSCARS can be downloaded via the project <a class="reference external" href="https://github.com/esnet/oscars-newtech">Github</a>.</p>
+</div>
+<div class="section" id="preparing-your-environment">
+<h2>Preparing Your Environment<a class="headerlink" href="#preparing-your-environment" title="Permalink to this headline">¶</a></h2>
+<p>Make sure the following are installed on your system:</p>
+<ul class="simple">
+<li><a class="reference external" href="https://www.java.com">Java</a> 1.8</li>
+<li>The latest version of <a class="reference external" href="http://maven.apache.org">Maven</a></li>
+</ul>
+</div>
+<div class="section" id="building-with-maven">
+<h2>Building with Maven<a class="headerlink" href="#building-with-maven" title="Permalink to this headline">¶</a></h2>
+<p>To build the project, run the following commands from the main project directory:</p>
+<div class="highlight-bash"><div class="highlight"><pre>mvn install
+</pre></div>
+</div>
+<p>This will require all unit tests included with the project to pass as a condition of a successful build. This is the recommended command.</p>
+<p>Alternatively, you may skip these tests:</p>
+<div class="highlight-bash"><div class="highlight"><pre>mvn install -DskipTests
+</pre></div>
+</div>
+<p>The unit tests can be run separately if desired:</p>
+<div class="highlight-bash"><div class="highlight"><pre>mvn <span class="nb">test</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="starting-oscars-modules">
+<h2>Starting OSCARS Modules<a class="headerlink" href="#starting-oscars-modules" title="Permalink to this headline">¶</a></h2>
+<p>OSCARS is pre-packaged with a start script, which initializes all modules of the system easily and conveniently. From the main project directory, run the command:</p>
+<div class="highlight-bash"><div class="highlight"><pre>./bin/start.sh
+</pre></div>
+</div>
+<p>At this point, OSCARS should be fully installed, built, and running on your local machine.  The following instructions will enable you to use the system, submit circuit reservations, etc.</p>
+</div>
+<div class="section" id="accessing-the-web-user-interface">
+<h2>Accessing the Web User Interface<a class="headerlink" href="#accessing-the-web-user-interface" title="Permalink to this headline">¶</a></h2>
+<p>The Web UI serves as a visual portal through which the user can interact with the underlying OSCARS system.</p>
+<p>The webui can be accessed (only once the system is running) at: <a class="reference external" href="https://localhost:8001">https://localhost:8001</a>.</p>
+<p>The user will be prompted for login credentials. By default, the following credentials will provide admin access priveleges:</p>
+<blockquote>
+<div><p><strong>Username: admin</strong></p>
+<p><strong>Password: oscars</strong></p>
+</div></blockquote>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Getting Started</a><ul>
+<li><a class="reference internal" href="#download-the-sourcecode">Download the sourcecode</a></li>
+<li><a class="reference internal" href="#preparing-your-environment">Preparing Your Environment</a></li>
+<li><a class="reference internal" href="#building-with-maven">Building with Maven</a></li>
+<li><a class="reference internal" href="#starting-oscars-modules">Starting OSCARS Modules</a></li>
+<li><a class="reference internal" href="#accessing-the-web-user-interface">Accessing the Web User Interface</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">User Documentation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../codedoc/index.html"
+                        title="next chapter">Code Documentation</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/userdoc/start.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../codedoc/index.html" title="Code Documentation"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="User Documentation"
+             >previous</a> |</li>
+        <li><a href="../index.html">OSCARS 1.0 1.0.2017 documentation</a> &raquo;</li>
+          <li><a href="index.html" >User Documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2017, ESnet.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

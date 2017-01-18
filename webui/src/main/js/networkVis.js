@@ -1,4 +1,5 @@
 const vis = require('../../../node_modules/vis/dist/vis');
+const client = require('./client');
 
 let resv_viz_name = "reservation_viz";
 
@@ -6,7 +7,7 @@ function make_network(nodes, edges, container, options, name) {
     // datasource{ nodes: vis.DataSet(nodes), edges -> vis.DataSet(edges) }
 
     let nodeDataset = new vis.DataSet(nodes);
-    let edgeDataset = new vis.DataSet(edges);
+    let edgeDataset = edges.length > 0 ? new vis.DataSet(edges) : new vis.DataSet();
     let datasource = {
         nodes: nodeDataset,
         edges: edgeDataset
@@ -17,7 +18,6 @@ function make_network(nodes, edges, container, options, name) {
 
 function make_network_with_datasource(datasource, container, options, name) {
     // datasource{ nodes: vis.DataSet(nodes), edges -> vis.DataSet(edges) }
-
 
     let network = new vis.Network(container, datasource, options);
 
@@ -104,6 +104,169 @@ function attach_handlers(vis_js_network, vis_js_datasets, name) {
     });
 }
 
+function drawPathOnNetwork(vizNetwork, allAzPaths)
+{
+    highlight_devices(vizNetwork.datasource, Object.keys(vizNetwork.datasource.nodes._data), true, "white");
+    highlight_links(vizNetwork.datasource, Object.keys(vizNetwork.datasource.edges._data), true, "blue");
+
+    let eachAzPath = allAzPaths.split(";");
+    let nodesToReserve = [];
+    let linksToReserve = [];
+
+    for(let i = 0; i < eachAzPath.length-1; i++)
+    {
+        let eachAzNode = eachAzPath[i].split(",");
+        let prevNode = "";
+        let prevNodeIsDevice = false;
+        for(let j = 0; j < eachAzNode.length-1; j++)
+        {
+            let nextNode = eachAzNode[j];
+
+            if(nextNode === prevNode)
+                continue;
+
+
+
+            let portNodes = nextNode.split(":");
+            let nextNodeIsDevice = false;
+            nextNodeIsDevice = portNodes.length <= 1;
+
+            if(nextNodeIsDevice)
+            {
+                nodesToReserve.push(nextNode);
+            }
+
+            if(!prevNodeIsDevice && !nextNodeIsDevice && j > 0)
+            {
+                let linkName = prevNode + " -- " + nextNode;
+                let reverseLinkName = nextNode + " -- " + prevNode;     // Not all links are bidirectional in the viz. Won't be colored properly.
+                linksToReserve.push(linkName);
+                linksToReserve.push(reverseLinkName);
+            }
+
+            prevNode = eachAzNode[j];
+            let prevPort = prevNode.split(":");
+            prevNodeIsDevice = prevPort.length <= 1;
+        }
+    }
+
+    vizNetwork.network.unselectAll();
+
+    highlight_devices(vizNetwork.datasource, nodesToReserve, true, "green");
+    highlight_links(vizNetwork.datasource, linksToReserve, true, "green");
+
+    //let highlightedNodes = nodesToReserve;
+    //let highlightedEdges = linksToReserve;
+}
+
+function drawFailedLinksOnNetwork(vizNetwork, resRequest)
+{
+    highlight_devices(vizNetwork.datasource, Object.keys(vizNetwork.datasource.nodes._data), true, "white");
+    highlight_links(vizNetwork.datasource, Object.keys(vizNetwork.datasource.edges._data), true, "blue");
+
+    // Compute Maximum requested B/W from requested pipes //
+    let maxPipeBW = 0;
+
+    let pipeIds = Object.keys(resRequest.pipes);
+    for(let p = 0; p < pipeIds.length; p++)
+    {
+        let oneBW = parseInt(resRequest.pipes[pipeIds[p]].bw);
+
+        if(oneBW > maxPipeBW)
+            maxPipeBW = oneBW;
+    }
+
+
+
+    // Identify the network ports
+    client.loadJSON({method: "GET", url:"/viz/listPorts"}).then(
+        (portsResponse) => {
+            let netPorts = JSON.parse(portsResponse);
+            client.submitReservation("/resv/topo/bwAvailAllPorts/", resRequest).then(
+                (response) => {
+                    let parsedResponse = JSON.parse(response);
+                    let fullPortMap = parsedResponse["bwAvailabilityMap"];
+                    let problemPorts = [];
+                    let insufficientNodes = [];
+                    let insufficientEdges = [];
+
+
+                    let junctionKeys = Object.keys(resRequest["junctions"]);
+
+                    // Build map of bandwidth requested per fixture
+                    // Also build map of fixture --> junction
+                    let junctionFixtureBwMap = {};
+                    let fixtureJunctionMap = {};
+                    for(let j = 0; j < junctionKeys.length; j++){
+                        let junctionName = junctionKeys[j];
+                        let junction = resRequest["junctions"][junctionName];
+                        let fixtures = junction["fixtures"];
+                        let fixtureKeys = Object.keys(fixtures);
+                        junctionFixtureBwMap[junctionName] = {};
+                        for(let f = 0; f < fixtureKeys.length; f++){
+                            let fixtureName = fixtureKeys[f];
+                            let fixture = fixtures[fixtureName];
+                            junctionFixtureBwMap[junctionName][fixtureName] = fixture.bw;
+                            fixtureJunctionMap[fixtureName] = junctionName;
+                        }
+                    }
+
+                    // Mark every port that has insufficient BW as a problem port
+                    // Also mark junctions
+                    for(let p = 0; p < netPorts.length; p++) {
+                        let onePort = netPorts[p];
+                        let inBW = fullPortMap[onePort][0];
+                        let egBW = fullPortMap[onePort][1];
+                        let minBW = Math.min(inBW, egBW);
+                        if(onePort in fixtureJunctionMap){
+                            let parentJunctionName = fixtureJunctionMap[onePort];
+                            let requestedBW = junctionFixtureBwMap[parentJunctionName][onePort];
+                            if(requestedBW > minBW){
+                                problemPorts.push(onePort);
+                                insufficientNodes.push(parentJunctionName);
+                            }
+                        }
+                        else{
+                            if(minBW < maxPipeBW){
+                                problemPorts.push(onePort);
+                            }
+                        }
+                    }
+
+
+                    // Find all links terminating at each problematic port.
+                    for(let p = 0; p < problemPorts.length; p++)
+                    {
+                        let badPort = problemPorts[p];
+
+                        let edgeKeys = Object.keys(vizNetwork.datasource.edges._data);
+                        for(let l = 0; l < edgeKeys.length; l++)
+                        {
+                            let key = edgeKeys[l];
+                            let oneLink = vizNetwork.datasource.edges._data[key];
+                            if(oneLink.id.includes(badPort))
+                            {
+                                insufficientEdges.push(oneLink.id);
+                            }
+                        }
+                    }
+
+
+
+                    // 6. Color all problematic links and nodes red.
+                    vizNetwork.network.unselectAll();
+                    highlight_devices(vizNetwork.datasource, insufficientNodes, true, "red");
+                    highlight_links(vizNetwork.datasource, insufficientEdges, true, "red");
+
+                }
+            );
+        }
+    );
+
+
+
+}
+
 function highlight_devices(network, deviceIDs, isSelected, color)
 {
     let newColor = color;
@@ -144,4 +307,4 @@ function trigger_form_changes(is_resv, selected_an_edge, selected_a_node, is_sel
     ;
 }
 
-module.exports = {make_network, make_network_with_datasource};
+module.exports = {make_network, make_network_with_datasource, drawPathOnNetwork, drawFailedLinksOnNetwork};

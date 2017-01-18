@@ -1,3 +1,6 @@
+
+const deepEqual = require('deep-equal');
+
 /** Determines equality of Connections by performing deep equality checks of all contained parameters, Requested/Reserved objects and collections **/
 function sameConnection(oldConn, newConn)
 {
@@ -33,6 +36,7 @@ function sameConnection(oldConn, newConn)
     if(oldConn.schedule.submitted !== newConn.schedule.submitted || oldConn.schedule.setup !== newConn.schedule.setup || oldConn.schedule.teardown !== newConn.schedule.teardown)
         return false;
 
+
     // Specification
     if(oldSpec.id !== newSpec.id)
         return false;
@@ -46,6 +50,7 @@ function sameConnection(oldConn, newConn)
         return false;
     if(!arraysEqual(oldSpec.scheduleSpec.startDates, newSpec.scheduleSpec.startDates) || !arraysEqual(oldSpec.scheduleSpec.endDates, newSpec.scheduleSpec.endDates) || oldSpec.scheduleSpec.minimumDuration !== newSpec.scheduleSpec.minimumDuration)
         return false;
+
 
     // Requested Reservation Objects
     if(oldFlow.minPipes !== newFlow.minPipes || oldFlow.maxPipes !== newFlow.maxPipes || oldFlow.containerConnectionId !== newFlow.containerConnectionId)
@@ -75,6 +80,7 @@ function sameConnection(oldConn, newConn)
         if(!sameRequestedJunction(oldJunc, newJunc))
             return false;
     }
+
 
     // Pipes
     if(oldPipeSet.length !== newPipeSet.length)
@@ -143,6 +149,7 @@ function sameConnection(oldConn, newConn)
             return false;
     }
 
+
     // Ethernet Pipes
     if(oldResEthPipes.length !== newResEthPipes.length)
         return false;
@@ -193,6 +200,7 @@ function sameConnection(oldConn, newConn)
             return false;
     }
 
+
     // Bidirectional Paths
     if(oldBiPaths.length != newBiPaths.length)
         return false;
@@ -205,6 +213,7 @@ function sameConnection(oldConn, newConn)
     for(let bi = 0; bi < oldBiPaths.length; bi++)
     {
         let oldBiPath = oldBiPaths[bi];
+
         let oldBiPathID = oldBiPath.uniqueID;
 
         let newBI = $.inArray(oldBiPathID, newBiPathIDs);
@@ -217,6 +226,7 @@ function sameConnection(oldConn, newConn)
         if(!arraysEqual(oldBiPath.azPath, newBiPath.azPath) || !arraysEqual(oldBiPath.zaPath, newBiPath.zaPath))
             return false;
     }
+
 
     return true;
 }
@@ -299,34 +309,14 @@ function sameReservedJunction(oldJunc, newJunc)
             return false;
     }
 
+
+
     // Vlans
     let oldVlanSet = oldJunc.reservedVlans;
     let newVlanSet = newJunc.reservedVlans;
-    let newVlanInts = []
+    let newVlanUrns = [];
 
-    if(oldVlanSet.length !== newVlanSet.length)
-        return false;
-
-    for(let v = 0; v < newVlanSet.length; v++)
-        newVlanInts.push(newVlanSet[v].vlan);
-
-    for(let v = 0; v < oldVlanSet.length; v++)
-    {
-        let oldVlan = oldVlanSet[v];
-        let oldVlanInt = oldVlan.vlan;
-
-        let newV = $.inArray(oldVlanInt, newVlanInts);
-
-        if(newV === -1)
-            return false;
-
-        let newVlan = newVlanSet[newV];
-
-        if(oldVlan.urn !== newVlan.urn || oldVlan.vlan !== newVlan.vlan || oldVlan.beginning !== newVlan.beginning || oldVlan.ending !== newVlan.ending)
-            return false;
-    }
-
-    return true;
+    return deepEqual(oldVlanSet, newVlanSet);
 }
 
 
