@@ -5,14 +5,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.resv.ResourceType;
 import net.es.oscars.dto.spec.ReservedBlueprint;
+import net.es.oscars.dto.spec.ReservedMplsPipe;
 import net.es.oscars.dto.spec.ReservedVlanFlow;
 import net.es.oscars.dto.spec.ReservedVlanJunction;
 import net.es.oscars.dto.topo.enums.DeviceModel;
 import net.es.oscars.pce.TopPCE;
 import net.es.oscars.pss.PSSException;
+import net.es.oscars.pss.prop.PssConfig;
 import net.es.oscars.pss.tpl.Assembler;
 import net.es.oscars.pss.tpl.Stringifier;
 import net.es.oscars.resv.dao.ConnectionRepository;
+import net.es.oscars.resv.dao.ReservedPssResourceRepository;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.st.prov.ProvState;
 import net.es.oscars.topo.ent.UrnE;
@@ -23,6 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 
@@ -39,6 +44,12 @@ public class PssResourceService {
     @Autowired
     private RouterCommandGenerator rcg;
 
+    @Autowired
+    private ReservedPssResourceRepository pssResRepo;
+
+    @Autowired
+    private PssConfig pssConfig;
+
     public void generateConfig(ConnectionE conn) throws PSSException {
         rcg.generateConfig(conn);
     }
@@ -47,18 +58,21 @@ public class PssResourceService {
         log.info("starting PSS resource reservation");
         ReservedVlanFlowE rvf = conn.getReserved().getVlanFlow();
         Set<ReservedVlanJunctionE> rvj_set = new HashSet<>();
-        rvj_set.addAll(rvf.getJunctions());
-        rvf.getMplsPipes().forEach(mp -> {
-            rvj_set.add(mp.getAJunction());
-            rvj_set.add(mp.getZJunction());
+        Instant beginning = conn.getReservedSchedule().get(0).toInstant();
+        Instant ending = conn.getReservedSchedule().get(1).toInstant();
+
+        // isolated junctions
+        rvf.getJunctions().forEach(rvj -> this.reserveIsolatedJunction(rvj, beginning, ending));
+
+        rvf.getMplsPipes().forEach(rmp -> {
+            this.reserveMplsPipe(rmp, beginning, ending);
         });
-        rvf.getEthPipes().forEach(mp -> {
-            rvj_set.add(mp.getAJunction());
-            rvj_set.add(mp.getZJunction());
+
+        rvf.getEthPipes().forEach(rep -> {
+            this.reserveEthPipe(rep, beginning, ending);
         });
-        reservePssJunction(rvj_set,
-                conn.getReservedSchedule().get(0).toInstant(),
-                conn.getReservedSchedule().get(1).toInstant());
+
+
         connRepo.save(conn);
         log.info("saved PSS resources, connection is now:");
         try {
@@ -70,92 +84,177 @@ public class PssResourceService {
         }
     }
 
-    private void reservePssJunction(Set<ReservedVlanJunctionE> rvjs,
-                                    Instant beginning, Instant ending) {
-        if (rvjs == null) {
-            return;
-        }
-        for (ReservedVlanJunctionE rvj : rvjs) {
-            UrnE device = topoService.device(rvj.getDeviceUrn());
-            Set<ReservedPssResourceE> junctionResources = new HashSet<>();
-            switch (device.getDeviceModel()) {
-                case ALCATEL_SR7750:
-                    junctionResources = reserveJuniperVplsBase(device, beginning, ending);
-                    rvj.getFixtures().forEach(f -> {
-                        UrnE fixtureUrn = topoService.getUrn(f.getIfceUrn());
-                        f.getReservedPssResources().addAll(reserveAlcatelFixture(fixtureUrn, beginning, ending));
-                    });
+    private void reserveIsolatedJunction(ReservedVlanJunctionE rvj, Instant beginning, Instant ending) {
 
-                    break;
+        UrnE device = topoService.device(rvj.getDeviceUrn());
+
+        Set<ReservedPssResourceE> junctionResources = new HashSet<>();
+
+        Integer vcId;
+        switch (device.getDeviceModel()) {
+            case JUNIPER_EX:
+                // no further identifiers to reserve
+                break;
+            case JUNIPER_MX:
+                vcId = this.reserveVcId(beginning, ending);
+                junctionResources.add(makeVcIdResource(vcId, beginning, ending));
+                log.info("reserved vcid "+ vcId);
+
+                break;
+            case ALCATEL_SR7750:
+                vcId = this.reserveVcId(beginning, ending);
+                junctionResources.add(makeVcIdResource(vcId, beginning, ending));
+                log.info("reserved vcid "+ vcId);
+
+                Integer sdpId = this.reserveSdpId(beginning, ending);
+                junctionResources.add(makeSdpIdResource(sdpId, beginning, ending));
+                log.info("reserved sdpId "+ sdpId);
+
+                log.info("reserving Alcatel fixtures");
+                rvj.getFixtures().forEach(f -> {
+
+                    Integer inQosId = this.reserveQosId(rvj.getDeviceUrn(), ResourceType.ALU_INGRESS_POLICY_ID, beginning, ending);
+                    Integer egQosId = this.reserveQosId(rvj.getDeviceUrn(), ResourceType.ALU_EGRESS_POLICY_ID, beginning, ending);
+
+                    ReservedPssResourceE inQosIdRes = this.makeQosIdResource(rvj.getDeviceUrn(), inQosId, ResourceType.ALU_INGRESS_POLICY_ID, beginning, ending);
+                    ReservedPssResourceE egQosIdRes = this.makeQosIdResource(rvj.getDeviceUrn(), egQosId, ResourceType.ALU_INGRESS_POLICY_ID, beginning, ending);
+
+                    f.getReservedPssResources().add(inQosIdRes);
+                    f.getReservedPssResources().add(egQosIdRes);
+                });
+                break;
+        }
+        rvj.getReservedPssResources().addAll(junctionResources);
+    }
+
+    private void reserveEthPipe(ReservedEthPipeE rep, Instant beginning, Instant ending) {
+
+    }
+
+    private void reserveMplsPipe(ReservedMplsPipeE rmp, Instant beginning, Instant ending) {
+        Integer vcId = reserveVcId(beginning, ending);
+        ReservedVlanJunctionE aj = rmp.getAJunction();
+        ReservedVlanJunctionE zj = rmp.getZJunction();
+
+
+        Set<ReservedVlanJunctionE> rvjs = new HashSet<>();
+        rvjs.add(aj);
+        rvjs.add(zj);
+
+        for (ReservedVlanJunctionE rvj : rvjs) {
+            // VCID always there
+            rvj.getReservedPssResources().add(makeVcIdResource(vcId, beginning, ending));
+            log.info("reserved vcid " + vcId + " in junction for " + rvj.getDeviceUrn());
+
+            UrnE device = topoService.device(rvj.getDeviceUrn());
+            switch (device.getDeviceModel()) {
                 case JUNIPER_EX:
                     // no further identifiers to reserve
                     break;
                 case JUNIPER_MX:
-                    junctionResources = reserveAlcatelVplsBase(device, beginning, ending);
+                    // no further identifiers to reserve
                     break;
-            }
-            rvj.getReservedPssResources().addAll(junctionResources);
+                case ALCATEL_SR7750:
+                    Integer sdpId = this.reserveSdpId(beginning, ending);
+                    rvj.getReservedPssResources().add(makeSdpIdResource(sdpId, beginning, ending));
+                    log.info("reserved sdpId " + sdpId + " in junction for " + rvj.getDeviceUrn());
 
+                    log.info("reserving Alcatel fixtures (qos Ids etc) in junction for " + rvj.getDeviceUrn());
+                    rvj.getFixtures().forEach(f -> {
+
+                        Integer inQosId = this.reserveQosId(rvj.getDeviceUrn(), ResourceType.ALU_INGRESS_POLICY_ID, beginning, ending);
+                        Integer egQosId = this.reserveQosId(rvj.getDeviceUrn(), ResourceType.ALU_EGRESS_POLICY_ID, beginning, ending);
+                        log.info("qosIds : " + inQosId + " " + egQosId);
+
+                        ReservedPssResourceE inQosIdRes = this.makeQosIdResource(rvj.getDeviceUrn(), inQosId, ResourceType.ALU_INGRESS_POLICY_ID, beginning, ending);
+                        ReservedPssResourceE egQosIdRes = this.makeQosIdResource(rvj.getDeviceUrn(), egQosId, ResourceType.ALU_EGRESS_POLICY_ID, beginning, ending);
+
+                        f.getReservedPssResources().add(inQosIdRes);
+                        f.getReservedPssResources().add(egQosIdRes);
+                    });
+                    break;
+
+            }
         }
 
-
     }
 
-    // TODO: decide correct identifier, don't hardcode
 
-    private Set<ReservedPssResourceE> reserveJuniperVplsBase(UrnE device, Instant beginning, Instant ending) {
-        Set<ReservedPssResourceE> resources = new HashSet<>();
+    // do the choosing
+
+    private Integer reserveQosId(String deviceUrn, ResourceType rt, Instant beginning, Instant ending) {
+        return 6000;
+    }
+
+    private Integer reserveSdpId(Instant beginning, Instant ending) {
+        return 6000;
+    }
+
+
+    private Integer reserveVcId(Instant beginning, Instant ending) {
+        return 6000;
+    }
+
+
+    // returns all overlappign reosurces of defined type
+    private Set<ReservedPssResourceE> findOverlappingReservedIds(Instant beginning, Instant ending, ResourceType rt) {
+        Set<ReservedPssResourceE> reservedResources = new HashSet<>();
+
+        Optional<List<ReservedPssResourceE>> maybeResvResources = pssResRepo.findOverlappingInterval(beginning, ending);
+
+        maybeResvResources.ifPresent(rprEs ->
+                rprEs.stream().filter(r -> r.getResourceType().equals(rt)).forEach(reservedResources::add)
+        );
+
+        return reservedResources;
+    }
+
+    private Optional<Integer> chooseNewId(Integer floor, Integer ceiling, Set<Integer> reserved) {
+        for (Integer i = floor; i <= ceiling; i++) {
+            if (!reserved.contains(i)) {
+                return Optional.of(i);
+            }
+        }
+        return Optional.empty();
+    }
+
+
+    private ReservedPssResourceE makeQosIdResource(String deviceUrn, Integer qosId, ResourceType rt,
+                                                   Instant beginning, Instant ending) {
+        ReservedPssResourceE qosIdRes = ReservedPssResourceE.builder()
+                .resource(qosId)
+                .urn(deviceUrn)
+                .resourceType(rt)
+                .beginning(beginning)
+                .ending(ending)
+                .build();
+        return qosIdRes;
+    }
+
+    private ReservedPssResourceE makeVcIdResource(Integer vcId,
+                                                  Instant beginning, Instant ending) {
+
         ReservedPssResourceE vplsId = ReservedPssResourceE.builder()
-                .resource(6000)
-                .urn(device.getUrn())
+                .resource(vcId)
+                .urn(ResourceType.GLOBAL)
                 .resourceType(ResourceType.VC_ID)
                 .beginning(beginning)
                 .ending(ending)
                 .build();
-        resources.add(vplsId);
-        return resources;
+        return vplsId;
     }
 
-    private Set<ReservedPssResourceE> reserveAlcatelFixture(UrnE port, Instant beginning, Instant ending) {
-        Set<ReservedPssResourceE> resources = new HashSet<>();
-        ReservedPssResourceE inQosId = ReservedPssResourceE.builder()
-                .resource(6000)
-                .urn(port.getUrn())
-                .resourceType(ResourceType.ALU_INGRESS_POLICY_ID)
-                .beginning(beginning)
-                .ending(ending)
-                .build();
-        ReservedPssResourceE egQosId = ReservedPssResourceE.builder()
-                .resource(6000)
-                .urn(port.getUrn())
-                .resourceType(ResourceType.ALU_EGRESS_POLICY_ID)
-                .beginning(beginning)
-                .ending(ending)
-                .build();
-        resources.add(inQosId);
-        resources.add(egQosId);
-        return resources;
-    }
-
-    private Set<ReservedPssResourceE> reserveAlcatelVplsBase(UrnE device, Instant beginning, Instant ending) {
-        Set<ReservedPssResourceE> resources = new HashSet<>();
-        ReservedPssResourceE vplsId = ReservedPssResourceE.builder()
-                .resource(6000)
-                .urn(device.getUrn())
-                .resourceType(ResourceType.VC_ID)
-                .beginning(beginning)
-                .ending(ending)
-                .build();
-        ReservedPssResourceE sdpId = ReservedPssResourceE.builder()
-                .urn(device.getUrn())
-                .resource(6000)
+    private ReservedPssResourceE makeSdpIdResource(Integer sdpId,
+                                                   Instant beginning, Instant ending) {
+        ReservedPssResourceE sdpIdRes = ReservedPssResourceE.builder()
+                .urn(ResourceType.GLOBAL)
+                .resource(sdpId)
                 .resourceType(ResourceType.ALU_SDP_ID)
                 .beginning(beginning)
                 .ending(ending)
                 .build();
-        resources.add(vplsId);
-        resources.add(sdpId);
-        return resources;
+
+        return sdpIdRes;
     }
 
 
