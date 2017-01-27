@@ -1,0 +1,298 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Path Computation Service Enhancements &mdash; OSCARS 1.0 1.0.2017 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0.2017',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="shortcut icon" href="../_static/esnet.png"/>
+    <link rel="top" title="OSCARS 1.0 1.0.2017 documentation" href="../index.html" />
+    <link rel="up" title="Core Module" href="core_doc.html" />
+    <link rel="next" title="Web User Interface (WebUI)" href="webui_doc.html" />
+    <link rel="prev" title="Bhandari PCE Module" href="pce/pce_bhandari_doc.html" /> 
+  </head>
+  <body>
+	<a href="../index.html"><img src="../_static/oscars_banner.png" alt="OSCARS 1.0" width="100%"></a>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="webui_doc.html" title="Web User Interface (WebUI)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="pce/pce_bhandari_doc.html" title="Bhandari PCE Module"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">OSCARS</a> &raquo;</li>
+          <li><a href="index.html" >User Documentation</a> &raquo;</li>
+          <li><a href="overview.html" >Project Overview</a> &raquo;</li>
+          <li><a href="core_doc.html" accesskey="U">Core Module</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper"><html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head></head>
+      
+<body role="document">
+	<p>
+		Developed by 
+		<a href="http://es.net/" target="_blank"><img src="../_static/esnet_full_logo.jpg" alt="ESnet" /></a>
+	</p>
+	<p>
+		In collaboration with 
+		<a href="http://highspeed.uml.edu/" target="_blank"><img src="../_static/uml_acnl_logo.png" alt="Advanced Communication Networks Laboratory, UMass Lowell"/></a>
+	</p>
+
+</body>	<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head></head>
+      
+<body role="document">
+
+<h3>DOWNLOAD</h3>
+
+<p><b>Current Version:</b> 1.0.2017</p>
+
+<p>Get <a href="https://github.com/esnet/oscars-newtech">OSCARS</a> from Github</p>
+</body>	
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">User Documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="start.html">Getting Started</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="overview.html">Project Overview</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="core_doc.html">Core Module</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="requestspec_doc.html">Circuit Request Specification</a></li>
+<li class="toctree-l4"><a class="reference internal" href="resvspec_doc.html">Circuit Reservation Specification</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plumbing_doc.html">Plumbing Specification</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plumbing_doc.html#advanced-plumbing">Advanced Plumbing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="topologyref_doc.html">Topology Assumptions Reference</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pce_doc.html">Path Computation Engine (PCE)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pce_doc.html#pce-workflow">PCE Workflow</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pce_doc.html#pce-structure">PCE Structure</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="">Path Computation Service Enhancements</a><ul class="simple">
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="webui_doc.html">Web User Interface (WebUI)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="whatif_doc.html">What-If Service Module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="virtualcircuits.html">Virtual Circuits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="webui_doc.html">Web User Interface (WebUI)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../codedoc/index.html">Code Documentation</a></li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="pce/pce_bhandari_doc.html"
+                        title="previous chapter">Bhandari PCE Module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="webui_doc.html"
+                        title="next chapter">Web User Interface (WebUI)</a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="path-computation-service-enhancements">
+<h1>Path Computation Service Enhancements<a class="headerlink" href="#path-computation-service-enhancements" title="Permalink to this headline">¶</a></h1>
+<a class="reference internal image-reference" href="../_images/construction.png"><img alt="../_images/construction.png" class="align-center" src="../_images/construction.png" style="width: 640.0px; height: 360.0px;" /></a>
+<p>OSCARS 1.0 supports a number of all-new routing capabilities which provide an unprecedented amount of user control over how the PCE identifies working solutions. All of these services may be triggered without alteration to the code, and without the need for modifying configuration parameters when launching OSCARS. This document discusses the PCE service enhancement suite, while <tt class="xref doc docutils literal"><span class="pre">???</span></tt> provides details on how the user can exert control over the flow through the PCE to request each of the described services. The following table offers a listing of the services discussed throughout the remainder of the document. Note: Forward-direction circuit is denoted as <strong>A-Z</strong>, while reverse is denoted as <strong>Z-A</strong>.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="15%" />
+<col width="85%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Service Enhancement</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Asymmetric Bandwidth Capability</td>
+<td>A-Z and Z-A circuits may exhibit/explicitly require different bandwidth quantities.</td>
+</tr>
+<tr class="row-odd"><td>Non-palindromic Return Path</td>
+<td>A-Z and Z-A circuits may not mirror one another. Only portions of the route passing through an MPLS segment may differ.</td>
+</tr>
+<tr class="row-even"><td>Multipoint Routing</td>
+<td>Provide more than one destination device for a circuit, or create a cyclic transfer among a set of devices.</td>
+</tr>
+<tr class="row-odd"><td>Explicit Pathfinding Services</td>
+<td>Force the PCE to use or avoid specific portions of the network during pathfinding.</td>
+</tr>
+<tr class="row-even"><td><ul class="first last simple">
+<li>Complete Route Specification</li>
+</ul>
+</td>
+<td>Specify exact A-Z and Z-A circuits in which the specified path must be traversed in order. Pathfinding fails if exact match cannot be reserved.</td>
+</tr>
+<tr class="row-odd"><td><ul class="first last simple">
+<li>Partial Route Specification</li>
+</ul>
+</td>
+<td>Specify a partial A-Z or Z-A circuit in which all specified nodes/ports must be reached in relative order, but they serve as waypoints along the computed path.</td>
+</tr>
+<tr class="row-even"><td><ul class="first last simple">
+<li>“Blacklist” Avoidance Routing</li>
+</ul>
+</td>
+<td>Specify a set of nodes/ports which are to be pruned from the network topology prior to pathfinding to ensure avoidance.</td>
+</tr>
+<tr class="row-odd"><td>Survivable Routing Services</td>
+<td>Establish multiple routes along disjoint-paths within the same requested pipe in case of physical network failure. If survivable routing is impossible, the entire reservation fails.</td>
+</tr>
+<tr class="row-even"><td><ul class="first last simple">
+<li>Complete Path-Survivability</li>
+</ul>
+</td>
+<td><em>Only</em> the souce node/port and destination source/port are shared among paths. <strong>Exactly two paths computed.</strong></td>
+</tr>
+<tr class="row-odd"><td><ul class="first last simple">
+<li>MPLS Segment-Survivability</li>
+</ul>
+</td>
+<td>Provides survivability <em>only</em> within an MPLS segment. All Ethernet segments are identical among paths. <strong>Exactly two paths computed.</strong></td>
+</tr>
+<tr class="row-even"><td><ul class="first last simple">
+<li>K-Disjoint Path Survivability</li>
+</ul>
+</td>
+<td>Specify a number (K) of disjoint paths desired. All paths will be set-wise disjoint.</td>
+</tr>
+<tr class="row-odd"><td>VLAN Translation/Swapping</td>
+<td>Enables multiple VLAN tags to be used for a single circuit by translating VLAN tags to those available at intermediate nodes along the route.</td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="asymmetric-bandwidth-capability-service">
+<span id="asymm-pce-service"></span><h2>Asymmetric Bandwidth Capability Service<a class="headerlink" href="#asymmetric-bandwidth-capability-service" title="Permalink to this headline">¶</a></h2>
+<p>Figure 8: Asymmetric Bandwidth Reservation with 100 Mbps AZ and 50 Mbps ZA. Only 50 Mbps bandwidth is available on the (N, M) link.</p>
+<p>When the AZ and ZA directions of a requested path do not require the same bandwidth (e.g. the control signal returning from the destination only needs 50 Mbps, while the traffic in the forward direction requires 100 Mbps), the user can specify asymmetric (non-identical) requested bandwidths for a pipe. A link is only chosen during pathfinding if the matching link in the opposite direction (e.g. links (M, N) and (N, M) ) has sufficient bandwidth to support the requested bandwidth in that direction. An example where the user requests 100 Mbps in the AZ direction, and only 25 Mbps in the return direction, is depicted in Fig. 8. The user would be unable to get a path through this network if they requested 100 Mbps for both AZ and ZA, but is able to by requested a lower bandwidth for the ZA path.</p>
+</div>
+<div class="section" id="non-palindromic-return-path-service">
+<span id="nonpalindromic-pce-service"></span><h2>Non-Palindromic Return Path Service<a class="headerlink" href="#non-palindromic-return-path-service" title="Permalink to this headline">¶</a></h2>
+<p>Figure 9: High-Level view of transformation from MPLS layer to Service Layer. The dashed lines represent the shortest available AZ and ZA paths through the MPLS layer between the Ethernet switches.</p>
+<p>Figure 10: Service Layer topology, including two unidirectional MPLS routes treated as a bidirectional link.</p>
+<p>It is possible for the MPLS layer to support non-identical forward (AZ) and return (ZA) paths. The user can request this by marking a particular pipe as Non-Palindromic, allowing the PCE to use (possibly) different paths through the MPLS layer to provision the request. This is accomplished by creating a Service Layer Topology for each non-palindromic request. This service layer topology (example shown in Fig. 10) consists of all Ethernet layer devices, along with multiple logical links representing routes between each pair of switches that can be connected through the MPLS layer. These logical links are found by identifying the shortest available unidirectional AZ and ZA pair between each Ethernet “entry point” into the MPLS layer (Fig. 9). A shortest path algorithm is then run on the service layer topology, as is done in the basic PCE service, to determine the best AZ and ZA path for a request through the network.</p>
+</div>
+<div class="section" id="multipoint-routing-service">
+<h2>Multipoint Routing Service<a class="headerlink" href="#multipoint-routing-service" title="Permalink to this headline">¶</a></h2>
+<p>Figure 11: Multipoint Request, in the form of two requested pipes.</p>
+<p>Figure 12: Multipoint paths through the network.</p>
+<p>As mentioned above, users can specify multiple requested pipes within one request, and in such a way can establish Multipoint or Mesh reservations. Fig. 11 shows such a request, and Fig. 12 shows the matching physical paths through the network used to provision the request. Users can submit any number of pipes in a request, and the PCE will attempt to provision them all. As the pipes will compete with each other for resources, the pipes are sorted and pathfinding is tried in order. If it is impossible to provision them in that sequence, the order will be reversed and pathfinding is attempted again. If it is still not possible to find a path for every pipe, the request fails.</p>
+</div>
+<div class="section" id="explicit-routing-services">
+<span id="ero-pce-services"></span><h2>Explicit Routing Services<a class="headerlink" href="#explicit-routing-services" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="complete-partial-route-specification-service">
+<span id="ero-pce-partial"></span><h3>Complete/Partial Route Specification Service<a class="headerlink" href="#complete-partial-route-specification-service" title="Permalink to this headline">¶</a></h3>
+<p>Figure 13: A partially specified route (A -&gt; P -&gt; N -&gt; Q -&gt; Z). Shortest paths are used to connect those specified nodes.</p>
+<p>A pipe submitted to the PCE can have a specified list of network nodes (devices or ports) that must be included in the associated forward and return path. The network is pruned down to just the specified nodes, and if a feasible path can be found, the path is used. Otherwise, the route is treated as partially specified, and the specified nodes are connected using a shortest path algorithm. If the desired nodes cannot be connected, then the request fails.</p>
+</div>
+<div class="section" id="blacklist-avoidance-routing">
+<h3>“Blacklist” Avoidance Routing<a class="headerlink" href="#blacklist-avoidance-routing" title="Permalink to this headline">¶</a></h3>
+<p>Figure 14: A route avoiding blacklisted ports N1, N2, and Q3.</p>
+<p>In addition to providing nodes that must be included in the path, nodes that must not be included can be specified as well. All links connected to these “blacklisted” nodes are removed from the topology before pathfinding. As usual, if a path cannot be found, the request fails.</p>
+</div>
+</div>
+<div class="section" id="survivable-routing-services">
+<span id="surv-pce-services"></span><h2>Survivable Routing Services<a class="headerlink" href="#survivable-routing-services" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="complete-path-survivability-service">
+<span id="surv-pce-complete"></span><h3>Complete Path-Survivability Service<a class="headerlink" href="#complete-path-survivability-service" title="Permalink to this headline">¶</a></h3>
+<p>Figure 15: End-to-End (excluding the device -&gt; fixture links) link-disjoint Primary and Backup paths.</p>
+<p>Network elements, particularly links, experience failures almost regularly. Any traffic traversing a link at the time of failure can be lost, and service may be interrupted. To mitigate this loss, a backup path can be established alongside the primary path requested by a user. If the user indicates that a pipe must be provisioned using Total survivability, a link-disjoint path pair will be found between the requested pipe’s two junctions. No links will be shared between these primary and backup paths. Each path in the pair will be palindromic; in other words, each will have both a forward/reverse, or AZ/ZA flow. If a disjoint path pair through the network cannot be found, then the request fails.</p>
+</div>
+<div class="section" id="mpls-segment-survivability-service">
+<span id="surv-pce-mpls"></span><h3>MPLS Segment Survivability Service<a class="headerlink" href="#mpls-segment-survivability-service" title="Permalink to this headline">¶</a></h3>
+<p>Figure 16: Service Layer abstraction of MPLS-only Link-Disjoint survivability. Each MPLS service layer link represents a disjoint path pair through the MPLS layer.</p>
+<p>Alternatively, if the user only needs disjoint paths in the MPLS layer, or Partial survivability, a service layer topology is constructed through the same approach used for non-palindromic requests. The only difference is that each undirectional logical link represents a disjoint path pair in that direction. For simplicity, the logical link in the reverse direction must be palindromic with the forward direction link; in other words, the forward logical link represents a disjoint pair of forward paths, while the reverse direction logical link represents that same path pair, but with the links in reverse. If no disjoint path pairs through the MPLS layer can be found, and it is not possible to establish a route without going through the MPLS layer, then the request fails.</p>
+</div>
+<div class="section" id="k-disjoint-path-survivability-service">
+<span id="surv-pce-kpath"></span><h3>K-Disjoint Path Survivability Service<a class="headerlink" href="#k-disjoint-path-survivability-service" title="Permalink to this headline">¶</a></h3>
+<p>The user can request any number of disjoint paths for either Total or Partial survivability. This is implemented through an iterative version of Bhandari’s Algorithm, which will find the specified number of link-disjoint paths K (or the maximum number of disjoint paths less than K).</p>
+<p>As of February 1, 2017, K-path survivability is implemented only in the BhandariPCE, and there is not yet any avenue in the Survivability PCE API to support the service at this time. This connective tissue will be incorporated into a future release version.</p>
+</div>
+</div>
+<div class="section" id="vlan-translation-swapping">
+<h2>VLAN Translation/Swapping<a class="headerlink" href="#vlan-translation-swapping" title="Permalink to this headline">¶</a></h2>
+<p>Figure 17: VLAN Translation example where a different VLAN tag can be assigned to intermediate ports if a requested tag is not available.</p>
+<p>While not a specific service that can be requested, VLAN Translation (or Swapping), is a procedure used in the TranslationPCE to assign VLAN tags to a reserved path. VLAN translation allows one VLAN tag, possibly different than the tag(s) requested, to be used for the intermediate ports in a path. The VLANs available at each port (or at each switch) are encapsulated in a set of IntRange objects, each of which represents a contiguous range of VLAN IDs. For example, IntRanges [5, 10] and [15, 20] could be available at a specific port, while IDs outside of that range are unavailable. To perform VLAN swapping, the PCE take the path returned from pathfinding and retrieve the available ranges from each port involved in the path (along with each port on each switch in the path, if those ports aren&#8217;t already in the path). The problem ends up being similar to the Set Cover problem - choose the minimum set of VLANs that will cover all involved ports, with the following restrictions: fixtures(ingress/egress points) must use one of the requested VLAN tags (could be different for different fixtures), all intermediate ports along the path must use the same VLAN tag, and all ports on any switches involved must use the same VLAN tag.</p>
+<p>Major steps:
+(1) Check if there are any VLAN tags available across the path (including fixtures). If so, use one of those.
+(2) If (1) was not successful: For each fixture, assign a requested &amp; available VLAN tag. Check if any of those tags are available across the intermediate ports of the path. If so, assign it to those ports as well (if they have not have VLANs assigned yet). If any fixture cannot have an assignment, then the request cannot be provisioned.
+(3) If the intermediate ports are still not assigned, determine if there are any tags that are available across the entire intermediate path. If so, assign them. If not, the request cannot be provisioned.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">due to the above requirement that all ports on a switch are assigned a tag if that tag is assigned to any one of the ports, multiple VLANs may be assigned to a port throughout this process.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="webui_doc.html" title="Web User Interface (WebUI)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="pce/pce_bhandari_doc.html" title="Bhandari PCE Module"
+             >previous</a> |</li>
+        <li><a href="../index.html">OSCARS</a> &raquo;</li>
+          <li><a href="index.html" >User Documentation</a> &raquo;</li>
+          <li><a href="overview.html" >Project Overview</a> &raquo;</li>
+          <li><a href="core_doc.html" >Core Module</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2017, ESnet.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

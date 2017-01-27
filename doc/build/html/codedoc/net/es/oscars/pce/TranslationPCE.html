@@ -1,0 +1,626 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>TranslationPCE &mdash; OSCARS 1.0 1.0.2017 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '1.0.2017',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="shortcut icon" href="../../../../../_static/esnet.png"/>
+    <link rel="top" title="OSCARS 1.0 1.0.2017 documentation" href="../../../../../index.html" />
+    <link rel="up" title="net.es.oscars.pce" href="package-index.html" />
+    <link rel="next" title="VlanService" href="VlanService.html" />
+    <link rel="prev" title="TopologyPruneTest" href="TopologyPruneTest.html" /> 
+  </head>
+  <body>
+	<a href="../../../../../index.html"><img src="../../../../../_static/oscars_banner.png" alt="OSCARS 1.0" width="100%"></a>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="VlanService.html" title="VlanService"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="TopologyPruneTest.html" title="TopologyPruneTest"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../../../../index.html">OSCARS</a> &raquo;</li>
+          <li><a href="../../../../index.html" >Code Documentation</a> &raquo;</li>
+          <li><a href="../../../../packages.html" >Javadoc</a> &raquo;</li>
+          <li><a href="package-index.html" accesskey="U">net.es.oscars.pce</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper"><html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head></head>
+      
+<body role="document">
+	<p>
+		Developed by 
+		<a href="http://es.net/" target="_blank"><img src="../../../../../_static/esnet_full_logo.jpg" alt="ESnet" /></a>
+	</p>
+	<p>
+		In collaboration with 
+		<a href="http://highspeed.uml.edu/" target="_blank"><img src="../../../../../_static/uml_acnl_logo.png" alt="Advanced Communication Networks Laboratory, UMass Lowell"/></a>
+	</p>
+
+</body>	<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head></head>
+      
+<body role="document">
+
+<h3>DOWNLOAD</h3>
+
+<p><b>Current Version:</b> 1.0.2017</p>
+
+<p>Get <a href="https://github.com/esnet/oscars-newtech">OSCARS</a> from Github</p>
+</body>	
+<h3><a href="../../../../../index.html">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../../../userdoc/index.html">User Documentation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../../../index.html">Code Documentation</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../../../packages.html">Javadoc</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="TopologyPruneTest.html"
+                        title="previous chapter">TopologyPruneTest</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="VlanService.html"
+                        title="next chapter">VlanService</a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="translationpce">
+<h1>TranslationPCE<a class="headerlink" href="#translationpce" title="Permalink to this headline">¶</a></h1>
+<dl class="type">
+<dt id="net.es.oscars.pce.TranslationPCE">
+public class <tt class="descname">TranslationPCE</tt><a class="headerlink" href="#net.es.oscars.pce.TranslationPCE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="section" id="methods">
+<h2>Methods<a class="headerlink" href="#methods" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="createfixtureandresources">
+<h3>createFixtureAndResources<a class="headerlink" href="#createfixtureandresources" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.TranslationPCE.createFixtureAndResources(String, EthFixtureType, Integer, Integer, Set, Date, Date, String)">
+public ReservedVlanFixtureE <tt class="descname">createFixtureAndResources</tt><big>(</big><a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> portUrn</em>, EthFixtureType<em> fixtureType</em>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a><em> azMbps</em>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a><em> zaMbps</em>, Set&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a>&gt;<em> vlanIds</em>, Date<em> start</em>, Date<em> end</em>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> connectionId</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.TranslationPCE.createFixtureAndResources(String, EthFixtureType, Integer, Integer, Set, Date, Date, String)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a Reserved Fixtures and it&#8217;s associated resources (VLAN and Bandwidth) using the input.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>portUrn</strong> &#8211; <ul>
+<li>The URN of the desired fixture</li>
+</ul>
+</li>
+<li><strong>fixtureType</strong> &#8211; <ul>
+<li>The typing of the desired fixture</li>
+</ul>
+</li>
+<li><strong>azMbps</strong> &#8211; <ul>
+<li>The requested ingress bandwidth</li>
+</ul>
+</li>
+<li><strong>zaMbps</strong> &#8211; <ul>
+<li>The requested egress bandwidth</li>
+</ul>
+</li>
+<li><strong>vlanIds</strong> &#8211; <ul>
+<li>The assigned VLAN IDs</li>
+</ul>
+</li>
+<li><strong>start</strong> &#8211; <ul>
+<li>The requested start date</li>
+</ul>
+</li>
+<li><strong>end</strong> &#8211; <ul>
+<li>The requested end date</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The reserved fixture, containing all of its reserved resources</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="createjunctionandfixtures">
+<h3>createJunctionAndFixtures<a class="headerlink" href="#createjunctionandfixtures" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.TranslationPCE.createJunctionAndFixtures(TopoVertex, Map, Map, Set, Map, Map, Date, Date, String)">
+public ReservedVlanJunctionE <tt class="descname">createJunctionAndFixtures</tt><big>(</big>TopoVertex<em> device</em>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, UrnE&gt;<em> urnMap</em>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, DeviceModel&gt;<em> deviceModels</em>, Set&lt;RequestedVlanJunctionE&gt;<em> requestedJunctions</em>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, Set&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a>&gt;&gt;<em> vlanMap</em>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>&gt;<em> portToDeviceMap</em>, Date<em> start</em>, Date<em> end</em>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> connectionId</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.TranslationPCE.createJunctionAndFixtures(TopoVertex, Map, Map, Set, Map, Map, Date, Date, String)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a Junction and it&#8217;s associated fixtures given the input parameters.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>device</strong> &#8211; <ul>
+<li>The device vertex associated with the junction</li>
+</ul>
+</li>
+<li><strong>urnMap</strong> &#8211; <ul>
+<li>A mapping of URN strings to URN objects</li>
+</ul>
+</li>
+<li><strong>deviceModels</strong> &#8211; <ul>
+<li>A mapping of URN strings to Device Models</li>
+</ul>
+</li>
+<li><strong>requestedJunctions</strong> &#8211; <ul>
+<li>A set of requested junctions - used to determine attributes of junction/fixtures</li>
+</ul>
+</li>
+<li><strong>vlanMap</strong> &#8211; <ul>
+<li>Map of assigned VLANs for each fixture</li>
+</ul>
+</li>
+<li><strong>start</strong> &#8211; <ul>
+<li>The requested start date</li>
+</ul>
+</li>
+<li><strong>end</strong> &#8211; <ul>
+<li>The requested end date</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Throws:</th><td class="field-body"><ul class="first simple">
+<li><strong>PSSException</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A Reserved Vlan Junction with Reserved Fixtures (if contained in a matching requested junction)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="createreservedbandwidth">
+<h3>createReservedBandwidth<a class="headerlink" href="#createreservedbandwidth" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.TranslationPCE.createReservedBandwidth(String, Integer, Integer, Date, Date, String)">
+public ReservedBandwidthE <tt class="descname">createReservedBandwidth</tt><big>(</big><a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> urn</em>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a><em> inMbps</em>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a><em> egMbps</em>, Date<em> start</em>, Date<em> end</em>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> connectionId</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.TranslationPCE.createReservedBandwidth(String, Integer, Integer, Date, Date, String)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create the reserved bandwidth given the input parameters.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>urn</strong> &#8211; <ul>
+<li>The URN associated with this bandwidth</li>
+</ul>
+</li>
+<li><strong>inMbps</strong> &#8211; <ul>
+<li>The ingress bandwidth</li>
+</ul>
+</li>
+<li><strong>egMbps</strong> &#8211; <ul>
+<li>The egress bandwidth</li>
+</ul>
+</li>
+<li><strong>start</strong> &#8211; <ul>
+<li>The requested start</li>
+</ul>
+</li>
+<li><strong>end</strong> &#8211; <ul>
+<li>The requested end</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A reserved bandwidth object</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="createreservedbandwidthforeros">
+<h3>createReservedBandwidthForEROs<a class="headerlink" href="#createreservedbandwidthforeros" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.TranslationPCE.createReservedBandwidthForEROs(List, List, Map, Date, Date, String)">
+public Set&lt;ReservedBandwidthE&gt; <tt class="descname">createReservedBandwidthForEROs</tt><big>(</big>List&lt;TopoVertex&gt;<em> az</em>, List&lt;TopoVertex&gt;<em> za</em>, Map&lt;TopoVertex, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a>&gt;&gt;<em> requestedBandwidthMap</em>, Date<em> start</em>, Date<em> end</em>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> connectionId</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.TranslationPCE.createReservedBandwidthForEROs(List, List, Map, Date, Date, String)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given two lists of EROS in the AZ and ZA direction, a map of URNs, a map of the requested bandwidth at each URN, and the requested schedule, return a combined set of reserved bandwidth objects for the AZ and ZA paths</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>az</strong> &#8211; <ul>
+<li>The AZ vertices</li>
+</ul>
+</li>
+<li><strong>za</strong> &#8211; <ul>
+<li>The ZA vertices</li>
+</ul>
+</li>
+<li><strong>requestedBandwidthMap</strong> &#8211; <ul>
+<li>A mapping of Vertex objects to &#8220;Ingress&#8221;/&#8221;Egress&#8221; requested bandwidth</li>
+</ul>
+</li>
+<li><strong>start</strong> &#8211; <ul>
+<li>The requested start date</li>
+</ul>
+</li>
+<li><strong>end</strong> &#8211; <ul>
+<li>The requested end date</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A set of all reserved bandwidth for every port (across both paths)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="createreservedfixture">
+<h3>createReservedFixture<a class="headerlink" href="#createreservedfixture" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.TranslationPCE.createReservedFixture(String, Set, Set, ReservedBandwidthE, EthFixtureType)">
+public ReservedVlanFixtureE <tt class="descname">createReservedFixture</tt><big>(</big><a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> urn</em>, Set&lt;ReservedPssResourceE&gt;<em> pssResources</em>, Set&lt;ReservedVlanE&gt;<em> rsvVlans</em>, ReservedBandwidthE<em> rsvBw</em>, EthFixtureType<em> fixtureType</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.TranslationPCE.createReservedFixture(String, Set, Set, ReservedBandwidthE, EthFixtureType)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a reserved fixture, given the input parameters.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>urn</strong> &#8211; <ul>
+<li>The fixture&#8217;s URN</li>
+</ul>
+</li>
+<li><strong>pssResources</strong> &#8211; <ul>
+<li>The fixture&#8217;s PSS Resources</li>
+</ul>
+</li>
+<li><strong>rsvVlans</strong> &#8211; <ul>
+<li>The fixture&#8217;s assigned VLAN IDs</li>
+</ul>
+</li>
+<li><strong>rsvBw</strong> &#8211; <ul>
+<li>The fixture&#8217;s assigned bandwidth</li>
+</ul>
+</li>
+<li><strong>fixtureType</strong> &#8211; <ul>
+<li>The fixture&#8217;s type</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The Reserved VLAN Fixture</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="createreservedjunction">
+<h3>createReservedJunction<a class="headerlink" href="#createreservedjunction" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.TranslationPCE.createReservedJunction(String, Set, Set, EthJunctionType, Set)">
+public ReservedVlanJunctionE <tt class="descname">createReservedJunction</tt><big>(</big><a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> urn</em>, Set&lt;ReservedPssResourceE&gt;<em> pssResources</em>, Set&lt;ReservedVlanFixtureE&gt;<em> fixtures</em>, EthJunctionType<em> junctionType</em>, Set&lt;ReservedVlanE&gt;<em> reservedVlans</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.TranslationPCE.createReservedJunction(String, Set, Set, EthJunctionType, Set)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a reserved junction given the input</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>urn</strong> &#8211; <ul>
+<li>The junction&#8217;s URN</li>
+</ul>
+</li>
+<li><strong>pssResources</strong> &#8211; <ul>
+<li>The junction&#8217;s PSS Resources</li>
+</ul>
+</li>
+<li><strong>fixtures</strong> &#8211; <ul>
+<li>The junction&#8217;s fixtures</li>
+</ul>
+</li>
+<li><strong>junctionType</strong> &#8211; <ul>
+<li>The junction&#8217;s type</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The Reserved VLAN Junction</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="createreservedvlan">
+<h3>createReservedVlan<a class="headerlink" href="#createreservedvlan" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.TranslationPCE.createReservedVlan(String, Integer, Date, Date)">
+public ReservedVlanE <tt class="descname">createReservedVlan</tt><big>(</big><a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> urn</em>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a><em> vlanId</em>, Date<em> start</em>, Date<em> end</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.TranslationPCE.createReservedVlan(String, Integer, Date, Date)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create the reserved VLAN ID given the input parameters.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>urn</strong> &#8211; <ul>
+<li>The URN associated with this VLAN</li>
+</ul>
+</li>
+<li><strong>vlanId</strong> &#8211; <ul>
+<li>The ID value for the VLAN tag</li>
+</ul>
+</li>
+<li><strong>start</strong> &#8211; <ul>
+<li>The requested start time</li>
+</ul>
+</li>
+<li><strong>end</strong> &#8211; <ul>
+<li>The requested end time</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The reserved VLAN objct</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="createreservedvlanforeros">
+<h3>createReservedVlanForEROs<a class="headerlink" href="#createreservedvlanforeros" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.TranslationPCE.createReservedVlanForEROs(List, List, Map, Map, Date, Date)">
+public Set&lt;ReservedVlanE&gt; <tt class="descname">createReservedVlanForEROs</tt><big>(</big>List&lt;TopoVertex&gt;<em> az</em>, List&lt;TopoVertex&gt;<em> za</em>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, UrnE&gt;<em> urnMap</em>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, Set&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a>&gt;&gt;<em> vlanMap</em>, Date<em> start</em>, Date<em> end</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.TranslationPCE.createReservedVlanForEROs(List, List, Map, Map, Date, Date)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given two lists of EROS in the AZ and ZA direction, a map of URNs, a chosen vlan ID, and the requested schedule, return a combined set of reserved VLAN objects for the AZ and ZA paths</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>az</strong> &#8211; <ul>
+<li>The AZ vertices</li>
+</ul>
+</li>
+<li><strong>za</strong> &#8211; <ul>
+<li>The ZA vertices</li>
+</ul>
+</li>
+<li><strong>urnMap</strong> &#8211; <ul>
+<li>A mapping of URN string to URN object</li>
+</ul>
+</li>
+<li><strong>vlanMap</strong> &#8211; <ul>
+<li>A mapping of URN object to assigned VLAN ID</li>
+</ul>
+</li>
+<li><strong>start</strong> &#8211; <ul>
+<li>The requested start date</li>
+</ul>
+</li>
+<li><strong>end</strong> &#8211; <ul>
+<li>The requested end date</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A set of all reserved VLAN objects for every port (across both paths)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="reserverequestedpipe">
+<h3>reserveRequestedPipe<a class="headerlink" href="#reserverequestedpipe" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.TranslationPCE.reserveRequestedPipe(RequestedVlanPipeE, List, List, List, List, Set, Set, Map, Map, Date, Date, String)">
+public void <tt class="descname">reserveRequestedPipe</tt><big>(</big>RequestedVlanPipeE<em> reqPipe</em>, List&lt;TopoEdge&gt;<em> azERO</em>, List&lt;TopoEdge&gt;<em> zaERO</em>, List&lt;ReservedBandwidthE&gt;<em> reservedBandwidths</em>, List&lt;ReservedVlanE&gt;<em> reservedVlans</em>, Set&lt;ReservedMplsPipeE&gt;<em> reservedMplsPipes</em>, Set&lt;ReservedEthPipeE&gt;<em> reservedEthPipes</em>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, Set&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>&gt;&gt;<em> deviceToPortMap</em>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>&gt;<em> portToDeviceMap</em>, Date<em> start</em>, Date<em> end</em>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> connectionId</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.TranslationPCE.reserveRequestedPipe(RequestedVlanPipeE, List, List, List, List, Set, Set, Map, Map, Date, Date, String)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a set of reserved pipes/junctions from a requested pipe. A requested pipe can produce: One pipe for each pair of Ethernet devices One pipe for each MPLS segment along the path This function will add to the reservedMplsPipes and reservedEthPipes sets passed in as input</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>reqPipe</strong> &#8211; <ul>
+<li>THe requested pipe, containing details on the requested endpoints/bandwidth/VLANs</li>
+</ul>
+</li>
+<li><strong>azERO</strong> &#8211; <ul>
+<li>The physical path taken by the pipe in the A-&gt;Z direction</li>
+</ul>
+</li>
+<li><strong>zaERO</strong> &#8211; <ul>
+<li>The physical path taken by the pipe in the Z-&gt;A direction</li>
+</ul>
+</li>
+<li><strong>reservedBandwidths</strong> &#8211; <ul>
+<li>The list of all bandwidth reserved so far</li>
+</ul>
+</li>
+<li><strong>reservedVlans</strong> &#8211; <ul>
+<li>The list of all VLAN IDs reserved so far</li>
+</ul>
+</li>
+<li><strong>reservedMplsPipes</strong> &#8211; <ul>
+<li>The set of all reserved MPLS pipes so far</li>
+</ul>
+</li>
+<li><strong>reservedEthPipes</strong> &#8211; <ul>
+<li>The set of all reserved Ethernet pipes so far</li>
+</ul>
+</li>
+<li><strong>deviceToPortMap</strong> &#8211; </li>
+<li><strong>portToDeviceMap</strong> &#8211; &#64;throws PCEException</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Throws:</th><td class="field-body"><ul class="first last simple">
+<li><strong>PSSException</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="reserverequestedpipewithpairs">
+<h3>reserveRequestedPipeWithPairs<a class="headerlink" href="#reserverequestedpipewithpairs" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.TranslationPCE.reserveRequestedPipeWithPairs(RequestedVlanPipeE, List, List, List, List, Set, Set, Map, Map, Date, Date, String)">
+public void <tt class="descname">reserveRequestedPipeWithPairs</tt><big>(</big>RequestedVlanPipeE<em> reqPipe</em>, List&lt;List&lt;TopoEdge&gt;&gt;<em> azEROs</em>, List&lt;List&lt;TopoEdge&gt;&gt;<em> zaEROs</em>, List&lt;ReservedBandwidthE&gt;<em> reservedBandwidths</em>, List&lt;ReservedVlanE&gt;<em> reservedVlans</em>, Set&lt;ReservedMplsPipeE&gt;<em> reservedMplsPipes</em>, Set&lt;ReservedEthPipeE&gt;<em> reservedEthPipes</em>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, Set&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>&gt;&gt;<em> deviceToPortMap</em>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>&gt;<em> portToDeviceMap</em>, Date<em> start</em>, Date<em> end</em>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> connectionId</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.TranslationPCE.reserveRequestedPipeWithPairs(RequestedVlanPipeE, List, List, List, List, Set, Set, Map, Map, Date, Date, String)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="reservesimplejunction">
+<h3>reserveSimpleJunction<a class="headerlink" href="#reservesimplejunction" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.TranslationPCE.reserveSimpleJunction(RequestedVlanJunctionE, List, List, Map, Map, Date, Date, String)">
+public ReservedVlanJunctionE <tt class="descname">reserveSimpleJunction</tt><big>(</big>RequestedVlanJunctionE<em> req_j</em>, List&lt;ReservedBandwidthE&gt;<em> reservedBandwidths</em>, List&lt;ReservedVlanE&gt;<em> reservedVlans</em>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, Set&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>&gt;&gt;<em> deviceToPortMap</em>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>&gt;<em> portToDeviceMap</em>, Date<em> start</em>, Date<em> end</em>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> connectionId</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.TranslationPCE.reserveSimpleJunction(RequestedVlanJunctionE, List, List, Map, Map, Date, Date, String)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a ReservedVlanJunctionE given a request for ingress/egress traffic within a device.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>req_j</strong> &#8211; <ul>
+<li>The requested junction</li>
+</ul>
+</li>
+<li><strong>deviceToPortMap</strong> &#8211; <ul>
+<li>Map from each device name to set of port names</li>
+</ul>
+</li>
+<li><strong>portToDeviceMap</strong> &#8211; <ul>
+<li>Map from each port name to parent device name</li>
+</ul>
+</li>
+<li><strong>start</strong> &#8211; <ul>
+<li>The requested start date</li>
+</ul>
+</li>
+<li><strong>end</strong> &#8211; <ul>
+<li>The requested end date</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Throws:</th><td class="field-body"><ul class="first simple">
+<li><strong>PSSException</strong> &#8211; </li>
+<li><a class="reference internal" href="PCEException.html#net.es.oscars.pce.PCEException" title="net.es.oscars.pce.PCEException"><strong>PCEException</strong></a> &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The Reserved Junction</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="testbandwidthrequirements">
+<h3>testBandwidthRequirements<a class="headerlink" href="#testbandwidthrequirements" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.TranslationPCE.testBandwidthRequirements(RequestedVlanPipeE, List, List, Map, Integer, Integer, Map, Map, List)">
+public void <tt class="descname">testBandwidthRequirements</tt><big>(</big>RequestedVlanPipeE<em> reqPipe</em>, List&lt;TopoEdge&gt;<em> azERO</em>, List&lt;TopoEdge&gt;<em> zaERO</em>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, UrnE&gt;<em> urnMap</em>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a><em> azMbps</em>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a><em> zaMbps</em>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a>&gt;&gt;<em> availBwMap</em>, Map&lt;TopoVertex, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a>&gt;&gt;<em> requestedBandwidthMap</em>, List&lt;ReservedBandwidthE&gt;<em> reservedBandwidths</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.TranslationPCE.testBandwidthRequirements(RequestedVlanPipeE, List, List, Map, Integer, Integer, Map, Map, List)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="VlanService.html" title="VlanService"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="TopologyPruneTest.html" title="TopologyPruneTest"
+             >previous</a> |</li>
+        <li><a href="../../../../../index.html">OSCARS</a> &raquo;</li>
+          <li><a href="../../../../index.html" >Code Documentation</a> &raquo;</li>
+          <li><a href="../../../../packages.html" >Javadoc</a> &raquo;</li>
+          <li><a href="package-index.html" >net.es.oscars.pce</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2017, ESnet.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

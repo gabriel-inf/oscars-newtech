@@ -1,0 +1,714 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>BandwidthService &mdash; OSCARS 1.0 1.0.2017 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '1.0.2017',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="shortcut icon" href="../../../../../_static/esnet.png"/>
+    <link rel="top" title="OSCARS 1.0 1.0.2017 documentation" href="../../../../../index.html" />
+    <link rel="up" title="net.es.oscars.pce" href="package-index.html" />
+    <link rel="next" title="BellmanFordPCE" href="BellmanFordPCE.html" />
+    <link rel="prev" title="net.es.oscars.pce" href="package-index.html" /> 
+  </head>
+  <body>
+	<a href="../../../../../index.html"><img src="../../../../../_static/oscars_banner.png" alt="OSCARS 1.0" width="100%"></a>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="BellmanFordPCE.html" title="BellmanFordPCE"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="package-index.html" title="net.es.oscars.pce"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../../../../index.html">OSCARS</a> &raquo;</li>
+          <li><a href="../../../../index.html" >Code Documentation</a> &raquo;</li>
+          <li><a href="../../../../packages.html" >Javadoc</a> &raquo;</li>
+          <li><a href="package-index.html" accesskey="U">net.es.oscars.pce</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper"><html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head></head>
+      
+<body role="document">
+	<p>
+		Developed by 
+		<a href="http://es.net/" target="_blank"><img src="../../../../../_static/esnet_full_logo.jpg" alt="ESnet" /></a>
+	</p>
+	<p>
+		In collaboration with 
+		<a href="http://highspeed.uml.edu/" target="_blank"><img src="../../../../../_static/uml_acnl_logo.png" alt="Advanced Communication Networks Laboratory, UMass Lowell"/></a>
+	</p>
+
+</body>	<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head></head>
+      
+<body role="document">
+
+<h3>DOWNLOAD</h3>
+
+<p><b>Current Version:</b> 1.0.2017</p>
+
+<p>Get <a href="https://github.com/esnet/oscars-newtech">OSCARS</a> from Github</p>
+</body>	
+<h3><a href="../../../../../index.html">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../../../userdoc/index.html">User Documentation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../../../index.html">Code Documentation</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../../../packages.html">Javadoc</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="package-index.html"
+                        title="previous chapter">net.es.oscars.pce</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="BellmanFordPCE.html"
+                        title="next chapter">BellmanFordPCE</a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="bandwidthservice">
+<h1>BandwidthService<a class="headerlink" href="#bandwidthservice" title="Permalink to this headline">¶</a></h1>
+<dl class="type">
+<dt id="net.es.oscars.pce.BandwidthService">
+public class <tt class="descname">BandwidthService</tt><a class="headerlink" href="#net.es.oscars.pce.BandwidthService" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="section" id="methods">
+<h2>Methods<a class="headerlink" href="#methods" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="buildbandwidthavailabilitymap">
+<h3>buildBandwidthAvailabilityMap<a class="headerlink" href="#buildbandwidthavailabilitymap" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.BandwidthService.buildBandwidthAvailabilityMap(List)">
+public Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a>&gt;&gt; <tt class="descname">buildBandwidthAvailabilityMap</tt><big>(</big>List&lt;ReservedBandwidthE&gt;<em> rsvBandwidths</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.BandwidthService.buildBandwidthAvailabilityMap(List)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build a map of the available bandwidth at each URN. For each URN, there is a map of &#8220;Ingress&#8221; and &#8220;Egress&#8221; bandwidth available. Only port URNs can be found in this map.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>rsvBandwidths</strong> &#8211; <ul>
+<li>A list of all bandwidth reserved so far</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A mapping of URN to Ingress/Egress bandwidth availability</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="buildbandwidthavailabilitymapurn">
+<h3>buildBandwidthAvailabilityMapUrn<a class="headerlink" href="#buildbandwidthavailabilitymapurn" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.BandwidthService.buildBandwidthAvailabilityMapUrn(String, ReservableBandwidthE, Map)">
+public Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a>&gt; <tt class="descname">buildBandwidthAvailabilityMapUrn</tt><big>(</big><a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> urn</em>, ReservableBandwidthE<em> bandwidth</em>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, List&lt;ReservedBandwidthE&gt;&gt;<em> resvBwMap</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.BandwidthService.buildBandwidthAvailabilityMapUrn(String, ReservableBandwidthE, Map)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine how much Ingress/Egress bandwidth is still available at a URN. If the list of reserved bandwidths is empty, then all of the Reservable Bandwidth at that URN is available. Otherwise, subtract the sum Ingress/Egress bandwidth from the maximum reservable bandwidth at that URN.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>bandwidth</strong> &#8211; <ul>
+<li>ReservableBandwidthE object, which contains the maximum Ingress/Egress bandwidth for a given URN</li>
+</ul>
+</li>
+<li><strong>resvBwMap</strong> &#8211; <ul>
+<li>A Mapping from a URN to a list of Reserved Bandwidths at that URN.</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A map containing the net available ingress/egress bandwidth at a URN</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="buildbandwidthavailabilitymapwithurns">
+<h3>buildBandwidthAvailabilityMapWithUrns<a class="headerlink" href="#buildbandwidthavailabilitymapwithurns" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.BandwidthService.buildBandwidthAvailabilityMapWithUrns(List, List)">
+public Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a>&gt;&gt; <tt class="descname">buildBandwidthAvailabilityMapWithUrns</tt><big>(</big>List&lt;ReservedBandwidthE&gt;<em> rsvBandwidths</em>, List&lt;UrnE&gt;<em> urns</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.BandwidthService.buildBandwidthAvailabilityMapWithUrns(List, List)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build a map of the available bandwidth at each URN. For each URN, there is a map of &#8220;Ingress&#8221; and &#8220;Egress&#8221; bandwidth available. Only port URNs can be found in this map.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>rsvBandwidths</strong> &#8211; <ul>
+<li>A list of all bandwidth reserved so far</li>
+</ul>
+</li>
+<li><strong>urns</strong> &#8211; <ul>
+<li>A list of UrnE objects</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A mapping of URN to Ingress/Egress bandwidth availability</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="buildrequestedbandwidthmap">
+<h3>buildRequestedBandwidthMap<a class="headerlink" href="#buildrequestedbandwidthmap" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.BandwidthService.buildRequestedBandwidthMap(List, List)">
+public Map&lt;TopoVertex, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a>&gt;&gt; <tt class="descname">buildRequestedBandwidthMap</tt><big>(</big>List&lt;List&lt;TopoEdge&gt;&gt;<em> EROs</em>, List&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a>&gt;<em> bandwidths</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.BandwidthService.buildRequestedBandwidthMap(List, List)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build a map of the requested bandwidth at each port TopoVertex contained within the passed in EROs</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>EROs</strong> &#8211; <ul>
+<li>List of paths</li>
+</ul>
+</li>
+<li><strong>bandwidths</strong> &#8211; <ul>
+<li>List of bandwidths</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A mapping from TopoVertex (ports only) to requested &#8220;Ingress&#8221; and &#8220;Egress&#8221; bandwidth</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="buildreservedbandwidthmap">
+<h3>buildReservedBandwidthMap<a class="headerlink" href="#buildreservedbandwidthmap" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.BandwidthService.buildReservedBandwidthMap(List)">
+public Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, List&lt;ReservedBandwidthE&gt;&gt; <tt class="descname">buildReservedBandwidthMap</tt><big>(</big>List&lt;ReservedBandwidthE&gt;<em> rsvBwList</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.BandwidthService.buildReservedBandwidthMap(List)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build a mapping of UrnE objects to ReservedBandwidthE objects.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>rsvBwList</strong> &#8211; A list of all bandwidth reserved.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A map of UrnE to ReservedBandwidthE objects</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="createreservedbandwidthlist">
+<h3>createReservedBandwidthList<a class="headerlink" href="#createreservedbandwidthlist" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.BandwidthService.createReservedBandwidthList(Set, Set, Set, Date, Date)">
+public List&lt;ReservedBandwidthE&gt; <tt class="descname">createReservedBandwidthList</tt><big>(</big>Set&lt;ReservedVlanJunctionE&gt;<em> reservedJunctions</em>, Set&lt;ReservedMplsPipeE&gt;<em> reservedMplsPipes</em>, Set&lt;ReservedEthPipeE&gt;<em> reservedEthPipes</em>, Date<em> start</em>, Date<em> end</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.BandwidthService.createReservedBandwidthList(Set, Set, Set, Date, Date)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a set of reserved junctions and reserved MPLS / ETHERNET pipes, extract the reserved bandwidth objects which fall within the requested schedule period and return them all together as a list</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>reservedJunctions</strong> &#8211; <ul>
+<li>Set of reserved ethernet junctions</li>
+</ul>
+</li>
+<li><strong>reservedMplsPipes</strong> &#8211; <ul>
+<li>Set of reserved MPLS pipes</li>
+</ul>
+</li>
+<li><strong>reservedEthPipes</strong> &#8211; <ul>
+<li>Set of reserved Ethernet pipes</li>
+</ul>
+</li>
+<li><strong>start</strong> &#8211; <ul>
+<li>The requested start date</li>
+</ul>
+</li>
+<li><strong>end</strong> &#8211; <ul>
+<li>The requested end date</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">List of all reserved bandwidth contained within reserved pipes and the reserved repository.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="evaluatebandwidtherobi">
+<h3>evaluateBandwidthEROBi<a class="headerlink" href="#evaluatebandwidtherobi" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.BandwidthService.evaluateBandwidthEROBi(Map, Integer, Integer, List, List, Map)">
+public boolean <tt class="descname">evaluateBandwidthEROBi</tt><big>(</big>Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, UrnE&gt;<em> urnMap</em>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a><em> azMbps</em>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a><em> zaMbps</em>, List&lt;TopoEdge&gt;<em> azERO</em>, List&lt;TopoEdge&gt;<em> zaERO</em>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a>&gt;&gt;<em> availBwMap</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.BandwidthService.evaluateBandwidthEROBi(Map, Integer, Integer, List, List, Map)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Examine all AZ and ZA edges, confirm that the requested bandwidth can be supported given the available bandwidth.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>urnMap</strong> &#8211; <ul>
+<li>A map of URN string to URN objects</li>
+</ul>
+</li>
+<li><strong>azERO</strong> &#8211; <ul>
+<li>The path in the A-&gt;Z direction</li>
+</ul>
+</li>
+<li><strong>zaERO</strong> &#8211; <ul>
+<li>The path in the Z-&gt;A direction</li>
+</ul>
+</li>
+<li><strong>availBwMap</strong> &#8211; <ul>
+<li>A map of bandwidth availability</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">True, if there is sufficient bandwidth across all edges. False, otherwise.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="evaluatebandwidtherouni">
+<h3>evaluateBandwidthEROUni<a class="headerlink" href="#evaluatebandwidtherouni" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.BandwidthService.evaluateBandwidthEROUni(List, Map, Map, Integer)">
+public boolean <tt class="descname">evaluateBandwidthEROUni</tt><big>(</big>List&lt;TopoEdge&gt;<em> ERO</em>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, UrnE&gt;<em> urnMap</em>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a>&gt;&gt;<em> availBwMap</em>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a><em> bwMbps</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.BandwidthService.evaluateBandwidthEROUni(List, Map, Map, Integer)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a list of edges, confirm that there is sufficient bandwidth available in the one direction</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ERO</strong> &#8211; <ul>
+<li>A series of edges</li>
+</ul>
+</li>
+<li><strong>urnMap</strong> &#8211; <ul>
+<li>A mapping of URN strings to URN objects</li>
+</ul>
+</li>
+<li><strong>availBwMap</strong> &#8211; <ul>
+<li>A mapping of URN objects to lists of reserved bandwidth for that URN</li>
+</ul>
+</li>
+<li><strong>bwMbps</strong> &#8211; <ul>
+<li>The bandwidth in the specified direction</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">True, if the segment can support the requested bandwidth. False, otherwise.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="evaluatebandwidthedge">
+<h3>evaluateBandwidthEdge<a class="headerlink" href="#evaluatebandwidthedge" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.BandwidthService.evaluateBandwidthEdge(TopoEdge, Integer, Integer, Map, Map)">
+public boolean <tt class="descname">evaluateBandwidthEdge</tt><big>(</big>TopoEdge<em> edge</em>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a><em> azBw</em>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a><em> zaBw</em>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, UrnE&gt;<em> urnMap</em>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a>&gt;&gt;<em> availBwMap</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.BandwidthService.evaluateBandwidthEdge(TopoEdge, Integer, Integer, Map, Map)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate an edge to determine if the nodes on either end of the edge support the requested az and za bandwidths. An edge will only fail the test if one or both URNs (corresponding to the nodes): (1) have valid reservable bandwidth fields, and (2) the URN(s) do not have sufficient available bandwidth available in both the az and za directions (egress and ingress).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>edge</strong> &#8211; <ul>
+<li>The edge to be evaluated.</li>
+</ul>
+</li>
+<li><strong>azBw</strong> &#8211; <ul>
+<li>The requested bandwidth in one direction.</li>
+</ul>
+</li>
+<li><strong>zaBw</strong> &#8211; <ul>
+<li>The requested bandwidth in the other direction.</li>
+</ul>
+</li>
+<li><strong>urnMap</strong> &#8211; <ul>
+<li>Map of URN name to UrnE object.</li>
+</ul>
+</li>
+<li><strong>availBwMap</strong> &#8211; <ul>
+<li>Map of UrnE objects to &#8220;Ingress&#8221; and &#8220;Egress&#8221; Available Bandwidth</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">True if there is sufficient reservable bandwidth, False otherwise.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="evaluatebandwidthedgeuni">
+<h3>evaluateBandwidthEdgeUni<a class="headerlink" href="#evaluatebandwidthedgeuni" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.BandwidthService.evaluateBandwidthEdgeUni(TopoEdge, Integer, Map, Map)">
+public boolean <tt class="descname">evaluateBandwidthEdgeUni</tt><big>(</big>TopoEdge<em> edge</em>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a><em> theBw</em>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, UrnE&gt;<em> urnMap</em>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a>&gt;&gt;<em> availBwMap</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.BandwidthService.evaluateBandwidthEdgeUni(TopoEdge, Integer, Map, Map)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate an edge to determine if the nodes on either end of the edge support the requested unidriectional bandwidth. An edge will only fail the test if one or both URNs (corresponding to the nodes): (1) have valid reservable bandwidth fields, and (2) the URN(s) do not have sufficient available bandwidth available in the unique direction.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>edge</strong> &#8211; <ul>
+<li>The edge to be evaluated.</li>
+</ul>
+</li>
+<li><strong>theBw</strong> &#8211; <ul>
+<li>The requested bandwidth in one direction.</li>
+</ul>
+</li>
+<li><strong>urnMap</strong> &#8211; <ul>
+<li>Map of URN name to UrnE object.</li>
+</ul>
+</li>
+<li><strong>availBwMap</strong> &#8211; <ul>
+<li>Map of UrnE objects to &#8220;Ingress&#8221; and &#8220;Egress&#8221; Available Bandwidth</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">True if there is sufficient reservable bandwidth, False otherwise.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="evaluatebandwidthjunction">
+<h3>evaluateBandwidthJunction<a class="headerlink" href="#evaluatebandwidthjunction" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.BandwidthService.evaluateBandwidthJunction(RequestedVlanJunctionE, List)">
+public boolean <tt class="descname">evaluateBandwidthJunction</tt><big>(</big>RequestedVlanJunctionE<em> req_j</em>, List&lt;ReservedBandwidthE&gt;<em> reservedBandwidths</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.BandwidthService.evaluateBandwidthJunction(RequestedVlanJunctionE, List)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Confirm that a requested VLAN junction supports the requested bandwidth. Checks each fixture of the junction.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>req_j</strong> &#8211; <ul>
+<li>The requested junction.</li>
+</ul>
+</li>
+<li><strong>reservedBandwidths</strong> &#8211; <ul>
+<li>The reserved bandwidth.</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">True, if there is enough bandwidth at every fixture. False, otherwise.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="evaluatebandwidthsharedurn">
+<h3>evaluateBandwidthSharedURN<a class="headerlink" href="#evaluatebandwidthsharedurn" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.BandwidthService.evaluateBandwidthSharedURN(String, Map, Integer, Integer, Integer, Integer)">
+public boolean <tt class="descname">evaluateBandwidthSharedURN</tt><big>(</big><a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> urn</em>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a>&gt;&gt;<em> availBwMap</em>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a><em> inMbpsAZ</em>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a><em> egMbpsAZ</em>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a><em> inMbpsZA</em>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a><em> egMbpsZA</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.BandwidthService.evaluateBandwidthSharedURN(String, Map, Integer, Integer, Integer, Integer)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a specific URN, which is traversed in the same direction by the forward and reverse path, determine if there is enough bandwidth available to support the requested bandwidth</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>urn</strong> &#8211; <ul>
+<li>The URN</li>
+</ul>
+</li>
+<li><strong>availBwMap</strong> &#8211; <ul>
+<li>Map of URNs to available Bandwidth</li>
+</ul>
+</li>
+<li><strong>inMbpsAZ</strong> &#8211; <ul>
+<li>Requested ingress Mbps in the A-&gt;Z direction</li>
+</ul>
+</li>
+<li><strong>egMbpsAZ</strong> &#8211; <ul>
+<li>Requested egress Mbps in the A-&gt;Z direction</li>
+</ul>
+</li>
+<li><strong>inMbpsZA</strong> &#8211; <ul>
+<li>Requested ingress Mbps in the Z-&gt;A direction</li>
+</ul>
+</li>
+<li><strong>egMbpsZA</strong> &#8211; <ul>
+<li>Requested egress Mbps in the Z-&gt;A direction</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">True, if there is enough available bandwidth at the URN. False, otherwise</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="evaluatebandwidthurn">
+<h3>evaluateBandwidthURN<a class="headerlink" href="#evaluatebandwidthurn" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.BandwidthService.evaluateBandwidthURN(String, Map, Integer, Integer)">
+public boolean <tt class="descname">evaluateBandwidthURN</tt><big>(</big><a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> urn</em>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a>&gt;&gt;<em> availBwMap</em>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a><em> inMbps</em>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a><em> egMbps</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.BandwidthService.evaluateBandwidthURN(String, Map, Integer, Integer)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a specific URN, determine if there is enough bandwidth available to support the requested bandwidth</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>urn</strong> &#8211; <ul>
+<li>The URN</li>
+</ul>
+</li>
+<li><strong>availBwMap</strong> &#8211; <ul>
+<li>Map of URNs to available Bandwidth</li>
+</ul>
+</li>
+<li><strong>inMbps</strong> &#8211; <ul>
+<li>Requested ingress Mbps</li>
+</ul>
+</li>
+<li><strong>egMbps</strong> &#8211; <ul>
+<li>Requested egress Mbps</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">True, if there is enough available bandwidth at the URN. False, otherwise</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="getreservedbandwidthfromrepo">
+<h3>getReservedBandwidthFromRepo<a class="headerlink" href="#getreservedbandwidthfromrepo" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.BandwidthService.getReservedBandwidthFromRepo(Date, Date)">
+public List&lt;ReservedBandwidthE&gt; <tt class="descname">getReservedBandwidthFromRepo</tt><big>(</big>Date<em> start</em>, Date<em> end</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.BandwidthService.getReservedBandwidthFromRepo(Date, Date)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a list of all bandwidth reserved between a start and end date/time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>start</strong> &#8211; <ul>
+<li>The start of the time range</li>
+</ul>
+</li>
+<li><strong>end</strong> &#8211; <ul>
+<li>The end of the time range</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A list of reserved bandwidth</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="getreservedbandwidthsfromethpipes">
+<h3>getReservedBandwidthsFromEthPipes<a class="headerlink" href="#getreservedbandwidthsfromethpipes" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.BandwidthService.getReservedBandwidthsFromEthPipes(Set)">
+public List&lt;ReservedBandwidthE&gt; <tt class="descname">getReservedBandwidthsFromEthPipes</tt><big>(</big>Set&lt;ReservedEthPipeE&gt;<em> reservedPipes</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.BandwidthService.getReservedBandwidthsFromEthPipes(Set)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve all Reserved Bandwidth from a set of reserved Ethernet pipes.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>reservedPipes</strong> &#8211; <ul>
+<li>Set of reserved pipes</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A list of all reserved bandwidth within the set of reserved Ethernet pipes.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="getreservedbandwidthsfromjunctions">
+<h3>getReservedBandwidthsFromJunctions<a class="headerlink" href="#getreservedbandwidthsfromjunctions" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.BandwidthService.getReservedBandwidthsFromJunctions(Set)">
+public List&lt;ReservedBandwidthE&gt; <tt class="descname">getReservedBandwidthsFromJunctions</tt><big>(</big>Set&lt;ReservedVlanJunctionE&gt;<em> junctions</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.BandwidthService.getReservedBandwidthsFromJunctions(Set)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve all reserved bandwidths from a set of reserved junctions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>junctions</strong> &#8211; <ul>
+<li>Set of reserved junctions.</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A list of all bandwidth reserved at those junctions.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="getreservedbandwidthsfrommplspipes">
+<h3>getReservedBandwidthsFromMplsPipes<a class="headerlink" href="#getreservedbandwidthsfrommplspipes" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.BandwidthService.getReservedBandwidthsFromMplsPipes(Set)">
+public List&lt;ReservedBandwidthE&gt; <tt class="descname">getReservedBandwidthsFromMplsPipes</tt><big>(</big>Set&lt;ReservedMplsPipeE&gt;<em> reservedPipes</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.BandwidthService.getReservedBandwidthsFromMplsPipes(Set)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve all Reserved Bandwidth from a set of reserved MPLS pipes.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>reservedPipes</strong> &#8211; <ul>
+<li>Set of reserved pipes</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A list of all reserved bandwidth within the set of reserved MPLS pipes.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="BellmanFordPCE.html" title="BellmanFordPCE"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="package-index.html" title="net.es.oscars.pce"
+             >previous</a> |</li>
+        <li><a href="../../../../../index.html">OSCARS</a> &raquo;</li>
+          <li><a href="../../../../index.html" >Code Documentation</a> &raquo;</li>
+          <li><a href="../../../../packages.html" >Javadoc</a> &raquo;</li>
+          <li><a href="package-index.html" >net.es.oscars.pce</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2017, ESnet.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

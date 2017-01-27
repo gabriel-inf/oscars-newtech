@@ -1,0 +1,619 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>VlanService &mdash; OSCARS 1.0 1.0.2017 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '1.0.2017',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="shortcut icon" href="../../../../../_static/esnet.png"/>
+    <link rel="top" title="OSCARS 1.0 1.0.2017 documentation" href="../../../../../index.html" />
+    <link rel="up" title="net.es.oscars.pce" href="package-index.html" />
+    <link rel="next" title="VlanTranslationTest" href="VlanTranslationTest.html" />
+    <link rel="prev" title="TranslationPCE" href="TranslationPCE.html" /> 
+  </head>
+  <body>
+	<a href="../../../../../index.html"><img src="../../../../../_static/oscars_banner.png" alt="OSCARS 1.0" width="100%"></a>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="VlanTranslationTest.html" title="VlanTranslationTest"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="TranslationPCE.html" title="TranslationPCE"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../../../../index.html">OSCARS</a> &raquo;</li>
+          <li><a href="../../../../index.html" >Code Documentation</a> &raquo;</li>
+          <li><a href="../../../../packages.html" >Javadoc</a> &raquo;</li>
+          <li><a href="package-index.html" accesskey="U">net.es.oscars.pce</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper"><html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head></head>
+      
+<body role="document">
+	<p>
+		Developed by 
+		<a href="http://es.net/" target="_blank"><img src="../../../../../_static/esnet_full_logo.jpg" alt="ESnet" /></a>
+	</p>
+	<p>
+		In collaboration with 
+		<a href="http://highspeed.uml.edu/" target="_blank"><img src="../../../../../_static/uml_acnl_logo.png" alt="Advanced Communication Networks Laboratory, UMass Lowell"/></a>
+	</p>
+
+</body>	<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head></head>
+      
+<body role="document">
+
+<h3>DOWNLOAD</h3>
+
+<p><b>Current Version:</b> 1.0.2017</p>
+
+<p>Get <a href="https://github.com/esnet/oscars-newtech">OSCARS</a> from Github</p>
+</body>	
+<h3><a href="../../../../../index.html">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../../../userdoc/index.html">User Documentation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../../../index.html">Code Documentation</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../../../packages.html">Javadoc</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="TranslationPCE.html"
+                        title="previous chapter">TranslationPCE</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="VlanTranslationTest.html"
+                        title="next chapter">VlanTranslationTest</a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="vlanservice">
+<h1>VlanService<a class="headerlink" href="#vlanservice" title="Permalink to this headline">¶</a></h1>
+<dl class="type">
+<dt id="net.es.oscars.pce.VlanService">
+public class <tt class="descname">VlanService</tt><a class="headerlink" href="#net.es.oscars.pce.VlanService" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="section" id="methods">
+<h2>Methods<a class="headerlink" href="#methods" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="addtosetoverlap">
+<h3>addToSetOverlap<a class="headerlink" href="#addtosetoverlap" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.VlanService.addToSetOverlap(Set, Set)">
+public Set&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a>&gt; <tt class="descname">addToSetOverlap</tt><big>(</big>Set&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a>&gt;<em> overlap</em>, Set&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a>&gt;<em> other</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.VlanService.addToSetOverlap(Set, Set)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterate through the set of overlapping VLAN tags, keep the elements in that set which are also contained in every IntRange passed in.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>overlap</strong> &#8211; <ul>
+<li>The set of overlapping VLAN tags.</li>
+</ul>
+</li>
+<li><strong>other</strong> &#8211; <ul>
+<li>Another set of VLAN tags, to be overlapped with the current overlapping set.</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The (possibly reduced) set of overlapping VLAN tags.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="buildavailablevlanidmap">
+<h3>buildAvailableVlanIdMap<a class="headerlink" href="#buildavailablevlanidmap" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.VlanService.buildAvailableVlanIdMap(Map, List, Map)">
+public Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, Set&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a>&gt;&gt; <tt class="descname">buildAvailableVlanIdMap</tt><big>(</big>Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, UrnE&gt;<em> urnMap</em>, List&lt;ReservedVlanE&gt;<em> reservedVlans</em>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>&gt;<em> portToDeviceMap</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.VlanService.buildAvailableVlanIdMap(Map, List, Map)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="createreservedvlanlist">
+<h3>createReservedVlanList<a class="headerlink" href="#createreservedvlanlist" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.VlanService.createReservedVlanList(Set, Set, Date, Date)">
+public List&lt;ReservedVlanE&gt; <tt class="descname">createReservedVlanList</tt><big>(</big>Set&lt;ReservedVlanJunctionE&gt;<em> reservedJunctions</em>, Set&lt;ReservedEthPipeE&gt;<em> reservedEthPipes</em>, Date<em> start</em>, Date<em> end</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.VlanService.createReservedVlanList(Set, Set, Date, Date)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a set of reserved junctions and reserved ethernet pipes, retrieve all reserved VLAN objects within the specified schedule period.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>reservedJunctions</strong> &#8211; <ul>
+<li>Set of reserved junctions</li>
+</ul>
+</li>
+<li><strong>reservedEthPipes</strong> &#8211; <ul>
+<li>Set of reserved ethernet pipes</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="findedgesetpervlanid">
+<h3>findEdgeSetPerVlanID<a class="headerlink" href="#findedgesetpervlanid" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.VlanService.findEdgeSetPerVlanID(Set, Map, Map)">
+public Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a>, Set&lt;TopoEdge&gt;&gt; <tt class="descname">findEdgeSetPerVlanID</tt><big>(</big>Set&lt;TopoEdge&gt;<em> edges</em>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, UrnE&gt;<em> urnMap</em>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, Set&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a>&gt;&gt;<em> availVlanMap</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.VlanService.findEdgeSetPerVlanID(Set, Map, Map)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Traverse the set of edges, and create a map of VLAN ID to the edges where that ID is available</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>edges</strong> &#8211; <ul>
+<li>The set of edges.</li>
+</ul>
+</li>
+<li><strong>urnMap</strong> &#8211; <ul>
+<li>Map of URN name to UrnE object.</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A (possibly empty) set of VLAN tags that are available across every edge.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="findmaxvalidedgeset">
+<h3>findMaxValidEdgeSet<a class="headerlink" href="#findmaxvalidedgeset" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.VlanService.findMaxValidEdgeSet(Set, Map, List, Map)">
+public Set&lt;TopoEdge&gt; <tt class="descname">findMaxValidEdgeSet</tt><big>(</big>Set&lt;TopoEdge&gt;<em> availableEdges</em>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, UrnE&gt;<em> urnMap</em>, List&lt;IntRange&gt;<em> vlans</em>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, Set&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a>&gt;&gt;<em> availVlanMap</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.VlanService.findMaxValidEdgeSet(Set, Map, List, Map)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a pruned set of edges where the nodes on either end of the edge support at least one of the specified VLANs. A map of URNs are used to retrive the reservable VLAN sets from nodes (where applicable). Builds a mapping from each available VLAN id to the set of edges that support that ID. Using this mapping, the largest set of edges that supports a requested VLAN id (or any VLAN id if none are specified) is returned.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>availableEdges</strong> &#8211; <ul>
+<li>The set of currently available edges, which will be pruned further using VLAN tags.</li>
+</ul>
+</li>
+<li><strong>urnMap</strong> &#8211; <ul>
+<li>Map of URN name to UrnE object.</li>
+</ul>
+</li>
+<li><strong>vlans</strong> &#8211; <ul>
+<li>Requested VLAN ranges. Any VLAN ID within those ranges can be accepted.</li>
+</ul>
+</li>
+<li><strong>availVlanMap</strong> &#8211; <ul>
+<li>Map of UrnE objects to a List of available VLAN tags.</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The input edges, pruned using the input set of VLAN tags.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="findsetcover">
+<h3>findSetCover<a class="headerlink" href="#findsetcover" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.VlanService.findSetCover(Map)">
+public Set&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a>&gt; <tt class="descname">findSetCover</tt><big>(</big>Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, Set&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a>&gt;&gt;<em> validVlanMap</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.VlanService.findSetCover(Map)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="getavailablevlanids">
+<h3>getAvailableVlanIds<a class="headerlink" href="#getavailablevlanids" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.VlanService.getAvailableVlanIds(String, Map, Map, Map)">
+public Set&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a>&gt; <tt class="descname">getAvailableVlanIds</tt><big>(</big><a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> urn</em>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, Set&lt;ReservedVlanE&gt;&gt;<em> resvVlanMap</em>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, Set&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>&gt;&gt;<em> deviceToPortMap</em>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, UrnE&gt;<em> urnMap</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.VlanService.getAvailableVlanIds(String, Map, Map, Map)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get all VLAN IDs available at a URN based on the possible reservable ranges and the currently reserved IDs.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>urn</strong> &#8211; <ul>
+<li>The currently considered URN string</li>
+</ul>
+</li>
+<li><strong>resvVlanMap</strong> &#8211; <ul>
+<li>A mapping representing the Reserved VLANs at a URN</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Set of VLAN IDs that are both supported and not reserved at a URN</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="getintrangesfromstring">
+<h3>getIntRangesFromString<a class="headerlink" href="#getintrangesfromstring" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.VlanService.getIntRangesFromString(String)">
+public List&lt;IntRange&gt; <tt class="descname">getIntRangesFromString</tt><big>(</big><a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> vlans</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.VlanService.getIntRangesFromString(String)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a list of strings, convert all valid strings into IntRanges.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>vlans</strong> &#8211; <ul>
+<li>Requested VLAN ranges. Any VLAN ID within those ranges can be accepted.</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A list of IntRanges, each representing a range of VLAN ID values parsed from a string.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="getintegersfromranges">
+<h3>getIntegersFromRanges<a class="headerlink" href="#getintegersfromranges" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.VlanService.getIntegersFromRanges(List)">
+public Set&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a>&gt; <tt class="descname">getIntegersFromRanges</tt><big>(</big>List&lt;IntRange&gt;<em> vlans</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.VlanService.getIntegersFromRanges(List)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return all of the VLAN ids contained within the list of VLAN ranges.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>vlans</strong> &#8211; <ul>
+<li>Requested VLAN ranges. Any VLAN ID within those ranges can be accepted.</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The set of VLAN ids making up the input ranges.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="getreservedvlansfromethernetpipes">
+<h3>getReservedVlansFromEthernetPipes<a class="headerlink" href="#getreservedvlansfromethernetpipes" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.VlanService.getReservedVlansFromEthernetPipes(Set)">
+public List&lt;ReservedVlanE&gt; <tt class="descname">getReservedVlansFromEthernetPipes</tt><big>(</big>Set&lt;ReservedEthPipeE&gt;<em> reservedPipes</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.VlanService.getReservedVlansFromEthernetPipes(Set)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve all Reserved VLAN IDs from a set of reserved pipes.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>reservedPipes</strong> &#8211; <ul>
+<li>Set of reserved pipes</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A list of all reserved VLAN IDs within the set of reserved pipes.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="getreservedvlansfromjunctions">
+<h3>getReservedVlansFromJunctions<a class="headerlink" href="#getreservedvlansfromjunctions" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.VlanService.getReservedVlansFromJunctions(Set)">
+public List&lt;ReservedVlanE&gt; <tt class="descname">getReservedVlansFromJunctions</tt><big>(</big>Set&lt;ReservedVlanJunctionE&gt;<em> junctions</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.VlanService.getReservedVlansFromJunctions(Set)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve all reserved VLAN IDs from a set of reserved junctions</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>junctions</strong> &#8211; <ul>
+<li>Set of reserved junctions.</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A list of all VLAN IDs reserved at those junctions.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="getreservedvlansfromrepo">
+<h3>getReservedVlansFromRepo<a class="headerlink" href="#getreservedvlansfromrepo" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.VlanService.getReservedVlansFromRepo(Date, Date)">
+public List&lt;ReservedVlanE&gt; <tt class="descname">getReservedVlansFromRepo</tt><big>(</big>Date<em> start</em>, Date<em> end</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.VlanService.getReservedVlansFromRepo(Date, Date)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a list of all VLAN IDs reserved between a start and end date/time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>start</strong> &#8211; <ul>
+<li>The start of the time range</li>
+</ul>
+</li>
+<li><strong>end</strong> &#8211; <ul>
+<li>The end of the time range</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A list of reserved VLAN IDs</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="getsetofnumbersinrange">
+<h3>getSetOfNumbersInRange<a class="headerlink" href="#getsetofnumbersinrange" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.VlanService.getSetOfNumbersInRange(IntRange)">
+public Set&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a>&gt; <tt class="descname">getSetOfNumbersInRange</tt><big>(</big>IntRange<em> aRange</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.VlanService.getSetOfNumbersInRange(IntRange)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve a set of all Integers that fall within the specified IntRange.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>aRange</strong> &#8211; <ul>
+<li>The specified IntRange</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The set of Integers contained within the range.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="getvlanrangesfromurnstring">
+<h3>getVlanRangesFromUrnString<a class="headerlink" href="#getvlanrangesfromurnstring" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.VlanService.getVlanRangesFromUrnString(Map, String)">
+public List&lt;IntRange&gt; <tt class="descname">getVlanRangesFromUrnString</tt><big>(</big>Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, UrnE&gt;<em> urnMap</em>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> matchingUrn</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.VlanService.getVlanRangesFromUrnString(Map, String)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Using the list of URNs and the URN string, find the matching UrnE object and retrieve all of its reservable IntRanges.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>urnMap</strong> &#8211; <ul>
+<li>Map of URN name to UrnE object.</li>
+</ul>
+</li>
+<li><strong>matchingUrn</strong> &#8211; <ul>
+<li>String representation of the desired URN.</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li>All IntRanges supported at the URN.</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="getvlansfromjunction">
+<h3>getVlansFromJunction<a class="headerlink" href="#getvlansfromjunction" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.VlanService.getVlansFromJunction(RequestedVlanJunctionE)">
+public List&lt;IntRange&gt; <tt class="descname">getVlansFromJunction</tt><big>(</big>RequestedVlanJunctionE<em> junction</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.VlanService.getVlansFromJunction(RequestedVlanJunctionE)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the requested set of VLAN tags from a junction by streaming through the fixtures in the junction.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>junction</strong> &#8211; <ul>
+<li>The requested VLAN junction.</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The set of VLAN tags (Integers) requested for fixtures at that junction.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="selectvlansforjunction">
+<h3>selectVLANsForJunction<a class="headerlink" href="#selectvlansforjunction" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.VlanService.selectVLANsForJunction(RequestedVlanJunctionE, List, Map, Map, Map)">
+public Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, Set&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a>&gt;&gt; <tt class="descname">selectVLANsForJunction</tt><big>(</big>RequestedVlanJunctionE<em> req_j</em>, List&lt;ReservedVlanE&gt;<em> rsvVlans</em>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, Set&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>&gt;&gt;<em> deviceToPortMap</em>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>&gt;<em> portToDeviceMap</em>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, UrnE&gt;<em> urnMap</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.VlanService.selectVLANsForJunction(RequestedVlanJunctionE, List, Map, Map, Map)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Select a VLAN ID for a junction. All fixtures on the junction must use their requested VLAN tag.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>req_j</strong> &#8211; <ul>
+<li>The requested junction.</li>
+</ul>
+</li>
+<li><strong>deviceToPortMap</strong> &#8211; </li>
+<li><strong>portToDeviceMap</strong> &#8211; &#64;return A valid VLAN iD for each URN on this junction.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="selectvlansforpipe">
+<h3>selectVlansForPipe<a class="headerlink" href="#selectvlansforpipe" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.VlanService.selectVlansForPipe(RequestedVlanPipeE, Map, List, List, List, Map, Map)">
+public Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, Set&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a>&gt;&gt; <tt class="descname">selectVlansForPipe</tt><big>(</big>RequestedVlanPipeE<em> reqPipe</em>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, UrnE&gt;<em> urnMap</em>, List&lt;ReservedVlanE&gt;<em> reservedVlans</em>, List&lt;TopoEdge&gt;<em> azERO</em>, List&lt;TopoEdge&gt;<em> zaERO</em>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, Set&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>&gt;&gt;<em> deviceToPortMap</em>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>&gt;<em> portToDeviceMap</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.VlanService.selectVlansForPipe(RequestedVlanPipeE, Map, List, List, List, Map, Map)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a mapping of URN entity to VLAN Integer ID. This map will contain the URNs of all fixtures, junctions, and ports in-between the junction.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>reqPipe</strong> &#8211; <ul>
+<li>The requested pipe.</li>
+</ul>
+</li>
+<li><strong>urnMap</strong> &#8211; <ul>
+<li>A mapping of URN string to URN entity</li>
+</ul>
+</li>
+<li><strong>reservedVlans</strong> &#8211; <ul>
+<li>List of all reserved VLANs</li>
+</ul>
+</li>
+<li><strong>azERO</strong> &#8211; <ul>
+<li>The AZ edges</li>
+</ul>
+</li>
+<li><strong>zaERO</strong> &#8211; <ul>
+<li>The ZA edges</li>
+</ul>
+</li>
+<li><strong>deviceToPortMap</strong> &#8211; </li>
+<li><strong>portToDeviceMap</strong> &#8211; &#64;return Map from URN entity to VLAN ID chosen for that entity.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="stringifyvlanmap">
+<h3>stringifyVlanMap<a class="headerlink" href="#stringifyvlanmap" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.VlanService.stringifyVlanMap(Map)">
+public <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a> <tt class="descname">stringifyVlanMap</tt><big>(</big>Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, Set&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a>&gt;&gt;<em> input</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.VlanService.stringifyVlanMap(Map)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="VlanTranslationTest.html" title="VlanTranslationTest"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="TranslationPCE.html" title="TranslationPCE"
+             >previous</a> |</li>
+        <li><a href="../../../../../index.html">OSCARS</a> &raquo;</li>
+          <li><a href="../../../../index.html" >Code Documentation</a> &raquo;</li>
+          <li><a href="../../../../packages.html" >Javadoc</a> &raquo;</li>
+          <li><a href="package-index.html" >net.es.oscars.pce</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2017, ESnet.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>
