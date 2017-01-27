@@ -1,7 +1,3 @@
-.. OSCARS 1.0 documentation master file, created by
-   sphinx-quickstart on Mon Jan 16 13:33:15 2017.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
 
 OSCARS 1.0
 ==========
@@ -12,16 +8,9 @@ Documentation Contents
 ----------------------
 
 .. toctree::
-   :maxdepth: 2
+   :titlesonly:
 
    userdoc/index
    codedoc/index
 
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
 

@@ -1,0 +1,440 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>PruningService &mdash; OSCARS 1.0 1.0.2017 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '1.0.2017',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="shortcut icon" href="../../../../../_static/esnet.png"/>
+    <link rel="top" title="OSCARS 1.0 1.0.2017 documentation" href="../../../../../index.html" />
+    <link rel="up" title="net.es.oscars.pce" href="package-index.html" />
+    <link rel="next" title="ReserveTopoTest" href="ReserveTopoTest.html" />
+    <link rel="prev" title="PalindromicalPCE" href="PalindromicalPCE.html" /> 
+  </head>
+  <body>
+	<a href="../../../../../index.html"><img src="../../../../../_static/oscars_banner.png" alt="OSCARS 1.0" width="100%"></a>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="ReserveTopoTest.html" title="ReserveTopoTest"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="PalindromicalPCE.html" title="PalindromicalPCE"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../../../../index.html">OSCARS</a> &raquo;</li>
+          <li><a href="../../../../index.html" >Code Documentation</a> &raquo;</li>
+          <li><a href="../../../../packages.html" >Javadoc</a> &raquo;</li>
+          <li><a href="package-index.html" accesskey="U">net.es.oscars.pce</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper"><html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head></head>
+      
+<body role="document">
+	<p>
+		Developed by 
+		<a href="http://es.net/" target="_blank"><img src="../../../../../_static/esnet_full_logo.jpg" alt="ESnet" /></a>
+	</p>
+	<p>
+		In collaboration with 
+		<a href="http://highspeed.uml.edu/" target="_blank"><img src="../../../../../_static/uml_acnl_logo.png" alt="Advanced Communication Networks Laboratory, UMass Lowell"/></a>
+	</p>
+
+</body>	<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head></head>
+      
+<body role="document">
+
+<h3>DOWNLOAD</h3>
+
+<p><b>Current Version:</b> 1.0.2017</p>
+
+<p>Get <a href="https://github.com/esnet/oscars-newtech">OSCARS</a> from Github</p>
+</body>	
+<h3><a href="../../../../../index.html">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../../../userdoc/index.html">User Documentation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../../../index.html">Code Documentation</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../../../packages.html">Javadoc</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="PalindromicalPCE.html"
+                        title="previous chapter">PalindromicalPCE</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="ReserveTopoTest.html"
+                        title="next chapter">ReserveTopoTest</a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="pruningservice">
+<h1>PruningService<a class="headerlink" href="#pruningservice" title="Permalink to this headline">¶</a></h1>
+<dl class="type">
+<dt id="net.es.oscars.pce.PruningService">
+public class <tt class="descname">PruningService</tt><a class="headerlink" href="#net.es.oscars.pce.PruningService" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pruning Service. This class can take in a variety of inputs (Bidrectional bandwidth, a pair of unidirectional bandwidths (AZ/ZA), specified set of desired VLAN tags, or a logical pipe (containing those other elements)). With any/all of those inputs, edges are removed from the passed in topology that do not meet the specified bandwidth/VLAN requirements.</p>
+</dd></dl>
+
+<div class="section" id="methods">
+<h2>Methods<a class="headerlink" href="#methods" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="pruneblacklist">
+<h3>pruneBlacklist<a class="headerlink" href="#pruneblacklist" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.PruningService.pruneBlacklist(Topology, Set)">
+public Set&lt;TopoEdge&gt; <tt class="descname">pruneBlacklist</tt><big>(</big>Topology<em> topology</em>, Set&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>&gt;<em> urnBlacklist</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.PruningService.pruneBlacklist(Topology, Set)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Identifies topology edges that correspond to a given set of topology URNs, for removal from the topology.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>topology</strong> &#8211; <ul>
+<li>Full un-pruned topology containing all edges and vertices in the network</li>
+</ul>
+</li>
+<li><strong>urnBlacklist</strong> &#8211; <ul>
+<li>Set of URN strings corresponding to blacklisted devices/ports.</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Set of blacklisted edges to be pruned from the topology.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="prunewithpipe">
+<h3>pruneWithPipe<a class="headerlink" href="#prunewithpipe" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.PruningService.pruneWithPipe(Topology, RequestedVlanPipeE, List, List)">
+public Topology <tt class="descname">pruneWithPipe</tt><big>(</big>Topology<em> topo</em>, RequestedVlanPipeE<em> pipe</em>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/util/List.html" title="java.util.List">List</a>&lt;ReservedBandwidthE&gt;<em> rsvBwList</em>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/util/List.html" title="java.util.List">List</a>&lt;ReservedVlanE&gt;<em> rsvVlanList</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.PruningService.pruneWithPipe(Topology, RequestedVlanPipeE, List, List)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prune the topology using a logical pipe. The pipe contains the requested bandwidth and VLANs (through querying the attached junctions/fixtures). The URNs are pulled from the URN repository.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>topo</strong> &#8211; <ul>
+<li>The topology to be pruned.</li>
+</ul>
+</li>
+<li><strong>pipe</strong> &#8211; <ul>
+<li>The logical pipe, from which the requested bandwidth and VLANs are retrieved.</li>
+</ul>
+</li>
+<li><strong>rsvBwList</strong> &#8211; <ul>
+<li>A list of Reserved Bandwidth to be considered when pruning (along with Bandwidth in the Repo)</li>
+</ul>
+</li>
+<li><strong>rsvVlanList</strong> &#8211; <ul>
+<li>A list of Reserved VLAN tags to be considered when pruning (along with VLANs in the Repo)</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The topology with ineligible edges removed.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="id1">
+<h3>pruneWithPipe<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.PruningService.pruneWithPipe(Topology, RequestedVlanPipeE, Date, Date)">
+public Topology <tt class="descname">pruneWithPipe</tt><big>(</big>Topology<em> topo</em>, RequestedVlanPipeE<em> pipe</em>, Date<em> start</em>, Date<em> end</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.PruningService.pruneWithPipe(Topology, RequestedVlanPipeE, Date, Date)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prune the topology using a logical pipe. The pipe contains the requested bandwidth and VLANs (through querying the attached junctions/fixtures). The URNs are pulled from the URN repository.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>topo</strong> &#8211; <ul>
+<li>The topology to be pruned.</li>
+</ul>
+</li>
+<li><strong>pipe</strong> &#8211; <ul>
+<li>The logical pipe, from which the requested bandwidth and VLANs are retrieved.</li>
+</ul>
+</li>
+<li><strong>start</strong> &#8211; <ul>
+<li>The start date of the request</li>
+</ul>
+</li>
+<li><strong>end</strong> &#8211; <ul>
+<li>The end date of the request</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The topology with ineligible edges removed.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="id2">
+<h3>pruneWithPipe<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.PruningService.pruneWithPipe(Topology, RequestedVlanPipeE, List, List, List)">
+public Topology <tt class="descname">pruneWithPipe</tt><big>(</big>Topology<em> topo</em>, RequestedVlanPipeE<em> pipe</em>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/util/List.html" title="java.util.List">List</a>&lt;UrnE&gt;<em> urns</em>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/util/List.html" title="java.util.List">List</a>&lt;ReservedBandwidthE&gt;<em> rsvBwList</em>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/util/List.html" title="java.util.List">List</a>&lt;ReservedVlanE&gt;<em> rsvVlanList</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.PruningService.pruneWithPipe(Topology, RequestedVlanPipeE, List, List, List)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prune the topology using a logical pipe. The pipe contains the requested bandwidth and VLANs (through querying the attached junctions/fixtures). A list of URNs is passed into match devices/interfaces to topology elements.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>topo</strong> &#8211; <ul>
+<li>The topology to be pruned.</li>
+</ul>
+</li>
+<li><strong>pipe</strong> &#8211; <ul>
+<li>The logical pipe, from which the requested bandwidth and VLANs are retrieved.</li>
+</ul>
+</li>
+<li><strong>urns</strong> &#8211; <ul>
+<li>The URNs that will be used to match available resources with elements of the topology.</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The topology with ineligible edges removed.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="prunewithpipeaz">
+<h3>pruneWithPipeAZ<a class="headerlink" href="#prunewithpipeaz" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.PruningService.pruneWithPipeAZ(Topology, RequestedVlanPipeE, List, List)">
+public Topology <tt class="descname">pruneWithPipeAZ</tt><big>(</big>Topology<em> topo</em>, RequestedVlanPipeE<em> pipe</em>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/util/List.html" title="java.util.List">List</a>&lt;ReservedBandwidthE&gt;<em> rsvBwList</em>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/util/List.html" title="java.util.List">List</a>&lt;ReservedVlanE&gt;<em> rsvVlanList</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.PruningService.pruneWithPipeAZ(Topology, RequestedVlanPipeE, List, List)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prune the topology based on A-&gt;Z bandwidth using a logical pipe. The pipe contains the requested bandwidth and VLANs (through querying the attached junctions/fixtures). The URNs are pulled from the URN repository.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>topo</strong> &#8211; <ul>
+<li>The topology to be pruned.</li>
+</ul>
+</li>
+<li><strong>pipe</strong> &#8211; <ul>
+<li>The logical pipe, from which the requested bandwidth and VLANs are retrieved.</li>
+</ul>
+</li>
+<li><strong>rsvBwList</strong> &#8211; <ul>
+<li>A list of Reserved Bandwidth to be considered when pruning (along with Bandwidth in the Repo)</li>
+</ul>
+</li>
+<li><strong>rsvVlanList</strong> &#8211; <ul>
+<li>A list of Reserved VLAN tags to be considered when pruning (along with VLANs in the Repo)</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The topology with ineligible edges removed.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="id3">
+<h3>pruneWithPipeAZ<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.PruningService.pruneWithPipeAZ(Topology, RequestedVlanPipeE, List, List, List)">
+public Topology <tt class="descname">pruneWithPipeAZ</tt><big>(</big>Topology<em> topo</em>, RequestedVlanPipeE<em> pipe</em>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/util/List.html" title="java.util.List">List</a>&lt;UrnE&gt;<em> urns</em>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/util/List.html" title="java.util.List">List</a>&lt;ReservedBandwidthE&gt;<em> rsvBwList</em>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/util/List.html" title="java.util.List">List</a>&lt;ReservedVlanE&gt;<em> rsvVlanList</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.PruningService.pruneWithPipeAZ(Topology, RequestedVlanPipeE, List, List, List)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prune the topology based on A-&gt;Z bandwidth using a logical pipe. The pipe contains the requested bandwidth and VLANs (through querying the attached junctions/fixtures). A list of URNs is passed into match devices/interfaces to topology elements.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>topo</strong> &#8211; <ul>
+<li>The topology to be pruned.</li>
+</ul>
+</li>
+<li><strong>pipe</strong> &#8211; <ul>
+<li>The logical pipe, from which the requested bandwidth and VLANs are retrieved.</li>
+</ul>
+</li>
+<li><strong>urns</strong> &#8211; <ul>
+<li>The URNs that will be used to match available resources with elements of the topology.</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The topology with ineligible edges removed.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="prunewithpipeza">
+<h3>pruneWithPipeZA<a class="headerlink" href="#prunewithpipeza" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.PruningService.pruneWithPipeZA(Topology, RequestedVlanPipeE, List, List)">
+public Topology <tt class="descname">pruneWithPipeZA</tt><big>(</big>Topology<em> topo</em>, RequestedVlanPipeE<em> pipe</em>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/util/List.html" title="java.util.List">List</a>&lt;ReservedBandwidthE&gt;<em> rsvBwList</em>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/util/List.html" title="java.util.List">List</a>&lt;ReservedVlanE&gt;<em> rsvVlanList</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.PruningService.pruneWithPipeZA(Topology, RequestedVlanPipeE, List, List)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prune the topology based on Z-&gt;A bandwidth using a logical pipe. The pipe contains the requested bandwidth and VLANs (through querying the attached junctions/fixtures). The URNs are pulled from the URN repository.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>topo</strong> &#8211; <ul>
+<li>The topology to be pruned.</li>
+</ul>
+</li>
+<li><strong>pipe</strong> &#8211; <ul>
+<li>The logical pipe, from which the requested bandwidth and VLANs are retrieved.</li>
+</ul>
+</li>
+<li><strong>rsvBwList</strong> &#8211; <ul>
+<li>A list of Reserved Bandwidth to be considered when pruning (along with Bandwidth in the Repo)</li>
+</ul>
+</li>
+<li><strong>rsvVlanList</strong> &#8211; <ul>
+<li>A list of Reserved VLAN tags to be considered when pruning (along with VLANs in the Repo)</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The topology with ineligible edges removed.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="id4">
+<h3>pruneWithPipeZA<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.pce.PruningService.pruneWithPipeZA(Topology, RequestedVlanPipeE, List, List, List)">
+public Topology <tt class="descname">pruneWithPipeZA</tt><big>(</big>Topology<em> topo</em>, RequestedVlanPipeE<em> pipe</em>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/util/List.html" title="java.util.List">List</a>&lt;UrnE&gt;<em> urns</em>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/util/List.html" title="java.util.List">List</a>&lt;ReservedBandwidthE&gt;<em> rsvBwList</em>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/util/List.html" title="java.util.List">List</a>&lt;ReservedVlanE&gt;<em> rsvVlanList</em><big>)</big><a class="headerlink" href="#net.es.oscars.pce.PruningService.pruneWithPipeZA(Topology, RequestedVlanPipeE, List, List, List)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prune the topology based on Z-&gt;A bandwidth using a logical pipe. The pipe contains the requested bandwidth and VLANs (through querying the attached junctions/fixtures). A list of URNs is passed into match devices/interfaces to topology elements.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>topo</strong> &#8211; <ul>
+<li>The topology to be pruned.</li>
+</ul>
+</li>
+<li><strong>pipe</strong> &#8211; <ul>
+<li>The logical pipe, from which the requested bandwidth and VLANs are retrieved.</li>
+</ul>
+</li>
+<li><strong>urns</strong> &#8211; <ul>
+<li>The URNs that will be used to match available resources with elements of the topology.</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The topology with ineligible edges removed.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="ReserveTopoTest.html" title="ReserveTopoTest"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="PalindromicalPCE.html" title="PalindromicalPCE"
+             >previous</a> |</li>
+        <li><a href="../../../../../index.html">OSCARS</a> &raquo;</li>
+          <li><a href="../../../../index.html" >Code Documentation</a> &raquo;</li>
+          <li><a href="../../../../packages.html" >Javadoc</a> &raquo;</li>
+          <li><a href="package-index.html" >net.es.oscars.pce</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2017, ESnet.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

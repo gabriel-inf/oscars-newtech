@@ -83,7 +83,7 @@ function countValidFixtures(junction){
 
 // fixture: {id: ~~, selected: true or false, bandwidth: ~~, vlan: ~~}
 function validateFixture(fixture){
-    return fixture.selected && fixture.bw > 0 && fixture.vlan.length > 0;
+    return fixture.selected && fixture.bw > -1 && fixture.vlan.length > 0;
 }
 
 module.exports = {validateReservation};
