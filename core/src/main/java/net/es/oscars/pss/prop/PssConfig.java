@@ -18,4 +18,16 @@ public class PssConfig {
     @NonNull
     private String templateExtension;
 
+    @NonNull
+    private String addressesFilename;
+
+    @NonNull
+    private String vcidRange;
+
+    @NonNull
+    private String sdpidRange;
+
+    @NonNull
+    private String qosidRange;
+
 }

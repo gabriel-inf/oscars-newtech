@@ -250,6 +250,7 @@ public class PCEAssistant {
                 result.put(ResourceType.ALU_INGRESS_POLICY_ID, deviceScope);
                 result.put(ResourceType.ALU_EGRESS_POLICY_ID, deviceScope);
                 result.put(ResourceType.VC_ID, global);
+                result.put(ResourceType.ALU_SDP_ID, global);
 
                 return result;
             case JUNOS_SWITCH:

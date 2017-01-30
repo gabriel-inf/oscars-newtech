@@ -13,6 +13,7 @@ import net.es.oscars.webui.dto.MinimalRequest;
 import net.es.oscars.webui.ipc.ConnectionProvider;
 import net.es.oscars.webui.ipc.MinimalPreChecker;
 import net.es.oscars.webui.ipc.MinimalRequester;
+import org.hashids.Hashids;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -116,7 +117,18 @@ public class ReservationController {
     @ResponseBody
     public Map<String, String> new_connection_id() {
         Map<String, String> result = new HashMap<>();
-        result.put("connectionId", UUID.randomUUID().toString());
+
+        Hashids hashids = new Hashids("a salt");
+
+        // todo: better random or something, also poke the backend
+        Random rand = new Random();
+        Integer id = rand.nextInt();
+        if (id < 0 ) {
+            id = -1 * id;
+        }
+        String connectionId = hashids.encode(id);
+
+        result.put("connectionId", connectionId);
         log.info("provided new connection id: " + result.get("connectionId"));
         return result;
     }

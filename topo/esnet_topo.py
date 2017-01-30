@@ -9,9 +9,11 @@ INPUT_DEVICES = "input/devices.json"
 INPUT_SWITCHES = "input/switches.json"
 INPUT_ISIS = "input/isis.json"
 INPUT_PORTS = "input/ports.json"
+INPUT_ADDRS = "input/ip_addrs.json"
 
 OUTPUT_DEVICES = "output/devices.json"
 OUTPUT_ADJCIES = "output/adjacencies.json"
+OUTPUT_ADDRS = "output/addrs.json"
 
 
 def main():
@@ -26,6 +28,10 @@ def main():
     in_str = open(INPUT_PORTS).read()
     in_ports = json.loads(in_str)
 
+    in_str = open(INPUT_ADDRS).read()
+    addrs = json.loads(in_str)
+
+
     oscars_devices = transform_devices(in_devices=in_devices)
 
     (oscars_adjcies, igp_portmap) = transform_isis(isis_adjcies=isis_adjcies)
@@ -36,11 +42,46 @@ def main():
 
     merge_phy_ports(oscars_devices=oscars_devices, ports=in_ports, igp_portmap=igp_portmap)
 
+    urn_addrs = make_urn_addrs(addrs=addrs, isis_adjcies=isis_adjcies)
+
     with open(OUTPUT_DEVICES, 'w') as outfile:
         json.dump(oscars_devices, outfile, indent=2)
 
     with open(OUTPUT_ADJCIES, 'w') as outfile:
         json.dump(oscars_adjcies, outfile, indent=2)
+
+    with open(OUTPUT_ADDRS, 'w') as outfile:
+        json.dump(urn_addrs, outfile, indent=2)
+
+
+def make_urn_addrs(addrs=None, isis_adjcies=None):
+    urn_addrs_dict = {}
+    for addr in addrs:
+        int_name = addr["int_name"]
+        address = addr["address"]
+        router = addr["router"]
+
+        if int_name == "lo0.0" or int_name == "system":
+            urn = router
+            urn_addrs_dict[urn] = address
+    for isis_adjcy in isis_adjcies:
+        address = isis_adjcy["a_addr"]
+        router = isis_adjcy["a"]
+        port = isis_adjcy["a_port"]
+        urn = router+":"+port
+        urn_addrs_dict[urn] = address
+
+    urn_addrs = []
+    for urn in urn_addrs_dict.keys():
+        entry = {
+            "urn": urn,
+            "ipv4Address": urn_addrs_dict[urn]
+        }
+        urn_addrs.append(entry)
+
+
+    return urn_addrs
+
 
 
 def filter_out_not_igp(igp_portmap=None, oscars_devices=None):
