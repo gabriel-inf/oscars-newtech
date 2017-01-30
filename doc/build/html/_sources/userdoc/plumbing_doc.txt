@@ -81,7 +81,7 @@ Given this robust plumbing infrastructure the possibilities are truly endless wh
     :alt: Advanced plumbing 3
     :align: center
 
-    *Advanced plumbing: Fleible to application's needs.*
+    *Advanced plumbing: Flexible to application's needs.*
 
 
 OSCARS 1.0 is designed to seamlessly adapt to a user's changing service requirements. More importantly, OSCARS 1.0 has been designed with a focus on introducing a novel service suite never before offered on a such a large-scale or commercial system. By focusing on the cutting-edge at inception, new and emerging communication paradigms from academia and industry alike will be easily adopted in OSCARS! 

@@ -155,7 +155,7 @@
 </div>
 <div class="section" id="request-topology-services">
 <h2>Request &amp; Topology Services<a class="headerlink" href="#request-topology-services" title="Permalink to this headline">¶</a></h2>
-<p>The PCE subsystem heavily relies upon the <tt class="xref doc docutils literal"><span class="pre">service/service_topology_doc</span></tt> and <tt class="xref doc docutils literal"><span class="pre">pruningservice_doc</span></tt> modules. This collection of services is responsible for evaluating the user inputs, and pruning the topology as necessary depending on which resources are (or are not) available during the reservation’s prescribed lifetime. Depending on what parameters are associated with the <a class="reference internal" href="requestspec_doc.html"><em>Circuit Request Specification</em></a>, when it is passed into the PCE, the topology will be pruned differently.  The services in this category can be considered support modules to the PCE business logic modules.</p>
+<p>The PCE subsystem heavily relies upon the <tt class="xref doc docutils literal"><span class="pre">service/service_topology_doc</span></tt> and <tt class="xref doc docutils literal"><span class="pre">service/service_pruning_doc</span></tt> modules. This collection of services is responsible for evaluating the user inputs, and pruning the topology as necessary depending on which resources are (or are not) available during the reservation’s prescribed lifetime. Depending on what parameters are associated with the <a class="reference internal" href="requestspec_doc.html"><em>Circuit Request Specification</em></a>, when it is passed into the PCE, the topology will be pruned differently.  The services in this category can be considered support modules to the PCE business logic modules.</p>
 </div>
 <div class="section" id="request-specific-pce-logic-workflow">
 <h2>Request-Specific PCE Logic Workflow<a class="headerlink" href="#request-specific-pce-logic-workflow" title="Permalink to this headline">¶</a></h2>
@@ -182,7 +182,7 @@
 </dd>
 <dt><strong>2.   Obtain current network state information.</strong></dt>
 <dd><ol class="first last loweralpha simple">
-<li>Query the <tt class="xref doc docutils literal"><span class="pre">toposervice_doc</span></tt> for devices/ports/links, including connectivity and resource-availability details.</li>
+<li>Query the <tt class="xref doc docutils literal"><span class="pre">service/service_topology_doc</span></tt> for devices/ports/links, including connectivity and resource-availability details.</li>
 <li>Identify types of nodes (Ethernet Switch / MPLS Router / Port).</li>
 </ol>
 </dd>
@@ -191,7 +191,7 @@
 <li><p class="first">Form a relationship between network resources and user request.</p>
 </li>
 <li><dl class="first docutils">
-<dt>Invoke the <tt class="xref doc docutils literal"><span class="pre">pruningservice_doc</span></tt> to temporarily remove network elements that violate the Request Specification.</dt>
+<dt>Invoke the <tt class="xref doc docutils literal"><span class="pre">service/service_pruning_doc</span></tt> to temporarily remove network elements that violate the Request Specification.</dt>
 <dd><ol class="first last lowerroman simple">
 <li>Elements with <em>Insufficient bandwidth</em>.</li>
 <li>Elements with <em>Insufficient VLAN availability</em>.</li>
@@ -249,6 +249,18 @@
 <p class="caption"><em>Basic PCE behavior: The shortest constrained-path is computed by the PCE.</em></p>
 </div>
 <p>OSCARS 1.0 incorporates a modular PCE, such that the basic pathfinding solutions shown here do not exhibit the entire potential of the system. Taking its influence from emerging communication trends from industry and academia alike, OSCARS 1.0 also includes a robust catalog of <a class="reference internal" href="advanced_service_doc.html"><em>Path Computation Service Enhancements</em></a>. Each of these services provides additional flexibility and control over how the PCE identifies solutions.</p>
+<div class="section" id="service-details">
+<h3>Service Details<a class="headerlink" href="#service-details" title="Permalink to this headline">¶</a></h3>
+<p><strong>Can be combined with:</strong></p>
+<ul class="simple">
+<li><a class="reference internal" href="enhanced/asymm_service_doc.html#asymm-pce-service"><em>Asymmetric Bandwidth Capability Service</em></a></li>
+<li><a class="reference internal" href="enhanced/multipoint_service_doc.html#multipoint-pce-service"><em>Multipoint Routing Service</em></a></li>
+</ul>
+<p><strong>Relevant PCE Module(s)</strong></p>
+<ul class="simple">
+<li><a class="reference internal" href="pce/pce_palindrome_doc.html"><em>Palindromic PCE Module</em></a></li>
+</ul>
+</div>
 </div>
 </div>
 <div class="section" id="pce-structure">

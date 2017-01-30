@@ -80,9 +80,39 @@
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="../index.html">User Documentation</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../start.html">Getting Started</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="../overview.html">Project Overview</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../overview.html">Project Overview</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../core_doc.html">Core Module</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../requestspec_doc.html">Circuit Request Specification</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../resvspec_doc.html">Circuit Reservation Specification</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../plumbing_doc.html">Plumbing Specification</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../plumbing_doc.html#advanced-plumbing">Advanced Plumbing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../topologyref_doc.html">Topology Assumptions Reference</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pce_doc.html">Path Computation Engine (PCE)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pce_doc.html#pce-workflow">PCE Workflow</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="../pce_doc.html#pce-structure">PCE Structure</a><ul class="current">
+<li class="toctree-l5"><a class="reference internal" href="pce_top_doc.html">Top PCE Module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="pce_translation_doc.html">Translation PCE Module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="pce_layer3_doc.html">Layer 3 PCE Module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="pce_palindrome_doc.html">Palindromic PCE Module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="pce_nonpalindrome_doc.html">Non-Palindromic PCE Module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="pce_survivability_doc.html">Survivability PCE Module</a></li>
+<li class="toctree-l5 current"><a class="current reference internal" href="">Explicit Route Object (ERO) PCE Module</a><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="pce_dijkstra_doc.html">Dijkstra PCE Module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="pce_bellman_ford_doc.html">Bellman-Ford PCE Module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="pce_bhandari_doc.html">Bhandari PCE Module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../advanced_service_doc.html">Path Computation Service Enhancements</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../webui_doc.html">Web User Interface (WebUI)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../whatif_doc.html">What-If Service Module</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../virtualcircuits.html">Virtual Circuits</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../webui/webui.html">Web UI Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../webui_doc.html">Web User Interface (WebUI)</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../codedoc/index.html">Code Documentation</a></li>
@@ -133,7 +163,7 @@
 <div class="section" id="ero-blacklist">
 <h2>ERO Blacklist<a class="headerlink" href="#ero-blacklist" title="Permalink to this headline">¶</a></h2>
 <p>In addition to providing nodes that must be included in the path, nodes that <strong>must not</strong> be included in the route can be specified as a &#8220;blacklist&#8221;. All links connected to these blacklisted nodes are removed from the topology by the <tt class="xref doc docutils literal"><span class="pre">../service/service_pruning_doc</span></tt> prior to pathfinding. If a route cannot be computed given the remaining resources, the circuit request fails.</p>
-<p>This module comprises the majority of the <a class="reference internal" href="../advanced_service_doc.html#ero-pce-services"><em>Explicit Routing Services</em></a>, however these services can be combined with the <a class="reference internal" href="../advanced_service_doc.html#asymm-pce-service"><em>Asymmetric Bandwidth Capability Service</em></a>.</p>
+<p>This module comprises the majority of the <a class="reference internal" href="../enhanced/ero_service_doc.html#ero-pce-services"><em>Explicit Routing Services</em></a>, however these services can be combined with the <a class="reference internal" href="../enhanced/asymm_service_doc.html#asymm-pce-service"><em>Asymmetric Bandwidth Capability Service</em></a>.</p>
 </div>
 <div class="section" id="module-details">
 <h2>Module Details<a class="headerlink" href="#module-details" title="Permalink to this headline">¶</a></h2>

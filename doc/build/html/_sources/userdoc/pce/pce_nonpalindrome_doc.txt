@@ -18,7 +18,7 @@ Module Details
 - :doc:`pce_dijkstra_doc`
 - :doc:`../service/service_topology_doc`
 - :doc:`../service/service_pruning_doc`
-- :doc:`..virtual_topo_doc`
+- :doc:`../virtual_topo_doc`
 
 **Called By:** 
 

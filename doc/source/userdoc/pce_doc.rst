@@ -15,7 +15,7 @@ The PCE subsystem provides all of the logic involved with identifying constraine
 Request & Topology Services
 ---------------------------
 
-The PCE subsystem heavily relies upon the :doc:`service/service_topology_doc` and :doc:`pruningservice_doc` modules. This collection of services is responsible for evaluating the user inputs, and pruning the topology as necessary depending on which resources are (or are not) available during the reservation’s prescribed lifetime. Depending on what parameters are associated with the :doc:`requestspec_doc`, when it is passed into the PCE, the topology will be pruned differently.  The services in this category can be considered support modules to the PCE business logic modules.
+The PCE subsystem heavily relies upon the :doc:`service/service_topology_doc` and :doc:`service/service_pruning_doc` modules. This collection of services is responsible for evaluating the user inputs, and pruning the topology as necessary depending on which resources are (or are not) available during the reservation’s prescribed lifetime. Depending on what parameters are associated with the :doc:`requestspec_doc`, when it is passed into the PCE, the topology will be pruned differently.  The services in this category can be considered support modules to the PCE business logic modules.
 
 
 
@@ -52,12 +52,12 @@ The OSCARS 1.0 PCE is modular in design, and supports constraint-driven adaptive
 	b. Forward input parameters to the appropriate PCE service-specific module.
 
 **2.   Obtain current network state information.**
-	a. Query the :doc:`toposervice_doc` for devices/ports/links, including connectivity and resource-availability details.
+	a. Query the :doc:`service/service_topology_doc` for devices/ports/links, including connectivity and resource-availability details.
 	b. Identify types of nodes (Ethernet Switch / MPLS Router / Port).
 
 **3.   Prune the network.**
 	a. Form a relationship between network resources and user request.
-	b. Invoke the :doc:`pruningservice_doc` to temporarily remove network elements that violate the Request Specification.
+	b. Invoke the :doc:`service/service_pruning_doc` to temporarily remove network elements that violate the Request Specification.
 		i. Elements with *Insufficient bandwidth*.
 		ii. Elements with *Insufficient VLAN availability*.
 
@@ -116,6 +116,18 @@ It's important to note that the PCE identifies the shortest *constrained-path*, 
     *Basic PCE behavior: The shortest constrained-path is computed by the PCE.*
 
 OSCARS 1.0 incorporates a modular PCE, such that the basic pathfinding solutions shown here do not exhibit the entire potential of the system. Taking its influence from emerging communication trends from industry and academia alike, OSCARS 1.0 also includes a robust catalog of :doc:`advanced_service_doc`. Each of these services provides additional flexibility and control over how the PCE identifies solutions.
+
+Service Details
+^^^^^^^^^^^^^^^
+
+**Can be combined with:**
+
+- :ref:`asymm_pce_service`
+- :ref:`multipoint_pce_service`
+
+**Relevant PCE Module(s)**
+
+- :doc:`pce/pce_palindrome_doc`
 
 
 .. _pce_structure:

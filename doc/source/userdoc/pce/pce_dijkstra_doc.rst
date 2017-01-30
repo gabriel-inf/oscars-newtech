@@ -19,7 +19,7 @@ Module Details
 - :doc:`pce_palindrome_doc`
 - :doc:`pce_survivability_doc`
 - :doc:`../service/service_bandwidth_availability_doc`
-- :doc:`..virtual_topo_doc`
+- :doc:`../virtual_topo_doc`
 
 **API Specification:**
 

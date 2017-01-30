@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="../_static/esnet.png"/>
     <link rel="top" title="OSCARS 1.0 1.0.2017 documentation" href="../index.html" />
     <link rel="up" title="Core Module" href="core_doc.html" />
-    <link rel="next" title="Path Computation Engine (PCE)" href="pce_doc.html" />
+    <link rel="next" title="Topology Assumptions Reference" href="topologyref_doc.html" />
     <link rel="prev" title="Circuit Reservation Specification" href="resvspec_doc.html" /> 
   </head>
   <body>
@@ -39,7 +39,7 @@
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="pce_doc.html" title="Path Computation Engine (PCE)"
+          <a href="topologyref_doc.html" title="Topology Assumptions Reference"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="resvspec_doc.html" title="Circuit Reservation Specification"
@@ -79,19 +79,38 @@
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">User Documentation</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="start.html">Getting Started</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="overview.html">Project Overview</a></li>
-<li class="toctree-l2"><a class="reference internal" href="virtualcircuits.html">Virtual Circuits</a></li>
-<li class="toctree-l2"><a class="reference internal" href="webui/webui.html">Web UI Documentation</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="overview.html">Project Overview</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="core_doc.html">Core Module</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="requestspec_doc.html">Circuit Request Specification</a></li>
+<li class="toctree-l4"><a class="reference internal" href="resvspec_doc.html">Circuit Reservation Specification</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="">Plumbing Specification</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#advanced-plumbing">Advanced Plumbing</a><ul class="simple">
 </ul>
 </li>
+<li class="toctree-l4"><a class="reference internal" href="topologyref_doc.html">Topology Assumptions Reference</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pce_doc.html">Path Computation Engine (PCE)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pce_doc.html#pce-workflow">PCE Workflow</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pce_doc.html#pce-structure">PCE Structure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="advanced_service_doc.html">Path Computation Service Enhancements</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="webui_doc.html">Web User Interface (WebUI)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="whatif_doc.html">What-If Service Module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="virtualcircuits.html">Virtual Circuits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="webui_doc.html">Web User Interface (WebUI)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../codedoc/index.html">Code Documentation</a></li>
 </ul>
 
   <h4>Previous topic</h4>
   <p class="topless"><a href="resvspec_doc.html"
                         title="previous chapter">Circuit Reservation Specification</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="pce_doc.html"
-                        title="next chapter">Path Computation Engine (PCE)</a></p>
+  <p class="topless"><a href="topologyref_doc.html"
+                        title="next chapter">Topology Assumptions Reference</a></p>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
@@ -130,7 +149,7 @@
 <a class="reference internal image-reference" href="../_images/pipeintro.png"><img alt="Plumbing overview" src="../_images/pipeintro.png" style="width: 640.0px; height: 360.0px;" /></a>
 <p class="caption"><em>Overview of OSCARS circuit plumbing representation.</em></p>
 </div>
-<p>Using these sets of requested pipes and junctions, pathfinding is performed by PCE modules based on the user&#8217;s <a class="reference internal" href="requestspec_doc.html"><em>Circuit Request Specification</em></a>, and then the solution paths are translated back into Reserved Pipes, Reserved Junctions, and Reserved Fixtures. An example of the distinction between Requested plumbing, the physical path, and Reserved plumbing is shown in the figure above. This process (performed by the <a class="reference internal" href="pce_translation_doc.html"><em>Translation PCE Module</em></a>) takes a physical path, and converts it into a series of pipes (or just singular junctions, for any requested “simple” junctions) in the following manner:</p>
+<p>Using these sets of requested pipes and junctions, pathfinding is performed by PCE modules based on the user&#8217;s <a class="reference internal" href="requestspec_doc.html"><em>Circuit Request Specification</em></a>, and then the solution paths are translated back into Reserved Pipes, Reserved Junctions, and Reserved Fixtures. An example of the distinction between Requested plumbing, the physical path, and Reserved plumbing is shown in the figure above. This process (performed by the <tt class="xref doc docutils literal"><span class="pre">pce_translation_doc</span></tt>) takes a physical path, and converts it into a series of pipes (or just singular junctions, for any requested “simple” junctions) in the following manner:</p>
 <ul class="simple">
 <li>For each pair of adjacent Ethernet switches, a reserved pipe is constructed, with the ports connecting them contained within the pipe, and with the two switches represented as junctions.</li>
 <li>For each Ethernet switch &#8211; MPLS router pair, a reserved pipe is constructed in the same fashion.</li>
@@ -165,7 +184,7 @@
 <p>Given this robust plumbing infrastructure the possibilities are truly endless when it comes to specifying a logical request. As long as at least two fixtures are included in the specification (and of course assuming that the network can support the desired bandwidth and VLAN resources) any circuit set is feasible. Consider the pair of figures below for an idea of the possibilities.</p>
 <div class="figure align-center">
 <a class="reference internal image-reference" href="../_images/pipe_advanced_3.png"><img alt="Advanced plumbing 3" src="../_images/pipe_advanced_3.png" style="width: 743.0px; height: 325.5px;" /></a>
-<p class="caption"><em>Advanced plumbing: Fleible to application&#8217;s needs.</em></p>
+<p class="caption"><em>Advanced plumbing: Flexible to application&#8217;s needs.</em></p>
 </div>
 <p>OSCARS 1.0 is designed to seamlessly adapt to a user&#8217;s changing service requirements. More importantly, OSCARS 1.0 has been designed with a focus on introducing a novel service suite never before offered on a such a large-scale or commercial system. By focusing on the cutting-edge at inception, new and emerging communication paradigms from academia and industry alike will be easily adopted in OSCARS!</p>
 <p>The <a class="reference internal" href="pce_doc.html"><em>Path Computation Engine (PCE)</em></a> is responsible for computing the routes necessary to construct the circuit reservation. If the user specifies multiple pipes with different parameters or service requirements, each pipe is handled independently. For example, a request consisting of two unique pipes, where one pipe specifies <em>Service A</em>, and the other specifies <em>Service B</em>, both pipes will be satisfied without interference from the other&#8217;s service.</p>
@@ -185,7 +204,7 @@
           <a href="../genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="pce_doc.html" title="Path Computation Engine (PCE)"
+          <a href="topologyref_doc.html" title="Topology Assumptions Reference"
              >next</a> |</li>
         <li class="right" >
           <a href="resvspec_doc.html" title="Circuit Reservation Specification"
