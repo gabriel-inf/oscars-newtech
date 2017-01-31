@@ -1,7 +1,7 @@
 Service-Layer Topology
 ======================
 
-The :ref:`nonpalindromic_pce_service` introduced in OSCARS 1.0 provide intelligent and flexible routing capabilities supported by the heterogeneity of physical devices used throughout ESnet. In particular, device classes include: Ethernet Switches, and MPLS Routers. These services consider the distribution of these devices and decompose the physical network topology into two distinct layers:
+The :ref:`nonpalindromic_pce_service` introduced in OSCARS 1.0 provides intelligent and flexible routing capabilities supported by the heterogeneity of physical devices used throughout ESnet. In particular, device classes include: Ethernet Switches, and MPLS Routers. These services consider the distribution of these devices and decompose the physical network topology into two distinct layers:
 
 The Service-Layer Topology
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -47,14 +47,14 @@ As described above, every pair of Service-Layer components adjacent to the MPLS-
 
     *Routing is performed between each pair of MPLS-Layer ports.*
 
-First, a route is computed between every pair of MPLS-Layer ports. This procedure is conducted for every circuit reservation requiring this abstraction because the network state is dynamic and changes with each subsequent circuit reservation or release. Then, those MPLS-Layer routes beginning and terminating at the end-points of an abstract link are then saved as a translational list mapping the physical path to the appropriate abstract links. The weight of an abstract link is exactly identical to the sum of the weights of all physical links it contains. 
+First, a route is computed between every pair of MPLS-Layer ports. This procedure is conducted for every circuit reservation requiring this abstraction because the network state is dynamic and changes with each subsequent circuit reservation or release. Then, those MPLS-Layer routes beginning and terminating at the end-points of an abstract link are saved as a translational list mapping the physical path to the appropriate abstract links. The weight of an abstract link is exactly identical to the sum of the weights of all physical links it contains. 
 
 .. figure:: ../../.static/mpls_route_map.png
     :width: 50%
     :alt: MPLS-Layer Route Map
     :align: center
 
-    *The weight of the computed abstract links corresponds to the total weight of the physical links it traverses. Abstract link pairs need not correspond to idential physical routes or weights.*
+    *The weight of the computed abstract links corresponds to the total weight of the physical links it traverses. Abstract link pairs need not correspond to idential physical routes nor weights.*
 
 .. note::
 

@@ -112,7 +112,7 @@
             
   <div class="section" id="service-layer-topology">
 <h1>Service-Layer Topology<a class="headerlink" href="#service-layer-topology" title="Permalink to this headline">¶</a></h1>
-<p>The <a class="reference internal" href="nonpalindromic_service_doc.html#nonpalindromic-pce-service"><em>Non-Palindromic Return Path Service</em></a> introduced in OSCARS 1.0 provide intelligent and flexible routing capabilities supported by the heterogeneity of physical devices used throughout ESnet. In particular, device classes include: Ethernet Switches, and MPLS Routers. These services consider the distribution of these devices and decompose the physical network topology into two distinct layers:</p>
+<p>The <a class="reference internal" href="nonpalindromic_service_doc.html#nonpalindromic-pce-service"><em>Non-Palindromic Return Path Service</em></a> introduced in OSCARS 1.0 provides intelligent and flexible routing capabilities supported by the heterogeneity of physical devices used throughout ESnet. In particular, device classes include: Ethernet Switches, and MPLS Routers. These services consider the distribution of these devices and decompose the physical network topology into two distinct layers:</p>
 <div class="section" id="the-service-layer-topology">
 <h2>The Service-Layer Topology<a class="headerlink" href="#the-service-layer-topology" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
@@ -143,10 +143,10 @@
 <a class="reference internal image-reference" href="../../_images/mpls_routing.gif"><img alt="MPLS-Layer Routing" src="../../_images/mpls_routing.gif" style="width: 396.1px; height: 352.75px;" /></a>
 <p class="caption"><em>Routing is performed between each pair of MPLS-Layer ports.</em></p>
 </div>
-<p>First, a route is computed between every pair of MPLS-Layer ports. This procedure is conducted for every circuit reservation requiring this abstraction because the network state is dynamic and changes with each subsequent circuit reservation or release. Then, those MPLS-Layer routes beginning and terminating at the end-points of an abstract link are then saved as a translational list mapping the physical path to the appropriate abstract links. The weight of an abstract link is exactly identical to the sum of the weights of all physical links it contains.</p>
+<p>First, a route is computed between every pair of MPLS-Layer ports. This procedure is conducted for every circuit reservation requiring this abstraction because the network state is dynamic and changes with each subsequent circuit reservation or release. Then, those MPLS-Layer routes beginning and terminating at the end-points of an abstract link are saved as a translational list mapping the physical path to the appropriate abstract links. The weight of an abstract link is exactly identical to the sum of the weights of all physical links it contains.</p>
 <div class="figure align-center">
 <a class="reference internal image-reference" href="../../_images/mpls_route_map.png"><img alt="MPLS-Layer Route Map" src="../../_images/mpls_route_map.png" style="width: 50%;" /></a>
-<p class="caption"><em>The weight of the computed abstract links corresponds to the total weight of the physical links it traverses. Abstract link pairs need not correspond to idential physical routes or weights.</em></p>
+<p class="caption"><em>The weight of the computed abstract links corresponds to the total weight of the physical links it traverses. Abstract link pairs need not correspond to idential physical routes nor weights.</em></p>
 </div>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>

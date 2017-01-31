@@ -27,7 +27,8 @@ Service Enhancement   			  	Description
 ==========================================	============
 
 .. toctree::
-   :maxdepth: 1
+   :titlesonly:
+   :includehidden:
 
    enhanced/asymm_service_doc
    enhanced/nonpalindromic_service_doc
@@ -35,7 +36,6 @@ Service Enhancement   			  	Description
    enhanced/ero_service_doc
    enhanced/survivability_service_doc
    enhanced/vlan_service_doc
-   virtual_surv_topo_doc
 
 
 

@@ -23,7 +23,7 @@ Module Details
 - :doc:`pce_dijkstra_doc`
 - :doc:`../service/service_topology_doc`
 - :doc:`../service/service_pruning_doc`
-- :doc:`../virtual_topo_surv_doc`
+- :ref:`virtual_surv_topo`
 
 **Called By:** 
 
