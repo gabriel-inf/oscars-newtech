@@ -1,5 +1,6 @@
 const React = require('react');
 const NavBar = require('./navbar');
+import Dropdown from 'react-dropdown';
 const client = require('./client');
 const networkVis = require('./networkVis');
 
@@ -28,22 +29,23 @@ class ReservationWhatIfApp extends React.Component{
             status: "UNHELD"
         };
 
-        client.loadJSON({method: "GET", url: "/resv/newConnectionId"})
-            .then((response) => {
-                    let json_data = JSON.parse(response);
-                    reservation["connectionId"] = json_data["connectionId"];
-                }
-            );
         this.state = {
             reservation: reservation,
+            networkPortMap: {},
             maxBw: 100,
             bw: 0,
             azERO: [],
             zaERO: [],
             startAt: startAt,
             endAt: endAt,
+            src: "--",
+            srcPort: "--",
+            dst: "--",
+            dstPort: "--",
             networkVis: {},
-            pathClearEnabled: false
+            pathClearEnabled: false,
+            portToDeviceMap: {"--" : "--"},
+            deviceToPortMap: {["--"] : ["--"]},
         };
 
         this.handleBwSliderChange = this.handleBwSliderChange.bind(this);
@@ -51,10 +53,40 @@ class ReservationWhatIfApp extends React.Component{
         this.initializeNetwork = this.initializeNetwork.bind(this);
         this.selectNode = this.selectNode.bind(this);
         this.handleClearPath = this.handleClearPath.bind(this);
+        this.updateReservation = this.updateReservation.bind(this);
+        this.updatePtDMap = this.updatePtDMap.bind(this);
+        this.updateDtPMap = this.updateDtPMap.bind(this);
+
+        client.loadJSON({method: "GET", url: "/resv/newConnectionId"})
+            .then(this.updateReservation);
+
+        client.loadJSON({method: "GET", url: "/topology/portdevicemap/full"})
+            .then(this.updatePtDMap);
+
+        client.loadJSON({method: "GET", url: "/topology/deviceportmap/full"})
+            .then(this.updateDtPMap);
     }
 
     componentDidMount(){
         client.loadJSON({method: "GET", url: "/viz/topology/multilayer"}).then(this.initializeNetwork);
+    }
+
+    updateReservation(response){
+        let jsonData = JSON.parse(response);
+        let reservation = this.state.reservation;
+        reservation["connectionId"] = jsonData["connectionId"];
+        this.setState({reservation: reservation});
+    }
+
+    updatePtDMap(response){
+        let map = JSON.parse(response);
+        this.setState({portToDeviceMap: map});
+    }
+
+    updateDtPMap(response){
+        let map = JSON.parse(response);
+        map["--"] = ["--"];
+        this.setState({deviceToPortMap: map});
     }
 
     initializeNetwork(response){
@@ -114,11 +146,17 @@ class ReservationWhatIfApp extends React.Component{
         networkVis.highlight_devices(datasource, removedNodes, false, '');
 
         let pathClearEnabled = false;
+        let src = "--";
+        let dst = "--";
         if(azERO.length > 0) {
             pathClearEnabled = true;
+            src = azERO[0];
+        }
+        if(azERO.length > 1){
+            dst = azERO[azERO.length-1];
         }
         let zaERO = azERO.slice().reverse();
-        this.setState({azERO: azERO, zaERO: zaERO, pathClearEnabled: pathClearEnabled});
+        this.setState({azERO: azERO, zaERO: zaERO, pathClearEnabled: pathClearEnabled, src: src, dst: dst});
     }
 
     handleBwSliderChange(event){
@@ -136,8 +174,17 @@ class ReservationWhatIfApp extends React.Component{
             <div>
                 <NavBar isAuthenticated={this.props.route.isAuthenticated} isAdmin={this.props.route.isAdmin}/>
                 <h2> What-if? </h2>
-                <PathSelectionPanel pathClearEnabled={this.state.pathClearEnabled} handleClearPath={this.handleClearPath}/>
-                <BandwidthTimePanel handleBwSliderChange={this.handleBwSliderChange} maxBw={this.state.maxBw} bw={this.state.bw}/>
+                <PathSelectionPanel
+                    pathClearEnabled={this.state.pathClearEnabled}
+                    handleClearPath={this.handleClearPath}
+                    srcPorts={this.state.deviceToPortMap[this.state.src]}
+                    dstPorts={this.state.deviceToPortMap[this.state.dst]}
+                />
+                <BandwidthTimePanel
+                    handleBwSliderChange={this.handleBwSliderChange}
+                    maxBw={this.state.maxBw}
+                    bw={this.state.bw}
+                />
                 <ParameterDisplay bw={this.state.bw} startAt={this.state.reservation.startAt} endAt={this.state.reservation.endAt}/>
                 <ReservationButton />
             </div>
@@ -164,7 +211,13 @@ class PathSelectionPanel extends React.Component{
             <div className="panel-group" >
                 <div className="panel panel-default">
                     <Heading title="Show / hide network" onClick={this.handleHeadingClick}/>
-                    <NetworkPanel show={this.state.showPanel} pathClearEnabled={this.props.pathClearEnabled} handleClearPath={this.props.handleClearPath}/>
+                    <NetworkPanel
+                        show={this.state.showPanel}
+                        pathClearEnabled={this.props.pathClearEnabled}
+                        handleClearPath={this.props.handleClearPath}
+                        srcPorts={this.props.srcPorts}
+                        dstPorts={this.props.dstPorts}
+                    />
                 </div>
             </div>
         );
@@ -191,8 +244,17 @@ class NetworkPanel extends React.Component{
                             Clear Path
                         </button>
                     </div>
-                    <PortSelectionDropdown type="src" />
-                    <PortSelectionDropdown type="dst" />
+                </div>
+                <div>
+                    <div className="dropdown">
+                        <p style={{fontSize: "16px"}}>Select Source Port</p>
+                        <Dropdown options={this.props.srcPorts} value={this.props.srcPorts[0]} placeholder="Select a port" />
+                    </div>
+
+                    <div className="dropdown">
+                        <p style={{fontSize: "16px"}}>Select Destination Port</p>
+                        <Dropdown options={this.props.dstPorts} value={this.props.dstPorts[0]} placeholder="Select a port"/>
+                    </div>
                 </div>
             </div>
         );
@@ -205,13 +267,17 @@ class PortSelectionDropdown extends React.Component{
         let id = this.props.type + "PortDrop";
         let ulId = this.props.type + "PortList";
         let title = this.props.type === "src"? "Select Source Port" : "Select Destination Port";
+        let listItems = this.props.list.map((port) => <li key={port}>{port}</li>);
+        debugger;
         return(
             <div className="dropdown">
                 <p style={{fontSize: "16px"}}>{title}</p>
                 <button type="button" id={id} className="btn dropdown-toggle">
                     <span className="caret" />
                 </button>
-                <ul className="dropdown-menu" id={ulId} />
+                <ul className="dropdown-menu" id={ulId}>
+                    {listItems}
+                </ul>
             </div>
         );
     }
