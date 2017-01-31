@@ -516,7 +516,7 @@ class NetworkPanel extends React.Component{
     constructor(props){
         super(props);
 
-        this.state = {showPanel: true, networkVis: {}, junctions: []};
+        this.state = {showPanel: true};
         this.handleHeadingClick = this.handleHeadingClick.bind(this);
     }
 

@@ -1,6 +1,7 @@
 const React = require('react');
 const NavBar = require('./navbar');
 const client = require('./client');
+const networkVis = require('./networkVis');
 
 
 class ReservationWhatIfApp extends React.Component{
@@ -36,14 +37,98 @@ class ReservationWhatIfApp extends React.Component{
         this.state = {
             reservation: reservation,
             maxBw: 100,
-            bw: 50
+            bw: 0,
+            azERO: [],
+            zaERO: [],
+            startAt: startAt,
+            endAt: endAt,
+            networkVis: {},
+            pathClearEnabled: false
         };
 
         this.handleBwSliderChange = this.handleBwSliderChange.bind(this);
+        this.componentDidMount = this.componentDidMount.bind(this);
+        this.initializeNetwork = this.initializeNetwork.bind(this);
+        this.selectNode = this.selectNode.bind(this);
+        this.handleClearPath = this.handleClearPath.bind(this);
+    }
+
+    componentDidMount(){
+        client.loadJSON({method: "GET", url: "/viz/topology/multilayer"}).then(this.initializeNetwork);
+    }
+
+    initializeNetwork(response){
+        let jsonData = JSON.parse(response);
+        let nodes = jsonData.nodes;
+        let edges = jsonData.edges;
+        let networkElement = document.getElementById('network_viz');
+        let netOptions = {
+            autoResize: true,
+            width: '90%',
+            height: '400px',
+            interaction: {
+                hover: false,
+                navigationButtons: false,
+                zoomView: false,
+                dragView: true,
+                multiselect: false,
+                selectable: true,
+            },
+            physics: {
+                stabilization: true,
+            },
+            nodes: {
+                shape: 'dot',
+                color: {background: "white"},
+            }
+        };
+        let displayViz = networkVis.make_network(nodes, edges, networkElement, netOptions, "network_viz");
+        displayViz.network.on('selectNode', this.selectNode);
+        this.setState({networkVis: displayViz});
+    }
+
+    selectNode(properties){
+        if(properties.nodes.length === 0)       // Only consider node clicks
+            return;
+
+        let theNode = properties.nodes[0];
+
+        let azERO = this.state.azERO.slice();
+        let removedNodes = [];
+
+        let index = $.inArray(theNode, azERO);
+
+        // New selection, add to list
+        if(index == -1){
+            azERO.push(theNode);
+        }
+        // Reselected, remove from list
+        else{
+            removedNodes.push(theNode);
+            azERO.splice(index, 1);
+        }
+
+        let datasource = this.state.networkVis.datasource;
+        this.state.networkVis.network.unselectAll();
+        networkVis.highlight_devices(datasource, azERO, true, 'green');
+        networkVis.highlight_devices(datasource, removedNodes, false, '');
+
+        let pathClearEnabled = false;
+        if(azERO.length > 0) {
+            pathClearEnabled = true;
+        }
+        let zaERO = azERO.slice().reverse();
+        this.setState({azERO: azERO, zaERO: zaERO, pathClearEnabled: pathClearEnabled});
     }
 
     handleBwSliderChange(event){
         this.setState({bw: event.target.value});
+    }
+
+    handleClearPath(){
+        this.state.networkVis.network.unselectAll();
+        networkVis.highlight_devices(this.state.networkVis.datasource, this.state.azERO, false, '');
+        this.setState({azERO: [], zaERO: [], bw: 0, maxBw: 100, pathClearEnabled: false});
     }
 
     render(){
@@ -51,7 +136,7 @@ class ReservationWhatIfApp extends React.Component{
             <div>
                 <NavBar isAuthenticated={this.props.route.isAuthenticated} isAdmin={this.props.route.isAdmin}/>
                 <h2> What-if? </h2>
-                <PathSelectionPanel />
+                <PathSelectionPanel pathClearEnabled={this.state.pathClearEnabled} handleClearPath={this.handleClearPath}/>
                 <BandwidthTimePanel handleBwSliderChange={this.handleBwSliderChange} maxBw={this.state.maxBw} bw={this.state.bw}/>
                 <ParameterDisplay bw={this.state.bw} startAt={this.state.reservation.startAt} endAt={this.state.reservation.endAt}/>
                 <ReservationButton />
@@ -79,7 +164,7 @@ class PathSelectionPanel extends React.Component{
             <div className="panel-group" >
                 <div className="panel panel-default">
                     <Heading title="Show / hide network" onClick={this.handleHeadingClick}/>
-                    <NetworkPanel show={this.state.showPanel}/>
+                    <NetworkPanel show={this.state.showPanel} pathClearEnabled={this.props.pathClearEnabled} handleClearPath={this.props.handleClearPath}/>
                 </div>
             </div>
         );
@@ -89,14 +174,22 @@ class PathSelectionPanel extends React.Component{
 class NetworkPanel extends React.Component{
 
     render(){
+
+        let buttonStatus = this.props.pathClearEnabled? "active" : "disabled";
+        let buttonClassName = "btn btn-danger " + buttonStatus;
         return(
             <div id="network_panel" className="panel-body collapse in" style={this.props.show ? {} : { display: "none" }}>
-                <div id="networkVisualization" className="col-md-10" width="90%">
-                    <div className="vis-network" />
+                <div id="network_viz" className="col-md-10" width="90%">
+                    <div className="viz-network">Network map</div>
                 </div>
                 <div>
                     <div>
-                        <button type="reset" id="buttonCancelERO" className="btn btn-danger disabled">Clear Path</button>
+                        <button type="reset"
+                                id="buttonCancelERO"
+                                className={buttonClassName}
+                                onClick={this.props.handleClearPath}>
+                            Clear Path
+                        </button>
                     </div>
                     <PortSelectionDropdown type="src" />
                     <PortSelectionDropdown type="dst" />
@@ -111,9 +204,10 @@ class PortSelectionDropdown extends React.Component{
     render(){
         let id = this.props.type + "PortDrop";
         let ulId = this.props.type + "PortList";
+        let title = this.props.type === "src"? "Select Source Port" : "Select Destination Port";
         return(
             <div className="dropdown">
-                <p style={{fontSize: "16px"}}>Select Source Port</p>
+                <p style={{fontSize: "16px"}}>{title}</p>
                 <button type="button" id={id} className="btn dropdown-toggle">
                     <span className="caret" />
                 </button>
