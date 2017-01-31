@@ -62,9 +62,13 @@ public class ConnectionSimplificationService {
             return Status.HELD;
         }
         //TODO: Change in future, currently IDLE_WAIT is default state after committing OR aborting
-        if (resv.equals(ResvState.COMMITTING) || resv.equals(ResvState.IDLE_WAIT)) {
+        if (resv.equals(ResvState.COMMITTING)) {
             return Status.COMMITTED;
-        } else {
+        }
+        if(resv.equals(ResvState.IDLE_WAIT)){
+            return Status.IDLE_WAIT;
+        }
+        else {
             return Status.ABORTED;
         }
     }
