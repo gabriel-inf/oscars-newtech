@@ -3,6 +3,7 @@ const NavBar = require('./navbar');
 import Dropdown from 'react-dropdown';
 const client = require('./client');
 const networkVis = require('./networkVis');
+const deepEqual = require('deep-equal');
 
 
 class ReservationWhatIfApp extends React.Component{
@@ -19,6 +20,7 @@ class ReservationWhatIfApp extends React.Component{
         let endAt = new Date();
         endAt.setDate(endAt.getDate() + 1);
         endAt.setTime(endAt.getTime() + 15000 * 60);
+
         let reservation = {
             junctions: {},
             pipes: {},
@@ -29,23 +31,30 @@ class ReservationWhatIfApp extends React.Component{
             status: "UNHELD"
         };
 
-        this.state = {
-            reservation: reservation,
-            networkPortMap: {},
-            maxBw: 100,
-            bw: 0,
+        let bwAvailRequest = {
+            startTime: startAt,
+            endTime: endAt,
             azERO: [],
             zaERO: [],
-            startAt: startAt,
-            endAt: endAt,
+            azBandwidth: 0,
+            zaBandwidth: 0,
+        };
+
+
+        this.state = {
+            reservation: reservation,
+            bwAvailRequest: bwAvailRequest,
             src: "--",
             srcPort: "--",
             dst: "--",
             dstPort: "--",
+            currBw: 0,
+            maxBw: 100,
             networkVis: {},
             pathClearEnabled: false,
             portToDeviceMap: {"--" : "--"},
             deviceToPortMap: {["--"] : ["--"]},
+            networkPortMap: {}
         };
 
         this.handleBwSliderChange = this.handleBwSliderChange.bind(this);
@@ -58,6 +67,8 @@ class ReservationWhatIfApp extends React.Component{
         this.updateDtPMap = this.updateDtPMap.bind(this);
         this.handleSrcPortSelect = this.handleSrcPortSelect.bind(this);
         this.handleDstPortSelect = this.handleDstPortSelect.bind(this);
+        this.componentDidUpdate = this.componentDidUpdate.bind(this);
+        this.submitBwAvailRequest = this.submitBwAvailRequest.bind(this);
 
         client.loadJSON({method: "GET", url: "/resv/newConnectionId"})
             .then(this.updateReservation);
@@ -71,6 +82,41 @@ class ReservationWhatIfApp extends React.Component{
 
     componentDidMount(){
         client.loadJSON({method: "GET", url: "/viz/topology/multilayer"}).then(this.initializeNetwork);
+    }
+
+    componentDidUpdate(prevProps, prevState){
+        // Only do verification and bw avail request if relevant state has changed
+        let bwAvailRequest = this.state.bwAvailRequest;
+        if(!deepEqual(prevState.bwAvailRequest, bwAvailRequest) && bwAvailRequest.azERO.length > 1){
+            let bwAvailResponse = this.submitBwAvailRequest(bwAvailRequest);
+            bwAvailResponse.then(
+                (successResponse) => {
+                    console.log(successResponse);
+                },
+                (failResponse) => {
+                    console.log("Error: " + failResponse.status + " - " + failResponse.statusText);
+                }
+            );
+        }
+    }
+
+    submitBwAvailRequest(bwAvailRequest){
+        // Add src and dst ports: [srcPort, azERO, dstPort], [dstPort, zaERO, srcPort]
+        let modAzERO = bwAvailRequest.azERO.slice();
+        let modZaERO = bwAvailRequest.zaERO.slice();
+        modAzERO.unshift(this.state.srcPort);
+        modAzERO.push(this.state.dstPort);
+        modZaERO.unshift(this.state.dstPort);
+        modZaERO.push(this.state.srcPort);
+        let modBwAvailRequest = {
+            startTime: bwAvailRequest.startTime,
+            endTime: bwAvailRequest.endTime,
+            azERO: modAzERO,
+            zaERO: modZaERO,
+            azBandwidth: bwAvailRequest.azBandwidth,
+            zaBandwidth: bwAvailRequest.zaBandwidth,
+        };
+        return client.submit("POST", "/topology/bwavailability/path", modBwAvailRequest);
     }
 
     updateReservation(response){
@@ -127,7 +173,10 @@ class ReservationWhatIfApp extends React.Component{
 
         let theNode = properties.nodes[0];
 
-        let azERO = this.state.azERO.slice();
+        // Make a clone of BW Avail request so you can detect changes more easily
+        let bwAvailRequest = jQuery.extend(true, {}, this.state.bwAvailRequest);
+
+        let azERO = bwAvailRequest.azERO.slice();
         let removedNodes = [];
 
         let index = $.inArray(theNode, azERO);
@@ -170,17 +219,22 @@ class ReservationWhatIfApp extends React.Component{
         }
         let dstPort = prevDst != dst ? this.state.deviceToPortMap[dst][0]: this.state.dstPort;
 
-        this.setState({azERO: azERO, zaERO: zaERO, pathClearEnabled: pathClearEnabled, src: src, srcPort: srcPort, dst: dst, dstPort: dstPort});
+        bwAvailRequest["azERO"] = azERO;
+        bwAvailRequest["zaERO"] = zaERO;
+        this.setState({bwAvailRequest, pathClearEnabled: pathClearEnabled, src: src, srcPort: srcPort, dst: dst, dstPort: dstPort});
     }
 
     handleBwSliderChange(event){
-        this.setState({bw: event.target.value});
+        this.setState({currBw: event.target.value});
     }
 
     handleClearPath(){
         this.state.networkVis.network.unselectAll();
-        networkVis.highlight_devices(this.state.networkVis.datasource, this.state.azERO, false, '');
-        this.setState({azERO: [], zaERO: [], bw: 0, maxBw: 100, pathClearEnabled: false, src: "--", srcPort: "--", dst: "--", dstPort: "--"});
+        let bwAvailRequest = this.state.bwAvailRequest;
+        networkVis.highlight_devices(this.state.networkVis.datasource, this.state.bwAvailRequest.azERO, false, '');
+        bwAvailRequest["azERO"] = [];
+        bwAvailRequest["zaERO"] = [];
+        this.setState({bwAvailRequest: bwAvailRequest, currBw: 0, maxBw: 100, pathClearEnabled: false, src: "--", srcPort: "--", dst: "--", dstPort: "--"});
     }
 
     handleSrcPortSelect(option){
@@ -209,9 +263,9 @@ class ReservationWhatIfApp extends React.Component{
                 <BandwidthTimePanel
                     handleBwSliderChange={this.handleBwSliderChange}
                     maxBw={this.state.maxBw}
-                    bw={this.state.bw}
+                    bw={this.state.currBw}
                 />
-                <ParameterDisplay bw={this.state.bw} startAt={this.state.reservation.startAt} endAt={this.state.reservation.endAt}/>
+                <ParameterDisplay bw={this.state.currBw} startAt={this.state.reservation.startAt} endAt={this.state.reservation.endAt}/>
                 <ReservationButton />
             </div>
         );
