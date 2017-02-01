@@ -176,65 +176,52 @@ public class RepoEntityBuilder {
             Set<Layer> capabilities = new HashSet<>();
             capabilities.add(Layer.INTERNAL);
             capabilities.add(Layer.ETHERNET);
-
-            if (!v.getVertexType().equals(VertexType.PORT)) {
-                if(v.getVertexType().equals(VertexType.ROUTER)) {
-                    capabilities.add(Layer.MPLS);
-                    urn = buildUrn(v, null, capabilities, floors, ceilings);
-                }
-                else {
-                    urn = buildUrn(v, null, capabilities, floors, ceilings);
-                }
-            } else {
-                TopoVertex deviceVertex = portToDeviceMap.get(v);
-                VertexType deviceVertexType = deviceVertex.getVertexType();
-                List<Integer> portInEgBw = portBWs.get(v);
-                if(deviceVertexType.equals(VertexType.ROUTER)) {
-                    capabilities.add(Layer.MPLS);
-                    urn = buildUrn(v, determineDeviceModel(deviceVertexType), capabilities, portInEgBw.get(0),
-                            portInEgBw.get(1), floors, ceilings);
-                }
-                else {
-                    urn = buildUrn(v, determineDeviceModel(deviceVertexType), capabilities, portInEgBw.get(0),
-                            portInEgBw.get(1), floors, ceilings);
-                }
+            // If vertex is a port, get it's parent's type instead
+            VertexType deviceType = v.getVertexType().equals(VertexType.PORT) ? portToDeviceMap.get(v).getVertexType() : v.getVertexType();
+            DeviceModel deviceModel = determineDeviceModel(deviceType);
+            if(deviceType.equals(VertexType.ROUTER)){
+                capabilities.add(Layer.MPLS);
             }
+
+            if(v.getVertexType().equals(VertexType.PORT)){
+                List<Integer> portInEgBw = portBWs.get(v);
+                urn = buildPortUrn(v, deviceModel, capabilities, portInEgBw.get(0), portInEgBw.get(1), floors, ceilings);
+            }
+            else{
+                urn = buildUrn(v, deviceModel, capabilities, floors, ceilings);
+            }
+
             urnList.add(urn);
         }
         return urn;
     }
 
-    public UrnE buildUrn(TopoVertex vertex, DeviceModel parentModel, Set<Layer> capabilities,
+    public UrnE buildUrn(TopoVertex vertex, DeviceModel deviceModel, Set<Layer> capabilities,
                          List<Integer> floors, List<Integer> ceilings){
         VertexType vertexType = vertex.getVertexType();
         UrnType urnType = determineUrnType(vertexType);
         DeviceType deviceType = determineDeviceType(vertexType);
         IfceType ifceType = determineIfceType(vertexType);
-        DeviceModel model = parentModel == null ? determineDeviceModel(vertexType) : parentModel;
 
         UrnE urn =  UrnE.builder()
                 .urn(vertex.getUrn())
                 .urnType(urnType)
                 .deviceType(deviceType)
                 .ifceType(ifceType)
-                .deviceModel(model)
+                .deviceModel(deviceModel)
                 .reservablePssResources(new HashSet<>())
                 .valid(true)
                 .capabilities(capabilities)
                 .build();
 
-        Integer ingressBw = 1000;
-        Integer egressBw = 1000;
-        if(vertexType.equals(VertexType.PORT)){
-            ReservableBandwidthE resvBw = buildReservableBandwidth(ingressBw, egressBw);
+        if(deviceType.equals(DeviceType.SWITCH)) {
             ReservableVlanE resvVlan = buildReservableVlan(buildIntRanges(floors, ceilings));
-            urn.setReservableBandwidth(resvBw);
             urn.setReservableVlans(resvVlan);
         }
         return urn;
     }
 
-    public UrnE buildUrn(TopoVertex vertex, DeviceModel parentModel, Set<Layer> capabilities, Integer inBW, Integer egBW,
+    public UrnE buildPortUrn(TopoVertex vertex, DeviceModel parentModel, Set<Layer> capabilities, Integer inBW, Integer egBW,
                          List<Integer> floors, List<Integer> ceilings){
         VertexType vertexType = vertex.getVertexType();
         UrnType urnType = determineUrnType(vertexType);
@@ -253,10 +240,10 @@ public class RepoEntityBuilder {
                 .capabilities(capabilities)
                 .build();
 
-        if(vertexType.equals(VertexType.PORT)){
-            ReservableBandwidthE resvBw = buildReservableBandwidth(inBW, egBW);
+        ReservableBandwidthE resvBw = buildReservableBandwidth(inBW, egBW);
+        urn.setReservableBandwidth(resvBw);
+        if(deviceType.equals(DeviceType.ROUTER)){
             ReservableVlanE resvVlan = buildReservableVlan(buildIntRanges(floors, ceilings));
-            urn.setReservableBandwidth(resvBw);
             urn.setReservableVlans(resvVlan);
         }
         return urn;

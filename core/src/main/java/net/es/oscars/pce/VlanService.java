@@ -576,7 +576,6 @@ public class VlanService {
         // Get the VLANs available across the AZ/ZA path
         Set<Integer> availableVlansAcrossPath = findAvailableVlansBidirectional(pipeUrns, availableVlanMap);
         if (availableVlansAcrossPath == null) {
-            log.error("null available vlans across path!");
             availableVlansAcrossPath = new HashSet<>();
         }
 
@@ -730,6 +729,7 @@ public class VlanService {
                 }
             }
 
+
             for (String fixUrn : sortedFixtureUrns) {
                 UrnE parentDeviceUrn = urnMap.get(portToDeviceMap.get(fixUrn));
                 if (!chosenVlanMap.get(fixUrn).isEmpty() && isSwitch(parentDeviceUrn)) {
@@ -744,11 +744,13 @@ public class VlanService {
 
     private Map<String,Set<Integer>> initializeChosenVlanMap(Set<String> pipeUrns, Map<String, Set<String>> nonFixPortUrnMap) {
 
+        log.info("Pipe URNs: " + pipeUrns.toString());
         Map<String, Set<Integer>> chosenVlanMap = new HashMap<>();
         for(String pipeUrn : pipeUrns){
             chosenVlanMap.put(pipeUrn, new HashSet<>());
         }
         for(Set<String> nonFixturePorts : nonFixPortUrnMap.values()){
+            log.info("Non-Fixture Ports: " + nonFixturePorts.toString());
             for(String nonFixturePort : nonFixturePorts){
                 chosenVlanMap.put(nonFixturePort, new HashSet<>());
             }
@@ -1016,13 +1018,10 @@ public class VlanService {
 
         Set<String> urns = new HashSet<>();
 
-        //List<TopoEdge> interEdges = edges.size() > edges.subList(2, edges.size() - 2);
         for (TopoEdge edge : edges) {
-            String aUrnString = edge.getA().getUrn();
-            String zUrnString = edge.getZ().getUrn();
             List<String> urnStrings = new ArrayList<>();
-            urnStrings.add(aUrnString);
-            urnStrings.add(zUrnString);
+            urnStrings.add(edge.getA().getUrn());
+            urnStrings.add(edge.getZ().getUrn());
             for (String urn_s : urnStrings) {
                 UrnE urn_e = urnMap.get(urn_s);
                 if (urn_e != null) {

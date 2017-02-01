@@ -88,15 +88,11 @@ public class BandwidthAvailabilityService {
         Topology topo = topoService.getMultilayerTopology();
         Boolean pairValid = validatePair(request, topo);
         Boolean pathValid = validateEros(request, topo);
-        if(!pathValid){
-            log.info("Input paths are invalid: either null or elements in path are not in topology.");
-        }
-        if(!pairValid){
-            log.info("Input source/dest pair is invalid: Either Devices/Ports are null or not in topology");
-        }
         if (!pathValid && !pairValid) {
             log.info("Topology: " + topo);
-            log.info("Invalid Bandwidth Availability Request");
+            log.info("Invalid Bandwidth Availability Request. One of two problems may have occured:");
+            log.info("(1) Input paths are invalid: either null or elements in path are not in topology.");
+            log.info("(2) Input source/dest pair is invalid: Either Devices/Ports are null or not in topology");
             return buildResponse(new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>());
         }
 

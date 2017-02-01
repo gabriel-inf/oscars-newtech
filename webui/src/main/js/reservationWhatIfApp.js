@@ -87,7 +87,9 @@ class ReservationWhatIfApp extends React.Component{
     componentDidUpdate(prevProps, prevState){
         // Only do verification and bw avail request if relevant state has changed
         let bwAvailRequest = this.state.bwAvailRequest;
-        if(!deepEqual(prevState.bwAvailRequest, bwAvailRequest) && bwAvailRequest.azERO.length > 1){
+        let pathChange = !deepEqual(prevState.bwAvailRequest, bwAvailRequest);
+        let portChange = prevState.srcPort != this.state.srcPort || prevState.dstPort != this.state.dstPort;
+        if(bwAvailRequest.azERO.length > 1 && (pathChange || portChange)){
             let bwAvailResponse = this.submitBwAvailRequest(bwAvailRequest);
             bwAvailResponse.then(
                 (successResponse) => {
