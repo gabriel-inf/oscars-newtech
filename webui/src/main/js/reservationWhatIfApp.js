@@ -56,6 +56,8 @@ class ReservationWhatIfApp extends React.Component{
         this.updateReservation = this.updateReservation.bind(this);
         this.updatePtDMap = this.updatePtDMap.bind(this);
         this.updateDtPMap = this.updateDtPMap.bind(this);
+        this.handleSrcPortSelect = this.handleSrcPortSelect.bind(this);
+        this.handleDstPortSelect = this.handleDstPortSelect.bind(this);
 
         client.loadJSON({method: "GET", url: "/resv/newConnectionId"})
             .then(this.updateReservation);
@@ -156,7 +158,19 @@ class ReservationWhatIfApp extends React.Component{
             dst = azERO[azERO.length-1];
         }
         let zaERO = azERO.slice().reverse();
-        this.setState({azERO: azERO, zaERO: zaERO, pathClearEnabled: pathClearEnabled, src: src, dst: dst});
+
+        let prevSrc = this.state.portToDeviceMap[this.state.srcPort];
+        let prevDst = this.state.portToDeviceMap[this.state.dstPort];
+        let srcPort = "--";
+        if(src == prevDst){
+            srcPort = this.state.dstPort;
+        }
+        else{
+            srcPort = prevSrc != src ? this.state.deviceToPortMap[src][0]: this.state.srcPort;
+        }
+        let dstPort = prevDst != dst ? this.state.deviceToPortMap[dst][0]: this.state.dstPort;
+
+        this.setState({azERO: azERO, zaERO: zaERO, pathClearEnabled: pathClearEnabled, src: src, srcPort: srcPort, dst: dst, dstPort: dstPort});
     }
 
     handleBwSliderChange(event){
@@ -166,7 +180,15 @@ class ReservationWhatIfApp extends React.Component{
     handleClearPath(){
         this.state.networkVis.network.unselectAll();
         networkVis.highlight_devices(this.state.networkVis.datasource, this.state.azERO, false, '');
-        this.setState({azERO: [], zaERO: [], bw: 0, maxBw: 100, pathClearEnabled: false});
+        this.setState({azERO: [], zaERO: [], bw: 0, maxBw: 100, pathClearEnabled: false, src: "--", srcPort: "--", dst: "--", dstPort: "--"});
+    }
+
+    handleSrcPortSelect(option){
+        this.setState({srcPort: option.value});
+    }
+
+    handleDstPortSelect(option){
+        this.setState({dstPort: option.value});
     }
 
     render(){
@@ -178,7 +200,11 @@ class ReservationWhatIfApp extends React.Component{
                     pathClearEnabled={this.state.pathClearEnabled}
                     handleClearPath={this.handleClearPath}
                     srcPorts={this.state.deviceToPortMap[this.state.src]}
+                    srcPort={this.state.srcPort}
                     dstPorts={this.state.deviceToPortMap[this.state.dst]}
+                    dstPort={this.state.dstPort}
+                    handleSrcPortSelect={this.handleSrcPortSelect}
+                    handleDstPortSelect={this.handleDstPortSelect}
                 />
                 <BandwidthTimePanel
                     handleBwSliderChange={this.handleBwSliderChange}
@@ -216,7 +242,11 @@ class PathSelectionPanel extends React.Component{
                         pathClearEnabled={this.props.pathClearEnabled}
                         handleClearPath={this.props.handleClearPath}
                         srcPorts={this.props.srcPorts}
+                        srcPort={this.props.srcPort}
                         dstPorts={this.props.dstPorts}
+                        dstPort={this.props.dstPort}
+                        handleSrcPortSelect={this.props.handleSrcPortSelect}
+                        handleDstPortSelect={this.props.handleDstPortSelect}
                     />
                 </div>
             </div>
@@ -248,12 +278,12 @@ class NetworkPanel extends React.Component{
                 <div>
                     <div className="dropdown">
                         <p style={{fontSize: "16px"}}>Select Source Port</p>
-                        <Dropdown options={this.props.srcPorts} value={this.props.srcPorts[0]} placeholder="Select a port" />
+                        <Dropdown options={this.props.srcPorts} value={this.props.srcPort} placeholder="Select a port" onChange={this.props.handleSrcPortSelect}/>
                     </div>
 
                     <div className="dropdown">
                         <p style={{fontSize: "16px"}}>Select Destination Port</p>
-                        <Dropdown options={this.props.dstPorts} value={this.props.dstPorts[0]} placeholder="Select a port"/>
+                        <Dropdown options={this.props.dstPorts} value={this.props.dstPort} placeholder="Select a port" onChange={this.props.handleDstPortSelect}/>
                     </div>
                 </div>
             </div>
