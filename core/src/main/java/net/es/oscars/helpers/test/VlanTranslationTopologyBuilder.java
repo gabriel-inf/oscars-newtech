@@ -32,26 +32,14 @@ public class VlanTranslationTopologyBuilder {
         Map<TopoVertex, TopoVertex> portDeviceMap = buildThreeSwitchPortDeviceMap(nameMap);
 
         Map<TopoVertex, List<Integer>> floorMap = new HashMap<>();
-        floorMap.put(nameMap.get("A:0"), Collections.singletonList(1));
-        floorMap.put(nameMap.get("A:1"), Collections.singletonList(1));
-        floorMap.put(nameMap.get("A:2"), Collections.singletonList(1));
-        floorMap.put(nameMap.get("B:0"), Collections.singletonList(1));
-        floorMap.put(nameMap.get("B:1"), Collections.singletonList(1));
-        floorMap.put(nameMap.get("B:2"), Collections.singletonList(1));
-        floorMap.put(nameMap.get("C:0"), Collections.singletonList(1));
-        floorMap.put(nameMap.get("C:1"), Collections.singletonList(1));
-        floorMap.put(nameMap.get("C:2"), Collections.singletonList(1));
+        floorMap.put(nameMap.get("A"), Collections.singletonList(1));
+        floorMap.put(nameMap.get("B"), Collections.singletonList(1));
+        floorMap.put(nameMap.get("C"), Collections.singletonList(1));
 
         Map<TopoVertex, List<Integer>> ceilingMap = new HashMap<>();
-        ceilingMap.put(nameMap.get("A:0"), Collections.singletonList(5));
-        ceilingMap.put(nameMap.get("A:1"), Collections.singletonList(5));
-        ceilingMap.put(nameMap.get("A:2"), Collections.singletonList(5));
-        ceilingMap.put(nameMap.get("B:0"), Collections.singletonList(5));
-        ceilingMap.put(nameMap.get("B:1"), Collections.singletonList(5));
-        ceilingMap.put(nameMap.get("B:2"), Collections.singletonList(5));
-        ceilingMap.put(nameMap.get("C:0"), Collections.singletonList(5));
-        ceilingMap.put(nameMap.get("C:1"), Collections.singletonList(5));
-        ceilingMap.put(nameMap.get("C:2"), Collections.singletonList(5));
+        ceilingMap.put(nameMap.get("A"), Collections.singletonList(5));
+        ceilingMap.put(nameMap.get("B"), Collections.singletonList(5));
+        ceilingMap.put(nameMap.get("C"), Collections.singletonList(5));
 
         testBuilder.populateRepos(topo.getVertices(), topo.getEdges(), portDeviceMap, floorMap, ceilingMap);
     }
@@ -68,26 +56,14 @@ public class VlanTranslationTopologyBuilder {
         Map<TopoVertex, TopoVertex> portDeviceMap = buildThreeSwitchPortDeviceMap(nameMap);
 
         Map<TopoVertex, List<Integer>> floorMap = new HashMap<>();
-        floorMap.put(nameMap.get("A:0"), Collections.singletonList(4));
-        floorMap.put(nameMap.get("A:1"), Collections.singletonList(4));
-        floorMap.put(nameMap.get("A:2"), Collections.singletonList(1));
-        floorMap.put(nameMap.get("B:0"), Collections.singletonList(4));
-        floorMap.put(nameMap.get("B:1"), Collections.singletonList(4));
-        floorMap.put(nameMap.get("B:2"), Collections.singletonList(4));
-        floorMap.put(nameMap.get("C:0"), Collections.singletonList(4));
-        floorMap.put(nameMap.get("C:1"), Collections.singletonList(4));
-        floorMap.put(nameMap.get("C:2"), Collections.singletonList(1));
+        floorMap.put(nameMap.get("A"), Collections.singletonList(3));
+        floorMap.put(nameMap.get("B"), Collections.singletonList(4));
+        floorMap.put(nameMap.get("C"), Collections.singletonList(3));
 
         Map<TopoVertex, List<Integer>> ceilingMap = new HashMap<>();
-        ceilingMap.put(nameMap.get("A:0"), Collections.singletonList(5));
-        ceilingMap.put(nameMap.get("A:1"), Collections.singletonList(5));
-        ceilingMap.put(nameMap.get("A:2"), Collections.singletonList(5));
-        ceilingMap.put(nameMap.get("B:0"), Collections.singletonList(5));
-        ceilingMap.put(nameMap.get("B:1"), Collections.singletonList(5));
-        ceilingMap.put(nameMap.get("B:2"), Collections.singletonList(5));
-        ceilingMap.put(nameMap.get("C:0"), Collections.singletonList(5));
-        ceilingMap.put(nameMap.get("C:1"), Collections.singletonList(5));
-        ceilingMap.put(nameMap.get("C:2"), Collections.singletonList(5));
+        ceilingMap.put(nameMap.get("A"), Collections.singletonList(3));
+        ceilingMap.put(nameMap.get("B"), Collections.singletonList(5));
+        ceilingMap.put(nameMap.get("C"), Collections.singletonList(3));
 
         testBuilder.populateRepos(topo.getVertices(), topo.getEdges(), portDeviceMap, floorMap, ceilingMap);
     }
@@ -104,26 +80,14 @@ public class VlanTranslationTopologyBuilder {
         Map<TopoVertex, TopoVertex> portDeviceMap = buildThreeSwitchPortDeviceMap(nameMap);
 
         Map<TopoVertex, List<Integer>> floorMap = new HashMap<>();
-        floorMap.put(nameMap.get("A:0"), Collections.singletonList(1));
-        floorMap.put(nameMap.get("A:1"), Collections.singletonList(1));
-        floorMap.put(nameMap.get("A:2"), Collections.singletonList(1));
-        floorMap.put(nameMap.get("B:0"), Collections.singletonList(1));
-        floorMap.put(nameMap.get("B:1"), Collections.singletonList(1));
-        floorMap.put(nameMap.get("B:2"), Collections.singletonList(1));
-        floorMap.put(nameMap.get("C:0"), Collections.singletonList(1));
-        floorMap.put(nameMap.get("C:1"), Collections.singletonList(1));
-        floorMap.put(nameMap.get("C:2"), Collections.singletonList(1));
+        floorMap.put(nameMap.get("A"), Collections.singletonList(2));
+        floorMap.put(nameMap.get("B"), Collections.singletonList(1));
+        floorMap.put(nameMap.get("C"), Collections.singletonList(2));
 
         Map<TopoVertex, List<Integer>> ceilingMap = new HashMap<>();
-        ceilingMap.put(nameMap.get("A:0"), Collections.singletonList(2));
-        ceilingMap.put(nameMap.get("A:1"), Collections.singletonList(2));
-        ceilingMap.put(nameMap.get("A:2"), Collections.singletonList(2));
-        ceilingMap.put(nameMap.get("B:0"), Collections.singletonList(2));
-        ceilingMap.put(nameMap.get("B:1"), Collections.singletonList(2));
-        ceilingMap.put(nameMap.get("B:2"), Collections.singletonList(2));
-        ceilingMap.put(nameMap.get("C:0"), Collections.singletonList(2));
-        ceilingMap.put(nameMap.get("C:1"), Collections.singletonList(2));
-        ceilingMap.put(nameMap.get("C:2"), Collections.singletonList(2));
+        ceilingMap.put(nameMap.get("A"), Collections.singletonList(3));
+        ceilingMap.put(nameMap.get("B"), Collections.singletonList(1));
+        ceilingMap.put(nameMap.get("C"), Collections.singletonList(3));
 
         testBuilder.populateRepos(topo.getVertices(), topo.getEdges(), portDeviceMap, floorMap, ceilingMap);
     }
