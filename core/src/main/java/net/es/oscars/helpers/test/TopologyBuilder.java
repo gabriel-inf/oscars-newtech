@@ -1000,7 +1000,7 @@ public class TopologyBuilder
 
         for(TopoVertex oneVert : topoNodes)
         {
-            if(oneVert.getVertexType().equals(VertexType.PORT))
+            if(oneVert.getVertexType().equals(VertexType.SWITCH))
             {
                 floorMap.put(oneVert, floors);
                 ceilingMap.put(oneVert, ceilings);

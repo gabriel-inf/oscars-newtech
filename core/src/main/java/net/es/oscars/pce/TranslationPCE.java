@@ -155,11 +155,10 @@ public class TranslationPCE {
 
         Map<String, Set<Integer>> chosenVlanMap
                 = vlanService.selectVlansForPipe(reqPipe, urnMap, reservedVlans, azERO, zaERO, deviceToPortMap, portToDeviceMap);
-        for (String urn : chosenVlanMap.keySet()) {
-            UrnE topoUrn = urnMap.get(urn);
-            if (chosenVlanMap.get(urn).isEmpty() && topoUrn.getReservableVlans() != null) {
-                throw new PCEException(("VLAN could not not be found for URN " + urn));
-            }
+
+        Boolean validVlanAssignment = evaluateAssignedVlanMap(chosenVlanMap, urnMap, portToDeviceMap);
+        if(!validVlanAssignment){
+            throw new PCEException(("VLAN could not not be found for all URNs"));
         }
         Map<TopoVertex, ReservedVlanJunctionE> junctionMap = new HashMap<>();
 
@@ -168,8 +167,6 @@ public class TranslationPCE {
 
         reserveEntities(reqPipe, azSegments, zaSegments, urnMap, requestedBandwidthMap, chosenVlanMap, reservedEthPipes,
                 reservedMplsPipes, junctionMap, portToDeviceMap, start, end, connectionId);
-
-
     }
 
     public void reserveRequestedPipeWithPairs(RequestedVlanPipeE reqPipe, List<List<TopoEdge>> azEROs,
@@ -193,11 +190,10 @@ public class TranslationPCE {
 
         Map<String, Set<Integer>> chosenVlanMap = vlanService.selectVlansForPipe(reqPipe, urnMap, reservedVlans,
                 combinedAzERO, combinedZaERO, deviceToPortMap, portToDeviceMap);
-        for (String urn : chosenVlanMap.keySet()) {
-            UrnE topoUrn = urnMap.get(urn);
-            if (chosenVlanMap.get(urn).isEmpty() && topoUrn.getReservableVlans() != null) {
-                throw new PCEException(("VLAN could not not be found for URN " + urn));
-            }
+
+        Boolean validVlanAssignment = evaluateAssignedVlanMap(chosenVlanMap, urnMap, portToDeviceMap);
+        if(!validVlanAssignment){
+            throw new PCEException(("VLAN could not not be found for all URNs"));
         }
 
         Map<TopoVertex, ReservedVlanJunctionE> junctionMap = new HashMap<>();
@@ -221,6 +217,29 @@ public class TranslationPCE {
 
         reservedEthPipes.addAll(filteredEthPipes);
         reservedMplsPipes.addAll(filteredMplsPipes);
+    }
+
+    private Boolean evaluateAssignedVlanMap(Map<String, Set<Integer>> chosenVlanMap, Map<String, UrnE> urnMap, Map<String, String> portToDeviceMap) {
+        Boolean valid = true;
+        for (String urn : chosenVlanMap.keySet()) {
+            UrnE topoUrn = urnMap.get(urn);
+            Boolean parentHasVlans = evaluateIfParentHasVlans(topoUrn, portToDeviceMap, urnMap);
+            if (chosenVlanMap.get(urn).isEmpty() && (topoUrn.getReservableVlans() != null || parentHasVlans)) {
+                valid = false;
+            }
+        }
+        return valid;
+    }
+
+    private Boolean evaluateIfParentHasVlans(UrnE topoUrn, Map<String, String> portToDeviceMap, Map<String, UrnE> urnMap){
+        Boolean parentHasVlans = false;
+        if(topoUrn.getUrnType().equals(UrnType.IFCE) && topoUrn.getReservableVlans() == null){
+            String urnString = topoUrn.getUrn();
+            String parentString = portToDeviceMap.get(urnString);
+            UrnE parentUrn = urnMap.get(parentString);
+            parentHasVlans = parentUrn.getReservableVlans() != null;
+        }
+        return parentHasVlans;
     }
 
     private Map<TopoVertex, Map<String, Integer>> evaluateRequestedBandwidth(List<ReservedBandwidthE> reservedBandwidths,

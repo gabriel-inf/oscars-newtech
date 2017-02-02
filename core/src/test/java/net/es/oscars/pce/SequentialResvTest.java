@@ -344,32 +344,34 @@ public class SequentialResvTest {
                 assert(oneConnection.getReserved().getVlanFlow().getMplsPipes().isEmpty());
                 assert(oneConnection.getReserved().getVlanFlow().getJunctions().isEmpty());
                 assert(oneConnection.getReserved().getVlanFlow().getAllPaths().isEmpty());
-                continue;
+            }
+            else {
+                assert (reservedBlueprint != null);
+
+                ReservedVlanFlowE reservedFlow = reservedBlueprint.getVlanFlow();
+                assert (reservedFlow != null);
+
+                Set<ReservedEthPipeE> allResEthPipes = reservedFlow.getEthPipes();
+                Set<ReservedMplsPipeE> allResMplsPipes = reservedFlow.getMplsPipes();
+                Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
+
+                assert (allResJunctions.size() == 0);
+                assert (allResEthPipes.size() == 1);
+                assert (allResMplsPipes.size() == 0);
+
+                ReservedVlanFixtureE portA = allResEthPipes.iterator().next().getAJunction().getFixtures().iterator().next();
+                ReservedVlanFixtureE portZ = allResEthPipes.iterator().next().getZJunction().getFixtures().iterator().next();
+                Set<Integer> vlansA = portA.getReservedVlans().stream().map(ReservedVlanE::getVlan).collect(Collectors.toSet());
+                Set<Integer> vlansZ = portZ.getReservedVlans().stream().map(ReservedVlanE::getVlan).collect(Collectors.toSet());
+
+                assert (!usedVlanIDsA.containsAll(vlansA));
+                assert (!usedVlanIDsZ.containsAll(vlansZ));
+
+                usedVlanIDsA.addAll(vlansA);
+                usedVlanIDsZ.addAll(vlansZ);
             }
 
-            assert (reservedBlueprint != null);
 
-            ReservedVlanFlowE reservedFlow = reservedBlueprint.getVlanFlow();
-            assert (reservedFlow != null);
-
-            Set<ReservedEthPipeE> allResEthPipes = reservedFlow.getEthPipes();
-            Set<ReservedMplsPipeE> allResMplsPipes = reservedFlow.getMplsPipes();
-            Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
-
-            assert (allResJunctions.size() == 0);
-            assert (allResEthPipes.size() == 1);
-            assert (allResMplsPipes.size() == 0);
-
-            ReservedVlanFixtureE portA = allResEthPipes.iterator().next().getAJunction().getFixtures().iterator().next();
-            ReservedVlanFixtureE portZ = allResEthPipes.iterator().next().getZJunction().getFixtures().iterator().next();
-            Set<Integer> vlansA = portA.getReservedVlans().stream().map(ReservedVlanE::getVlan).collect(Collectors.toSet());
-            Set<Integer> vlansZ = portZ.getReservedVlans().stream().map(ReservedVlanE::getVlan).collect(Collectors.toSet());
-
-            assert (!usedVlanIDsA.containsAll(vlansA));
-            assert (!usedVlanIDsZ.containsAll(vlansZ));
-
-            usedVlanIDsA.addAll(vlansA);
-            usedVlanIDsZ.addAll(vlansZ);
         }
 
         Set<ReservedBandwidthE> portBWs = bwRepo.findAll().stream()
