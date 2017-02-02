@@ -2,6 +2,7 @@ package net.es.oscars.pce;
 
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.IntRange;
+import net.es.oscars.dto.topo.enums.VertexType;
 import net.es.oscars.helpers.IntRangeParsing;
 import net.es.oscars.resv.dao.ReservedVlanRepository;
 import net.es.oscars.resv.ent.*;
@@ -879,23 +880,28 @@ public class VlanService {
             // Overlap is used to track all VLAN tags that are available across both endpoints of an edge
             Set<Integer> overlap = new HashSet<>();
             // Get all possible VLAN ranges reservable at the a and z ends of the edge
-            List<IntRange> aRanges = getVlanRangesFromUrnString(urnMap, edge.getA().getUrn());
-            List<IntRange> zRanges = getVlanRangesFromUrnString(urnMap, edge.getZ().getUrn());
+            //List<IntRange> aRanges = getVlanRangesFromUrnString(urnMap, edge.getA().getUrn());
+            //List<IntRange> zRanges = getVlanRangesFromUrnString(urnMap, edge.getZ().getUrn());
+            Set<Integer> aAvailVlans = availVlanMap.getOrDefault(edge.getA().getUrn(), null);
+            Set<Integer> zAvailVlans = availVlanMap.getOrDefault(edge.getZ().getUrn(), null);
 
             // If neither edge has reservable VLAN fields, add the edge to the "-1" VLAN tag list.
             // These edges do not need to be pruned, and will be added at the end to the best set of edges
-            if (aRanges.isEmpty() && zRanges.isEmpty() || edge.getLayer().equals(Layer.MPLS)) {
+            Boolean safeA = edge.getA().getVertexType().equals(VertexType.VIRTUAL) || aAvailVlans == null;
+            Boolean safeZ = edge.getZ().getVertexType().equals(VertexType.VIRTUAL) || zAvailVlans == null;
+            //aRanges.isEmpty() && zRanges.isEmpty() || edge.getLayer().equals(Layer.MPLS)
+            if (safeA || safeZ) {
                 edgesPerId.get(-1).add(edge);
             }
             // Otherwise, find the intersection between the VLAN ranges (if any), and add the edge to the list
             // matching each overlapping VLAN ID.
             else {
                 // Find what VLAN ids are actually available at A and Z
-                if (!aRanges.isEmpty()) {
-                    addToSetOverlap(overlap, availVlanMap.get(edge.getA().getUrn()));
+                if (aAvailVlans.size() > 0) {
+                    addToSetOverlap(overlap, aAvailVlans);
                 }
-                if (!zRanges.isEmpty()) {
-                    addToSetOverlap(overlap, availVlanMap.get(edge.getZ().getUrn()));
+                if (zAvailVlans.size() > 0) {
+                    addToSetOverlap(overlap, zAvailVlans);
                 }
 
                 // For overlapping IDs, put that edge into the map
