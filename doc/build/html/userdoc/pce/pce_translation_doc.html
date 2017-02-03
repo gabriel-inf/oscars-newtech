@@ -102,6 +102,7 @@
 <li class="toctree-l5"><a class="reference internal" href="pce_dijkstra_doc.html">Dijkstra PCE Module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="pce_bellman_ford_doc.html">Bellman-Ford PCE Module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="pce_bhandari_doc.html">Bhandari PCE Module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../service/service_vlan_doc.html">VLAN Service</a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="../advanced_service_doc.html">Path Computation Service Enhancements</a></li>
@@ -146,19 +147,19 @@
           <div class="body">
             
   <div class="section" id="translation-pce-module">
-<h1>Translation PCE Module<a class="headerlink" href="#translation-pce-module" title="Permalink to this headline">¶</a></h1>
-<p>This module converts computed routes through the network topology into data structures appropriate for conforming to the <a class="reference internal" href="../plumbing_doc.html"><em>Plumbing Specification</em></a>.</p>
+<span id="pce-translation"></span><h1>Translation PCE Module<a class="headerlink" href="#translation-pce-module" title="Permalink to this headline">¶</a></h1>
+<p>This module converts computed routes through the network topology into data structures appropriate for conforming to the <a class="reference internal" href="../plumbing_doc.html#plumbing"><em>Plumbing Specification</em></a>.</p>
 <div class="section" id="module-details">
 <h2>Module Details<a class="headerlink" href="#module-details" title="Permalink to this headline">¶</a></h2>
 <p><strong>Calls:</strong></p>
 <ul class="simple">
-<li><tt class="xref doc docutils literal"><span class="pre">../service/service_topology_doc</span></tt></li>
-<li><tt class="xref doc docutils literal"><span class="pre">../service/service_bandwidth_doc</span></tt></li>
-<li><tt class="xref doc docutils literal"><span class="pre">../service/service_vlan_doc</span></tt></li>
+<li><em class="xref std std-ref">service_topology</em></li>
+<li><em class="xref std std-ref">service_bandwidth</em></li>
+<li><a class="reference internal" href="../service/service_vlan_doc.html#service-vlan"><em>VLAN Service</em></a></li>
 </ul>
 <p><strong>Called By:</strong></p>
 <ul class="simple">
-<li><a class="reference internal" href="pce_top_doc.html"><em>Top PCE Module</em></a></li>
+<li><a class="reference internal" href="pce_top_doc.html#pce-top"><em>Top PCE Module</em></a></li>
 </ul>
 <p><strong>API Specification:</strong></p>
 <ul class="simple">

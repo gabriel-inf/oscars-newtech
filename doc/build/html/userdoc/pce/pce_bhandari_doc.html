@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="../../_static/esnet.png"/>
     <link rel="top" title="OSCARS 1.0 1.0.2017 documentation" href="../../index.html" />
     <link rel="up" title="Path Computation Engine (PCE)" href="../pce_doc.html" />
-    <link rel="next" title="Path Computation Service Enhancements" href="../advanced_service_doc.html" />
+    <link rel="next" title="VLAN Service" href="../service/service_vlan_doc.html" />
     <link rel="prev" title="Bellman-Ford PCE Module" href="pce_bellman_ford_doc.html" /> 
   </head>
   <body>
@@ -39,7 +39,7 @@
           <a href="../../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="../advanced_service_doc.html" title="Path Computation Service Enhancements"
+          <a href="../service/service_vlan_doc.html" title="VLAN Service"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="pce_bellman_ford_doc.html" title="Bellman-Ford PCE Module"
@@ -102,6 +102,7 @@
 <li class="toctree-l5 current"><a class="current reference internal" href="">Bhandari PCE Module</a><ul class="simple">
 </ul>
 </li>
+<li class="toctree-l5"><a class="reference internal" href="../service/service_vlan_doc.html">VLAN Service</a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="../advanced_service_doc.html">Path Computation Service Enhancements</a></li>
@@ -122,8 +123,8 @@
   <p class="topless"><a href="pce_bellman_ford_doc.html"
                         title="previous chapter">Bellman-Ford PCE Module</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="../advanced_service_doc.html"
-                        title="next chapter">Path Computation Service Enhancements</a></p>
+  <p class="topless"><a href="../service/service_vlan_doc.html"
+                        title="next chapter">VLAN Service</a></p>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../../search.html" method="get">
@@ -146,8 +147,8 @@
           <div class="body">
             
   <div class="section" id="bhandari-pce-module">
-<h1>Bhandari PCE Module<a class="headerlink" href="#bhandari-pce-module" title="Permalink to this headline">¶</a></h1>
-<p>This module is one of the fundamental pathfinding elements of the PCE, used to compute the least-cost pair of edge-disjoint paths through a network topology. Such a technique is useful for <a class="reference internal" href="../advanced_service_doc.html#surv-pce-services"><em>Survivable Routing Services</em></a>. Bhandari&#8217;s <a class="reference external" href="https://en.wikipedia.org/wiki/Edge_disjoint_shortest_pair_algorithm">Algorithm</a> differs from other heuristics which aim to minimize the cost of the primary path at the cost of a more expensive secondary path. Consider the example below:</p>
+<span id="pce-bhandari"></span><h1>Bhandari PCE Module<a class="headerlink" href="#bhandari-pce-module" title="Permalink to this headline">¶</a></h1>
+<p>This module is one of the fundamental pathfinding elements of the PCE, used to compute the least-cost pair of edge-disjoint paths through a network topology. Such a technique is useful for <a class="reference internal" href="../enhanced/survivability_service_doc.html#surv-pce-services"><em>Survivable Routing Services</em></a>. Bhandari&#8217;s <a class="reference external" href="https://en.wikipedia.org/wiki/Edge_disjoint_shortest_pair_algorithm">Algorithm</a> differs from other heuristics which aim to minimize the cost of the primary path at the cost of a more expensive secondary path. Consider the example below:</p>
 <div class="section" id="simple-path-protection">
 <h2>Simple Path Protection<a class="headerlink" href="#simple-path-protection" title="Permalink to this headline">¶</a></h2>
 <p>The animation below illustrates how a pair of link-disjoint paths may be found on a network topology in a simple manner.  The steps are very straightforward:</p>
@@ -185,12 +186,12 @@
 <h2>Module Details<a class="headerlink" href="#module-details" title="Permalink to this headline">¶</a></h2>
 <p><strong>Calls:</strong></p>
 <ul class="simple">
-<li><a class="reference internal" href="pce_bellman_ford_doc.html"><em>Bellman-Ford PCE Module</em></a></li>
+<li><em class="xref std std-ref">pce_bellman_ford</em></li>
 </ul>
 <p><strong>Called By:</strong></p>
 <ul class="simple">
-<li><a class="reference internal" href="pce_survivability_doc.html"><em>Survivability PCE Module</em></a></li>
-<li><tt class="xref doc docutils literal"><span class="pre">../virtual_topo_surv_doc</span></tt></li>
+<li><a class="reference internal" href="pce_survivability_doc.html#pce-survivability"><em>Survivability PCE Module</em></a></li>
+<li><em class="xref std std-ref">virtual_topo_surv</em></li>
 </ul>
 <p><strong>API Specification:</strong></p>
 <ul class="simple">
@@ -212,7 +213,7 @@
           <a href="../../genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="../advanced_service_doc.html" title="Path Computation Service Enhancements"
+          <a href="../service/service_vlan_doc.html" title="VLAN Service"
              >next</a> |</li>
         <li class="right" >
           <a href="pce_bellman_ford_doc.html" title="Bellman-Ford PCE Module"

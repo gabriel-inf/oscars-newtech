@@ -102,6 +102,7 @@
 </ul>
 </li>
 <li class="toctree-l5"><a class="reference internal" href="pce_bhandari_doc.html">Bhandari PCE Module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../service/service_vlan_doc.html">VLAN Service</a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="../advanced_service_doc.html">Path Computation Service Enhancements</a></li>
@@ -146,8 +147,8 @@
           <div class="body">
             
   <div class="section" id="bellman-ford-pce-module">
-<h1>Bellman-Ford PCE Module<a class="headerlink" href="#bellman-ford-pce-module" title="Permalink to this headline">¶</a></h1>
-<p>This module is one of the fundamental pathfinding elements of the PCE, used to compute shortest (least-cost) path routing on a constrained network. The Bellman-Ford <a class="reference external" href="https://en.wikipedia.org/wiki/Bellman%E2%80%93Ford_algorithm">Algorithm</a> is one of the most widely adopted routing algorithms because it optimally computes its path, and is able to incorporate negatively weighted edges into its graph model. This module serves as the underlying pathfinding mechanism for the <a class="reference internal" href="pce_bhandari_doc.html"><em>Bhandari PCE Module</em></a>, which requires negative edge weights. The module is not incorporated into any service-specific PCE modules at this time.</p>
+<span id="bellman-ford"></span><h1>Bellman-Ford PCE Module<a class="headerlink" href="#bellman-ford-pce-module" title="Permalink to this headline">¶</a></h1>
+<p>This module is one of the fundamental pathfinding elements of the PCE, used to compute shortest (least-cost) path routing on a constrained network. The Bellman-Ford <a class="reference external" href="https://en.wikipedia.org/wiki/Bellman%E2%80%93Ford_algorithm">Algorithm</a> is one of the most widely adopted routing algorithms because it optimally computes its path, and is able to incorporate negatively weighted edges into its graph model. This module serves as the underlying pathfinding mechanism for the <a class="reference internal" href="pce_bhandari_doc.html#pce-bhandari"><em>Bhandari PCE Module</em></a>, which requires negative edge weights. The module is not incorporated into any service-specific PCE modules at this time.</p>
 <div class="section" id="module-details">
 <h2>Module Details<a class="headerlink" href="#module-details" title="Permalink to this headline">¶</a></h2>
 <p><strong>Calls:</strong></p>
@@ -156,7 +157,7 @@
 </ul>
 <p><strong>Called By:</strong></p>
 <ul class="simple">
-<li><a class="reference internal" href="pce_bhandari_doc.html"><em>Bhandari PCE Module</em></a></li>
+<li><a class="reference internal" href="pce_bhandari_doc.html#pce-bhandari"><em>Bhandari PCE Module</em></a></li>
 </ul>
 <p><strong>API Specification:</strong></p>
 <ul class="simple">

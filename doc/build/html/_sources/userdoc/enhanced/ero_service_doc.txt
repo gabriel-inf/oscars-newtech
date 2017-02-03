@@ -3,7 +3,7 @@
 Explicit Routing Services
 =========================
 
-OSCARS 1.0 supports the specification of circuits with prescribed route solutions. That is, the :doc:`../pce_doc` does not necessarily need compute a route without help form the user. The user can in fact designate an *Explicit Route Object (ERO)* which serves as input to the PCE during pathfinding. The ERO may specify a complete route (in both the forward- and reverse-directions), a partial set of waypoints which must be reach along the route, or a set of devices and ports which must *not* be included in the route. This service enhances the user's ability to predict certain qualities of the espected solution.
+OSCARS 1.0 supports the specification of circuits with prescribed route solutions. That is, the :ref:`pce_doc` does not necessarily need compute a route without help form the user. The user can in fact designate an *Explicit Route Object (ERO)* which serves as input to the PCE during pathfinding. The ERO may specify a complete route (in both the forward- and reverse-directions), a partial set of waypoints which must be reach along the route, or a set of devices and ports which must *not* be included in the route. This service enhances the user's ability to predict certain qualities of the espected solution.
 
 .. _ero_pce_complete:
 
@@ -54,7 +54,7 @@ Service Details
 
 **Relevant PCE Module(s)**
 
-- :doc:`../pce/pce_ero_doc`
+- :ref:`pce_ero`
 
 
 .. _ero_pce_partial:
@@ -92,7 +92,7 @@ Service Details
 
 **Relevant PCE Module(s)**
 
-- :doc:`../pce/pce_ero_doc`
+- :ref:`pce_ero`
 
 
 .. _ero_pce_blacklist:
@@ -100,7 +100,7 @@ Service Details
 “Blacklist” Avoidance Routing
 -----------------------------
 
-In addition (or as an alternative) to providing nodes that must be included in the path as in the Complete and Partial ERO Specifications, the user may also find it desirable to be able to *avoid* a particular node or set of nodes comprising a section of the network topology. This desire is likely application-/user-specific. The user may specify a collection of devices and ports which they deem to be undesirable for the given circuit request. All of these "blacklisted" nodes, as well as the network links connected to included ports will be explicitly pruned from the network prior to pathfinding. If the remaining network components do not support a working route solution, the reservation fails. Since this ERO service is handled be the :doc:`../service_pruning_doc`, it can be combined with all other existing PCE services.
+In addition (or as an alternative) to providing nodes that must be included in the path as in the Complete and Partial ERO Specifications, the user may also find it desirable to be able to *avoid* a particular node or set of nodes comprising a section of the network topology. This desire is likely application-/user-specific. The user may specify a collection of devices and ports which they deem to be undesirable for the given circuit request. All of these "blacklisted" nodes, as well as the network links connected to included ports will be explicitly pruned from the network prior to pathfinding. If the remaining network components do not support a working route solution, the reservation fails. Since this ERO service is handled be the :ref:`service_pruning`, it can be combined with all other existing PCE services.
     
 
 
@@ -127,4 +127,4 @@ In addition (or as an alternative) to providing nodes that must be included in t
 
 **Relevant Topology/PCE Service(s)**
 
-- :doc:`../service/service_pruning_doc`
+- :ref:`service_pruning`

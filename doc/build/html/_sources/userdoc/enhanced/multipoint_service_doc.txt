@@ -3,7 +3,7 @@
 Multipoint Routing Service
 ==========================
 
-As mentioned in the :doc:`../pce_doc`, and the :doc:`../plumbing_doc`, multiple pipes may be requested within one single :doc:`../requestspec_doc`. By etsbalishing pipes between a set consisting of more than two end-points, a circuit can be established as a Multipoint, or Multicast, or Mesh service. The figure below illustrates the plumbing illustration which can be used to specifiy such a setup as well as the physical routing solutions that will provision the requested circuit. This example shows a Multicast circuit with a single source and multiple destinations.
+As mentioned in the :ref:`pce_doc`, and the :ref:`plumbing`, multiple pipes may be requested within one single :ref:`requestspec`. By etsbalishing pipes between a set consisting of more than two end-points, a circuit can be established as a Multipoint, or Multicast, or Mesh service. The figure below illustrates the plumbing illustration which can be used to specifiy such a setup as well as the physical routing solutions that will provision the requested circuit. This example shows a Multicast circuit with a single source and multiple destinations.
 
 
 .. figure:: ../../.static/pce_multicast.gif
@@ -41,8 +41,8 @@ Service Details
 
 **Relevant PCE Module(s)**
 
-- :doc:`../pce/pce_palindrome_doc`
-- :doc:`../pce/pce_nonpalindrome_doc`
-- :doc:`../pce/pce_ero_doc`
-- :doc:`../pce/pce_survivability_doc`
+- :ref:`pce_palindrome`
+- :ref:`pce_nonpalindrome`
+- :ref:`pce_ero`
+- :ref:`pce_survivability`
 

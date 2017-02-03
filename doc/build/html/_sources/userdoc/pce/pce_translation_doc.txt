@@ -1,20 +1,21 @@
+.. _pce_translation:
 
 Translation PCE Module
 ======================
 
-This module converts computed routes through the network topology into data structures appropriate for conforming to the :doc:`../plumbing_doc`.
+This module converts computed routes through the network topology into data structures appropriate for conforming to the :ref:`plumbing`.
 
 Module Details
 --------------
 **Calls:**
 
-- :doc:`../service/service_topology_doc`
-- :doc:`../service/service_bandwidth_doc`
-- :doc:`../service/service_vlan_doc`
+- :ref:`service_topology`
+- :ref:`service_bandwidth`
+- :ref:`service_vlan`
 
 **Called By:** 
 
-- :doc:`pce_top_doc`
+- :ref:`pce_top`
 
 **API Specification:**
 

@@ -1,3 +1,4 @@
+.. _requestspec:
 
 Circuit Request Specification
 =============================

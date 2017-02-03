@@ -102,6 +102,7 @@
 <li class="toctree-l5"><a class="reference internal" href="pce_dijkstra_doc.html">Dijkstra PCE Module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="pce_bellman_ford_doc.html">Bellman-Ford PCE Module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="pce_bhandari_doc.html">Bhandari PCE Module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../service/service_vlan_doc.html">VLAN Service</a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="../advanced_service_doc.html">Path Computation Service Enhancements</a></li>
@@ -146,7 +147,7 @@
           <div class="body">
             
   <div class="section" id="non-palindromic-pce-module">
-<h1>Non-Palindromic PCE Module<a class="headerlink" href="#non-palindromic-pce-module" title="Permalink to this headline">¶</a></h1>
+<span id="pce-nonpalindrome"></span><h1>Non-Palindromic PCE Module<a class="headerlink" href="#non-palindromic-pce-module" title="Permalink to this headline">¶</a></h1>
 <p>The Non-Palindromic PCE finds a pair of paths through the network (forward-direction and reverse-direction), such that they are <strong>not</strong> required to mirror each other, i.e. they are not required to be palindromes. The concept is that if there is sufficient bandwidth availability in the forward-direction on a route, but insufficient bandwidth to support the reverse-direction setup, an alternate reverse path can be established instead. This is particularly useful when the reverse path will be used primarily for control signals which are not essential to business operations, but <em>are</em> required for communication to be properly established. From the user&#8217;s perspective, the circuit is logically identical as long as some reverse path can be established.</p>
 <p>Some caveats exist to this flexibility however. <strong>All</strong> Ethernet devices and ports found in the forward path, as well as those network links connected to them <strong>must</strong> be represented in the return path. Ethernet ports are configured with a given VLAN tag, and the remote port is required to use the same VLAN configuration. <strong>Only</strong> segments of the network which consist of exclusively MPLS routers/ports and the links that connect them may differ. Therefore, the forward path will be computed and then the MPLS subpaths on the reverse path will be computed independently. If a solution cannot be found for the reverse path given the computed forward path, the circuit reservation will fail.</p>
 <p>Because the reverse path&#8217;s MPLS segments are computed independently, it&#8217;s quite possible that they will mirror those in the forward path. There is currently no support for requiring that the paths must be non-palindromic.</p>
@@ -155,14 +156,14 @@
 <h2>Module Details<a class="headerlink" href="#module-details" title="Permalink to this headline">¶</a></h2>
 <p><strong>Calls:</strong></p>
 <ul class="simple">
-<li><a class="reference internal" href="pce_dijkstra_doc.html"><em>Dijkstra PCE Module</em></a></li>
-<li><tt class="xref doc docutils literal"><span class="pre">../service/service_topology_doc</span></tt></li>
-<li><tt class="xref doc docutils literal"><span class="pre">../service/service_pruning_doc</span></tt></li>
-<li><tt class="xref doc docutils literal"><span class="pre">../virtual_topo_doc</span></tt></li>
+<li><a class="reference internal" href="pce_dijkstra_doc.html#pce-dijkstra"><em>Dijkstra PCE Module</em></a></li>
+<li><em class="xref std std-ref">service_topology</em></li>
+<li><em class="xref std std-ref">service_pruning</em></li>
+<li><em class="xref std std-ref">virtual_topo</em></li>
 </ul>
 <p><strong>Called By:</strong></p>
 <ul class="simple">
-<li><a class="reference internal" href="pce_top_doc.html"><em>Top PCE Module</em></a></li>
+<li><a class="reference internal" href="pce_top_doc.html#pce-top"><em>Top PCE Module</em></a></li>
 </ul>
 <p><strong>API Specification:</strong></p>
 <ul class="simple">

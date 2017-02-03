@@ -1,3 +1,4 @@
+.. _resvspec:
 
 Circuit Reservation Specification
 =================================

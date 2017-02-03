@@ -3,7 +3,7 @@
 Asymmetric Bandwidth Capability Service
 =======================================
 
-Some communication does not require identical bandwidth constraints in the A-Z and Z-A direction. For example, the return path may only be required for control signalling, and could thus require much less bandwidth than the data transfer which may be unidirectional in the forward-direction.  Traditional circuit establishment calls for specifying a single uniform bandwidth rate for both directions. The result is illustrated by the below figure, in which the bandwidth capacity on some network links is sufficient to support the A-Z path, but no sufficient to support the Z-A path. During path computation, the :doc:`../service/service_pruning_doc` will first prune out the insufficient (unidirectional) link, and thus no bidirectional path exists to support the given reservation.
+Some communication does not require identical bandwidth constraints in the A-Z and Z-A direction. For example, the return path may only be required for control signalling, and could thus require much less bandwidth than the data transfer which may be unidirectional in the forward-direction.  Traditional circuit establishment calls for specifying a single uniform bandwidth rate for both directions. The result is illustrated by the below figure, in which the bandwidth capacity on some network links is sufficient to support the A-Z path, but no sufficient to support the Z-A path. During path computation, the :ref:`service_pruning` will first prune out the insufficient (unidirectional) link, and thus no bidirectional path exists to support the given reservation.
 
 .. figure:: ../../.static/pce_asymm_need.gif
     :scale: 75%
@@ -35,8 +35,8 @@ Service Details
 
 **Relevant PCE Module(s)**
 
-- :doc:`../pce/pce_palindrome_doc`
-- :doc:`../pce/pce_nonpalindrome_doc`
-- :doc:`../pce/pce_ero_doc`
-- :doc:`../pce/pce_survivability_doc`
+- :ref:`pce_palindrome`
+- :ref:`pce_nonpalindrome`
+- :ref:`pce_ero`
+- :ref:`pce_survivability`
 

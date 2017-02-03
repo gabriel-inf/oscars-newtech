@@ -1,15 +1,16 @@
+.. _topologyref:
 
 Topology Assumptions Reference
 ==============================
 
-The figure below provides a basic reference to the primary network topology assumptions used throughout the illustrative examples found in remainder of this documentation suite. For example, these assumptions apply to the documents on :doc:`pce_doc` and :doc`advanced_service_doc`.
+The figure below provides a basic reference to the primary network topology assumptions used throughout the illustrative examples found in remainder of this documentation suite. For example, these assumptions apply to the documents on :ref:`pce_doc` and :ref`advanced_service`.
 
 .. figure:: ../.static/topology_ref.png
     :width: 50%
     :alt: Topology Assumptions
     :align: center
 
-    *Assumptions of topology components. *
+    *Assumptions of topology components.*
 
 
 All network links are assumed to be comprised of a bidirectional pair of individual unidirectional fibers in opposite directions such that circuit established in one direction do not necessarily indicate the same in reverse. 

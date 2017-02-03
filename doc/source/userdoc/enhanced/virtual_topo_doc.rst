@@ -1,3 +1,5 @@
+.. _virtual_topo:
+
 Service-Layer Topology
 ======================
 
@@ -15,7 +17,7 @@ The MPLS-Layer Topology
 - MPLS routers and connected ports.
 - Network links connecting a pair of MPLS routers.
 
-All circuit service begins and terminates are devices and ports on the Service-Layer. The MPLS-Layer, meanwhile, is abstracted out of the Service-Layer such that no MPLS elements are included. For each pair of elements on the border between the two layers, there exist two abstract edges as shown in the figure below (refer to the :doc:`../topologyref_doc` for an introduction to the topology element illustrations used throughout this document). These edges represent a logical connection through the MPLS-Layer.
+All circuit service begins and terminates are devices and ports on the Service-Layer. The MPLS-Layer, meanwhile, is abstracted out of the Service-Layer such that no MPLS elements are included. For each pair of elements on the border between the two layers, there exist two abstract edges as shown in the figure below (refer to the :ref:`topologyref` for an introduction to the topology element illustrations used throughout this document). These edges represent a logical connection through the MPLS-Layer.
 
 .. figure:: ../../.static/service_topo.gif
     :width: 45%
@@ -24,7 +26,7 @@ All circuit service begins and terminates are devices and ports on the Service-L
 
     *All MPLS-Layer components are abstracted out of the Service-Layer to be replaced by abstract edges connecting pairs of Service-Layer components.*
 
-The Service-Layer topology can then be submitted in place of the true physical topology to the :doc:`../pce_doc`. The abstract links are treated identically to physical links by the PCE components. That is, they are pruned from the Service-Layer topology and then included in the set of links passed into the :ref:`pathfinding_algorithms`. Once the PCE has completed execution on the Service-Layer topology, any abstract links included in the solution are translated back into their corresponding physical counterparts. The figure below shows a possible PCE solution consisting of a physical link and an abstract link. No further processing by the PCE is performed in order to compute the physical paths. The process of assigning translational values and weights is described below.
+The Service-Layer topology can then be submitted in place of the true physical topology to the :ref:`pce_doc`. The abstract links are treated identically to physical links by the PCE components. That is, they are pruned from the Service-Layer topology and then included in the set of links passed into the :ref:`pathfinding_algorithms`. Once the PCE has completed execution on the Service-Layer topology, any abstract links included in the solution are translated back into their corresponding physical counterparts. The figure below shows a possible PCE solution consisting of a physical link and an abstract link. No further processing by the PCE is performed in order to compute the physical paths. The process of assigning translational values and weights is described below.
 
 
 .. figure:: ../../.static/service_topo_effect.png

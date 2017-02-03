@@ -1,3 +1,4 @@
+.. _pce_layer3:
 
 Layer 3 PCE Module
 ==================

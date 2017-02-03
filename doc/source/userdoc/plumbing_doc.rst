@@ -1,3 +1,4 @@
+.. _plumbing:
 
 Plumbing Specification
 ======================
@@ -17,7 +18,7 @@ OSCARS 1.0 has introduced a design which enables users to logically represent th
 
 
 
-OSCARS applies the above analogy to each circuit request and reservation; obviously replacing the water transferred through the system with network traffic. Here, the fixtures are simply the ingress/egress ports where the data enters/exits the network. The junctions represent the network devices (Ethernet switches and MPLS routers). Note that the ingress/egress ports are found on these devices. Lastly, the pipes will connect the junctions. OSCARS passes the user request into the :doc:`pce_doc` in the form of a set of Requested Pipes and Requested “Simple” Junctions (which represent a request to establish a circuit from one port on a device to another port on the same device). Note: No fewer than two fixtures may be specified as part of a circuit request.
+OSCARS applies the above analogy to each circuit request and reservation; obviously replacing the water transferred through the system with network traffic. Here, the fixtures are simply the ingress/egress ports where the data enters/exits the network. The junctions represent the network devices (Ethernet switches and MPLS routers). Note that the ingress/egress ports are found on these devices. Lastly, the pipes will connect the junctions. OSCARS passes the user request into the :ref:`pce_doc` in the form of a set of Requested Pipes and Requested “Simple” Junctions (which represent a request to establish a circuit from one port on a device to another port on the same device). Note: No fewer than two fixtures may be specified as part of a circuit request.
 
 .. figure:: ../.static/pipeintro.png
     :scale: 50%
@@ -26,7 +27,7 @@ OSCARS applies the above analogy to each circuit request and reservation; obviou
 
     *Overview of OSCARS circuit plumbing representation.*
 
-Using these sets of requested pipes and junctions, pathfinding is performed by PCE modules based on the user's :doc:`requestspec_doc`, and then the solution paths are translated back into Reserved Pipes, Reserved Junctions, and Reserved Fixtures. An example of the distinction between Requested plumbing, the physical path, and Reserved plumbing is shown in the figure above. This process (performed by the :doc:`pce_translation_doc`) takes a physical path, and converts it into a series of pipes (or just singular junctions, for any requested “simple” junctions) in the following manner: 
+Using these sets of requested pipes and junctions, pathfinding is performed by PCE modules based on the user's :ref:`requestspec`, and then the solution paths are translated back into Reserved Pipes, Reserved Junctions, and Reserved Fixtures. An example of the distinction between Requested plumbing, the physical path, and Reserved plumbing is shown in the figure above. This process (performed by the :ref:`pce_translation`) takes a physical path, and converts it into a series of pipes (or just singular junctions, for any requested “simple” junctions) in the following manner: 
 
 - For each pair of adjacent Ethernet switches, a reserved pipe is constructed, with the ports connecting them contained within the pipe, and with the two switches represented as junctions.
 - For each Ethernet switch -- MPLS router pair, a reserved pipe is constructed in the same fashion.
@@ -86,5 +87,5 @@ Given this robust plumbing infrastructure the possibilities are truly endless wh
 
 OSCARS 1.0 is designed to seamlessly adapt to a user's changing service requirements. More importantly, OSCARS 1.0 has been designed with a focus on introducing a novel service suite never before offered on a such a large-scale or commercial system. By focusing on the cutting-edge at inception, new and emerging communication paradigms from academia and industry alike will be easily adopted in OSCARS! 
 
-The :doc:`pce_doc` is responsible for computing the routes necessary to construct the circuit reservation. If the user specifies multiple pipes with different parameters or service requirements, each pipe is handled independently. For example, a request consisting of two unique pipes, where one pipe specifies *Service A*, and the other specifies *Service B*, both pipes will be satisfied without interference from the other's service.
+The :ref:`pce_doc` is responsible for computing the routes necessary to construct the circuit reservation. If the user specifies multiple pipes with different parameters or service requirements, each pipe is handled independently. For example, a request consisting of two unique pipes, where one pipe specifies *Service A*, and the other specifies *Service B*, both pipes will be satisfied without interference from the other's service.
 

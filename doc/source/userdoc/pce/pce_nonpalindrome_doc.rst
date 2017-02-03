@@ -1,3 +1,4 @@
+.. _pce_nonpalindrome:
 
 Non-Palindromic PCE Module
 ==========================
@@ -15,14 +16,14 @@ Module Details
 --------------
 **Calls:**
 
-- :doc:`pce_dijkstra_doc`
-- :doc:`../service/service_topology_doc`
-- :doc:`../service/service_pruning_doc`
-- :doc:`../virtual_topo_doc`
+- :ref:`pce_dijkstra`
+- :ref:`service_topology`
+- :ref:`service_pruning`
+- :ref:`virtual_topo`
 
 **Called By:** 
 
-- :doc:`pce_top_doc`
+- :ref:`pce_top`
 
 **API Specification:**
 

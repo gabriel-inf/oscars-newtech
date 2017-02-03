@@ -77,36 +77,8 @@
 <p>Get <a href="https://github.com/esnet/oscars-newtech">OSCARS</a> from Github</p>
 </body>	
 <h3><a href="../../index.html">Table Of Contents</a></h3>
-<ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="../index.html">User Documentation</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../start.html">Getting Started</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="../overview.html">Project Overview</a><ul class="current">
-<li class="toctree-l3 current"><a class="reference internal" href="../core_doc.html">Core Module</a><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="../requestspec_doc.html">Circuit Request Specification</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../resvspec_doc.html">Circuit Reservation Specification</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../plumbing_doc.html">Plumbing Specification</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../plumbing_doc.html#advanced-plumbing">Advanced Plumbing</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../topologyref_doc.html">Topology Assumptions Reference</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../pce_doc.html">Path Computation Engine (PCE)</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../pce_doc.html#pce-workflow">PCE Workflow</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../pce_doc.html#pce-structure">PCE Structure</a></li>
-<li class="toctree-l4 current"><a class="reference internal" href="../advanced_service_doc.html">Path Computation Service Enhancements</a><ul class="current">
-<li class="toctree-l5"><a class="reference internal" href="asymm_service_doc.html">Asymmetric Bandwidth Capability Service</a></li>
-<li class="toctree-l5 current"><a class="current reference internal" href="">Non-Palindromic Return Path Service</a></li>
-<li class="toctree-l5"><a class="reference internal" href="multipoint_service_doc.html">Multipoint Routing Service</a></li>
-<li class="toctree-l5"><a class="reference internal" href="ero_service_doc.html">Explicit Routing Services</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="../webui_doc.html">Web User Interface (WebUI)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../whatif_doc.html">What-If Service Module</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="../virtualcircuits.html">Virtual Circuits</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../webui_doc.html">Web User Interface (WebUI)</a></li>
-</ul>
-</li>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../index.html">User Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../codedoc/index.html">Code Documentation</a></li>
 </ul>
 
@@ -139,7 +111,7 @@
             
   <div class="section" id="non-palindromic-return-path-service">
 <span id="nonpalindromic-pce-service"></span><h1>Non-Palindromic Return Path Service<a class="headerlink" href="#non-palindromic-return-path-service" title="Permalink to this headline">¶</a></h1>
-<p>It is possible for the MPLS layer to support non-identical A-Z and Z-A paths. The user can request that the path computation performed for a particulat pipe be Non-Palindromic, allowing the PCE to use (possibly) different paths through the MPLS layer to provision the request. All Ethernet devices/ports/links used in the forward path, <strong>must</strong> be represented in the return path. Only MPLS devices/ports/links may differ in forward-/reverse-direction paths. This is accomplished by creating a <a class="reference internal" href="virtual_topo_doc.html"><em>Service-Layer Topology</em></a> for each Non-Palindromic request. This Service-Layer topology abstracts out the MPLS-Layer devices, and replaces them with a pair of abstract links between each pair of Service-Layer elements adjacent to the MPLS-Layer. These abstract links are computed independently such they they each correspond to the shortest path between the end-points. Therefore, the forward and return paths <em>may</em> contain different routing elements.</p>
+<p>It is possible for the MPLS layer to support non-identical A-Z and Z-A paths. The user can request that the path computation performed for a particulat pipe be Non-Palindromic, allowing the PCE to use (possibly) different paths through the MPLS layer to provision the request. All Ethernet devices/ports/links used in the forward path, <strong>must</strong> be represented in the return path. Only MPLS devices/ports/links may differ in forward-/reverse-direction paths. This is accomplished by creating a <a class="reference internal" href="virtual_topo_doc.html#virtual-topo"><em>Service-Layer Topology</em></a> for each Non-Palindromic request. This Service-Layer topology abstracts out the MPLS-Layer devices, and replaces them with a pair of abstract links between each pair of Service-Layer elements adjacent to the MPLS-Layer. These abstract links are computed independently such they they each correspond to the shortest path between the end-points. Therefore, the forward and return paths <em>may</em> contain different routing elements.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">There is currently no support for <em>forcing</em> Non-Palindromic solutions. It&#8217;s entirely possible for the PCE to compute Palindromic solutions even when Non-Palindromic service is requested.</p>
@@ -162,8 +134,8 @@
 </ul>
 <p><strong>Relevant PCE Module(s)</strong></p>
 <ul class="simple">
-<li><a class="reference internal" href="../pce/pce_nonpalindrome_doc.html"><em>Non-Palindromic PCE Module</em></a></li>
-<li><a class="reference internal" href="../pce/pce_ero_doc.html"><em>Explicit Route Object (ERO) PCE Module</em></a></li>
+<li><a class="reference internal" href="../pce/pce_nonpalindrome_doc.html#pce-nonpalindrome"><em>Non-Palindromic PCE Module</em></a></li>
+<li><a class="reference internal" href="../pce/pce_ero_doc.html#pce-ero"><em>Explicit Route Object (ERO) PCE Module</em></a></li>
 </ul>
 <div class="toctree-wrapper compound">
 </div>

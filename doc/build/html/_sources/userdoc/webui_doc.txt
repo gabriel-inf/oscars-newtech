@@ -1,3 +1,4 @@
+.. _webui:
 
 Web User Interface (WebUI)
 ==========================
