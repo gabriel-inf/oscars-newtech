@@ -63,8 +63,7 @@ class ReservationWhatIfApp extends React.Component{
         this.selectNode = this.selectNode.bind(this);
         this.handleClearPath = this.handleClearPath.bind(this);
         this.updateReservation = this.updateReservation.bind(this);
-        this.updatePtDMap = this.updatePtDMap.bind(this);
-        this.updateDtPMap = this.updateDtPMap.bind(this);
+        this.updatePortMaps = this.updatePortMaps.bind(this);
         this.handleSrcPortSelect = this.handleSrcPortSelect.bind(this);
         this.handleDstPortSelect = this.handleDstPortSelect.bind(this);
         this.componentDidUpdate = this.componentDidUpdate.bind(this);
@@ -73,11 +72,8 @@ class ReservationWhatIfApp extends React.Component{
         client.loadJSON({method: "GET", url: "/resv/newConnectionId"})
             .then(this.updateReservation);
 
-        client.loadJSON({method: "GET", url: "/topology/portdevicemap/full"})
-            .then(this.updatePtDMap);
-
-        client.loadJSON({method: "GET", url: "/topology/deviceportmap/full"})
-            .then(this.updateDtPMap);
+        client.loadJSON({method: "GET", url: "/info/vlanEdges"})
+            .then(this.updatePortMaps);
     }
 
     componentDidMount(){
@@ -128,16 +124,28 @@ class ReservationWhatIfApp extends React.Component{
         this.setState({reservation: reservation});
     }
 
-    updatePtDMap(response){
-        let map = JSON.parse(response);
-        this.setState({portToDeviceMap: map});
+    updatePortMaps(response){
+        let vlanPorts = JSON.parse(response);
+
+        let deviceToPortMap = {};
+        deviceToPortMap["--"] = ["--"];
+        let portToDeviceMap = {};
+
+        for(let i = 0; i < vlanPorts.length; i++){
+            let port = vlanPorts[i];
+            let device = port.split(":")[0];
+            portToDeviceMap[port] = device;
+            if(deviceToPortMap.hasOwnProperty(device)){
+                deviceToPortMap[device].push(port);
+            }
+            else{
+                deviceToPortMap[device] = [port];
+            }
+        }
+        this.setState({deviceToPortMap: deviceToPortMap});
+        this.setState({portToDeviceMap: portToDeviceMap});
     }
 
-    updateDtPMap(response){
-        let map = JSON.parse(response);
-        map["--"] = ["--"];
-        this.setState({deviceToPortMap: map});
-    }
 
     initializeNetwork(response){
         let jsonData = JSON.parse(response);

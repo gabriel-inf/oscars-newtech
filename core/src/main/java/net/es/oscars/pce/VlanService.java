@@ -880,8 +880,6 @@ public class VlanService {
             // Overlap is used to track all VLAN tags that are available across both endpoints of an edge
             Set<Integer> overlap = new HashSet<>();
             // Get all possible VLAN ranges reservable at the a and z ends of the edge
-            //List<IntRange> aRanges = getVlanRangesFromUrnString(urnMap, edge.getA().getUrn());
-            //List<IntRange> zRanges = getVlanRangesFromUrnString(urnMap, edge.getZ().getUrn());
             Set<Integer> aAvailVlans = availVlanMap.getOrDefault(edge.getA().getUrn(), null);
             Set<Integer> zAvailVlans = availVlanMap.getOrDefault(edge.getZ().getUrn(), null);
 
@@ -889,7 +887,6 @@ public class VlanService {
             // These edges do not need to be pruned, and will be added at the end to the best set of edges
             Boolean safeA = edge.getA().getVertexType().equals(VertexType.VIRTUAL) || aAvailVlans == null;
             Boolean safeZ = edge.getZ().getVertexType().equals(VertexType.VIRTUAL) || zAvailVlans == null;
-            //aRanges.isEmpty() && zRanges.isEmpty() || edge.getLayer().equals(Layer.MPLS)
             if (safeA || safeZ) {
                 edgesPerId.get(-1).add(edge);
             }
