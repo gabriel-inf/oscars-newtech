@@ -2,6 +2,7 @@ package net.es.oscars.pce;
 
 
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.dto.spec.RequestedVlanFixture;
 import net.es.oscars.resv.dao.ReservedBandwidthRepository;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.dto.topo.TopoEdge;
@@ -242,7 +243,8 @@ public class BandwidthService {
      * @return A mapping from TopoVertex (ports only) to requested "Ingress" and "Egress" bandwidth
      */
     public Map<TopoVertex, Map<String, Integer>> buildRequestedBandwidthMap(List<List<TopoEdge>> EROs,
-                                                                            List<Integer> bandwidths) {
+                                                                            List<Integer> bandwidths,
+                                                                            RequestedVlanPipeE reqPipe) {
         // Map a port node to a map of "Ingress" and "Egress" requested bandwidth values
         Map<TopoVertex, Map<String, Integer>> requestedBandwidthMap = new HashMap<>();
 
@@ -257,6 +259,7 @@ public class BandwidthService {
 
         return requestedBandwidthMap;
     }
+
 
     /**
      * Build an initial map of requested bandwidth in the Ingress and Egress directions
@@ -611,30 +614,48 @@ public class BandwidthService {
      * (1) have valid reservable bandwidth fields, and (2) the URN(s) do not have sufficient available bandwidth
      * available in both the az and za directions (egress and ingress).
      *
-     * @param edge       - The edge to be evaluated.
-     * @param azBw       - The requested bandwidth in one direction.
-     * @param zaBw       - The requested bandwidth in the other direction.
-     * @param urnMap     - Map of URN name to UrnE object.
-     * @param availBwMap - Map of UrnE objects to "Ingress" and "Egress" Available Bandwidth
+     * @param edge                      - The edge to be evaluated.
+     * @param azBw                      - The requested bandwidth in one direction.
+     * @param zaBw                      - The requested bandwidth in the other direction.
+     * @param urnMap                    - Map of URN name to UrnE object.
+     * @param availBwMap                - Map of UrnE objects to "Ingress" and "Egress" Available Bandwidth
+     * @param requestedFixtureBwMap     - Map of requested bandwidth for each fixture. Can be different from az and za bw.
      * @return True if there is sufficient reservable bandwidth, False otherwise.
      */
     public boolean evaluateBandwidthEdge(TopoEdge edge, Integer azBw, Integer zaBw, Map<String, UrnE> urnMap,
-                                         Map<String, Map<String, Integer>> availBwMap) {
+                                         Map<String, Map<String, Integer>> availBwMap,
+                                         Map<String, Map<String, Integer>> requestedFixtureBwMap) {
 
         // At least one of the two has reservable bandwidth, so check the valid nodes to determine
         // If they have sufficient bandwidth. In the case of a (device, port) edge, only the port must be checked.
         // If it is a (port, port) edge, then both must be checked.
         boolean aPasses = true;
         boolean zPasses = true;
-        if (availBwMap.containsKey(edge.getA().getUrn())) {
+        String aUrn = edge.getA().getUrn();
+        String zUrn = edge.getZ().getUrn();
+        if (availBwMap.containsKey(aUrn)) {
             // Get a map of the available Ingress/Egress bandwidth for URN a
-            Map<String, Integer> aAvailBwMap = availBwMap.get(edge.getA().getUrn());
-            aPasses = aAvailBwMap.get("Egress") >= azBw && aAvailBwMap.get("Ingress") >= zaBw;
+            Map<String, Integer> aAvailBwMap = availBwMap.get(aUrn);
+            if(requestedFixtureBwMap.containsKey(aUrn)){
+                Map<String, Integer> aRequestedBwMap = requestedFixtureBwMap.get(aUrn);
+                aPasses = aAvailBwMap.get("Egress") >= aRequestedBwMap.get("Egress") &&
+                        aAvailBwMap.get("Ingress") >= aRequestedBwMap.get("Ingress");
+            }
+            else{
+                aPasses = aAvailBwMap.get("Egress") >= azBw && aAvailBwMap.get("Ingress") >= zaBw;
+            }
         }
-        if (availBwMap.containsKey(edge.getA().getUrn())) {
+        if (availBwMap.containsKey(zUrn)) {
             // Get a map of the available Ingress/Egress bandwidth for URN z
-            Map<String, Integer> zAvailBwMap = availBwMap.get(edge.getA().getUrn());
-            zPasses = zAvailBwMap.get("Ingress") >= azBw && zAvailBwMap.get("Egress") >= zaBw;
+            Map<String, Integer> zAvailBwMap = availBwMap.get(zUrn);
+            if(requestedFixtureBwMap.containsKey(zUrn)){
+                Map<String, Integer> zRequestedBwMap = requestedFixtureBwMap.get(zUrn);
+                zPasses = zAvailBwMap.get("Egress") >= zRequestedBwMap.get("Egress") &&
+                        zAvailBwMap.get("Ingress") >= zRequestedBwMap.get("Ingress");
+            }
+            else{
+                zPasses = zAvailBwMap.get("Ingress") >= azBw && zAvailBwMap.get("Egress") >= zaBw;
+            }
         }
 
         return aPasses && zPasses;
@@ -643,7 +664,7 @@ public class BandwidthService {
 
     /**
      * Evaluate an edge to determine if the nodes on either end of the edge support the requested
-     * unidriectional bandwidth. An edge will only fail the test if one or both URNs (corresponding to the nodes):
+     * unidirectional bandwidth. An edge will only fail the test if one or both URNs (corresponding to the nodes):
      * (1) have valid reservable bandwidth fields, and (2) the URN(s) do not have sufficient available bandwidth
      * available in the unique direction.
      *
@@ -678,4 +699,38 @@ public class BandwidthService {
         return aPasses && zPasses;
     }
 
+    public boolean evaluateBandwidthFixtures(RequestedVlanPipeE reqPipe, Map<String, Map<String, Integer>> availBwMap) {
+        Set<RequestedVlanFixtureE> aFixtures = reqPipe.getAJunction().getFixtures();
+        Set<RequestedVlanFixtureE> zFixtures = reqPipe.getZJunction().getFixtures();
+
+        return confirmSufficientBandwidthFixtures(aFixtures, availBwMap) && confirmSufficientBandwidthFixtures(zFixtures, availBwMap);
+    }
+
+    private boolean confirmSufficientBandwidthFixtures(Set<RequestedVlanFixtureE> fixtures,
+                                                       Map<String, Map<String, Integer>> availBwMap) {
+        boolean allValid = true;
+        for(RequestedVlanFixtureE fix : fixtures){
+            String fixUrn = fix.getPortUrn();
+            Integer ingressBw = fix.getInMbps();
+            Integer egressBw = fix.getEgMbps();
+            // If too much is requested for ingress or egress, then it is not a valid request
+            if(ingressBw > availBwMap.get(fixUrn).get("Ingress") || egressBw > availBwMap.get(fixUrn).get("Egress")){
+                allValid = false;
+            }
+        }
+        return allValid;
+    }
+
+    public Map<String, Map<String,Integer>> buildRequestedFixtureBandwidthMap(Set<RequestedVlanFixtureE> fixtures) {
+        Map<String, Map<String, Integer>> requestedBwMap = new HashMap<>();
+        for(RequestedVlanFixtureE fix : fixtures){
+            String urn = fix.getPortUrn();
+            Integer ingress = fix.getInMbps();
+            Integer egress = fix.getEgMbps();
+            requestedBwMap.put(urn, buildZeroRequestedBandwidthMap());
+            requestedBwMap.get(urn).put("Ingress", ingress);
+            requestedBwMap.get(urn).put("Egress", egress);
+        }
+        return requestedBwMap;
+    }
 }

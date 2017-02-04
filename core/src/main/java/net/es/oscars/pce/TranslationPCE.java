@@ -251,11 +251,17 @@ public class TranslationPCE {
 
         // Returns a mapping from topovertices (ports) to an "Ingress"/"Egress" map of the total Ingress/Egress
         // Requested bandwidth at that port across both the azERO and the zaERO
-        List<List<TopoEdge>> EROs = Arrays.asList(azERO, zaERO);
-        List<Integer> bandwidths = Arrays.asList(reqPipe.getAzMbps(), reqPipe.getZaMbps());
-        Map<TopoVertex, Map<String, Integer>> requestedBandwidthMap = bwService.buildRequestedBandwidthMap(EROs, bandwidths);
+        // NOTE: REMOVE STARTING SOURCE FIXTURE AND ENDING DESTINATION FIXTURE WHILE TESTING AZ/ZA BANDWIDTH
+        // TEST FIXTURES SEPARATELY, AS THEY MAY HAVE THEIR OWN REQUIRED BANDWIDTH
+        List<TopoEdge> trimmedAzERO = azERO.subList(1, azERO.size()-1);
+        List<TopoEdge> trimmedZaERO = zaERO.subList(1, zaERO.size()-1);
 
-        testBandwidthRequirements(reqPipe, azERO, zaERO, urnMap, reqPipe.getAzMbps(), reqPipe.getZaMbps(), availBwMap,
+        List<List<TopoEdge>> EROs = Arrays.asList(trimmedAzERO, trimmedZaERO);
+        List<Integer> bandwidths = Arrays.asList(reqPipe.getAzMbps(), reqPipe.getZaMbps());
+
+        Map<TopoVertex, Map<String, Integer>> requestedBandwidthMap = bwService.buildRequestedBandwidthMap(EROs, bandwidths, reqPipe);
+
+        testBandwidthRequirements(reqPipe, trimmedAzERO, trimmedZaERO, urnMap, reqPipe.getAzMbps(), reqPipe.getZaMbps(), availBwMap,
                 requestedBandwidthMap, reservedBandwidths);
 
         return requestedBandwidthMap;
@@ -283,11 +289,6 @@ public class TranslationPCE {
 
         // now, decompose the path
         assert (azSegments.size() == zaSegments.size());
-
-        // for each segment:
-        // if it is an Ethernet segment, make junctions, one per device
-        // if it is an MPLS segment, make a pipe
-        // all the while, make sure to merge in the current first and last junctions as needed
 
         // Map of junction pairs to pipe EROs
         Map<List<TopoVertex>, Map<String, List<TopoVertex>>> junctionPairToPipeEROMap = new HashMap<>();
@@ -343,8 +344,8 @@ public class TranslationPCE {
             DeviceModel aModel = deviceModels.get(aJunction.getDeviceUrn());
             DeviceModel zModel = deviceModels.get(zJunction.getDeviceUrn());
 
-            Set<ReservedBandwidthE> pipeBandwidths = createReservedBandwidthForEROs(pipeEroMap.get("AZ"), pipeEroMap.get("ZA"), requestedBandwidthMap, start, end, connectionId);
-
+            Set<ReservedBandwidthE> pipeBandwidths = createReservedBandwidthForEROs(pipeEroMap.get("AZ"),
+                    pipeEroMap.get("ZA"), requestedBandwidthMap, start, end, connectionId);
 
             if (thisLayer.equals(Layer.MPLS)) {
                 ReservedMplsPipeE mplsPipe = ReservedMplsPipeE.builder()
@@ -644,6 +645,12 @@ public class TranslationPCE {
                                           Map<TopoVertex, Map<String, Integer>> requestedBandwidthMap,
                                           List<ReservedBandwidthE> reservedBandwidths) throws PCEException {
         // Confirm that there is sufficient bandwidth to meet the request (given what has been reserved so far)
+
+        // Evaluate the fixtures
+        boolean sufficientBwFixtures = bwService.evaluateBandwidthFixtures(reqPipe, availBwMap);
+        if(!sufficientBwFixtures){
+            throw new PCEException("Insufficient bandwidth to meet requested fixtures for pipe " + reqPipe.toString());
+        }
         // Palindromic EROs -- evaluate both directions at each port - traffic flows both ways
         if (pceAssistant.palindromicEros(azERO, zaERO)) {
             boolean sufficientBw = bwService.evaluateBandwidthEROBi(urnMap, azMbps, zaMbps, azERO, zaERO, availBwMap);

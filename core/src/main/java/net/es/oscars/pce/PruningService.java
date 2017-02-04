@@ -119,7 +119,11 @@ public class PruningService {
 
         Set<String> urnBlacklist = pipe.getUrnBlacklist();
 
-        return pruneTopology(topo, azBw, zaBw, vlans, urns, rsvBwList, rsvVlanList, urnBlacklist);
+        Set<RequestedVlanFixtureE> fixtures = new HashSet<>();
+        fixtures.addAll(pipe.getAJunction().getFixtures());
+        fixtures.addAll(pipe.getZJunction().getFixtures());
+
+        return pruneTopology(topo, azBw, zaBw, vlans, urns, rsvBwList, rsvVlanList, urnBlacklist, fixtures);
     }
 
     /**
@@ -180,7 +184,8 @@ public class PruningService {
      */
     private Topology pruneTopology(Topology topo, Integer azBw, Integer zaBw, List<IntRange> vlans,
                                    List<UrnE> urns, List<ReservedBandwidthE> rsvBwList,
-                                   List<ReservedVlanE> rsvVlanList, Set<String> urnBlacklist)
+                                   List<ReservedVlanE> rsvVlanList, Set<String> urnBlacklist,
+                                   Set<RequestedVlanFixtureE> fixtures)
     {
         //Build map of URN name to UrnE
         Map<String, UrnE> urnMap = buildUrnMap(urns);
@@ -195,6 +200,9 @@ public class PruningService {
         // Build map of URN to resvVlan
         Map<String, Set<Integer>> availVlanMap = vlanSvc.buildAvailableVlanIdMap(urnMap, rsvVlanList, portToDeviceMap);
 
+        // Requested bandwidth map for fixtures
+        Map<String, Map<String, Integer>> fixtureRequestedBwMap = bwSvc.buildRequestedFixtureBandwidthMap(fixtures);
+
         // Copy the original topology's layer and set of vertices.
         Topology pruned = new Topology();
         pruned.setLayer(topo.getLayer());
@@ -202,7 +210,7 @@ public class PruningService {
         // Filter out edges from the topology that do not have sufficient bandwidth available on both terminating nodes.
         // Also filters out all edges where either terminating node is not present in the URN map.
         Set<TopoEdge> availableEdges = topo.getEdges().stream()
-                .filter(e -> bwSvc.evaluateBandwidthEdge(e, azBw, zaBw, urnMap, availBwMap))
+                .filter(e -> bwSvc.evaluateBandwidthEdge(e, azBw, zaBw, urnMap, availBwMap, fixtureRequestedBwMap))
                 .collect(Collectors.toSet());
         // If this is an MPLS topology, or there are no edges left, just take the bandwidth-pruned set of edges.
         // Otherwise, find all the remaining edges that can support the requested VLAN(s).
@@ -250,6 +258,7 @@ public class PruningService {
 
         // Build map of URN to resvVlan
         Map<String, Set<Integer>> availVlanMap = vlanSvc.buildAvailableVlanIdMap(urnMap, rsvVlanList, portToDeviceMap);
+
 
         // Copy the original topology's layer and set of vertices.
         Topology pruned = new Topology();
