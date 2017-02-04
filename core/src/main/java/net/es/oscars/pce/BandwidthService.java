@@ -668,14 +668,16 @@ public class BandwidthService {
      * (1) have valid reservable bandwidth fields, and (2) the URN(s) do not have sufficient available bandwidth
      * available in the unique direction.
      *
-     * @param edge       - The edge to be evaluated.
-     * @param theBw      - The requested bandwidth in one direction.
-     * @param urnMap     - Map of URN name to UrnE object.
-     * @param availBwMap - Map of UrnE objects to "Ingress" and "Egress" Available Bandwidth
+     * @param edge                      - The edge to be evaluated.
+     * @param theBw                      - The requested bandwidth in one direction.
+     * @param urnMap                    - Map of URN name to UrnE object.
+     * @param availBwMap                - Map of UrnE objects to "Ingress" and "Egress" Available Bandwidth
+     * @param requestedFixtureBwMap     - Map of requested bandwidth for each fixture. Can be different from az and za bw.
      * @return True if there is sufficient reservable bandwidth, False otherwise.
      */
     public boolean evaluateBandwidthEdgeUni(TopoEdge edge, Integer theBw, Map<String, UrnE> urnMap,
-                                            Map<String, Map<String, Integer>> availBwMap) {
+                                            Map<String, Map<String, Integer>> availBwMap,
+                                            Map<String, Map<String, Integer>> requestedFixtureBwMap) {
 
         if (!edge.getA().getVertexType().equals(VertexType.PORT) || !edge.getZ().getVertexType().equals(VertexType.PORT))
             return true;
@@ -685,15 +687,29 @@ public class BandwidthService {
         // If it is a (port, port) edge, then both must be checked.
         boolean aPasses = true;
         boolean zPasses = true;
-        if (availBwMap.containsKey(edge.getA().getUrn())) {
+        String aUrn = edge.getA().getUrn();
+        String zUrn = edge.getZ().getUrn();
+        if (availBwMap.containsKey(aUrn)) {
             // Get a map of the available Ingress/Egress bandwidth for URN a
-            Map<String, Integer> aAvailBwMap = availBwMap.get(edge.getA().getUrn());
-            aPasses = aAvailBwMap.get("Egress") >= theBw;
+            Map<String, Integer> aAvailBwMap = availBwMap.get(aUrn);
+            if(requestedFixtureBwMap.containsKey(aUrn)){
+                Map<String, Integer> aRequestedBwMap = requestedFixtureBwMap.get(aUrn);
+                aPasses = aAvailBwMap.get("Egress") >= aRequestedBwMap.get("Egress");
+            }
+            else{
+                aPasses = aAvailBwMap.get("Egress") >= theBw;
+            }
         }
-        if (availBwMap.containsKey(edge.getZ().getUrn())) {
+        if (availBwMap.containsKey(zUrn)) {
             // Get a map of the available Ingress/Egress bandwidth for URN z
-            Map<String, Integer> zAvailBwMap = availBwMap.get(edge.getZ().getUrn());
-            zPasses = zAvailBwMap.get("Ingress") >= theBw;
+            Map<String, Integer> zAvailBwMap = availBwMap.get(zUrn);
+            if(requestedFixtureBwMap.containsKey(zUrn)){
+                Map<String, Integer> zRequestedBwMap = requestedFixtureBwMap.get(zUrn);
+                zPasses = zAvailBwMap.get("Ingress") >= zRequestedBwMap.get("Ingress");
+            }
+            else{
+                zPasses = zAvailBwMap.get("Ingress") >= theBw;
+            }
         }
 
         return aPasses && zPasses;
