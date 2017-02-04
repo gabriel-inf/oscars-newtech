@@ -428,6 +428,72 @@ public class BandwidthAvailabilityServiceTest {
     }
 
     @Test
+    public void reservationsStartDuringEndDuringDifferentPipeAndJunctionBw(){
+
+        reservedBandwidthRepo.deleteAll();
+        topologyBuilder.buildTopoFourPaths();
+        List<UrnE> urns = urnRepo.findAll();
+        Map<String, UrnE> urnMap = urns.stream().collect(Collectors.toMap(UrnE::getUrn, urn -> urn));
+        Instant now = Instant.parse("1995-10-23T00:00:00Z");
+
+        List<String> reservedPortNames = Arrays.asList("portA", "nodeK:3", "nodeW:1", "nodeW:2", "nodeQ:3", "portZ");
+        List<Instant> reservedStartTimes = Arrays.asList(
+                now.plus(2L, ChronoUnit.HOURS),
+                now.plus(2L, ChronoUnit.HOURS),
+                now.plus(2L, ChronoUnit.HOURS),
+                now.plus(2L, ChronoUnit.HOURS),
+                now.plus(2L, ChronoUnit.HOURS),
+                now.plus(2L, ChronoUnit.HOURS));
+        List<Instant> reservedEndTimes = Arrays.asList(
+                now.plus(3L, ChronoUnit.HOURS),
+                now.plus(3L, ChronoUnit.HOURS),
+                now.plus(3L, ChronoUnit.HOURS),
+                now.plus(3L, ChronoUnit.HOURS),
+                now.plus(3L, ChronoUnit.HOURS),
+                now.plus(3L, ChronoUnit.HOURS));
+        List<Integer> inBandwidths = Arrays.asList(100, 500, 500, 500, 500, 200);
+        List<Integer> egBandwidths = Arrays.asList(100, 500, 500, 500, 500, 200);
+
+        Integer expectedMinAzBw = 500;
+        Integer expectedMaxAzBw = 1000;
+        Integer expectedMinZaBw = 500;
+        Integer expectedMaxZaBw = 1000;
+
+        List<String> path = Arrays.asList("portA", "nodeK", "nodeK:3", "nodeW:1", "nodeW", "nodeW:2", "nodeQ:3", "nodeQ", "portZ");
+        List<String> revPath = new ArrayList<>(path);
+        Collections.reverse(revPath);
+
+        Instant requestStartTime = now.plus(1L, ChronoUnit.HOURS);
+        Instant requestEndTime = now.plus(5L, ChronoUnit.HOURS);
+
+        Map<Instant, Integer> azGoalMap = new HashMap<>();
+        azGoalMap.put(requestStartTime, expectedMaxAzBw);
+        azGoalMap.put(reservedStartTimes.get(0), expectedMinAzBw);
+        azGoalMap.put(reservedEndTimes.get(0), expectedMaxAzBw);
+        azGoalMap.put(requestEndTime, expectedMaxAzBw);
+        Map<Instant, Integer> zaGoalMap = new HashMap<>();
+        zaGoalMap.put(requestStartTime, expectedMaxZaBw);
+        zaGoalMap.put(reservedStartTimes.get(0), expectedMinZaBw);
+        zaGoalMap.put(reservedEndTimes.get(0), expectedMaxZaBw);
+        zaGoalMap.put(requestEndTime, expectedMaxZaBw);
+
+        Map<String, Integer> minExpectedBwMap = new HashMap<>();
+        minExpectedBwMap.put(az1, expectedMinAzBw);
+        minExpectedBwMap.put(za1, expectedMinZaBw);
+
+        Map<String, Map<Instant, Integer>> expectedBwMap = new HashMap<>();
+        expectedBwMap.put(az1, azGoalMap);
+        expectedBwMap.put(za1, zaGoalMap);
+
+        //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
+        //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime);
+        testResponse(response, minExpectedBwMap, expectedBwMap);
+    }
+
+
+    @Test
     public void reservationsStartDuringEndAfter(){
 
         reservedBandwidthRepo.deleteAll();

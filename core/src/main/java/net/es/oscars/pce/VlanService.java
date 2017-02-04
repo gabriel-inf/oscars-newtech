@@ -745,13 +745,13 @@ public class VlanService {
 
     private Map<String,Set<Integer>> initializeChosenVlanMap(Set<String> pipeUrns, Map<String, Set<String>> nonFixPortUrnMap) {
 
-        log.info("Pipe URNs: " + pipeUrns.toString());
+        //log.info("Pipe URNs: " + pipeUrns.toString());
         Map<String, Set<Integer>> chosenVlanMap = new HashMap<>();
         for(String pipeUrn : pipeUrns){
             chosenVlanMap.put(pipeUrn, new HashSet<>());
         }
         for(Set<String> nonFixturePorts : nonFixPortUrnMap.values()){
-            log.info("Non-Fixture Ports: " + nonFixturePorts.toString());
+            //log.info("Non-Fixture Ports: " + nonFixturePorts.toString());
             for(String nonFixturePort : nonFixturePorts){
                 chosenVlanMap.put(nonFixturePort, new HashSet<>());
             }
