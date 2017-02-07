@@ -478,7 +478,7 @@ class ReservationApp extends React.Component{
     }
 
     render(){
-        let reservation = jQuery.extend(true, {}, this.state.reservation);
+        let reservation = $.extend(true, {}, this.state.reservation);
         return(
             <div>
                 <NavBar isAuthenticated={this.props.route.isAuthenticated} isAdmin={this.props.route.isAdmin}/>

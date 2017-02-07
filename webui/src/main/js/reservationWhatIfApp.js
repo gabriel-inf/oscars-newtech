@@ -4,6 +4,7 @@ import Dropdown from 'react-dropdown';
 const client = require('./client');
 const networkVis = require('./networkVis');
 const deepEqual = require('deep-equal');
+const vis = require('../../../node_modules/vis/dist/vis');
 
 
 class ReservationWhatIfApp extends React.Component{
@@ -49,8 +50,9 @@ class ReservationWhatIfApp extends React.Component{
             dst: "--",
             dstPort: "--",
             currBw: 0,
-            maxBw: 100,
+            maxBw: 10000,
             networkVis: {},
+            bwAvailMap : {},
             pathClearEnabled: false,
             portToDeviceMap: {"--" : "--"},
             deviceToPortMap: {["--"] : ["--"]},
@@ -68,6 +70,7 @@ class ReservationWhatIfApp extends React.Component{
         this.handleDstPortSelect = this.handleDstPortSelect.bind(this);
         this.componentDidUpdate = this.componentDidUpdate.bind(this);
         this.submitBwAvailRequest = this.submitBwAvailRequest.bind(this);
+        this.initializeBandwidthMap = this.initializeBandwidthMap.bind(this);
 
         client.loadJSON({method: "GET", url: "/resv/newConnectionId"})
             .then(this.updateReservation);
@@ -78,6 +81,7 @@ class ReservationWhatIfApp extends React.Component{
 
     componentDidMount(){
         client.loadJSON({method: "GET", url: "/viz/topology/multilayer"}).then(this.initializeNetwork);
+        this.initializeBandwidthMap();
     }
 
     componentDidUpdate(prevProps, prevState){
@@ -145,7 +149,6 @@ class ReservationWhatIfApp extends React.Component{
         this.setState({deviceToPortMap: deviceToPortMap});
         this.setState({portToDeviceMap: portToDeviceMap});
     }
-
 
     initializeNetwork(response){
         let jsonData = JSON.parse(response);
@@ -234,10 +237,6 @@ class ReservationWhatIfApp extends React.Component{
         this.setState({bwAvailRequest, pathClearEnabled: pathClearEnabled, src: src, srcPort: srcPort, dst: dst, dstPort: dstPort});
     }
 
-    handleBwSliderChange(event){
-        this.setState({currBw: event.target.value});
-    }
-
     handleClearPath(){
         this.state.networkVis.network.unselectAll();
         let bwAvailRequest = this.state.bwAvailRequest;
@@ -253,6 +252,98 @@ class ReservationWhatIfApp extends React.Component{
 
     handleDstPortSelect(option){
         this.setState({dstPort: option.value});
+    }
+
+    initializeBandwidthMap(){
+        let bwViz = document.getElementById('bwVisualization');
+
+        let nowDate = Date.now();
+        let furthestDate = nowDate + 1000 * 60 * 60 * 24 * 365;  // 1 year in the future
+
+        let bwOptions = {
+            style:'line',
+            drawPoints: false,
+            orientation:'bottom',
+            start: this.state.bwAvailRequest.startTime.getUTCMilliseconds(),
+            end: this.state.bwAvailRequest.endTime.getUTCMilliseconds() + (1000 * 60 * 60 * 24 * 1.1),
+            zoomable: true,
+            zoomMin: 1000 * 60 * 60 * 24,
+            zoomMax: 1000 * 60 * 60 * 24 * 365 * 2,
+            min: nowDate,
+            max: furthestDate,
+            shaded: {enabled: true},
+            width: '90%',
+            height: '400px',
+            minHeight: '400px',
+            maxHeight: '400px',
+            legend: {enabled: false, icons: false},
+            interpolation: {enabled: false},
+            dataAxis: {left: {range: {min: 0, max: 10000},}, icons: true},
+        };
+
+        let bwData = new vis.DataSet();
+
+        // Set up the look of the availability data points //
+        let groupSettingsAvail = {
+            id: "avail",
+            content: "Group Name",
+            style: 'stroke-width:1;stroke:#709FE0;',
+            options: {
+                shaded: {enabled: true, orientation: 'bottom', style: 'fill-opacity:0.5;fill:#709FE0;'}
+            }
+        };
+
+        // Set up the look of the reservation window data points //
+        let groupSettingsBar = {
+            id: "bwBar",
+            content: "Group Name",
+            style: 'stroke-width:5;stroke:red;',
+            options: {
+                shaded: {enabled: true, orientation: 'bottom', style: 'fill-opacity:0.7;fill:red;'},
+            }
+        };
+
+        let bwGroups = new vis.DataSet();
+        bwGroups.add(groupSettingsAvail);
+        bwGroups.add(groupSettingsBar);
+
+        // Create the Bar Graph
+        let bwAvailMap = new vis.Graph2d(bwViz, bwData, bwGroups, bwOptions);
+
+        bwData.add({x: nowDate, y: -10, group: 'avail'});
+        bwData.add({x: furthestDate, y: -10, group: 'avail'});
+
+        // Set first time bar: Start Time
+        let startBarID = "starttime";
+        bwAvailMap.addCustomTime(this.state.bwAvailRequest.startTime, startBarID);
+
+        // Set second time bar: End Time
+        let endBarID = "endtime";
+        bwAvailMap.addCustomTime(this.state.bwAvailRequest.endTime, endBarID);
+
+        let currWindow = bwAvailMap.getWindow();
+
+        // Listener for changing start/end times
+        /*
+        bwAvailMap.on('timechange', function (properties) { changeTime(properties, startBarID, endBarID); });
+
+        // Listener for double-click event
+        bwAvailMap.on('doubleClick', function (properties) { moveDatePicker(properties, startBarID, endBarID); });
+
+        // Listener for range-change event
+        bwAvailMap.on('rangechange', function (properties) { currWindow = bwAvailMap.getWindow(); });
+
+        // Listener to redraw map as time progresses
+        bwAvailMap.on('currentTimeTick', function (properties) { refreshMap(); });
+
+        // Listener for changing bandwidth values
+        $("#bwSlider").on("input change", function() { updateBandwidth(); });
+        */
+        this.setState({bwAvailMap: bwAvailMap});
+    }
+
+    handleBwSliderChange(event){
+        this.setState({currBw: event.target.value});
     }
 
     render(){
@@ -355,27 +446,6 @@ class NetworkPanel extends React.Component{
     }
 }
 
-class PortSelectionDropdown extends React.Component{
-
-    render(){
-        let id = this.props.type + "PortDrop";
-        let ulId = this.props.type + "PortList";
-        let title = this.props.type === "src"? "Select Source Port" : "Select Destination Port";
-        let listItems = this.props.list.map((port) => <li key={port}>{port}</li>);
-        debugger;
-        return(
-            <div className="dropdown">
-                <p style={{fontSize: "16px"}}>{title}</p>
-                <button type="button" id={id} className="btn dropdown-toggle">
-                    <span className="caret" />
-                </button>
-                <ul className="dropdown-menu" id={ulId}>
-                    {listItems}
-                </ul>
-            </div>
-        );
-    }
-}
 
 class BandwidthTimePanel extends React.Component{
 
@@ -415,7 +485,7 @@ class AvailabilityPanel extends React.Component{
                 <div style={{float: "left"}}>
                     <BandwidthSlider handleBwSliderChange={this.props.handleBwSliderChange} maxBw={this.props.maxBw} bw={this.props.bw}/>
                 </div>
-                <div id="bwVisualization" />
+                <div id="bwVisualization"/>
             </div>
         );
     }
@@ -433,8 +503,8 @@ class BandwidthSlider extends React.Component{
 
     render(){
         return(
-            <input id="bwSlider" type="range" className="verticalSlider" min="0" max={this.props.maxBw} value={this.props.bw} step="1" height="400px" width="5px"
-                   style={{WebkitAppearance: "slider-vertical"}} onChange={this.props.handleBwSliderChange}/>
+            <input id="bwSlider" type="range" className="verticalSlider" min="0" max={this.props.maxBw} value={this.props.bw} step="1"
+                   style={{WebkitAppearance: "slider-vertical", height: "350px", width: "50px"}} onChange={this.props.handleBwSliderChange}/>
         );
     }
 }
