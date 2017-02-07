@@ -2,15 +2,25 @@
 
 .. java:import:: net.es.oscars.dto.spec SurvivabilityType
 
+.. java:import:: net.es.oscars.dto.topo.enums DeviceType
+
 .. java:import:: net.es.oscars.pss PSSException
 
 .. java:import:: net.es.oscars.dto.topo TopoEdge
 
 .. java:import:: net.es.oscars.dto.spec PalindromicType
 
+.. java:import:: net.es.oscars.topo.dao UrnRepository
+
 .. java:import:: net.es.oscars.topo.ent BidirectionalPathE
 
 .. java:import:: net.es.oscars.topo.ent EdgeE
+
+.. java:import:: net.es.oscars.topo.ent ReservableVlanE
+
+.. java:import:: net.es.oscars.topo.ent UrnE
+
+.. java:import:: net.es.oscars.topo.pop Device
 
 .. java:import:: net.es.oscars.topo.svc TopoService
 

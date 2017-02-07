@@ -63,7 +63,7 @@ Module Details
 **Called By:** 
 
 - :ref:`pce_survivability`
-- :ref:`virtual_topo_surv`
+- :ref:`virtual_surv_topo`
 
 **API Specification:**
 

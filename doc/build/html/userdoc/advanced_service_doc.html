@@ -39,14 +39,15 @@
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
           <a href="enhanced/asymm_service_doc.html" title="Asymmetric Bandwidth Capability Service"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="service/service_vlan_doc.html" title="VLAN Service"
              accesskey="P">previous</a> |</li>
         <li><a href="../index.html">OSCARS</a> &raquo;</li>
-          <li><a href="index.html" >User Documentation</a> &raquo;</li>
-          <li><a href="overview.html" >Project Overview</a> &raquo;</li>
           <li><a href="core_doc.html" accesskey="U">Core Module</a> &raquo;</li> 
       </ul>
     </div>
@@ -77,30 +78,23 @@
 </body>	
 <h3><a href="../index.html">Table Of Contents</a></h3>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">User Documentation</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="start.html">Getting Started</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="overview.html">Project Overview</a><ul class="current">
-<li class="toctree-l3 current"><a class="reference internal" href="core_doc.html">Core Module</a><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="requestspec_doc.html">Circuit Request Specification</a></li>
-<li class="toctree-l4"><a class="reference internal" href="resvspec_doc.html">Circuit Reservation Specification</a></li>
-<li class="toctree-l4"><a class="reference internal" href="plumbing_doc.html">Plumbing Specification</a></li>
-<li class="toctree-l4"><a class="reference internal" href="plumbing_doc.html#advanced-plumbing">Advanced Plumbing</a></li>
-<li class="toctree-l4"><a class="reference internal" href="topologyref_doc.html">Topology Assumptions Reference</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pce_doc.html">Path Computation Engine (PCE)</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pce_doc.html#pce-workflow">PCE Workflow</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pce_doc.html#pce-structure">PCE Structure</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="">Path Computation Service Enhancements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="start.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="start.html#project-structure">Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="virtualcircuits.html">Virtual Circuits</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="core_doc.html">Core Module</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="topologyref_doc.html">Topology Assumptions Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pce_doc.html">Path Computation Engine (PCE)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pce_doc.html#pce-workflow">PCE Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pce_doc.html#pce-structure">PCE Structure</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="">Path Computation Service Enhancements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pss_doc.html">Path Setup Subsystem (PSS)</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="webui_doc.html">Web User Interface (WebUI)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="whatif_doc.html">What-If Service Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="webui_doc.html">Web User Interface (WebUI)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whatif_doc.html">What-If Service Module</a></li>
 </ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="virtualcircuits.html">Virtual Circuits</a></li>
-<li class="toctree-l2"><a class="reference internal" href="webui_doc.html">Web User Interface (WebUI)</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="../codedoc/index.html">Code Documentation</a></li>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../codedoc/packages.html">Javadoc</a></li>
 </ul>
 
   <h4>Previous topic</h4>
@@ -133,7 +127,7 @@
   <div class="section" id="path-computation-service-enhancements">
 <span id="advanced-service"></span><h1>Path Computation Service Enhancements<a class="headerlink" href="#path-computation-service-enhancements" title="Permalink to this headline">¶</a></h1>
 <a class="reference internal image-reference" href="../_images/construction.png"><img alt="../_images/construction.png" class="align-center" src="../_images/construction.png" style="width: 640.0px; height: 360.0px;" /></a>
-<p>OSCARS 1.0 supports a number of all-new composable routing capabilities which provide an unprecedented amount of user control over how the <a class="reference internal" href="pce_doc.html#pce-doc"><em>Path Computation Engine (PCE)</em></a> identifies working solutions. All of these services may be triggered without alteration to the underlying code, and without the need for modifying configuration parameters when launching OSCARS. This document discusses the PCE service enhancement suite, while <em class="xref std std-ref">???</em> provides details on how the user can exert control over the flow through the PCE to engage and toggle each of the described services. The following table offers a listing of the services discussed throughout the remainder of the document. Note: Forward-direction circuit route is denoted as <strong>A-Z</strong>, while reverse is denoted as <strong>Z-A</strong>.</p>
+<p>OSCARS 1.0 supports a number of all-new composable routing capabilities which provide an unprecedented amount of user control over how the <a class="reference internal" href="pce_doc.html#pce-doc"><em>Path Computation Engine (PCE)</em></a> identifies working solutions. All of these services may be triggered without alteration to the underlying code, and without the need for modifying configuration parameters when launching OSCARS. This document discusses the PCE service enhancement suite, while <a class="reference internal" href="circuit/requestspec_doc.html#requestspec"><em>Circuit Request Specification</em></a> provides details on how the user can exert control over the flow through the PCE to engage and toggle each of the described services. The following table offers a listing of the services discussed throughout the remainder of the document. Note: Forward-direction circuit route is denoted as <strong>A-Z</strong>, while reverse is denoted as <strong>Z-A</strong>.</p>
 <table border="1" class="docutils">
 <colgroup>
 <col width="19%" />
@@ -215,14 +209,15 @@
           <a href="../genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
           <a href="enhanced/asymm_service_doc.html" title="Asymmetric Bandwidth Capability Service"
              >next</a> |</li>
         <li class="right" >
           <a href="service/service_vlan_doc.html" title="VLAN Service"
              >previous</a> |</li>
         <li><a href="../index.html">OSCARS</a> &raquo;</li>
-          <li><a href="index.html" >User Documentation</a> &raquo;</li>
-          <li><a href="overview.html" >Project Overview</a> &raquo;</li>
           <li><a href="core_doc.html" >Core Module</a> &raquo;</li> 
       </ul>
     </div>

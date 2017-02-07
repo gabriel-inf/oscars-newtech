@@ -27,7 +27,7 @@
     <link rel="top" title="OSCARS 1.0 1.0.2017 documentation" href="../index.html" />
     <link rel="up" title="Core Module" href="core_doc.html" />
     <link rel="next" title="Path Computation Engine (PCE)" href="pce_doc.html" />
-    <link rel="prev" title="Plumbing Specification" href="plumbing_doc.html" /> 
+    <link rel="prev" title="Core Module" href="core_doc.html" /> 
   </head>
   <body>
 	<a href="../index.html"><img src="../_static/oscars_banner.png" alt="OSCARS 1.0" width="100%"></a>
@@ -39,14 +39,15 @@
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
           <a href="pce_doc.html" title="Path Computation Engine (PCE)"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="plumbing_doc.html" title="Plumbing Specification"
+          <a href="core_doc.html" title="Core Module"
              accesskey="P">previous</a> |</li>
         <li><a href="../index.html">OSCARS</a> &raquo;</li>
-          <li><a href="index.html" >User Documentation</a> &raquo;</li>
-          <li><a href="overview.html" >Project Overview</a> &raquo;</li>
           <li><a href="core_doc.html" accesskey="U">Core Module</a> &raquo;</li> 
       </ul>
     </div>
@@ -77,35 +78,28 @@
 </body>	
 <h3><a href="../index.html">Table Of Contents</a></h3>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">User Documentation</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="start.html">Getting Started</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="overview.html">Project Overview</a><ul class="current">
-<li class="toctree-l3 current"><a class="reference internal" href="core_doc.html">Core Module</a><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="requestspec_doc.html">Circuit Request Specification</a></li>
-<li class="toctree-l4"><a class="reference internal" href="resvspec_doc.html">Circuit Reservation Specification</a></li>
-<li class="toctree-l4"><a class="reference internal" href="plumbing_doc.html">Plumbing Specification</a></li>
-<li class="toctree-l4"><a class="reference internal" href="plumbing_doc.html#advanced-plumbing">Advanced Plumbing</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="">Topology Assumptions Reference</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pce_doc.html">Path Computation Engine (PCE)</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pce_doc.html#pce-workflow">PCE Workflow</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pce_doc.html#pce-structure">PCE Structure</a></li>
-<li class="toctree-l4"><a class="reference internal" href="advanced_service_doc.html">Path Computation Service Enhancements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="start.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="start.html#project-structure">Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="virtualcircuits.html">Virtual Circuits</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="core_doc.html">Core Module</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="">Topology Assumptions Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pce_doc.html">Path Computation Engine (PCE)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pce_doc.html#pce-workflow">PCE Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pce_doc.html#pce-structure">PCE Structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced_service_doc.html">Path Computation Service Enhancements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pss_doc.html">Path Setup Subsystem (PSS)</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="webui_doc.html">Web User Interface (WebUI)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="whatif_doc.html">What-If Service Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="webui_doc.html">Web User Interface (WebUI)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whatif_doc.html">What-If Service Module</a></li>
 </ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="virtualcircuits.html">Virtual Circuits</a></li>
-<li class="toctree-l2"><a class="reference internal" href="webui_doc.html">Web User Interface (WebUI)</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="../codedoc/index.html">Code Documentation</a></li>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../codedoc/packages.html">Javadoc</a></li>
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="plumbing_doc.html"
-                        title="previous chapter">Plumbing Specification</a></p>
+  <p class="topless"><a href="core_doc.html"
+                        title="previous chapter">Core Module</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="pce_doc.html"
                         title="next chapter">Path Computation Engine (PCE)</a></p>
@@ -157,14 +151,15 @@
           <a href="../genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
           <a href="pce_doc.html" title="Path Computation Engine (PCE)"
              >next</a> |</li>
         <li class="right" >
-          <a href="plumbing_doc.html" title="Plumbing Specification"
+          <a href="core_doc.html" title="Core Module"
              >previous</a> |</li>
         <li><a href="../index.html">OSCARS</a> &raquo;</li>
-          <li><a href="index.html" >User Documentation</a> &raquo;</li>
-          <li><a href="overview.html" >Project Overview</a> &raquo;</li>
           <li><a href="core_doc.html" >Core Module</a> &raquo;</li> 
       </ul>
     </div>

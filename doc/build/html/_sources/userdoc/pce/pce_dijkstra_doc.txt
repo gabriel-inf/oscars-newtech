@@ -11,7 +11,7 @@ Module Details
 --------------
 **Calls:**
 
-- :ref:`../service/service_topology`
+- :ref:`service_topology`
 
 **Called By:** 
 
@@ -19,7 +19,7 @@ Module Details
 - :ref:`pce_nonpalindrome`
 - :ref:`pce_palindrome`
 - :ref:`pce_survivability`
-- :ref:`service_bandwidth_availability`
+- :ref:`service_bandwidth`
 - :ref:`virtual_topo`
 
 **API Specification:**

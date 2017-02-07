@@ -22,8 +22,7 @@ Module Details
 
 **Called By:** 
 
-- :ref:`service_bandwidth_availability`
-- :ref:`service_resv`
+- N/A
 
 **API Specification:**
 

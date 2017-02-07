@@ -39,14 +39,15 @@
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
           <a href="pce/pce_top_doc.html" title="Top PCE Module"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="topologyref_doc.html" title="Topology Assumptions Reference"
              accesskey="P">previous</a> |</li>
         <li><a href="../index.html">OSCARS</a> &raquo;</li>
-          <li><a href="index.html" >User Documentation</a> &raquo;</li>
-          <li><a href="overview.html" >Project Overview</a> &raquo;</li>
           <li><a href="core_doc.html" accesskey="U">Core Module</a> &raquo;</li> 
       </ul>
     </div>
@@ -77,47 +78,43 @@
 </body>	
 <h3><a href="../index.html">Table Of Contents</a></h3>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">User Documentation</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="start.html">Getting Started</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="overview.html">Project Overview</a><ul class="current">
-<li class="toctree-l3 current"><a class="reference internal" href="core_doc.html">Core Module</a><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="requestspec_doc.html">Circuit Request Specification</a></li>
-<li class="toctree-l4"><a class="reference internal" href="resvspec_doc.html">Circuit Reservation Specification</a></li>
-<li class="toctree-l4"><a class="reference internal" href="plumbing_doc.html">Plumbing Specification</a></li>
-<li class="toctree-l4"><a class="reference internal" href="plumbing_doc.html#advanced-plumbing">Advanced Plumbing</a></li>
-<li class="toctree-l4"><a class="reference internal" href="topologyref_doc.html">Topology Assumptions Reference</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="">Path Computation Engine (PCE)</a><ul class="simple">
+<li class="toctree-l1"><a class="reference internal" href="start.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="start.html#project-structure">Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="virtualcircuits.html">Virtual Circuits</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="core_doc.html">Core Module</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="topologyref_doc.html">Topology Assumptions Reference</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="">Path Computation Engine (PCE)</a><ul class="simple">
 </ul>
 </li>
-<li class="toctree-l4"><a class="reference internal" href="#pce-workflow">PCE Workflow</a><ul class="simple">
+<li class="toctree-l2"><a class="reference internal" href="#pce-workflow">PCE Workflow</a><ul class="simple">
 </ul>
 </li>
-<li class="toctree-l4"><a class="reference internal" href="#pce-structure">PCE Structure</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="pce/pce_top_doc.html">Top PCE Module</a></li>
-<li class="toctree-l5"><a class="reference internal" href="pce/pce_translation_doc.html">Translation PCE Module</a></li>
-<li class="toctree-l5"><a class="reference internal" href="pce/pce_layer3_doc.html">Layer 3 PCE Module</a></li>
-<li class="toctree-l5"><a class="reference internal" href="pce/pce_palindrome_doc.html">Palindromic PCE Module</a></li>
-<li class="toctree-l5"><a class="reference internal" href="pce/pce_nonpalindrome_doc.html">Non-Palindromic PCE Module</a></li>
-<li class="toctree-l5"><a class="reference internal" href="pce/pce_survivability_doc.html">Survivability PCE Module</a></li>
-<li class="toctree-l5"><a class="reference internal" href="pce/pce_ero_doc.html">Explicit Route Object (ERO) PCE Module</a></li>
-<li class="toctree-l5"><a class="reference internal" href="pce/pce_dijkstra_doc.html">Dijkstra PCE Module</a></li>
-<li class="toctree-l5"><a class="reference internal" href="pce/pce_bellman_ford_doc.html">Bellman-Ford PCE Module</a></li>
-<li class="toctree-l5"><a class="reference internal" href="pce/pce_bhandari_doc.html">Bhandari PCE Module</a></li>
-<li class="toctree-l5"><a class="reference internal" href="service/service_vlan_doc.html">VLAN Service</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pce-structure">PCE Structure</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pce/pce_top_doc.html">Top PCE Module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pce/pce_translation_doc.html">Translation PCE Module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pce/pce_layer3_doc.html">Layer 3 PCE Module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pce/pce_palindrome_doc.html">Palindromic PCE Module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pce/pce_nonpalindrome_doc.html">Non-Palindromic PCE Module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pce/pce_survivability_doc.html">Survivability PCE Module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pce/pce_ero_doc.html">Explicit Route Object (ERO) PCE Module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pce/pce_dijkstra_doc.html">Dijkstra PCE Module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pce/pce_bellman_ford_doc.html">Bellman-Ford PCE Module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pce/pce_bhandari_doc.html">Bhandari PCE Module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="service/service_topology_doc.html">Topology Service</a></li>
+<li class="toctree-l3"><a class="reference internal" href="service/service_pruning_doc.html">Topology Pruning Service</a></li>
+<li class="toctree-l3"><a class="reference internal" href="service/service_bandwidth_doc.html">Reserved Bandwidth Service</a></li>
+<li class="toctree-l3"><a class="reference internal" href="service/service_vlan_doc.html">VLAN Service</a></li>
 </ul>
 </li>
-<li class="toctree-l4"><a class="reference internal" href="advanced_service_doc.html">Path Computation Service Enhancements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced_service_doc.html">Path Computation Service Enhancements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pss_doc.html">Path Setup Subsystem (PSS)</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="webui_doc.html">Web User Interface (WebUI)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="whatif_doc.html">What-If Service Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="webui_doc.html">Web User Interface (WebUI)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whatif_doc.html">What-If Service Module</a></li>
 </ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="virtualcircuits.html">Virtual Circuits</a></li>
-<li class="toctree-l2"><a class="reference internal" href="webui_doc.html">Web User Interface (WebUI)</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="../codedoc/index.html">Code Documentation</a></li>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../codedoc/packages.html">Javadoc</a></li>
 </ul>
 
   <h4>Previous topic</h4>
@@ -156,11 +153,11 @@
 </div>
 <div class="section" id="request-topology-services">
 <h2>Request &amp; Topology Services<a class="headerlink" href="#request-topology-services" title="Permalink to this headline">¶</a></h2>
-<p>The PCE subsystem heavily relies upon the <em class="xref std std-ref">service_topology</em> and <em class="xref std std-ref">service_pruning</em> modules. This collection of services is responsible for evaluating the user inputs, and pruning the topology as necessary depending on which resources are (or are not) available during the reservation’s prescribed lifetime. Depending on what parameters are associated with the <a class="reference internal" href="requestspec_doc.html#requestspec"><em>Circuit Request Specification</em></a>, when it is passed into the PCE, the topology will be pruned differently.  The services in this category can be considered support modules to the PCE business logic modules.</p>
+<p>The PCE subsystem heavily relies upon the <a class="reference internal" href="service/service_topology_doc.html#service-topology"><em>Topology Service</em></a> and <a class="reference internal" href="service/service_pruning_doc.html#service-pruning"><em>Topology Pruning Service</em></a> modules. This collection of services is responsible for evaluating the user inputs, and pruning the topology as necessary depending on which resources are (or are not) available during the reservation’s prescribed lifetime. Depending on what parameters are associated with the <a class="reference internal" href="circuit/requestspec_doc.html#requestspec"><em>Circuit Request Specification</em></a>, when it is passed into the PCE, the topology will be pruned differently.  The services in this category can be considered support modules to the PCE business logic modules.</p>
 </div>
 <div class="section" id="request-specific-pce-logic-workflow">
 <h2>Request-Specific PCE Logic Workflow<a class="headerlink" href="#request-specific-pce-logic-workflow" title="Permalink to this headline">¶</a></h2>
-<p>The modules in this category comprise the “brain” of the PCE. As of OSCARS 1.0, the progression through the PCE is dynamic. Submodules are engaged depending solely on the user’s input, as specified by the <a class="reference internal" href="plumbing_doc.html#plumbing"><em>Plumbing Specification</em></a> and do not require any configuration alterations to the system. Details of the <a class="reference internal" href="#pce-workflow"><em>PCE Workflow</em></a> and <a class="reference internal" href="#pce-structure"><em>PCE Structure</em></a> are discussed later in this document.</p>
+<p>The modules in this category comprise the “brain” of the PCE. As of OSCARS 1.0, the progression through the PCE is dynamic. Submodules are engaged depending solely on the user’s input, as specified by the <a class="reference internal" href="circuit/plumbing_doc.html#plumbing"><em>Plumbing Specification</em></a> and do not require any configuration alterations to the system. Details of the <a class="reference internal" href="#pce-workflow"><em>PCE Workflow</em></a> and <a class="reference internal" href="#pce-structure"><em>PCE Structure</em></a> are discussed later in this document.</p>
 </div>
 <div class="section" id="pathfinding-algorithms">
 <span id="id1"></span><h2>Pathfinding Algorithms<a class="headerlink" href="#pathfinding-algorithms" title="Permalink to this headline">¶</a></h2>
@@ -177,13 +174,13 @@
 <dl class="docutils">
 <dt><strong>1.   Parse Request Specification.</strong></dt>
 <dd><ol class="first last loweralpha simple">
-<li>Identify what the user has requested (Start-time, End-time,bandwidth, etc. as specified in the <a class="reference internal" href="requestspec_doc.html#requestspec"><em>Circuit Request Specification</em></a>)</li>
+<li>Identify what the user has requested (Start-time, End-time,bandwidth, etc. as specified in the <a class="reference internal" href="circuit/requestspec_doc.html#requestspec"><em>Circuit Request Specification</em></a>)</li>
 <li>Forward input parameters to the appropriate PCE service-specific module.</li>
 </ol>
 </dd>
 <dt><strong>2.   Obtain current network state information.</strong></dt>
 <dd><ol class="first last loweralpha simple">
-<li>Query the <em class="xref std std-ref">service_topology</em> for devices/ports/links, including connectivity and resource-availability details.</li>
+<li>Query the <a class="reference internal" href="service/service_topology_doc.html#service-topology"><em>Topology Service</em></a> for devices/ports/links, including connectivity and resource-availability details.</li>
 <li>Identify types of nodes (Ethernet Switch / MPLS Router / Port).</li>
 </ol>
 </dd>
@@ -192,7 +189,7 @@
 <li><p class="first">Form a relationship between network resources and user request.</p>
 </li>
 <li><dl class="first docutils">
-<dt>Invoke the <em class="xref std std-ref">service_pruning</em> to temporarily remove network elements that violate the Request Specification.</dt>
+<dt>Invoke the <a class="reference internal" href="service/service_pruning_doc.html#service-pruning"><em>Topology Pruning Service</em></a> to temporarily remove network elements that violate the Request Specification.</dt>
 <dd><ol class="first last lowerroman simple">
 <li>Elements with <em>Insufficient bandwidth</em>.</li>
 <li>Elements with <em>Insufficient VLAN availability</em>.</li>
@@ -216,13 +213,13 @@
 </dd>
 <dt><strong>5.   Reservation.</strong></dt>
 <dd><ol class="first last loweralpha simple">
-<li>If Pathfinding is successful, save the selected network resources (route information, selected VLAN, schedule, etc.) into the circuit&#8217;s <a class="reference internal" href="resvspec_doc.html#resvspec"><em>Circuit Reservation Specification</em></a>. Otherwise, fail gracefully.</li>
+<li>If Pathfinding is successful, save the selected network resources (route information, selected VLAN, schedule, etc.) into the circuit&#8217;s <a class="reference internal" href="circuit/resvspec_doc.html#resvspec"><em>Circuit Reservation Specification</em></a>. Otherwise, fail gracefully.</li>
 <li>Save the circuit details in the Reservation Database.</li>
 </ol>
 </dd>
 <dt><strong>6.   Configure the networks.</strong></dt>
 <dd><ol class="first last loweralpha simple">
-<li>Forward the reservation details to the <em class="xref std std-ref">pss</em> for network configuration.</li>
+<li>Forward the reservation details to the <a class="reference internal" href="pss_doc.html#pss"><em>Path Setup Subsystem (PSS)</em></a> for network configuration.</li>
 </ol>
 </dd>
 </dl>
@@ -270,7 +267,7 @@
 <a class="reference internal image-reference" href="../_images/pce_arch_2.png"><img alt="PCE Wokflow" src="../_images/pce_arch_2.png" style="width: 558.0px; height: 198.5px;" /></a>
 <p class="caption"><em>PCE business logic workflow.</em></p>
 </div>
-<p>The figure above shows the logic flow through the PCE. The <a class="reference internal" href="requestspec_doc.html#requestspec"><em>Circuit Request Specification</em></a> enters the <a class="reference internal" href="pce/pce_top_doc.html#pce-top"><em>Top PCE Module</em></a>, which serves as the Reservation Workflow Control mechanism and decomposes the request into its <a class="reference internal" href="plumbing_doc.html#plumbing"><em>Plumbing Specification</em></a> and determines how to process each pipe. Note that pipes are specified independently, meaning that the Top PCE may prescribe different flows for a single circuit request. Each requested pipe will then be fed through one or more service-specific PCE submodules in order to perform the desired constrained pathfinding. These service-specific submodules each provide unique logic to identify routing solutions. These submodules are integrated to provide the set of <a class="reference internal" href="advanced_service_doc.html#advanced-service"><em>Path Computation Service Enhancements</em></a> new to OSCARS 1.0. For example, assume that a user wants to incorporate a survivable backup path to be computed upon submission of a circuit request. There exists a PCE submodule designed for accomplishing exactly this task. Alternatively, consider a scenario in which the user wishes to prescribe a specific route, often known as an <em>Explicit Route Object (ERO)</em> to a circuit. The OSCARS PCE provides a submodule for supporting such an action. The desired services are triggered during request specification, and the Top PCE will determine which of the appropriate PCE submodules to engage for supporting them. The figure below gives an expanded view of the PCE logic workflow. Each of the service-specific PCE submodules (which may cooperate with one another in some cases) will return the selected path elements describing the routing solution. The selected elements are then passed to the <a class="reference internal" href="pce/pce_translation_doc.html#pce-translation"><em>Translation PCE Module</em></a> where the route is adapted into the reserved plumbing architecture which comprises the <a class="reference internal" href="resvspec_doc.html#resvspec"><em>Circuit Reservation Specification</em></a>. A significant portion of this process is that of <a class="reference internal" href="service/service_vlan_doc.html#vlan-translation"><em>VLAN Translation and Swapping</em></a>. The reservation details are added to the circuit, which is returned back to the Top PCE, which in turn gives back to the caller the updated circuit.</p>
+<p>The figure above shows the logic flow through the PCE. The <a class="reference internal" href="circuit/requestspec_doc.html#requestspec"><em>Circuit Request Specification</em></a> enters the <a class="reference internal" href="pce/pce_top_doc.html#pce-top"><em>Top PCE Module</em></a>, which serves as the Reservation Workflow Control mechanism and decomposes the request into its <a class="reference internal" href="circuit/plumbing_doc.html#plumbing"><em>Plumbing Specification</em></a> and determines how to process each pipe. Note that pipes are specified independently, meaning that the Top PCE may prescribe different flows for a single circuit request. Each requested pipe will then be fed through one or more service-specific PCE submodules in order to perform the desired constrained pathfinding. These service-specific submodules each provide unique logic to identify routing solutions. These submodules are integrated to provide the set of <a class="reference internal" href="advanced_service_doc.html#advanced-service"><em>Path Computation Service Enhancements</em></a> new to OSCARS 1.0. For example, assume that a user wants to incorporate a survivable backup path to be computed upon submission of a circuit request. There exists a PCE submodule designed for accomplishing exactly this task. Alternatively, consider a scenario in which the user wishes to prescribe a specific route, often known as an <em>Explicit Route Object (ERO)</em> to a circuit. The OSCARS PCE provides a submodule for supporting such an action. The desired services are triggered during request specification, and the Top PCE will determine which of the appropriate PCE submodules to engage for supporting them. The figure below gives an expanded view of the PCE logic workflow. Each of the service-specific PCE submodules (which may cooperate with one another in some cases) will return the selected path elements describing the routing solution. The selected elements are then passed to the <a class="reference internal" href="pce/pce_translation_doc.html#pce-translation"><em>Translation PCE Module</em></a> where the route is adapted into the reserved plumbing architecture which comprises the <a class="reference internal" href="circuit/resvspec_doc.html#resvspec"><em>Circuit Reservation Specification</em></a>. A significant portion of this process is that of <a class="reference internal" href="service/service_vlan_doc.html#vlan-translation"><em>VLAN Translation and Swapping</em></a>. The reservation details are added to the circuit, which is returned back to the Top PCE, which in turn gives back to the caller the updated circuit.</p>
 <div class="figure align-center">
 <a class="reference internal image-reference" href="../_images/pce_arch_3.png"><img alt="PCE Expanded Wokflow" src="../_images/pce_arch_3.png" style="width: 525.5px; height: 284.0px;" /></a>
 <p class="caption"><em>Expanded PCE business logic workflow.</em></p>
@@ -312,17 +309,12 @@
 <h3>Request and Topology Service Submodules<a class="headerlink" href="#request-and-topology-service-submodules" title="Permalink to this headline">¶</a></h3>
 <div class="toctree-wrapper compound">
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="service/service_topology_doc.html">Topology Service</a></li>
+<li class="toctree-l1"><a class="reference internal" href="service/service_pruning_doc.html">Topology Pruning Service</a></li>
+<li class="toctree-l1"><a class="reference internal" href="service/service_bandwidth_doc.html">Reserved Bandwidth Service</a></li>
 <li class="toctree-l1"><a class="reference internal" href="service/service_vlan_doc.html">VLAN Service</a></li>
 </ul>
 </div>
-<p>BandwidthService
-Calls: ReservedBandwidthRepository, UrnRepository
-Called By: TopPCE, PruningService, TranslationPCE, BandwidthAvailabilityService
-Description: Provides methods that handle retrieving reserved bandwidth objects from the repository, mapping reserved/available/requested bandwidth to network elements, and determining if requested bandwidth can be supported on a topology.</p>
-<p>PruningService
-Calls: UrnRepository, VlanService, BandwidthService, TopoService
-Called By: TopPCE, PalindromicalPCE, NonPalindromicalPCE, SurvivabilityPCE, EroPCE, ServiceLayerTopology, SurvivableServiceLayerTopology
-Description: Removes network links from a topology given a combination of requested bandwidth/VLAN IDs and reserved bandwidth/VLAN IDs.</p>
 </div>
 </div>
 </div>
@@ -340,14 +332,15 @@ Description: Removes network links from a topology given a combination of reques
           <a href="../genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
           <a href="pce/pce_top_doc.html" title="Top PCE Module"
              >next</a> |</li>
         <li class="right" >
           <a href="topologyref_doc.html" title="Topology Assumptions Reference"
              >previous</a> |</li>
         <li><a href="../index.html">OSCARS</a> &raquo;</li>
-          <li><a href="index.html" >User Documentation</a> &raquo;</li>
-          <li><a href="overview.html" >Project Overview</a> &raquo;</li>
           <li><a href="core_doc.html" >Core Module</a> &raquo;</li> 
       </ul>
     </div>

@@ -39,14 +39,15 @@
           <a href="../../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
           <a href="nonpalindromic_service_doc.html" title="Non-Palindromic Return Path Service"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="../advanced_service_doc.html" title="Path Computation Service Enhancements"
              accesskey="P">previous</a> |</li>
         <li><a href="../../index.html">OSCARS</a> &raquo;</li>
-          <li><a href="../index.html" >User Documentation</a> &raquo;</li>
-          <li><a href="../overview.html" >Project Overview</a> &raquo;</li>
           <li><a href="../core_doc.html" >Core Module</a> &raquo;</li>
           <li><a href="../advanced_service_doc.html" accesskey="U">Path Computation Service Enhancements</a> &raquo;</li> 
       </ul>
@@ -78,8 +79,15 @@
 </body>	
 <h3><a href="../../index.html">Table Of Contents</a></h3>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../index.html">User Documentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../codedoc/index.html">Code Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../start.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../start.html#project-structure">Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../virtualcircuits.html">Virtual Circuits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core_doc.html">Core Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../webui_doc.html">Web User Interface (WebUI)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whatif_doc.html">What-If Service Module</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../codedoc/packages.html">Javadoc</a></li>
 </ul>
 
   <h4>Previous topic</h4>
@@ -111,7 +119,7 @@
             
   <div class="section" id="asymmetric-bandwidth-capability-service">
 <span id="asymm-pce-service"></span><h1>Asymmetric Bandwidth Capability Service<a class="headerlink" href="#asymmetric-bandwidth-capability-service" title="Permalink to this headline">¶</a></h1>
-<p>Some communication does not require identical bandwidth constraints in the A-Z and Z-A direction. For example, the return path may only be required for control signalling, and could thus require much less bandwidth than the data transfer which may be unidirectional in the forward-direction.  Traditional circuit establishment calls for specifying a single uniform bandwidth rate for both directions. The result is illustrated by the below figure, in which the bandwidth capacity on some network links is sufficient to support the A-Z path, but no sufficient to support the Z-A path. During path computation, the <em class="xref std std-ref">service_pruning</em> will first prune out the insufficient (unidirectional) link, and thus no bidirectional path exists to support the given reservation.</p>
+<p>Some communication does not require identical bandwidth constraints in the A-Z and Z-A direction. For example, the return path may only be required for control signalling, and could thus require much less bandwidth than the data transfer which may be unidirectional in the forward-direction.  Traditional circuit establishment calls for specifying a single uniform bandwidth rate for both directions. The result is illustrated by the below figure, in which the bandwidth capacity on some network links is sufficient to support the A-Z path, but no sufficient to support the Z-A path. During path computation, the <a class="reference internal" href="../service/service_pruning_doc.html#service-pruning"><em>Topology Pruning Service</em></a> will first prune out the insufficient (unidirectional) link, and thus no bidirectional path exists to support the given reservation.</p>
 <div class="figure align-center">
 <a class="reference internal image-reference" href="../../_images/pce_asymm_need.gif"><img alt="Insufficient Bandwidth" src="../../_images/pce_asymm_need.gif" style="width: 674.25px; height: 285.0px;" /></a>
 <p class="caption"><em>A symmetric circuit cannot be established due to asymmetric bandwidth availability.</em></p>
@@ -154,14 +162,15 @@
           <a href="../../genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
           <a href="nonpalindromic_service_doc.html" title="Non-Palindromic Return Path Service"
              >next</a> |</li>
         <li class="right" >
           <a href="../advanced_service_doc.html" title="Path Computation Service Enhancements"
              >previous</a> |</li>
         <li><a href="../../index.html">OSCARS</a> &raquo;</li>
-          <li><a href="../index.html" >User Documentation</a> &raquo;</li>
-          <li><a href="../overview.html" >Project Overview</a> &raquo;</li>
           <li><a href="../core_doc.html" >Core Module</a> &raquo;</li>
           <li><a href="../advanced_service_doc.html" >Path Computation Service Enhancements</a> &raquo;</li> 
       </ul>

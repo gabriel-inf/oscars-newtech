@@ -201,16 +201,9 @@ Request and Topology Service Submodules
 
 
 
-BandwidthService
-Calls: ReservedBandwidthRepository, UrnRepository
-Called By: TopPCE, PruningService, TranslationPCE, BandwidthAvailabilityService
-Description: Provides methods that handle retrieving reserved bandwidth objects from the repository, mapping reserved/available/requested bandwidth to network elements, and determining if requested bandwidth can be supported on a topology.
 
 
-PruningService
-Calls: UrnRepository, VlanService, BandwidthService, TopoService
-Called By: TopPCE, PalindromicalPCE, NonPalindromicalPCE, SurvivabilityPCE, EroPCE, ServiceLayerTopology, SurvivableServiceLayerTopology
-Description: Removes network links from a topology given a combination of requested bandwidth/VLAN IDs and reserved bandwidth/VLAN IDs.
+
 
 
 

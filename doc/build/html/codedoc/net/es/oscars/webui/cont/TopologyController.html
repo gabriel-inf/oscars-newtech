@@ -1,0 +1,312 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>TopologyController &mdash; OSCARS 1.0 1.0.2017 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../../',
+        VERSION:     '1.0.2017',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../../_static/doctools.js"></script>
+    <link rel="shortcut icon" href="../../../../../../_static/esnet.png"/>
+    <link rel="top" title="OSCARS 1.0 1.0.2017 documentation" href="../../../../../../index.html" />
+    <link rel="up" title="net.es.oscars.webui.cont" href="package-index.html" />
+    <link rel="next" title="VizController" href="VizController.html" />
+    <link rel="prev" title="ReservationController" href="ReservationController.html" /> 
+  </head>
+  <body>
+	<a href="../../../../../../index.html"><img src="../../../../../../_static/oscars_banner.png" alt="OSCARS 1.0" width="100%"></a>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="VizController.html" title="VizController"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="ReservationController.html" title="ReservationController"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../../../../../index.html">OSCARS</a> &raquo;</li>
+          <li><a href="../../../../../packages.html" >Javadoc</a> &raquo;</li>
+          <li><a href="package-index.html" accesskey="U">net.es.oscars.webui.cont</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper"><html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head></head>
+      
+<body role="document">
+	<p>
+		Developed by 
+		<a href="http://es.net/" target="_blank"><img src="../../../../../../_static/esnet_full_logo.jpg" alt="ESnet" /></a>
+	</p>
+	<p>
+		In collaboration with 
+		<a href="http://highspeed.uml.edu/" target="_blank"><img src="../../../../../../_static/uml_acnl_logo.png" alt="Advanced Communication Networks Laboratory, UMass Lowell"/></a>
+	</p>
+
+</body>	<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head></head>
+      
+<body role="document">
+
+<h3>DOWNLOAD</h3>
+
+<p><b>Current Version:</b> 1.0.2017</p>
+
+<p>Get <a href="https://github.com/esnet/oscars-newtech">OSCARS</a> from Github</p>
+</body>	
+<h3><a href="../../../../../../index.html">Table Of Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../userdoc/start.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../userdoc/start.html#project-structure">Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../userdoc/virtualcircuits.html">Virtual Circuits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../userdoc/core_doc.html">Core Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../userdoc/webui_doc.html">Web User Interface (WebUI)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../userdoc/api_doc.html">Using the OSCARS API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../userdoc/whatif_doc.html">What-If Service Module</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../../../../packages.html">Javadoc</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../package-index.html">net.es.oscars</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../acct/package-index.html">net.es.oscars.acct</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../acct/dao/package-index.html">net.es.oscars.acct.dao</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../acct/ent/package-index.html">net.es.oscars.acct.ent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../acct/rest/package-index.html">net.es.oscars.acct.rest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../acct/svc/package-index.html">net.es.oscars.acct.svc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../authnz/dao/package-index.html">net.es.oscars.authnz.dao</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../authnz/ent/package-index.html">net.es.oscars.authnz.ent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../authnz/pop/package-index.html">net.es.oscars.authnz.pop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../authnz/prop/package-index.html">net.es.oscars.authnz.prop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../authnz/rest/package-index.html">net.es.oscars.authnz.rest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../authnz/svc/package-index.html">net.es.oscars.authnz.svc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../bwavail/package-index.html">net.es.oscars.bwavail</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../bwavail/rest/package-index.html">net.es.oscars.bwavail.rest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../bwavail/svc/package-index.html">net.es.oscars.bwavail.svc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../conf/dao/package-index.html">net.es.oscars.conf.dao</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../conf/ent/package-index.html">net.es.oscars.conf.ent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../conf/pop/package-index.html">net.es.oscars.conf.pop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../conf/prop/package-index.html">net.es.oscars.conf.prop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../conf/rest/package-index.html">net.es.oscars.conf.rest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../dto/package-index.html">net.es.oscars.dto</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../dto/acct/package-index.html">net.es.oscars.dto.acct</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../dto/auth/package-index.html">net.es.oscars.dto.auth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../dto/bwavail/package-index.html">net.es.oscars.dto.bwavail</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../dto/cfg/package-index.html">net.es.oscars.dto.cfg</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../dto/pss/package-index.html">net.es.oscars.dto.pss</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../dto/resv/package-index.html">net.es.oscars.dto.resv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../dto/rsrc/package-index.html">net.es.oscars.dto.rsrc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../dto/spec/package-index.html">net.es.oscars.dto.spec</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../dto/topo/package-index.html">net.es.oscars.dto.topo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../dto/topo/enums/package-index.html">net.es.oscars.dto.topo.enums</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../dto/viz/package-index.html">net.es.oscars.dto.viz</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../helpers/package-index.html">net.es.oscars.helpers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../helpers/test/package-index.html">net.es.oscars.helpers.test</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../oscarsapi/package-index.html">net.es.oscars.oscarsapi</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../pce/package-index.html">net.es.oscars.pce</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../pss/package-index.html">net.es.oscars.pss</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../pss/cmd/package-index.html">net.es.oscars.pss.cmd</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../pss/dao/package-index.html">net.es.oscars.pss.dao</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../pss/ent/package-index.html">net.es.oscars.pss.ent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../pss/pop/package-index.html">net.es.oscars.pss.pop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../pss/prop/package-index.html">net.es.oscars.pss.prop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../pss/rest/package-index.html">net.es.oscars.pss.rest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../pss/svc/package-index.html">net.es.oscars.pss.svc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../pss/tpl/package-index.html">net.es.oscars.pss.tpl</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rest/package-index.html">net.es.oscars.rest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../resv/package-index.html">net.es.oscars.resv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../resv/dao/package-index.html">net.es.oscars.resv.dao</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../resv/ent/package-index.html">net.es.oscars.resv.ent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../resv/rest/package-index.html">net.es.oscars.resv.rest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../resv/svc/package-index.html">net.es.oscars.resv.svc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../servicetopo/package-index.html">net.es.oscars.servicetopo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../simpleresv/rest/package-index.html">net.es.oscars.simpleresv.rest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../simpleresv/svc/package-index.html">net.es.oscars.simpleresv.svc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../st/oper/package-index.html">net.es.oscars.st.oper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../st/prov/package-index.html">net.es.oscars.st.prov</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../st/resv/package-index.html">net.es.oscars.st.resv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tasks/package-index.html">net.es.oscars.tasks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tasks/prop/package-index.html">net.es.oscars.tasks.prop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../topo/package-index.html">net.es.oscars.topo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../topo/dao/package-index.html">net.es.oscars.topo.dao</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../topo/ent/package-index.html">net.es.oscars.topo.ent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../topo/pop/package-index.html">net.es.oscars.topo.pop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../topo/prop/package-index.html">net.es.oscars.topo.prop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../topo/rest/package-index.html">net.es.oscars.topo.rest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../topo/serialization/package-index.html">net.es.oscars.topo.serialization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../topo/svc/package-index.html">net.es.oscars.topo.svc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../ui/pop/package-index.html">net.es.oscars.ui.pop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../ui/prop/package-index.html">net.es.oscars.ui.prop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../ui/rest/package-index.html">net.es.oscars.ui.rest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../package-index.html">net.es.oscars.webui</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="package-index.html">net.es.oscars.webui.cont</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="AdminAcctController.html">AdminAcctController</a></li>
+<li class="toctree-l3"><a class="reference internal" href="AdminConfController.html">AdminConfController</a></li>
+<li class="toctree-l3"><a class="reference internal" href="AdminTopoController.html">AdminTopoController</a></li>
+<li class="toctree-l3"><a class="reference internal" href="AdminUserController.html">AdminUserController</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ControllerConfig.html">ControllerConfig</a></li>
+<li class="toctree-l3"><a class="reference internal" href="MainController.html">MainController</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ReservationController.html">ReservationController</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="">TopologyController</a><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="VizController.html">VizController</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../dto/package-index.html">net.es.oscars.webui.dto</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ipc/package-index.html">net.es.oscars.webui.ipc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../viz/package-index.html">net.es.oscars.webui.viz</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="ReservationController.html"
+                        title="previous chapter">ReservationController</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="VizController.html"
+                        title="next chapter">VizController</a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="topologycontroller">
+<h1>TopologyController<a class="headerlink" href="#topologycontroller" title="Permalink to this headline">¶</a></h1>
+<dl class="type">
+<dt id="net.es.oscars.webui.cont.TopologyController">
+public class <tt class="descname">TopologyController</tt><a class="headerlink" href="#net.es.oscars.webui.cont.TopologyController" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="section" id="methods">
+<h2>Methods<a class="headerlink" href="#methods" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="getallportcapacity">
+<h3>getAllPortCapacity<a class="headerlink" href="#getallportcapacity" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.webui.cont.TopologyController.getAllPortCapacity()">
+public Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a>&gt; <tt class="descname">getAllPortCapacity</tt><big>(</big><big>)</big><a class="headerlink" href="#net.es.oscars.webui.cont.TopologyController.getAllPortCapacity()" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="getallreservedbw">
+<h3>getAllReservedBw<a class="headerlink" href="#getallreservedbw" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.webui.cont.TopologyController.getAllReservedBw()">
+public List&lt;<a class="reference internal" href="../../dto/spec/ReservedBandwidth.html#net.es.oscars.dto.spec.ReservedBandwidth" title="net.es.oscars.dto.spec.ReservedBandwidth">ReservedBandwidth</a>&gt; <tt class="descname">getAllReservedBw</tt><big>(</big><big>)</big><a class="headerlink" href="#net.es.oscars.webui.cont.TopologyController.getAllReservedBw()" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="getbwavailability">
+<h3>getBwAvailability<a class="headerlink" href="#getbwavailability" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.webui.cont.TopologyController.getBwAvailability(MinimalBwAvailRequest)">
+public <a class="reference internal" href="../../dto/bwavail/BandwidthAvailabilityResponse.html#net.es.oscars.dto.bwavail.BandwidthAvailabilityResponse" title="net.es.oscars.dto.bwavail.BandwidthAvailabilityResponse">BandwidthAvailabilityResponse</a> <tt class="descname">getBwAvailability</tt><big>(</big><a class="reference internal" href="../dto/MinimalBwAvailRequest.html#net.es.oscars.webui.dto.MinimalBwAvailRequest" title="net.es.oscars.webui.dto.MinimalBwAvailRequest">MinimalBwAvailRequest</a><em> minReq</em><big>)</big><a class="headerlink" href="#net.es.oscars.webui.cont.TopologyController.getBwAvailability(MinimalBwAvailRequest)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="get-device2port-map">
+<h3>get_device2port_map<a class="headerlink" href="#get-device2port-map" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.webui.cont.TopologyController.get_device2port_map()">
+public Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, Set&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>&gt;&gt; <tt class="descname">get_device2port_map</tt><big>(</big><big>)</big><a class="headerlink" href="#net.es.oscars.webui.cont.TopologyController.get_device2port_map()" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="get-port2device-map">
+<h3>get_port2device_map<a class="headerlink" href="#get-port2device-map" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.webui.cont.TopologyController.get_port2device_map()">
+public Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>&gt; <tt class="descname">get_port2device_map</tt><big>(</big><big>)</big><a class="headerlink" href="#net.es.oscars.webui.cont.TopologyController.get_port2device_map()" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="get-port-capacity">
+<h3>get_port_capacity<a class="headerlink" href="#get-port-capacity" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.webui.cont.TopologyController.get_port_capacity(List)">
+public Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a>&gt; <tt class="descname">get_port_capacity</tt><big>(</big>List&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>&gt;<em> ports</em><big>)</big><a class="headerlink" href="#net.es.oscars.webui.cont.TopologyController.get_port_capacity(List)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="get-reserved-bw">
+<h3>get_reserved_bw<a class="headerlink" href="#get-reserved-bw" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.webui.cont.TopologyController.get_reserved_bw(List)">
+public List&lt;<a class="reference internal" href="../../dto/spec/ReservedBandwidth.html#net.es.oscars.dto.spec.ReservedBandwidth" title="net.es.oscars.dto.spec.ReservedBandwidth">ReservedBandwidth</a>&gt; <tt class="descname">get_reserved_bw</tt><big>(</big>List&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>&gt;<em> resUrns</em><big>)</big><a class="headerlink" href="#net.es.oscars.webui.cont.TopologyController.get_reserved_bw(List)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="get-single-port-set">
+<h3>get_single_port_set<a class="headerlink" href="#get-single-port-set" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.webui.cont.TopologyController.get_single_port_set(String)">
+public Set&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>&gt; <tt class="descname">get_single_port_set</tt><big>(</big><a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> deviceURN</em><big>)</big><a class="headerlink" href="#net.es.oscars.webui.cont.TopologyController.get_single_port_set(String)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="VizController.html" title="VizController"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="ReservationController.html" title="ReservationController"
+             >previous</a> |</li>
+        <li><a href="../../../../../../index.html">OSCARS</a> &raquo;</li>
+          <li><a href="../../../../../packages.html" >Javadoc</a> &raquo;</li>
+          <li><a href="package-index.html" >net.es.oscars.webui.cont</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2017, ESnet.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

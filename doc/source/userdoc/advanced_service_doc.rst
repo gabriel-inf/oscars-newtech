@@ -7,7 +7,7 @@ Path Computation Service Enhancements
    :scale: 50%
    :align: center
 
-OSCARS 1.0 supports a number of all-new composable routing capabilities which provide an unprecedented amount of user control over how the :ref:`pce_doc` identifies working solutions. All of these services may be triggered without alteration to the underlying code, and without the need for modifying configuration parameters when launching OSCARS. This document discusses the PCE service enhancement suite, while :ref:`???` provides details on how the user can exert control over the flow through the PCE to engage and toggle each of the described services. The following table offers a listing of the services discussed throughout the remainder of the document. Note: Forward-direction circuit route is denoted as **A-Z**, while reverse is denoted as **Z-A**.
+OSCARS 1.0 supports a number of all-new composable routing capabilities which provide an unprecedented amount of user control over how the :ref:`pce_doc` identifies working solutions. All of these services may be triggered without alteration to the underlying code, and without the need for modifying configuration parameters when launching OSCARS. This document discusses the PCE service enhancement suite, while :ref:`requestspec` provides details on how the user can exert control over the flow through the PCE to engage and toggle each of the described services. The following table offers a listing of the services discussed throughout the remainder of the document. Note: Forward-direction circuit route is denoted as **A-Z**, while reverse is denoted as **Z-A**.
 
 
 ==========================================   	============

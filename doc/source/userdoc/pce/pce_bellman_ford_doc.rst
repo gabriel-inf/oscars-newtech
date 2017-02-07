@@ -1,4 +1,4 @@
-.. _bellman_ford:
+.. _pce_bellman_ford:
 
 Bellman-Ford PCE Module
 =======================

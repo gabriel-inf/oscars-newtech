@@ -1,0 +1,640 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ReservedEntityDecomposer &mdash; OSCARS 1.0 1.0.2017 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '1.0.2017',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="shortcut icon" href="../../../../../_static/esnet.png"/>
+    <link rel="top" title="OSCARS 1.0 1.0.2017 documentation" href="../../../../../index.html" />
+    <link rel="up" title="net.es.oscars.helpers" href="package-index.html" />
+    <link rel="next" title="net.es.oscars.helpers.test" href="test/package-index.html" />
+    <link rel="prev" title="RequestedEntityBuilder" href="RequestedEntityBuilder.html" /> 
+  </head>
+  <body>
+	<a href="../../../../../index.html"><img src="../../../../../_static/oscars_banner.png" alt="OSCARS 1.0" width="100%"></a>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="test/package-index.html" title="net.es.oscars.helpers.test"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="RequestedEntityBuilder.html" title="RequestedEntityBuilder"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../../../../index.html">OSCARS</a> &raquo;</li>
+          <li><a href="../../../../packages.html" >Javadoc</a> &raquo;</li>
+          <li><a href="package-index.html" accesskey="U">net.es.oscars.helpers</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper"><html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head></head>
+      
+<body role="document">
+	<p>
+		Developed by 
+		<a href="http://es.net/" target="_blank"><img src="../../../../../_static/esnet_full_logo.jpg" alt="ESnet" /></a>
+	</p>
+	<p>
+		In collaboration with 
+		<a href="http://highspeed.uml.edu/" target="_blank"><img src="../../../../../_static/uml_acnl_logo.png" alt="Advanced Communication Networks Laboratory, UMass Lowell"/></a>
+	</p>
+
+</body>	<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head></head>
+      
+<body role="document">
+
+<h3>DOWNLOAD</h3>
+
+<p><b>Current Version:</b> 1.0.2017</p>
+
+<p>Get <a href="https://github.com/esnet/oscars-newtech">OSCARS</a> from Github</p>
+</body>	
+<h3><a href="../../../../../index.html">Table Of Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../userdoc/start.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../userdoc/start.html#project-structure">Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../userdoc/virtualcircuits.html">Virtual Circuits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../userdoc/core_doc.html">Core Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../userdoc/webui_doc.html">Web User Interface (WebUI)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../userdoc/api_doc.html">Using the OSCARS API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../userdoc/whatif_doc.html">What-If Service Module</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../../../packages.html">Javadoc</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../package-index.html">net.es.oscars</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../acct/package-index.html">net.es.oscars.acct</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../acct/dao/package-index.html">net.es.oscars.acct.dao</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../acct/ent/package-index.html">net.es.oscars.acct.ent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../acct/rest/package-index.html">net.es.oscars.acct.rest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../acct/svc/package-index.html">net.es.oscars.acct.svc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../authnz/dao/package-index.html">net.es.oscars.authnz.dao</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../authnz/ent/package-index.html">net.es.oscars.authnz.ent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../authnz/pop/package-index.html">net.es.oscars.authnz.pop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../authnz/prop/package-index.html">net.es.oscars.authnz.prop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../authnz/rest/package-index.html">net.es.oscars.authnz.rest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../authnz/svc/package-index.html">net.es.oscars.authnz.svc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../bwavail/package-index.html">net.es.oscars.bwavail</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../bwavail/rest/package-index.html">net.es.oscars.bwavail.rest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../bwavail/svc/package-index.html">net.es.oscars.bwavail.svc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../conf/dao/package-index.html">net.es.oscars.conf.dao</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../conf/ent/package-index.html">net.es.oscars.conf.ent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../conf/pop/package-index.html">net.es.oscars.conf.pop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../conf/prop/package-index.html">net.es.oscars.conf.prop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../conf/rest/package-index.html">net.es.oscars.conf.rest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dto/package-index.html">net.es.oscars.dto</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dto/acct/package-index.html">net.es.oscars.dto.acct</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dto/auth/package-index.html">net.es.oscars.dto.auth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dto/bwavail/package-index.html">net.es.oscars.dto.bwavail</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dto/cfg/package-index.html">net.es.oscars.dto.cfg</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dto/pss/package-index.html">net.es.oscars.dto.pss</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dto/resv/package-index.html">net.es.oscars.dto.resv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dto/rsrc/package-index.html">net.es.oscars.dto.rsrc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dto/spec/package-index.html">net.es.oscars.dto.spec</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dto/topo/package-index.html">net.es.oscars.dto.topo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dto/topo/enums/package-index.html">net.es.oscars.dto.topo.enums</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dto/viz/package-index.html">net.es.oscars.dto.viz</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="package-index.html">net.es.oscars.helpers</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="InstantConverter.html">InstantConverter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="IntRangeParsing.html">IntRangeParsing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="JsonHelper.html">JsonHelper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="RequestedEntityBuilder.html">RequestedEntityBuilder</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="">ReservedEntityDecomposer</a><ul class="simple">
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="test/package-index.html">net.es.oscars.helpers.test</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../oscarsapi/package-index.html">net.es.oscars.oscarsapi</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pce/package-index.html">net.es.oscars.pce</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pss/package-index.html">net.es.oscars.pss</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pss/cmd/package-index.html">net.es.oscars.pss.cmd</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pss/dao/package-index.html">net.es.oscars.pss.dao</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pss/ent/package-index.html">net.es.oscars.pss.ent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pss/pop/package-index.html">net.es.oscars.pss.pop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pss/prop/package-index.html">net.es.oscars.pss.prop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pss/rest/package-index.html">net.es.oscars.pss.rest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pss/svc/package-index.html">net.es.oscars.pss.svc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pss/tpl/package-index.html">net.es.oscars.pss.tpl</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rest/package-index.html">net.es.oscars.rest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../resv/package-index.html">net.es.oscars.resv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../resv/dao/package-index.html">net.es.oscars.resv.dao</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../resv/ent/package-index.html">net.es.oscars.resv.ent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../resv/rest/package-index.html">net.es.oscars.resv.rest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../resv/svc/package-index.html">net.es.oscars.resv.svc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../servicetopo/package-index.html">net.es.oscars.servicetopo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../simpleresv/rest/package-index.html">net.es.oscars.simpleresv.rest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../simpleresv/svc/package-index.html">net.es.oscars.simpleresv.svc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../st/oper/package-index.html">net.es.oscars.st.oper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../st/prov/package-index.html">net.es.oscars.st.prov</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../st/resv/package-index.html">net.es.oscars.st.resv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tasks/package-index.html">net.es.oscars.tasks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tasks/prop/package-index.html">net.es.oscars.tasks.prop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../topo/package-index.html">net.es.oscars.topo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../topo/dao/package-index.html">net.es.oscars.topo.dao</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../topo/ent/package-index.html">net.es.oscars.topo.ent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../topo/pop/package-index.html">net.es.oscars.topo.pop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../topo/prop/package-index.html">net.es.oscars.topo.prop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../topo/rest/package-index.html">net.es.oscars.topo.rest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../topo/serialization/package-index.html">net.es.oscars.topo.serialization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../topo/svc/package-index.html">net.es.oscars.topo.svc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ui/pop/package-index.html">net.es.oscars.ui.pop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ui/prop/package-index.html">net.es.oscars.ui.prop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ui/rest/package-index.html">net.es.oscars.ui.rest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../webui/package-index.html">net.es.oscars.webui</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../webui/cont/package-index.html">net.es.oscars.webui.cont</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../webui/dto/package-index.html">net.es.oscars.webui.dto</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../webui/ipc/package-index.html">net.es.oscars.webui.ipc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../webui/viz/package-index.html">net.es.oscars.webui.viz</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="RequestedEntityBuilder.html"
+                        title="previous chapter">RequestedEntityBuilder</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="test/package-index.html"
+                        title="next chapter">net.es.oscars.helpers.test</a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="reservedentitydecomposer">
+<h1>ReservedEntityDecomposer<a class="headerlink" href="#reservedentitydecomposer" title="Permalink to this headline">¶</a></h1>
+<dl class="type">
+<dt id="net.es.oscars.helpers.ReservedEntityDecomposer">
+public class <tt class="descname">ReservedEntityDecomposer</tt><a class="headerlink" href="#net.es.oscars.helpers.ReservedEntityDecomposer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="section" id="methods">
+<h2>Methods<a class="headerlink" href="#methods" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="decomposeedgelist">
+<h3>decomposeEdgeList<a class="headerlink" href="#decomposeedgelist" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.helpers.ReservedEntityDecomposer.decomposeEdgeList(List)">
+public List&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>&gt; <tt class="descname">decomposeEdgeList</tt><big>(</big>List&lt;<a class="reference internal" href="../topo/ent/EdgeE.html#net.es.oscars.topo.ent.EdgeE" title="net.es.oscars.topo.ent.EdgeE">EdgeE</a>&gt;<em> edges</em><big>)</big><a class="headerlink" href="#net.es.oscars.helpers.ReservedEntityDecomposer.decomposeEdgeList(List)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="decomposeethpipe">
+<h3>decomposeEthPipe<a class="headerlink" href="#decomposeethpipe" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.helpers.ReservedEntityDecomposer.decomposeEthPipe(ReservedEthPipeE)">
+public Set&lt;<a class="reference internal" href="../topo/ent/UrnE.html#net.es.oscars.topo.ent.UrnE" title="net.es.oscars.topo.ent.UrnE">UrnE</a>&gt; <tt class="descname">decomposeEthPipe</tt><big>(</big><a class="reference internal" href="../resv/ent/ReservedEthPipeE.html#net.es.oscars.resv.ent.ReservedEthPipeE" title="net.es.oscars.resv.ent.ReservedEthPipeE">ReservedEthPipeE</a><em> pipe</em><big>)</big><a class="headerlink" href="#net.es.oscars.helpers.ReservedEntityDecomposer.decomposeEthPipe(ReservedEthPipeE)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a reserved Ethernet pipe into a set of URNs. Retrieves URNs from URN repository.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>pipe</strong> &#8211; <ul>
+<li>A reserved Ethernet pipe</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Set of all URNs that make up the reserved junctions, fixtures, AND az/za EROs in the pipe</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="id1">
+<h3>decomposeEthPipe<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.helpers.ReservedEntityDecomposer.decomposeEthPipe(ReservedEthPipeE, List)">
+public Set&lt;<a class="reference internal" href="../topo/ent/UrnE.html#net.es.oscars.topo.ent.UrnE" title="net.es.oscars.topo.ent.UrnE">UrnE</a>&gt; <tt class="descname">decomposeEthPipe</tt><big>(</big><a class="reference internal" href="../resv/ent/ReservedEthPipeE.html#net.es.oscars.resv.ent.ReservedEthPipeE" title="net.es.oscars.resv.ent.ReservedEthPipeE">ReservedEthPipeE</a><em> pipe</em>, List&lt;<a class="reference internal" href="../topo/ent/UrnE.html#net.es.oscars.topo.ent.UrnE" title="net.es.oscars.topo.ent.UrnE">UrnE</a>&gt;<em> urns</em><big>)</big><a class="headerlink" href="#net.es.oscars.helpers.ReservedEntityDecomposer.decomposeEthPipe(ReservedEthPipeE, List)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a reserved Ethernet pipe into a set of URNs. Retrieves URNs from input URN list.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>pipe</strong> &#8211; <ul>
+<li>A reserved Ethernet pipe</li>
+</ul>
+</li>
+<li><strong>urns</strong> &#8211; <ul>
+<li>A list of URN objects</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Set of all URNs that make up the reserved junctions, fixtures, AND az/za EROs in the pipe</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="id2">
+<h3>decomposeEthPipe<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.helpers.ReservedEntityDecomposer.decomposeEthPipe(ReservedEthPipeE, Map)">
+public Set&lt;<a class="reference internal" href="../topo/ent/UrnE.html#net.es.oscars.topo.ent.UrnE" title="net.es.oscars.topo.ent.UrnE">UrnE</a>&gt; <tt class="descname">decomposeEthPipe</tt><big>(</big><a class="reference internal" href="../resv/ent/ReservedEthPipeE.html#net.es.oscars.resv.ent.ReservedEthPipeE" title="net.es.oscars.resv.ent.ReservedEthPipeE">ReservedEthPipeE</a><em> pipe</em>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, <a class="reference internal" href="../topo/ent/UrnE.html#net.es.oscars.topo.ent.UrnE" title="net.es.oscars.topo.ent.UrnE">UrnE</a>&gt;<em> urnMap</em><big>)</big><a class="headerlink" href="#net.es.oscars.helpers.ReservedEntityDecomposer.decomposeEthPipe(ReservedEthPipeE, Map)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a reserved Ethernet pipe into a set of URNs. Retrieves URNs from input URN map.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>pipe</strong> &#8211; <ul>
+<li>A reserved Ethernet pipe</li>
+</ul>
+</li>
+<li><strong>urnMap</strong> &#8211; <ul>
+<li>A map of URN strings to URN objects</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Set of all URNs that make up the reserved junctions, fixtures, AND az/za EROs in the pipe</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="decomposeethpipeintoazerolist">
+<h3>decomposeEthPipeIntoAzEROList<a class="headerlink" href="#decomposeethpipeintoazerolist" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.helpers.ReservedEntityDecomposer.decomposeEthPipeIntoAzEROList(ReservedEthPipeE)">
+public List&lt;<a class="reference internal" href="../topo/ent/UrnE.html#net.es.oscars.topo.ent.UrnE" title="net.es.oscars.topo.ent.UrnE">UrnE</a>&gt; <tt class="descname">decomposeEthPipeIntoAzEROList</tt><big>(</big><a class="reference internal" href="../resv/ent/ReservedEthPipeE.html#net.es.oscars.resv.ent.ReservedEthPipeE" title="net.es.oscars.resv.ent.ReservedEthPipeE">ReservedEthPipeE</a><em> pipe</em><big>)</big><a class="headerlink" href="#net.es.oscars.helpers.ReservedEntityDecomposer.decomposeEthPipeIntoAzEROList(ReservedEthPipeE)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="id3">
+<h3>decomposeEthPipeIntoAzEROList<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.helpers.ReservedEntityDecomposer.decomposeEthPipeIntoAzEROList(ReservedEthPipeE, List)">
+public List&lt;<a class="reference internal" href="../topo/ent/UrnE.html#net.es.oscars.topo.ent.UrnE" title="net.es.oscars.topo.ent.UrnE">UrnE</a>&gt; <tt class="descname">decomposeEthPipeIntoAzEROList</tt><big>(</big><a class="reference internal" href="../resv/ent/ReservedEthPipeE.html#net.es.oscars.resv.ent.ReservedEthPipeE" title="net.es.oscars.resv.ent.ReservedEthPipeE">ReservedEthPipeE</a><em> pipe</em>, List&lt;<a class="reference internal" href="../topo/ent/UrnE.html#net.es.oscars.topo.ent.UrnE" title="net.es.oscars.topo.ent.UrnE">UrnE</a>&gt;<em> urns</em><big>)</big><a class="headerlink" href="#net.es.oscars.helpers.ReservedEntityDecomposer.decomposeEthPipeIntoAzEROList(ReservedEthPipeE, List)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="id4">
+<h3>decomposeEthPipeIntoAzEROList<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.helpers.ReservedEntityDecomposer.decomposeEthPipeIntoAzEROList(ReservedEthPipeE, Map)">
+public List&lt;<a class="reference internal" href="../topo/ent/UrnE.html#net.es.oscars.topo.ent.UrnE" title="net.es.oscars.topo.ent.UrnE">UrnE</a>&gt; <tt class="descname">decomposeEthPipeIntoAzEROList</tt><big>(</big><a class="reference internal" href="../resv/ent/ReservedEthPipeE.html#net.es.oscars.resv.ent.ReservedEthPipeE" title="net.es.oscars.resv.ent.ReservedEthPipeE">ReservedEthPipeE</a><em> pipe</em>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, <a class="reference internal" href="../topo/ent/UrnE.html#net.es.oscars.topo.ent.UrnE" title="net.es.oscars.topo.ent.UrnE">UrnE</a>&gt;<em> urnMap</em><big>)</big><a class="headerlink" href="#net.es.oscars.helpers.ReservedEntityDecomposer.decomposeEthPipeIntoAzEROList(ReservedEthPipeE, Map)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="decomposeethpipeintozaerolist">
+<h3>decomposeEthPipeIntoZaEROList<a class="headerlink" href="#decomposeethpipeintozaerolist" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.helpers.ReservedEntityDecomposer.decomposeEthPipeIntoZaEROList(ReservedEthPipeE)">
+public List&lt;<a class="reference internal" href="../topo/ent/UrnE.html#net.es.oscars.topo.ent.UrnE" title="net.es.oscars.topo.ent.UrnE">UrnE</a>&gt; <tt class="descname">decomposeEthPipeIntoZaEROList</tt><big>(</big><a class="reference internal" href="../resv/ent/ReservedEthPipeE.html#net.es.oscars.resv.ent.ReservedEthPipeE" title="net.es.oscars.resv.ent.ReservedEthPipeE">ReservedEthPipeE</a><em> pipe</em><big>)</big><a class="headerlink" href="#net.es.oscars.helpers.ReservedEntityDecomposer.decomposeEthPipeIntoZaEROList(ReservedEthPipeE)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="id5">
+<h3>decomposeEthPipeIntoZaEROList<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.helpers.ReservedEntityDecomposer.decomposeEthPipeIntoZaEROList(ReservedEthPipeE, List)">
+public List&lt;<a class="reference internal" href="../topo/ent/UrnE.html#net.es.oscars.topo.ent.UrnE" title="net.es.oscars.topo.ent.UrnE">UrnE</a>&gt; <tt class="descname">decomposeEthPipeIntoZaEROList</tt><big>(</big><a class="reference internal" href="../resv/ent/ReservedEthPipeE.html#net.es.oscars.resv.ent.ReservedEthPipeE" title="net.es.oscars.resv.ent.ReservedEthPipeE">ReservedEthPipeE</a><em> pipe</em>, List&lt;<a class="reference internal" href="../topo/ent/UrnE.html#net.es.oscars.topo.ent.UrnE" title="net.es.oscars.topo.ent.UrnE">UrnE</a>&gt;<em> urns</em><big>)</big><a class="headerlink" href="#net.es.oscars.helpers.ReservedEntityDecomposer.decomposeEthPipeIntoZaEROList(ReservedEthPipeE, List)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="id6">
+<h3>decomposeEthPipeIntoZaEROList<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.helpers.ReservedEntityDecomposer.decomposeEthPipeIntoZaEROList(ReservedEthPipeE, Map)">
+public List&lt;<a class="reference internal" href="../topo/ent/UrnE.html#net.es.oscars.topo.ent.UrnE" title="net.es.oscars.topo.ent.UrnE">UrnE</a>&gt; <tt class="descname">decomposeEthPipeIntoZaEROList</tt><big>(</big><a class="reference internal" href="../resv/ent/ReservedEthPipeE.html#net.es.oscars.resv.ent.ReservedEthPipeE" title="net.es.oscars.resv.ent.ReservedEthPipeE">ReservedEthPipeE</a><em> pipe</em>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, <a class="reference internal" href="../topo/ent/UrnE.html#net.es.oscars.topo.ent.UrnE" title="net.es.oscars.topo.ent.UrnE">UrnE</a>&gt;<em> urnMap</em><big>)</big><a class="headerlink" href="#net.es.oscars.helpers.ReservedEntityDecomposer.decomposeEthPipeIntoZaEROList(ReservedEthPipeE, Map)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="decomposejunction">
+<h3>decomposeJunction<a class="headerlink" href="#decomposejunction" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.helpers.ReservedEntityDecomposer.decomposeJunction(ReservedVlanJunctionE)">
+public Set&lt;<a class="reference internal" href="../topo/ent/UrnE.html#net.es.oscars.topo.ent.UrnE" title="net.es.oscars.topo.ent.UrnE">UrnE</a>&gt; <tt class="descname">decomposeJunction</tt><big>(</big><a class="reference internal" href="../resv/ent/ReservedVlanJunctionE.html#net.es.oscars.resv.ent.ReservedVlanJunctionE" title="net.es.oscars.resv.ent.ReservedVlanJunctionE">ReservedVlanJunctionE</a><em> junction</em><big>)</big><a class="headerlink" href="#net.es.oscars.helpers.ReservedEntityDecomposer.decomposeJunction(ReservedVlanJunctionE)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a requested junction into a set of URNs. Retrieves URNs from junction and fixtures, no passed in URNs needed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>junction</strong> &#8211; <ul>
+<li>The reserved junction</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Set of all URNs making up the junction (device) and fixtures (ports)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="decomposemplspipe">
+<h3>decomposeMplsPipe<a class="headerlink" href="#decomposemplspipe" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.helpers.ReservedEntityDecomposer.decomposeMplsPipe(ReservedMplsPipeE)">
+public Set&lt;<a class="reference internal" href="../topo/ent/UrnE.html#net.es.oscars.topo.ent.UrnE" title="net.es.oscars.topo.ent.UrnE">UrnE</a>&gt; <tt class="descname">decomposeMplsPipe</tt><big>(</big><a class="reference internal" href="../resv/ent/ReservedMplsPipeE.html#net.es.oscars.resv.ent.ReservedMplsPipeE" title="net.es.oscars.resv.ent.ReservedMplsPipeE">ReservedMplsPipeE</a><em> pipe</em><big>)</big><a class="headerlink" href="#net.es.oscars.helpers.ReservedEntityDecomposer.decomposeMplsPipe(ReservedMplsPipeE)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a reserved MPLS pipe into a set of URNs. Retrieves URNs from URN repository.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>pipe</strong> &#8211; <ul>
+<li>A MPLS Ethernet pipe</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Set of all URNs that make up the reserved junctions, fixtures, AND az/za EROs in the pipe</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="id7">
+<h3>decomposeMplsPipe<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.helpers.ReservedEntityDecomposer.decomposeMplsPipe(ReservedMplsPipeE, List)">
+public Set&lt;<a class="reference internal" href="../topo/ent/UrnE.html#net.es.oscars.topo.ent.UrnE" title="net.es.oscars.topo.ent.UrnE">UrnE</a>&gt; <tt class="descname">decomposeMplsPipe</tt><big>(</big><a class="reference internal" href="../resv/ent/ReservedMplsPipeE.html#net.es.oscars.resv.ent.ReservedMplsPipeE" title="net.es.oscars.resv.ent.ReservedMplsPipeE">ReservedMplsPipeE</a><em> pipe</em>, List&lt;<a class="reference internal" href="../topo/ent/UrnE.html#net.es.oscars.topo.ent.UrnE" title="net.es.oscars.topo.ent.UrnE">UrnE</a>&gt;<em> urns</em><big>)</big><a class="headerlink" href="#net.es.oscars.helpers.ReservedEntityDecomposer.decomposeMplsPipe(ReservedMplsPipeE, List)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a reserved MPLS pipe into a set of URNs. Retrieves URNs from input URN list.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>pipe</strong> &#8211; <ul>
+<li>A reserved MPLS pipe</li>
+</ul>
+</li>
+<li><strong>urns</strong> &#8211; <ul>
+<li>A list of URN objects</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Set of all URNs that make up the reserved junctions, fixtures, AND az/za EROs in the pipe</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="id8">
+<h3>decomposeMplsPipe<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.helpers.ReservedEntityDecomposer.decomposeMplsPipe(ReservedMplsPipeE, Map)">
+public Set&lt;<a class="reference internal" href="../topo/ent/UrnE.html#net.es.oscars.topo.ent.UrnE" title="net.es.oscars.topo.ent.UrnE">UrnE</a>&gt; <tt class="descname">decomposeMplsPipe</tt><big>(</big><a class="reference internal" href="../resv/ent/ReservedMplsPipeE.html#net.es.oscars.resv.ent.ReservedMplsPipeE" title="net.es.oscars.resv.ent.ReservedMplsPipeE">ReservedMplsPipeE</a><em> pipe</em>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, <a class="reference internal" href="../topo/ent/UrnE.html#net.es.oscars.topo.ent.UrnE" title="net.es.oscars.topo.ent.UrnE">UrnE</a>&gt;<em> urnMap</em><big>)</big><a class="headerlink" href="#net.es.oscars.helpers.ReservedEntityDecomposer.decomposeMplsPipe(ReservedMplsPipeE, Map)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a reserved MPLS pipe into a set of URNs. Retrieves URNs from input URN map.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>pipe</strong> &#8211; <ul>
+<li>A reserved MPLS pipe</li>
+</ul>
+</li>
+<li><strong>urnMap</strong> &#8211; <ul>
+<li>A map of URN strings to URN objects</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Set of all URNs that make up the reserved junctions, fixtures, AND az/za EROs in the pipe</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="decomposemplspipeintoazerolist">
+<h3>decomposeMplsPipeIntoAzEROList<a class="headerlink" href="#decomposemplspipeintoazerolist" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.helpers.ReservedEntityDecomposer.decomposeMplsPipeIntoAzEROList(ReservedMplsPipeE)">
+public List&lt;<a class="reference internal" href="../topo/ent/UrnE.html#net.es.oscars.topo.ent.UrnE" title="net.es.oscars.topo.ent.UrnE">UrnE</a>&gt; <tt class="descname">decomposeMplsPipeIntoAzEROList</tt><big>(</big><a class="reference internal" href="../resv/ent/ReservedMplsPipeE.html#net.es.oscars.resv.ent.ReservedMplsPipeE" title="net.es.oscars.resv.ent.ReservedMplsPipeE">ReservedMplsPipeE</a><em> pipe</em><big>)</big><a class="headerlink" href="#net.es.oscars.helpers.ReservedEntityDecomposer.decomposeMplsPipeIntoAzEROList(ReservedMplsPipeE)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="id9">
+<h3>decomposeMplsPipeIntoAzEROList<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.helpers.ReservedEntityDecomposer.decomposeMplsPipeIntoAzEROList(ReservedMplsPipeE, List)">
+public List&lt;<a class="reference internal" href="../topo/ent/UrnE.html#net.es.oscars.topo.ent.UrnE" title="net.es.oscars.topo.ent.UrnE">UrnE</a>&gt; <tt class="descname">decomposeMplsPipeIntoAzEROList</tt><big>(</big><a class="reference internal" href="../resv/ent/ReservedMplsPipeE.html#net.es.oscars.resv.ent.ReservedMplsPipeE" title="net.es.oscars.resv.ent.ReservedMplsPipeE">ReservedMplsPipeE</a><em> pipe</em>, List&lt;<a class="reference internal" href="../topo/ent/UrnE.html#net.es.oscars.topo.ent.UrnE" title="net.es.oscars.topo.ent.UrnE">UrnE</a>&gt;<em> urns</em><big>)</big><a class="headerlink" href="#net.es.oscars.helpers.ReservedEntityDecomposer.decomposeMplsPipeIntoAzEROList(ReservedMplsPipeE, List)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="id10">
+<h3>decomposeMplsPipeIntoAzEROList<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.helpers.ReservedEntityDecomposer.decomposeMplsPipeIntoAzEROList(ReservedMplsPipeE, Map)">
+public List&lt;<a class="reference internal" href="../topo/ent/UrnE.html#net.es.oscars.topo.ent.UrnE" title="net.es.oscars.topo.ent.UrnE">UrnE</a>&gt; <tt class="descname">decomposeMplsPipeIntoAzEROList</tt><big>(</big><a class="reference internal" href="../resv/ent/ReservedMplsPipeE.html#net.es.oscars.resv.ent.ReservedMplsPipeE" title="net.es.oscars.resv.ent.ReservedMplsPipeE">ReservedMplsPipeE</a><em> pipe</em>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, <a class="reference internal" href="../topo/ent/UrnE.html#net.es.oscars.topo.ent.UrnE" title="net.es.oscars.topo.ent.UrnE">UrnE</a>&gt;<em> urnMap</em><big>)</big><a class="headerlink" href="#net.es.oscars.helpers.ReservedEntityDecomposer.decomposeMplsPipeIntoAzEROList(ReservedMplsPipeE, Map)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="decomposemplspipeintozaerolist">
+<h3>decomposeMplsPipeIntoZaEROList<a class="headerlink" href="#decomposemplspipeintozaerolist" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.helpers.ReservedEntityDecomposer.decomposeMplsPipeIntoZaEROList(ReservedMplsPipeE)">
+public List&lt;<a class="reference internal" href="../topo/ent/UrnE.html#net.es.oscars.topo.ent.UrnE" title="net.es.oscars.topo.ent.UrnE">UrnE</a>&gt; <tt class="descname">decomposeMplsPipeIntoZaEROList</tt><big>(</big><a class="reference internal" href="../resv/ent/ReservedMplsPipeE.html#net.es.oscars.resv.ent.ReservedMplsPipeE" title="net.es.oscars.resv.ent.ReservedMplsPipeE">ReservedMplsPipeE</a><em> pipe</em><big>)</big><a class="headerlink" href="#net.es.oscars.helpers.ReservedEntityDecomposer.decomposeMplsPipeIntoZaEROList(ReservedMplsPipeE)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="id11">
+<h3>decomposeMplsPipeIntoZaEROList<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.helpers.ReservedEntityDecomposer.decomposeMplsPipeIntoZaEROList(ReservedMplsPipeE, List)">
+public List&lt;<a class="reference internal" href="../topo/ent/UrnE.html#net.es.oscars.topo.ent.UrnE" title="net.es.oscars.topo.ent.UrnE">UrnE</a>&gt; <tt class="descname">decomposeMplsPipeIntoZaEROList</tt><big>(</big><a class="reference internal" href="../resv/ent/ReservedMplsPipeE.html#net.es.oscars.resv.ent.ReservedMplsPipeE" title="net.es.oscars.resv.ent.ReservedMplsPipeE">ReservedMplsPipeE</a><em> pipe</em>, List&lt;<a class="reference internal" href="../topo/ent/UrnE.html#net.es.oscars.topo.ent.UrnE" title="net.es.oscars.topo.ent.UrnE">UrnE</a>&gt;<em> urns</em><big>)</big><a class="headerlink" href="#net.es.oscars.helpers.ReservedEntityDecomposer.decomposeMplsPipeIntoZaEROList(ReservedMplsPipeE, List)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="id12">
+<h3>decomposeMplsPipeIntoZaEROList<a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.helpers.ReservedEntityDecomposer.decomposeMplsPipeIntoZaEROList(ReservedMplsPipeE, Map)">
+public List&lt;<a class="reference internal" href="../topo/ent/UrnE.html#net.es.oscars.topo.ent.UrnE" title="net.es.oscars.topo.ent.UrnE">UrnE</a>&gt; <tt class="descname">decomposeMplsPipeIntoZaEROList</tt><big>(</big><a class="reference internal" href="../resv/ent/ReservedMplsPipeE.html#net.es.oscars.resv.ent.ReservedMplsPipeE" title="net.es.oscars.resv.ent.ReservedMplsPipeE">ReservedMplsPipeE</a><em> pipe</em>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, <a class="reference internal" href="../topo/ent/UrnE.html#net.es.oscars.topo.ent.UrnE" title="net.es.oscars.topo.ent.UrnE">UrnE</a>&gt;<em> urnMap</em><big>)</big><a class="headerlink" href="#net.es.oscars.helpers.ReservedEntityDecomposer.decomposeMplsPipeIntoZaEROList(ReservedMplsPipeE, Map)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="decomposereservedblueprint">
+<h3>decomposeReservedBlueprint<a class="headerlink" href="#decomposereservedblueprint" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.helpers.ReservedEntityDecomposer.decomposeReservedBlueprint(ReservedBlueprintE)">
+public Set&lt;<a class="reference internal" href="../topo/ent/UrnE.html#net.es.oscars.topo.ent.UrnE" title="net.es.oscars.topo.ent.UrnE">UrnE</a>&gt; <tt class="descname">decomposeReservedBlueprint</tt><big>(</big><a class="reference internal" href="../resv/ent/ReservedBlueprintE.html#net.es.oscars.resv.ent.ReservedBlueprintE" title="net.es.oscars.resv.ent.ReservedBlueprintE">ReservedBlueprintE</a><em> resBlueprint</em><big>)</big><a class="headerlink" href="#net.es.oscars.helpers.ReservedEntityDecomposer.decomposeReservedBlueprint(ReservedBlueprintE)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a reserved blueprint into a set of URNs. Retrieves URNs from repository.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>resBlueprint</strong> &#8211; <ul>
+<li>The reserved blueprint</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Set of all URNs that make up the reserved pipes/junction/fixtures in the blueprint.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="id13">
+<h3>decomposeReservedBlueprint<a class="headerlink" href="#id13" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.helpers.ReservedEntityDecomposer.decomposeReservedBlueprint(ReservedBlueprintE, List)">
+public Set&lt;<a class="reference internal" href="../topo/ent/UrnE.html#net.es.oscars.topo.ent.UrnE" title="net.es.oscars.topo.ent.UrnE">UrnE</a>&gt; <tt class="descname">decomposeReservedBlueprint</tt><big>(</big><a class="reference internal" href="../resv/ent/ReservedBlueprintE.html#net.es.oscars.resv.ent.ReservedBlueprintE" title="net.es.oscars.resv.ent.ReservedBlueprintE">ReservedBlueprintE</a><em> resBlueprint</em>, List&lt;<a class="reference internal" href="../topo/ent/UrnE.html#net.es.oscars.topo.ent.UrnE" title="net.es.oscars.topo.ent.UrnE">UrnE</a>&gt;<em> urns</em><big>)</big><a class="headerlink" href="#net.es.oscars.helpers.ReservedEntityDecomposer.decomposeReservedBlueprint(ReservedBlueprintE, List)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a reserved blueprint into a set of URNs. Retrieves URNs from input list of URNs</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>resBlueprint</strong> &#8211; <ul>
+<li>The reserved blueprint</li>
+</ul>
+</li>
+<li><strong>urns</strong> &#8211; <ul>
+<li>A list of URNs</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Set of all URNs that make up the reserved pipes/junction/fixtures in the blueprint.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="id14">
+<h3>decomposeReservedBlueprint<a class="headerlink" href="#id14" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.helpers.ReservedEntityDecomposer.decomposeReservedBlueprint(ReservedBlueprintE, Map)">
+public Set&lt;<a class="reference internal" href="../topo/ent/UrnE.html#net.es.oscars.topo.ent.UrnE" title="net.es.oscars.topo.ent.UrnE">UrnE</a>&gt; <tt class="descname">decomposeReservedBlueprint</tt><big>(</big><a class="reference internal" href="../resv/ent/ReservedBlueprintE.html#net.es.oscars.resv.ent.ReservedBlueprintE" title="net.es.oscars.resv.ent.ReservedBlueprintE">ReservedBlueprintE</a><em> resBlueprint</em>, Map&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>, <a class="reference internal" href="../topo/ent/UrnE.html#net.es.oscars.topo.ent.UrnE" title="net.es.oscars.topo.ent.UrnE">UrnE</a>&gt;<em> urnMap</em><big>)</big><a class="headerlink" href="#net.es.oscars.helpers.ReservedEntityDecomposer.decomposeReservedBlueprint(ReservedBlueprintE, Map)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a reserved blueprint into a set of URNs. Retrieves URNs from input URN map</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>resBlueprint</strong> &#8211; <ul>
+<li>The reserved blueprint</li>
+</ul>
+</li>
+<li><strong>urnMap</strong> &#8211; <ul>
+<li>A map of URN strings to URN objects</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Set of all URNs that make up the reserved pipes/junction/fixtures in the blueprint.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="translatestringlisttourns">
+<h3>translateStringListToUrns<a class="headerlink" href="#translatestringlisttourns" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.es.oscars.helpers.ReservedEntityDecomposer.translateStringListToUrns(List)">
+public List&lt;<a class="reference internal" href="../topo/ent/UrnE.html#net.es.oscars.topo.ent.UrnE" title="net.es.oscars.topo.ent.UrnE">UrnE</a>&gt; <tt class="descname">translateStringListToUrns</tt><big>(</big>List&lt;<a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html" title="java.lang.String">String</a>&gt;<em> pathElements</em><big>)</big><a class="headerlink" href="#net.es.oscars.helpers.ReservedEntityDecomposer.translateStringListToUrns(List)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="test/package-index.html" title="net.es.oscars.helpers.test"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="RequestedEntityBuilder.html" title="RequestedEntityBuilder"
+             >previous</a> |</li>
+        <li><a href="../../../../../index.html">OSCARS</a> &raquo;</li>
+          <li><a href="../../../../packages.html" >Javadoc</a> &raquo;</li>
+          <li><a href="package-index.html" >net.es.oscars.helpers</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2017, ESnet.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

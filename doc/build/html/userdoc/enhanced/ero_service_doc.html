@@ -39,14 +39,15 @@
           <a href="../../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
           <a href="survivability_service_doc.html" title="Survivable Routing Services"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="multipoint_service_doc.html" title="Multipoint Routing Service"
              accesskey="P">previous</a> |</li>
         <li><a href="../../index.html">OSCARS</a> &raquo;</li>
-          <li><a href="../index.html" >User Documentation</a> &raquo;</li>
-          <li><a href="../overview.html" >Project Overview</a> &raquo;</li>
           <li><a href="../core_doc.html" >Core Module</a> &raquo;</li>
           <li><a href="../advanced_service_doc.html" accesskey="U">Path Computation Service Enhancements</a> &raquo;</li> 
       </ul>
@@ -78,8 +79,15 @@
 </body>	
 <h3><a href="../../index.html">Table Of Contents</a></h3>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../index.html">User Documentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../codedoc/index.html">Code Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../start.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../start.html#project-structure">Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../virtualcircuits.html">Virtual Circuits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core_doc.html">Core Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../webui_doc.html">Web User Interface (WebUI)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whatif_doc.html">What-If Service Module</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../codedoc/packages.html">Javadoc</a></li>
 </ul>
 
   <h4>Previous topic</h4>
@@ -114,7 +122,7 @@
 <p>OSCARS 1.0 supports the specification of circuits with prescribed route solutions. That is, the <a class="reference internal" href="../pce_doc.html#pce-doc"><em>Path Computation Engine (PCE)</em></a> does not necessarily need compute a route without help form the user. The user can in fact designate an <em>Explicit Route Object (ERO)</em> which serves as input to the PCE during pathfinding. The ERO may specify a complete route (in both the forward- and reverse-directions), a partial set of waypoints which must be reach along the route, or a set of devices and ports which must <em>not</em> be included in the route. This service enhances the user&#8217;s ability to predict certain qualities of the espected solution.</p>
 <div class="section" id="complete-route-specification">
 <span id="ero-pce-complete"></span><h2>Complete Route Specification<a class="headerlink" href="#complete-route-specification" title="Permalink to this headline">¶</a></h2>
-<p>The user may specify the complete ERO for either the forward- or reverse-direction. If a complete ERO is specified, the <em class="xref std std-ref">service_pruning</em> will remove all other elements from the topology to ensure that only the expected solution may be computed by the PCE, as shown in the figure below (requested ERO elements with subscripts represent ports on a node that connect to the device matching the subscript label).</p>
+<p>The user may specify the complete ERO for either the forward- or reverse-direction. If a complete ERO is specified, the <a class="reference internal" href="../service/service_pruning_doc.html#service-pruning"><em>Topology Pruning Service</em></a> will remove all other elements from the topology to ensure that only the expected solution may be computed by the PCE, as shown in the figure below (requested ERO elements with subscripts represent ports on a node that connect to the device matching the subscript label).</p>
 <div class="figure align-center">
 <a class="reference internal image-reference" href="../../_images/ero_complete.png"><img alt="Complete ERO" src="../../_images/ero_complete.png" style="width: 672.75px; height: 348.0px;" /></a>
 <p class="caption"><em>A complete ERO may specify a particular route through the network not necessarily matching the most efficient path.</em></p>
@@ -178,7 +186,7 @@
 </div>
 <div class="section" id="blacklist-avoidance-routing">
 <span id="ero-pce-blacklist"></span><h2>“Blacklist” Avoidance Routing<a class="headerlink" href="#blacklist-avoidance-routing" title="Permalink to this headline">¶</a></h2>
-<p>In addition (or as an alternative) to providing nodes that must be included in the path as in the Complete and Partial ERO Specifications, the user may also find it desirable to be able to <em>avoid</em> a particular node or set of nodes comprising a section of the network topology. This desire is likely application-/user-specific. The user may specify a collection of devices and ports which they deem to be undesirable for the given circuit request. All of these &#8220;blacklisted&#8221; nodes, as well as the network links connected to included ports will be explicitly pruned from the network prior to pathfinding. If the remaining network components do not support a working route solution, the reservation fails. Since this ERO service is handled be the <em class="xref std std-ref">service_pruning</em>, it can be combined with all other existing PCE services.</p>
+<p>In addition (or as an alternative) to providing nodes that must be included in the path as in the Complete and Partial ERO Specifications, the user may also find it desirable to be able to <em>avoid</em> a particular node or set of nodes comprising a section of the network topology. This desire is likely application-/user-specific. The user may specify a collection of devices and ports which they deem to be undesirable for the given circuit request. All of these &#8220;blacklisted&#8221; nodes, as well as the network links connected to included ports will be explicitly pruned from the network prior to pathfinding. If the remaining network components do not support a working route solution, the reservation fails. Since this ERO service is handled be the <a class="reference internal" href="../service/service_pruning_doc.html#service-pruning"><em>Topology Pruning Service</em></a>, it can be combined with all other existing PCE services.</p>
 <div class="figure align-center">
 <a class="reference internal image-reference" href="../../_images/ero_blacklist.gif"><img alt="Blacklist" src="../../_images/ero_blacklist.gif" style="width: 665.25px; height: 399.75px;" /></a>
 <p class="caption"><em>Blacklisted elements are explicitly pruned out of the topology before PCE execution commences.</em></p>
@@ -197,7 +205,7 @@
 </ul>
 <p><strong>Relevant Topology/PCE Service(s)</strong></p>
 <ul class="simple">
-<li><em class="xref std std-ref">service_pruning</em></li>
+<li><a class="reference internal" href="../service/service_pruning_doc.html#service-pruning"><em>Topology Pruning Service</em></a></li>
 </ul>
 </div>
 </div>
@@ -215,14 +223,15 @@
           <a href="../../genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
           <a href="survivability_service_doc.html" title="Survivable Routing Services"
              >next</a> |</li>
         <li class="right" >
           <a href="multipoint_service_doc.html" title="Multipoint Routing Service"
              >previous</a> |</li>
         <li><a href="../../index.html">OSCARS</a> &raquo;</li>
-          <li><a href="../index.html" >User Documentation</a> &raquo;</li>
-          <li><a href="../overview.html" >Project Overview</a> &raquo;</li>
           <li><a href="../core_doc.html" >Core Module</a> &raquo;</li>
           <li><a href="../advanced_service_doc.html" >Path Computation Service Enhancements</a> &raquo;</li> 
       </ul>

@@ -41,7 +41,7 @@ Unlike the :ref:`virtual_topo` in which each abstract link corresponds to a sing
 
     *Survivable link-disjoint routing is performed between each pair of MPLS-Layer ports.*
 
-First, a pair of link-disjoint routes is computed between every pair of MPLS-Layer ports using the :ref:`pce_bhandari_doc`. This procedure is conducted for every circuit reservation requiring this abstraction because the network state is dynamic and changes with each subsequent circuit reservation or release. Then, those MPLS-Layer routes beginning and terminating at the end-points of an abstract link are saved as a translational list mapping the physical path-pair to the appropriate abstract links. The weight of an abstract link is exactly identical to the sum of the weights of all physical links contained within the **primary** MPLS-Layer path. 
+First, a pair of link-disjoint routes is computed between every pair of MPLS-Layer ports using the :ref:`pce_bhandari`. This procedure is conducted for every circuit reservation requiring this abstraction because the network state is dynamic and changes with each subsequent circuit reservation or release. Then, those MPLS-Layer routes beginning and terminating at the end-points of an abstract link are saved as a translational list mapping the physical path-pair to the appropriate abstract links. The weight of an abstract link is exactly identical to the sum of the weights of all physical links contained within the **primary** MPLS-Layer path. 
 
 .. figure:: ../../.static/mpls_route_map_survivable.gif
     :width: 75%

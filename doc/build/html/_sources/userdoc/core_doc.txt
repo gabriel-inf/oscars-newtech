@@ -76,12 +76,10 @@ Additional Documentation
    :titlesonly:
    :includehidden:
 
-   requestspec_doc
-   resvspec_doc
-   plumbing_doc
    topologyref_doc
    pce_doc
    advanced_service_doc
+   pss_doc
 
 
 
