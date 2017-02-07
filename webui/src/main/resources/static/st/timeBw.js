@@ -620,7 +620,6 @@ function resetBandwidthAvailabilityMap()
     updateBandwidth();
 }
 
-
 /* Plots B/W Availability on the Map */
 function drawBandwidthAvailabilityMap(azBW, zaBW)
 {
@@ -792,7 +791,6 @@ function getPathMinAvailability()
         }
     });
 }
-
 
 
 function computeFullERO()

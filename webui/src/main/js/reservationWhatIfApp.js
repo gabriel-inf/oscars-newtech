@@ -71,6 +71,8 @@ class ReservationWhatIfApp extends React.Component{
         this.componentDidUpdate = this.componentDidUpdate.bind(this);
         this.submitBwAvailRequest = this.submitBwAvailRequest.bind(this);
         this.initializeBandwidthMap = this.initializeBandwidthMap.bind(this);
+        this.processBwAvailResponse = this.processBwAvailResponse.bind(this);
+        this.drawBandwidthAvailabilityMap = this.drawBandwidthAvailabilityMap.bind(this);
 
         client.loadJSON({method: "GET", url: "/resv/newConnectionId"})
             .then(this.updateReservation);
@@ -93,7 +95,7 @@ class ReservationWhatIfApp extends React.Component{
             let bwAvailResponse = this.submitBwAvailRequest(bwAvailRequest);
             bwAvailResponse.then(
                 (successResponse) => {
-                    console.log(successResponse);
+                    this.processBwAvailResponse(JSON.parse(successResponse));
                 },
                 (failResponse) => {
                     console.log("Error: " + failResponse.status + " - " + failResponse.statusText);
@@ -119,6 +121,37 @@ class ReservationWhatIfApp extends React.Component{
             zaBandwidth: bwAvailRequest.zaBandwidth,
         };
         return client.submit("POST", "/topology/bwavailability/path", modBwAvailRequest);
+    }
+
+    processBwAvailResponse(bwAvailResponse){
+        let mapData = bwAvailResponse.bwAvailabilityMap;
+        let azData = mapData.Az1;
+        let zaData = mapData.Za1;
+
+        let azKeys = Object.keys(azData);
+        let zaKeys = Object.keys(zaData);
+
+        azKeys.sort();
+        zaKeys.sort();
+
+        let azChanges = new Map();
+        let zaChanges = new Map();
+
+        for(let azk = 0; azk < azKeys.length; azk++)
+        {
+            let azKey = azKeys[azk];
+            let keyAsDate  = new Date(Date.parse(azKey));
+            azChanges[keyAsDate] = azData[azKey];
+        }
+
+        for(let zak = 0; zak < zaKeys.length; zak++)
+        {
+            let zaKey = zaKeys[zak];
+            let keyAsDate  = new Date(Date.parse(zaKey));
+            zaChanges[keyAsDate] = zaData[zaKey];
+        }
+
+        this.drawBandwidthAvailabilityMap(azChanges, zaChanges);
     }
 
     updateReservation(response){
@@ -324,6 +357,9 @@ class ReservationWhatIfApp extends React.Component{
         let currWindow = bwAvailMap.getWindow();
 
         // Listener for changing start/end times
+        bwAvailMap.on('timechange', function (properties) { this.changeTime(properties, startBarID, endBarID); });
+
+        // Listener for changing start/end times
         /*
         bwAvailMap.on('timechange', function (properties) { changeTime(properties, startBarID, endBarID); });
 
@@ -342,8 +378,88 @@ class ReservationWhatIfApp extends React.Component{
         this.setState({bwAvailMap: bwAvailMap});
     }
 
+    drawBandwidthAvailabilityMap(azBW, zaBW){
+
+        let bwAvailMap = this.state.bwAvailMap;
+        let bwData = bwAvailMap.groupsData;
+        let oldBwValues = bwData.getIds({ filter: function (item) { return item.group === 'avail'; }});
+        bwData.remove(oldBwValues);
+
+        let theDates = Object.keys(azBW);
+
+        let minBW = 99999999;
+        let lastBW = 0;
+
+        for(let d = 0; d < theDates.length; d++)
+        {
+            let theTime = theDates[d];
+            let theBW = azBW[theTime];
+
+            bwData.add({x: theTime, y: theBW, group: 'avail'});
+
+            if(d !== 0)
+            {
+                bwData.add({x: theTime, y: lastBW, group: 'avail'});
+            }
+
+            if(theBW < minBW){
+                minBW = theBW;
+            }
+
+            lastBW = theBW;
+        }
+
+        // Set Map and Slider to range 0 - Min Reservable B/W for this path //
+        let oldMax = this.state.maxBw;
+        let oldVal = this.state.currBw;
+        let newMax = minBW;
+        let newVal = Math.floor(oldVal * newMax / oldMax);
+
+        // Update the new max range for bw
+        bwAvailMap.components[3].options.dataAxis.left.range.max = newMax;
+
+        this.setState({currBw: newVal, maxBw: newMax});
+        console.log(bwAvailMap.groupsData);
+
+        this.updateBandwidthBarGroup();
+    }
+
+    changeTime(properties, startBarId, endBarId){
+
+    }
+
+    updateBandwidthBarGroup(){
+
+        let bwAvailMap = this.state.bwAvailMap;
+        let bwData = bwAvailMap.groupsData;
+        let isAvailable = true; //inspectAvailability(this.state.currBw);
+
+        // Updated Color of area under reservation window //
+        let color = 'red';
+        if(isAvailable)
+            color = 'green';
+
+        let linestyle = 'stroke-width:5;stroke:' + color + ';';
+        let fillstyle = 'fill-opacity:0.7;fill:' + color + ';';
+
+        let bwBarGroup = bwData.get('bwBar');
+        bwBarGroup.style = linestyle;
+        bwBarGroup.options.shaded.style = fillstyle;
+        bwData.update(bwBarGroup);
+
+        // Update values of reservation window //
+        let oldBwValues = bwData.getIds({ filter: function (item) { return item.group === 'bwBar'; }});
+        let newBwValueLeft  = {x: this.state.bwAvailRequest.startTime, y: this.state.currBw, group: 'bwBar'};
+        let newBwValueRight = {x: this.state.bwAvailRequest.endTime, y: this.state.currBw, group: 'bwBar'};
+
+        bwData.remove(oldBwValues);
+        bwData.add(newBwValueLeft);
+        bwData.add(newBwValueRight);
+    }
+
     handleBwSliderChange(event){
         this.setState({currBw: event.target.value});
+        this.updateBandwidthBarGroup();
     }
 
     render(){
