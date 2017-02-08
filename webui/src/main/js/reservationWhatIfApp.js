@@ -49,7 +49,7 @@ class ReservationWhatIfApp extends React.Component{
             srcPort: "--",
             dst: "--",
             dstPort: "--",
-            currBw: 0,
+            currBw: 5000,
             maxBw: 10000,
             networkVis: {},
             bwAvailMap : {},
@@ -300,6 +300,7 @@ class ReservationWhatIfApp extends React.Component{
             start: this.state.bwAvailRequest.startTime.getUTCMilliseconds(),
             end: this.state.bwAvailRequest.endTime.getUTCMilliseconds() + (1000 * 60 * 60 * 24 * 1.1),
             zoomable: true,
+            autoResize: true,
             zoomMin: 1000 * 60 * 60 * 24,
             zoomMax: 1000 * 60 * 60 * 24 * 365 * 2,
             min: nowDate,
@@ -311,7 +312,7 @@ class ReservationWhatIfApp extends React.Component{
             maxHeight: '400px',
             legend: {enabled: false, icons: false},
             interpolation: {enabled: false},
-            dataAxis: {left: {range: {min: 0, max: 10000},}, icons: true},
+            dataAxis: {left: {range: {min: 0, max: 10000},}, icons: false},
         };
 
         let bwData = new vis.DataSet();
@@ -322,7 +323,7 @@ class ReservationWhatIfApp extends React.Component{
             content: "Group Name",
             style: 'stroke-width:1;stroke:#709FE0;',
             options: {
-                shaded: {enabled: true, orientation: 'bottom', style: 'fill-opacity:0.5;fill:#709FE0;'}
+                shaded: {enabled: true, orientation: 'bottom', style: 'fill-opacity:0.5;fill:#709FE0;', groupId: "avail"}
             }
         };
 
@@ -332,7 +333,7 @@ class ReservationWhatIfApp extends React.Component{
             content: "Group Name",
             style: 'stroke-width:5;stroke:red;',
             options: {
-                shaded: {enabled: true, orientation: 'bottom', style: 'fill-opacity:0.7;fill:red;'},
+                shaded: {enabled: true, orientation: 'bottom', style: 'fill-opacity:0.7;fill:green;'},
             }
         };
 
@@ -343,8 +344,8 @@ class ReservationWhatIfApp extends React.Component{
         // Create the Bar Graph
         let bwAvailMap = new vis.Graph2d(bwViz, bwData, bwGroups, bwOptions);
 
-        bwData.add({x: nowDate, y: -10, group: 'avail'});
-        bwData.add({x: furthestDate, y: -10, group: 'avail'});
+        bwData.add({x: nowDate, y: 5000, group: 'avail'});
+        bwData.add({x: furthestDate, y: 5000, group: 'avail'});
 
         // Set first time bar: Start Time
         let startBarID = "starttime";
@@ -354,34 +355,17 @@ class ReservationWhatIfApp extends React.Component{
         let endBarID = "endtime";
         bwAvailMap.addCustomTime(this.state.bwAvailRequest.endTime, endBarID);
 
-        let currWindow = bwAvailMap.getWindow();
-
         // Listener for changing start/end times
         bwAvailMap.on('timechange', function (properties) { this.changeTime(properties, startBarID, endBarID); });
 
-        // Listener for changing start/end times
-        /*
-        bwAvailMap.on('timechange', function (properties) { changeTime(properties, startBarID, endBarID); });
-
-        // Listener for double-click event
-        bwAvailMap.on('doubleClick', function (properties) { moveDatePicker(properties, startBarID, endBarID); });
-
-        // Listener for range-change event
-        bwAvailMap.on('rangechange', function (properties) { currWindow = bwAvailMap.getWindow(); });
-
-        // Listener to redraw map as time progresses
-        bwAvailMap.on('currentTimeTick', function (properties) { refreshMap(); });
-
-        // Listener for changing bandwidth values
-        $("#bwSlider").on("input change", function() { updateBandwidth(); });
-        */
         this.setState({bwAvailMap: bwAvailMap});
+        this.updateBandwidthBarGroup(bwAvailMap);
     }
 
     drawBandwidthAvailabilityMap(azBW, zaBW){
 
         let bwAvailMap = this.state.bwAvailMap;
-        let bwData = bwAvailMap.groupsData;
+        let bwData = bwAvailMap.itemsData;
         let oldBwValues = bwData.getIds({ filter: function (item) { return item.group === 'avail'; }});
         bwData.remove(oldBwValues);
 
@@ -409,29 +393,27 @@ class ReservationWhatIfApp extends React.Component{
             lastBW = theBW;
         }
 
+
         // Set Map and Slider to range 0 - Min Reservable B/W for this path //
-        let oldMax = this.state.maxBw;
-        let oldVal = this.state.currBw;
-        let newMax = minBW;
-        let newVal = Math.floor(oldVal * newMax / oldMax);
-
         // Update the new max range for bw
-        bwAvailMap.components[3].options.dataAxis.left.range.max = newMax;
+        //bwAvailMap.components[3].options.dataAxis.left.range.max = minBW;
 
-        this.setState({currBw: newVal, maxBw: newMax});
-        console.log(bwAvailMap.groupsData);
+        //this.setState({maxBw: newMax});
+        //console.log(bwAvailMap.groupsData);
+        bwAvailMap.setItems(bwData);
+        //bwAvailMap.redraw();
+        //this.setState({bwAvailMap: bwAvailMap});
 
-        this.updateBandwidthBarGroup();
+        this.updateBandwidthBarGroup(bwAvailMap);
     }
 
     changeTime(properties, startBarId, endBarId){
 
     }
 
-    updateBandwidthBarGroup(){
+    updateBandwidthBarGroup(bwAvailMap){
 
-        let bwAvailMap = this.state.bwAvailMap;
-        let bwData = bwAvailMap.groupsData;
+        let bwData = bwAvailMap.itemsData;
         let isAvailable = true; //inspectAvailability(this.state.currBw);
 
         // Updated Color of area under reservation window //
@@ -442,10 +424,10 @@ class ReservationWhatIfApp extends React.Component{
         let linestyle = 'stroke-width:5;stroke:' + color + ';';
         let fillstyle = 'fill-opacity:0.7;fill:' + color + ';';
 
-        let bwBarGroup = bwData.get('bwBar');
+        let bwBarGroup = bwAvailMap.groupsData.get('bwBar');
         bwBarGroup.style = linestyle;
         bwBarGroup.options.shaded.style = fillstyle;
-        bwData.update(bwBarGroup);
+        bwAvailMap.groupsData.update(bwBarGroup);
 
         // Update values of reservation window //
         let oldBwValues = bwData.getIds({ filter: function (item) { return item.group === 'bwBar'; }});
@@ -459,7 +441,7 @@ class ReservationWhatIfApp extends React.Component{
 
     handleBwSliderChange(event){
         this.setState({currBw: event.target.value});
-        this.updateBandwidthBarGroup();
+        this.updateBandwidthBarGroup(this.state.bwAvailMap);
     }
 
     render(){
@@ -562,7 +544,6 @@ class NetworkPanel extends React.Component{
     }
 }
 
-
 class BandwidthTimePanel extends React.Component{
 
     constructor(props){
@@ -588,7 +569,6 @@ class BandwidthTimePanel extends React.Component{
         );
     }
 }
-
 
 class AvailabilityPanel extends React.Component{
     render(){
