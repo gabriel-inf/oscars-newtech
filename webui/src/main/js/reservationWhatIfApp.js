@@ -32,15 +32,18 @@ class ReservationWhatIfApp extends React.Component{
             status: "UNHELD"
         };
 
+        let nowDate = new Date();
+        let furthestDate = new Date();
+        furthestDate.setDate(furthestDate.getDate() + 365 * 2);
+
         let bwAvailRequest = {
-            startTime: startAt,
-            endTime: endAt,
+            startTime: nowDate,
+            endTime: furthestDate,
             azERO: [],
             zaERO: [],
             azBandwidth: 0,
             zaBandwidth: 0,
         };
-
 
         this.state = {
             reservation: reservation,
@@ -54,9 +57,13 @@ class ReservationWhatIfApp extends React.Component{
             networkVis: {},
             bwAvailMap : {},
             pathClearEnabled: false,
+            submitReservationEnabled: false,
             portToDeviceMap: {"--" : "--"},
             deviceToPortMap: {["--"] : ["--"]},
-            networkPortMap: {}
+            networkPortMap: {},
+            nowDate: nowDate,
+            furthestDate: furthestDate,
+            combinedBwMap: {}
         };
 
         this.handleBwSliderChange = this.handleBwSliderChange.bind(this);
@@ -74,6 +81,7 @@ class ReservationWhatIfApp extends React.Component{
         this.processBwAvailResponse = this.processBwAvailResponse.bind(this);
         this.drawBandwidthAvailabilityMap = this.drawBandwidthAvailabilityMap.bind(this);
         this.changeTime = this.changeTime.bind(this);
+        //this.handleSubmitReservation = this.handleSubmitReservation.bind(this);
 
         client.loadJSON({method: "GET", url: "/resv/newConnectionId"})
             .then(this.updateReservation);
@@ -153,6 +161,8 @@ class ReservationWhatIfApp extends React.Component{
             zaChanges[keyAsDate] = zaData[zaKey];
         }
 
+        let combinedBwMap = bandwidthMapUnion(azChanges, zaChanges);
+        this.setState({combinedBwMap: combinedBwMap});
         this.drawBandwidthAvailabilityMap(azChanges, zaChanges);
     }
 
@@ -273,12 +283,24 @@ class ReservationWhatIfApp extends React.Component{
     }
 
     handleClearPath(){
+        // Deselect and dehighlight network devices
         this.state.networkVis.network.unselectAll();
-        let bwAvailRequest = this.state.bwAvailRequest;
         networkVis.highlight_devices(this.state.networkVis.datasource, this.state.bwAvailRequest.azERO, false, '');
+
+        // Clear AZ and ZA EROs
+        let bwAvailRequest = $.extend(true, {}, this.state.bwAvailRequest);
         bwAvailRequest["azERO"] = [];
         bwAvailRequest["zaERO"] = [];
-        this.setState({bwAvailRequest: bwAvailRequest, currBw: 0, maxBw: 100, pathClearEnabled: false, src: "--", srcPort: "--", dst: "--", dstPort: "--"});
+
+        // Reset bandwidth map values
+        let bwAvailMap = this.state.bwAvailMap;
+        let bwData = bwAvailMap.itemsData;
+        let oldBwValues = bwData.getIds({ filter: function (item) { return item.group === 'avail'; }});
+        bwData.remove(oldBwValues);
+        bwData.add({x: this.state.nowDate, y: 5000, group: 'avail'});
+        bwData.add({x: this.state.furthestDate, y: 5000, group: 'avail'});
+
+        this.setState({bwAvailRequest: bwAvailRequest, currBw: 0, maxBw: 10000, pathClearEnabled: false, src: "--", srcPort: "--", dst: "--", dstPort: "--"});
     }
 
     handleSrcPortSelect(option){
@@ -292,21 +314,18 @@ class ReservationWhatIfApp extends React.Component{
     initializeBandwidthMap(){
         let bwViz = document.getElementById('bwVisualization');
 
-        let nowDate = Date.now();
-        let furthestDate = nowDate + 1000 * 60 * 60 * 24 * 365;  // 1 year in the future
-
         let bwOptions = {
             style:'line',
             drawPoints: false,
             orientation:'bottom',
-            start: this.state.bwAvailRequest.startTime.getUTCMilliseconds(),
-            end: this.state.bwAvailRequest.endTime.getUTCMilliseconds() + (1000 * 60 * 60 * 24 * 1.1),
+            start: this.state.reservation.startAt.getUTCMilliseconds(),
+            end: this.state.reservation.endAt.getUTCMilliseconds() + (1000 * 60 * 60 * 24 * 1.1),
             zoomable: true,
             autoResize: true,
             zoomMin: 1000 * 60 * 60 * 24,
             zoomMax: 1000 * 60 * 60 * 24 * 365 * 2,
-            min: nowDate,
-            max: furthestDate,
+            min: this.state.nowDate,
+            max: this.state.furthestDate,
             shaded: {enabled: true},
             width: '90%',
             height: '400px',
@@ -346,32 +365,35 @@ class ReservationWhatIfApp extends React.Component{
         // Create the Bar Graph
         let bwAvailMap = new vis.Graph2d(bwViz, bwData, bwGroups, bwOptions);
 
-        bwData.add({x: nowDate, y: 5000, group: 'avail'});
-        bwData.add({x: furthestDate, y: 5000, group: 'avail'});
+        bwData.add({x: this.state.nowDate, y: 5000, group: 'avail'});
+        bwData.add({x: this.state.furthestDate, y: 5000, group: 'avail'});
+
+        let combinedBwMap = {};
+        combinedBwMap[this.state.nowDate.toString()] = 5000;
+        combinedBwMap[this.state.furthestDate.toString()] = 5000;
 
         // Set first time bar: Start Time
         let startBarID = "starttime";
-        bwAvailMap.addCustomTime(this.state.bwAvailRequest.startTime, startBarID);
+        bwAvailMap.addCustomTime(this.state.reservation.startAt, startBarID);
 
         // Set second time bar: End Time
         let endBarID = "endtime";
-        bwAvailMap.addCustomTime(this.state.bwAvailRequest.endTime, endBarID);
+        bwAvailMap.addCustomTime(this.state.reservation.endAt, endBarID);
 
         // Listener for changing start/end times
-        bwAvailMap.on('timechanged', properties => this.changeTime(properties, startBarID, endBarID));
+        bwAvailMap.on('timechange', properties => this.changeTime(properties, startBarID, endBarID));
 
-        this.setState({bwAvailMap: bwAvailMap});
+        this.setState({bwAvailMap: bwAvailMap, combinedBwMap: combinedBwMap});
         this.updateBandwidthBarGroup(bwAvailMap);
     }
 
-    drawBandwidthAvailabilityMap(azBW, zaBW){
+    drawBandwidthAvailabilityMap(combinedBwMap){
 
         let bwAvailMap = this.state.bwAvailMap;
         let bwData = bwAvailMap.itemsData;
         let oldBwValues = bwData.getIds({ filter: function (item) { return item.group === 'avail'; }});
         bwData.remove(oldBwValues);
 
-        let combinedBwMap = bandwidthMapUnion(azBW, zaBW);
         let theDates = Object.keys(combinedBwMap);
         theDates.sort((date1, date2) => {return Date.parse(date1) - Date.parse(date2)});
 
@@ -397,16 +419,7 @@ class ReservationWhatIfApp extends React.Component{
             lastBW = theBW;
         }
 
-
-        // Set Map and Slider to range 0 - Min Reservable B/W for this path //
-        // Update the new max range for bw
-        //bwAvailMap.components[3].options.dataAxis.left.range.max = minBW;
-
-        //this.setState({maxBw: newMax});
-        //console.log(bwAvailMap.groupsData);
         bwAvailMap.setItems(bwData);
-        //bwAvailMap.redraw();
-        //this.setState({bwAvailMap: bwAvailMap});
 
         this.updateBandwidthBarGroup(bwAvailMap);
     }
@@ -418,8 +431,8 @@ class ReservationWhatIfApp extends React.Component{
 
         let bwAvailMap = this.state.bwAvailMap;
 
-        let startTime = this.state.bwAvailRequest.startTime;
-        let endTime = this.state.bwAvailRequest.endTime;
+        let startTime = this.state.reservation.startAt;
+        let endTime = this.state.reservation.endAt;
 
         if(barID === startBarID)
         {
@@ -452,17 +465,19 @@ class ReservationWhatIfApp extends React.Component{
             }
         }
 
-        let bwAvailRequest = $.extend(true, {}, this.state.bwAvailRequest);
-        bwAvailRequest.startTime = startTime;
-        bwAvailRequest.endTime = endTime;
-        this.setState({bwAvailRequest : bwAvailRequest});
+        let reservation = $.extend(true, {}, this.state.reservation);
+        reservation.startAt = startTime;
+        reservation.endAt = endTime;
+        this.setState({reservation : reservation});
         this.updateBandwidthBarGroup(this.state.bwAvailMap);
     }
 
     updateBandwidthBarGroup(bwAvailMap){
 
         let bwData = bwAvailMap.itemsData;
-        let isAvailable = this.inspectAvailability(this.state.currBw, bwAvailMap);
+        let startAt = this.state.reservation.startAt;
+        let endAt = this.state.reservation.endAt;
+        let isAvailable = this.inspectAvailability(this.state.currBw, bwAvailMap, startAt, endAt);
 
         // Updated Color of area under reservation window //
         let color = 'red';
@@ -479,21 +494,37 @@ class ReservationWhatIfApp extends React.Component{
 
         // Update values of reservation window //
         let oldBwValues = bwData.getIds({ filter: function (item) { return item.group === 'bwBar'; }});
-        let newBwValueLeft  = {x: this.state.bwAvailRequest.startTime, y: this.state.currBw, group: 'bwBar'};
-        let newBwValueRight = {x: this.state.bwAvailRequest.endTime, y: this.state.currBw, group: 'bwBar'};
+        let newBwValueLeft  = {x: this.state.reservation.startAt, y: this.state.currBw, group: 'bwBar'};
+        let newBwValueRight = {x: this.state.reservation.endAt, y: this.state.currBw, group: 'bwBar'};
 
         bwData.remove(oldBwValues);
         bwData.add(newBwValueLeft);
         bwData.add(newBwValueRight);
     }
 
-    inspectAvailability(bandwidth, bwAvailMap){
-        let bwData = bwAvailMap.itemsData;
-        let bwValues = bwData.get({ filter: function (item) { return item.group === 'avail'; }});
-        for(let index = 0; index < bwValues.length; index++){
-            let bwDatapoint = bwValues[index];
-            if(bandwidth > bwDatapoint.y){
-                return false;
+    inspectAvailability(bandwidth, bwAvailMap, startAt, endAt){
+        let dates = Object.keys(this.state.combinedBwMap);
+        dates.sort((date1, date2) => {return Date.parse(date1) - Date.parse(date2)});
+
+        for(let index = 0; index < dates.length - 1; index++){
+            let currTimeString = dates[index];
+            let nextTimeString = dates[index+1];
+            let currBw = this.state.combinedBwMap[currTimeString];
+            let nextBw = this.state.combinedBwMap[nextTimeString];
+
+            let currTime = new Date(currTimeString);
+            let nextTime = new Date(nextTimeString);
+
+            if((currTime <= startAt && nextTime <= endAt && nextTime >= startAt) ||
+                (currTime >= startAt && nextTime <= endAt)){
+                if(currBw < bandwidth || nextBw < bandwidth){
+                    return false;
+                }
+            }
+            if((currTime <= startAt && nextTime >= endAt) || (currTime >= startAt && nextTime >= endAt)){
+                if(currBw < bandwidth){
+                    return false;
+                }
             }
         }
         return true;
@@ -524,7 +555,7 @@ class ReservationWhatIfApp extends React.Component{
                     maxBw={this.state.maxBw}
                     bw={this.state.currBw}
                 />
-                <ParameterDisplay bw={this.state.currBw} startAt={this.state.bwAvailRequest.startTime} endAt={this.state.bwAvailRequest.endTime}/>
+                <ParameterDisplay bw={this.state.currBw} startAt={this.state.reservation.startAt} endAt={this.state.reservation.endAt}/>
                 <ReservationButton />
             </div>
         );
