@@ -300,7 +300,32 @@ class ReservationWhatIfApp extends React.Component{
         bwData.add({x: this.state.nowDate, y: 5000, group: 'avail'});
         bwData.add({x: this.state.furthestDate, y: 5000, group: 'avail'});
 
-        this.setState({bwAvailRequest: bwAvailRequest, currBw: 0, maxBw: 10000, pathClearEnabled: false, src: "--", srcPort: "--", dst: "--", dstPort: "--"});
+        let combinedBwMap = {};
+        combinedBwMap[this.state.nowDate.toString()] = 5000;
+        combinedBwMap[this.state.furthestDate.toString()] = 5000;
+
+        let reservation = {
+            junctions: {},
+            pipes: {},
+            startAt: this.state.reservation.startAt,
+            endAt: this.state.reservation.endAt,
+            description: "",
+            connectionId: "",
+            status: "UNHELD"
+        };
+
+        this.setState({
+            bwAvailRequest: bwAvailRequest,
+            combinedBwMap: combinedBwMap,
+            reservation: reservation,
+            currBw: 5000,
+            maxBw: 10000,
+            pathClearEnabled: false,
+            submitReservationEnabled: false,
+            src: "--",
+            srcPort: "--",
+            dst: "--",
+            dstPort: "--"});
     }
 
     handleSrcPortSelect(option){
