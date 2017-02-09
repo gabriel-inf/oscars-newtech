@@ -421,12 +421,14 @@ class ReservationApp extends React.Component{
         this.setState({reservation: reservation});
     }
 
-    handleStartDateChange(reservation, newMoment){
+    handleStartDateChange(newMoment){
+        let reservation = this.state.reservation;
         reservation.startAt = newMoment.toDate();
         this.setState({reservation: reservation});
     }
 
-    handleEndDateChange(reservation, newMoment){
+    handleEndDateChange(newMoment){
+        let reservation = this.state.reservation;
         reservation.endAt = newMoment.toDate();
         this.setState({reservation: reservation});
     }
@@ -808,12 +810,12 @@ class ParameterForm extends React.Component{
                         <CalendarForm
                             name="Start"
                             date={this.props.reservation.startAt}
-                            handleDateChange={this.props.handleStartDateChange.bind(this, this.props.reservation)}
+                            handleDateChange={this.props.handleStartDateChange}
                         />
                         <CalendarForm
                             name="End"
                             date={this.props.reservation.endAt}
-                            handleDateChange={this.props.handleEndDateChange.bind(this, this.props.reservation)}
+                            handleDateChange={this.props.handleEndDateChange}
                         />
 
                         <div id="errors_box" className={this.props.messageBoxClass}>{this.props.message}</div>
@@ -847,7 +849,7 @@ class CalendarForm extends React.Component{
             <div className="form-group">
                 <label className="col-md-2 control-label">{this.props.name} at</label>
                 <div className="col-md-4 input-group" id={divId}>
-                    <DateTime value={this.props.date} onChange={this.props.handleDateChange.bind(this, this.props.reservation)}/>
+                    <DateTime value={this.props.date} onChange={this.props.handleDateChange}/>
                 </div>
             </div>
         );
