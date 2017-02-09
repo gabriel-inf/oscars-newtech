@@ -369,7 +369,9 @@ class ReservationWhatIfApp extends React.Component{
         let oldBwValues = bwData.getIds({ filter: function (item) { return item.group === 'avail'; }});
         bwData.remove(oldBwValues);
 
-        let theDates = Object.keys(azBW);
+        let combinedBwMap = bandwidthMapUnion(azBW, zaBW);
+        let theDates = Object.keys(combinedBwMap);
+        theDates.sort((date1, date2) => {return Date.parse(date1) - Date.parse(date2)});
 
         let minBW = 99999999;
         let lastBW = 0;
@@ -377,7 +379,7 @@ class ReservationWhatIfApp extends React.Component{
         for(let d = 0; d < theDates.length; d++)
         {
             let theTime = theDates[d];
-            let theBW = azBW[theTime];
+            let theBW = combinedBwMap[theTime];
 
             bwData.add({x: theTime, y: theBW, group: 'avail'});
 
@@ -674,6 +676,30 @@ class Heading extends React.Component{
             </div>
         );
     }
+}
+
+function bandwidthMapUnion(azBwMap, zaBwMap){
+
+    // Combine a map of all bandwidth events
+    // Keys are the dates
+    // If two events happen at the same date, keep the min
+    // As they are heading in different direction (AZ vs ZA)
+    let combinedMap = $.extend(true, {}, azBwMap);
+    let zaKeys = zaBwMap.keys();
+    for(let i = 0; i < zaKeys.length; i++){
+        let zaDate = zaKeys[i];
+        let zaBwValue = zaBwMap[zaDate];
+        if(combinedMap.hasOwnProperty(zaDate)){
+            let azBwValue = combinedMap[zaDate];
+            if(zaBwValue < azBwValue){
+                combinedMap[zaDate] = zaBwValue;
+            }
+        }
+        else{
+            combinedMap[zaDate] = zaBwValue;
+        }
+    }
+    return combinedMap;
 }
 
 module.exports = ReservationWhatIfApp;
