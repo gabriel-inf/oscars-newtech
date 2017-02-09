@@ -73,6 +73,7 @@ class ReservationWhatIfApp extends React.Component{
         this.initializeBandwidthMap = this.initializeBandwidthMap.bind(this);
         this.processBwAvailResponse = this.processBwAvailResponse.bind(this);
         this.drawBandwidthAvailabilityMap = this.drawBandwidthAvailabilityMap.bind(this);
+        this.changeTime = this.changeTime.bind(this);
 
         client.loadJSON({method: "GET", url: "/resv/newConnectionId"})
             .then(this.updateReservation);
@@ -91,6 +92,7 @@ class ReservationWhatIfApp extends React.Component{
         let bwAvailRequest = this.state.bwAvailRequest;
         let pathChange = !deepEqual(prevState.bwAvailRequest, bwAvailRequest);
         let portChange = prevState.srcPort != this.state.srcPort || prevState.dstPort != this.state.dstPort;
+
         if(bwAvailRequest.azERO.length > 1 && (pathChange || portChange)){
             let bwAvailResponse = this.submitBwAvailRequest(bwAvailRequest);
             bwAvailResponse.then(
@@ -356,7 +358,7 @@ class ReservationWhatIfApp extends React.Component{
         bwAvailMap.addCustomTime(this.state.bwAvailRequest.endTime, endBarID);
 
         // Listener for changing start/end times
-        bwAvailMap.on('timechange', function (properties) { this.changeTime(properties, startBarID, endBarID); });
+        bwAvailMap.on('timechanged', properties => this.changeTime(properties, startBarID, endBarID));
 
         this.setState({bwAvailMap: bwAvailMap});
         this.updateBandwidthBarGroup(bwAvailMap);
@@ -409,8 +411,52 @@ class ReservationWhatIfApp extends React.Component{
         this.updateBandwidthBarGroup(bwAvailMap);
     }
 
-    changeTime(properties, startBarId, endBarId){
+    changeTime(properties, startBarID, endBarID){
+        let barID = properties.id;
+        let startBarTime;
+        let endBarTime;
 
+        let bwAvailMap = this.state.bwAvailMap;
+
+        let startTime = this.state.bwAvailRequest.startTime;
+        let endTime = this.state.bwAvailRequest.endTime;
+
+        if(barID === startBarID)
+        {
+            startBarTime = properties.time;
+            endBarTime = bwAvailMap.getCustomTime(endBarID);
+
+            if(startBarTime <= endBarTime)      // Simple case, Start earlier than End
+            {
+                startTime = startBarTime;
+            }
+            else                                // Complex case, User has dragged Start to a point later than End
+            {
+                startTime = endBarTime;
+                endTime = startBarTime;
+            }
+        }
+        else
+        {
+            endBarTime = properties.time;
+            startBarTime = bwAvailMap.getCustomTime(startBarID);
+
+            if(startBarTime <= endBarTime)      // Simple case, End later than Start
+            {
+                endTime = endBarTime;
+            }
+            else                                // Complex case, User has dragged End to a point earlier than Start
+            {
+                startTime = endBarTime;
+                endTime = startBarTime;
+            }
+        }
+
+        let bwAvailRequest = $.extend(true, {}, this.state.bwAvailRequest);
+        bwAvailRequest.startTime = startTime;
+        bwAvailRequest.endTime = endTime;
+        this.setState({bwAvailRequest : bwAvailRequest});
+        this.updateBandwidthBarGroup(this.state.bwAvailMap);
     }
 
     updateBandwidthBarGroup(bwAvailMap){
@@ -478,7 +524,7 @@ class ReservationWhatIfApp extends React.Component{
                     maxBw={this.state.maxBw}
                     bw={this.state.currBw}
                 />
-                <ParameterDisplay bw={this.state.currBw} startAt={this.state.reservation.startAt} endAt={this.state.reservation.endAt}/>
+                <ParameterDisplay bw={this.state.currBw} startAt={this.state.bwAvailRequest.startTime} endAt={this.state.bwAvailRequest.endTime}/>
                 <ReservationButton />
             </div>
         );
