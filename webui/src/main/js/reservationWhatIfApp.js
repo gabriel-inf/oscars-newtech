@@ -414,7 +414,7 @@ class ReservationWhatIfApp extends React.Component{
     updateBandwidthBarGroup(bwAvailMap){
 
         let bwData = bwAvailMap.itemsData;
-        let isAvailable = true; //inspectAvailability(this.state.currBw);
+        let isAvailable = this.inspectAvailability(this.state.currBw, bwAvailMap);
 
         // Updated Color of area under reservation window //
         let color = 'red';
@@ -437,6 +437,18 @@ class ReservationWhatIfApp extends React.Component{
         bwData.remove(oldBwValues);
         bwData.add(newBwValueLeft);
         bwData.add(newBwValueRight);
+    }
+
+    inspectAvailability(bandwidth, bwAvailMap){
+        let bwData = bwAvailMap.itemsData;
+        let bwValues = bwData.get({ filter: function (item) { return item.group === 'avail'; }});
+        for(let index = 0; index < bwValues.length; index++){
+            let bwDatapoint = bwValues[index];
+            if(bandwidth > bwDatapoint.y){
+                return false;
+            }
+        }
+        return true;
     }
 
     handleBwSliderChange(event){
