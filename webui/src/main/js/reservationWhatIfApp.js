@@ -83,8 +83,8 @@ class ReservationWhatIfApp extends React.Component{
         this.processBwAvailResponse = this.processBwAvailResponse.bind(this);
         this.drawBandwidthAvailabilityMap = this.drawBandwidthAvailabilityMap.bind(this);
         this.changeTime = this.changeTime.bind(this);
-        this.updateReservation = this.updateReservation.bind(this);
-        //this.handleSubmitReservation = this.handleSubmitReservation.bind(this);
+        this.handleSubmitReservation = this.handleSubmitReservation.bind(this);
+        this.submitPrecheck = this.submitPrecheck.bind(this);
 
         client.loadJSON({method: "GET", url: "/resv/newConnectionId"})
             .then(this.assignReservationId);
@@ -104,9 +104,6 @@ class ReservationWhatIfApp extends React.Component{
         let pathChange = !deepEqual(prevState.bwAvailRequest, bwAvailRequest);
         let portChange = prevState.srcPort != this.state.srcPort || prevState.dstPort != this.state.dstPort;
 
-        let reservation = this.state.reservation;
-        let reservationChange = !deepEqual(prevState.reservation, reservation);
-
         if(bwAvailRequest.azERO.length > 1 && (pathChange || portChange)){
             let bwAvailResponse = this.submitBwAvailRequest(bwAvailRequest);
             bwAvailResponse.then(
@@ -118,26 +115,28 @@ class ReservationWhatIfApp extends React.Component{
                 }
             );
         }
-        if(reservationChange){
-            let reservationStatus = validator.validateReservation(this.state.reservation);
-            if(reservationStatus.isValid){
-                this.setState({message: "Reservation format valid. Prechecking resource availability...", messageBoxClass: "alert-success"});
-                let preCheckResponse = client.submitReservation("/resv/precheck", this.state.reservation);
-                preCheckResponse.then(
-                    (successResponse) => {
-                        this.processPrecheck(successResponse);
-                    },
-                    (failResponse) => {
-                        console.log("Error: " + failResponse.status + " - " + failResponse.statusText);
-                    }
-                );
-            }
-            else{
-                console.log(reservationStatus.errorMessages[0]);
-                this.setState({
-                    submitReservationEnabled: false
-                });
-            }
+    }
+
+    submitPrecheck(){
+        let reservationStatus = validator.validateReservation(this.state.reservation);
+        if(reservationStatus.isValid){
+            this.setState({message: "Reservation format valid. Prechecking resource availability...", messageBoxClass: "alert-success"});
+            let preCheckResponse = client.submitReservation("/resv/precheck", this.state.reservation);
+            preCheckResponse.then(
+                (successResponse) => {
+                    this.processPrecheck(successResponse);
+                },
+                (failResponse) => {
+                    console.log("Error: " + failResponse.status + " - " + failResponse.statusText);
+                }
+            );
+        }
+        else{
+            console.log(reservationStatus.errorMessages[0]);
+            this.setState({
+                message: "Reservation parameters invalid: " + reservationStatus.errorMessages[0],
+                submitReservationEnabled: false
+            });
         }
     }
 
@@ -323,7 +322,18 @@ class ReservationWhatIfApp extends React.Component{
 
         bwAvailRequest["azERO"] = azERO;
         bwAvailRequest["zaERO"] = zaERO;
-        this.setState({bwAvailRequest, pathClearEnabled: pathClearEnabled, src: src, srcPort: srcPort, dst: dst, dstPort: dstPort});
+        let reservation = buildReservation(this.state.currBw, bwAvailRequest.azERO, this.state.reservation.startAt,
+            this.state.reservation.endAt, src, srcPort, dst, dstPort, this.state.reservation.connectionId);
+        this.setState({
+            bwAvailRequest: bwAvailRequest,
+            reservation: reservation,
+            pathClearEnabled: pathClearEnabled,
+            src: src,
+            srcPort: srcPort,
+            dst: dst,
+            dstPort: dstPort,
+            submitReservationEnabled: false
+        });
     }
 
     handleClearPath(){
@@ -348,15 +358,9 @@ class ReservationWhatIfApp extends React.Component{
         combinedBwMap[this.state.nowDate.toString()] = 5000;
         combinedBwMap[this.state.furthestDate.toString()] = 5000;
 
-        let reservation = {
-            junctions: {},
-            pipes: {},
-            startAt: this.state.reservation.startAt,
-            endAt: this.state.reservation.endAt,
-            description: "",
-            connectionId: "",
-            status: "UNHELD"
-        };
+
+        let reservation = buildReservation(5000, bwAvailRequest.azERO, this.state.reservation.startAt, this.state.reservation.endAt,
+            "--", "--", "--", "--", this.state.reservation.connectionId);
 
         this.setState({
             bwAvailRequest: bwAvailRequest,
@@ -373,11 +377,15 @@ class ReservationWhatIfApp extends React.Component{
     }
 
     handleSrcPortSelect(option){
-        this.setState({srcPort: option.value});
+        let reservation = buildReservation(this.state.currBw, this.state.bwAvailRequest.azERO, this.state.reservation.startAt, this.state.reservation.endAt,
+            this.state.src, option.value, this.state.dst, this.state.dstPort, this.state.reservation.connectionId);
+        this.setState({srcPort: option.value, reservation: reservation, submitReservationEnabled: false});
     }
 
     handleDstPortSelect(option){
-        this.setState({dstPort: option.value});
+        let reservation = buildReservation(this.state.currBw, this.state.bwAvailRequest.azERO, this.state.reservation.startAt, this.state.reservation.endAt,
+        this.state.src, this.state.srcPort, this.state.dst, option.value, this.state.reservation.connectionId);
+        this.setState({dstPort: option.value, reservation: reservation, submitReservationEnabled: false});
     }
 
     initializeBandwidthMap(){
@@ -534,10 +542,9 @@ class ReservationWhatIfApp extends React.Component{
             }
         }
 
-        let reservation = $.extend(true, {}, this.state.reservation);
-        reservation.startAt = startTime;
-        reservation.endAt = endTime;
-        this.setState({reservation : reservation});
+        let reservation = buildReservation(this.state.currBw, this.state.bwAvailRequest.azERO, startTime, endTime,
+            this.state.src, this.state.srcPort, this.state.dst, this.state.dstPort, this.state.reservation.connectionId);
+        this.setState({reservation : reservation, submitReservationEnabled: false});
         this.updateBandwidthBarGroup(this.state.bwAvailMap);
     }
 
@@ -601,19 +608,14 @@ class ReservationWhatIfApp extends React.Component{
 
     handleBwSliderChange(event){
         let newBw = event.target.value;
-        if(this.state.bwAvailRequest.azERO.length > 1) {
-            this.updateReservation();
-        }
-        this.setState({currBw: newBw});
+        let reservation = buildReservation(newBw, this.state.bwAvailRequest.azERO, this.state.reservation.startAt, this.state.reservation.endAt,
+            this.state.src, this.state.srcPort, this.state.dst, this.state.dstPort, this.state.reservation.connectionId);
+        this.setState({currBw: newBw, submitReservationEnabled: false, reservation: reservation});
         this.updateBandwidthBarGroup(this.state.bwAvailMap);
     }
 
-    updateReservation(){
-        let bwAvailRequest = this.state.bwAvailRequest;
-        let currReservation = this.state.reservation;
-        let reservation = buildReservation(this.state.currBw, bwAvailRequest, currReservation.startAt, currReservation.endAt,
-            this.state.src, this.state.srcPort, this.state.dst, this.state.dstPort, currReservation.connectionId);
-        this.setState({reservation: reservation});
+    handleSubmitReservation(){
+        console.log("Submitting reservation");
     }
 
     render(){
@@ -638,7 +640,11 @@ class ReservationWhatIfApp extends React.Component{
                     message={this.state.message}
                 />
                 <ParameterDisplay bw={this.state.currBw} startAt={this.state.reservation.startAt} endAt={this.state.reservation.endAt}/>
-                <ReservationButton />
+
+                <div style={{width: "50%", margin: "auto", alignItems: "center", justifyContent: "center", display: "block"}}>
+                    <ParameterButton id="precheckButton" value="Precheck" onClick={this.submitPrecheck} enabled={true}/>
+                    <ParameterButton id="reservationButton" value="Place Reservation" onClick={this.handleSubmitReservation} enabled={this.state.submitReservationEnabled}/>
+                </div>
             </div>
         );
     }
@@ -777,7 +783,7 @@ class BandwidthSlider extends React.Component{
 
     render(){
         return(
-            <input id="bwSlider" type="range" className="verticalSlider" min="0" max={this.props.maxBw} value={this.props.bw} step="1"
+            <input id="bwSlider" type="range" className="verticalSlider" min="0" max={this.props.maxBw} value={this.props.bw} step="100"
                    style={{WebkitAppearance: "slider-vertical", height: "350px", width: "50px"}} onChange={this.props.handleBwSliderChange}/>
         );
     }
@@ -813,18 +819,19 @@ class ParameterDiv extends React.Component{
     }
 }
 
-class ReservationButton extends React.Component{
+class ParameterButton extends React.Component{
 
     render(){
         return(
-            <div style={{width: "40%", margin: "auto", padding: "auto"}}>
-                <button
-                    id="buttonHold"
-                    className="btn btn-primary disabled"
-                    style={{fontSize: "25px", border: "none", cursor: "pointer", minWidth: "300px"}}>
-                    Place Reservation
-                </button>
-            </div>
+                <input
+                    type="button"
+                    id={this.props.id}
+                    className="btn btn-primary"
+                    style={{fontSize: "25px", border: "none", cursor: "pointer", margin:"5px"}}
+                    value={this.props.value}
+                    onClick={this.props.onClick}
+                    disabled={!this.props.enabled}
+                />
         );
     }
 }
@@ -866,13 +873,13 @@ function bandwidthMapUnion(azBwMap, zaBwMap){
     return combinedMap;
 }
 
-function buildReservation(bandwidth, bwAvailRequest, start, end, src, srcPort, dst, dstPort, connectionId){
+function buildReservation(bandwidth, azERO, start, end, src, srcPort, dst, dstPort, connectionId){
     // Junction: {id: ~~, label: ~~, fixtures: {}}
     // fixtures: {id: {id: ~~, selected: true or false, bandwidth: ~~, vlan: ~~}, id: ~~, ....}
     // Pipe: {id: ~~, a: ~~, z: ~~, bw: ~~}
 
     // Build a pipe for each Pair in the AZ ERO sequence
-    let pipesAndJunctions = buildPipesAndJunctions(src, srcPort, dst, dstPort, bandwidth, bwAvailRequest.azERO);
+    let pipesAndJunctions = buildPipesAndJunctions(src, srcPort, dst, dstPort, bandwidth, azERO);
     return {
         junctions: pipesAndJunctions.junctions,
         pipes: pipesAndJunctions.pipes,
@@ -895,10 +902,10 @@ function buildPipesAndJunctions(src, srcPort, dst, dstPort, bandwidth, ERO){
         let aFixtures = {};
         let zFixtures = {};
         if(currName == src){
-            aFixtures = {srcPort: {id: srcPort, selected: true, bandwidth: bandwidth, vlan: "2-4094"}};
+            aFixtures[srcPort] =  {id: srcPort, selected: true, bw: bandwidth, vlan: "2-4094"};
         }
         if(nextName == dst){
-            zFixtures = {dstPort: {id: dstPort, selected: true, bandwidth: bandwidth, vlan: "2-4094"}};
+            zFixtures[dstPort] =  {id: dstPort, selected: true, bw: bandwidth, vlan: "2-4094"};
         }
         if(!junctions.hasOwnProperty(currName)){
             junctions[currName] = {id: currName, label: currName, fixtures: aFixtures};
