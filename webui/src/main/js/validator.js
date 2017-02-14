@@ -42,7 +42,7 @@ function validateJunctions(junctions){
     let junctionNameList = Object.keys(junctions);
     let errorMessages = [];
 
-    if(junctionNameList === 0){
+    if(junctionNameList.length == 0){
         errorMessages.push("Add at least one network node (junction) to reservation.");
     }
 
@@ -62,8 +62,6 @@ function validateJunctions(junctions){
     if(totalValidFixtures < 2){
         errorMessages.push("There must be at least two end points (fixtures) with bandwidth >= 0 across reservation. Select node in Sandbox to add fixtures.");
     }
-
-
 
     return {isValid: totalValid > 0 && totalValid == junctionNameList.length && totalValidFixtures > 1, errorMessages: errorMessages};
 }

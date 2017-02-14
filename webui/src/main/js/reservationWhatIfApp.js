@@ -5,15 +5,13 @@ const client = require('./client');
 const networkVis = require('./networkVis');
 const deepEqual = require('deep-equal');
 const vis = require('../../../node_modules/vis/dist/vis');
+const validator = require('./validator');
 
 
 class ReservationWhatIfApp extends React.Component{
 
     constructor(props){
         super(props);
-        // Junction: {id: ~~, label: ~~, fixtures: {}}
-        // fixtures: {id: {id: ~~, selected: true or false, bandwidth: ~~, vlan: ~~}, id: ~~, ....}
-        // Pipe: {id: ~~, a: ~~, z: ~~, bw: ~~}
 
         // Initialize default start/end date times
         let startAt = new Date();
@@ -22,6 +20,9 @@ class ReservationWhatIfApp extends React.Component{
         endAt.setDate(endAt.getDate() + 1);
         endAt.setTime(endAt.getTime() + 15000 * 60);
 
+        // Junction: {id: ~~, label: ~~, fixtures: {}}
+        // fixtures: {id: {id: ~~, selected: true or false, bandwidth: ~~, vlan: ~~}, id: ~~, ....}
+        // Pipe: {id: ~~, a: ~~, z: ~~, bw: ~~}
         let reservation = {
             junctions: {},
             pipes: {},
@@ -63,6 +64,7 @@ class ReservationWhatIfApp extends React.Component{
             networkPortMap: {},
             nowDate: nowDate,
             furthestDate: furthestDate,
+            message: "Select both a source and destination port to display the bandwidth availability of your selected route!",
             combinedBwMap: {}
         };
 
@@ -71,7 +73,7 @@ class ReservationWhatIfApp extends React.Component{
         this.initializeNetwork = this.initializeNetwork.bind(this);
         this.selectNode = this.selectNode.bind(this);
         this.handleClearPath = this.handleClearPath.bind(this);
-        this.updateReservation = this.updateReservation.bind(this);
+        this.assignReservationId = this.assignReservationId.bind(this);
         this.updatePortMaps = this.updatePortMaps.bind(this);
         this.handleSrcPortSelect = this.handleSrcPortSelect.bind(this);
         this.handleDstPortSelect = this.handleDstPortSelect.bind(this);
@@ -81,10 +83,11 @@ class ReservationWhatIfApp extends React.Component{
         this.processBwAvailResponse = this.processBwAvailResponse.bind(this);
         this.drawBandwidthAvailabilityMap = this.drawBandwidthAvailabilityMap.bind(this);
         this.changeTime = this.changeTime.bind(this);
+        this.updateReservation = this.updateReservation.bind(this);
         //this.handleSubmitReservation = this.handleSubmitReservation.bind(this);
 
         client.loadJSON({method: "GET", url: "/resv/newConnectionId"})
-            .then(this.updateReservation);
+            .then(this.assignReservationId);
 
         client.loadJSON({method: "GET", url: "/info/vlanEdges"})
             .then(this.updatePortMaps);
@@ -101,6 +104,9 @@ class ReservationWhatIfApp extends React.Component{
         let pathChange = !deepEqual(prevState.bwAvailRequest, bwAvailRequest);
         let portChange = prevState.srcPort != this.state.srcPort || prevState.dstPort != this.state.dstPort;
 
+        let reservation = this.state.reservation;
+        let reservationChange = !deepEqual(prevState.reservation, reservation);
+
         if(bwAvailRequest.azERO.length > 1 && (pathChange || portChange)){
             let bwAvailResponse = this.submitBwAvailRequest(bwAvailRequest);
             bwAvailResponse.then(
@@ -111,6 +117,44 @@ class ReservationWhatIfApp extends React.Component{
                     console.log("Error: " + failResponse.status + " - " + failResponse.statusText);
                 }
             );
+        }
+        if(reservationChange){
+            let reservationStatus = validator.validateReservation(this.state.reservation);
+            if(reservationStatus.isValid){
+                this.setState({message: "Reservation format valid. Prechecking resource availability...", messageBoxClass: "alert-success"});
+                let preCheckResponse = client.submitReservation("/resv/precheck", this.state.reservation);
+                preCheckResponse.then(
+                    (successResponse) => {
+                        this.processPrecheck(successResponse);
+                    },
+                    (failResponse) => {
+                        console.log("Error: " + failResponse.status + " - " + failResponse.statusText);
+                    }
+                );
+            }
+            else{
+                console.log(reservationStatus.errorMessages[0]);
+                this.setState({
+                    submitReservationEnabled: false
+                });
+            }
+        }
+    }
+
+    processPrecheck(response){
+        let data = JSON.parse(response);
+        let preCheckRes = data["preCheckResult"];
+        if(preCheckRes === "UNSUCCESSFUL"){
+            this.setState({
+                message: "Precheck Failed: Cannot establish reservation with current parameters!",
+                submitReservationEnabled: false
+            });
+        }
+        else{
+            this.setState({
+                message: "Precheck Passed: Click Place Reservation reserve!",
+                submitReservationEnabled: true
+            });
         }
     }
 
@@ -166,7 +210,7 @@ class ReservationWhatIfApp extends React.Component{
         this.drawBandwidthAvailabilityMap(azChanges, zaChanges);
     }
 
-    updateReservation(response){
+    assignReservationId(response){
         let jsonData = JSON.parse(response);
         let reservation = this.state.reservation;
         reservation["connectionId"] = jsonData["connectionId"];
@@ -406,7 +450,7 @@ class ReservationWhatIfApp extends React.Component{
         bwAvailMap.addCustomTime(this.state.reservation.endAt, endBarID);
 
         // Listener for changing start/end times
-        bwAvailMap.on('timechange', properties => this.changeTime(properties, startBarID, endBarID));
+        bwAvailMap.on('timechanged', properties => this.changeTime(properties, startBarID, endBarID));
 
         this.setState({bwAvailMap: bwAvailMap, combinedBwMap: combinedBwMap});
         this.updateBandwidthBarGroup(bwAvailMap);
@@ -556,8 +600,20 @@ class ReservationWhatIfApp extends React.Component{
     }
 
     handleBwSliderChange(event){
-        this.setState({currBw: event.target.value});
+        let newBw = event.target.value;
+        if(this.state.bwAvailRequest.azERO.length > 1) {
+            this.updateReservation();
+        }
+        this.setState({currBw: newBw});
         this.updateBandwidthBarGroup(this.state.bwAvailMap);
+    }
+
+    updateReservation(){
+        let bwAvailRequest = this.state.bwAvailRequest;
+        let currReservation = this.state.reservation;
+        let reservation = buildReservation(this.state.currBw, bwAvailRequest, currReservation.startAt, currReservation.endAt,
+            this.state.src, this.state.srcPort, this.state.dst, this.state.dstPort, currReservation.connectionId);
+        this.setState({reservation: reservation});
     }
 
     render(){
@@ -579,6 +635,7 @@ class ReservationWhatIfApp extends React.Component{
                     handleBwSliderChange={this.handleBwSliderChange}
                     maxBw={this.state.maxBw}
                     bw={this.state.currBw}
+                    message={this.state.message}
                 />
                 <ParameterDisplay bw={this.state.currBw} startAt={this.state.reservation.startAt} endAt={this.state.reservation.endAt}/>
                 <ReservationButton />
@@ -679,7 +736,12 @@ class BandwidthTimePanel extends React.Component{
             <div className="panel-group">
                 <div className="panel panel-default">
                     <Heading title="Show / hide Bandwidth x Time Availability" onClick={this.handleHeadingClick}/>
-                    <AvailabilityPanel show={this.state.showPanel} handleBwSliderChange={this.props.handleBwSliderChange} maxBw={this.props.maxBw} bw={this.props.bw}/>
+                    <AvailabilityPanel
+                        show={this.state.showPanel}
+                        handleBwSliderChange={this.props.handleBwSliderChange}
+                        maxBw={this.props.maxBw} bw={this.props.bw}
+                        message={this.props.message}
+                    />
                 </div>
             </div>
         );
@@ -692,7 +754,7 @@ class AvailabilityPanel extends React.Component{
             <div id="availability_panel" className="panel-body collapse  collapse in" style={this.props.show ? {} : { display: "none" }}>
                 <MessageBox
                     className="alert alert-danger"
-                    message="Select both a source and destination port to display the bandwidth availability of your selected route! "
+                    message={this.props.message}
                 />
                 <div style={{float: "left"}}>
                     <BandwidthSlider handleBwSliderChange={this.props.handleBwSliderChange} maxBw={this.props.maxBw} bw={this.props.bw}/>
@@ -802,6 +864,52 @@ function bandwidthMapUnion(azBwMap, zaBwMap){
         }
     }
     return combinedMap;
+}
+
+function buildReservation(bandwidth, bwAvailRequest, start, end, src, srcPort, dst, dstPort, connectionId){
+    // Junction: {id: ~~, label: ~~, fixtures: {}}
+    // fixtures: {id: {id: ~~, selected: true or false, bandwidth: ~~, vlan: ~~}, id: ~~, ....}
+    // Pipe: {id: ~~, a: ~~, z: ~~, bw: ~~}
+
+    // Build a pipe for each Pair in the AZ ERO sequence
+    let pipesAndJunctions = buildPipesAndJunctions(src, srcPort, dst, dstPort, bandwidth, bwAvailRequest.azERO);
+    return {
+        junctions: pipesAndJunctions.junctions,
+        pipes: pipesAndJunctions.pipes,
+        startAt: start,
+        endAt: end,
+        description: "What-if Generated Reservation",
+        connectionId: "connectionId",
+        status: "UNHELD"
+    };
+}
+
+function buildPipesAndJunctions(src, srcPort, dst, dstPort, bandwidth, ERO){
+    let pipes = {};
+    let junctions = {};
+    for(let i = 0; i < ERO.length-1; i++){
+        let currName = ERO[i];
+        let nextName = ERO[i+1];
+        let aJunction = {};
+        let zJunction = {};
+        let aFixtures = {};
+        let zFixtures = {};
+        if(currName == src){
+            aFixtures = {srcPort: {id: srcPort, selected: true, bandwidth: bandwidth, vlan: "2-4094"}};
+        }
+        if(nextName == dst){
+            zFixtures = {dstPort: {id: dstPort, selected: true, bandwidth: bandwidth, vlan: "2-4094"}};
+        }
+        if(!junctions.hasOwnProperty(currName)){
+            junctions[currName] = {id: currName, label: currName, fixtures: aFixtures};
+        }
+        if(!junctions.hasOwnProperty(nextName)){
+            junctions[nextName] = {id: nextName, label: nextName, fixtures: zFixtures};
+        }
+        let pipeId = currName + " -- " + nextName + "_1";
+        pipes[pipeId] = {id: pipeId, a: currName, z : nextName, bw: bandwidth};
+    }
+    return {junctions: junctions, pipes: pipes};
 }
 
 module.exports = ReservationWhatIfApp;
