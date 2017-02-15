@@ -153,9 +153,7 @@ public class NonPalindromicalPCE {
                     .filter(r -> r.getZ().equals(azEdge.getA()))
                     .findFirst();
 
-            if (reverseEdge.isPresent()) {
-                zaServiceLayerERO.add(reverseEdge.get());
-            }
+            reverseEdge.ifPresent(zaServiceLayerERO::add);
         }
 
         // 2. Reverse the order

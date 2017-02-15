@@ -2,12 +2,17 @@ package net.es.oscars.pce;
 
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.spec.SurvivabilityType;
+import net.es.oscars.dto.topo.enums.DeviceType;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.dto.topo.TopoEdge;
 import net.es.oscars.dto.spec.PalindromicType;
+import net.es.oscars.topo.dao.UrnRepository;
 import net.es.oscars.topo.ent.BidirectionalPathE;
 import net.es.oscars.topo.ent.EdgeE;
+import net.es.oscars.topo.ent.ReservableVlanE;
+import net.es.oscars.topo.ent.UrnE;
+import net.es.oscars.topo.pop.Device;
 import net.es.oscars.topo.svc.TopoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -49,6 +54,9 @@ public class TopPCE {
 
     @Autowired
     private BandwidthService bwService;
+
+    @Autowired
+    private UrnRepository urnRepo;
 
     /**
      * Given a requested Blueprint (made up of a VLAN or Layer3 Flow) and a Schedule Specification, attempt
@@ -482,6 +490,7 @@ public class TopPCE {
             } catch (NoSuchElementException ex) {
                 throw new PCEException("device not found in topology");
             }
+            validVlanRequest(junction);
         }
 
         Set<String> junctionsWithNoFixtures = allJunctions.stream().
@@ -491,7 +500,49 @@ public class TopPCE {
         if (!junctionsWithNoFixtures.isEmpty()) {
             // throw new PCEException("Junctions with no fixtures found: " + String.join(" ", junctionsWithNoFixtures));
         }
+
         log.info("all junctions & pipes are ok");
+    }
+
+    private void validVlanRequest(RequestedVlanJunctionE junction) throws PCEException{
+        // Confirm that VLANs can be reserved
+        // Either: Junction is a router, and the fixtures must have reservable VLANs
+        // Or:     Junction is a switch, and there must be reservable VLANs on the switch
+        String juncUrnString = junction.getDeviceUrn();
+        Optional<UrnE> urnOpt = urnRepo.findByUrn(juncUrnString);
+        if(urnOpt.isPresent()){
+            UrnE urn = urnOpt.get();
+            if(urn.getDeviceType().equals(DeviceType.SWITCH)){
+                ReservableVlanE resvVlan = urn.getReservableVlans();
+                if(resvVlan == null){
+                    throw new PCEException("Unable to reserve VLANs on " + juncUrnString);
+                }
+            }
+            // Evaluate the Router's fixtures
+            else{
+                validateFixtures(junction);
+            }
+        }
+        else{
+            throw new PCEException("Junction URN " + juncUrnString + " does not exist in repo.");
+        }
+    }
+
+    private void validateFixtures(RequestedVlanJunctionE junction) throws PCEException{
+        Set<RequestedVlanFixtureE> fixtures = junction.getFixtures();
+        for(RequestedVlanFixtureE fix : fixtures){
+            Optional<UrnE> fixUrnOpt = urnRepo.findByUrn(fix.getPortUrn());
+            if(fixUrnOpt.isPresent()){
+                UrnE fixtureUrn = fixUrnOpt.get();
+                ReservableVlanE resvVlan = fixtureUrn.getReservableVlans();
+                if(resvVlan == null){
+                    throw new PCEException("Unable to reserve VLANs on fixture " + fixtureUrn.getUrn());
+                }
+            }
+            else{
+                throw new PCEException("Fixture URN " + fix.getPortUrn() + " does not exist in repo.");
+            }
+        }
     }
 
 

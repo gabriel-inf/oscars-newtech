@@ -1,3 +1,4 @@
+.. _advanced_service:
 
 Path Computation Service Enhancements
 =====================================
@@ -6,128 +7,33 @@ Path Computation Service Enhancements
    :scale: 50%
    :align: center
 
-OSCARS 1.0 supports a number of all-new routing capabilities which provide an unprecedented amount of user control over how the PCE identifies working solutions. All of these services may be triggered without alteration to the code, and without the need for modifying configuration parameters when launching OSCARS. This document discusses the PCE service enhancement suite, while :doc:`???` provides details on how the user can exert control over the flow through the PCE to request each of the described services. The following table offers a listing of the services discussed throughout the remainder of the document. Note: Forward-direction circuit is denoted as **A-Z**, while reverse is denoted as **Z-A**.
+OSCARS 1.0 supports a number of all-new composable routing capabilities which provide an unprecedented amount of user control over how the :ref:`pce_doc` identifies working solutions. All of these services may be triggered without alteration to the underlying code, and without the need for modifying configuration parameters when launching OSCARS. This document discusses the PCE service enhancement suite, while :ref:`requestspec` provides details on how the user can exert control over the flow through the PCE to engage and toggle each of the described services. The following table offers a listing of the services discussed throughout the remainder of the document. Note: Forward-direction circuit route is denoted as **A-Z**, while reverse is denoted as **Z-A**.
 
 
-===============================   ============
-Service Enhancement   		  Description
-===============================   ============
-Asymmetric Bandwidth Capability   A-Z and Z-A circuits may exhibit/explicitly require different bandwidth quantities.
-Non-palindromic Return Path       A-Z and Z-A circuits may not mirror one another. Only portions of the route passing through an MPLS segment may differ.
-Multipoint Routing                Provide more than one destination device for a circuit, or create a cyclic transfer among a set of devices.
-Explicit Pathfinding Services	  Force the PCE to use or avoid specific portions of the network during pathfinding.	  
-- Complete Route Specification    Specify exact A-Z and Z-A circuits in which the specified path must be traversed in order. Pathfinding fails if exact match cannot be reserved.
-- Partial Route Specification     Specify a partial A-Z or Z-A circuit in which all specified nodes/ports must be reached in relative order, but they serve as waypoints along the computed path.
-- “Blacklist” Avoidance Routing   Specify a set of nodes/ports which are to be pruned from the network topology prior to pathfinding to ensure avoidance.
-Survivable Routing Services	  Establish multiple routes along disjoint-paths within the same requested pipe in case of physical network failure. If survivable routing is impossible, the entire reservation fails.
-- Complete Path-Survivability	  *Only* the souce node/port and destination source/port are shared among paths. **Exactly two paths computed.**
-- MPLS Segment-Survivability	  Provides survivability *only*	within an MPLS segment. All Ethernet segments are identical among paths. **Exactly two paths computed.**
-- K-Disjoint Path Survivability	  Specify a number (K) of disjoint paths desired. All paths will be set-wise disjoint.
-VLAN Translation/Swapping	  Enables multiple VLAN tags to be used for a single circuit by translating VLAN tags to those available at intermediate nodes along the route.
-===============================   ============
+==========================================   	============
+Service Enhancement   			  	Description
+==========================================	============
+:ref:`asymm_pce_service`			A-Z and Z-A circuits may exhibit/explicitly require different bandwidth quantities.
+:ref:`nonpalindromic_pce_service`		A-Z and Z-A circuits may not mirror one another. Only portions of the route passing through an MPLS segment may differ.
+:ref:`multipoint_pce_service`			Provide more than one destination device for a circuit, or create a cyclic transfer among a set of devices.
+:ref:`ero_pce_services`				Force the PCE to use or avoid specific portions of the network during pathfinding.	  
+- :ref:`ero_pce_complete`			Specify exact A-Z and Z-A circuits in which the specified path must be traversed in order. Pathfinding fails if exact match cannot be reserved.
+- :ref:`ero_pce_partial`			Specify a partial A-Z or Z-A circuit in which all specified nodes/ports must be reached in relative order, but they serve as waypoints along the computed path.
+- :ref:`ero_pce_blacklist`			Specify a set of nodes/ports which are to be pruned from the network topology prior to pathfinding to ensure avoidance.
+:ref:`surv_pce_services`			Establish multiple routes along disjoint-paths within the same requested pipe in case of physical network failure. If survivable routing is impossible, the entire reservation fails.
+- :ref:`surv_pce_complete`			*Only* the souce node/port and destination source/port are shared among paths. **Exactly two paths computed.**
+- :ref:`surv_pce_mpls`				Provides survivability *only*	within an MPLS segment. All Ethernet segments are identical among paths. **Exactly two paths computed.**
+- :ref:`surv_pce_kpath`				Specify a number (K) of disjoint paths desired. All paths will be set-wise disjoint.
+==========================================	============
+
+.. toctree::
+   :hidden:
+
+   enhanced/asymm_service_doc
+   enhanced/nonpalindromic_service_doc
+   enhanced/multipoint_service_doc
+   enhanced/ero_service_doc
+   enhanced/survivability_service_doc
 
 
-.. _asymm_pce_service:
-
-Asymmetric Bandwidth Capability Service
----------------------------------------
-
-Figure 8: Asymmetric Bandwidth Reservation with 100 Mbps AZ and 50 Mbps ZA. Only 50 Mbps bandwidth is available on the (N, M) link.
-
-When the AZ and ZA directions of a requested path do not require the same bandwidth (e.g. the control signal returning from the destination only needs 50 Mbps, while the traffic in the forward direction requires 100 Mbps), the user can specify asymmetric (non-identical) requested bandwidths for a pipe. A link is only chosen during pathfinding if the matching link in the opposite direction (e.g. links (M, N) and (N, M) ) has sufficient bandwidth to support the requested bandwidth in that direction. An example where the user requests 100 Mbps in the AZ direction, and only 25 Mbps in the return direction, is depicted in Fig. 8. The user would be unable to get a path through this network if they requested 100 Mbps for both AZ and ZA, but is able to by requested a lower bandwidth for the ZA path. 
-
-
-.. _nonpalindromic_pce_service:
-
-Non-Palindromic Return Path Service
------------------------------------
-
-Figure 9: High-Level view of transformation from MPLS layer to Service Layer. The dashed lines represent the shortest available AZ and ZA paths through the MPLS layer between the Ethernet switches.
-    
-
-Figure 10: Service Layer topology, including two unidirectional MPLS routes treated as a bidirectional link.
-
-It is possible for the MPLS layer to support non-identical forward (AZ) and return (ZA) paths. The user can request this by marking a particular pipe as Non-Palindromic, allowing the PCE to use (possibly) different paths through the MPLS layer to provision the request. This is accomplished by creating a Service Layer Topology for each non-palindromic request. This service layer topology (example shown in Fig. 10) consists of all Ethernet layer devices, along with multiple logical links representing routes between each pair of switches that can be connected through the MPLS layer. These logical links are found by identifying the shortest available unidirectional AZ and ZA pair between each Ethernet “entry point” into the MPLS layer (Fig. 9). A shortest path algorithm is then run on the service layer topology, as is done in the basic PCE service, to determine the best AZ and ZA path for a request through the network. 
-
-Multipoint Routing Service
---------------------------
-    
-Figure 11: Multipoint Request, in the form of two requested pipes.
-
-
-Figure 12: Multipoint paths through the network.
-
-As mentioned above, users can specify multiple requested pipes within one request, and in such a way can establish Multipoint or Mesh reservations. Fig. 11 shows such a request, and Fig. 12 shows the matching physical paths through the network used to provision the request. Users can submit any number of pipes in a request, and the PCE will attempt to provision them all. As the pipes will compete with each other for resources, the pipes are sorted and pathfinding is tried in order. If it is impossible to provision them in that sequence, the order will be reversed and pathfinding is attempted again. If it is still not possible to find a path for every pipe, the request fails.
-
-.. _ero_pce_services:
-
-Explicit Routing Services
--------------------------
-
-
-.. _ero_pce_partial:
-
-Complete/Partial Route Specification Service
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    
-Figure 13: A partially specified route (A -> P -> N -> Q -> Z). Shortest paths are used to connect those specified nodes.
-
-A pipe submitted to the PCE can have a specified list of network nodes (devices or ports) that must be included in the associated forward and return path. The network is pruned down to just the specified nodes, and if a feasible path can be found, the path is used. Otherwise, the route is treated as partially specified, and the specified nodes are connected using a shortest path algorithm. If the desired nodes cannot be connected, then the request fails.  
-
-“Blacklist” Avoidance Routing
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    
-Figure 14: A route avoiding blacklisted ports N1, N2, and Q3.
-
-In addition to providing nodes that must be included in the path, nodes that must not be included can be specified as well. All links connected to these “blacklisted” nodes are removed from the topology before pathfinding. As usual, if a path cannot be found, the request fails. 
-
-.. _surv_pce_services:
-
-Survivable Routing Services
----------------------------
-
-.. _surv_pce_complete:
-
-Complete Path-Survivability Service
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^    
-
-Figure 15: End-to-End (excluding the device -> fixture links) link-disjoint Primary and Backup paths.
-
-Network elements, particularly links, experience failures almost regularly. Any traffic traversing a link at the time of failure can be lost, and service may be interrupted. To mitigate this loss, a backup path can be established alongside the primary path requested by a user. If the user indicates that a pipe must be provisioned using Total survivability, a link-disjoint path pair will be found between the requested pipe’s two junctions. No links will be shared between these primary and backup paths. Each path in the pair will be palindromic; in other words, each will have both a forward/reverse, or AZ/ZA flow. If a disjoint path pair through the network cannot be found, then the request fails. 
-
-.. _surv_pce_mpls:
-
-MPLS Segment Survivability Service
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    
-Figure 16: Service Layer abstraction of MPLS-only Link-Disjoint survivability. Each MPLS service layer link represents a disjoint path pair through the MPLS layer.
-
-Alternatively, if the user only needs disjoint paths in the MPLS layer, or Partial survivability, a service layer topology is constructed through the same approach used for non-palindromic requests. The only difference is that each undirectional logical link represents a disjoint path pair in that direction. For simplicity, the logical link in the reverse direction must be palindromic with the forward direction link; in other words, the forward logical link represents a disjoint pair of forward paths, while the reverse direction logical link represents that same path pair, but with the links in reverse. If no disjoint path pairs through the MPLS layer can be found, and it is not possible to establish a route without going through the MPLS layer, then the request fails. 
-
-.. _surv_pce_kpath:
-
-K-Disjoint Path Survivability Service
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    
-The user can request any number of disjoint paths for either Total or Partial survivability. This is implemented through an iterative version of Bhandari’s Algorithm, which will find the specified number of link-disjoint paths K (or the maximum number of disjoint paths less than K).
-
-.. warning::
-
-As of February 1, 2017, K-path survivability is implemented only in the BhandariPCE, and there is not yet any avenue in the Survivability PCE API to support the service at this time. This connective tissue will be incorporated into a future release version.
-
-VLAN Translation/Swapping
--------------------------
-
-Figure 17: VLAN Translation example where a different VLAN tag can be assigned to intermediate ports if a requested tag is not available.
-
-While not a specific service that can be requested, VLAN Translation (or Swapping), is a procedure used in the TranslationPCE to assign VLAN tags to a reserved path. VLAN translation allows one VLAN tag, possibly different than the tag(s) requested, to be used for the intermediate ports in a path. The VLANs available at each port (or at each switch) are encapsulated in a set of IntRange objects, each of which represents a contiguous range of VLAN IDs. For example, IntRanges [5, 10] and [15, 20] could be available at a specific port, while IDs outside of that range are unavailable. To perform VLAN swapping, the PCE take the path returned from pathfinding and retrieve the available ranges from each port involved in the path (along with each port on each switch in the path, if those ports aren't already in the path). The problem ends up being similar to the Set Cover problem - choose the minimum set of VLANs that will cover all involved ports, with the following restrictions: fixtures(ingress/egress points) must use one of the requested VLAN tags (could be different for different fixtures), all intermediate ports along the path must use the same VLAN tag, and all ports on any switches involved must use the same VLAN tag.
-
-Major steps:
-(1) Check if there are any VLAN tags available across the path (including fixtures). If so, use one of those.
-(2) If (1) was not successful: For each fixture, assign a requested & available VLAN tag. Check if any of those tags are available across the intermediate ports of the path. If so, assign it to those ports as well (if they have not have VLANs assigned yet). If any fixture cannot have an assignment, then the request cannot be provisioned.
-(3) If the intermediate ports are still not assigned, determine if there are any tags that are available across the entire intermediate path. If so, assign them. If not, the request cannot be provisioned. 
-
-.. note:: 
-
-   due to the above requirement that all ports on a switch are assigned a tag if that tag is assigned to any one of the ports, multiple VLANs may be assigned to a port throughout this process.
 

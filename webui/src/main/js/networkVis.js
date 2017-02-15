@@ -307,4 +307,4 @@ function trigger_form_changes(is_resv, selected_an_edge, selected_a_node, is_sel
     ;
 }
 
-module.exports = {make_network, make_network_with_datasource, drawPathOnNetwork, drawFailedLinksOnNetwork};
+module.exports = {make_network, make_network_with_datasource, drawPathOnNetwork, drawFailedLinksOnNetwork, highlight_devices, highlight_links};

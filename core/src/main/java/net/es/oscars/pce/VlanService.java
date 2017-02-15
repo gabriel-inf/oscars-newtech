@@ -2,6 +2,7 @@ package net.es.oscars.pce;
 
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.IntRange;
+import net.es.oscars.dto.topo.enums.VertexType;
 import net.es.oscars.helpers.IntRangeParsing;
 import net.es.oscars.resv.dao.ReservedVlanRepository;
 import net.es.oscars.resv.ent.*;
@@ -576,7 +577,6 @@ public class VlanService {
         // Get the VLANs available across the AZ/ZA path
         Set<Integer> availableVlansAcrossPath = findAvailableVlansBidirectional(pipeUrns, availableVlanMap);
         if (availableVlansAcrossPath == null) {
-            log.error("null available vlans across path!");
             availableVlansAcrossPath = new HashSet<>();
         }
 
@@ -730,6 +730,7 @@ public class VlanService {
                 }
             }
 
+
             for (String fixUrn : sortedFixtureUrns) {
                 UrnE parentDeviceUrn = urnMap.get(portToDeviceMap.get(fixUrn));
                 if (!chosenVlanMap.get(fixUrn).isEmpty() && isSwitch(parentDeviceUrn)) {
@@ -744,11 +745,13 @@ public class VlanService {
 
     private Map<String,Set<Integer>> initializeChosenVlanMap(Set<String> pipeUrns, Map<String, Set<String>> nonFixPortUrnMap) {
 
+        //log.info("Pipe URNs: " + pipeUrns.toString());
         Map<String, Set<Integer>> chosenVlanMap = new HashMap<>();
         for(String pipeUrn : pipeUrns){
             chosenVlanMap.put(pipeUrn, new HashSet<>());
         }
         for(Set<String> nonFixturePorts : nonFixPortUrnMap.values()){
+            //log.info("Non-Fixture Ports: " + nonFixturePorts.toString());
             for(String nonFixturePort : nonFixturePorts){
                 chosenVlanMap.put(nonFixturePort, new HashSet<>());
             }
@@ -877,23 +880,25 @@ public class VlanService {
             // Overlap is used to track all VLAN tags that are available across both endpoints of an edge
             Set<Integer> overlap = new HashSet<>();
             // Get all possible VLAN ranges reservable at the a and z ends of the edge
-            List<IntRange> aRanges = getVlanRangesFromUrnString(urnMap, edge.getA().getUrn());
-            List<IntRange> zRanges = getVlanRangesFromUrnString(urnMap, edge.getZ().getUrn());
+            Set<Integer> aAvailVlans = availVlanMap.getOrDefault(edge.getA().getUrn(), null);
+            Set<Integer> zAvailVlans = availVlanMap.getOrDefault(edge.getZ().getUrn(), null);
 
             // If neither edge has reservable VLAN fields, add the edge to the "-1" VLAN tag list.
             // These edges do not need to be pruned, and will be added at the end to the best set of edges
-            if (aRanges.isEmpty() && zRanges.isEmpty() || edge.getLayer().equals(Layer.MPLS)) {
+            Boolean safeA = edge.getA().getVertexType().equals(VertexType.VIRTUAL) || aAvailVlans == null;
+            Boolean safeZ = edge.getZ().getVertexType().equals(VertexType.VIRTUAL) || zAvailVlans == null;
+            if (safeA || safeZ) {
                 edgesPerId.get(-1).add(edge);
             }
             // Otherwise, find the intersection between the VLAN ranges (if any), and add the edge to the list
             // matching each overlapping VLAN ID.
             else {
                 // Find what VLAN ids are actually available at A and Z
-                if (!aRanges.isEmpty()) {
-                    addToSetOverlap(overlap, availVlanMap.get(edge.getA().getUrn()));
+                if (aAvailVlans.size() > 0) {
+                    addToSetOverlap(overlap, aAvailVlans);
                 }
-                if (!zRanges.isEmpty()) {
-                    addToSetOverlap(overlap, availVlanMap.get(edge.getZ().getUrn()));
+                if (zAvailVlans.size() > 0) {
+                    addToSetOverlap(overlap, zAvailVlans);
                 }
 
                 // For overlapping IDs, put that edge into the map
@@ -1016,13 +1021,10 @@ public class VlanService {
 
         Set<String> urns = new HashSet<>();
 
-        //List<TopoEdge> interEdges = edges.size() > edges.subList(2, edges.size() - 2);
         for (TopoEdge edge : edges) {
-            String aUrnString = edge.getA().getUrn();
-            String zUrnString = edge.getZ().getUrn();
             List<String> urnStrings = new ArrayList<>();
-            urnStrings.add(aUrnString);
-            urnStrings.add(zUrnString);
+            urnStrings.add(edge.getA().getUrn());
+            urnStrings.add(edge.getZ().getUrn());
             for (String urn_s : urnStrings) {
                 UrnE urn_e = urnMap.get(urn_s);
                 if (urn_e != null) {

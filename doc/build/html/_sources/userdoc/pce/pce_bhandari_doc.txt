@@ -1,3 +1,4 @@
+.. _pce_bhandari:
 
 Bhandari PCE Module
 ===================
@@ -57,12 +58,12 @@ Module Details
 --------------
 **Calls:**
 
-- :doc:`pce_bellman_ford_doc`
+- :ref:`pce_bellman_ford`
 
 **Called By:** 
 
-- :doc:`pce_survivability_doc`
-- :doc:`../virtual_topo_surv_doc`
+- :ref:`pce_survivability`
+- :ref:`virtual_surv_topo`
 
 **API Specification:**
 

@@ -25,9 +25,8 @@
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <link rel="shortcut icon" href="../_static/esnet.png"/>
     <link rel="top" title="OSCARS 1.0 1.0.2017 documentation" href="../index.html" />
-    <link rel="up" title="User Documentation" href="index.html" />
-    <link rel="next" title="Project Overview" href="overview.html" />
-    <link rel="prev" title="User Documentation" href="index.html" /> 
+    <link rel="next" title="Virtual Circuits" href="virtualcircuits.html" />
+    <link rel="prev" title="OSCARS 1.0" href="../index.html" /> 
   </head>
   <body>
 	<a href="../index.html"><img src="../_static/oscars_banner.png" alt="OSCARS 1.0" width="100%"></a>
@@ -39,13 +38,15 @@
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="overview.html" title="Project Overview"
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="virtualcircuits.html" title="Virtual Circuits"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="index.html" title="User Documentation"
+          <a href="../index.html" title="OSCARS 1.0"
              accesskey="P">previous</a> |</li>
-        <li><a href="../index.html">OSCARS</a> &raquo;</li>
-          <li><a href="index.html" accesskey="U">User Documentation</a> &raquo;</li> 
+        <li><a href="../index.html">OSCARS</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
@@ -75,21 +76,25 @@
 </body>	
 <h3><a href="../index.html">Table Of Contents</a></h3>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">User Documentation</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="">Getting Started</a></li>
-<li class="toctree-l2"><a class="reference internal" href="overview.html">Project Overview</a></li>
-<li class="toctree-l2"><a class="reference internal" href="virtualcircuits.html">Virtual Circuits</a></li>
-<li class="toctree-l2"><a class="reference internal" href="webui/webui.html">Web UI Documentation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Getting Started</a><ul class="simple">
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="#project-structure">Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="virtualcircuits.html">Virtual Circuits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core_doc.html">Core Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="webui_doc.html">Web User Interface (WebUI)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whatif_doc.html">What-If Service Module</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../codedoc/packages.html">Javadoc</a></li>
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="index.html"
-                        title="previous chapter">User Documentation</a></p>
+  <p class="topless"><a href="../index.html"
+                        title="previous chapter">OSCARS 1.0</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="overview.html"
-                        title="next chapter">Project Overview</a></p>
+  <p class="topless"><a href="virtualcircuits.html"
+                        title="next chapter">Virtual Circuits</a></p>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
@@ -161,6 +166,46 @@
 </div></blockquote>
 </div>
 </div>
+<div class="section" id="project-structure">
+<h1>Project Structure<a class="headerlink" href="#project-structure" title="Permalink to this headline">¶</a></h1>
+<p>The role of OSCARS is to schedule <a class="reference internal" href="virtualcircuits.html#virtualcircuit"><em>Virtual Circuits</em></a> with guaranteed bandwidth and service offerings.</p>
+<p>OSCARS 1.0 has been developed as a Springboot application, made up of two major components:
+- The main application (&#8220;core&#8221;).
+- The web user interface (&#8220;webui&#8221;).</p>
+<p>The main project directory is structured as follows:</p>
+<ul>
+<li><p class="first"><strong>/bin</strong>: Contains scripts and executables for running OSCARS.</p>
+</li>
+<li><p class="first"><strong>/check</strong>: Integration tests.</p>
+</li>
+<li><dl class="first docutils">
+<dt><strong>/core</strong>: The main OSCARS application. The <a class="reference internal" href="core_doc.html#core"><em>Core Module</em></a> handles circuit requests, determines which path (if any) is available to satisfy the request, and submits them for pathfinding based on their specifications. If successful, the Core also reserves the appropriate network resources in an automated fashion. Key modules include:</dt>
+<dd><ul class="first last simple">
+<li><strong>acct</strong>: Maintains list of customers and handles storing, editing, and retrieving account information.</li>
+<li><strong>authnz</strong>: Tracks permissions/authorization associated with user accounts.</li>
+<li><strong>bwavail</strong>: Calculates the minimum amount of bandwidth available between a given source and destination within a given time duration. Returns a series of time points and corresponding changes in           availability, based on reservations in the system.</li>
+<li><strong>conf</strong>: Retrieves configurations, specified in &#8220;oscars-newtech/core/config&#8221;, for each OSCARS module on startup.</li>
+<li><strong>helpers</strong>: Functions useful for dealing with Instants and VLAN expression parsing.</li>
+<li><strong>pce</strong>: The <a class="reference internal" href="pce_doc.html#pce-doc"><em>Path Computation Engine (PCE)</em></a>. It takes a requested reservation&#8217;s parameters, evaluates the current topology, determines the (shortest) path, if any, and decides which network resources must be reserved.</li>
+<li><strong>pss</strong>: The <a class="reference internal" href="pss_doc.html#pss"><em>Path Setup Subsystem (PSS)</em></a> sets up, tears down, modifies and verifies network paths. Handles templates for physical network devices.</li>
+<li><strong>resv</strong>: Tracks reservations, and receives user parameters for reservation requests. This module describes <a class="reference internal" href="circuit/requestspec_doc.html#requestspec"><em>Circuit Request Specification</em></a>, <a class="reference internal" href="circuit/schedspec_doc.html#schedspec"><em>Circuit Schedule Specification</em></a>, and <a class="reference internal" href="circuit/resvspec_doc.html#resvspec"><em>Circuit Reservation Specification</em></a> for a circuit.</li>
+<li><strong>servicetopo</strong>: Abstracts the network topology to create unique <a class="reference internal" href="enhanced/virtual_topo_doc.html#virtual-topo"><em>Service-Layer Topology</em></a> views of the topology for a given request.</li>
+<li><strong>tasks</strong>: Services which run in the background and perform tasks at certain intervals (e.g. Select a submitted request to begin the reservation process).</li>
+<li><strong>topo</strong>: The <a class="reference internal" href="service/service_topology_doc.html#service-topology"><em>Topology Service</em></a> maintains topology information.</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p class="first"><strong>/doc</strong>: User and Code documentation.</p>
+</li>
+<li><p class="first"><strong>/shared</strong>: A collection of shared class definitions used by the different modules.</p>
+</li>
+<li><p class="first"><strong>/webui</strong>: The <a class="reference internal" href="webui_doc.html#webui"><em>Web User Interface (WebUI)</em></a> through which users can view their current and past reservations, and submit new reservation requests. The WebUI is built using the Thymeleaf template engine. The WebUI is a portal through which a user communicates with the Core API through REST calls.</p>
+</li>
+<li><p class="first"><strong>/whatif</strong>: Classes to facilitate flexible circuit provisioning. Services include translating incomplete or loosely-defined input parameters into optional or alternative solutions which may have different characteristics, service enhancements, and costs.</p>
+</li>
+</ul>
+</div>
 
 
           </div>
@@ -175,13 +220,15 @@
           <a href="../genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="overview.html" title="Project Overview"
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="virtualcircuits.html" title="Virtual Circuits"
              >next</a> |</li>
         <li class="right" >
-          <a href="index.html" title="User Documentation"
+          <a href="../index.html" title="OSCARS 1.0"
              >previous</a> |</li>
-        <li><a href="../index.html">OSCARS</a> &raquo;</li>
-          <li><a href="index.html" >User Documentation</a> &raquo;</li> 
+        <li><a href="../index.html">OSCARS</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

@@ -1,3 +1,4 @@
+.. _whatif:
 
 What-If Service Module
 ======================

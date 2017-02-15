@@ -1,3 +1,4 @@
+.. _core:
 
 Core Module
 ===========
@@ -14,28 +15,28 @@ The OSCARS Core is responsible for all circuit setup, reservation, and managemen
 
 Request Specification
 ---------------------
-Responsible for describing the formats of new incoming circuit request objects. Includes source node/port, destination node/port, start-time, end-time, bandwidth requirement, as well as additional optional values which alter the level and type of pathfinding service that OSCARS will perform in trying to satisfy the request. Specifics are offered in Section V of this document. Additional details: :doc:`requestspec_doc`
+Responsible for describing the formats of new incoming circuit request objects. Includes source node/port, destination node/port, start-time, end-time, bandwidth requirement, as well as additional optional values which alter the level and type of pathfinding service that OSCARS will perform in trying to satisfy the request. Specifics are offered in Section V of this document. Additional details: :ref:`requestspec`
 
 
 Reservation Specification
 -------------------------
-Responsible for describing the formats of successful and unsuccessful reservation objects. Additional details: :doc:`resvspec_doc`
+Responsible for describing the formats of successful and unsuccessful reservation objects. Additional details: :ref:`resvspec`
 
 
 Plumbing Specification
 ----------------------
 Internal representation of Request/Reservation Specifications. Manipulation of requested "plumbing" details allows OSCARS to enable a number of cooperating service enhancements during circuit setup.
-Additional details: :doc:`plumbing_doc`
+Additional details: :ref:`plumbing`
 
 
 Reservation Workflow Control
 ----------------------------
-Interprets the Request and Plumbing Specifications to determine which enhanced service capabilities should be considered and incorporated during the reservation process. This submodule determines how various path computation submodules should be accessed and in what order or combinations. In the implmentation, this component is called the :doc:`pce/pce_top_doc`
+Interprets the Request and Plumbing Specifications to determine which enhanced service capabilities should be considered and incorporated during the reservation process. This submodule determines how various path computation submodules should be accessed and in what order or combinations. In the implmentation, this component is called the :ref:`pce_top`
 
 
 Path Computation Engine
 -----------------------
-Provides all of the logic for computing a path given the current topology state (as maintained by the Topology Service), and the Request Specification. An extensive range of PCE services is newly available as of OSCARS 1.0, which can be applied independently for each request. The PCE evaluates the Request Specification, and dynamically traverses a set of non-linear submodules in a manner which best services the given request. The result is either a working path, or a notice of failure. The PCE is detailed extensively in: :doc:`pce_doc`
+Provides all of the logic for computing a path given the current topology state (as maintained by the Topology Service), and the Request Specification. An extensive range of PCE services is newly available as of OSCARS 1.0, which can be applied independently for each request. The PCE evaluates the Request Specification, and dynamically traverses a set of non-linear submodules in a manner which best services the given request. The result is either a working path, or a notice of failure. The PCE is detailed extensively in: :ref:`pce_doc`
 
 
 Pruning Service
@@ -73,13 +74,12 @@ Additional Documentation
 ------------------------
 .. toctree::
    :titlesonly:
+   :includehidden:
 
-   requestspec_doc
-   resvspec_doc
-   plumbing_doc
    topologyref_doc
    pce_doc
    advanced_service_doc
+   pss_doc
 
 
 

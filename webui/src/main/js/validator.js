@@ -42,28 +42,24 @@ function validateJunctions(junctions){
     let junctionNameList = Object.keys(junctions);
     let errorMessages = [];
 
-    if(junctionNameList === 0){
-        errorMessages.push("Add at least one network node (junction) to reservation.");
-    }
-
     for(let index = 0; index < junctionNameList.length; index++){
         let junction = junctions[junctionNameList[index]];
         let numValidFixtures = countValidFixtures(junction);
         if(numValidFixtures > 0){
-            totalValid++;
             totalValidFixtures += numValidFixtures;
+        }
+        if(junction.id != "--" && junction.id != ""){
+            totalValid++;
         }
     }
 
-    if(totalValid != junctionNameList.length){
-        errorMessages.push("Make sure that all Sandbox nodes have at least one end point (fixture) with bandwidth > 0. Select node in Sandbox to add fixtures.");
+    if(totalValid != junctionNameList.length || junctionNameList.length == 0){
+        errorMessages.push("Make sure that at least one junction has been selected.");
     }
 
     if(totalValidFixtures < 2){
-        errorMessages.push("There must be at least two end points (fixtures) with bandwidth > 0 across reservation. Select node in Sandbox to add fixtures.");
+        errorMessages.push("There must be at least two end points (fixtures) with bandwidth >= 0 across reservation.");
     }
-
-
 
     return {isValid: totalValid > 0 && totalValid == junctionNameList.length && totalValidFixtures > 1, errorMessages: errorMessages};
 }

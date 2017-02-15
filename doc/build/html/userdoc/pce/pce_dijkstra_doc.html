@@ -39,14 +39,15 @@
           <a href="../../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
           <a href="pce_bellman_ford_doc.html" title="Bellman-Ford PCE Module"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="pce_ero_doc.html" title="Explicit Route Object (ERO) PCE Module"
              accesskey="P">previous</a> |</li>
         <li><a href="../../index.html">OSCARS</a> &raquo;</li>
-          <li><a href="../index.html" >User Documentation</a> &raquo;</li>
-          <li><a href="../overview.html" >Project Overview</a> &raquo;</li>
           <li><a href="../core_doc.html" >Core Module</a> &raquo;</li>
           <li><a href="../pce_doc.html" accesskey="U">Path Computation Engine (PCE)</a> &raquo;</li> 
       </ul>
@@ -78,14 +79,41 @@
 </body>	
 <h3><a href="../../index.html">Table Of Contents</a></h3>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="../index.html">User Documentation</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../start.html">Getting Started</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="../overview.html">Project Overview</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../virtualcircuits.html">Virtual Circuits</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../webui/webui.html">Web UI Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../start.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../start.html#project-structure">Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../virtualcircuits.html">Virtual Circuits</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../core_doc.html">Core Module</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../topologyref_doc.html">Topology Assumptions Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pce_doc.html">Path Computation Engine (PCE)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pce_doc.html#pce-workflow">PCE Workflow</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../pce_doc.html#pce-structure">PCE Structure</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="pce_top_doc.html">Top PCE Module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pce_translation_doc.html">Translation PCE Module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pce_layer3_doc.html">Layer 3 PCE Module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pce_palindrome_doc.html">Palindromic PCE Module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pce_nonpalindrome_doc.html">Non-Palindromic PCE Module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pce_survivability_doc.html">Survivability PCE Module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pce_ero_doc.html">Explicit Route Object (ERO) PCE Module</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="">Dijkstra PCE Module</a><ul class="simple">
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../../codedoc/index.html">Code Documentation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pce_bellman_ford_doc.html">Bellman-Ford PCE Module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pce_bhandari_doc.html">Bhandari PCE Module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../service/service_topology_doc.html">Topology Service</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../service/service_pruning_doc.html">Topology Pruning Service</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../service/service_bandwidth_doc.html">Reserved Bandwidth Service</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../service/service_vlan_doc.html">VLAN Service</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../advanced_service_doc.html">Path Computation Service Enhancements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pss_doc.html">Path Setup Subsystem (PSS)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../webui_doc.html">Web User Interface (WebUI)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whatif_doc.html">What-If Service Module</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../codedoc/packages.html">Javadoc</a></li>
 </ul>
 
   <h4>Previous topic</h4>
@@ -116,22 +144,22 @@
           <div class="body">
             
   <div class="section" id="dijkstra-pce-module">
-<h1>Dijkstra PCE Module<a class="headerlink" href="#dijkstra-pce-module" title="Permalink to this headline">¶</a></h1>
+<span id="pce-dijkstra"></span><h1>Dijkstra PCE Module<a class="headerlink" href="#dijkstra-pce-module" title="Permalink to this headline">¶</a></h1>
 <p>This module is one of the fundamental pathfinding elements of the PCE, used to compute shortest (least-cost) path routing on a constrained network. Dijsktra&#8217;s <a class="reference external" href="https://en.wikipedia.org/wiki/Dijkstra's_algorithm">Algorithm</a> is one of the most widely adopted routing algorithms because it optimally computes its path. Most of the service-specific PCE modules rely on the Dijkstra PCE for the low-level path computation after constraining the topology for their specified services.</p>
 <div class="section" id="module-details">
 <h2>Module Details<a class="headerlink" href="#module-details" title="Permalink to this headline">¶</a></h2>
 <p><strong>Calls:</strong></p>
 <ul class="simple">
-<li><tt class="xref doc docutils literal"><span class="pre">../service/service_topology_doc</span></tt></li>
+<li><a class="reference internal" href="../service/service_topology_doc.html#service-topology"><em>Topology Service</em></a></li>
 </ul>
 <p><strong>Called By:</strong></p>
 <ul class="simple">
-<li><a class="reference internal" href="pce_ero_doc.html"><em>Explicit Route Object (ERO) PCE Module</em></a></li>
-<li><a class="reference internal" href="pce_nonpalindrome_doc.html"><em>Non-Palindromic PCE Module</em></a></li>
-<li><a class="reference internal" href="pce_palindrome_doc.html"><em>Palindromic PCE Module</em></a></li>
-<li><a class="reference internal" href="pce_survivability_doc.html"><em>Survivability PCE Module</em></a></li>
-<li><tt class="xref doc docutils literal"><span class="pre">../service/service_bandwidth_availability_doc</span></tt></li>
-<li><tt class="xref doc docutils literal"><span class="pre">..virtual_topo_doc</span></tt></li>
+<li><a class="reference internal" href="pce_ero_doc.html#pce-ero"><em>Explicit Route Object (ERO) PCE Module</em></a></li>
+<li><a class="reference internal" href="pce_nonpalindrome_doc.html#pce-nonpalindrome"><em>Non-Palindromic PCE Module</em></a></li>
+<li><a class="reference internal" href="pce_palindrome_doc.html#pce-palindrome"><em>Palindromic PCE Module</em></a></li>
+<li><a class="reference internal" href="pce_survivability_doc.html#pce-survivability"><em>Survivability PCE Module</em></a></li>
+<li><a class="reference internal" href="../service/service_bandwidth_doc.html#service-bandwidth"><em>Reserved Bandwidth Service</em></a></li>
+<li><a class="reference internal" href="../enhanced/virtual_topo_doc.html#virtual-topo"><em>Service-Layer Topology</em></a></li>
 </ul>
 <p><strong>API Specification:</strong></p>
 <ul class="simple">
@@ -153,14 +181,15 @@
           <a href="../../genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
           <a href="pce_bellman_ford_doc.html" title="Bellman-Ford PCE Module"
              >next</a> |</li>
         <li class="right" >
           <a href="pce_ero_doc.html" title="Explicit Route Object (ERO) PCE Module"
              >previous</a> |</li>
         <li><a href="../../index.html">OSCARS</a> &raquo;</li>
-          <li><a href="../index.html" >User Documentation</a> &raquo;</li>
-          <li><a href="../overview.html" >Project Overview</a> &raquo;</li>
           <li><a href="../core_doc.html" >Core Module</a> &raquo;</li>
           <li><a href="../pce_doc.html" >Path Computation Engine (PCE)</a> &raquo;</li> 
       </ul>

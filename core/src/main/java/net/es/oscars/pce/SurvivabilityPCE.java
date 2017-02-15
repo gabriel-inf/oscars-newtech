@@ -109,6 +109,8 @@ public class SurvivabilityPCE
         // Disjoint shortest-path routing
         List<List<TopoEdge>> azPathPairCalculated = bhandariPCE.computeDisjointPaths(prunedTopo, srcDevice, dstDevice, requestPipe.getNumDisjoint());
 
+        log.info(azPathPairCalculated.toString());
+
         if(azPathPairCalculated.isEmpty())
         {
             throw new PCEException("Empty path-pair in Survivability PCE");
@@ -164,6 +166,8 @@ public class SurvivabilityPCE
         {
             Collections.reverse(zaERO);
         }
+
+        log.info(zaPathPairCalculated.toString());
 
         assert(azPathPairCalculated.size() == requestPipe.getNumDisjoint());
         assert(azPathPairCalculated.size() == zaPathPairCalculated.size());

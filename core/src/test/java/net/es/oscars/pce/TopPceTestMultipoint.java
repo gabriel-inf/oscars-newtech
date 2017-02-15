@@ -384,7 +384,7 @@ public class TopPceTestMultipoint
 
             // Check that all reserved vlans in the pipe use the same VLAN ID
             Set<ReservedVlanE> rsvVlans = ethPipe.getReservedVlans();
-            assert(rsvVlans.stream().map(ReservedVlanE::getVlan).distinct().count()==1);
+            assert(rsvVlans.stream().map(ReservedVlanE::getVlan).distinct().count()<=1);
 
             assert (aJunc.getDeviceUrn().equals("nodeP") || aJunc.getDeviceUrn().equals("nodeL") || aJunc.getDeviceUrn().equals("nodeN"));
             assert (zJunc.getDeviceUrn().equals("nodeL") || zJunc.getDeviceUrn().equals("nodeM"));
@@ -554,7 +554,7 @@ public class TopPceTestMultipoint
 
             // Check that all reserved vlans in the pipe use the same VLAN ID
             Set<ReservedVlanE> rsvVlans = ethPipe.getReservedVlans();
-            assert(rsvVlans.stream().map(ReservedVlanE::getVlan).distinct().count()==1);
+            assert(rsvVlans.stream().map(ReservedVlanE::getVlan).distinct().count()<=1);
 
             assert (aJunc.getDeviceUrn().equals("nodeK") || aJunc.getDeviceUrn().equals("nodeL") || aJunc.getDeviceUrn().equals("nodeM"));
             assert (zJunc.getDeviceUrn().equals("nodeL") || zJunc.getDeviceUrn().equals("nodeM") || zJunc.getDeviceUrn().equals("nodeP") || zJunc.getDeviceUrn().equals("nodeR"));
@@ -942,7 +942,7 @@ public class TopPceTestMultipoint
 
             // Check that all reserved vlans in the pipe use the same VLAN ID
             Set<ReservedVlanE> rsvVlans = ethPipe.getReservedVlans();
-            assert(rsvVlans.stream().map(ReservedVlanE::getVlan).distinct().count()==1);
+            assert(rsvVlans.stream().map(ReservedVlanE::getVlan).distinct().count()<=1);
 
             for(String x : azERO)
                 actualAzERO = actualAzERO + x + "-";
@@ -1152,7 +1152,7 @@ public class TopPceTestMultipoint
 
             // Check that all reserved vlans in the pipe use the same VLAN ID
             Set<ReservedVlanE> rsvVlans = ethPipe.getReservedVlans();
-            assert(rsvVlans.stream().map(ReservedVlanE::getVlan).distinct().count()==1);
+            assert(rsvVlans.stream().map(ReservedVlanE::getVlan).distinct().count()<=1);
 
             assert (aJunc.getDeviceUrn().equals("nodeL") || aJunc.getDeviceUrn().equals("nodeN"));
             assert (zJunc.getDeviceUrn().equals("nodeM") || zJunc.getDeviceUrn().equals("nodeN"));

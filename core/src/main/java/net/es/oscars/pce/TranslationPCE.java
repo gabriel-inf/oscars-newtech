@@ -155,11 +155,10 @@ public class TranslationPCE {
 
         Map<String, Set<Integer>> chosenVlanMap
                 = vlanService.selectVlansForPipe(reqPipe, urnMap, reservedVlans, azERO, zaERO, deviceToPortMap, portToDeviceMap);
-        for (String urn : chosenVlanMap.keySet()) {
-            UrnE topoUrn = urnMap.get(urn);
-            if (chosenVlanMap.get(urn).isEmpty() && topoUrn.getReservableVlans() != null) {
-                throw new PCEException(("VLAN could not not be found for URN " + urn));
-            }
+
+        Boolean validVlanAssignment = evaluateAssignedVlanMap(chosenVlanMap, urnMap, portToDeviceMap);
+        if(!validVlanAssignment){
+            throw new PCEException(("VLAN could not not be found for all URNs"));
         }
         Map<TopoVertex, ReservedVlanJunctionE> junctionMap = new HashMap<>();
 
@@ -168,8 +167,6 @@ public class TranslationPCE {
 
         reserveEntities(reqPipe, azSegments, zaSegments, urnMap, requestedBandwidthMap, chosenVlanMap, reservedEthPipes,
                 reservedMplsPipes, junctionMap, portToDeviceMap, start, end, connectionId);
-
-
     }
 
     public void reserveRequestedPipeWithPairs(RequestedVlanPipeE reqPipe, List<List<TopoEdge>> azEROs,
@@ -193,11 +190,10 @@ public class TranslationPCE {
 
         Map<String, Set<Integer>> chosenVlanMap = vlanService.selectVlansForPipe(reqPipe, urnMap, reservedVlans,
                 combinedAzERO, combinedZaERO, deviceToPortMap, portToDeviceMap);
-        for (String urn : chosenVlanMap.keySet()) {
-            UrnE topoUrn = urnMap.get(urn);
-            if (chosenVlanMap.get(urn).isEmpty() && topoUrn.getReservableVlans() != null) {
-                throw new PCEException(("VLAN could not not be found for URN " + urn));
-            }
+
+        Boolean validVlanAssignment = evaluateAssignedVlanMap(chosenVlanMap, urnMap, portToDeviceMap);
+        if(!validVlanAssignment){
+            throw new PCEException(("VLAN could not not be found for all URNs"));
         }
 
         Map<TopoVertex, ReservedVlanJunctionE> junctionMap = new HashMap<>();
@@ -223,6 +219,29 @@ public class TranslationPCE {
         reservedMplsPipes.addAll(filteredMplsPipes);
     }
 
+    private Boolean evaluateAssignedVlanMap(Map<String, Set<Integer>> chosenVlanMap, Map<String, UrnE> urnMap, Map<String, String> portToDeviceMap) {
+        Boolean valid = true;
+        for (String urn : chosenVlanMap.keySet()) {
+            UrnE topoUrn = urnMap.get(urn);
+            Boolean parentHasVlans = evaluateIfParentHasVlans(topoUrn, portToDeviceMap, urnMap);
+            if (chosenVlanMap.get(urn).isEmpty() && (topoUrn.getReservableVlans() != null || parentHasVlans)) {
+                valid = false;
+            }
+        }
+        return valid;
+    }
+
+    private Boolean evaluateIfParentHasVlans(UrnE topoUrn, Map<String, String> portToDeviceMap, Map<String, UrnE> urnMap){
+        Boolean parentHasVlans = false;
+        if(topoUrn.getUrnType().equals(UrnType.IFCE) && topoUrn.getReservableVlans() == null){
+            String urnString = topoUrn.getUrn();
+            String parentString = portToDeviceMap.get(urnString);
+            UrnE parentUrn = urnMap.get(parentString);
+            parentHasVlans = parentUrn.getReservableVlans() != null;
+        }
+        return parentHasVlans;
+    }
+
     private Map<TopoVertex, Map<String, Integer>> evaluateRequestedBandwidth(List<ReservedBandwidthE> reservedBandwidths,
                                                                              List<TopoEdge> azERO, List<TopoEdge> zaERO,
                                                                              RequestedVlanPipeE reqPipe,
@@ -232,11 +251,17 @@ public class TranslationPCE {
 
         // Returns a mapping from topovertices (ports) to an "Ingress"/"Egress" map of the total Ingress/Egress
         // Requested bandwidth at that port across both the azERO and the zaERO
-        List<List<TopoEdge>> EROs = Arrays.asList(azERO, zaERO);
-        List<Integer> bandwidths = Arrays.asList(reqPipe.getAzMbps(), reqPipe.getZaMbps());
-        Map<TopoVertex, Map<String, Integer>> requestedBandwidthMap = bwService.buildRequestedBandwidthMap(EROs, bandwidths);
+        // NOTE: REMOVE STARTING SOURCE FIXTURE AND ENDING DESTINATION FIXTURE WHILE TESTING AZ/ZA BANDWIDTH
+        // TEST FIXTURES SEPARATELY, AS THEY MAY HAVE THEIR OWN REQUIRED BANDWIDTH
+        List<TopoEdge> trimmedAzERO = azERO.subList(1, azERO.size()-1);
+        List<TopoEdge> trimmedZaERO = zaERO.subList(1, zaERO.size()-1);
 
-        testBandwidthRequirements(reqPipe, azERO, zaERO, urnMap, reqPipe.getAzMbps(), reqPipe.getZaMbps(), availBwMap,
+        List<List<TopoEdge>> EROs = Arrays.asList(trimmedAzERO, trimmedZaERO);
+        List<Integer> bandwidths = Arrays.asList(reqPipe.getAzMbps(), reqPipe.getZaMbps());
+
+        Map<TopoVertex, Map<String, Integer>> requestedBandwidthMap = bwService.buildRequestedBandwidthMap(EROs, bandwidths, reqPipe);
+
+        testBandwidthRequirements(reqPipe, trimmedAzERO, trimmedZaERO, urnMap, reqPipe.getAzMbps(), reqPipe.getZaMbps(), availBwMap,
                 requestedBandwidthMap, reservedBandwidths);
 
         return requestedBandwidthMap;
@@ -264,11 +289,6 @@ public class TranslationPCE {
 
         // now, decompose the path
         assert (azSegments.size() == zaSegments.size());
-
-        // for each segment:
-        // if it is an Ethernet segment, make junctions, one per device
-        // if it is an MPLS segment, make a pipe
-        // all the while, make sure to merge in the current first and last junctions as needed
 
         // Map of junction pairs to pipe EROs
         Map<List<TopoVertex>, Map<String, List<TopoVertex>>> junctionPairToPipeEROMap = new HashMap<>();
@@ -324,8 +344,8 @@ public class TranslationPCE {
             DeviceModel aModel = deviceModels.get(aJunction.getDeviceUrn());
             DeviceModel zModel = deviceModels.get(zJunction.getDeviceUrn());
 
-            Set<ReservedBandwidthE> pipeBandwidths = createReservedBandwidthForEROs(pipeEroMap.get("AZ"), pipeEroMap.get("ZA"), requestedBandwidthMap, start, end, connectionId);
-
+            Set<ReservedBandwidthE> pipeBandwidths = createReservedBandwidthForEROs(pipeEroMap.get("AZ"),
+                    pipeEroMap.get("ZA"), requestedBandwidthMap, start, end, connectionId);
 
             if (thisLayer.equals(Layer.MPLS)) {
                 ReservedMplsPipeE mplsPipe = ReservedMplsPipeE.builder()
@@ -625,6 +645,12 @@ public class TranslationPCE {
                                           Map<TopoVertex, Map<String, Integer>> requestedBandwidthMap,
                                           List<ReservedBandwidthE> reservedBandwidths) throws PCEException {
         // Confirm that there is sufficient bandwidth to meet the request (given what has been reserved so far)
+
+        // Evaluate the fixtures
+        boolean sufficientBwFixtures = bwService.evaluateBandwidthFixtures(reqPipe, availBwMap);
+        if(!sufficientBwFixtures){
+            throw new PCEException("Insufficient bandwidth to meet requested fixtures for pipe " + reqPipe.toString());
+        }
         // Palindromic EROs -- evaluate both directions at each port - traffic flows both ways
         if (pceAssistant.palindromicEros(azERO, zaERO)) {
             boolean sufficientBw = bwService.evaluateBandwidthEROBi(urnMap, azMbps, zaMbps, azERO, zaERO, availBwMap);

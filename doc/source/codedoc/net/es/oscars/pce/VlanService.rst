@@ -2,6 +2,8 @@
 
 .. java:import:: net.es.oscars.dto IntRange
 
+.. java:import:: net.es.oscars.dto.topo.enums VertexType
+
 .. java:import:: net.es.oscars.helpers IntRangeParsing
 
 .. java:import:: net.es.oscars.resv.dao ReservedVlanRepository

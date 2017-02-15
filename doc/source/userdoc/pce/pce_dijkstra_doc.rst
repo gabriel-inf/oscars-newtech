@@ -1,3 +1,4 @@
+.. _pce_dijkstra:
 
 Dijkstra PCE Module
 ===================
@@ -10,16 +11,16 @@ Module Details
 --------------
 **Calls:**
 
-- :doc:`../service/service_topology_doc`
+- :ref:`service_topology`
 
 **Called By:** 
 
-- :doc:`pce_ero_doc`
-- :doc:`pce_nonpalindrome_doc`
-- :doc:`pce_palindrome_doc`
-- :doc:`pce_survivability_doc`
-- :doc:`../service/service_bandwidth_availability_doc`
-- :doc:`..virtual_topo_doc`
+- :ref:`pce_ero`
+- :ref:`pce_nonpalindrome`
+- :ref:`pce_palindrome`
+- :ref:`pce_survivability`
+- :ref:`service_bandwidth`
+- :ref:`virtual_topo`
 
 **API Specification:**
 
