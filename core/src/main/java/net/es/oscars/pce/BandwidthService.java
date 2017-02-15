@@ -89,7 +89,7 @@ public class BandwidthService {
         // Build a map, allowing us to retrieve a list of ReservedBandwidth given the associated URN
         Map<String, List<ReservedBandwidthE>> resvBwMap = buildReservedBandwidthMap(rsvBandwidths);
 
-        log.info(resvBwMap.toString());
+        //log.info(resvBwMap.toString());
         // Build a map, allowing us to retrieve the available "Ingress" and "Egress" bandwidth at each associated URN
         Map<String, Map<String, Integer>> availBwMap = new HashMap<>();
         urnRepository.findAll()

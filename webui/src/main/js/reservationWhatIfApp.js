@@ -606,7 +606,32 @@ class ReservationWhatIfApp extends React.Component{
 
     handleSubmitReservation(){
         console.log("Submitting reservation");
-
+        let reservation = this.state.reservation;
+        let holdResponse = client.submitReservation( "/resv/minimal_hold", reservation);
+        holdResponse.then(
+            (successResponse) => {
+                let commitResponse = client.submit("POST", "/resv/commit/", reservation.connectionId);
+                commitResponse.then(
+                    (successResponse) => {
+                        reservation.status = "COMMITTED";
+                        this.setState(
+                            {
+                                reservation: reservation,
+                                message: "Reservation committed. Redirecting to show reservation details..."
+                            });
+                        this.context.router.push("/react/resv/view/"+ reservation.connectionId);
+                    },
+                    (failResponse) => {
+                        console.log("Error: " + failResponse.status + " - " + failResponse.statusText);
+                        this.setState({message: "Failed to commit resources. Change parameters and precheck again. Error: " + failResponse.statusText});
+                    }
+                );
+            },
+            (failResponse) => {
+                console.log("Error: " + failResponse.status + " - " + failResponse.statusText);
+                this.setState({message: "Failed to hold resources. Change parameters and precheck again. Error: " + failResponse.statusText});
+            }
+        );
     }
 
     render(){
@@ -640,6 +665,10 @@ class ReservationWhatIfApp extends React.Component{
         );
     }
 }
+
+ReservationWhatIfApp.contextTypes = {
+    router: React.PropTypes.object
+};
 
 class PathSelectionPanel extends React.Component{
 
@@ -877,7 +906,7 @@ function buildReservation(bandwidth, azERO, start, end, src, srcPort, dst, dstPo
         startAt: start,
         endAt: end,
         description: "What-if Generated Reservation",
-        connectionId: "connectionId",
+        connectionId: connectionId,
         status: "UNHELD"
     };
 }
