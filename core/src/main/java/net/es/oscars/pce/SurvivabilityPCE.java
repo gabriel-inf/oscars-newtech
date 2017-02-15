@@ -79,9 +79,6 @@ public class SurvivabilityPCE
         String srcDeviceURN = requestPipe.getAJunction().getDeviceUrn();
         String dstDeviceURN = requestPipe.getZJunction().getDeviceUrn();
 
-        String srcPortURN = requestPipe.getAJunction().getFixtures().iterator().next().getPortUrn();
-        String dstPortURN = requestPipe.getZJunction().getFixtures().iterator().next().getPortUrn();
-
         UrnE srcDeviceURN_e = urnRepo.findByUrn(requestPipe.getAJunction().getDeviceUrn()).orElseThrow(NoSuchElementException::new);
         UrnE dstDeviceURN_e = urnRepo.findByUrn(requestPipe.getZJunction().getDeviceUrn()).orElseThrow(NoSuchElementException::new);
 
@@ -91,16 +88,11 @@ public class SurvivabilityPCE
 
         TopoVertex srcDevice = new TopoVertex(srcDeviceURN, srcType);
         TopoVertex dstDevice = new TopoVertex(dstDeviceURN, dstType);
-        TopoVertex srcPort = new TopoVertex(srcPortURN, VertexType.PORT);
-        TopoVertex dstPort = new TopoVertex(dstPortURN, VertexType.PORT);
 
         Topology multiLayerTopo = topoService.getMultilayerTopology();
 
         // Identify src/dst ports for disjoint routing
 
-        Set<TopoEdge> fixtureEdges = multiLayerTopo.getEdges().stream()
-                .filter(e -> e.getA().equals(srcPort) || e.getA().equals(dstPort) || e.getZ().equals(srcPort) || e.getZ().equals(dstPort))
-                .collect(Collectors.toSet());
 
 
         // Bandwidth and Vlan pruning
@@ -120,24 +112,6 @@ public class SurvivabilityPCE
             throw new PCEException(requestPipe.getNumDisjoint() + " disjoint paths could not be found in Survivability PCE");
         }
 
-        // Add the src/dst ports back to the routes to complete the EROs
-        for(TopoEdge fixEdge : fixtureEdges)
-        {
-            if(fixEdge.getA().equals(srcPort) && fixEdge.getZ().equals(srcDevice))
-            {
-                for(List<TopoEdge> azERO : azPathPairCalculated)
-                {
-                    azERO.add(0, fixEdge);
-                }
-            }
-            else if(fixEdge.getA().equals(dstDevice) && fixEdge.getZ().equals(dstPort))
-            {
-                for(List<TopoEdge> azERO : azPathPairCalculated)
-                {
-                    azERO.add(fixEdge);
-                }
-            }
-        }
 
         // Get palindromic paths in reverse-direction //
         List<List<TopoEdge>> zaPathPairCalculated = new ArrayList<>();
@@ -154,8 +128,7 @@ public class SurvivabilityPCE
                         .filter(r -> r.getZ().equals(azEdge.getA()))
                         .findFirst();
 
-                if(reverseEdge.isPresent())
-                    zaERO.add(reverseEdge.get());
+                reverseEdge.ifPresent(zaERO::add);
             }
 
             zaPathPairCalculated.add(zaERO);
@@ -315,10 +288,7 @@ public class SurvivabilityPCE
                     .filter(r -> r.getZ().equals(azEdge.getA()))
                     .findFirst();
 
-            if(reverseEdge.isPresent())
-            {
-                zaServiceLayerERO.add(reverseEdge.get());
-            }
+            reverseEdge.ifPresent(zaServiceLayerERO::add);
         }
 
         // 2. Reverse the order

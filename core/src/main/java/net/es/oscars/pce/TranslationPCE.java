@@ -73,6 +73,10 @@ public class TranslationPCE {
                 pceAssistant.decideJunctionType(deviceUrn.getDeviceModel()),
                 new HashSet<>());
 
+        if(req_j.getFixtures().size() == 0){
+            return rsv_j;
+        }
+
         // Select VLAN IDs for this junction
         Map<String, Set<Integer>> urnVlanMap = vlanService.selectVLANsForJunction(req_j, reservedVlans,
                 deviceToPortMap, portToDeviceMap, urnMap);
@@ -251,17 +255,13 @@ public class TranslationPCE {
 
         // Returns a mapping from topovertices (ports) to an "Ingress"/"Egress" map of the total Ingress/Egress
         // Requested bandwidth at that port across both the azERO and the zaERO
-        // NOTE: REMOVE STARTING SOURCE FIXTURE AND ENDING DESTINATION FIXTURE WHILE TESTING AZ/ZA BANDWIDTH
-        // TEST FIXTURES SEPARATELY, AS THEY MAY HAVE THEIR OWN REQUIRED BANDWIDTH
-        List<TopoEdge> trimmedAzERO = azERO.subList(1, azERO.size()-1);
-        List<TopoEdge> trimmedZaERO = zaERO.subList(1, zaERO.size()-1);
 
-        List<List<TopoEdge>> EROs = Arrays.asList(trimmedAzERO, trimmedZaERO);
+        List<List<TopoEdge>> EROs = Arrays.asList(azERO, zaERO);
         List<Integer> bandwidths = Arrays.asList(reqPipe.getAzMbps(), reqPipe.getZaMbps());
 
         Map<TopoVertex, Map<String, Integer>> requestedBandwidthMap = bwService.buildRequestedBandwidthMap(EROs, bandwidths, reqPipe);
 
-        testBandwidthRequirements(reqPipe, trimmedAzERO, trimmedZaERO, urnMap, reqPipe.getAzMbps(), reqPipe.getZaMbps(), availBwMap,
+        testBandwidthRequirements(reqPipe, azERO, zaERO, urnMap, reqPipe.getAzMbps(), reqPipe.getZaMbps(), availBwMap,
                 requestedBandwidthMap, reservedBandwidths);
 
         return requestedBandwidthMap;

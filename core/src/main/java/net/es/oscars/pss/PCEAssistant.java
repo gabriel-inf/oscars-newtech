@@ -33,12 +33,12 @@ public class PCEAssistant {
         List<Map<Layer, List<TopoVertex>>> result = new ArrayList<>();
 
         // We have List of edges like this
-        // Port -INTERNAL- Device -INTERNAL- Port -ETHERNET/MPLS- Port -INTERNAL- Device -INTERNAL- Port, etc
+        // Device -INTERNAL- Port -ETHERNET/MPLS- Port -INTERNAL- Device, etc
         // We want to make several lists of vertices
         assert(edges.size() > 2);
 
         // Find the first applicable non-INTERNAL edge on the path, and set it as the current layer
-        Layer currentLayer = edges.get(2).getLayer();
+        Layer currentLayer = edges.get(1).getLayer();
 
         // Initialize the containers for holding vertices per segment
         List<TopoVertex> segmentVertices = new ArrayList<>();
@@ -71,7 +71,7 @@ public class PCEAssistant {
             }
             // If we've been in an ETHERNET segment, check if next non-internal edge is MPLS
             // If so, switch the layer to MPLS and start a new segment
-            else if(currentLayer.equals(Layer.ETHERNET) && i % 3 == 2 && i + 3 != edges.size()){
+            else if(currentLayer.equals(Layer.ETHERNET) && i % 3 == 1 && i + 3 < edges.size()){
                 Layer nextPortToPortLayer = edges.get(i+3).getLayer();
                 if(currentLayer != nextPortToPortLayer){
                     currentLayer = nextPortToPortLayer;
@@ -420,12 +420,20 @@ public class PCEAssistant {
 
 
             // Retrieve and remove the AZ ingress and egress ports
-            TopoVertex azIngress = azVertices.remove(0);
-            TopoVertex azEgress = azVertices.remove(azVertices.size() - 1);
+            // No ingress port for the first segment
+            // No egress port for the last segment
+            TopoVertex azIngress = i==0 ? null : azVertices.remove(0);
+            TopoVertex azEgress = i==azSegments.size()-1 ? null : azVertices.remove(azVertices.size() - 1);
 
             // Remove the ZA ingress and egress ports
-            zaVertices.remove(0);
-            zaVertices.remove(zaVertices.size() - 1);
+            // No ingress port for the first segment
+            // No egress port for the last segment
+            if(i != azSegments.size()-1) {
+                zaVertices.remove(0);
+            }
+            if(i != 0) {
+                zaVertices.remove(zaVertices.size() - 1);
+            }
 
 
             // Store the first device and last device in the segment
@@ -442,12 +450,13 @@ public class PCEAssistant {
                 // Add to the list of all junction pairs
                 allJunctionPairs.put(interJunctionPairs.get(currInterJunctionPairIndex), Layer.ETHERNET);
 
-
                 // Add the ingress point to the intersegment AZ ERO
-                interAzEROs.get(currInterJunctionPairIndex).add(azIngress);
                 // Add the ingress port to the front of the intersegment ZA ERO
                 // This should reverse the order
-                interZaEROs.get(currInterJunctionPairIndex).add(0, azIngress);
+                if(azIngress != null) {
+                    interAzEROs.get(currInterJunctionPairIndex).add(azIngress);
+                    interZaEROs.get(currInterJunctionPairIndex).add(0, azIngress);
+                }
 
 
                 // Reset the collections of intersection junction pairs and pipes
@@ -531,8 +540,10 @@ public class PCEAssistant {
             // Add the egress point of this segment to a new intersegment pipe ERO
             if (i < azSegments.size() - 1) {
                 interJunctionPairs.get(currInterJunctionPairIndex).add(lastDevice);
-                interAzEROs.get(currInterJunctionPairIndex).add(azEgress);
-                interZaEROs.get(currInterJunctionPairIndex).add(azEgress);
+                if(azEgress != null) {
+                    interAzEROs.get(currInterJunctionPairIndex).add(azEgress);
+                    interZaEROs.get(currInterJunctionPairIndex).add(azEgress);
+                }
             }
         }
 

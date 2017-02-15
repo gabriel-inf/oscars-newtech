@@ -580,7 +580,7 @@ public class TopPCE {
             if(!isAzPath){
                 EdgeE fixEdge = EdgeE.builder().origin(aJunction.getDeviceUrn()).target(reqFix.getPortUrn()).build();
                 if(!edges.contains(fixEdge)){
-                    edges.add(edges.size()-1, fixEdge);
+                    edges.add(fixEdge);
                 }
             }
         }
@@ -590,13 +590,13 @@ public class TopPCE {
             if(isAzPath){
                 EdgeE fixEdge = EdgeE.builder().origin(zJunction.getDeviceUrn()).target(reqFix.getPortUrn()).build();
                 if(!edges.contains(fixEdge)){
-                    edges.add(0, fixEdge);
+                    edges.add(fixEdge);
                 }
             }
             if(!isAzPath){
                 EdgeE fixEdge = EdgeE.builder().origin(reqFix.getPortUrn()).target(zJunction.getDeviceUrn()).build();
                 if(!edges.contains(fixEdge)){
-                    edges.add(edges.size()-1, fixEdge);
+                    edges.add(0, fixEdge);
                 }
             }
         }

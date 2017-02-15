@@ -42,45 +42,49 @@ public class PalindromicalPCE {
                                                              List<ReservedVlanE> rsvVlanList) throws PCEException {
         Topology multiLayerTopo = topoService.getMultilayerTopology();
 
-        String srcPortURN = requestPipe.getAJunction().getFixtures().iterator().next().getPortUrn();
-        String dstPortURN = requestPipe.getZJunction().getFixtures().iterator().next().getPortUrn();
+        String srcUrn = requestPipe.getAJunction().getDeviceUrn();
+        String dstUrn = requestPipe.getZJunction().getDeviceUrn();
 
-        TopoVertex srcPort = new TopoVertex(srcPortURN, VertexType.PORT);
-        TopoVertex dstPort = new TopoVertex(dstPortURN, VertexType.PORT);
+        Optional<TopoVertex> src = multiLayerTopo.getVertexByUrn(srcUrn);
+        Optional<TopoVertex> dst = multiLayerTopo.getVertexByUrn(dstUrn);
 
-        // Bandwidth and Vlan pruning
-        Topology prunedTopo = pruningService.pruneWithPipe(multiLayerTopo, requestPipe, rsvBwList, rsvVlanList);
+        if(src.isPresent() && dst.isPresent()){
+            // Bandwidth and Vlan pruning
+            Topology prunedTopo = pruningService.pruneWithPipe(multiLayerTopo, requestPipe, rsvBwList, rsvVlanList);
 
-        // Shortest path routing
-        List<TopoEdge> azERO = dijkstraPCE.computeShortestPathEdges(prunedTopo, srcPort, dstPort);
+            // Shortest path routing
+            List<TopoEdge> azERO = dijkstraPCE.computeShortestPathEdges(prunedTopo, src.get(), dst.get());
 
-        if (azERO.isEmpty()) {
-            throw new PCEException("Empty path from Symmetric PCE");
+            if (azERO.isEmpty()) {
+                throw new PCEException("Empty path from Palindromical PCE");
+            }
+
+            // Get symmetric path in reverse-direction
+            List<TopoEdge> zaERO = new LinkedList<>();
+
+            // 1. Reverse the links
+            for (TopoEdge azEdge : azERO) {
+                Optional<TopoEdge> reverseEdge = prunedTopo.getEdges().stream()
+                        .filter(r -> r.getA().equals(azEdge.getZ()))
+                        .filter(r -> r.getZ().equals(azEdge.getA()))
+                        .findFirst();
+
+                reverseEdge.ifPresent(zaERO::add);
+            }
+
+            // 2. Reverse the order
+            Collections.reverse(zaERO);
+
+            assert (azERO.size() == zaERO.size());
+
+            Map<String, List<TopoEdge>> theMap = new HashMap<>();
+            theMap.put("az", azERO);
+            theMap.put("za", zaERO);
+
+            return theMap;
         }
-
-        // Get symmetric path in reverse-direction
-        List<TopoEdge> zaERO = new LinkedList<>();
-
-        // 1. Reverse the links
-        for (TopoEdge azEdge : azERO) {
-            Optional<TopoEdge> reverseEdge = prunedTopo.getEdges().stream()
-                    .filter(r -> r.getA().equals(azEdge.getZ()))
-                    .filter(r -> r.getZ().equals(azEdge.getA()))
-                    .findFirst();
-
-            if (reverseEdge.isPresent())
-                zaERO.add(reverseEdge.get());
+        else{
+            throw new PCEException("Either source or destination are not present in topology");
         }
-
-        // 2. Reverse the order
-        Collections.reverse(zaERO);
-
-        assert (azERO.size() == zaERO.size());
-
-        Map<String, List<TopoEdge>> theMap = new HashMap<>();
-        theMap.put("az", azERO);
-        theMap.put("za", zaERO);
-
-        return theMap;
     }
 }

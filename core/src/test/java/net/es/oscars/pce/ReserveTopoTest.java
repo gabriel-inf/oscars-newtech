@@ -219,12 +219,6 @@ public class ReserveTopoTest {
 
     public List<TopoEdge> buildDecomposablePath() {
 
-        TopoEdge a_zero_to_a = TopoEdge.builder()
-                .a(TopoVertex.builder().urn("alpha:0/1/0").build())
-                .z(TopoVertex.builder().urn("alpha").build())
-                .layer(Layer.INTERNAL)
-                .metric(1L)
-                .build();
 
         TopoEdge a_to_a_one = TopoEdge.builder()
                 .a(TopoVertex.builder().urn("alpha").build())
@@ -289,15 +283,8 @@ public class ReserveTopoTest {
                 .metric(100L)
                 .build();
 
-        TopoEdge d_to_d_zero = TopoEdge.builder()
-                .a(TopoVertex.builder().urn("delta").build())
-                .z(TopoVertex.builder().urn("delta:0/1/0").build())
-                .layer(Layer.INTERNAL)
-                .metric(1L)
-                .build();
 
         List<TopoEdge> edges = new ArrayList<>();
-        edges.add(a_zero_to_a);
         edges.add(a_to_a_one);
         edges.add(a_one_to_b_one);
         edges.add(b_one_to_b);
@@ -307,7 +294,6 @@ public class ReserveTopoTest {
         edges.add(c_to_c_one);
         edges.add(c_one_to_d_one);
         edges.add(d_one_to_d);
-        edges.add(d_to_d_zero);
 
         return edges;
     }

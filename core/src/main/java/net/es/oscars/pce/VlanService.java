@@ -593,7 +593,7 @@ public class VlanService {
 
 
         // If there is any overlap between these sets, use this ID for everything
-        Set<Integer> availableEverywhere = new HashSet<>(availableVlansAcrossFixtures);
+        Set<Integer> availableEverywhere = availableVlansAcrossFixtures != null ? new HashSet<>(availableVlansAcrossFixtures) : new HashSet<>();
         availableEverywhere.retainAll(availableVlansAcrossPath);
         if (isSwitch(aJunctionUrn_e)) {
             availableEverywhere.retainAll(nonFixPortVlansMap.get(aJunctionUrn));
