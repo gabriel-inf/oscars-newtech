@@ -160,7 +160,7 @@ public class TranslationPCE {
         Map<String, Set<Integer>> chosenVlanMap
                 = vlanService.selectVlansForPipe(reqPipe, urnMap, reservedVlans, azERO, zaERO, deviceToPortMap, portToDeviceMap);
 
-        Boolean validVlanAssignment = evaluateAssignedVlanMap(chosenVlanMap, urnMap, portToDeviceMap);
+        Boolean validVlanAssignment = evaluateAssignedVlanMap(chosenVlanMap, reqPipe, azERO, zaERO);
         if(!validVlanAssignment){
             throw new PCEException(("VLAN could not not be found for all URNs"));
         }
@@ -195,7 +195,7 @@ public class TranslationPCE {
         Map<String, Set<Integer>> chosenVlanMap = vlanService.selectVlansForPipe(reqPipe, urnMap, reservedVlans,
                 combinedAzERO, combinedZaERO, deviceToPortMap, portToDeviceMap);
 
-        Boolean validVlanAssignment = evaluateAssignedVlanMap(chosenVlanMap, urnMap, portToDeviceMap);
+        Boolean validVlanAssignment = evaluateAssignedVlanMapMultiplePaths(chosenVlanMap, reqPipe, azEROs, zaEROs);
         if(!validVlanAssignment){
             throw new PCEException(("VLAN could not not be found for all URNs"));
         }
@@ -223,16 +223,59 @@ public class TranslationPCE {
         reservedMplsPipes.addAll(filteredMplsPipes);
     }
 
-    private Boolean evaluateAssignedVlanMap(Map<String, Set<Integer>> chosenVlanMap, Map<String, UrnE> urnMap, Map<String, String> portToDeviceMap) {
+    private Boolean evaluateAssignedVlanMapMultiplePaths(Map<String, Set<Integer>> chosenVlanMap,  RequestedVlanPipeE pipe,
+                                            List<List<TopoEdge>> azEROs, List<List<TopoEdge>> zaEROs) {
         Boolean valid = true;
         for (String urn : chosenVlanMap.keySet()) {
-            UrnE topoUrn = urnMap.get(urn);
-            Boolean parentHasVlans = evaluateIfParentHasVlans(topoUrn, portToDeviceMap, urnMap);
-            if (chosenVlanMap.get(urn).isEmpty() && parentHasVlans) {
-                valid = false;
+            // It's only okay for no VLANs to be assigned if the port is on a router
+            // and it is not in AZ path, ZA path, or fixtures.
+            if (chosenVlanMap.get(urn).isEmpty()) {
+                List<Boolean> inAzPaths = azEROs.stream().map(path -> evaluateIfInPath(urn, path)).collect(Collectors.toList());
+                List<Boolean> inZaPaths = zaEROs.stream().map(path -> evaluateIfInPath(urn, path)).collect(Collectors.toList());
+                Boolean inFixtures = evaluateIfInFixtures(urn, pipe);
+                if(inAzPaths.contains(true) || inZaPaths.contains(true) || inFixtures){
+                    valid = false;
+                }
             }
         }
         return valid;
+    }
+
+    private Boolean evaluateAssignedVlanMap(Map<String, Set<Integer>> chosenVlanMap,  RequestedVlanPipeE pipe,
+                                            List<TopoEdge> azERO, List<TopoEdge> zaERO) {
+
+        log.info("Chosen map: " + chosenVlanMap.toString());
+        Boolean valid = true;
+        for (String urn : chosenVlanMap.keySet()) {
+            // It's only okay for no VLANs to be assigned if the port is on a router
+            // and it is not in AZ path, ZA path, or fixtures.
+            if (chosenVlanMap.get(urn).isEmpty()) {
+                Boolean inAzPath = evaluateIfInPath(urn, azERO);
+                Boolean inZaPath = evaluateIfInPath(urn, zaERO);
+                Boolean inFixtures = evaluateIfInFixtures(urn, pipe);
+                if(inAzPath || inZaPath || inFixtures){
+                    valid = false;
+                }
+            }
+        }
+        return valid;
+    }
+
+    private Boolean evaluateIfInPath(String urn, List<TopoEdge> ERO){
+        for(TopoEdge edge : ERO){
+            String aUrn = edge.getA().getUrn();
+            String zUrn = edge.getZ().getUrn();
+            if(urn.equals(aUrn) || urn.equals(zUrn)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private Boolean evaluateIfInFixtures(String urn, RequestedVlanPipeE pipe){
+        Set<RequestedVlanFixtureE> fixtures = new HashSet<>(pipe.getAJunction().getFixtures());
+        fixtures.addAll(pipe.getZJunction().getFixtures());
+        return fixtures.stream().map(RequestedVlanFixtureE::getPortUrn).anyMatch(fixUrn -> fixUrn.equals(urn));
     }
 
     private Boolean evaluateIfParentHasVlans(UrnE topoUrn, Map<String, String> portToDeviceMap, Map<String, UrnE> urnMap){

@@ -106,6 +106,7 @@ class ReservationWhatIfApp extends React.Component{
 
         if(bwAvailRequest.azERO.length > 1 && (pathChange || portChange)){
             let bwAvailResponse = this.submitBwAvailRequest(bwAvailRequest);
+            debugger;
             bwAvailResponse.then(
                 (successResponse) => {
                     this.processBwAvailResponse(JSON.parse(successResponse));
@@ -211,6 +212,7 @@ class ReservationWhatIfApp extends React.Component{
         let combinedBwMap = bandwidthMapUnion(azChanges, zaChanges);
         this.setState({combinedBwMap: combinedBwMap});
         this.drawBandwidthAvailabilityMap(azChanges, zaChanges);
+        debugger;
     }
 
     assignReservationId(response){
