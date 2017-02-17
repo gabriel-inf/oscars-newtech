@@ -58,14 +58,13 @@ public class ReserveTopoTest {
         assert segments.size() == 2;
         assert segments.get(0).size() == 1;
         assert segments.get(0).containsKey(Layer.ETHERNET);
-        assert segments.get(0).get(Layer.ETHERNET).size() == 3;
-        assert segments.get(0).get(Layer.ETHERNET).get(0).getUrn().equals("alpha:0/1/0");
-        assert segments.get(0).get(Layer.ETHERNET).get(1).getUrn().equals("alpha");
-        assert segments.get(0).get(Layer.ETHERNET).get(2).getUrn().equals("alpha:1/1/1");
+        assert segments.get(0).get(Layer.ETHERNET).size() == 2;
+        assert segments.get(0).get(Layer.ETHERNET).get(0).getUrn().equals("alpha");
+        assert segments.get(0).get(Layer.ETHERNET).get(1).getUrn().equals("alpha:1/1/1");
 
         assert segments.get(1).size() == 1;
         assert segments.get(1).containsKey(Layer.MPLS);
-        assert segments.get(1).get(Layer.MPLS).size() == 9;
+        assert segments.get(1).get(Layer.MPLS).size() == 8;
 
         assert segments.get(1).get(Layer.MPLS).get(0).getUrn().equals("bravo:1/1/1");
         assert segments.get(1).get(Layer.MPLS).get(1).getUrn().equals("bravo");
@@ -75,7 +74,6 @@ public class ReserveTopoTest {
         assert segments.get(1).get(Layer.MPLS).get(5).getUrn().equals("charlie:1/1/1");
         assert segments.get(1).get(Layer.MPLS).get(6).getUrn().equals("delta:1/1/1");
         assert segments.get(1).get(Layer.MPLS).get(7).getUrn().equals("delta");
-        assert segments.get(1).get(Layer.MPLS).get(8).getUrn().equals("delta:0/1/0");
 
     }
 

@@ -428,7 +428,7 @@ public class PCEAssistant {
             // Remove the ZA ingress and egress ports
             // No ingress port for the first segment
             // No egress port for the last segment
-            if(i != azSegments.size()-1) {
+            if(i != zaSegments.size()-1) {
                 zaVertices.remove(0);
             }
             if(i != 0) {

@@ -2,10 +2,7 @@ package net.es.oscars.pce;
 
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.spec.SurvivabilityType;
-import net.es.oscars.resv.ent.RequestedVlanPipeE;
-import net.es.oscars.resv.ent.ReservedBandwidthE;
-import net.es.oscars.resv.ent.ReservedVlanE;
-import net.es.oscars.resv.ent.ScheduleSpecificationE;
+import net.es.oscars.resv.ent.*;
 import net.es.oscars.servicetopo.SurvivableServiceLayerTopology;
 import net.es.oscars.dto.topo.TopoEdge;
 import net.es.oscars.dto.topo.TopoVertex;
@@ -226,11 +223,15 @@ public class SurvivabilityPCE
         TopoVertex srcDevice = new TopoVertex(srcDeviceURN.getUrn(), srcType);
         TopoVertex dstDevice = new TopoVertex(dstDeviceURN.getUrn(), dstType);
 
-        UrnE srcPortURN = urnRepo.findByUrn(requestPipe.getAJunction().getFixtures().iterator().next().getPortUrn()).orElseThrow(NoSuchElementException::new);
-        UrnE dstPortURN = urnRepo.findByUrn(requestPipe.getZJunction().getFixtures().iterator().next().getPortUrn()).orElseThrow(NoSuchElementException::new);
+        Set<RequestedVlanFixtureE> srcFixtures = requestPipe.getAJunction().getFixtures();
+        Set<RequestedVlanFixtureE> dstFixtures = requestPipe.getZJunction().getFixtures();
 
-        TopoVertex srcPort = new TopoVertex(srcPortURN.getUrn(), VertexType.PORT);
-        TopoVertex dstPort = new TopoVertex(dstPortURN.getUrn(), VertexType.PORT);
+        TopoVertex srcPort = srcFixtures.size() > 0 ?
+                new TopoVertex(srcFixtures.iterator().next().getPortUrn(), VertexType.PORT) :
+                new TopoVertex("fix" + srcDevice.getUrn(), VertexType.PORT);
+        TopoVertex dstPort = dstFixtures.size() > 0 ?
+                new TopoVertex(dstFixtures.iterator().next().getPortUrn(), VertexType.PORT) :
+                new TopoVertex("fix" + dstDevice.getUrn(), VertexType.PORT);
 
         // Handle MPLS-layer source/destination devices
         serviceLayerTopology.buildLogicalLayerSrcNodes(srcDevice, srcPort);
@@ -296,23 +297,55 @@ public class SurvivabilityPCE
 
         Map<String, List<TopoEdge>> theMap = new HashMap<>();
 
+        // AZ Primary paths: Remove starting and ending ports
+        if(azServiceLayerERO.get(0).getA().getVertexType().equals(VertexType.PORT)){
+            azServiceLayerERO.remove(0);
+        }
+        if(azServiceLayerERO.get(azServiceLayerERO.size()-1).getZ().getVertexType().equals(VertexType.PORT)){
+            azServiceLayerERO.remove(azServiceLayerERO.size()-1);
+        }
+
+
+        // ZA Primary Paths: remove starting and ending ports
+        if(zaServiceLayerERO.get(0).getA().getVertexType().equals(VertexType.PORT)){
+            zaServiceLayerERO.remove(0);
+        }
+        if(zaServiceLayerERO.get(zaServiceLayerERO.size()-1).getZ().getVertexType().equals(VertexType.PORT)){
+            zaServiceLayerERO.remove(zaServiceLayerERO.size()-1);
+        }
+
         if(!(azServiceLayerERO.size() == zaServiceLayerERO.size()))
             return  theMap;
 
         // Obtain physical ERO from Service-Layer EROs
+
         List<TopoEdge> azEROPrimary = serviceLayerTopology.getActualPrimaryERO(azServiceLayerERO);
         List<TopoEdge> azEROSecondary = serviceLayerTopology.getActualSecondaryERO(azServiceLayerERO);
 
+        // AZ Primary paths: Remove starting and ending ports
+        if(azEROPrimary.get(0).getA().getVertexType().equals(VertexType.PORT)){
+            azEROPrimary.remove(0);
+        }
+        if(azEROPrimary.get(azEROPrimary.size()-1).getZ().getVertexType().equals(VertexType.PORT)){
+            azEROPrimary.remove(azEROPrimary.size()-1);
+        }
+
+        // ZA Primary Paths: remove starting and ending ports
+        if(azEROSecondary.get(0).getA().getVertexType().equals(VertexType.PORT)){
+            azEROSecondary.remove(0);
+        }
+        if(azEROSecondary.get(azEROSecondary.size()-1).getZ().getVertexType().equals(VertexType.PORT)){
+            azEROSecondary.remove(azEROSecondary.size()-1);
+        }
         // No logical edges were used in this path - Only a single non-survivable Ethernet-only ERO will be returned
         if(azEROPrimary.equals(azEROSecondary))
         {
-            assert(azEROPrimary.equals(azServiceLayerERO));
-
             theMap.put("az", azServiceLayerERO);
             theMap.put("za", zaServiceLayerERO);
 
             return theMap;
         }
+
 
         // Get palindromic Physical-Layer path in reverse-direction
         List<TopoEdge> zaEROPrimary = new LinkedList<>();
@@ -349,10 +382,13 @@ public class SurvivabilityPCE
         Collections.reverse(zaEROPrimary);
         Collections.reverse(zaEROSecondary);
 
+
+
         if(!(azEROPrimary.size() == zaEROPrimary.size()))
             return  theMap;
         if(!(azEROSecondary.size() == zaEROSecondary.size()))
             return  theMap;
+
 
         theMap.put("az1", azEROPrimary);
         theMap.put("za1", zaEROPrimary);
