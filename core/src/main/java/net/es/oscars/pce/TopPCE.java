@@ -445,7 +445,7 @@ public class TopPCE {
      */
     private boolean verifySurvEros(Map<String, List<TopoEdge>> eroMap) {
         if (eroMap != null) {
-            if (eroMap.size() == 4) {
+            if (eroMap.size() > 2 && eroMap.size() % 2 == 0) {
                 return eroMap.values().stream().allMatch(l -> l.size() > 0);
             }
         }

@@ -10,6 +10,7 @@ import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.helpers.test.AsymmTopologyBuilder;
 import net.es.oscars.helpers.test.TopologyBuilder;
+import net.es.oscars.topo.ent.BidirectionalPathE;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1079,7 +1080,7 @@ public class TopPceTestSurvivableTotal
     @Test
     public void survivablePceTestESnet()
     {
-        log.info("Initializing test: 'survivablePceTest15'.");
+        log.info("Initializing test: 'survivablePceTestESnet'.");
 
         RequestedBlueprintE requestedBlueprint;
         Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
@@ -1088,10 +1089,10 @@ public class TopPceTestSurvivableTotal
         Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
         Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
 
-        String srcPort = "sdsc-sdn2:xe-0/0/0";
-        String srcDevice = "sdsc-sdn2";
-        String dstPort = "eqx-chi-rt1:ge-0/1/7";
-        String dstDevice = "eqx-chi-rt1";
+        String srcPort = "fnal-mr2:xe-0/2/0";
+        String srcDevice = "fnal-mr2";
+        String dstPort = "nersc-mr2:xe-0/1/0";
+        String dstDevice = "nersc-mr2";
         Integer azBW = 25;
         Integer zaBW = 25;
         PalindromicType palindrome = PalindromicType.PALINDROME;
@@ -1113,8 +1114,56 @@ public class TopPceTestSurvivableTotal
             log.error("", pceE);
         }
 
-        assert (!reservedBlueprint.isPresent());
+        assert (reservedBlueprint.isPresent());
+        Set<BidirectionalPathE> paths = reservedBlueprint.get().getVlanFlow().getAllPaths();
+        assert(paths.size() == 2);
+        assert(paths.stream().allMatch(path -> path.getAzPath().size() > 0 && path.getZaPath().size() > 0));
 
-        log.info("test 'survivablePceTest15' passed.");
+        log.info("test 'survivablePceTestESnet' passed.");
+    }
+
+    @Test
+    public void survivablePceTestESnet3Paths()
+    {
+        log.info("Initializing test: 'survivablePceTestESnet3Paths'.");
+
+        RequestedBlueprintE requestedBlueprint;
+        Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
+        ScheduleSpecificationE requestedSched;
+
+        Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
+        Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
+
+        String srcPort = "chic-cr5:3/2/1";
+        String srcDevice = "chic-cr5";
+        String dstPort = "lond-cr5:10/1/4";
+        String dstDevice = "lond-cr5";
+        Integer azBW = 25;
+        Integer zaBW = 25;
+        PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_TOTAL;
+        String vlan = "any";
+
+        topologyBuilder.buildTopoEsnet();
+        requestedSched = testBuilder.buildSchedule(startDate, endDate);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 3, 1, 1, "survTest");
+
+        log.info("Beginning test: 'survivablePceTestESnet3Paths'.");
+
+        try
+        {
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
+        }
+        catch(PCEException | PSSException pceE)
+        {
+            log.error("", pceE);
+        }
+
+        assert (reservedBlueprint.isPresent());
+        Set<BidirectionalPathE> paths = reservedBlueprint.get().getVlanFlow().getAllPaths();
+        assert(paths.size() == 3);
+        assert(paths.stream().allMatch(path -> path.getAzPath().size() > 0 && path.getZaPath().size() > 0));
+
+        log.info("test 'survivablePceTestESnet3Paths' passed.");
     }
 }

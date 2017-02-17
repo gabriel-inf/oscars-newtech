@@ -97,25 +97,25 @@ public class SurvivabilityPCE
         Topology prunedTopo = pruningService.pruneWithPipeAZ(multiLayerTopo, requestPipe, rsvBwList, rsvVlanList);
 
         // Disjoint shortest-path routing
-        List<List<TopoEdge>> azPathPairCalculated = bhandariPCE.computeDisjointPaths(prunedTopo, srcDevice, dstDevice, requestPipe.getNumDisjoint());
+        List<List<TopoEdge>> azPathSet = bhandariPCE.computeDisjointPaths(prunedTopo, srcDevice, dstDevice, requestPipe.getNumDisjoint());
 
-        log.info(azPathPairCalculated.toString());
+        log.info(azPathSet.toString());
 
-        if(azPathPairCalculated.isEmpty())
+        if(azPathSet.isEmpty())
         {
-            throw new PCEException("Empty path-pair in Survivability PCE");
+            throw new PCEException("Empty path-set in Survivability PCE");
         }
-        else if(azPathPairCalculated.size() != requestPipe.getNumDisjoint())
+        else if(azPathSet.size() != requestPipe.getNumDisjoint())
         {
             throw new PCEException(requestPipe.getNumDisjoint() + " disjoint paths could not be found in Survivability PCE");
         }
 
 
         // Get palindromic paths in reverse-direction //
-        List<List<TopoEdge>> zaPathPairCalculated = new ArrayList<>();
+        List<List<TopoEdge>> zaPathSet = new ArrayList<>();
 
         // 1. Reverse the links
-        for(List<TopoEdge> azERO : azPathPairCalculated)
+        for(List<TopoEdge> azERO : azPathSet)
         {
             List<TopoEdge> zaERO = new ArrayList<>();
 
@@ -129,36 +129,36 @@ public class SurvivabilityPCE
                 reverseEdge.ifPresent(zaERO::add);
             }
 
-            zaPathPairCalculated.add(zaERO);
+            zaPathSet.add(zaERO);
         }
 
         // 2. Reverse the order
-        for(List<TopoEdge> zaERO : zaPathPairCalculated)
+        for(List<TopoEdge> zaERO : zaPathSet)
         {
             Collections.reverse(zaERO);
         }
 
-        log.info(zaPathPairCalculated.toString());
+        log.info(zaPathSet.toString());
 
-        assert(azPathPairCalculated.size() == requestPipe.getNumDisjoint());
-        assert(azPathPairCalculated.size() == zaPathPairCalculated.size());
+        assert(azPathSet.size() == requestPipe.getNumDisjoint());
+        assert(azPathSet.size() == zaPathSet.size());
 
 
-        for(int p = 0; p < azPathPairCalculated.size(); p++)
+        for(int p = 0; p < azPathSet.size(); p++)
         {
-            List<TopoEdge> azERO = azPathPairCalculated.get(p);
-            List<TopoEdge> zaERO = zaPathPairCalculated.get(p);
+            List<TopoEdge> azERO = azPathSet.get(p);
+            List<TopoEdge> zaERO = zaPathSet.get(p);
             assert(azERO.size() == zaERO.size());
         }
 
         Map<String, List<TopoEdge>> theMap = new HashMap<>();
         Integer numPathsSoFar = 0;
-        for(List<TopoEdge> azPath : azPathPairCalculated){
+        for(List<TopoEdge> azPath : azPathSet){
             numPathsSoFar += 1;
             theMap.put("az" + numPathsSoFar, azPath);
         }
         numPathsSoFar = 0;
-        for(List<TopoEdge> zaPath : zaPathPairCalculated){
+        for(List<TopoEdge> zaPath : zaPathSet){
             numPathsSoFar += 1;
             theMap.put("za" + numPathsSoFar, zaPath);
         }
