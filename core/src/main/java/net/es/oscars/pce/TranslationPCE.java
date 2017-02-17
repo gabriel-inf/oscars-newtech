@@ -228,7 +228,7 @@ public class TranslationPCE {
         for (String urn : chosenVlanMap.keySet()) {
             UrnE topoUrn = urnMap.get(urn);
             Boolean parentHasVlans = evaluateIfParentHasVlans(topoUrn, portToDeviceMap, urnMap);
-            if (chosenVlanMap.get(urn).isEmpty() && (topoUrn.getReservableVlans() != null || parentHasVlans)) {
+            if (chosenVlanMap.get(urn).isEmpty() && parentHasVlans) {
                 valid = false;
             }
         }

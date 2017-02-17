@@ -3,6 +3,7 @@ package net.es.oscars.pce;
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.spec.SurvivabilityType;
 import net.es.oscars.resv.ent.*;
+import net.es.oscars.servicetopo.ServiceLayerTopology;
 import net.es.oscars.servicetopo.SurvivableServiceLayerTopology;
 import net.es.oscars.dto.topo.TopoEdge;
 import net.es.oscars.dto.topo.TopoVertex;
@@ -236,6 +237,14 @@ public class SurvivabilityPCE
         // Handle MPLS-layer source/destination devices
         serviceLayerTopology.buildLogicalLayerSrcNodes(srcDevice, srcPort);
         serviceLayerTopology.buildLogicalLayerDstNodes(dstDevice, dstPort);
+        // Add the fake port to Service Layer Topology's MPLS topology
+        // Only do this if the source/dest is a router and if no fixtures are defined
+        if(srcDevice.getVertexType().equals(VertexType.ROUTER) && srcFixtures.size() == 0){
+            addPortToServiceMplsTopology(serviceLayerTopology, srcPort, srcDevice);
+        }
+        if(dstDevice.getVertexType().equals(VertexType.ROUTER) && dstFixtures.size() == 0){
+            addPortToServiceMplsTopology(serviceLayerTopology, dstPort, dstDevice);
+        }
 
         // Performs shortest path routing on MPLS-layer to properly assign weights to each logical link on Service-Layer
         serviceLayerTopology.calculateLogicalLinkWeights(requestPipe, urnRepo.findAll(), rsvBwList, rsvVlanList);
@@ -359,10 +368,7 @@ public class SurvivabilityPCE
                     .filter(r -> r.getZ().equals(azEdge.getA()))
                     .findFirst();
 
-            if(reverseEdge.isPresent())
-            {
-                zaEROPrimary.add(reverseEdge.get());
-            }
+            reverseEdge.ifPresent(zaEROPrimary::add);
         }
 
         for(TopoEdge azEdge : azEROSecondary)
@@ -372,10 +378,7 @@ public class SurvivabilityPCE
                     .filter(r -> r.getZ().equals(azEdge.getA()))
                     .findFirst();
 
-            if(reverseEdge.isPresent())
-            {
-                zaEROSecondary.add(reverseEdge.get());
-            }
+            reverseEdge.ifPresent(zaEROSecondary::add);
         }
 
         // 2. Reverse the order
@@ -396,5 +399,16 @@ public class SurvivabilityPCE
         theMap.put("za2", zaEROSecondary);
 
         return theMap;
+    }
+
+    private void addPortToServiceMplsTopology(SurvivableServiceLayerTopology serviceLayerTopology, TopoVertex port, TopoVertex device) {
+        serviceLayerTopology.getMplsLayerPorts().add(port);
+        TopoEdge portToDeviceEdge = new TopoEdge(port, device, 0L, Layer.MPLS);
+        TopoEdge deviceToPortEdge = new TopoEdge(device, port, 0L, Layer.MPLS);
+        serviceLayerTopology.getMplsLayerLinks().add(portToDeviceEdge);
+        serviceLayerTopology.getMplsLayerLinks().add(deviceToPortEdge);
+        serviceLayerTopology.getMplsTopology().getVertices().add(port);
+        serviceLayerTopology.getMplsTopology().getEdges().add(portToDeviceEdge);
+        serviceLayerTopology.getMplsTopology().getEdges().add(deviceToPortEdge);
     }
 }

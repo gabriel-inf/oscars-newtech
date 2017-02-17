@@ -3215,6 +3215,105 @@ public class TopPceTestNonPalindromic
         log.info("test 'nonPalPceHighLinkCostTest2' passed.");
     }
 
+
+    @Test
+    public void asymmPceTestNoFixtures()
+    {
+        log.info("Initializing test: 'asymmPceTest12'.");
+
+        RequestedBlueprintE requestedBlueprint;
+        Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
+        ScheduleSpecificationE requestedSched;
+
+        Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
+        Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
+
+        String srcDevice = "nodeK";
+        String dstDevice = "nodeQ";
+        Integer azBW = 50;
+        Integer zaBW = 25;
+        PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
+        String vlan = "any";
+
+        topologyBuilder.buildTopo12();
+        requestedSched = testBuilder.buildSchedule(startDate, endDate);
+        requestedBlueprint = testBuilder.buildRequest("", srcDevice, "", dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1, 1, 1, "nonPalTest");
+
+        log.info("Beginning test: 'asymmPceTest12'.");
+
+        try
+        {
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
+        }
+        catch(PCEException | PSSException pceE){ log.error("", pceE); }
+
+        assert(reservedBlueprint.isPresent());
+
+        ReservedVlanFlowE reservedFlow = reservedBlueprint.get().getVlanFlow();
+
+        Set<ReservedEthPipeE> allResEthPipes = reservedFlow.getEthPipes();
+        Set<ReservedMplsPipeE> allResMplsPipes = reservedFlow.getMplsPipes();
+        Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
+
+        assert(allResJunctions.size() == 0);
+        assert(allResEthPipes.size() == 2);
+        assert(allResMplsPipes.size() == 0);
+
+        // Ethernet Pipes
+        for(ReservedEthPipeE ethPipe : allResEthPipes)
+        {
+            ReservedVlanJunctionE aJunc = ethPipe.getAJunction();
+            ReservedVlanJunctionE zJunc = ethPipe.getZJunction();
+            Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
+            Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
+            List<String> azERO = ethPipe.getAzERO();
+            List<String> zaERO = ethPipe.getZaERO();
+            String actualAzERO = aJunc.getDeviceUrn() + "-";
+            String actualZaERO = zJunc.getDeviceUrn() + "-";
+
+            for(String x : azERO)
+                actualAzERO = actualAzERO + x + "-";
+
+            for(String x : zaERO)
+                actualZaERO = actualZaERO + x + "-";
+
+            actualAzERO = actualAzERO + zJunc.getDeviceUrn();
+            actualZaERO = actualZaERO + aJunc.getDeviceUrn();
+
+
+            assert (aJunc.getDeviceUrn().equals("nodeK") || aJunc.getDeviceUrn().equals("nodeM"));
+            assert (zJunc.getDeviceUrn().equals("nodeM") || zJunc.getDeviceUrn().equals("nodeQ"));
+
+            if(aJunc.getDeviceUrn().equals("nodeK"))
+            {
+                assert (aFixes.size() == 0);
+                assert (zFixes.size() == 0);
+
+                String expectedAzERO = "nodeK-nodeK:2-nodeM:1-nodeM";
+                String expectedZaERO = "nodeM-nodeM:1-nodeK:2-nodeK";
+
+                assert (zJunc.getDeviceUrn().equals("nodeM"));
+                assert (actualAzERO.equals(expectedAzERO));
+                assert (actualZaERO.equals(expectedZaERO));
+            }
+            else
+            {
+                assert (aFixes.size() == 0);
+                assert (zFixes.size() == 0);
+
+                String expectedAzERO = "nodeM-nodeM:2-nodeQ:2-nodeQ";
+                String expectedZaERO = "nodeQ-nodeQ:2-nodeM:2-nodeM";
+
+                assert (zJunc.getDeviceUrn().equals("nodeQ"));
+                assert (actualAzERO.equals(expectedAzERO));
+                assert (actualZaERO.equals(expectedZaERO));
+            }
+        }
+
+        log.info("test 'asymmPceTest12' passed.");
+    }
+
     @Test
     public void nonPalPceHighLinkCostTest3()
     {
