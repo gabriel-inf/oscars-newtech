@@ -591,7 +591,7 @@ public class VlanService {
         //Initialize chosen VLAN map
         Set<String> fixtures = reqPipe.getAJunction().getFixtures().stream().map(RequestedVlanFixtureE::getPortUrn).collect(Collectors.toSet());
         fixtures.addAll(reqPipe.getZJunction().getFixtures().stream().map(RequestedVlanFixtureE::getPortUrn).collect(Collectors.toSet()));
-        Map<String, Set<Integer>> chosenVlanMap = initializeChosenVlanMap(pipeUrns, nonFixPortUrnMap, fixtures);
+        Map<String, Set<Integer>> chosenVlanMap = initializeChosenVlanMap(pipeUrns, fixtures);
 
 
         // If there is any overlap between these sets, use this ID for everything
@@ -687,8 +687,6 @@ public class VlanService {
                     }
                     // If available options, choose a VLAN and assign it to the fixture and the port URNs (if device is a switch)
                     if (!options.isEmpty()) {
-                        log.info(chosenVlanMap.toString());
-                        log.info(fixUrn);
                         Integer chosenVlan = options.get(0);
                         chosenVlanMap.get(fixUrn).add(chosenVlan);
                         if (isSwitch(parentDeviceUrn_e)) {
@@ -745,18 +743,12 @@ public class VlanService {
         return chosenVlanMap;
     }
 
-    private Map<String,Set<Integer>> initializeChosenVlanMap(Set<String> pipeUrns, Map<String, Set<String>> nonFixPortUrnMap, Set<String> fixtures) {
+    private Map<String,Set<Integer>> initializeChosenVlanMap(Set<String> pipeUrns, Set<String> fixtures) {
 
         //log.info("Pipe URNs: " + pipeUrns.toString());
         Map<String, Set<Integer>> chosenVlanMap = new HashMap<>();
         for(String pipeUrn : pipeUrns){
             chosenVlanMap.put(pipeUrn, new HashSet<>());
-        }
-        for(Set<String> nonFixturePorts : nonFixPortUrnMap.values()){
-            //log.info("Non-Fixture Ports: " + nonFixturePorts.toString());
-            for(String nonFixturePort : nonFixturePorts){
-                chosenVlanMap.put(nonFixturePort, new HashSet<>());
-            }
         }
         for(String fixtureUrn : fixtures){
             chosenVlanMap.put(fixtureUrn, new HashSet<>());
