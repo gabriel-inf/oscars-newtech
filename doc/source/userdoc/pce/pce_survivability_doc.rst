@@ -11,10 +11,6 @@ This module provides the primary implementation for the :ref:`surv_pce_services`
 - :ref:`surv_pce_mpls`
 - :ref:`surv_pce_kpath`
 
-.. warning::
-
-   As of February 1, 2017, K-path survivability is implemented only in the BhandariPCE, and there is not yet any avenue in the Survivability PCE API to support the reservation of K-paths at this time. This connective tissue will be incorporated into a future release version.
-
 
 Module Details
 --------------

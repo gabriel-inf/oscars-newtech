@@ -80,23 +80,16 @@ The user can request any number of link-disjoint paths for either Complet or Par
 
     *K-Path link-disjoint survivability, for a value of K=3.*
 
-.. warning::
-
-	As of February 1, 2017, K-path survivability is implemented only in the BhandariPCE, and there is not yet any avenue in the Survivability PCE API to support the service at this time. This connective tissue will be incorporated into a future release version.
-
 Service Details
 ^^^^^^^^^^^^^^^
 
 **Can be combined with:**
 
-N/A
-
-.. - :ref:`multipoint_pce_service`
+- :ref:`multipoint_pce_service`
 
 **Relevant PCE Module(s)**
 
-.. - :ref:`pce_survivability`
-
+- :ref:`pce_survivability`
 - :ref:`pce_bhandari`
 
 
