@@ -135,12 +135,6 @@ public class EroPceTest
         List<String> azString = dijkstraPCE.translatePathVerticesToStrings(azVerts);
         List<String> zaString = dijkstraPCE.translatePathVerticesToStrings(zaVerts);
 
-        // Computed EROs also include port URNs. Add those to requested EROs from comparison.
-        azERO.add(0, srcPorts.get(0));
-        azERO.add(dstPorts.get(0));
-        zaERO.add(0, dstPorts.get(0));
-        zaERO.add(srcPorts.get(0));
-
         assert(azString.equals(azERO));
         assert(zaString.equals(zaERO));
 
@@ -223,12 +217,6 @@ public class EroPceTest
         List<TopoVertex> zaVerts = dijkstraPCE.translatePathEdgesToVertices(computedZaEro);
         List<String> azString = dijkstraPCE.translatePathVerticesToStrings(azVerts);
         List<String> zaString = dijkstraPCE.translatePathVerticesToStrings(zaVerts);
-
-        // Computed EROs also include port URNs. Add those to requested EROs from comparison.
-        azERO.add(0, srcPorts.get(0));
-        azERO.add(dstPorts.get(0));
-        zaERO.add(0, dstPorts.get(0));
-        zaERO.add(srcPorts.get(0));
 
         assert(azString.equals(azERO));
         assert(zaString.equals(zaERO));
@@ -445,12 +433,6 @@ public class EroPceTest
         List<String> azString = dijkstraPCE.translatePathVerticesToStrings(azVerts);
         List<String> zaString = dijkstraPCE.translatePathVerticesToStrings(zaVerts);
 
-        // Computed EROs also include port URNs. Add those to requested EROs from comparison.
-        azERO.add(0, srcPorts.get(0));
-        azERO.add(dstPorts.get(0));
-        zaERO.add(0, dstPorts.get(0));
-        zaERO.add(srcPorts.get(0));
-
         assert(azString.equals(azERO));
         assert(zaString.equals(zaERO));
 
@@ -530,12 +512,6 @@ public class EroPceTest
         List<TopoVertex> zaVerts = dijkstraPCE.translatePathEdgesToVertices(computedZaEro);
         List<String> azString = dijkstraPCE.translatePathVerticesToStrings(azVerts);
         List<String> zaString = dijkstraPCE.translatePathVerticesToStrings(zaVerts);
-
-        // Computed EROs also include port URNs. Add those to requested EROs from comparison.
-        azERO.add(0, srcPorts.get(0));
-        azERO.add(dstPorts.get(0));
-        zaERO.add(0, dstPorts.get(0));
-        zaERO.add(srcPorts.get(0));
 
         assert(azString.equals(azERO));
         assert(zaString.equals(zaERO));
@@ -640,9 +616,10 @@ public class EroPceTest
         List<String> computedAZEro = connectionTest.getReserved().getVlanFlow().getMplsPipes().iterator().next().getAzERO();
         List<String> computedZAEro = connectionTest.getReserved().getVlanFlow().getMplsPipes().iterator().next().getZaERO();
 
-        // Each reserved pipe will have EROs not containing src/dst devices. Add those for comparison with requested EROs
+
         computedAZEro.add(0, srcDevice);
         computedAZEro.add(dstDevice);
+
         computedZAEro.add(0, dstDevice);
         computedZAEro.add(srcDevice);
 
@@ -1341,12 +1318,6 @@ public class EroPceTest
         List<String> azString = dijkstraPCE.translatePathVerticesToStrings(azVerts);
         List<String> zaString = dijkstraPCE.translatePathVerticesToStrings(zaVerts);
 
-        // Computed EROs also include port URNs. Add those to requested EROs from comparison.
-        azERO.add(0, srcPorts.get(0));
-        azERO.add(dstPorts.get(0));
-        zaERO.add(0, dstPorts.get(0));
-        zaERO.add(srcPorts.get(0));
-
         log.info("Requested AZ ERO: " + azERO);
         log.info("Actual AZ ERO: " + azString);
         log.info("Requested ZA ERO: " + zaERO);
@@ -1418,11 +1389,6 @@ public class EroPceTest
         List<String> azString = dijkstraPCE.translatePathVerticesToStrings(azVerts);
         List<String> zaString = dijkstraPCE.translatePathVerticesToStrings(zaVerts);
 
-        // Computed EROs also include port URNs. Add those to requested EROs from comparison.
-        azERO.add(0, srcPorts.get(0));
-        azERO.add(dstPorts.get(0));
-        zaERO.add(0, dstPorts.get(0));
-        zaERO.add(srcPorts.get(0));
 
         log.info("Requested AZ ERO: " + azERO);
         log.info("Actual AZ ERO: " + azString);
@@ -1497,11 +1463,6 @@ public class EroPceTest
         List<String> azString = dijkstraPCE.translatePathVerticesToStrings(azVerts);
         List<String> zaString = dijkstraPCE.translatePathVerticesToStrings(zaVerts);
 
-        // Computed EROs also include port URNs. Add those to requested EROs from comparison.
-        azERO.add(0, srcPorts.get(0));
-        azERO.add(dstPorts.get(0));
-        zaERO.add(0, dstPorts.get(0));
-        zaERO.add(srcPorts.get(0));
 
         log.info("Requested AZ ERO: " + azERO);
         log.info("Actual AZ ERO: " + azString);

@@ -42,117 +42,118 @@ public class EroPCE {
                                                            List<ReservedBandwidthE> rsvBwList,
                                                            List<ReservedVlanE> rsvVlanList) throws PCEException {
         log.info("Entering EroPCE.");
-        UrnE srcPortURN = topoService.getUrn(requestPipe.getAJunction().getFixtures().iterator().next().getPortUrn());
-        UrnE dstPortURN = topoService.getUrn(requestPipe.getZJunction().getFixtures().iterator().next().getPortUrn());
-
-        TopoVertex srcPort = new TopoVertex(srcPortURN.getUrn(), VertexType.PORT);
-        TopoVertex dstPort = new TopoVertex(dstPortURN.getUrn(), VertexType.PORT);
-        String srcPortName = srcPortURN.getUrn();
-        String dstPortName = dstPortURN.getUrn();
 
         Topology multiLayerTopoAzDirection = topoService.getMultilayerTopology();
         Topology multiLayerTopoZaDirection = topoService.getMultilayerTopology();   // Same as AZ initially
 
-        List<String> requestedAzERO = requestPipe.getAzERO().stream().collect(Collectors.toList());
-        List<String> requestedZaERO = requestPipe.getZaERO().stream().collect(Collectors.toList());
+        String srcUrn = requestPipe.getAJunction().getDeviceUrn();
+        String dstUrn = requestPipe.getZJunction().getDeviceUrn();
 
-        if (!requestedAzERO.get(0).equals(requestPipe.getAJunction().getDeviceUrn()) ||
-                !requestedAzERO.get(requestedAzERO.size() - 1).equals(requestPipe.getZJunction().getDeviceUrn())) {
-            throw new PCEException("Requested ERO must begin at source-device URN, and terminate at destination-device URN.");
-        }
+        Optional<TopoVertex> src = multiLayerTopoAzDirection.getVertexByUrn(srcUrn);
+        Optional<TopoVertex> dst = multiLayerTopoAzDirection.getVertexByUrn(dstUrn);
+        if(src.isPresent() && dst.isPresent()){
 
-        if (!requestedZaERO.get(0).equals(requestPipe.getZJunction().getDeviceUrn()) ||
-                !requestedZaERO.get(requestedZaERO.size() - 1).equals(requestPipe.getAJunction().getDeviceUrn())) {
-            throw new PCEException("Requested ERO must begin at source-device URN, and terminate at destination-device URN.");
-        }
+            List<String> requestedAzERO = requestPipe.getAzERO().stream().collect(Collectors.toList());
+            List<String> requestedZaERO = requestPipe.getZaERO().stream().collect(Collectors.toList());
 
-        if (requestedAzERO.isEmpty() || requestedZaERO.isEmpty())
-            throw new PCEException("Requested ERO must include at least one URN.");
+            if (!requestedAzERO.get(0).equals(srcUrn) ||
+                    !requestedAzERO.get(requestedAzERO.size() - 1).equals(dstUrn)) {
+                throw new PCEException("Requested ERO must begin at source-device URN, and terminate at destination-device URN.");
+            }
 
-        requestedAzERO.add(0, srcPortName);
-        requestedAzERO.add(dstPortName);
-        requestedZaERO.add(0, dstPortName);
-        requestedZaERO.add(srcPortName);
+            if (!requestedZaERO.get(0).equals(dstUrn) ||
+                    !requestedZaERO.get(requestedZaERO.size() - 1).equals(srcUrn)) {
+                throw new PCEException("Requested ERO must begin at source-device URN, and terminate at destination-device URN.");
+            }
 
-        Set<TopoVertex> azNodes = multiLayerTopoAzDirection.getVertices().stream()
-                .filter(v -> requestedAzERO.contains(v.getUrn()))
-                .collect(Collectors.toSet());
+            if (requestedAzERO.isEmpty() || requestedZaERO.isEmpty())
+                throw new PCEException("Requested ERO must include at least one URN.");
 
-        Set<TopoVertex> zaNodes = multiLayerTopoZaDirection.getVertices().stream()
-                .filter(v -> requestedZaERO.contains(v.getUrn()))
-                .collect(Collectors.toSet());
 
-        Set<TopoEdge> edgestoKeepAz = multiLayerTopoAzDirection.getEdges().stream()
-                .filter(e -> (azNodes.contains(e.getA()) && azNodes.contains(e.getZ())) || (azNodes.contains(e.getZ()) && azNodes.contains(e.getA())))
-                .collect(Collectors.toSet());
+            Set<TopoVertex> azNodes = multiLayerTopoAzDirection.getVertices().stream()
+                    .filter(v -> requestedAzERO.contains(v.getUrn()))
+                    .collect(Collectors.toSet());
 
-        Set<TopoEdge> edgestoKeepZa = multiLayerTopoZaDirection.getEdges().stream()
-                .filter(e -> (zaNodes.contains(e.getA()) && zaNodes.contains(e.getZ())) || (zaNodes.contains(e.getZ()) && zaNodes.contains(e.getA())))
-                .collect(Collectors.toSet());
+            Set<TopoVertex> zaNodes = multiLayerTopoZaDirection.getVertices().stream()
+                    .filter(v -> requestedZaERO.contains(v.getUrn()))
+                    .collect(Collectors.toSet());
 
-        // Prune all URNs from topology not matching specified EROs
-        multiLayerTopoAzDirection.getVertices().retainAll(azNodes);
-        multiLayerTopoZaDirection.getVertices().retainAll(zaNodes);
+            Set<TopoEdge> edgestoKeepAz = multiLayerTopoAzDirection.getEdges().stream()
+                    .filter(e -> (azNodes.contains(e.getA()) && azNodes.contains(e.getZ())) || (azNodes.contains(e.getZ()) && azNodes.contains(e.getA())))
+                    .collect(Collectors.toSet());
 
-        // Prune all Edges from topology not beginning/ending at specified ERO URNs
-        multiLayerTopoAzDirection.getEdges().retainAll(edgestoKeepAz);
-        multiLayerTopoZaDirection.getEdges().retainAll(edgestoKeepZa);
+            Set<TopoEdge> edgestoKeepZa = multiLayerTopoZaDirection.getEdges().stream()
+                    .filter(e -> (zaNodes.contains(e.getA()) && zaNodes.contains(e.getZ())) || (zaNodes.contains(e.getZ()) && zaNodes.contains(e.getA())))
+                    .collect(Collectors.toSet());
 
-        for (TopoEdge badEdge : multiLayerTopoAzDirection.getEdges()) {
-            if (badEdge.getA().getVertexType().equals(VertexType.SWITCH) || badEdge.getZ().getVertexType().equals(VertexType.SWITCH)) {
-                if (!multiLayerTopoZaDirection.getVertices().contains(badEdge.getA()) && !multiLayerTopoZaDirection.getVertices().contains(badEdge.getZ())) {
-                    throw new PCEException("All ETHERNET-layer devices and ports must be represented in both the forward-direction and reverse-direction EROs");
+            // Prune all URNs from topology not matching specified EROs
+            multiLayerTopoAzDirection.getVertices().retainAll(azNodes);
+            multiLayerTopoZaDirection.getVertices().retainAll(zaNodes);
+
+            // Prune all Edges from topology not beginning/ending at specified ERO URNs
+            multiLayerTopoAzDirection.getEdges().retainAll(edgestoKeepAz);
+            multiLayerTopoZaDirection.getEdges().retainAll(edgestoKeepZa);
+
+            for (TopoEdge badEdge : multiLayerTopoAzDirection.getEdges()) {
+                if (badEdge.getA().getVertexType().equals(VertexType.SWITCH) || badEdge.getZ().getVertexType().equals(VertexType.SWITCH)) {
+                    if (!multiLayerTopoZaDirection.getVertices().contains(badEdge.getA()) && !multiLayerTopoZaDirection.getVertices().contains(badEdge.getZ())) {
+                        throw new PCEException("All ETHERNET-layer devices and ports must be represented in both the forward-direction and reverse-direction EROs");
+                    }
                 }
             }
-        }
 
-        for (TopoEdge badEdge : multiLayerTopoZaDirection.getEdges()) {
-            if (badEdge.getA().getVertexType().equals(VertexType.SWITCH) || badEdge.getZ().getVertexType().equals(VertexType.SWITCH)) {
-                if (!multiLayerTopoAzDirection.getVertices().contains(badEdge.getA()) && !multiLayerTopoAzDirection.getVertices().contains(badEdge.getZ())) {
-                    throw new PCEException("All ETHERNET-layer devices and ports must be represented in both the forward-direction and reverse-direction EROs");
+            for (TopoEdge badEdge : multiLayerTopoZaDirection.getEdges()) {
+                if (badEdge.getA().getVertexType().equals(VertexType.SWITCH) || badEdge.getZ().getVertexType().equals(VertexType.SWITCH)) {
+                    if (!multiLayerTopoAzDirection.getVertices().contains(badEdge.getA()) && !multiLayerTopoAzDirection.getVertices().contains(badEdge.getZ())) {
+                        throw new PCEException("All ETHERNET-layer devices and ports must be represented in both the forward-direction and reverse-direction EROs");
+                    }
                 }
             }
+
+            // Check if the destination is reachable from the source
+            // If not, then only a partial ERO has been passed in
+            if (!checkForReachability(multiLayerTopoAzDirection, src.get(), dst.get()) || !checkForReachability(multiLayerTopoAzDirection, src.get(), dst.get())) {
+                return handlePartialERO(topoService.getMultilayerTopology(), requestPipe, rsvBwList, rsvVlanList, requestedAzERO, requestedZaERO);
+            }
+
+            // Bandwidth and Vlan pruning
+            Topology prunedTopoAZ = pruningService.pruneWithPipeAZ(multiLayerTopoAzDirection, requestPipe, rsvBwList, rsvVlanList);
+            Topology prunedTopoZA = pruningService.pruneWithPipeZA(multiLayerTopoZaDirection, requestPipe, rsvBwList, rsvVlanList);
+
+
+            if (!prunedTopoAZ.equals(multiLayerTopoAzDirection))
+                throw new PCEException("Requested AZ ERO unavailable; failed to complete Path Computation");
+            if (!prunedTopoZA.equals(multiLayerTopoZaDirection))
+                throw new PCEException("Requested ZA ERO unavailable; failed to complete Path Computation");
+
+            // Shortest path routing
+            List<TopoEdge> azEroCalculated = dijkstraPCE.computeShortestPathEdges(prunedTopoAZ, src.get(), dst.get());
+            List<TopoEdge> zaEroCalculated = dijkstraPCE.computeShortestPathEdges(prunedTopoZA, dst.get(), src.get());
+
+            if (azEroCalculated.isEmpty() || zaEroCalculated.isEmpty()) {
+                throw new PCEException("Empty path from Symmetric PCE");
+            }
+
+            List<TopoVertex> azEroVertices = dijkstraPCE.translatePathEdgesToVertices(azEroCalculated);
+            List<TopoVertex> zaEroVertices = dijkstraPCE.translatePathEdgesToVertices(zaEroCalculated);
+            List<String> azEroStrings = dijkstraPCE.translatePathVerticesToStrings(azEroVertices);
+            List<String> zaEroStrings = dijkstraPCE.translatePathVerticesToStrings(zaEroVertices);
+
+
+            if (!azEroStrings.equals(requestedAzERO) || !zaEroStrings.equals(requestedZaERO)) {
+                throw new PCEException("Requested ERO unavailable; failed to complete Path Computation");
+            }
+
+            Map<String, List<TopoEdge>> theMap = new HashMap<>();
+            theMap.put("az", azEroCalculated);
+            theMap.put("za", zaEroCalculated);
+
+            return theMap;
+        }
+        else{
+            throw new PCEException("Either source or destination are not present in topology");
         }
 
-        // Check if the destination is reachable from the source
-        // If not, then only a partial ERO has been passed in
-        if (!checkForReachability(multiLayerTopoAzDirection, srcPort, dstPort) || !checkForReachability(multiLayerTopoAzDirection, srcPort, dstPort)) {
-            return handlePartialERO(topoService.getMultilayerTopology(), requestPipe, rsvBwList, rsvVlanList, requestedAzERO, requestedZaERO);
-        }
-
-        // Bandwidth and Vlan pruning
-        Topology prunedTopoAZ = pruningService.pruneWithPipeAZ(multiLayerTopoAzDirection, requestPipe, rsvBwList, rsvVlanList);
-        Topology prunedTopoZA = pruningService.pruneWithPipeZA(multiLayerTopoZaDirection, requestPipe, rsvBwList, rsvVlanList);
-
-
-        if (!prunedTopoAZ.equals(multiLayerTopoAzDirection))
-            throw new PCEException("Requested AZ ERO unavailable; failed to complete Path Computation");
-        if (!prunedTopoZA.equals(multiLayerTopoZaDirection))
-            throw new PCEException("Requested ZA ERO unavailable; failed to complete Path Computation");
-
-        // Shortest path routing
-        List<TopoEdge> azEroCalculated = dijkstraPCE.computeShortestPathEdges(prunedTopoAZ, srcPort, dstPort);
-        List<TopoEdge> zaEroCalculated = dijkstraPCE.computeShortestPathEdges(prunedTopoZA, dstPort, srcPort);
-
-        if (azEroCalculated.isEmpty() || zaEroCalculated.isEmpty()) {
-            throw new PCEException("Empty path from Symmetric PCE");
-        }
-
-        List<TopoVertex> azEroVertices = dijkstraPCE.translatePathEdgesToVertices(azEroCalculated);
-        List<TopoVertex> zaEroVertices = dijkstraPCE.translatePathEdgesToVertices(zaEroCalculated);
-        List<String> azEroStrings = dijkstraPCE.translatePathVerticesToStrings(azEroVertices);
-        List<String> zaEroStrings = dijkstraPCE.translatePathVerticesToStrings(zaEroVertices);
-
-
-        if (!azEroStrings.equals(requestedAzERO) || !zaEroStrings.equals(requestedZaERO)) {
-            throw new PCEException("Requested ERO unavailable; failed to complete Path Computation");
-        }
-
-        Map<String, List<TopoEdge>> theMap = new HashMap<>();
-        theMap.put("az", azEroCalculated);
-        theMap.put("za", zaEroCalculated);
-
-        return theMap;
     }
 
     private Map<String, List<TopoEdge>> handlePartialERO(Topology topo, RequestedVlanPipeE reqPipe,

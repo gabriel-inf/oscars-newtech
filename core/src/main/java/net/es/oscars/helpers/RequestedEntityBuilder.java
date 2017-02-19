@@ -192,10 +192,12 @@ public class RequestedEntityBuilder {
                                                  SurvivabilityType survivable, String vlanExp, Integer numDisjoint){
 
         List<String> aFixNames = new ArrayList<>();
-        aFixNames.add(aPort);
+        if(!aPort.equals(""))
+            aFixNames.add(aPort);
 
         List<String> zFixNames = new ArrayList<>();
-        zFixNames.add(zPort);
+        if(!zPort.equals(""))
+            zFixNames.add(zPort);
 
         return RequestedVlanPipeE.builder()
                 .aJunction(buildRequestedJunction(aDevice, aFixNames, azMbps, zaMbps, vlanExp, true))
@@ -217,10 +219,12 @@ public class RequestedEntityBuilder {
                                                  Integer numDisjoint){
 
         List<String> aFixNames = new ArrayList<>();
-        aFixNames.add(aPort);
+        if(!aPort.equals(""))
+            aFixNames.add(aPort);
 
         List<String> zFixNames = new ArrayList<>();
-        zFixNames.add(zPort);
+        if(!zPort.equals(""))
+            zFixNames.add(zPort);
 
         return RequestedVlanPipeE.builder()
                 .aJunction(buildRequestedJunction(aDevice, aFixNames, azMbps, zaMbps, aVlanExp, true))
@@ -242,10 +246,12 @@ public class RequestedEntityBuilder {
                                                  Integer numDisjoint){
 
         List<String> aFixNames = new ArrayList<>();
-        aFixNames.add(aPort);
+        if(!aPort.equals(""))
+            aFixNames.add(aPort);
 
         List<String> zFixNames = new ArrayList<>();
-        zFixNames.add(zPort);
+        if(!zPort.equals(""))
+            zFixNames.add(zPort);
 
         return RequestedVlanPipeE.builder()
                 .aJunction(buildRequestedJunction(aDevice, aFixNames, azMbps, zaMbps, vlanExp, true))

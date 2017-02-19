@@ -1,6 +1,7 @@
 package net.es.oscars.pce;
 
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.resv.ent.RequestedVlanFixtureE;
 import net.es.oscars.resv.ent.RequestedVlanPipeE;
 import net.es.oscars.resv.ent.ReservedBandwidthE;
 import net.es.oscars.resv.ent.ReservedVlanE;
@@ -100,15 +101,28 @@ public class NonPalindromicalPCE {
         TopoVertex srcDevice = new TopoVertex(srcDeviceURN.getUrn(), srcType);
         TopoVertex dstDevice = new TopoVertex(dstDeviceURN.getUrn(), dstType);
 
-        UrnE srcPortURN = topoService.getUrn(requestPipe.getAJunction().getFixtures().iterator().next().getPortUrn());
-        UrnE dstPortURN = topoService.getUrn(requestPipe.getZJunction().getFixtures().iterator().next().getPortUrn());
+        Set<RequestedVlanFixtureE> srcFixtures = requestPipe.getAJunction().getFixtures();
+        Set<RequestedVlanFixtureE> dstFixtures = requestPipe.getZJunction().getFixtures();
 
-        TopoVertex srcPort = new TopoVertex(srcPortURN.getUrn(), VertexType.PORT);
-        TopoVertex dstPort = new TopoVertex(dstPortURN.getUrn(), VertexType.PORT);
+        TopoVertex srcPort = srcFixtures.size() > 0 ?
+                new TopoVertex(srcFixtures.iterator().next().getPortUrn(), VertexType.PORT) :
+                new TopoVertex("fix" + srcDevice.getUrn(), VertexType.PORT);
+        TopoVertex dstPort = dstFixtures.size() > 0 ?
+                new TopoVertex(dstFixtures.iterator().next().getPortUrn(), VertexType.PORT) :
+                new TopoVertex("fix" + dstDevice.getUrn(), VertexType.PORT);
 
         // Handle MPLS-layer source/destination devices
         serviceLayerTopology.buildLogicalLayerSrcNodes(srcDevice, srcPort);
         serviceLayerTopology.buildLogicalLayerDstNodes(dstDevice, dstPort);
+
+        // Add the fake port to Service Layer Topology's MPLS topology
+        // Only do this if the source/dest is a router and if no fixtures are defined
+        if(srcDevice.getVertexType().equals(VertexType.ROUTER) && srcFixtures.size() == 0){
+            addPortToServiceMplsTopology(serviceLayerTopology, srcPort, srcDevice);
+        }
+        if(dstDevice.getVertexType().equals(VertexType.ROUTER) && dstFixtures.size() == 0){
+            addPortToServiceMplsTopology(serviceLayerTopology, dstPort, dstDevice);
+        }
 
         // Performs shortest path routing on MPLS-layer to properly assign weights to each logical link on Service-Layer
         serviceLayerTopology.calculateLogicalLinkWeights(requestPipe, urnRepo.findAll(), rsvBwList, rsvVlanList);
@@ -123,14 +137,14 @@ public class NonPalindromicalPCE {
         TopoVertex serviceLayerDstNode;
 
         if (srcDevice.getVertexType().equals(VertexType.SWITCH)) {
-            serviceLayerSrcNode = srcPort;
+            serviceLayerSrcNode = srcDevice;
         } else {
             serviceLayerSrcNode = serviceLayerTopology.getVirtualNode(srcDevice);
             assert (serviceLayerSrcNode != null);
         }
 
         if (dstDevice.getVertexType().equals(VertexType.SWITCH)) {
-            serviceLayerDstNode = dstPort;
+            serviceLayerDstNode = dstDevice;
         } else {
             serviceLayerDstNode = serviceLayerTopology.getVirtualNode(dstDevice);
             assert (serviceLayerDstNode != null);
@@ -171,11 +185,36 @@ public class NonPalindromicalPCE {
         azERO = serviceLayerTopology.getActualEROAZ(azServiceLayerERO);
         zaERO = serviceLayerTopology.getActualEROZA(zaServiceLayerERO);
 
+        // Remove starting and ending ports
+        if(azERO.get(0).getA().getVertexType().equals(VertexType.PORT)){
+            azERO.remove(0);
+        }
+        if(azERO.get(azERO.size()-1).getZ().getVertexType().equals(VertexType.PORT)){
+            azERO.remove(azERO.size()-1);
+        }
+        if(zaERO.get(0).getA().getVertexType().equals(VertexType.PORT)){
+            zaERO.remove(0);
+        }
+        if(zaERO.get(zaERO.size()-1).getZ().getVertexType().equals(VertexType.PORT)){
+            zaERO.remove(zaERO.size()-1);
+        }
+
         theMap.put("az", azERO);
         theMap.put("za", zaERO);
 
         // TODO: Current implementation only tries the shortest forward-direction route. May result in false-negatives if reverse-direction is unavailable. If unsuccessful, prune out bad ports and try again.
 
         return theMap;
+    }
+
+    private void addPortToServiceMplsTopology(ServiceLayerTopology serviceLayerTopology, TopoVertex port, TopoVertex device) {
+        serviceLayerTopology.getMplsLayerPorts().add(port);
+        TopoEdge portToDeviceEdge = new TopoEdge(port, device, 0L, Layer.MPLS);
+        TopoEdge deviceToPortEdge = new TopoEdge(device, port, 0L, Layer.MPLS);
+        serviceLayerTopology.getMplsLayerLinks().add(portToDeviceEdge);
+        serviceLayerTopology.getMplsLayerLinks().add(deviceToPortEdge);
+        serviceLayerTopology.getMplsTopology().getVertices().add(port);
+        serviceLayerTopology.getMplsTopology().getEdges().add(portToDeviceEdge);
+        serviceLayerTopology.getMplsTopology().getEdges().add(deviceToPortEdge);
     }
 }

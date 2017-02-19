@@ -318,7 +318,6 @@ public class TopPCE {
 
             // Update list of reserved VLAN IDs
             List<ReservedVlanE> rsvVlans = vlanService.createReservedVlanList(simpleJunctions, reservedEthPipes, start, end);
-
             // Find the shortest path for the pipe, build a map for the AZ and ZA path
             Map<String, List<TopoEdge>> eroMapForPipe = findShortestConstrainedPath(pipe, rsvBandwidths, rsvVlans);
 
@@ -446,7 +445,7 @@ public class TopPCE {
      */
     private boolean verifySurvEros(Map<String, List<TopoEdge>> eroMap) {
         if (eroMap != null) {
-            if (eroMap.size() == 4) {
+            if (eroMap.size() > 2 && eroMap.size() % 2 == 0) {
                 return eroMap.values().stream().allMatch(l -> l.size() > 0);
             }
         }
@@ -580,7 +579,7 @@ public class TopPCE {
             if(!isAzPath){
                 EdgeE fixEdge = EdgeE.builder().origin(aJunction.getDeviceUrn()).target(reqFix.getPortUrn()).build();
                 if(!edges.contains(fixEdge)){
-                    edges.add(edges.size()-1, fixEdge);
+                    edges.add(fixEdge);
                 }
             }
         }
@@ -590,13 +589,13 @@ public class TopPCE {
             if(isAzPath){
                 EdgeE fixEdge = EdgeE.builder().origin(zJunction.getDeviceUrn()).target(reqFix.getPortUrn()).build();
                 if(!edges.contains(fixEdge)){
-                    edges.add(0, fixEdge);
+                    edges.add(fixEdge);
                 }
             }
             if(!isAzPath){
                 EdgeE fixEdge = EdgeE.builder().origin(reqFix.getPortUrn()).target(zJunction.getDeviceUrn()).build();
                 if(!edges.contains(fixEdge)){
-                    edges.add(edges.size()-1, fixEdge);
+                    edges.add(0, fixEdge);
                 }
             }
         }

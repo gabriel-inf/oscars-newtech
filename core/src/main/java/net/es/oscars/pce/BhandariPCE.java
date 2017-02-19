@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 import java.util.stream.Collectors;
 
+
 @Slf4j
 @Component
 public class BhandariPCE {
@@ -26,7 +27,6 @@ public class BhandariPCE {
 
         return computePaths(topo, source, dest, k);
     }
-
 
     private List<List<TopoEdge>> computePaths(Topology topo, TopoVertex source, TopoVertex dest, Integer k){
 
@@ -53,6 +53,7 @@ public class BhandariPCE {
         modifiedTopo.setLayer(topo.getLayer());
         modifiedTopo.setVertices(topo.getVertices());
         modifiedTopo.setEdges(new HashSet<>(topo.getEdges()));
+
         for(Integer pIndex = 1; pIndex < k; pIndex++){
 
             // Get the previous shortest path
@@ -63,17 +64,24 @@ public class BhandariPCE {
                 Long reversedMetric = -1 * pathEdge.getMetric();
                 TopoEdge reversedEdge = new TopoEdge(pathEdge.getZ(), pathEdge.getA(), reversedMetric, pathEdge.getLayer());
                 reversedToOriginalMap.put(reversedEdge, pathEdge);
-                modifiedTopo.getEdges().remove(pathEdge);
+                Set<TopoEdge> allBetweenPair = findAllBetweenPair(pathEdge.getA(), pathEdge.getZ(), modifiedTopo.getEdges());
+                modifiedTopo.getEdges().removeAll(allBetweenPair);
                 modifiedTopo.getEdges().add(reversedEdge);
             }
 
             // Find the new shortest path
             List<TopoEdge> modShortestPath = bellmanFordPCE.shortestPath(modifiedTopo, source, dest);
-            //logPath(modShortestPath, "SP for (" + source.getUrn() + "," + dest.getUrn() + ")");
+            //(modShortestPath, "SP on modified topology for (" + source.getUrn() + "," + dest.getUrn() + ")");
             tempPaths.add(modShortestPath);
         }
         return combine(shortestPath, tempPaths, reversedToOriginalMap, modifiedTopo, source, dest, k);
 
+    }
+
+    private Set<TopoEdge> findAllBetweenPair(TopoVertex src, TopoVertex dst, Set<TopoEdge> edges){
+        return edges.stream()
+                .filter(e -> e.getA().equals(src) && e.getZ().equals(dst) || e.getA().equals(dst) && e.getZ().equals(src))
+                .collect(Collectors.toSet());
     }
 
     private List<List<TopoEdge>> combine(List<TopoEdge> shortestPath, List<List<TopoEdge>> tempPaths,
@@ -84,7 +92,8 @@ public class BhandariPCE {
 
         // Remove all inverse edges taken in new shortest path (along with mapped edge in original shortest path)
         Set<TopoEdge> combinedEdges = new HashSet<>();
-        for (List<TopoEdge> tempPath : tempPaths) {
+        for (Integer index = 1; index < tempPaths.size(); index++) {
+            List<TopoEdge> tempPath = tempPaths.get(index);
             for (TopoEdge modSpEdge : tempPath) {
                 if (reversedToOriginalMap.containsKey(modSpEdge)) {
                     TopoEdge origSpEdge = reversedToOriginalMap.get(modSpEdge);

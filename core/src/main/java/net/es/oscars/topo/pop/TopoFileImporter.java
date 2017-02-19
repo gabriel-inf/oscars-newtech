@@ -227,6 +227,7 @@ public class TopoFileImporter implements TopoImporter {
 
     private List<Device> importDevicesFromFile(String filename, boolean overwrite) throws IOException {
         File jsonFile = new File(filename);
+        String workingDirectory = System.getProperty("user.dir");
         ObjectMapper mapper = jsonHelper.mapper();
         return Arrays.asList(mapper.readValue(jsonFile, Device[].class));
     }

@@ -120,7 +120,6 @@ class ReservationWhatIfApp extends React.Component{
     submitPrecheck(){
         let reservation = buildReservation(this.state.currBw, this.state.bwAvailRequest.azERO, this.state.reservation.startAt,
             this.state.reservation.endAt, this.state.src, this.state.srcPort, this.state.dst, this.state.dstPort, this.state.reservation.connectionId);
-        debugger;
         this.setState({reservation: reservation});
         let reservationStatus = validator.validateReservation(reservation);
         if(reservationStatus.isValid){

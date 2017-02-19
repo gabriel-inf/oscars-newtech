@@ -114,10 +114,11 @@ public class BandwidthAvailabilityService {
         for(RequestedBlueprintE reqBlueprint : requestedBlueprints){
             try {
                 Optional<ReservedBlueprintE> optRsvBlueprint = topPCE.makeReserved(reqBlueprint, reqSchSpec, chosenDates);
-                ReservedBlueprintE rsvBlueprint = null;
+                ReservedBlueprintE rsvBlueprint;
                 // If a path could be found, store the URNs used
                 if (optRsvBlueprint.isPresent()) {
                     rsvBlueprint = optRsvBlueprint.get();
+                    log.info(rsvBlueprint.toString());
                     pathNum = processReservedBlueprint(rsvBlueprint, request, minAvailableBwMap, bwAvailabilityMap,
                             pathPairMap, pathNameMap, pathNum);
                 }

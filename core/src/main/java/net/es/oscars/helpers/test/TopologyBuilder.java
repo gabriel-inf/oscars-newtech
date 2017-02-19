@@ -3,11 +3,14 @@ package net.es.oscars.helpers.test;
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.topo.TopoEdge;
 import net.es.oscars.dto.topo.TopoVertex;
+import net.es.oscars.dto.topo.Topology;
 import net.es.oscars.dto.topo.enums.Layer;
 import net.es.oscars.dto.topo.enums.VertexType;
+import net.es.oscars.topo.pop.TopoFileImporter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -19,7 +22,6 @@ public class TopologyBuilder
 {
     @Autowired
     private RepoEntityBuilder testBuilder;
-
 
     public void buildTopo1()
     {
@@ -2726,5 +2728,9 @@ public class TopologyBuilder
 
 
         testBuilder.populateRepos(topoNodes, topoLinks, portToDeviceMap);
+    }
+
+    public void buildTopoEsnet() {
+        testBuilder.importEsnet();
     }
 }
