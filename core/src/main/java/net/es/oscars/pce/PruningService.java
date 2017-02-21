@@ -199,7 +199,7 @@ public class PruningService {
         Map<String, UrnE> urnMap = buildUrnMap(urns);
 
         // Build map of URN to available bandwidth
-        Map<String, Map<String, Integer>> availBwMap = bwSvc.buildBandwidthAvailabilityMapWithUrns(rsvBwList, urns);
+        Map<String, Map<String, Integer>> availBwMap = bwSvc.buildBandwidthAvailabilityMapFromUrnList(rsvBwList, urns);
 
         // Get map of parent device vertex -> set of port vertices
         Map<String, Set<String>> deviceToPortMap = topoService.buildDeviceToPortMap();
@@ -258,7 +258,7 @@ public class PruningService {
         Map<String, UrnE> urnMap = buildUrnMap(urns);
 
         // Build map of URN to available bandwidth
-        Map<String, Map<String, Integer>> availBwMap = bwSvc.buildBandwidthAvailabilityMapWithUrns(rsvBwList, urns);
+        Map<String, Map<String, Integer>> availBwMap = bwSvc.buildBandwidthAvailabilityMapFromUrnList(rsvBwList, urns);
 
         // Get map of parent device vertex -> set of port vertices
         Map<String, Set<String>> deviceToPortMap = topoService.buildDeviceToPortMap();

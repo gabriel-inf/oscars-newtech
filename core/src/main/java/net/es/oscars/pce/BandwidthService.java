@@ -2,7 +2,6 @@ package net.es.oscars.pce;
 
 
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.dto.spec.RequestedVlanFixture;
 import net.es.oscars.resv.dao.ReservedBandwidthRepository;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.dto.topo.TopoEdge;
@@ -80,36 +79,26 @@ public class BandwidthService {
 
     /**
      * Build a map of the available bandwidth at each URN. For each URN, there is a map of "Ingress" and "Egress"
-     * bandwidth available. Only port URNs can be found in this map.
+     * bandwidth available. Only port URNs can be found in this map. Retrieves URNs from the repository.
      *
      * @param rsvBandwidths - A list of all bandwidth reserved so far
-     * @return A mapping of URN to Ingress/Egress bandwidth availability
+     * @return A mapping of URN name to Ingress/Egress bandwidth availability {urn = {Ingress: num, Egress: num}}
      */
-    public Map<String, Map<String, Integer>> buildBandwidthAvailabilityMap(List<ReservedBandwidthE> rsvBandwidths) {
-        // Build a map, allowing us to retrieve a list of ReservedBandwidth given the associated URN
-        Map<String, List<ReservedBandwidthE>> resvBwMap = buildReservedBandwidthMap(rsvBandwidths);
-
-        //log.info(resvBwMap.toString());
-        // Build a map, allowing us to retrieve the available "Ingress" and "Egress" bandwidth at each associated URN
-        Map<String, Map<String, Integer>> availBwMap = new HashMap<>();
-        urnRepository.findAll()
-                .stream()
-                .filter(urn -> urn.getReservableBandwidth() != null)
-                .forEach(urn -> availBwMap.put(urn.getUrn(), buildBandwidthAvailabilityMapUrn(urn.getUrn(), urn.getReservableBandwidth(), resvBwMap)));
-
-        return availBwMap;
+    public Map<String, Map<String, Integer>> buildBandwidthAvailabilityMapFromUrnRepo(List<ReservedBandwidthE> rsvBandwidths) {
+        List<UrnE> urns = urnRepository.findAll();
+        return buildBandwidthAvailabilityMapFromUrnList(rsvBandwidths, urns);
     }
 
     /**
      * Build a map of the available bandwidth at each URN. For each URN, there is a map of "Ingress" and "Egress"
-     * bandwidth available. Only port URNs can be found in this map.
+     * bandwidth available. Only port URNs can be found in this map. URNs are passed in.
      *
      * @param rsvBandwidths - A list of all bandwidth reserved so far
      * @param urns          - A list of UrnE objects
-     * @return A mapping of URN to Ingress/Egress bandwidth availability
+     * @return A mapping of URN name to Ingress/Egress bandwidth availability {urn = {Ingress: num, Egress: num}}
      */
-    public Map<String, Map<String, Integer>> buildBandwidthAvailabilityMapWithUrns(List<ReservedBandwidthE> rsvBandwidths,
-                                                                                 List<UrnE> urns) {
+    public Map<String, Map<String, Integer>> buildBandwidthAvailabilityMapFromUrnList(List<ReservedBandwidthE> rsvBandwidths,
+                                                                                      List<UrnE> urns) {
         // Build a map, allowing us to retrieve a list of ReservedBandwidth given the associated URN
         Map<String, List<ReservedBandwidthE>> resvBwMap = buildReservedBandwidthMap(rsvBandwidths);
 
@@ -129,7 +118,7 @@ public class BandwidthService {
      *
      * @param bandwidth - ReservableBandwidthE object, which contains the maximum Ingress/Egress bandwidth for a given URN
      * @param resvBwMap - A Mapping from a URN to a list of Reserved Bandwidths at that URN.
-     * @return A map containing the net available ingress/egress bandwidth at a URN
+     * @return A mapping Ingress/Egress bandwidth availability {Ingress: num, Egress: num}
      */
     public Map<String, Integer> buildBandwidthAvailabilityMapUrn(String urn, ReservableBandwidthE bandwidth,
                                                                  Map<String, List<ReservedBandwidthE>> resvBwMap) {
@@ -595,7 +584,7 @@ public class BandwidthService {
 
 
         // Get map of "Ingress" and "Egress" bandwidth availability
-        Map<String, Map<String, Integer>> availBwMap = buildBandwidthAvailabilityMap(reservedBandwidths);
+        Map<String, Map<String, Integer>> availBwMap = buildBandwidthAvailabilityMapFromUrnRepo(reservedBandwidths);
 
         // For each requested fixture,
         for (RequestedVlanFixtureE reqFix : reqFixtures) {

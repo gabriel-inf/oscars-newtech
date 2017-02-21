@@ -5,6 +5,8 @@ import net.es.oscars.dto.topo.TopoEdge;
 import net.es.oscars.dto.topo.TopoVertex;
 import net.es.oscars.dto.topo.enums.VertexType;
 import net.es.oscars.dto.topo.enums.*;
+import net.es.oscars.resv.dao.ReservedBandwidthRepository;
+import net.es.oscars.resv.ent.ReservedBandwidthE;
 import net.es.oscars.topo.dao.UrnAdjcyRepository;
 import net.es.oscars.topo.dao.UrnRepository;
 import net.es.oscars.topo.ent.*;
@@ -15,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.*;
 
 @Slf4j
@@ -26,6 +29,9 @@ public class RepoEntityBuilder {
 
     @Autowired
     private UrnAdjcyRepository adjcyRepo;
+
+    @Autowired
+    private ReservedBandwidthRepository reservedBandwidthRepo;
 
 
     public void populateRepos(Collection<TopoVertex> vertices, Collection<TopoEdge> edges, Map<TopoVertex,TopoVertex> portToDeviceMap){
@@ -342,5 +348,21 @@ public class RepoEntityBuilder {
         topoProperties.setAdjciesFilename("config/esnet-adjacencies.json");
         log.info("Building ESnet topology");
         TopoFileImporter topoImporter = new TopoFileImporter(urnRepo, adjcyRepo, topoProperties);
+    }
+
+    public void reserveBandwidth(List<String> reservedPortNames, List<Instant> reservedStartTimes,
+                                  List<Instant> reservedEndTimes, List<Integer> inBandwidths, List<Integer> egBandwidths) {
+        List<ReservedBandwidthE> reservedBandwidths = new ArrayList<>();
+        for(Integer index = 0; index < reservedPortNames.size(); index++){
+            reservedBandwidths.add(ReservedBandwidthE.builder()
+                    .urn(reservedPortNames.get(index))
+                    .beginning(reservedStartTimes.get(index))
+                    .ending(reservedEndTimes.get(index))
+                    .inBandwidth(inBandwidths.get(index))
+                    .egBandwidth(egBandwidths.get(index))
+                    .containerConnectionId("testConnectionID")
+                    .build());
+        }
+        reservedBandwidthRepo.save(reservedBandwidths);
     }
 }
