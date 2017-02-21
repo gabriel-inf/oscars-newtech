@@ -235,11 +235,11 @@ public class SurvivableServiceLayerTopology
      * Calls PruningService and DijkstraPCE methods to compute shortest MPLS-layer path-pair, calculates the combined weight of each path, and maps them to the appropriate logical links.
      * @param requestedVlanPipe - Request pipe
      * @param urnList - List of URNs in the network; Necessary for passing to PruningService methods
-     * @param rsvBwList - List of currently reserved Bandwidth elements (during request schedule)
+     * @param bwAvailMap - A map of available "Ingress" and 'Egress" bandwidth for each URN.
      * @param rsvVlanList - List of currently reserved VLAN elements (during request schedule)
      */
-    public void calculateLogicalLinkWeights(RequestedVlanPipeE requestedVlanPipe, List<UrnE> urnList, List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList)
-    {
+    public void calculateLogicalLinkWeights(RequestedVlanPipeE requestedVlanPipe, List<UrnE> urnList,
+                                            Map<String, Map<String, Integer>> bwAvailMap, List<ReservedVlanE> rsvVlanList){
         Set<SurvivableLogicalEdge> logicalLinksToRemoveFromServiceLayer = new HashSet<>();
 
         Topology mplsLayerTopo = new Topology();
@@ -248,7 +248,7 @@ public class SurvivableServiceLayerTopology
         mplsLayerTopo.getEdges().addAll(mplsLayerLinks);
 
         // Step 1: Prune MPLS-Layer topology once before considering any logical links.
-        Topology prunedMPLSTopo = pruningService.pruneWithPipe(mplsLayerTopo, requestedVlanPipe, urnList, rsvBwList, rsvVlanList);
+        Topology prunedMPLSTopo = pruningService.pruneWithPipe(mplsLayerTopo, requestedVlanPipe, urnList, bwAvailMap, rsvVlanList);
 
         for(SurvivableLogicalEdge oneLogicalLink : logicalLinks)
         {
@@ -354,7 +354,7 @@ public class SurvivableServiceLayerTopology
             adaptationTopo.setVertices(adaptationPorts);
             adaptationTopo.setEdges(adaptationEdges);
 
-            Topology prunedAdaptationTopo = pruningService.pruneWithPipe(adaptationTopo, requestedVlanPipe, rsvBwList, rsvVlanList);
+            Topology prunedAdaptationTopo = pruningService.pruneWithPipe(adaptationTopo, requestedVlanPipe, bwAvailMap, rsvVlanList);
 
             if(!prunedAdaptationTopo.equals(adaptationTopo))
             {

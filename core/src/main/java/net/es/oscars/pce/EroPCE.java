@@ -39,7 +39,7 @@ public class EroPCE {
      * @throws PCEException
      */
     public Map<String, List<TopoEdge>> computeSpecifiedERO(RequestedVlanPipeE requestPipe,
-                                                           List<ReservedBandwidthE> rsvBwList,
+                                                           Map<String, Map<String, Integer>> bwAvailMap,
                                                            List<ReservedVlanE> rsvVlanList) throws PCEException {
         log.info("Entering EroPCE.");
 
@@ -113,12 +113,12 @@ public class EroPCE {
             // Check if the destination is reachable from the source
             // If not, then only a partial ERO has been passed in
             if (!checkForReachability(multiLayerTopoAzDirection, src.get(), dst.get()) || !checkForReachability(multiLayerTopoAzDirection, src.get(), dst.get())) {
-                return handlePartialERO(topoService.getMultilayerTopology(), requestPipe, rsvBwList, rsvVlanList, requestedAzERO, requestedZaERO);
+                return handlePartialERO(topoService.getMultilayerTopology(), requestPipe, bwAvailMap, rsvVlanList, requestedAzERO, requestedZaERO);
             }
 
             // Bandwidth and Vlan pruning
-            Topology prunedTopoAZ = pruningService.pruneWithPipeAZ(multiLayerTopoAzDirection, requestPipe, rsvBwList, rsvVlanList);
-            Topology prunedTopoZA = pruningService.pruneWithPipeZA(multiLayerTopoZaDirection, requestPipe, rsvBwList, rsvVlanList);
+            Topology prunedTopoAZ = pruningService.pruneWithPipeAZ(multiLayerTopoAzDirection, requestPipe, bwAvailMap, rsvVlanList);
+            Topology prunedTopoZA = pruningService.pruneWithPipeZA(multiLayerTopoZaDirection, requestPipe, bwAvailMap, rsvVlanList);
 
 
             if (!prunedTopoAZ.equals(multiLayerTopoAzDirection))
@@ -157,7 +157,7 @@ public class EroPCE {
     }
 
     private Map<String, List<TopoEdge>> handlePartialERO(Topology topo, RequestedVlanPipeE reqPipe,
-                                                         List<ReservedBandwidthE> rsvBwList, List<ReservedVlanE> rsvVlanList,
+                                                         Map<String, Map<String, Integer>> bwAvailMap, List<ReservedVlanE> rsvVlanList,
                                                          List<String> azERO, List<String> zaERO) throws PCEException {
 
         // Find the shortest AZ path from the source to each intermediate "destination" before reaching the final
@@ -175,7 +175,7 @@ public class EroPCE {
             throw new PCEException("Routing failed as the AZ or ZA partial EROs are not palindromic.");
         }
 
-        Topology prunedTopo = pruningService.pruneWithPipe(topo, reqPipe, rsvBwList, rsvVlanList);
+        Topology prunedTopo = pruningService.pruneWithPipe(topo, reqPipe, bwAvailMap, rsvVlanList);
 
         List<TopoEdge> azPath = new ArrayList<>();
         for (Integer index = 0; index < azNodes.size() - 1; index++) {

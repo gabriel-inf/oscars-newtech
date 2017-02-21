@@ -45,6 +45,12 @@ public class BlacklistPruningTest {
     @Autowired
     private TopoService topoService;
 
+    @Autowired
+    private BandwidthService bwService;
+
+    @Autowired
+    private VlanService vlanService;
+
     @Test
     public void blacklistMplsTest(){
         log.info("Initializing test: 'blacklistMplsTest'.");
@@ -253,7 +259,15 @@ public class BlacklistPruningTest {
     public void pruneTest(RequestedBlueprintE requestedBlueprint, Topology topo, ScheduleSpecificationE requestedSched,
                         Set<TopoEdge> origEdges, Set<TopoVertex> origVerts, Set<String> blacklist){
         RequestedVlanPipeE reqPipe = requestedBlueprint.getVlanFlow().getPipes().iterator().next();
-        topo = pruningService.pruneWithPipe(topo, reqPipe, requestedSched.getStartDates().get(0), requestedSched.getEndDates().get(0));
+
+        List<ReservedBandwidthE> reservedBandwidths = bwService.getReservedBandwidthFromRepo(requestedSched.getStartDates().get(0),
+                requestedSched.getEndDates().get(0));
+        List<ReservedVlanE> reservedVlans = vlanService.getReservedVlansFromRepo(requestedSched.getStartDates().get(0),
+                requestedSched.getEndDates().get(0));
+
+        Map<String, Map<String, Integer>> bwAvailMap = bwService.buildBandwidthAvailabilityMapFromUrnRepo(reservedBandwidths);
+
+        topo = pruningService.pruneWithPipe(topo, reqPipe, bwAvailMap, reservedVlans);
         Set<TopoEdge> newEdges = topo.getEdges();
         Set<TopoVertex> newVerts = topo.getVertices();
 

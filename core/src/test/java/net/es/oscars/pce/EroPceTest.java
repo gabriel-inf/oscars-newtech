@@ -65,6 +65,9 @@ public class EroPceTest
     @Autowired
     private TopPCE topPCE;
 
+    @Autowired
+    private BandwidthService bwService;
+
     @Test
     public void eroPceTestPalindrome()
     {
@@ -119,9 +122,12 @@ public class EroPceTest
 
         Map<String, List<TopoEdge>> computedPaths = null;
 
+
+        Map<String, Map<String, Integer>> bwAvailMap = bwService.buildBandwidthAvailabilityMapFromUrnRepo(new ArrayList<>());
+
         try
         {
-            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, new ArrayList<>(), new ArrayList<>());
+            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, bwAvailMap, new ArrayList<>());
         }
         catch(PCEException pceE){ log.error("", pceE); }
 
@@ -202,9 +208,10 @@ public class EroPceTest
 
         Map<String, List<TopoEdge>> computedPaths = null;
 
+        Map<String, Map<String, Integer>> bwAvailMap = bwService.buildBandwidthAvailabilityMapFromUrnRepo(new ArrayList<>());
         try
         {
-            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, new ArrayList<>(), new ArrayList<>());
+            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, bwAvailMap, new ArrayList<>());
         }
         catch(PCEException pceE){ log.error("", pceE); }
 
@@ -286,9 +293,11 @@ public class EroPceTest
 
         Map<String, List<TopoEdge>> computedPaths = null;
 
+        Map<String, Map<String, Integer>> bwAvailMap = bwService.buildBandwidthAvailabilityMapFromUrnRepo(new ArrayList<>());
+
         try
         {
-            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, new ArrayList<>(), new ArrayList<>());
+            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, bwAvailMap, new ArrayList<>());
         }
         catch(PCEException pceE){ log.error("", pceE); }
 
@@ -352,9 +361,11 @@ public class EroPceTest
 
         Map<String, List<TopoEdge>> computedPaths = null;
 
+        Map<String, Map<String, Integer>> bwAvailMap = bwService.buildBandwidthAvailabilityMapFromUrnRepo(new ArrayList<>());
+
         try
         {
-            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, new ArrayList<>(), new ArrayList<>());
+            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, bwAvailMap, new ArrayList<>());
         }
         catch(PCEException pceE){ log.error("", pceE); }
 
@@ -417,9 +428,10 @@ public class EroPceTest
 
         Map<String, List<TopoEdge>> computedPaths = null;
 
+        Map<String, Map<String, Integer>> bwAvailMap = bwService.buildBandwidthAvailabilityMapFromUrnRepo(new ArrayList<>());
         try
         {
-            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, new ArrayList<>(), new ArrayList<>());
+            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, bwAvailMap, new ArrayList<>());
         }
         catch(PCEException pceE){ log.error("", pceE); }
 
@@ -497,9 +509,10 @@ public class EroPceTest
 
         Map<String, List<TopoEdge>> computedPaths = null;
 
+        Map<String, Map<String, Integer>> bwAvailMap = bwService.buildBandwidthAvailabilityMapFromUrnRepo(new ArrayList<>());
         try
         {
-            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, new ArrayList<>(), new ArrayList<>());
+            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, bwAvailMap, new ArrayList<>());
         }
         catch(PCEException pceE){ log.error("", pceE); }
 
@@ -796,9 +809,10 @@ public class EroPceTest
 
         Map<String, List<TopoEdge>> computedPaths = null;
 
+        Map<String, Map<String, Integer>> bwAvailMap = bwService.buildBandwidthAvailabilityMapFromUrnRepo(new ArrayList<>());
         try
         {
-            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, new ArrayList<>(), new ArrayList<>());
+            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, bwAvailMap, new ArrayList<>());
         }
         catch(PCEException pceE){ log.error("", pceE); }
 
@@ -870,9 +884,10 @@ public class EroPceTest
 
         Map<String, List<TopoEdge>> computedPaths = null;
 
+        Map<String, Map<String, Integer>> bwAvailMap = bwService.buildBandwidthAvailabilityMapFromUrnRepo(new ArrayList<>());
         try
         {
-            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, new ArrayList<>(), new ArrayList<>());
+            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, bwAvailMap, new ArrayList<>());
         }
         catch(PCEException pceE){ log.error("", pceE); }
 
@@ -1302,9 +1317,11 @@ public class EroPceTest
 
         Map<String, List<TopoEdge>> computedPaths = null;
 
+        Map<String, Map<String, Integer>> bwAvailMap = bwService.buildBandwidthAvailabilityMapFromUrnRepo(new ArrayList<>());
+
         try
         {
-            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, new ArrayList<>(), new ArrayList<>());
+            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, bwAvailMap, new ArrayList<>());
         }
         catch(PCEException pceE){ log.error("", pceE); }
 
@@ -1373,9 +1390,12 @@ public class EroPceTest
 
         Map<String, List<TopoEdge>> computedPaths = null;
 
+
+        Map<String, Map<String, Integer>> bwAvailMap = bwService.buildBandwidthAvailabilityMapFromUrnRepo(new ArrayList<>());
+
         try
         {
-            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, new ArrayList<>(), new ArrayList<>());
+            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, bwAvailMap, new ArrayList<>());
         }
         catch(PCEException pceE){ log.error("", pceE); }
 
@@ -1447,9 +1467,10 @@ public class EroPceTest
 
         Map<String, List<TopoEdge>> computedPaths = null;
 
+        Map<String, Map<String, Integer>> bwAvailMap = bwService.buildBandwidthAvailabilityMapFromUrnRepo(new ArrayList<>());
         try
         {
-            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, new ArrayList<>(), new ArrayList<>());
+            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, bwAvailMap, new ArrayList<>());
         }
         catch(PCEException pceE){ log.error("", pceE); }
 

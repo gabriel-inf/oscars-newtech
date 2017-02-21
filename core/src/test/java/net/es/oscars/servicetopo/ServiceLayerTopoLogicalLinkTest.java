@@ -5,6 +5,7 @@ import net.es.oscars.CoreUnitTestConfiguration;
 import net.es.oscars.dto.pss.EthFixtureType;
 import net.es.oscars.dto.pss.EthJunctionType;
 import net.es.oscars.dto.pss.EthPipeType;
+import net.es.oscars.pce.BandwidthService;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.dto.topo.TopoEdge;
 import net.es.oscars.dto.topo.TopoVertex;
@@ -43,6 +44,9 @@ public class ServiceLayerTopoLogicalLinkTest
 {
     @Autowired
     private ServiceLayerTopology serviceLayerTopo;
+
+    @Autowired
+    private BandwidthService bwService;
 
     private Set<TopoVertex> ethernetTopoVertices;
     private Set<TopoVertex> mplsTopoVertices;
@@ -101,7 +105,8 @@ public class ServiceLayerTopoLogicalLinkTest
 
         serviceLayerTopo.buildLogicalLayerSrcNodes(srcDevice, srcPort);
         serviceLayerTopo.buildLogicalLayerDstNodes(dstDevice, dstPort);
-        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, urnList, resvBW, resvVLAN);
+        Map<String, Map<String, Integer>> bwAvailMap = bwService.buildBandwidthAvailabilityMapFromUrnRepo(resvBW);
+        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, urnList, bwAvailMap, resvVLAN);
 
         log.info("Beginning test: 'verifyLogicalLinksLinear'.");
 
@@ -206,7 +211,8 @@ public class ServiceLayerTopoLogicalLinkTest
 
         serviceLayerTopo.buildLogicalLayerSrcNodes(srcDevice, srcPort);
         serviceLayerTopo.buildLogicalLayerDstNodes(dstDevice, dstPort);
-        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, urnList, resvBW, resvVLAN);
+        Map<String, Map<String, Integer>> bwAvailMap = bwService.buildBandwidthAvailabilityMapFromUrnRepo(resvBW);
+        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, urnList, bwAvailMap, resvVLAN);
 
         log.info("Beginning test: 'verifyLogicalLinksMultipath'.");
 
@@ -328,7 +334,8 @@ public class ServiceLayerTopoLogicalLinkTest
         
         serviceLayerTopo.buildLogicalLayerSrcNodes(srcDevice, srcPort);
         serviceLayerTopo.buildLogicalLayerDstNodes(dstDevice, dstPort);
-        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, urnList, resvBW, resvVLAN);
+        Map<String, Map<String, Integer>> bwAvailMap = bwService.buildBandwidthAvailabilityMapFromUrnRepo(resvBW);
+        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, urnList, bwAvailMap, resvVLAN);
 
         log.info("Beginning test: 'verifyLogicalLinksLongerPath'.");
 
@@ -451,7 +458,8 @@ public class ServiceLayerTopoLogicalLinkTest
 
         serviceLayerTopo.buildLogicalLayerSrcNodes(srcDevice, srcPort);
         serviceLayerTopo.buildLogicalLayerDstNodes(dstDevice, dstPort);
-        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, urnList, resvBW, resvVLAN);
+        Map<String, Map<String, Integer>> bwAvailMap = bwService.buildBandwidthAvailabilityMapFromUrnRepo(resvBW);
+        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, urnList, bwAvailMap, resvVLAN);
 
         log.info("Beginning test: 'verifyLogicalLinksAsymmetric'.");
 
@@ -564,7 +572,8 @@ public class ServiceLayerTopoLogicalLinkTest
 
         serviceLayerTopo.buildLogicalLayerSrcNodes(srcDevice, srcPort);
         serviceLayerTopo.buildLogicalLayerDstNodes(dstDevice, dstPort);
-        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, urnList, resvBW, resvVLAN);
+        Map<String, Map<String, Integer>> bwAvailMap = bwService.buildBandwidthAvailabilityMapFromUrnRepo(resvBW);
+        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, urnList, bwAvailMap, resvVLAN);
 
         log.info("Beginning test: 'verifyLogicalLinksDisjointMpls'.");
 
@@ -728,7 +737,8 @@ public class ServiceLayerTopoLogicalLinkTest
                     assert false;
             });
 
-        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, urnList, resvBW, resvVLAN);
+        Map<String, Map<String, Integer>> bwAvailMap = bwService.buildBandwidthAvailabilityMapFromUrnRepo(resvBW);
+        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, urnList, bwAvailMap, resvVLAN);
 
         logicalLinks = serviceLayerTopo.getLogicalLinks();
         llBackup = serviceLayerTopo.getLlBackup();
@@ -916,7 +926,9 @@ public class ServiceLayerTopoLogicalLinkTest
                         assert false;
                 });
 
-        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, urnList, resvBW, resvVLAN);
+
+        Map<String, Map<String, Integer>> bwAvailMap = bwService.buildBandwidthAvailabilityMapFromUrnRepo(resvBW);
+        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, urnList, bwAvailMap, resvVLAN);
 
         logicalLinks = serviceLayerTopo.getLogicalLinks();
         llBackup = serviceLayerTopo.getLlBackup();
@@ -1103,7 +1115,9 @@ public class ServiceLayerTopoLogicalLinkTest
                         assert false;
                 });
 
-        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, urnList, resvBW, resvVLAN);
+
+        Map<String, Map<String, Integer>> bwAvailMap = bwService.buildBandwidthAvailabilityMapFromUrnRepo(resvBW);
+        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, urnList, bwAvailMap, resvVLAN);
 
         logicalLinks = serviceLayerTopo.getLogicalLinks();
         llBackup = serviceLayerTopo.getLlBackup();

@@ -38,7 +38,7 @@ public class PalindromicalPCE {
      * @throws PCEException
      */
     public Map<String, List<TopoEdge>> computePalindromicERO(RequestedVlanPipeE requestPipe,
-                                                             List<ReservedBandwidthE> rsvBwList,
+                                                             Map<String, Map<String, Integer>> bwAvailMap,
                                                              List<ReservedVlanE> rsvVlanList) throws PCEException {
         Topology multiLayerTopo = topoService.getMultilayerTopology();
 
@@ -50,7 +50,7 @@ public class PalindromicalPCE {
 
         if(src.isPresent() && dst.isPresent()){
             // Bandwidth and Vlan pruning
-            Topology prunedTopo = pruningService.pruneWithPipe(multiLayerTopo, requestPipe, rsvBwList, rsvVlanList);
+            Topology prunedTopo = pruningService.pruneWithPipe(multiLayerTopo, requestPipe, bwAvailMap, rsvVlanList);
 
             // Shortest path routing
             List<TopoEdge> azERO = dijkstraPCE.computeShortestPathEdges(prunedTopo, src.get(), dst.get());
