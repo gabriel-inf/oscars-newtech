@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -126,25 +127,31 @@ public class BandwidthService {
         availBw.put("Ingress", bandwidth.getIngressBw());
         availBw.put("Egress", bandwidth.getEgressBw());
         if (resvBwMap.containsKey(urn)) {
-            List<ReservedBandwidthE> resvBwList = resvBwMap.get(urn);
+            // Sort Reserved bandwidth list by start, and then end
+            Comparator<ReservedBandwidthE> byStartTime = Comparator.comparing(ReservedBandwidthE::getBeginning);
+            Comparator<ReservedBandwidthE> byEndTime = Comparator.comparing(ReservedBandwidthE::getEnding);
+            List<ReservedBandwidthE> resvBwList = resvBwMap.get(urn).stream().sorted(byStartTime.thenComparing(byEndTime)).collect(Collectors.toList());
+
             Integer maxIngress = 0;
             Integer maxEgress = 0;
+            for(ReservedBandwidthE bw1 : resvBwList){
+                Instant bw1End = bw1.getEnding();
 
-            // Find all overlapping bandwidth tuples
-            // Find the max ingress and egress consumed during any time period
-            Set<Set<ReservedBandwidthE>> overlappingReservations = findOverlappingBandwidthReservations(resvBwList);
-            for(Set<ReservedBandwidthE> overlap : overlappingReservations){
-                // Sum up the ingress and egress used by these overlapping reservations
-                Integer sumIngress = 0;
-                Integer sumEgress = 0;
-                for (ReservedBandwidthE resv : overlap) {
-                    sumIngress += resv.getInBandwidth();
-                    sumEgress += resv.getEgBandwidth();
+                Integer ingress = 0;
+                Integer egress = 0;
+                for(ReservedBandwidthE bw2: resvBwList){
+                    Instant bw2Start = bw2.getBeginning();
+                    // These two reservations overlap in time
+                    if(bw2Start.isBefore(bw1End)){
+                        ingress += bw2.getInBandwidth();
+                        egress += bw2.getEgBandwidth();
+                    }
                 }
                 // If either metric is greater than the current max, it's the new max
-                maxIngress = Math.max(sumIngress, maxIngress);
-                maxEgress = Math.max(sumEgress, maxEgress);
+                maxIngress = Math.max(ingress, maxIngress);
+                maxEgress = Math.max(egress, maxEgress);
             }
+
             // Remove the maximum reserved bandwidth from the available ingress/egress
             availBw.put("Ingress", Math.max(bandwidth.getIngressBw() - maxIngress, 0));
             availBw.put("Egress", Math.max(bandwidth.getEgressBw() - maxEgress, 0));
