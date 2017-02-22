@@ -106,10 +106,13 @@ public class BandwidthService {
 
         // Build a map, allowing us to retrieve the available "Ingress" and "Egress" bandwidth at each associated URN
         Map<String, Map<String, Integer>> availBwMap = new HashMap<>();
+        Instant then = Instant.now();
         urns.stream()
                 .filter(urn -> urn.getReservableBandwidth() != null)
                 .forEach(urn -> availBwMap.put(urn.getUrn(), buildBandwidthAvailabilityMapUrn(urn.getUrn(), urn.getReservableBandwidth(), resvBwMap)));
 
+        Instant now = Instant.now();
+        Long seconds = now.getEpochSecond() - then.getEpochSecond();
         return availBwMap;
     }
 
@@ -171,16 +174,24 @@ public class BandwidthService {
             Integer maxIngress = 0;
             Integer maxEgress = 0;
             for(ReservedBandwidthE bw1 : resvBwList){
+                Instant bw1Start = bw1.getBeginning();
                 Instant bw1End = bw1.getEnding();
 
                 Integer ingress = 0;
                 Integer egress = 0;
                 for(ReservedBandwidthE bw2: resvBwList){
                     Instant bw2Start = bw2.getBeginning();
+                    Instant bw2End = bw2.getEnding();
                     // These two reservations overlap in time
-                    if(bw2Start.isBefore(bw1End)){
+                    // x1 <= y2 && y1 <= x2
+                    if(bw1Start.isBefore(bw2End) && bw2Start.isBefore(bw1End)){
                         ingress += bw2.getInBandwidth();
                         egress += bw2.getEgBandwidth();
+                    }
+                    // BW2 starts after BW1 ends. They do not overlap. As the list is sorted, there can be no more
+                    // reserved bandwidths in the list that do overlap
+                    else{
+                        break;
                     }
                 }
                 // If either metric is greater than the current max, it's the new max

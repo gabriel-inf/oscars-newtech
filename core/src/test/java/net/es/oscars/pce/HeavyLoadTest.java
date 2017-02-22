@@ -69,7 +69,7 @@ public class HeavyLoadTest {
         Instant now = Instant.parse("1995-10-23T00:00:00Z");
         Instant requestStartTime = now.plus(1L, ChronoUnit.HOURS);
         Instant requestEndTime = now.plus(5L, ChronoUnit.HOURS);
-        Integer numBandwidthReservations = 50000;
+        Integer numBandwidthReservations = 100000;
 
         String srcPort = "chic-cr5:3/2/1";
         String srcDevice = "chic-cr5";
@@ -88,6 +88,7 @@ public class HeavyLoadTest {
         log.info("Beginning test: 'Many Bandwidth Reservations Test'.");
 
         Optional<ReservedBlueprintE> reservedBlueprint = null;
+
         try
         {
            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
@@ -96,6 +97,7 @@ public class HeavyLoadTest {
         {
             log.error("", pceE);
         }
+
         // Assert that it was able to get through PCE without crashing
         assert(reservedBlueprint != null);
 
