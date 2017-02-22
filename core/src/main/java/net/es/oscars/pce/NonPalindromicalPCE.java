@@ -49,7 +49,7 @@ public class NonPalindromicalPCE {
      * @throws PCEException
      */
     public Map<String, List<TopoEdge>> computeNonPalindromicERO(RequestedVlanPipeE requestPipe,
-                                                                List<ReservedBandwidthE> rsvBwList,
+                                                                Map<String, Map<String, Integer>> bwAvailMap,
                                                                 List<ReservedVlanE> rsvVlanList) throws PCEException {
         Topology ethTopo = topoService.layer(Layer.ETHERNET);
         Topology intTopo = topoService.layer(Layer.INTERNAL);
@@ -125,13 +125,13 @@ public class NonPalindromicalPCE {
         }
 
         // Performs shortest path routing on MPLS-layer to properly assign weights to each logical link on Service-Layer
-        serviceLayerTopology.calculateLogicalLinkWeights(requestPipe, urnRepo.findAll(), rsvBwList, rsvVlanList);
+        serviceLayerTopology.calculateLogicalLinkWeights(requestPipe, urnRepo.findAll(), bwAvailMap, rsvVlanList);
 
         Topology slTopo;
 
         slTopo = serviceLayerTopology.getSLTopology();
 
-        Topology prunedSlTopo = pruningService.pruneWithPipe(slTopo, requestPipe, rsvBwList, rsvVlanList);
+        Topology prunedSlTopo = pruningService.pruneWithPipe(slTopo, requestPipe, bwAvailMap, rsvVlanList);
 
         TopoVertex serviceLayerSrcNode;
         TopoVertex serviceLayerDstNode;

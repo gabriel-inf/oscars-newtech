@@ -48,20 +48,21 @@ public class SurvivabilityPCE
      * Depends on BhandariPCE to construct the survivable physical-layer EROs for a request after pruning the topology based on requested parameters
      *
      * @param requestPipe Requested pipe with required reservation parameters
+     * @param bwAvailMap
      * @return A four- element Map containing both the primary and secondary link-disjoint forward-direction EROs and the primary and secondary link-disjoint reverse-direction EROs
      * @throws PCEException
      */
     public Map<String, List<TopoEdge>> computeSurvivableERO(RequestedVlanPipeE requestPipe,
-                                                            List<ReservedBandwidthE> rsvBwList,
+                                                            Map<String, Map<String, Integer>> bwAvailMap,
                                                             List<ReservedVlanE> rsvVlanList) throws PCEException
     {
         if(requestPipe.getEroSurvivability().equals(SurvivabilityType.SURVIVABILITY_TOTAL))
         {
-            return computeSurvivableEroComplete(requestPipe, rsvBwList, rsvVlanList);
+            return computeSurvivableEroComplete(requestPipe, bwAvailMap, rsvVlanList);
         }
         else if(requestPipe.getEroSurvivability().equals(SurvivabilityType.SURVIVABILITY_PARTIAL))
         {
-            return computeSurvivableEroPartial(requestPipe, rsvBwList, rsvVlanList);
+            return computeSurvivableEroPartial(requestPipe, bwAvailMap, rsvVlanList);
         }
         else
         {
@@ -71,7 +72,7 @@ public class SurvivabilityPCE
 
 
     private Map<String, List<TopoEdge>> computeSurvivableEroComplete(RequestedVlanPipeE requestPipe,
-                                                                     List<ReservedBandwidthE> rsvBwList,
+                                                                     Map<String, Map<String, Integer>> bwAvailMap,
                                                                      List<ReservedVlanE> rsvVlanList) throws PCEException
     {
         String srcDeviceURN = requestPipe.getAJunction().getDeviceUrn();
@@ -94,7 +95,7 @@ public class SurvivabilityPCE
 
 
         // Bandwidth and Vlan pruning
-        Topology prunedTopo = pruningService.pruneWithPipeAZ(multiLayerTopo, requestPipe, rsvBwList, rsvVlanList);
+        Topology prunedTopo = pruningService.pruneWithPipeAZ(multiLayerTopo, requestPipe, bwAvailMap, rsvVlanList);
 
         // Disjoint shortest-path routing
         List<List<TopoEdge>> azPathSet = bhandariPCE.computeDisjointPaths(prunedTopo, srcDevice, dstDevice, requestPipe.getNumDisjoint());
@@ -169,7 +170,7 @@ public class SurvivabilityPCE
     //TODO: Make this work with a set number of disjoint paths
     // Number of disjoint paths requested specified in the requestPipe
     private Map<String, List<TopoEdge>> computeSurvivableEroPartial(RequestedVlanPipeE requestPipe,
-                                                                    List<ReservedBandwidthE> rsvBwList,
+                                                                    Map<String, Map<String, Integer>> bwAvailMap,
                                                                     List<ReservedVlanE> rsvVlanList) throws PCEException
     {
         Topology ethTopo = topoService.layer(Layer.ETHERNET);
@@ -247,14 +248,14 @@ public class SurvivabilityPCE
         }
 
         // Performs shortest path routing on MPLS-layer to properly assign weights to each logical link on Service-Layer
-        serviceLayerTopology.calculateLogicalLinkWeights(requestPipe, urnRepo.findAll(), rsvBwList, rsvVlanList);
+        serviceLayerTopology.calculateLogicalLinkWeights(requestPipe, urnRepo.findAll(), bwAvailMap, rsvVlanList);
 
         Topology slTopo;
 
         slTopo = serviceLayerTopology.getSLTopology();
 
-        Topology prunedSlTopo = pruningService.pruneWithPipe(slTopo, requestPipe, rsvBwList, rsvVlanList);
-        Topology prunedPhysicalTopo = pruningService.pruneWithPipe(physTopo, requestPipe, rsvBwList, rsvVlanList);
+        Topology prunedSlTopo = pruningService.pruneWithPipe(slTopo, requestPipe, bwAvailMap, rsvVlanList);
+        Topology prunedPhysicalTopo = pruningService.pruneWithPipe(physTopo, requestPipe, bwAvailMap, rsvVlanList);
 
         TopoVertex serviceLayerSrcNode;
         TopoVertex serviceLayerDstNode;

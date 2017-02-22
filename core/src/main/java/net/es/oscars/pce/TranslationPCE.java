@@ -54,7 +54,7 @@ public class TranslationPCE {
      * @throws PSSException
      */
     public ReservedVlanJunctionE reserveSimpleJunction(RequestedVlanJunctionE req_j,
-                                                       List<ReservedBandwidthE> reservedBandwidths,
+                                                       Map<String, Map<String, Integer>> bwAvailMap,
                                                        List<ReservedVlanE> reservedVlans,
                                                        Map<String, Set<String>> deviceToPortMap,
                                                        Map<String, String> portToDeviceMap, Date start, Date end, String connectionId)
@@ -87,7 +87,7 @@ public class TranslationPCE {
         log.info("Chosen VLAN Map: " + urnVlanMap);
 
         // Confirm that there is sufficient available bandwidth
-        boolean sufficientBandwidth = bwService.evaluateBandwidthJunction(req_j, reservedBandwidths);
+        boolean sufficientBandwidth = bwService.evaluateBandwidthJunction(req_j, bwAvailMap);
         if (!sufficientBandwidth) {
             return null;
         }
@@ -130,23 +130,19 @@ public class TranslationPCE {
      * @param reqPipe            - THe requested pipe, containing details on the requested endpoints/bandwidth/VLANs
      * @param azERO              - The physical path taken by the pipe in the A->Z direction
      * @param zaERO              - The physical path taken by the pipe in the Z->A direction
-     * @param reservedBandwidths - The list of all bandwidth reserved so far
+     * @param bwAvailMap         - Map of "Ingress" and "Egress" bandwidth availability at each URN
      * @param reservedVlans      - The list of all VLAN IDs reserved so far
-     * @param reservedMplsPipes  - The set of all reserved MPLS pipes so far
-     * @param reservedEthPipes   - The set of all reserved Ethernet pipes so far
-     * @param deviceToPortMap
+     * @param deviceToPortMap    - Map of all ports per device
      * @param portToDeviceMap    @throws PCEException
      * @throws PSSException
      */
-    public void reserveRequestedPipe(RequestedVlanPipeE reqPipe,
-                                     List<TopoEdge> azERO,
-                                     List<TopoEdge> zaERO,
-                                     List<ReservedBandwidthE> reservedBandwidths,
-                                     List<ReservedVlanE> reservedVlans,
-                                     Set<ReservedMplsPipeE> reservedMplsPipes,
-                                     Set<ReservedEthPipeE> reservedEthPipes,
-                                     Map<String, Set<String>> deviceToPortMap,
-                                     Map<String, String> portToDeviceMap, Date start, Date end, String connectionId)
+    public TranslationPCEResponse reserveRequestedPipe(RequestedVlanPipeE reqPipe,
+                                                       List<TopoEdge> azERO,
+                                                       List<TopoEdge> zaERO,
+                                                       Map<String, Map<String, Integer>> bwAvailMap,
+                                                       List<ReservedVlanE> reservedVlans,
+                                                       Map<String, Set<String>> deviceToPortMap,
+                                                       Map<String, String> portToDeviceMap, Date start, Date end, String connectionId)
             throws PCEException, PSSException {
 
         // Build a urn map
@@ -155,7 +151,7 @@ public class TranslationPCE {
             urnMap.put(u.getUrn(), u);
         });
 
-        Map<TopoVertex, Map<String, Integer>> requestedBandwidthMap = evaluateRequestedBandwidth(reservedBandwidths, azERO, zaERO, reqPipe, urnMap);
+        Map<TopoVertex, Map<String, Integer>> requestedBandwidthMap = evaluateRequestedBandwidth(bwAvailMap, azERO, zaERO, reqPipe, urnMap);
 
         Map<String, Set<Integer>> chosenVlanMap
                 = vlanService.selectVlansForPipe(reqPipe, urnMap, reservedVlans, azERO, zaERO, deviceToPortMap, portToDeviceMap);
@@ -169,14 +165,17 @@ public class TranslationPCE {
         List<Map<Layer, List<TopoVertex>>> azSegments = PCEAssistant.decompose(azERO);
         List<Map<Layer, List<TopoVertex>>> zaSegments = PCEAssistant.decompose(zaERO);
 
+        Set<ReservedEthPipeE> reservedEthPipes = new HashSet<>();
+        Set<ReservedMplsPipeE> reservedMplsPipes = new HashSet<>();
         reserveEntities(reqPipe, azSegments, zaSegments, urnMap, requestedBandwidthMap, chosenVlanMap, reservedEthPipes,
                 reservedMplsPipes, junctionMap, portToDeviceMap, start, end, connectionId);
+        return TranslationPCEResponse.builder().ethPipes(reservedEthPipes).mplsPipes(reservedMplsPipes).build();
     }
 
-    public void reserveRequestedPipeWithPairs(RequestedVlanPipeE reqPipe, List<List<TopoEdge>> azEROs,
-                                              List<List<TopoEdge>> zaEROs, List<ReservedBandwidthE> reservedBandwidths,
-                                              List<ReservedVlanE> reservedVlans, Set<ReservedMplsPipeE> reservedMplsPipes,
-                                              Set<ReservedEthPipeE> reservedEthPipes, Map<String, Set<String>> deviceToPortMap,
+    public TranslationPCEResponse reserveRequestedPipeWithPairs(RequestedVlanPipeE reqPipe, List<List<TopoEdge>> azEROs,
+                                              List<List<TopoEdge>> zaEROs, Map<String, Map<String, Integer>> bwAvailMap,
+                                              List<ReservedVlanE> reservedVlans,
+                                              Map<String, Set<String>> deviceToPortMap,
                                               Map<String, String> portToDeviceMap, Date start, Date end, String connectionId) throws PSSException, PCEException {
 
         List<TopoEdge> combinedAzERO = combineEROs(azEROs);
@@ -188,7 +187,7 @@ public class TranslationPCE {
             urnMap.put(u.getUrn(), u);
         });
 
-        Map<TopoVertex, Map<String, Integer>> requestedBandwidthMap = evaluateRequestedBandwidth(reservedBandwidths,
+        Map<TopoVertex, Map<String, Integer>> requestedBandwidthMap = evaluateRequestedBandwidth(bwAvailMap,
                 combinedAzERO, combinedZaERO, reqPipe, urnMap);
 
 
@@ -219,8 +218,7 @@ public class TranslationPCE {
         Set<ReservedEthPipeE> filteredEthPipes = pceAssistant.filterEthPipeSet(tempEthPipes);
         Set<ReservedMplsPipeE> filteredMplsPipes = pceAssistant.filterMplsPipeSet(tempMplsPipes);
 
-        reservedEthPipes.addAll(filteredEthPipes);
-        reservedMplsPipes.addAll(filteredMplsPipes);
+        return TranslationPCEResponse.builder().ethPipes(filteredEthPipes).mplsPipes(filteredMplsPipes).build();
     }
 
     private Boolean evaluateAssignedVlanMapMultiplePaths(Map<String, Set<Integer>> chosenVlanMap,  RequestedVlanPipeE pipe,
@@ -289,12 +287,10 @@ public class TranslationPCE {
         return parentHasVlans;
     }
 
-    private Map<TopoVertex, Map<String, Integer>> evaluateRequestedBandwidth(List<ReservedBandwidthE> reservedBandwidths,
+    private Map<TopoVertex, Map<String, Integer>> evaluateRequestedBandwidth(Map<String, Map<String, Integer>> bwAvailMap,
                                                                              List<TopoEdge> azERO, List<TopoEdge> zaERO,
                                                                              RequestedVlanPipeE reqPipe,
                                                                              Map<String, UrnE> urnMap) throws PCEException {
-        // Get map of "Ingress" and "Egress" bandwidth availability
-        Map<String, Map<String, Integer>> availBwMap = bwService.buildBandwidthAvailabilityMap(reservedBandwidths);
 
         // Returns a mapping from topovertices (ports) to an "Ingress"/"Egress" map of the total Ingress/Egress
         // Requested bandwidth at that port across both the azERO and the zaERO
@@ -304,8 +300,8 @@ public class TranslationPCE {
 
         Map<TopoVertex, Map<String, Integer>> requestedBandwidthMap = bwService.buildRequestedBandwidthMap(EROs, bandwidths, reqPipe);
 
-        testBandwidthRequirements(reqPipe, azERO, zaERO, urnMap, reqPipe.getAzMbps(), reqPipe.getZaMbps(), availBwMap,
-                requestedBandwidthMap, reservedBandwidths);
+        testBandwidthRequirements(reqPipe, azERO, zaERO, urnMap, reqPipe.getAzMbps(), reqPipe.getZaMbps(), bwAvailMap,
+                requestedBandwidthMap);
 
         return requestedBandwidthMap;
     }
@@ -685,8 +681,7 @@ public class TranslationPCE {
     public void testBandwidthRequirements(RequestedVlanPipeE reqPipe, List<TopoEdge> azERO, List<TopoEdge> zaERO,
                                           Map<String, UrnE> urnMap, Integer azMbps, Integer zaMbps,
                                           Map<String, Map<String, Integer>> availBwMap,
-                                          Map<TopoVertex, Map<String, Integer>> requestedBandwidthMap,
-                                          List<ReservedBandwidthE> reservedBandwidths) throws PCEException {
+                                          Map<TopoVertex, Map<String, Integer>> requestedBandwidthMap) throws PCEException {
         // Confirm that there is sufficient bandwidth to meet the request (given what has been reserved so far)
 
         // Evaluate the fixtures
@@ -752,19 +747,13 @@ public class TranslationPCE {
                 // Filter out devices
                 sharedPorts.removeIf(p -> !p.getVertexType().equals(VertexType.PORT));
 
-                List<ReservedBandwidthE> sharedBandwidths = reservedBandwidths.stream()
-                        .filter(sBW -> sharedPortNames.contains(sBW.getUrn()))
-                        .collect(Collectors.toList());
-
-                Map<String, Map<String, Integer>> sharedBwMap;
-                sharedBwMap = bwService.buildBandwidthAvailabilityMap(sharedBandwidths);
 
                 for (TopoVertex sharedPort : sharedPorts) {
                     if (!urnMap.containsKey(sharedPort.getUrn())) {
                         assert false;
                     }
 
-                    if (!bwService.evaluateBandwidthSharedURN(sharedPort.getUrn(), sharedBwMap, azMbps, azMbps, zaMbps, zaMbps)) {
+                    if (!bwService.evaluateBandwidthSharedURN(sharedPort.getUrn(), availBwMap, azMbps, azMbps, zaMbps, zaMbps)) {
                         throw new PCEException("Insufficient Bandwidth to meet requested pipe" + reqPipe.toString() + " given previous reservations in flow");
                     }
                 }

@@ -5,6 +5,7 @@ import net.es.oscars.CoreUnitTestConfiguration;
 import net.es.oscars.dto.pss.EthFixtureType;
 import net.es.oscars.dto.pss.EthJunctionType;
 import net.es.oscars.dto.pss.EthPipeType;
+import net.es.oscars.pce.BandwidthService;
 import net.es.oscars.pce.DijkstraPCE;
 import net.es.oscars.pce.PruningService;
 import net.es.oscars.resv.ent.*;
@@ -51,6 +52,9 @@ public class ServiceLayerEROTest
 
     @Autowired
     private DijkstraPCE dijkstraPCE;
+
+    @Autowired
+    private BandwidthService bwService;
 
     private Set<TopoVertex> ethernetTopoVertices;
     private Set<TopoVertex> mplsTopoVertices;
@@ -562,11 +566,13 @@ public class ServiceLayerEROTest
         serviceLayerTopo.buildLogicalLayerSrcNodes(srcDevice, srcPort);     // should create VIRTUAL nodes
         serviceLayerTopo.buildLogicalLayerDstNodes(dstDevice, dstPort);     // should create VIRTUAL nodes
 
+
+        Map<String, Map<String, Integer>> bwAvailMap = bwService.buildBandwidthAvailabilityMapFromUrnRepo(resvBW);
         // Performs shortest path routing on MPLS-layer to properly assign weights to each logical link on Service-Layer
-        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, urnList, resvBW, resvVLAN);
+        serviceLayerTopo.calculateLogicalLinkWeights(requestedPipe, urnList, bwAvailMap, resvVLAN);
 
         Topology slTopo = serviceLayerTopo.getSLTopology();
-        Topology prunedSlTopo = pruningService.pruneWithPipe(slTopo, requestedPipe, requestedSched.getStartDates().get(0), requestedSched.getEndDates().get(0));
+        Topology prunedSlTopo = pruningService.pruneWithPipe(slTopo, requestedPipe, bwAvailMap, resvVLAN);
 
         TopoVertex serviceLayerSrcNode;
         TopoVertex serviceLayerDstNode;

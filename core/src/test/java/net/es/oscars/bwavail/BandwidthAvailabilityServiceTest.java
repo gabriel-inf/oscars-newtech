@@ -5,6 +5,7 @@ import net.es.oscars.CoreUnitTestConfiguration;
 import net.es.oscars.bwavail.svc.BandwidthAvailabilityService;
 import net.es.oscars.dto.bwavail.BandwidthAvailabilityRequest;
 import net.es.oscars.dto.bwavail.BandwidthAvailabilityResponse;
+import net.es.oscars.helpers.test.RepoEntityBuilder;
 import net.es.oscars.helpers.test.TopologyBuilder;
 import net.es.oscars.resv.dao.ReservedBandwidthRepository;
 import net.es.oscars.resv.ent.ReservedBandwidthE;
@@ -43,6 +44,9 @@ public class BandwidthAvailabilityServiceTest {
 
     @Autowired
     private ReservedBandwidthRepository reservedBandwidthRepo;
+    
+    @Autowired
+    private RepoEntityBuilder repoEntityBuilder;
 
     private final String az1 = "Az1";
     private final String za1 = "Za1";
@@ -94,7 +98,7 @@ public class BandwidthAvailabilityServiceTest {
         expectedBwMap.put(za1, zaGoalMap);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
+        repoEntityBuilder.reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime);
         testResponse(response, minExpectedBwMap, expectedBwMap);
@@ -145,7 +149,7 @@ public class BandwidthAvailabilityServiceTest {
         expectedBwMap.put(za1, zaGoalMap);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
+        repoEntityBuilder.reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         BandwidthAvailabilityResponse response = placeRequestJunction(requestStartTime, requestEndTime);
         testResponse(response, minExpectedBwMap, expectedBwMap);
@@ -196,7 +200,7 @@ public class BandwidthAvailabilityServiceTest {
         expectedBwMap.put(za1, zaGoalMap);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
+        repoEntityBuilder.reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         BandwidthAvailabilityResponse response = placeRequestJunctionPath(requestStartTime, requestEndTime);
         testResponse(response, minExpectedBwMap, expectedBwMap);
@@ -252,7 +256,7 @@ public class BandwidthAvailabilityServiceTest {
         expectedBwMap.put(za1, zaGoalMap);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
+        repoEntityBuilder.reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime);
         testResponse(response, minExpectedBwMap, expectedBwMap);
@@ -308,7 +312,7 @@ public class BandwidthAvailabilityServiceTest {
         expectedBwMap.put(za1, zaGoalMap);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
+        repoEntityBuilder.reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime);
         testResponse(response, minExpectedBwMap, expectedBwMap);
@@ -363,7 +367,7 @@ public class BandwidthAvailabilityServiceTest {
         expectedBwMap.put(za1, zaGoalMap);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
+        repoEntityBuilder.reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime);
         testResponse(response, minExpectedBwMap, expectedBwMap);
@@ -421,7 +425,7 @@ public class BandwidthAvailabilityServiceTest {
         expectedBwMap.put(za1, zaGoalMap);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
+        repoEntityBuilder.reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime);
         testResponse(response, minExpectedBwMap, expectedBwMap);
@@ -486,7 +490,7 @@ public class BandwidthAvailabilityServiceTest {
         expectedBwMap.put(za1, zaGoalMap);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
+        repoEntityBuilder.reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime);
         testResponse(response, minExpectedBwMap, expectedBwMap);
@@ -545,7 +549,7 @@ public class BandwidthAvailabilityServiceTest {
         expectedBwMap.put(za1, zaGoalMap);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
+        repoEntityBuilder.reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime);
         testResponse(response, minExpectedBwMap, expectedBwMap);
@@ -601,7 +605,7 @@ public class BandwidthAvailabilityServiceTest {
         expectedBwMap.put(za1, zaGoalMap);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
+        repoEntityBuilder.reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime);
         testResponse(response, minExpectedBwMap, expectedBwMap);
@@ -657,7 +661,7 @@ public class BandwidthAvailabilityServiceTest {
         expectedBwMap.put(za1, zaGoalMap);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
+        repoEntityBuilder.reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime);
         testResponse(response, minExpectedBwMap, expectedBwMap);
@@ -713,7 +717,7 @@ public class BandwidthAvailabilityServiceTest {
         expectedBwMap.put(za1, zaGoalMap);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
+        repoEntityBuilder.reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime);
         testResponse(response, minExpectedBwMap, expectedBwMap);
@@ -781,7 +785,7 @@ public class BandwidthAvailabilityServiceTest {
         expectedBwMap.put(za1, zaGoalMap);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
+        repoEntityBuilder.reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime);
         testResponse(response, minExpectedBwMap, expectedBwMap);
@@ -842,7 +846,7 @@ public class BandwidthAvailabilityServiceTest {
         expectedBwMap.put(za1, zaGoalMap);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
+        repoEntityBuilder.reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime);
         testResponse(response, minExpectedBwMap, expectedBwMap);
@@ -903,7 +907,7 @@ public class BandwidthAvailabilityServiceTest {
         expectedBwMap.put(za1, zaGoalMap);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
+        repoEntityBuilder.reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime);
         testResponse(response, minExpectedBwMap, expectedBwMap);
@@ -964,7 +968,7 @@ public class BandwidthAvailabilityServiceTest {
         expectedBwMap.put(za1, zaGoalMap);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
+        repoEntityBuilder.reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime);
         testResponse(response, minExpectedBwMap, expectedBwMap);
@@ -1025,7 +1029,7 @@ public class BandwidthAvailabilityServiceTest {
         expectedBwMap.put(za1, zaGoalMap);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
+        repoEntityBuilder.reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime);
         testResponse(response, minExpectedBwMap, expectedBwMap);
@@ -1086,7 +1090,7 @@ public class BandwidthAvailabilityServiceTest {
         expectedBwMap.put(za1, zaGoalMap);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
+        repoEntityBuilder.reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime);
         testResponse(response, minExpectedBwMap, expectedBwMap);
@@ -1147,7 +1151,7 @@ public class BandwidthAvailabilityServiceTest {
         expectedBwMap.put(za1, zaGoalMap);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
+        repoEntityBuilder.reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime);
         testResponse(response, minExpectedBwMap, expectedBwMap);
@@ -1208,7 +1212,7 @@ public class BandwidthAvailabilityServiceTest {
         expectedBwMap.put(za1, zaGoalMap);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
+        repoEntityBuilder.reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime);
         testResponse(response, minExpectedBwMap, expectedBwMap);
@@ -1267,7 +1271,7 @@ public class BandwidthAvailabilityServiceTest {
         expectedBwMap.put(za1, zaGoalMap);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
+        repoEntityBuilder.reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime);
         testResponse(response, minExpectedBwMap, expectedBwMap);
@@ -1326,7 +1330,7 @@ public class BandwidthAvailabilityServiceTest {
         expectedBwMap.put(za1, zaGoalMap);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
+        repoEntityBuilder.reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime);
         testResponse(response, minExpectedBwMap, expectedBwMap);
@@ -1380,7 +1384,7 @@ public class BandwidthAvailabilityServiceTest {
         expectedBwMap.put(za1, zaGoalMap);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
+        repoEntityBuilder.reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime);
         testResponse(response, minExpectedBwMap, expectedBwMap);
@@ -1440,7 +1444,7 @@ public class BandwidthAvailabilityServiceTest {
         expectedBwMap.put(za1, zaGoalMap);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
+        repoEntityBuilder.reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime);
         testResponse(response, minExpectedBwMap, expectedBwMap);
@@ -1504,7 +1508,7 @@ public class BandwidthAvailabilityServiceTest {
         expectedBwMap.put(za1, zaGoalMap);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
+        repoEntityBuilder.reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime);
         testResponse(response, minExpectedBwMap, expectedBwMap);
@@ -1574,7 +1578,7 @@ public class BandwidthAvailabilityServiceTest {
         expectedBwMap.put(za1, zaGoalMap);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
+        repoEntityBuilder.reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime, azEros, zaEros);
         testResponse(response, minExpectedBwMap, expectedBwMap);
@@ -1658,7 +1662,7 @@ public class BandwidthAvailabilityServiceTest {
         expectedBwMap.put(za2, zaGoalMap2);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
+        repoEntityBuilder.reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime, azEros, zaEros);
         testResponse(response, minExpectedBwMap, expectedBwMap);
@@ -1741,7 +1745,7 @@ public class BandwidthAvailabilityServiceTest {
         expectedBwMap.put(za2, zaGoalMap2);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Reserve Bandwidth ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
+        repoEntityBuilder.reserveBandwidth(reservedPortNames, reservedStartTimes, reservedEndTimes, inBandwidths, egBandwidths);
         //~~~~~~~~~~~~~~~~~~~~~~~~~~ Make the request ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         BandwidthAvailabilityResponse response = placeRequest(requestStartTime, requestEndTime, 2, true);
         testResponse(response, minExpectedBwMap, expectedBwMap);
@@ -1861,20 +1865,5 @@ public class BandwidthAvailabilityServiceTest {
 
         return bwAvailService.getBandwidthAvailabilityMap(request);
     }
-
-    private void reserveBandwidth(List<String> reservedPortNames, List<Instant> reservedStartTimes,
-                                  List<Instant> reservedEndTimes, List<Integer> inBandwidths, List<Integer> egBandwidths) {
-        List<ReservedBandwidthE> reservedBandwidths = new ArrayList<>();
-        for(Integer index = 0; index < reservedPortNames.size(); index++){
-            reservedBandwidths.add(ReservedBandwidthE.builder()
-                    .urn(reservedPortNames.get(index))
-                    .beginning(reservedStartTimes.get(index))
-                    .ending(reservedEndTimes.get(index))
-                    .inBandwidth(inBandwidths.get(index))
-                    .egBandwidth(egBandwidths.get(index))
-                    .containerConnectionId("testConenctionID")
-                    .build());
-        }
-        reservedBandwidthRepo.save(reservedBandwidths);
-    }
+    
 }

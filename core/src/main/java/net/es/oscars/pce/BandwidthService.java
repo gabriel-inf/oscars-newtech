@@ -2,7 +2,6 @@ package net.es.oscars.pce;
 
 
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.dto.spec.RequestedVlanFixture;
 import net.es.oscars.resv.dao.ReservedBandwidthRepository;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.dto.topo.TopoEdge;
@@ -15,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -51,10 +51,10 @@ public class BandwidthService {
                                                                 Set<ReservedEthPipeE> reservedEthPipes,
                                                                 Date start, Date end) {
         // Retrieve all bandwidth reserved so far from pipes & junctions
-        List<ReservedBandwidthE> rsvBandwidths = getReservedBandwidthsFromJunctions(reservedJunctions);
+        List<ReservedBandwidthE> rsvBandwidths = getReservedBandwidthFromRepo(start, end);
+        rsvBandwidths.addAll(getReservedBandwidthsFromJunctions(reservedJunctions));
         rsvBandwidths.addAll(getReservedBandwidthsFromMplsPipes(reservedMplsPipes));
         rsvBandwidths.addAll(getReservedBandwidthsFromEthPipes(reservedEthPipes));
-        rsvBandwidths.addAll(getReservedBandwidthFromRepo(start, end));
 
         return rsvBandwidths;
     }
@@ -78,47 +78,76 @@ public class BandwidthService {
         return map;
     }
 
+
     /**
      * Build a map of the available bandwidth at each URN. For each URN, there is a map of "Ingress" and "Egress"
-     * bandwidth available. Only port URNs can be found in this map.
+     * bandwidth available. Only port URNs can be found in this map. Retrieves URNs from the repository.
      *
      * @param rsvBandwidths - A list of all bandwidth reserved so far
-     * @return A mapping of URN to Ingress/Egress bandwidth availability
+     * @return A mapping of URN name to Ingress/Egress bandwidth availability {urn = {Ingress: num, Egress: num}}
      */
-    public Map<String, Map<String, Integer>> buildBandwidthAvailabilityMap(List<ReservedBandwidthE> rsvBandwidths) {
-        // Build a map, allowing us to retrieve a list of ReservedBandwidth given the associated URN
-        Map<String, List<ReservedBandwidthE>> resvBwMap = buildReservedBandwidthMap(rsvBandwidths);
-
-        //log.info(resvBwMap.toString());
-        // Build a map, allowing us to retrieve the available "Ingress" and "Egress" bandwidth at each associated URN
-        Map<String, Map<String, Integer>> availBwMap = new HashMap<>();
-        urnRepository.findAll()
-                .stream()
-                .filter(urn -> urn.getReservableBandwidth() != null)
-                .forEach(urn -> availBwMap.put(urn.getUrn(), buildBandwidthAvailabilityMapUrn(urn.getUrn(), urn.getReservableBandwidth(), resvBwMap)));
-
-        return availBwMap;
+    public Map<String, Map<String, Integer>> buildBandwidthAvailabilityMapFromUrnRepo(List<ReservedBandwidthE> rsvBandwidths) {
+        List<UrnE> urns = urnRepository.findAll();
+        return buildBandwidthAvailabilityMapFromUrnList(rsvBandwidths, urns);
     }
 
     /**
      * Build a map of the available bandwidth at each URN. For each URN, there is a map of "Ingress" and "Egress"
-     * bandwidth available. Only port URNs can be found in this map.
+     * bandwidth available. Only port URNs can be found in this map. URNs are passed in.
      *
      * @param rsvBandwidths - A list of all bandwidth reserved so far
      * @param urns          - A list of UrnE objects
-     * @return A mapping of URN to Ingress/Egress bandwidth availability
+     * @return A mapping of URN name to Ingress/Egress bandwidth availability {urn = {Ingress: num, Egress: num}}
      */
-    public Map<String, Map<String, Integer>> buildBandwidthAvailabilityMapWithUrns(List<ReservedBandwidthE> rsvBandwidths,
-                                                                                 List<UrnE> urns) {
+    public Map<String, Map<String, Integer>> buildBandwidthAvailabilityMapFromUrnList(List<ReservedBandwidthE> rsvBandwidths,
+                                                                                      List<UrnE> urns) {
         // Build a map, allowing us to retrieve a list of ReservedBandwidth given the associated URN
         Map<String, List<ReservedBandwidthE>> resvBwMap = buildReservedBandwidthMap(rsvBandwidths);
 
         // Build a map, allowing us to retrieve the available "Ingress" and "Egress" bandwidth at each associated URN
         Map<String, Map<String, Integer>> availBwMap = new HashMap<>();
+        Instant then = Instant.now();
         urns.stream()
                 .filter(urn -> urn.getReservableBandwidth() != null)
                 .forEach(urn -> availBwMap.put(urn.getUrn(), buildBandwidthAvailabilityMapUrn(urn.getUrn(), urn.getReservableBandwidth(), resvBwMap)));
 
+        Instant now = Instant.now();
+        Long seconds = now.getEpochSecond() - then.getEpochSecond();
+        return availBwMap;
+    }
+
+    /**
+     * Update a current bandwidth availability map with the new reserved bandwidth additions.
+     * @param availBwMap - Current map of "Ingress" and "Egress" bandwidth available for each/specific URNs
+     * @param newBandwidths - A list of reserved bandwidths that will be added to this map
+     * @return The updated map
+     */
+    public Map<String, Map<String, Integer>> amendBandwidthAvailabilityMap(Map<String, Map<String, Integer>> availBwMap, List<ReservedBandwidthE> newBandwidths){
+
+        for(ReservedBandwidthE rsvBw : newBandwidths){
+            String urn = rsvBw.getUrn();
+            Integer ingress = rsvBw.getInBandwidth();
+            Integer egress = rsvBw.getEgBandwidth();
+
+            Map<String, Integer> bwMap = new HashMap<>();
+            // Retrieve original values if it's already in the map
+            // Otherwise, store the reservable values for Ingress and Egress for this URN
+            if(availBwMap.containsKey(urn)){
+                bwMap = availBwMap.get(urn);
+            }
+            else{
+                Optional<UrnE> urnE = urnRepository.findByUrn(urn);
+                if(urnE.isPresent()){
+                    ReservableBandwidthE reservableBandwidth = urnE.get().getReservableBandwidth();
+                    bwMap.put("Ingress", reservableBandwidth.getIngressBw());
+                    bwMap.put("Egress", reservableBandwidth.getEgressBw());
+                }
+            }
+
+            // Update the values in the map
+            bwMap.put("Ingress", Math.max(bwMap.get("Ingress") - ingress, 0));
+            bwMap.put("Egress", Math.max(bwMap.get("Egress") - egress, 0));
+        }
         return availBwMap;
     }
 
@@ -129,7 +158,7 @@ public class BandwidthService {
      *
      * @param bandwidth - ReservableBandwidthE object, which contains the maximum Ingress/Egress bandwidth for a given URN
      * @param resvBwMap - A Mapping from a URN to a list of Reserved Bandwidths at that URN.
-     * @return A map containing the net available ingress/egress bandwidth at a URN
+     * @return A mapping Ingress/Egress bandwidth availability {Ingress: num, Egress: num}
      */
     public Map<String, Integer> buildBandwidthAvailabilityMapUrn(String urn, ReservableBandwidthE bandwidth,
                                                                  Map<String, List<ReservedBandwidthE>> resvBwMap) {
@@ -137,25 +166,39 @@ public class BandwidthService {
         availBw.put("Ingress", bandwidth.getIngressBw());
         availBw.put("Egress", bandwidth.getEgressBw());
         if (resvBwMap.containsKey(urn)) {
-            List<ReservedBandwidthE> resvBwList = resvBwMap.get(urn);
+            // Sort Reserved bandwidth list by start, and then end
+            Comparator<ReservedBandwidthE> byStartTime = Comparator.comparing(ReservedBandwidthE::getBeginning);
+            Comparator<ReservedBandwidthE> byEndTime = Comparator.comparing(ReservedBandwidthE::getEnding);
+            List<ReservedBandwidthE> resvBwList = resvBwMap.get(urn).stream().sorted(byStartTime.thenComparing(byEndTime)).collect(Collectors.toList());
+
             Integer maxIngress = 0;
             Integer maxEgress = 0;
+            for(ReservedBandwidthE bw1 : resvBwList){
+                Instant bw1Start = bw1.getBeginning();
+                Instant bw1End = bw1.getEnding();
 
-            // Find all overlapping bandwidth tuples
-            // Find the max ingress and egress consumed during any time period
-            Set<Set<ReservedBandwidthE>> overlappingReservations = findOverlappingBandwidthReservations(resvBwList);
-            for(Set<ReservedBandwidthE> overlap : overlappingReservations){
-                // Sum up the ingress and egress used by these overlapping reservations
-                Integer sumIngress = 0;
-                Integer sumEgress = 0;
-                for (ReservedBandwidthE resv : overlap) {
-                    sumIngress += resv.getInBandwidth();
-                    sumEgress += resv.getEgBandwidth();
+                Integer ingress = 0;
+                Integer egress = 0;
+                for(ReservedBandwidthE bw2: resvBwList){
+                    Instant bw2Start = bw2.getBeginning();
+                    Instant bw2End = bw2.getEnding();
+                    // These two reservations overlap in time
+                    // x1 <= y2 && y1 <= x2
+                    if(bw1Start.isBefore(bw2End) && bw2Start.isBefore(bw1End)){
+                        ingress += bw2.getInBandwidth();
+                        egress += bw2.getEgBandwidth();
+                    }
+                    // BW2 starts after BW1 ends. They do not overlap. As the list is sorted, there can be no more
+                    // reserved bandwidths in the list that do overlap
+                    else{
+                        break;
+                    }
                 }
                 // If either metric is greater than the current max, it's the new max
-                maxIngress = Math.max(sumIngress, maxIngress);
-                maxEgress = Math.max(sumEgress, maxEgress);
+                maxIngress = Math.max(ingress, maxIngress);
+                maxEgress = Math.max(egress, maxEgress);
             }
+
             // Remove the maximum reserved bandwidth from the available ingress/egress
             availBw.put("Ingress", Math.max(bandwidth.getIngressBw() - maxIngress, 0));
             availBw.put("Egress", Math.max(bandwidth.getEgressBw() - maxEgress, 0));
@@ -163,77 +206,6 @@ public class BandwidthService {
         return availBw;
     }
 
-    /**
-     * Find all subsets of reserved bandwidth, where all members of each subset overlap entirely with each other
-     * @param resvBwList - List of reserved bandwidths.
-     * @return Every subset of pairwise overlapping bandwidth reservations.
-     */
-    private Set<Set<ReservedBandwidthE>> findOverlappingBandwidthReservations(List<ReservedBandwidthE> resvBwList) {
-        Set<Set<ReservedBandwidthE>> powerSet = new HashSet<>();
-        powerSet.add(new HashSet<>());
-
-        // For each reserved bandwidth, add it to all existing subsets in the power set
-        for(ReservedBandwidthE resvBw : resvBwList){
-            // Store the new subsets
-            Set<Set<ReservedBandwidthE>> newSets = new HashSet<>();
-            // For each existing subset, add the current reserved bandwidth
-            for(Set<ReservedBandwidthE> subset : powerSet){
-                Set<ReservedBandwidthE> newSubset = new HashSet<>(subset);
-                newSubset.add(resvBw);
-                // Only store this new subset if all members overlap
-                if(allOverlap(newSubset)) {
-                    newSets.add(newSubset);
-                }
-            }
-            powerSet.addAll(newSets);
-        }
-
-        // Filter out the subsets where all members do not overlap
-        return powerSet;
-    }
-
-
-    /**
-     * Given a subset of reserved bandwidth, determine if ALL of them overlap with each other (pairwise)
-     * @param subset - A set of reserved bandwidth.
-     * @return True if they all overlap, False otherwise (or if there is nothing in the subset)
-     */
-    private boolean allOverlap(Set<ReservedBandwidthE> subset) {
-        List<ReservedBandwidthE> reservedList = new ArrayList<>(subset);
-
-        // Can only have an overlap if there's at least one item
-        boolean doesOverlap = reservedList.size() > 0;
-
-        // If you have more than one item, ALL of them most overlap in time with each other
-        if(reservedList.size() > 1) {
-            // Get the "first" bandwidth
-            for (Integer firstIndex = 0; firstIndex < reservedList.size(); firstIndex++) {
-                ReservedBandwidthE firstBw = reservedList.get(firstIndex);
-                // Get each "following" bandwidth in the list
-                for (Integer secondIndex = firstIndex + 1; secondIndex < reservedList.size(); secondIndex++) {
-                    ReservedBandwidthE otherBw = reservedList.get(secondIndex);
-                    // If they don't overlap, this subset is no good
-                    if (!determineOverlap(firstBw, otherBw)) {
-                        doesOverlap = false;
-                        break;
-                    }
-                }
-            }
-        }
-        return doesOverlap;
-
-    }
-
-    /**
-     * Given two reserved bandwidth, determine if they overlap in time.
-     * @param aBw - One of the bandwidths.
-     * @param bBw - The other bandwidth.
-     * @return True if they do overlap, False otherwise.
-     */
-    private boolean determineOverlap(ReservedBandwidthE aBw, ReservedBandwidthE bBw){
-        // If a.start <= b.end && b.start <= a.end
-        return aBw.getBeginning().isBefore(bBw.getEnding()) && bBw.getBeginning().isBefore(aBw.getEnding());
-    }
 
     /**
      * Build a map of the requested bandwidth at each port TopoVertex contained within the passed in EROs
@@ -585,22 +557,19 @@ public class BandwidthService {
      * Confirm that a requested VLAN junction supports the requested bandwidth. Checks each fixture of the junction.
      *
      * @param req_j              - The requested junction.
-     * @param reservedBandwidths - The reserved bandwidth.
+     * @param bwAvailMap         - Map of available bandwidth at each URN
      * @return True, if there is enough bandwidth at every fixture. False, otherwise.
      */
-    public boolean evaluateBandwidthJunction(RequestedVlanJunctionE req_j, List<ReservedBandwidthE> reservedBandwidths) {
+    public boolean evaluateBandwidthJunction(RequestedVlanJunctionE req_j, Map<String, Map<String, Integer>> bwAvailMap) {
 
         // All requested fixtures on this junction
         Set<RequestedVlanFixtureE> reqFixtures = req_j.getFixtures();
 
 
-        // Get map of "Ingress" and "Egress" bandwidth availability
-        Map<String, Map<String, Integer>> availBwMap = buildBandwidthAvailabilityMap(reservedBandwidths);
-
         // For each requested fixture,
         for (RequestedVlanFixtureE reqFix : reqFixtures) {
-            // Confirum that there is enough available bandwidth at that URN
-            if (!evaluateBandwidthURN(reqFix.getPortUrn(), availBwMap, reqFix.getInMbps(), reqFix.getEgMbps())) {
+            // Confirm that there is enough available bandwidth at that URN
+            if (!evaluateBandwidthURN(reqFix.getPortUrn(), bwAvailMap, reqFix.getInMbps(), reqFix.getEgMbps())) {
                 return false;
             }
         }

@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.spec.SurvivabilityType;
 import net.es.oscars.dto.topo.enums.DeviceType;
 import net.es.oscars.pss.PSSException;
+import net.es.oscars.resv.dao.ReservedBandwidthRepository;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.dto.topo.TopoEdge;
 import net.es.oscars.dto.spec.PalindromicType;
@@ -12,7 +13,6 @@ import net.es.oscars.topo.ent.BidirectionalPathE;
 import net.es.oscars.topo.ent.EdgeE;
 import net.es.oscars.topo.ent.ReservableVlanE;
 import net.es.oscars.topo.ent.UrnE;
-import net.es.oscars.topo.pop.Device;
 import net.es.oscars.topo.svc.TopoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -57,6 +57,7 @@ public class TopPCE {
 
     @Autowired
     private UrnRepository urnRepo;
+
 
     /**
      * Given a requested Blueprint (made up of a VLAN or Layer3 Flow) and a Schedule Specification, attempt
@@ -211,9 +212,13 @@ public class TopPCE {
         Map<String, Set<String>> deviceToPortMap = topoService.buildDeviceToPortMap();
         Map<String, String> portToDeviceMap = topoService.buildPortToDeviceMap(deviceToPortMap);
 
+        // Initialize the bandwidth availability map
+        List<ReservedBandwidthE> reservedBandwidths = bwService.getReservedBandwidthFromRepo(start, end);
+        Map<String, Map<String, Integer>> bwAvailMap = bwService.buildBandwidthAvailabilityMapFromUrnRepo(reservedBandwidths);
+
         // Attempt to reserve simple junctions
         log.info("Handling Simple Junctions");
-        Set<ReservedVlanJunctionE> simpleJunctions = handleRequestedJunctions(reqJunctions, start, end, deviceToPortMap, portToDeviceMap, connId);
+        Set<ReservedVlanJunctionE> simpleJunctions = handleRequestedJunctions(reqJunctions, start, end, deviceToPortMap, portToDeviceMap, connId, bwAvailMap);
         log.info("All simple junctions handled");
         // If not all junctions were able to be reserved, no later range can work
         // Break the loop, then check for any valid ranges
@@ -221,11 +226,14 @@ public class TopPCE {
             return false;
         }
 
+        // Clone the bandwidth availability map: multiple attempts at reserving pipes won't affect the original
+        Map<String, Map<String, Integer>> clonedAvailMap = new HashMap<>(bwAvailMap);
 
         // Keep track of the number of successfully reserved pipes (numReserved)
         // Attempt to reserve all requested pipes
         log.info("Starting to handle pipes");
-        Integer numReserved = handleRequestedPipes(reqPipes, start, end, simpleJunctions, reservedMplsPipes, reservedEthPipes, deviceToPortMap, portToDeviceMap, allPaths, connId);
+        Integer numReserved = handleRequestedPipes(reqPipes, start, end, simpleJunctions, reservedMplsPipes, reservedEthPipes,
+                deviceToPortMap, portToDeviceMap, allPaths, connId, clonedAvailMap);
 
         // If pipes were not able to be reserved in the original order, try reversing the order pipes are attempted
         if ((numReserved != reqPipes.size()) && (reqPipes.size() > 1)) {
@@ -234,7 +242,9 @@ public class TopPCE {
             reservedMplsPipes = new HashSet<>();
             reservedEthJunctions = new HashSet<>();
             allPaths = new HashSet<>();
-            numReserved = handleRequestedPipes(reqPipes, start, end, simpleJunctions, reservedMplsPipes, reservedEthPipes, deviceToPortMap, portToDeviceMap, allPaths, connId);
+            clonedAvailMap = new HashMap<>(bwAvailMap);
+            numReserved = handleRequestedPipes(reqPipes, start, end, simpleJunctions, reservedMplsPipes, reservedEthPipes,
+                    deviceToPortMap, portToDeviceMap, allPaths, connId, clonedAvailMap);
         }
 
         // If the pipes still cannot be reserved, no later range can work
@@ -265,25 +275,34 @@ public class TopPCE {
 
     private Set<ReservedVlanJunctionE> handleRequestedJunctions(List<RequestedVlanJunctionE> reqJunctions, Date start, Date end,
                                                                 Map<String, Set<String>> deviceToPortMap,
-                                                                Map<String, String> portToDeviceMap, String connId){
+                                                                Map<String, String> portToDeviceMap, String connId,
+                                                                Map<String, Map<String, Integer>> bwAvailMap){
 
         Set<ReservedVlanJunctionE> simpleJunctions = new HashSet<>();
+        List<ReservedBandwidthE> newestBandwidths = new ArrayList<>();
         for(RequestedVlanJunctionE reqJunction: reqJunctions) {
-            // Update list of reserved bandwidths
-            List<ReservedBandwidthE> rsvBandwidths = bwService.createReservedBandwidthList(simpleJunctions, new HashSet<>(),
-                    new HashSet<>(), start, end);
 
             // Update list of reserved VLAN IDs
             List<ReservedVlanE> rsvVlans = vlanService.createReservedVlanList(simpleJunctions, new HashSet<>(), start, end);
 
+            ReservedVlanJunctionE junction = null;
             try {
-                ReservedVlanJunctionE junction = transPCE.reserveSimpleJunction(reqJunction, rsvBandwidths, rsvVlans, deviceToPortMap, portToDeviceMap, start, end, connId);
+                junction = transPCE.reserveSimpleJunction(reqJunction, bwAvailMap, rsvVlans, deviceToPortMap, portToDeviceMap, start, end, connId);
                 if (junction != null) {
                     simpleJunctions.add(junction);
                 }
             } catch (PCEException | PSSException e) {
                 log.info(e.getMessage());
             }
+
+            // Update list of reserved bandwidths
+            if(junction != null){
+                Set<ReservedVlanJunctionE> junctionSet = new HashSet<>();
+                junctionSet.add(junction);
+                newestBandwidths = bwService.getReservedBandwidthsFromJunctions(junctionSet);
+            }
+            // Update the availability map
+            bwService.amendBandwidthAvailabilityMap(bwAvailMap, newestBandwidths);
         }
         return simpleJunctions;
     }
@@ -300,26 +319,27 @@ public class TopPCE {
      * @param deviceToPortMap
      * @param portToDeviceMap
      * @param connectionId      - The unique ID of the connection containing the requested pipes
+     * @param bwAvailMap
      * @return The number of requested pipes which were able to be reserved
      */
     private Integer handleRequestedPipes(List<RequestedVlanPipeE> pipes, Date start, Date end,
                                          Set<ReservedVlanJunctionE> simpleJunctions, Set<ReservedMplsPipeE> reservedMplsPipes,
                                          Set<ReservedEthPipeE> reservedEthPipes, Map<String, Set<String>> deviceToPortMap,
-                                         Map<String, String> portToDeviceMap, Set<BidirectionalPathE> allPaths, String connectionId) {
+                                         Map<String, String> portToDeviceMap, Set<BidirectionalPathE> allPaths,
+                                         String connectionId, Map<String, Map<String, Integer>> bwAvailMap) {
         // The number of requested pipes successfully reserved
         Integer numReserved = 0;
 
         // Loop through all requested pipes
         for (RequestedVlanPipeE pipe : pipes) {
 
-            // Update list of reserved bandwidths
-            List<ReservedBandwidthE> rsvBandwidths = bwService.createReservedBandwidthList(simpleJunctions, reservedMplsPipes,
-                    reservedEthPipes, start, end);
-
             // Update list of reserved VLAN IDs
             List<ReservedVlanE> rsvVlans = vlanService.createReservedVlanList(simpleJunctions, reservedEthPipes, start, end);
             // Find the shortest path for the pipe, build a map for the AZ and ZA path
-            Map<String, List<TopoEdge>> eroMapForPipe = findShortestConstrainedPath(pipe, rsvBandwidths, rsvVlans);
+            Map<String, List<TopoEdge>> eroMapForPipe = findShortestConstrainedPath(pipe, bwAvailMap, rsvVlans);
+
+            // Store the response from translation PCE
+            TranslationPCEResponse transPceResponse = null;
 
             // If the paths are valid, attempt to reserve the resources
             if (verifyEros(eroMapForPipe)) {
@@ -337,7 +357,8 @@ public class TopPCE {
 
                 // Try to get the reserved resources
                 try {
-                    transPCE.reserveRequestedPipe(pipe, azEros, zaEros, rsvBandwidths, rsvVlans, reservedMplsPipes, reservedEthPipes, deviceToPortMap, portToDeviceMap, start, end, connectionId);
+                    transPceResponse = transPCE.reserveRequestedPipe(pipe, azEros, zaEros, bwAvailMap, rsvVlans,
+                            deviceToPortMap, portToDeviceMap, start, end, connectionId);
                 }
                 // If it failed, decrement the number reserved
                 catch (Exception e) {
@@ -369,13 +390,29 @@ public class TopPCE {
 
                 // Try to get the reserved resources
                 try {
-                    transPCE.reserveRequestedPipeWithPairs(pipe, azEROs, zaEROs, rsvBandwidths, rsvVlans, reservedMplsPipes, reservedEthPipes, deviceToPortMap, portToDeviceMap, start, end, connectionId);
+                    transPceResponse = transPCE.reserveRequestedPipeWithPairs(pipe, azEROs, zaEROs, bwAvailMap, rsvVlans,
+                            deviceToPortMap, portToDeviceMap, start, end, connectionId);
                 }
                 // If it failed, decrement the number reserved
                 catch (Exception e) {
                     log.info(e.getMessage());
                     numReserved--;
                 }
+            }
+
+            // Retrieve the new Reserved Ethernet and MPLS pipes
+            if(transPceResponse != null){
+                Set<ReservedEthPipeE> newEthPipes = transPceResponse.getEthPipes();
+                Set<ReservedMplsPipeE> newMplsPipes = transPceResponse.getMplsPipes();
+
+                // Update the bandwidth availability map
+                List<ReservedBandwidthE> newBandwidths = bwService.getReservedBandwidthsFromEthPipes(newEthPipes);
+                newBandwidths.addAll(bwService.getReservedBandwidthsFromMplsPipes(newMplsPipes));
+                bwService.amendBandwidthAvailabilityMap(bwAvailMap, newBandwidths);
+
+                // Store the new reserved pipes
+                reservedEthPipes.addAll(newEthPipes);
+                reservedMplsPipes.addAll(newMplsPipes);
             }
         }
         return numReserved;
@@ -386,12 +423,12 @@ public class TopPCE {
      * so far.
      *
      * @param pipe          - The requested pipe.
-     * @param rsvBandwidths - A list of all reserved bandwidths (so far)
+     * @param bwAvailMap    - A map of available "Ingress" and "Egress" bandwidth at each URN.
      * @param rsvVlans      - A list of all reserved VLANs (so far)
      * @return A map containing the AZ and ZA shortest paths
      */
     private Map<String, List<TopoEdge>> findShortestConstrainedPath(RequestedVlanPipeE pipe,
-                                                                    List<ReservedBandwidthE> rsvBandwidths,
+                                                                    Map<String, Map<String, Integer>> bwAvailMap,
                                                                     List<ReservedVlanE> rsvVlans) {
         log.info("Computing Shortest Constrained Path");
         Map<String, List<TopoEdge>> eroMap = null;
@@ -399,18 +436,18 @@ public class TopPCE {
         try {
             if (!pipe.getEroSurvivability().equals(SurvivabilityType.SURVIVABILITY_NONE) && pipe.getNumDisjoint() > 1) {
                 log.info("Entering Survivability PCE");
-                eroMap = survivabilityPCE.computeSurvivableERO(pipe, rsvBandwidths, rsvVlans);
+                eroMap = survivabilityPCE.computeSurvivableERO(pipe, bwAvailMap, rsvVlans);
                 log.info("Exiting Survivability PCE");
             } else if (!pipe.getAzERO().isEmpty() && !pipe.getZaERO().isEmpty()) {
                 log.info("Attempting to reserve specified Explicit Route Object");
-                eroMap = eroPCE.computeSpecifiedERO(pipe, rsvBandwidths, rsvVlans);
+                eroMap = eroPCE.computeSpecifiedERO(pipe, bwAvailMap, rsvVlans);
             } else if (pipe.getEroPalindromic().equals(PalindromicType.PALINDROME)) {
                 log.info("Entering Palindromical PCE");
-                eroMap = palindromicalPCE.computePalindromicERO(pipe, rsvBandwidths, rsvVlans);       // A->Z ERO is palindrome of Z->A ERO
+                eroMap = palindromicalPCE.computePalindromicERO(pipe, bwAvailMap, rsvVlans);       // A->Z ERO is palindrome of Z->A ERO
                 log.info("Exiting Palindromical PCE");
             } else {
                 log.info("Entering NON-Palindromical PCE");
-                eroMap = nonPalindromicPCE.computeNonPalindromicERO(pipe, rsvBandwidths, rsvVlans);       // A->Z ERO is NOT palindrome of Z->A ERO
+                eroMap = nonPalindromicPCE.computeNonPalindromicERO(pipe, bwAvailMap, rsvVlans);       // A->Z ERO is NOT palindrome of Z->A ERO
                 log.info("Exiting NON-Palindromical PCE");
             }
         } catch (PCEException e) {
