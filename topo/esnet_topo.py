@@ -31,7 +31,6 @@ def main():
     in_str = open(INPUT_ADDRS).read()
     addrs = json.loads(in_str)
 
-
     oscars_devices = transform_devices(in_devices=in_devices)
 
     (oscars_adjcies, igp_portmap) = transform_isis(isis_adjcies=isis_adjcies)
@@ -81,7 +80,6 @@ def make_urn_addrs(addrs=None, isis_adjcies=None):
 
 
     return urn_addrs
-
 
 
 def filter_out_not_igp(igp_portmap=None, oscars_devices=None):
@@ -186,31 +184,95 @@ def model_map(os=None, description=None):
 
 
 def transform_isis(isis_adjcies=None):
+    best_urns = best_urns_by_addr(isis_adjcies=isis_adjcies)
+
     oscars_adjcies = []
     igp_portmap = {}
+
+    for isis_adjcy in isis_adjcies:
+        a_router = isis_adjcy["a"]
+
+        a_port = isis_adjcy["a_port"]
+        a_addr = isis_adjcy["a_addr"]
+        z_addr = isis_adjcy["z_addr"]
+
+        a_urn = best_urns[a_addr]
+        z_urn = best_urns[z_addr]
+
+        if a_urn is not None and z_urn is not None:
+
+            oscars_adjcy = {
+                "a": a_urn,
+                "z": z_urn,
+                "metrics": {
+                    "MPLS": isis_adjcy["latency"]
+                }
+            }
+            oscars_adjcies.append(oscars_adjcy)
+
+            if a_router not in igp_portmap.keys():
+                igp_portmap[a_router] = {}
+
+            igp_portmap[a_router][a_port] = {
+                "mbps": isis_adjcy["mbps"]
+            }
+        # else:
+        #   print "skipping " + a_addr
+
+    return oscars_adjcies, igp_portmap
+
+
+def best_urns_by_addr(isis_adjcies=None):
+    urns_for_addr = {}
+    all_port_urns = []
+    dupe_port_urns = []
+    all_ifce_urns = []
+    dupe_ifce_urns = []
+
     for isis_adjcy in isis_adjcies:
         router_a = isis_adjcy["a"]
-        router_z = isis_adjcy["z"]
         port_a = isis_adjcy["a_port"]
-        port_z = isis_adjcy["z_port"]
-        a_urn = router_a + ":" + port_a
-        z_urn = router_z + ":" + port_z
-        oscars_adjcy = {
-            "a": a_urn,
-            "z": z_urn,
-            "metrics": {
-                "MPLS": isis_adjcy["latency"]
-            }
-        }
-        oscars_adjcies.append(oscars_adjcy)
+        addr_a = isis_adjcy["a_addr"]
 
-        if router_a not in igp_portmap.keys():
-            igp_portmap[router_a] = {}
+        ifce_urn_a = None
+        if "a_ifce" in isis_adjcy.keys():
+            ifce_a = isis_adjcy["a_ifce"]
+            ifce_urn_a = router_a + ":" +ifce_a
+            if ifce_urn_a in all_ifce_urns:
+                dupe_ifce_urns.append(ifce_urn_a)
+            else:
+                all_ifce_urns.append(ifce_urn_a)
 
-        igp_portmap[router_a][port_a] = {
-            "mbps": isis_adjcy["mbps"]
+        port_urn_a = router_a + ":" +port_a
+        if port_urn_a in all_port_urns:
+            dupe_port_urns.append(port_urn_a)
+        else:
+            all_port_urns.append(port_urn_a)
+
+        addr_urn_a = router_a + ":" +addr_a
+
+        entry = {
+            "port_urn": port_urn_a,
+            "ifce_urn": ifce_urn_a,
+            "addr_urn": addr_urn_a
         }
-    return oscars_adjcies, igp_portmap
+        urns_for_addr[addr_a] = entry
+
+    best_urns = {}
+
+    for addr in urns_for_addr.keys():
+        entry = urns_for_addr[addr]
+        if entry["port_urn"] not in dupe_port_urns:
+            best_urns[addr] = entry["port_urn"]
+        elif entry["ifce_urn"] is not None:
+            best_urns[addr] = None
+        #   best_urns[addr] = entry["ifce_urn"]
+        #   print "dupe urn! " + entry["ifce_urn"]
+        else:
+            best_urns[addr] = None
+        #   best_urns[addr] = entry["addr_urn"]
+        #   print "dupe urn! " + entry["addr_urn"]
+    return best_urns
 
 
 if __name__ == '__main__':
