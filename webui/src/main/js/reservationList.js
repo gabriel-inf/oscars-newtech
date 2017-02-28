@@ -59,17 +59,10 @@ class ReservationList extends React.Component{
 class ReservationDetails extends React.Component{
     constructor(props){
         super(props);
-        this.state = {startDate: new Date(), endDate: new Date(), submitDate: new Date(), graphHidden: true};
-    }
-
-    componentDidMount(){
-        let start = this.state.startDate;
-        start.setTime(this.props.reservation.specification.scheduleSpec.startDates[0]);
-        let end = this.state.endDate;
-        end.setTime(this.props.reservation.specification.scheduleSpec.startDates[0]);
-        let submit = this.state.submitDate;
-        submit.setTime(this.props.reservation.schedule.submitted);
-        this.setState({startDate: start, endDate: end, submitDate: submit});
+        let start = new Date(this.props.reservation.specification.scheduleSpec.startDates[0]);
+        let end = new Date(this.props.reservation.specification.scheduleSpec.endDates[0]);
+        let submit = new Date(this.props.reservation.schedule.submitted);
+        this.state = {startDate: start, endDate: end, submitDate: submit, graphHidden: true};
     }
 
 
