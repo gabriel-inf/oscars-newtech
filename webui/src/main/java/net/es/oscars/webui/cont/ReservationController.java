@@ -61,6 +61,14 @@ public class ReservationController {
         return "resv_view";
     }
 
+    @RequestMapping(value = "/resv/get/{connectionId}", method=RequestMethod.GET)
+    @ResponseBody
+    public Connection resv_get_details(@PathVariable String connectionId) {
+        String restPath = oscarsUrl + "/resv/get/" + connectionId;
+
+        return restTemplate.getForObject(restPath, Connection.class);
+    }
+
 
     @RequestMapping("/resv/list")
     public String resv_list(Model model) { return "resv_list"; }

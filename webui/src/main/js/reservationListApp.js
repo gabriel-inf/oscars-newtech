@@ -5,29 +5,41 @@ const client = require('./client');
 const connHelper = require('./connectionHelper');
 const networkVis = require('./networkVis');
 const vis = require('../../../node_modules/vis/dist/vis');
-const deepEqual = require('deep-equal');
+const ReservationList = require("./reservationList");
 
 class ReservationListApp extends React.Component{
 
     constructor(props){
         super(props);
-        this.state = {reservations: []};
+        this.state = {reservations: [], timeoutId: -1};
         this.setState = this.setState.bind(this);
         this.componentDidMount = this.componentDidMount.bind(this);
         this.updateReservations = this.updateReservations.bind(this);
         this.listHasChanged = this.listHasChanged.bind(this);
         this.evaluateReservationList = this.evaluateReservationList.bind(this);
+        this.componentWillUnmount = this.componentWillUnmount.bind(this);
     }
 
     componentDidMount(){
         return this.updateReservations();
     }
 
+    componentWillUnmount(){
+        clearTimeout(this.state.timeoutId);
+    }
+
     updateReservations(){
         client.loadJSON({method: "GET", url: '/resv/list/allconnections'})
-            .then(this.evaluateReservationList);
-
-        setTimeout(this.updateReservations, 10000);   // Updates every 10 seconds
+            .then(
+                (successResponse) => {
+                    this.evaluateReservationList(successResponse);
+                },
+                (failResponse) => {
+                    console.log("Error: " + failResponse.status + " - " + failResponse.statusText);
+                }
+        );
+        let timeoutId = setTimeout(this.updateReservations, 15000);   // Updates every 15 seconds
+        this.setState({timeoutId: timeoutId});
     }
 
     evaluateReservationList(response){
@@ -67,177 +79,9 @@ class ReservationListApp extends React.Component{
             <div>
                 <NavBar isAuthenticated={this.props.route.isAuthenticated} isAdmin={this.props.route.isAdmin}/>
                 <ReservationHeatMap reservations={this.state.reservations}/>
-                <ReservationList reservations={this.state.reservations}/>
+                <p style={{marginLeft: '40px', color: '#2c5699'}}> Select a connection to view additional reservation details.</p>
+                <ReservationList reservations={this.state.reservations} alwaysExpanded={false}/>
             </div>
-        );
-    }
-}
-
-class ReservationList extends React.Component{
-    constructor(props){
-        super(props);
-
-        let resExpanded = {};
-        for(let resv of this.props.reservations){
-            resExpanded[resv.connectionId] = false;
-        }
-
-        this.state = {resExpanded: resExpanded};
-        this.handleClick = this.handleClick.bind(this);
-    }
-
-    handleClick(id){
-        let resExpanded = this.state.resExpanded;
-        resExpanded[id] = !resExpanded[id];
-        this.setState({resExpanded: resExpanded});
-    }
-
-    render(){
-        const rows = [];
-        for(let resv of this.props.reservations){
-            rows.push(
-                <ReservationDetails reservation={resv} key={resv.connectionId} onClick={(id) => this.handleClick(id)}/>
-            );
-            if(this.state.resExpanded[resv.connectionId]){
-                let graphKey = "graph_" + resv.connectionId;
-                rows.push(
-                    <ReservationGraph connId={resv.connectionId} key={graphKey}/>
-                );
-            }
-        }
-        return (
-            <table id="listTable" className="table table-hover">
-                <thead>
-                <tr>
-                    <th id="tester" style={{marginLeft: '40px', color: '#2c5699'}}> Expand a connection to view additional reservation details.</th>
-                </tr>
-                <tr>
-                    <th style={{width: '150px'}}>Connection ID</th>
-                    <th style={{width: '200px'}}>Description</th>
-                    <th style={{width: '200px'}}>Status</th>
-                    <th style={{width: '200px'}}>Request Details</th>
-                    <th style={{width: '200px'}}>User</th>
-                    <th style={{width: '200px'}}>Submission Time</th>
-                </tr>
-                </thead>
-                <tbody id="listBody">
-                {rows}
-                </tbody>
-            </table>
-        )
-    }
-}
-
-class ReservationDetails extends React.Component{
-    constructor(props){
-        super(props);
-        this.state = {startDate: new Date(), endDate: new Date(), submitDate: new Date(), graphHidden: true};
-    }
-
-    componentDidMount(){
-        let start = this.state.startDate;
-        start.setTime(this.props.reservation.specification.scheduleSpec.startDates[0]);
-        let end = this.state.endDate;
-        end.setTime(this.props.reservation.specification.scheduleSpec.startDates[0]);
-        let submit = this.state.submitDate;
-        submit.setTime(this.props.reservation.schedule.submitted);
-        this.setState({startDate: start, endDate: end, submitDate: submit});
-    }
-
-
-    render(){
-        return(
-            <tr className="accordion-toggle" onClick={() => this.props.onClick(this.props.reservation.connectionId)} >
-                <td>{this.props.reservation.connectionId}</td>
-                <td>{this.props.reservation.specification.description}</td>
-                <td>
-                    <div>{this.props.reservation.states.resv}</div>
-                    <div>{this.props.reservation.states.prov}</div>
-                    <div>{this.props.reservation.states.oper}</div>
-                </td>
-                <td>
-                    <div>{"Start: " + this.state.startDate.toString()}</div>
-                    <div>{"End: " + this.state.endDate.toString()}</div>
-                </td>
-                <td>{this.props.reservation.specification.username}</td>
-                <td>{this.state.submitDate.toString()}</td>
-            </tr>
-        )
-
-    }
-}
-
-class ReservationGraph extends React.Component{
-
-    constructor(props){
-        super(props);
-        this.state = {edges: [], nodes: []};
-        this.displayGraph = this.displayGraph.bind(this);
-    }
-
-    componentDidMount(){
-        client.loadJSON({method: "GET", url: "/viz/connection/" + this.props.connId})
-            .then(this.displayGraph);
-    }
-
-    displayGraph(response){
-        let json_data = JSON.parse(response);
-
-        let edges = json_data.edges;
-        let nodes = json_data.nodes;
-        this.setState({edges: edges, nodes: nodes});
-
-        if(edges.length == 0 && nodes.length === 0){
-            return;
-        }
-
-        // Parse JSON string into object
-        let resOptions = {
-            autoResize: true,
-            width: '100%',
-            height: '100%',
-            interaction: {
-                hover: true,
-                navigationButtons: false,
-                zoomView: false,
-                dragView: false,
-                multiselect: false,
-                selectable: true,
-            },
-            physics: {
-                stabilization: true,
-            },
-            nodes: {
-                shape: 'dot',
-                color: {background: "white"},
-            }
-        };
-
-        let vizName = "resViz_" + this.props.connId;
-
-        let vizElement = document.getElementById(vizName);
-        let reservation_viz = networkVis.make_network(nodes, edges, vizElement, resOptions, vizName);
-
-    }
-
-    render(){
-        let resVizId = "resViz_" + this.props.connId;
-        let resVizClass = "panel-body in" + this.props.connId;
-        return (
-            <tr>
-                <td colSpan={6}>
-                    {this.state.edges.length > 0 || this.state.nodes.length > 0 ?
-                        <div>
-                            <b>Reservation Path:</b> {this.props.connId}
-                            <div id={resVizId} className={resVizClass} style={{display:"block"}}></div>
-                        </div> :
-                        <div>
-                            <b>Reservation Path:</b> {this.props.connId}
-                            <div>No path data found.</div>
-                        </div>
-                    }
-                </td>
-            </tr>
         );
     }
 }
