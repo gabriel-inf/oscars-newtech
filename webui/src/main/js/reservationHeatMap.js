@@ -53,15 +53,14 @@ class ReservationHeatMap extends React.Component{
     }
 
     initializeNetwork() {
-        let portCaps = {};
 
         // Identify the network ports
         client.loadJSON({method: "GET", url: "/topology/bwcapacity"}).then(function(response) {
-            portCaps = JSON.parse(response);
-        });
+            let portCaps = JSON.parse(response);
+            client.loadJSON({method: "GET", url: "/viz/topology/multilayer"}).then(
+                (response) => this.buildMap(response, portCaps))
+        }.bind(this));
 
-        client.loadJSON({method: "GET", url: "/viz/topology/multilayer"}).then(
-            (response) => this.buildMap(response, portCaps));
     }
 
     buildMap(response, portCaps){
@@ -248,22 +247,25 @@ class ReservationHeatMap extends React.Component{
 
         for(let edge in netData.edges._data)
         {
-            let linkBW = 0;
+            if(netData.edges._data.hasOwnProperty(edge)){
+                let linkBW = 0;
 
-            if(linkConsumptionMap.has(edge))
-                linkBW = linkConsumptionMap.get(edge);
+                if(linkConsumptionMap.has(edge))
+                    linkBW = linkConsumptionMap.get(edge);
 
-            let linkCap = this.calculateLinkCapacity(edge, portCaps); // 5. Get link utilization as percentage of capacity
-            let linkUtil = linkBW / linkCap;
-            let linkColor = this.pickColor(linkUtil);      // 6. Select link color based on utilization
+                let linkCap = this.calculateLinkCapacity(edge, portCaps); // 5. Get link utilization as percentage of capacity
+                let linkUtil = linkBW / linkCap;
 
-            allLinkDetails.set(edge, {
-                id: edge,
-                consumed: linkBW,
-                capacity: linkCap,
-                utilization: linkUtil,
-                color: linkColor,
-            });
+                let linkColor = this.pickColor(linkUtil);      // 6. Select link color based on utilization
+
+                allLinkDetails.set(edge, {
+                    id: edge,
+                    consumed: linkBW,
+                    capacity: linkCap,
+                    utilization: linkUtil,
+                    color: linkColor,
+                });
+            }
         }
 
         // 7. Update and color links

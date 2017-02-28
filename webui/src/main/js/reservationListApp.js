@@ -7,6 +7,7 @@ const networkVis = require('./networkVis');
 const vis = require('../../../node_modules/vis/dist/vis');
 const ReservationList = require("./reservationList");
 
+let timeoutId = -1;
 class ReservationListApp extends React.Component{
 
     constructor(props){
@@ -25,7 +26,7 @@ class ReservationListApp extends React.Component{
     }
 
     componentWillUnmount(){
-        clearTimeout(this.state.timeoutId);
+        clearTimeout(timeoutId);
     }
 
     updateReservations(){
@@ -38,8 +39,7 @@ class ReservationListApp extends React.Component{
                     console.log("Error: " + failResponse.status + " - " + failResponse.statusText);
                 }
         );
-        let timeoutId = setTimeout(this.updateReservations, 15000);   // Updates every 15 seconds
-        this.setState({timeoutId: timeoutId});
+        timeoutId = setTimeout(this.updateReservations, 15000);   // Updates every 15 seconds
     }
 
     evaluateReservationList(response){
@@ -53,7 +53,6 @@ class ReservationListApp extends React.Component{
         // If new list is empty, list has only changed if old was not empty
         if($.isEmptyObject(newConnectionList)){
             return !$.isEmptyObject(oldConnectionList);
-
         }
 
         // Same size
