@@ -30,7 +30,7 @@ public class BandwidthAvailabilityController {
         log.info("Request Details: " + request.toString());
 
         BandwidthAvailabilityResponse response = bwAvailService.getBandwidthAvailabilityMap(request);
-        log.info("Response Details: " + response.toString());
+        //log.info("Response Details: " + response.toString());
         return response;
     }
 
@@ -42,7 +42,7 @@ public class BandwidthAvailabilityController {
         log.info("Request Details: " + bwRequest.toString());
 
         PortBandwidthAvailabilityResponse response = bwAvailService.getBandwidthAvailabilityOnAllPorts(bwRequest);
-        log.info("Response Details: " + response.toString());
+        //log.info("Response Details: " + response.toString());
         return response;
     }
 }
