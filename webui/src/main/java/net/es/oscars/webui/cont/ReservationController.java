@@ -9,10 +9,11 @@ import net.es.oscars.dto.resv.ConnectionFilter;
 import net.es.oscars.dto.spec.RequestedVlanPipe;
 import net.es.oscars.dto.topo.BidirectionalPath;
 import net.es.oscars.dto.topo.Edge;
+import net.es.oscars.webui.dto.AdvancedRequest;
 import net.es.oscars.webui.dto.MinimalRequest;
 import net.es.oscars.webui.ipc.ConnectionProvider;
 import net.es.oscars.webui.ipc.MinimalPreChecker;
-import net.es.oscars.webui.ipc.MinimalRequester;
+import net.es.oscars.webui.ipc.Requester;
 import org.hashids.Hashids;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -30,7 +31,7 @@ public class ReservationController {
     private RestTemplate restTemplate;
 
     @Autowired
-    private MinimalRequester minimalRequester;
+    private Requester requester;
 
     @Autowired
     private MinimalPreChecker minimalPreChecker;
@@ -165,7 +166,22 @@ public class ReservationController {
     @RequestMapping(value = "/resv/minimal_hold", method = RequestMethod.POST)
     @ResponseBody
     public Map<String, String> resv_minimal_hold(@RequestBody MinimalRequest request) {
-        Connection c = minimalRequester.holdMinimal(request);
+        Connection c = requester.holdMinimal(request);
+        try {
+            Thread.sleep(500L);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        Map<String, String> res = new HashMap<>();
+        res.put("connectionId", c.getConnectionId());
+
+        return res;
+    }
+
+    @RequestMapping(value = "/resv/advanced_hold", method = RequestMethod.POST)
+    @ResponseBody
+    public Map<String, String> resv_advanced_hold(@RequestBody AdvancedRequest request) {
+        Connection c = requester.holdAdvanced(request);
         try {
             Thread.sleep(500L);
         } catch (InterruptedException e) {
