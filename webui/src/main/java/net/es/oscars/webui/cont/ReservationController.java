@@ -12,7 +12,7 @@ import net.es.oscars.dto.topo.Edge;
 import net.es.oscars.webui.dto.AdvancedRequest;
 import net.es.oscars.webui.dto.MinimalRequest;
 import net.es.oscars.webui.ipc.ConnectionProvider;
-import net.es.oscars.webui.ipc.MinimalPreChecker;
+import net.es.oscars.webui.ipc.PreChecker;
 import net.es.oscars.webui.ipc.Requester;
 import org.hashids.Hashids;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +34,7 @@ public class ReservationController {
     private Requester requester;
 
     @Autowired
-    private MinimalPreChecker minimalPreChecker;
+    private PreChecker preChecker;
 
     @Autowired
     private ConnectionProvider connectionProvider;
@@ -198,12 +198,25 @@ public class ReservationController {
     @ResponseBody
     public Map<String, String> resv_preCheck(@RequestBody MinimalRequest request)
     {
-        Connection c = minimalPreChecker.preCheckMinimal(request);
+        Connection c = preChecker.preCheckMinimal(request);
         log.info("Request Details: " + request.toString());
 
+        return processPrecheckResponse(request.getConnectionId(), c);
+    }
+
+    @RequestMapping(value = "/resv/advanced_precheck", method = RequestMethod.POST)
+    @ResponseBody
+    public Map<String, String> resv_precheck_advanced(@RequestBody AdvancedRequest request){
+        Connection c = preChecker.preCheckAdvanced(request);
+        log.info("Request Details: " + request.toString());
+
+        return processPrecheckResponse(request.getConnectionId(), c);
+    }
+
+    private Map<String, String> processPrecheckResponse(String connectionId, Connection c){
         Map<String, String> res = new HashMap<>();
 
-        res.put("connectionId", request.getConnectionId());
+        res.put("connectionId", connectionId);
 
         //TODO: Pass back reservation with all details
         if(c == null)
@@ -218,7 +231,7 @@ public class ReservationController {
 
             Set<BidirectionalPath> allPaths = c.getReserved().getVlanFlow().getAllPaths();
 
-            String pathList = new String();
+            String pathList = "";
 
             for(BidirectionalPath biPath : allPaths)
             {

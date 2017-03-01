@@ -98,7 +98,7 @@ class ReservationApp extends React.Component{
             let reservationStatus = validator.validateReservation(this.state.reservation);
             if(reservationStatus.isValid){
                 this.setState({message: "Reservation format valid. Prechecking resource availability...", messageBoxClass: "alert-success"});
-                let preCheckResponse = client.submitReservation("/resv/precheck", this.state.reservation);
+                let preCheckResponse = client.submitReservation("/resv/advanced_precheck", this.state.reservation);
                 preCheckResponse.then(
                     (successResponse) => {
                         this.processPrecheck(successResponse);
@@ -220,20 +220,9 @@ class ReservationApp extends React.Component{
                     if(!(pipeId in pipeIdNumberDict)){
                         pipeIdNumberDict[pipeId] = 0;
                     }
-                    // Add a number of to the pipe ID to make them uniqueh
-                    newPipe = {
-                        id: pipeId + "_" + pipeIdNumberDict[pipeId],
-                        a: lastNodeName,
-                        from: lastNodeName,
-                        z: newNodeName,
-                        to: newNodeName,
-                        azbw: 0,
-                        zabw: 0,
-                        symmetricBw: true,
-                        palindromicPath: true,
-                        survivabilityType: "None",
-                        numPaths: 1
-                    };
+                    // Add a number of to the pipe ID to make them unique
+                    newPipe = createPipe(pipeId, pipeIdNumberDict[pipeId], lastNodeName, newNodeName, 0, 0, true, true, "None", 1, [], [], []);
+
                     reservation.pipes[newPipe.id] = newPipe;
                     // Increment the counter
                     pipeIdNumberDict[pipeId] += 1;
@@ -256,6 +245,7 @@ class ReservationApp extends React.Component{
             this.state.networkVis.network.unselectAll();
         }
     }
+
 
     completeJunctionAddition(newNodeName, newPipe, reservation, nodeOrder, pipeIdNumberDict, response){
         // Get the fixtures for this junction
@@ -312,11 +302,7 @@ class ReservationApp extends React.Component{
                 pipeIdNumberDict[pipeId] = 0;
             }
 
-            let newPipe = {
-                id: pipeId + "_" + pipeIdNumberDict[pipeId],
-                a: data.from,
-                z: data.to
-            };
+            let newPipe = createPipe(pipeId, pipeIdNumberDict[pipeId], data.from, data.to, 0, 0, true, true, "None", 1, [], [], []);
 
             // Change the Viz edge ID to match the pipe ID
             data.id = pipeId + "_" + pipeIdNumberDict[pipeId];
@@ -494,7 +480,7 @@ class ReservationApp extends React.Component{
 
     handleHold(reservation){
         reservation.status = "HELD";
-        let holdResponse = client.submitReservation( "/resv/minimal_hold", reservation);
+        let holdResponse = client.submitReservation( "/resv/advanced_hold", reservation);
         holdResponse.then(
             (successResponse) => {
                 this.setState(
@@ -962,6 +948,25 @@ class ParameterFormButton extends React.Component{
             />
         );
     }
+}
+
+function createPipe(pipeId, number, aName, zName, azBw, zaBw, symmetric, palindromic, survivabiliyType, numPaths, azERO, zaERO, blacklist){
+    return {
+        id: pipeId + "_" + number,
+        a: aName,
+        from: aName,
+        z: zName,
+        to: zName,
+        azbw: azBw,
+        zabw: zaBw,
+        symmetricBw: symmetric,
+        palindromicPath: palindromic,
+        survivabilityType: survivabiliyType,
+        numPaths: numPaths,
+        azERO: azERO,
+        zaERO: zaERO,
+        blacklist: blacklist
+    };
 }
 
 module.exports = ReservationApp;
