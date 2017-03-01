@@ -91,7 +91,6 @@ public class BellmanFordPCE {
                 if(!distanceMap.containsKey(a) || !distanceMap.containsKey(z)){
                     log.info("At least one vertex on an edge does not exist in topology");
                     log.info("Edge: " + edge);
-                    log.info("A: " + a.getUrn() + "or Z: " + z.getUrn());
                     return new HashMap<>();
                 }
                 Long weight = distanceMap.get(a) + edge.getMetric();
