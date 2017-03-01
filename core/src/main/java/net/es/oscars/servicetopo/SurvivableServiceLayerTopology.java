@@ -150,6 +150,7 @@ public class SurvivableServiceLayerTopology
         mplsLayerPorts.addAll(allMplsPorts);
         mplsLayerLinks.addAll(allMplsEdges);
         mplsLayerLinks.addAll(allInternalMPLSEdges);
+
     }
 
     /**

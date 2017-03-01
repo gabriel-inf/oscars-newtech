@@ -1589,6 +1589,14 @@ public class TopPceTestSurvivablePartial
         Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
         Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
 
+        // ISSUE: albq (router) has ports on the Ethernet layer. Those ports don't appear on the MPLS layer, but
+        // the edges connecting albq to those ports are included in MPLS.
+        // Test passes, but it's kinda weird.
+        // Also look into what service layer topology looks like
+        // Have seen examples where it's (srcPort) -> (virtual srcPort) |-> (virtual srcDevice)
+        //                                                              |-> (rest of network)
+        // With the virtual srcDevice not connected to anything else.
+
         String srcPort = "wash-cr5:10/1/10";
         String srcDevice = "wash-cr5";
         String dstPort = "denv-cr5:10/1/11";

@@ -177,6 +177,7 @@ public class SurvivabilityPCE
         Topology intTopo = topoService.layer(Layer.INTERNAL);
         Topology mplsTopo = topoService.layer(Layer.MPLS);
 
+
         Topology physTopo = topoService.getMultilayerTopology();
 
         // Filter MPLS-ports and MPLS-devices out of ethTopo

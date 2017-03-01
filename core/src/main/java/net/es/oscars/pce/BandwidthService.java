@@ -106,13 +106,10 @@ public class BandwidthService {
 
         // Build a map, allowing us to retrieve the available "Ingress" and "Egress" bandwidth at each associated URN
         Map<String, Map<String, Integer>> availBwMap = new HashMap<>();
-        Instant then = Instant.now();
         urns.stream()
                 .filter(urn -> urn.getReservableBandwidth() != null)
                 .forEach(urn -> availBwMap.put(urn.getUrn(), buildBandwidthAvailabilityMapForUrn(urn.getUrn(), urn.getReservableBandwidth(), resvBwMap)));
 
-        Instant now = Instant.now();
-        Long seconds = now.getEpochSecond() - then.getEpochSecond();
         return availBwMap;
     }
 

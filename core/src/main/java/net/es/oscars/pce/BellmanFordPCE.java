@@ -88,10 +88,11 @@ public class BellmanFordPCE {
             for(TopoEdge edge : edges){
                 TopoVertex a = edge.getA();
                 TopoVertex z = edge.getZ();
-                if(!distanceMap.containsKey(a) || !distanceMap.containsKey(z)){
-                    log.info("At least one vertex on an edge does not exist in topology");
-                    log.info("Edge: " + edge);
-                    return new HashMap<>();
+                if(!distanceMap.containsKey(a)){
+                    distanceMap.put(a, 999999999L);
+                }
+                if(!distanceMap.containsKey(z)){
+                    distanceMap.put(z, 999999999L);
                 }
                 Long weight = distanceMap.get(a) + edge.getMetric();
                 if(weight < distanceMap.get(z)){
