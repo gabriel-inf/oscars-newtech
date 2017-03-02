@@ -106,13 +106,10 @@ public class BandwidthService {
 
         // Build a map, allowing us to retrieve the available "Ingress" and "Egress" bandwidth at each associated URN
         Map<String, Map<String, Integer>> availBwMap = new HashMap<>();
-        Instant then = Instant.now();
         urns.stream()
                 .filter(urn -> urn.getReservableBandwidth() != null)
-                .forEach(urn -> availBwMap.put(urn.getUrn(), buildBandwidthAvailabilityMapUrn(urn.getUrn(), urn.getReservableBandwidth(), resvBwMap)));
+                .forEach(urn -> availBwMap.put(urn.getUrn(), buildBandwidthAvailabilityMapForUrn(urn.getUrn(), urn.getReservableBandwidth(), resvBwMap)));
 
-        Instant now = Instant.now();
-        Long seconds = now.getEpochSecond() - then.getEpochSecond();
         return availBwMap;
     }
 
@@ -160,8 +157,8 @@ public class BandwidthService {
      * @param resvBwMap - A Mapping from a URN to a list of Reserved Bandwidths at that URN.
      * @return A mapping Ingress/Egress bandwidth availability {Ingress: num, Egress: num}
      */
-    public Map<String, Integer> buildBandwidthAvailabilityMapUrn(String urn, ReservableBandwidthE bandwidth,
-                                                                 Map<String, List<ReservedBandwidthE>> resvBwMap) {
+    public Map<String, Integer> buildBandwidthAvailabilityMapForUrn(String urn, ReservableBandwidthE bandwidth,
+                                                                    Map<String, List<ReservedBandwidthE>> resvBwMap) {
         Map<String, Integer> availBw = new HashMap<>();
         availBw.put("Ingress", bandwidth.getIngressBw());
         availBw.put("Egress", bandwidth.getEgressBw());

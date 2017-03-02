@@ -9,10 +9,11 @@ import net.es.oscars.dto.resv.ConnectionFilter;
 import net.es.oscars.dto.spec.RequestedVlanPipe;
 import net.es.oscars.dto.topo.BidirectionalPath;
 import net.es.oscars.dto.topo.Edge;
+import net.es.oscars.webui.dto.AdvancedRequest;
 import net.es.oscars.webui.dto.MinimalRequest;
 import net.es.oscars.webui.ipc.ConnectionProvider;
-import net.es.oscars.webui.ipc.MinimalPreChecker;
-import net.es.oscars.webui.ipc.MinimalRequester;
+import net.es.oscars.webui.ipc.PreChecker;
+import net.es.oscars.webui.ipc.Requester;
 import org.hashids.Hashids;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -30,10 +31,10 @@ public class ReservationController {
     private RestTemplate restTemplate;
 
     @Autowired
-    private MinimalRequester minimalRequester;
+    private Requester requester;
 
     @Autowired
-    private MinimalPreChecker minimalPreChecker;
+    private PreChecker preChecker;
 
     @Autowired
     private ConnectionProvider connectionProvider;
@@ -59,6 +60,14 @@ public class ReservationController {
 
         model.addAttribute("connection", conn);
         return "resv_view";
+    }
+
+    @RequestMapping(value = "/resv/get/{connectionId}", method=RequestMethod.GET)
+    @ResponseBody
+    public Connection resv_get_details(@PathVariable String connectionId) {
+        String restPath = oscarsUrl + "/resv/get/" + connectionId;
+
+        return restTemplate.getForObject(restPath, Connection.class);
     }
 
 
@@ -157,7 +166,22 @@ public class ReservationController {
     @RequestMapping(value = "/resv/minimal_hold", method = RequestMethod.POST)
     @ResponseBody
     public Map<String, String> resv_minimal_hold(@RequestBody MinimalRequest request) {
-        Connection c = minimalRequester.holdMinimal(request);
+        Connection c = requester.holdMinimal(request);
+        try {
+            Thread.sleep(500L);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        Map<String, String> res = new HashMap<>();
+        res.put("connectionId", c.getConnectionId());
+
+        return res;
+    }
+
+    @RequestMapping(value = "/resv/advanced_hold", method = RequestMethod.POST)
+    @ResponseBody
+    public Map<String, String> resv_advanced_hold(@RequestBody AdvancedRequest request) {
+        Connection c = requester.holdAdvanced(request);
         try {
             Thread.sleep(500L);
         } catch (InterruptedException e) {
@@ -174,12 +198,25 @@ public class ReservationController {
     @ResponseBody
     public Map<String, String> resv_preCheck(@RequestBody MinimalRequest request)
     {
-        Connection c = minimalPreChecker.preCheckMinimal(request);
+        Connection c = preChecker.preCheckMinimal(request);
         log.info("Request Details: " + request.toString());
 
+        return processPrecheckResponse(request.getConnectionId(), c);
+    }
+
+    @RequestMapping(value = "/resv/advanced_precheck", method = RequestMethod.POST)
+    @ResponseBody
+    public Map<String, String> resv_precheck_advanced(@RequestBody AdvancedRequest request){
+        Connection c = preChecker.preCheckAdvanced(request);
+        log.info("Request Details: " + request.toString());
+
+        return processPrecheckResponse(request.getConnectionId(), c);
+    }
+
+    private Map<String, String> processPrecheckResponse(String connectionId, Connection c){
         Map<String, String> res = new HashMap<>();
 
-        res.put("connectionId", request.getConnectionId());
+        res.put("connectionId", connectionId);
 
         //TODO: Pass back reservation with all details
         if(c == null)
@@ -194,7 +231,7 @@ public class ReservationController {
 
             Set<BidirectionalPath> allPaths = c.getReserved().getVlanFlow().getAllPaths();
 
-            String pathList = new String();
+            String pathList = "";
 
             for(BidirectionalPath biPath : allPaths)
             {

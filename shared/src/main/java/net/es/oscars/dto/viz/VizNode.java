@@ -17,6 +17,7 @@ public class VizNode {
     String label;
     Integer value;
     String title;
+    String type;
     Map<String, Boolean> fixed;
     Integer x;
     Integer y;

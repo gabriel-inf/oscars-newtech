@@ -62,8 +62,9 @@ public class VizExporter {
             nodes.add(rvj.getDeviceUrn());
         }
 
-        for (String deviceUrn : nodes) {
-            this.makeNode(deviceUrn, g);
+        Set<TopoVertex> pathVertices = multilayer.getVertices().stream().filter(v -> nodes.contains(v.getUrn())).collect(Collectors.toSet());
+        for (TopoVertex vertex: pathVertices) {
+            this.makeNode(vertex, g);
         }
         return g;
     }
@@ -249,8 +250,9 @@ public class VizExporter {
             }
         }
 
-        for (String deviceUrn : portMap.keySet()) {
-            this.makeNode(deviceUrn, g);
+        Set<TopoVertex> vertices = multilayer.getVertices().stream().filter(v -> !v.getVertexType().equals(VertexType.PORT)).collect(Collectors.toSet());
+        for (TopoVertex vertex : vertices) {
+            this.makeNode(vertex, g);
         }
 
         return g;
@@ -382,36 +384,36 @@ public class VizExporter {
 
         }
 
-        for (String deviceUrn : portMap.keySet()) {
-            this.makeNode(deviceUrn, g);
+        for (TopoVertex vertex : multilayer.getVertices()) {
+            this.makeNode(vertex, g);
         }
 
         return g;
     }
 
 
-    private void makeNode(String node, VizGraph g) {
+    private void makeNode(TopoVertex node, VizGraph g) {
 
         Map<String, Set<String>> hubs = topologyProvider.getHubs();
         Map<String, Position> positions = topologyProvider.getPositions();
         String hub = null;
         for (String h : hubs.keySet()) {
-            if (hubs.get(h).contains(node)) {
+            if (hubs.get(h).contains(node.getUrn())) {
                 hub = h;
             }
         }
 
-        VizNode n = VizNode.builder().id(node).label(node).title(node).value(1).build();
+        VizNode n = VizNode.builder().id(node.getUrn()).label(node.getUrn()).title(node.getUrn()).value(1).type(node.getVertexType().toString()).build();
         if (hub != null) {
             n.setGroup(hub);
         }
 
-        if (positions.keySet().contains(node)) {
+        if (positions.keySet().contains(node.getUrn())) {
             n.setFixed(new HashMap<>());
             n.getFixed().put("x", true);
             n.getFixed().put("y", true);
-            n.setX(positions.get(node).getX());
-            n.setY(positions.get(node).getY());
+            n.setX(positions.get(node.getUrn()).getX());
+            n.setY(positions.get(node.getUrn()).getY());
         }
 
 

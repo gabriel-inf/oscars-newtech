@@ -2,7 +2,8 @@ package net.es.oscars.webui.ipc;
 
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.resv.Connection;
-import net.es.oscars.webui.dto.MinimalConnectionBuilder;
+import net.es.oscars.webui.dto.AdvancedRequest;
+import net.es.oscars.webui.dto.ConnectionBuilder;
 import net.es.oscars.webui.dto.MinimalRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -11,7 +12,7 @@ import org.springframework.web.client.RestTemplate;
 
 @Slf4j
 @Component
-public class MinimalRequester {
+public class Requester {
     @Autowired
     private RestTemplate restTemplate;
 
@@ -20,8 +21,20 @@ public class MinimalRequester {
     public Connection holdMinimal(MinimalRequest minimalRequest) {
         log.info("holding minimal " + minimalRequest.toString());
 
-        MinimalConnectionBuilder minimalConnectionBuilder = new MinimalConnectionBuilder();
-        Connection c = minimalConnectionBuilder.buildMinimalConnectionFromRequest(minimalRequest);
+        ConnectionBuilder connectionBuilder = new ConnectionBuilder();
+        Connection c = connectionBuilder.buildConnectionFromMinimalRequest(minimalRequest);
+        return hold(c);
+    }
+
+    public Connection holdAdvanced(AdvancedRequest advancedRequest){
+        log.info("Holding advanced " + advancedRequest.toString());
+
+        ConnectionBuilder connectionBuilder = new ConnectionBuilder();
+        Connection c = connectionBuilder.buildConnectionFromAdvancedRequest(advancedRequest);
+        return hold(c);
+    }
+
+    public Connection hold(Connection c){
 
         String submitUrl = "/resv/connection/add";
         String restPath = oscarsUrl + submitUrl;

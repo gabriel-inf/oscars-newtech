@@ -6,6 +6,7 @@ const vis = require('../../../node_modules/vis/dist/vis');
 const DateTime = require('react-datetime');
 const validator = require('./validator');
 const deepEqual = require('deep-equal');
+import Dropdown from 'react-dropdown';
 
 class ReservationApp extends React.Component{
 
@@ -38,6 +39,8 @@ class ReservationApp extends React.Component{
                 }
             );
 
+        let survivabilityTypes = ["None", "MPLS only", "End-to-End"];
+
         this.state = {
             reservation: reservation,
             nodeOrder: [],
@@ -52,7 +55,8 @@ class ReservationApp extends React.Component{
             messageBoxClass: "alert-info",
             message: "Add a node to your reservation to get started!",
             enableHold: false,
-            enableCommit: false
+            enableCommit: false,
+            survivabilityTypes: survivabilityTypes
         };
         this.componentDidMount = this.componentDidMount.bind(this);
         this.componentDidUpdate = this.componentDidUpdate.bind(this);
@@ -67,7 +71,12 @@ class ReservationApp extends React.Component{
         this.handleSandboxSelection = this.handleSandboxSelection.bind(this);
         this.deleteJunction = this.deleteJunction.bind(this);
         this.deletePipe = this.deletePipe.bind(this);
-        this.handlePipeBwChange = this.handlePipeBwChange.bind(this);
+        this.handlePipeAzBw = this.handlePipeAzBw.bind(this);
+        this.handlePipeZaBw = this.handlePipeZaBw.bind(this);
+        this.handleSymmetricBwSelection = this.handleSymmetricBwSelection.bind(this);
+        this.handlePalindromicSelection = this.handlePalindromicSelection.bind(this);
+        this.handleSurvivabilitySelection = this.handleSurvivabilitySelection.bind(this);
+        this.handleNumPaths = this.handleNumPaths.bind(this);
         this.handleFixtureSelection = this.handleFixtureSelection.bind(this);
         this.handleFixtureVlanChange = this.handleFixtureVlanChange.bind(this);
         this.handleFixtureBwChange = this.handleFixtureBwChange.bind(this);
@@ -89,7 +98,7 @@ class ReservationApp extends React.Component{
             let reservationStatus = validator.validateReservation(this.state.reservation);
             if(reservationStatus.isValid){
                 this.setState({message: "Reservation format valid. Prechecking resource availability...", messageBoxClass: "alert-success"});
-                let preCheckResponse = client.submitReservation("/resv/precheck", this.state.reservation);
+                let preCheckResponse = client.submitReservation("/resv/advanced_precheck", this.state.reservation);
                 preCheckResponse.then(
                     (successResponse) => {
                         this.processPrecheck(successResponse);
@@ -211,14 +220,9 @@ class ReservationApp extends React.Component{
                     if(!(pipeId in pipeIdNumberDict)){
                         pipeIdNumberDict[pipeId] = 0;
                     }
-                    // Add a number of to the pipe ID to make them uniqueh
-                    newPipe = {
-                        id: pipeId + "_" + pipeIdNumberDict[pipeId],
-                        a: lastNodeName,
-                        from: lastNodeName,
-                        z: newNodeName,
-                        to: newNodeName,
-                        bw: 0};
+                    // Add a number of to the pipe ID to make them unique
+                    newPipe = createPipe(pipeId, pipeIdNumberDict[pipeId], lastNodeName, newNodeName, 0, 0, true, true, "None", 1, [], [], []);
+
                     reservation.pipes[newPipe.id] = newPipe;
                     // Increment the counter
                     pipeIdNumberDict[pipeId] += 1;
@@ -241,6 +245,7 @@ class ReservationApp extends React.Component{
             this.state.networkVis.network.unselectAll();
         }
     }
+
 
     completeJunctionAddition(newNodeName, newPipe, reservation, nodeOrder, pipeIdNumberDict, response){
         // Get the fixtures for this junction
@@ -297,11 +302,7 @@ class ReservationApp extends React.Component{
                 pipeIdNumberDict[pipeId] = 0;
             }
 
-            let newPipe = {
-                id: pipeId + "_" + pipeIdNumberDict[pipeId],
-                a: data.from,
-                z: data.to
-            };
+            let newPipe = createPipe(pipeId, pipeIdNumberDict[pipeId], data.from, data.to, 0, 0, true, true, "None", 1, [], [], []);
 
             // Change the Viz edge ID to match the pipe ID
             data.id = pipeId + "_" + pipeIdNumberDict[pipeId];
@@ -394,8 +395,47 @@ class ReservationApp extends React.Component{
         this.setState({selectedPipes: edges, selectedJunctions: nodes})
     }
 
-    handlePipeBwChange(pipe, reservation, event){
-        pipe.bw = event.target.value;
+    handlePipeAzBw(pipe, reservation, event){
+        pipe.azbw = event.target.value;
+        if(pipe.symmetricBw){
+            pipe.zabw = event.target.value;
+        }
+        reservation.pipes[pipe.id] = pipe;
+        this.setState({reservation: reservation});
+    }
+
+    handlePipeZaBw(pipe, reservation, event){
+        pipe.zabw = event.target.value;
+        if(pipe.symmetricBw){
+            pipe.azbw = event.target.value;
+        }
+        reservation.pipes[pipe.id] = pipe;
+        this.setState({reservation: reservation});
+    }
+
+    handleSymmetricBwSelection(pipe, reservation, event){
+        pipe.symmetricBw = !pipe.symmetricBw;
+        if(pipe.symmetricBw){
+            pipe.zabw = pipe.azbw;
+        }
+        reservation.pipes[pipe.id] = pipe;
+        this.setState({reservation: reservation});
+    }
+
+    handlePalindromicSelection(pipe, reservation, event){
+        pipe.palindromicPath = !pipe.palindromicPath;
+        reservation.pipes[pipe.id] = pipe;
+        this.setState({reservation: reservation});
+    }
+
+    handleSurvivabilitySelection(pipe, reservation, option){
+        pipe.survivabilityType = option.value;
+        reservation.pipes[pipe.id] = pipe;
+        this.setState({reservation: reservation});
+    }
+
+    handleNumPaths(pipe, reservation, event){
+        pipe.numPaths = event.target.value;
         reservation.pipes[pipe.id] = pipe;
         this.setState({reservation: reservation});
     }
@@ -440,7 +480,7 @@ class ReservationApp extends React.Component{
 
     handleHold(reservation){
         reservation.status = "HELD";
-        let holdResponse = client.submitReservation( "/resv/minimal_hold", reservation);
+        let holdResponse = client.submitReservation( "/resv/advanced_hold", reservation);
         holdResponse.then(
             (successResponse) => {
                 this.setState(
@@ -490,7 +530,13 @@ class ReservationApp extends React.Component{
                                          showJunctionPanel={this.state.showJunctionPanel}
                                          selectedPipes={this.state.selectedPipes}
                                          selectedJunctions={this.state.selectedJunctions}
-                                         handlePipeBw={this.handlePipeBwChange}
+                                         handlePipeAzBw={this.handlePipeAzBw}
+                                         handlePipeZaBw={this.handlePipeZaBw}
+                                         handleSymmetricBwSelection={this.handleSymmetricBwSelection}
+                                         handlePalindromicSelection={this.handlePalindromicSelection}
+                                         handleSurvivabilitySelection={this.handleSurvivabilitySelection}
+                                         handleNumPaths={this.handleNumPaths}
+                                         survivabilityTypes={this.state.survivabilityTypes}
                                          handleFixtureSelection={this.handleFixtureSelection}
                                          handleFixtureBwChange={this.handleFixtureBwChange}
                                          handleFixtureVlanChange={this.handleFixtureVlanChange}
@@ -618,7 +664,13 @@ class ReservationDetailsPanel extends React.Component{
                             pipe={selectedPipe}
                             key={selectedPipe.id}
                             style={(this.props.showPipePanel) ? {} : { display: "none" }}
-                            handlePipeBw={this.props.handlePipeBw}
+                            handlePipeAzBw={this.props.handlePipeAzBw}
+                            handlePipeZaBw={this.props.handlePipeZaBw}
+                            handleSymmetricBwSelection={this.props.handleSymmetricBwSelection}
+                            handlePalindromicSelection={this.props.handlePalindromicSelection}
+                            handleSurvivabilitySelection={this.props.handleSurvivabilitySelection}
+                            handleNumPaths={this.props.handleNumPaths}
+                            survivabilityTypes={this.props.survivabilityTypes}
                         /> : null
                     }
                     {selectedJunction != null ?
@@ -650,15 +702,41 @@ class PipePanel extends React.Component{
                     <form className="form-inline" id="pipe_form">
                         <table className="table table-striped table-bordered table-hover">
                             <thead>
-                            <tr><td>From</td>
-                                <td>Bandwidth</td>
-                                <td>To</td>
+                            <tr><td>Src -> Dest</td>
+                                <td>Src -> Dest Bandwidth</td>
+                                <td>Dest -> Src Bandwidth <br/>
+                                    <input id="pipe_different_za_bw" type="checkbox" className="form-check-input" checked={!this.props.pipe.symmetricBw}
+                                           onChange={this.props.handleSymmetricBwSelection.bind(this, this.props.pipe, this.props.reservation)}/>
+                                    &nbsp;(Check to enable editing)
+                                </td>
+                                <td>Enable unrestricted Dest -> Src pathfinding?</td>
+                                <td>Survivability</td>
+                                <td>Num. Paths</td>
                             </tr></thead>
                             <tbody>
-                            <tr><td><input id="pipe_a" type="text"  readOnly={true} className="form-control input-md" value={this.props.pipe.a}/></td>
-                                <td><input id="pipe_bw" type="text" className="form-control input-md" value={this.props.pipe.bw}
-                                           onChange={this.props.handlePipeBw.bind(this, this.props.pipe, this.props.reservation)}/></td>
-                                <td><input id="pipe_z" type="text" readOnly={true} className="form-control input-md" value={this.props.pipe.z} /></td>
+                            <tr>
+                                <td><input id="pipe_az" type="text"  readOnly={true} className="form-control input-md"
+                                           value={this.props.pipe.a + " -> " + this.props.pipe.z}/>
+                                </td>
+                                <td><input id="pipe_azbw" type="text" className="form-control input-md" value={this.props.pipe.azbw}
+                                           onChange={this.props.handlePipeAzBw.bind(this, this.props.pipe, this.props.reservation)}/></td>
+                                <td>
+                                    <input id="pipe_zabw" type="text" className="form-control input-md" value={this.props.pipe.zabw}
+                                           disabled={this.props.pipe.symmetricBw}
+                                           onChange={this.props.handlePipeZaBw.bind(this, this.props.pipe, this.props.reservation)}/>
+                                </td>
+                                <td><input id="pipe_different_za_path" type="checkbox" className="form-check-input" checked={!this.props.pipe.palindromicPath}
+                                           onChange={this.props.handlePalindromicSelection.bind(this, this.props.pipe, this.props.reservation)}/>
+                                </td>
+                                <td><Dropdown options={this.props.survivabilityTypes} value={this.props.pipe.survivabilityType}
+                                              placeholder="Select a SurvivabilityType"
+                                              onChange={this.props.handleSurvivabilitySelection.bind(this, this.props.pipe, this.props.reservation)}/>
+                                </td>
+                                <td>
+                                    <input id="pipe_numpaths" type="text" className="form-control input-md" value={this.props.pipe.numPaths}
+                                           onChange={this.props.handleNumPaths.bind(this, this.props.pipe, this.props.reservation)}/>
+                                </td>
+
                             </tr></tbody>
                         </table>
                     </form>
@@ -870,6 +948,25 @@ class ParameterFormButton extends React.Component{
             />
         );
     }
+}
+
+function createPipe(pipeId, number, aName, zName, azBw, zaBw, symmetric, palindromic, survivabiliyType, numPaths, azERO, zaERO, blacklist){
+    return {
+        id: pipeId + "_" + number,
+        a: aName,
+        from: aName,
+        z: zName,
+        to: zName,
+        azbw: azBw,
+        zabw: zaBw,
+        symmetricBw: symmetric,
+        palindromicPath: palindromic,
+        survivabilityType: survivabiliyType,
+        numPaths: numPaths,
+        azERO: azERO,
+        zaERO: zaERO,
+        blacklist: blacklist
+    };
 }
 
 module.exports = ReservationApp;
