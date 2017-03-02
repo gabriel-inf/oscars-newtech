@@ -709,7 +709,7 @@ class PipePanel extends React.Component{
                                            onChange={this.props.handleSymmetricBwSelection.bind(this, this.props.pipe, this.props.reservation)}/>
                                     &nbsp;(Check to enable editing)
                                 </td>
-                                <td>Enable unrestricted Dest -> Src pathing?</td>
+                                <td>Enable unrestricted Dest -> Src pathfinding?</td>
                                 <td>Survivability</td>
                                 <td>Num. Paths</td>
                             </tr></thead>
