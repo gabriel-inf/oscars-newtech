@@ -27,6 +27,7 @@
     <modules>
         <module>core</module>
         <module>shared</module>
+        <module>pss</module>
         <module>webui</module>
         <module>check</module>
         <module>whatif</module>
