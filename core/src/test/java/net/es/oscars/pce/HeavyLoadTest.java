@@ -3,14 +3,12 @@ package net.es.oscars.pce;
 
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.CoreUnitTestConfiguration;
-import net.es.oscars.dto.bwavail.BandwidthAvailabilityResponse;
 import net.es.oscars.dto.spec.PalindromicType;
 import net.es.oscars.dto.spec.SurvivabilityType;
 import net.es.oscars.dto.topo.enums.UrnType;
 import net.es.oscars.helpers.RequestedEntityBuilder;
 import net.es.oscars.helpers.test.RepoEntityBuilder;
 import net.es.oscars.helpers.test.TopologyBuilder;
-import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.dao.ReservedBandwidthRepository;
 import net.es.oscars.resv.ent.RequestedBlueprintE;
 import net.es.oscars.resv.ent.ReservedBlueprintE;
@@ -21,7 +19,7 @@ import net.es.oscars.topo.svc.TopoService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,11 +27,10 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @Slf4j
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(CoreUnitTestConfiguration.class)
+@SpringBootTest(classes=CoreUnitTestConfiguration.class)
 @Transactional
 public class HeavyLoadTest {
 
