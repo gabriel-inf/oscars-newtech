@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.pss.cmd.Command;
 import net.es.oscars.dto.pss.cmd.CommandType;
+import net.es.oscars.pss.prop.PssConfig;
 import net.es.oscars.pss.svc.CommandQueuer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,19 +21,20 @@ import java.util.List;
 public class CommandPopulator {
 
     private CommandQueuer queuer;
-    @Value("${check.filename}")
-    String devicesFile;
+
+    private PssConfig config;
 
     @Autowired
-    public void CommandPopulator(CommandQueuer queuer) {
+    public void CommandPopulator(CommandQueuer queuer, PssConfig config) {
         this.queuer = queuer;
+        this.config = config;
     }
 
     @PostConstruct
     public void makeCommand() throws IOException {
 
         ObjectMapper mapper = new ObjectMapper();
-        File jsonFile = new File(devicesFile);
+        File jsonFile = new File(config.getCheckFilename());
 
         List<DeviceEntry> devicesToCheck = Arrays.asList(mapper.readValue(jsonFile, DeviceEntry[].class));
 
@@ -49,7 +51,7 @@ public class CommandPopulator {
                     .build();
 
             String commandId = queuer.newCommand(cmd);
-            log.info("added a new command "+commandId);
+            log.info("added a new command " + commandId);
 
         });
     }

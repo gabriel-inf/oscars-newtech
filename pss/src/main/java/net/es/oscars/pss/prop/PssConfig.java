@@ -15,5 +15,9 @@ public class PssConfig {
     @NonNull
     private String checkFilename;
 
+    @NonNull
+    private String rancidDir;
 
+    @NonNull
+    private String cloginrc;
 }
