@@ -54,7 +54,7 @@ public class ConnectionBuilder
 
         Map<String, RequestedVlanJunction> junctionMap = buildJunctionMap(minimalJunctionMap);
         Set<RequestedVlanJunction> inPipes = new HashSet<>();
-        Set<RequestedVlanPipe> pipes = new HashSet<>();
+        Set<RequestedVlanPipe> pipes;
         if(advanced){
             pipes = buildRequestedPipesFromAdvanced(advancedPipeMap, inPipes, junctionMap);
         }
@@ -63,7 +63,7 @@ public class ConnectionBuilder
         }
         Set<RequestedVlanJunction> junctions = junctionMap.values().stream().filter(j -> !inPipes.contains(j)).collect(Collectors.toSet());
 
-        RequestedVlanFlow reqvf = buildRequestedVlanFlow(junctions, pipes, 1, 1, connectionId);
+        RequestedVlanFlow reqvf = buildRequestedVlanFlow(junctions, pipes, pipes.size(), pipes.size(), connectionId);
 
         RequestedBlueprint reqbp = buildRequestedBlueprint(layer3Flow, reqvf, connectionId);
 
