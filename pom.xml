@@ -27,8 +27,8 @@
     <modules>
         <module>core</module>
         <module>shared</module>
+        <module>pss</module>
         <module>webui</module>
-        <module>check</module>
         <module>whatif</module>
     </modules>
     <profiles>
@@ -78,18 +78,6 @@
         <dependencies>
 
             <dependency>
-                <groupId>org.assertj</groupId>
-                <artifactId>assertj-core</artifactId>
-                <version>2.3.0</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-all</artifactId>
-                <version>1.10.19</version>
-            </dependency>
-
-            <dependency>
                 <groupId>com.jayway.restassured</groupId>
                 <artifactId>rest-assured</artifactId>
                 <version>2.9.0</version>
@@ -98,13 +86,7 @@
             <dependency>
                 <groupId>org.springframework.statemachine</groupId>
                 <artifactId>spring-statemachine-core</artifactId>
-                <version>1.1.0.RELEASE</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.springframework.data</groupId>
-                <artifactId>spring-data-envers</artifactId>
-                <version>0.3.0.RELEASE</version>
+                <version>1.2.2.RELEASE</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.security.extensions</groupId>
@@ -157,7 +139,7 @@
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
-                <version>1.16.10</version>
+                <version>1.16.14</version>
             </dependency>
 
             <dependency>
@@ -192,7 +174,7 @@
                 <!-- Import dependency management from Spring Boot -->
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>1.3.6.RELEASE</version>
+                <version>1.5.2.RELEASE</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -205,7 +187,7 @@
                 <plugin>
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-maven-plugin</artifactId>
-                    <version>1.3.5.RELEASE</version>
+                    <version>1.5.2.RELEASE</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>

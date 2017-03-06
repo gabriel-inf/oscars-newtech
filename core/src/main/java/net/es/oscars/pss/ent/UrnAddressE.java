@@ -21,7 +21,6 @@ public class UrnAddressE {
     @NonNull
     private String ipv4Address;
 
-    @NonNull
     private String ipv6Address;
 
 
