@@ -1069,7 +1069,7 @@ public class SequentialResvTest {
         reqPipes.add(pipeAZ1);
         reqPipes.add(pipeAZ2);
 
-        requestedBlueprint = testBuilder.buildRequest(reqPipes, 1, 1, "reusedBlueprint");
+        requestedBlueprint = testBuilder.buildRequest(reqPipes, reqPipes.size(), reqPipes.size(), "reusedBlueprint");
 
         connection1 = testBuilder.buildConnection(requestedBlueprint, testBuilder.buildSchedule(startDate, endDate),
                 "conn1", "First Multipipe Connection");

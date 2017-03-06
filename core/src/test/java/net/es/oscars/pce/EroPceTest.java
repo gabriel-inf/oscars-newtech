@@ -590,7 +590,7 @@ public class EroPceTest
         pipeAZTest.setAzERO(azERO);
         pipeAZTest.setZaERO(zaERO);
         pipesTest.add(pipeAZTest);
-        blueprintTest = testBuilder.buildRequest(pipesTest, 2, 2, "eroTest");
+        blueprintTest = testBuilder.buildRequest(pipesTest, pipesTest.size(), pipesTest.size(), "eroTest");
         connectionTest = testBuilder.buildConnection(blueprintTest, requestedSched, "connTest", "End-to-End Connection");
 
         // Initial request which allows us to avoid altering BandwidthRepo -- Reserves a bunch of critical B/W
@@ -608,7 +608,7 @@ public class EroPceTest
         RequestedVlanPipeE pipeAZBig = testBuilder.buildRequestedPipe(srcPortsBig, srcDeviceBig, dstPortsBig, dstDeviceBig,
                 azBWBig, zaBWBig, palindrome, survivability, vlan, 1);
         pipesBig.add(pipeAZBig);
-        blueprintBig = testBuilder.buildRequest(pipesBig, 1, 1, "eroTest");
+        blueprintBig = testBuilder.buildRequest(pipesBig, pipesBig.size(), pipesBig.size(), "eroTest");
         connectionBig = testBuilder.buildConnection(blueprintBig, requestedSched, "connBig", "Big Single-link Connection");
 
 

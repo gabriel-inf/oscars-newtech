@@ -36,6 +36,25 @@ public class VlanService {
      */
 
     /**
+     * Given a set of reserved junctions and reserved ethernet pipes, retrieve all reserved VLAN objects from Repo
+     * within the specified schedule period and from the reserved junctions/pipes.
+     *
+     * @param reservedJunctions - Set of reserved junctions
+     * @param reservedEthPipes  - Set of reserved ethernet pipes
+     * @return
+     */
+    public List<ReservedVlanE> createReservedVlanListFromJunctionsPipesRepo(Set<ReservedVlanJunctionE> reservedJunctions,
+                                                      Set<ReservedEthPipeE> reservedEthPipes, Date start, Date end) {
+
+        // Retrieve all VLAN IDs reserved so far from junctions & pipes
+        List<ReservedVlanE> rsvVlans = getReservedVlansFromJunctions(reservedJunctions);
+        rsvVlans.addAll(getReservedVlansFromEthernetPipes(reservedEthPipes));
+        rsvVlans.addAll(getReservedVlansFromRepo(start, end));
+
+        return rsvVlans;
+    }
+
+    /**
      * Given a set of reserved junctions and reserved ethernet pipes, retrieve all reserved VLAN objects
      * within the specified schedule period.
      *
@@ -44,12 +63,11 @@ public class VlanService {
      * @return
      */
     public List<ReservedVlanE> createReservedVlanList(Set<ReservedVlanJunctionE> reservedJunctions,
-                                                      Set<ReservedEthPipeE> reservedEthPipes, Date start, Date end) {
+                                                      Set<ReservedEthPipeE> reservedEthPipes) {
 
         // Retrieve all VLAN IDs reserved so far from junctions & pipes
         List<ReservedVlanE> rsvVlans = getReservedVlansFromJunctions(reservedJunctions);
         rsvVlans.addAll(getReservedVlansFromEthernetPipes(reservedEthPipes));
-        rsvVlans.addAll(getReservedVlansFromRepo(start, end));
 
         return rsvVlans;
     }
