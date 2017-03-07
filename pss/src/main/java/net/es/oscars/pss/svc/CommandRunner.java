@@ -9,7 +9,6 @@ import net.es.oscars.pss.beans.ControlPlaneException;
 import net.es.oscars.pss.beans.ControlPlaneResult;
 import net.es.oscars.pss.prop.PssConfig;
 import net.es.oscars.pss.rancid.RancidArguments;
-import net.es.oscars.pss.rancid.RancidResult;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +32,6 @@ public class CommandRunner {
         this.config = config;
         this.controlPlaneChecker = controlPlaneChecker;
     }
-
     public void run(CommandStatus status, Command command) {
         try {
 
@@ -83,6 +81,7 @@ public class CommandRunner {
 
         try {
             runRancid(args);
+            result.setStatus(ControlPlaneStatus.VERIFIED);
 
         } catch (IOException ex) {
             log.error("IO error", ex);

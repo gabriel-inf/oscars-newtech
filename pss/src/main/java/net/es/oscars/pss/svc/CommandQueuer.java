@@ -10,12 +10,13 @@ import org.hashids.Hashids;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Service
 public class CommandQueuer {
-    private HashMap<String, Command> commands = new HashMap<>();
-    private HashMap<String, CommandStatus> statuses = new HashMap<>();
+    private ConcurrentHashMap<String, Command> commands = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, CommandStatus> statuses = new ConcurrentHashMap<>();
     Hashids hashids = new Hashids("ESnet salt");
 
     public String newCommand(Command command) {

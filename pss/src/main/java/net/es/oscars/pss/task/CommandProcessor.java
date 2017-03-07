@@ -34,6 +34,9 @@ public class CommandProcessor {
             status.setLifecycleStatus(LifecycleStatus.PROCESSING);
             log.info("running command "+commandId);
             queuer.getCommand(commandId).ifPresent(cmd -> runner.run(status, cmd));
+            log.info("completed command "+commandId);
+            status.setLifecycleStatus(LifecycleStatus.COMPLETED);
+            queuer.setCommandStatus(commandId, status);
 
 
         });

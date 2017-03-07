@@ -1,8 +1,10 @@
 package net.es.oscars.pss;
 
+import net.es.oscars.pss.pop.Startup;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
@@ -12,7 +14,14 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 public class PssApp {
     public static void main(String[] args) {
-        SpringApplication.run(PssApp.class, args);
+        ConfigurableApplicationContext app = SpringApplication.run(PssApp.class, args);
+
+        Startup startup = (Startup)app.getBean("startup");
+
+        startup.onStart();
+
+
+
     }
 
 }
