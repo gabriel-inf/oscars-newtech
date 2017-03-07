@@ -10,11 +10,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RancidArguments {
-    private String executable;
-    private String cloginrc;
-
-    private String command;
-    private String router;
+public class RancidResult {
+    private String commandline;
+    private String details;
+    private Integer exitCode;
 
 }
