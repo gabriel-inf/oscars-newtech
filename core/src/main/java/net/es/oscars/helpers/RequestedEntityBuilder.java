@@ -166,7 +166,7 @@ public class RequestedEntityBuilder {
                 .junctions(junctions)
                 .pipes(pipes)
                 .minPipes(minPipes)
-                .maxPipes(minPipes)
+                .maxPipes(maxPipes)
                 .containerConnectionId(connectionId)
                 .build();
     }

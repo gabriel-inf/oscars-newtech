@@ -146,6 +146,7 @@ public class TopPCE {
         if(chosenRangeIndex == -1){
             return reserved;
         }
+        log.info("PCE success.");
 
         // If you make it to this point, then you must have at least one range where the reservation can be made
         // and meets the minimum duration requirement
@@ -177,12 +178,15 @@ public class TopPCE {
                 buildPathHopCountMap(pipes, bwAvailMap, repoVlans) : new HashMap<>();
 
         Comparator<RequestedVlanPipeE> byPathHopCount = Comparator.comparing(hopCountMap::get);
-        Comparator<RequestedVlanPipeE> byAJunction = (p1, p2) -> p1.getAJunction().getDeviceUrn().compareToIgnoreCase(p2.getAJunction().getDeviceUrn());
-        Comparator<RequestedVlanPipeE> byZJunction = (p1, p2) -> p1.getZJunction().getDeviceUrn().compareToIgnoreCase(p2.getZJunction().getDeviceUrn());
         // Sort by largest bandwidth first
         Comparator<RequestedVlanPipeE> byAzMbps = Comparator.comparing(RequestedVlanPipeE::getAzMbps).reversed();
         // Sort by largest bandwidth first
         Comparator<RequestedVlanPipeE> byZaMbps = Comparator.comparing(RequestedVlanPipeE::getZaMbps).reversed();
+
+        Comparator<RequestedVlanPipeE> byAJunction = (p1, p2) ->
+                p1.getAJunction().getDeviceUrn().compareToIgnoreCase(p2.getAJunction().getDeviceUrn());
+        Comparator<RequestedVlanPipeE> byZJunction = (p1, p2) ->
+                p1.getZJunction().getDeviceUrn().compareToIgnoreCase(p2.getZJunction().getDeviceUrn());
 
         // Only compare by hop count if doing manycast
         if(minPipes < pipes.size()){
@@ -203,7 +207,7 @@ public class TopPCE {
         for(RequestedVlanPipeE pipe : pipes){
             // Sum up the hop count for all paths
             Map<String, List<TopoEdge>> paths = findShortestConstrainedPath(pipe, bwAvailMap, rsvVlans);
-            Integer total = paths.values().stream().mapToInt(List::size).sum();
+            Integer total = paths!= null ? paths.values().stream().mapToInt(List::size).sum() : Integer.MAX_VALUE;
             pathLengthMap.put(pipe, total);
         }
         return pathLengthMap;
@@ -266,10 +270,12 @@ public class TopPCE {
         // Attempt to reserve all requested pipes
         log.info("Starting to handle pipes");
         Integer numReserved = handleRequestedPipes(reqPipes, start, end, simpleJunctions, reservedMplsPipes, reservedEthPipes,
-                deviceToPortMap, portToDeviceMap, allPaths, connId, clonedAvailMap, repoVlans, minPipes);
+                deviceToPortMap, portToDeviceMap, allPaths, connId, clonedAvailMap, repoVlans, maxPipes);
 
         // If pipes were not able to be reserved in the original order, try reversing the order pipes are attempted
         if (numReserved < minPipes && (reqPipes.size() > 1)) {
+            log.info("Insufficient number of pipes reserved, trying reverse order.");
+            log.info("Num reserved: " + numReserved + ", Num Required: " + minPipes);
             Collections.reverse(reqPipes);
             reservedEthPipes = new HashSet<>();
             reservedMplsPipes = new HashSet<>();
@@ -277,12 +283,14 @@ public class TopPCE {
             allPaths = new HashSet<>();
             clonedAvailMap = new HashMap<>(bwAvailMap);
             numReserved = handleRequestedPipes(reqPipes, start, end, simpleJunctions, reservedMplsPipes, reservedEthPipes,
-                    deviceToPortMap, portToDeviceMap, allPaths, connId, clonedAvailMap, repoVlans, minPipes);
+                    deviceToPortMap, portToDeviceMap, allPaths, connId, clonedAvailMap, repoVlans, maxPipes);
         }
 
         // If the pipes still cannot be reserved, no later range can work
         // Break the loop, then check for any valid ranges
         if (numReserved < minPipes) {
+            log.info("Insufficient number of pipes reserved, request failed.");
+            log.info("Num reserved: " + numReserved + ", Num Required: " + minPipes);
             return false;
         }
         // All pipes were successfully found, store the reserved resources
@@ -351,11 +359,11 @@ public class TopPCE {
      * @param simpleJunctions   - The currently reserved independent junctions
      * @param reservedMplsPipes - The currently reserved MPLS pipes
      * @param reservedEthPipes  - The currently reserved Ethernet pipes
-     * @param deviceToPortMap
-     * @param portToDeviceMap
+     * @param deviceToPortMap   - Map of matching ports for each device
+     * @param portToDeviceMap   - Map of matching device for each port
      * @param connectionId      - The unique ID of the connection containing the requested pipes
-     * @param bwAvailMap
-     * @param minPipes
+     * @param bwAvailMap        - Mapping of Ingress and Egress bandwidth available at each URN
+     * @param maxPipes          - The maximum number of pipes that need to be reserved
      * @return The number of requested pipes which were able to be reserved
      */
     private Integer handleRequestedPipes(List<RequestedVlanPipeE> pipes, Date start, Date end,
@@ -363,12 +371,17 @@ public class TopPCE {
                                          Set<ReservedEthPipeE> reservedEthPipes, Map<String, Set<String>> deviceToPortMap,
                                          Map<String, String> portToDeviceMap, Set<BidirectionalPathE> allPaths,
                                          String connectionId, Map<String, Map<String, Integer>> bwAvailMap,
-                                         List<ReservedVlanE> repoVlans, Integer minPipes) {
+                                         List<ReservedVlanE> repoVlans, Integer maxPipes) {
         // The number of requested pipes successfully reserved
         Integer numReserved = 0;
 
         // Loop through all requested pipes
         for (RequestedVlanPipeE pipe : pipes) {
+
+            // Stop when you've reserved enough pipes
+            if(Objects.equals(numReserved, maxPipes)){
+                break;
+            }
 
             // Update list of reserved VLAN IDs
             List<ReservedVlanE> rsvVlans = vlanService.createReservedVlanList(simpleJunctions, reservedEthPipes);
@@ -452,9 +465,6 @@ public class TopPCE {
                 reservedEthPipes.addAll(newEthPipes);
                 reservedMplsPipes.addAll(newMplsPipes);
             }
-            if(numReserved >= minPipes){
-                break;
-            }
         }
         return numReserved;
     }
@@ -471,28 +481,28 @@ public class TopPCE {
     private Map<String, List<TopoEdge>> findShortestConstrainedPath(RequestedVlanPipeE pipe,
                                                                     Map<String, Map<String, Integer>> bwAvailMap,
                                                                     List<ReservedVlanE> rsvVlans) {
-        log.info("Computing Shortest Constrained Path");
+        //log.info("Computing Shortest Constrained Path");
         Map<String, List<TopoEdge>> eroMap = null;
 
         try {
             if (!pipe.getEroSurvivability().equals(SurvivabilityType.SURVIVABILITY_NONE) && pipe.getNumDisjoint() > 1) {
-                log.info("Entering Survivability PCE");
+                //log.info("Entering Survivability PCE");
                 eroMap = survivabilityPCE.computeSurvivableERO(pipe, bwAvailMap, rsvVlans);
-                log.info("Exiting Survivability PCE");
+                //log.info("Exiting Survivability PCE");
             } else if (!pipe.getAzERO().isEmpty() && !pipe.getZaERO().isEmpty()) {
-                log.info("Attempting to reserve specified Explicit Route Object");
+                //log.info("Attempting to reserve specified Explicit Route Object");
                 eroMap = eroPCE.computeSpecifiedERO(pipe, bwAvailMap, rsvVlans);
             } else if (pipe.getEroPalindromic().equals(PalindromicType.PALINDROME)) {
-                log.info("Entering Palindromical PCE");
+                //log.info("Entering Palindromical PCE");
                 eroMap = palindromicalPCE.computePalindromicERO(pipe, bwAvailMap, rsvVlans);       // A->Z ERO is palindrome of Z->A ERO
-                log.info("Exiting Palindromical PCE");
+                //log.info("Exiting Palindromical PCE");
             } else {
-                log.info("Entering NON-Palindromical PCE");
+                //log.info("Entering NON-Palindromical PCE");
                 eroMap = nonPalindromicPCE.computeNonPalindromicERO(pipe, bwAvailMap, rsvVlans);       // A->Z ERO is NOT palindrome of Z->A ERO
-                log.info("Exiting NON-Palindromical PCE");
+                //log.info("Exiting NON-Palindromical PCE");
             }
         } catch (PCEException e) {
-            log.error("PCE Unsuccessful", e.getMessage());
+            log.error("Failed to find shortest constrained path. " + e.getMessage());
         }
 
         return eroMap;
