@@ -12,6 +12,11 @@ import org.springframework.stereotype.Component;
 @NoArgsConstructor
 public class PssConfig {
 
+
+    @NonNull
+    private String[] templateDirs;
+
+
     @NonNull
     private String checkFilename;
 

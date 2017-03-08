@@ -37,8 +37,6 @@ public class CommandProcessor {
             log.info("completed command "+commandId);
             status.setLifecycleStatus(LifecycleStatus.COMPLETED);
             queuer.setCommandStatus(commandId, status);
-
-
         });
 
     }

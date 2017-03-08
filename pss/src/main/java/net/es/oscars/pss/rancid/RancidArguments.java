@@ -14,7 +14,7 @@ public class RancidArguments {
     private String executable;
     private String cloginrc;
 
-    private String command;
+    private String routerConfig;
     private String router;
 
 }

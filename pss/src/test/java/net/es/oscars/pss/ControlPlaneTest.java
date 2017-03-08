@@ -70,7 +70,7 @@ public class ControlPlaneTest {
             totalMs += 2000;
             waitingFor.clear();
             for (String commandId : commandIds) {
-                log.debug("checking status for command " + commandId);
+                log.debug("checking status for routerConfig " + commandId);
                 CommandStatus status = queuer.getStatus(commandId).orElseThrow(NoSuchElementException::new);
                 if (status.getLifecycleStatus().equals(LifecycleStatus.COMPLETED)) {
                     ControlPlaneStatus st = status.getControlPlaneStatus();
