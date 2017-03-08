@@ -2,7 +2,10 @@ package net.es.oscars.pce;
 
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.spec.SurvivabilityType;
+import net.es.oscars.dto.topo.TopoVertex;
 import net.es.oscars.dto.topo.enums.DeviceType;
+import net.es.oscars.dto.topo.enums.Layer;
+import net.es.oscars.dto.topo.enums.VertexType;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.dto.topo.TopoEdge;
@@ -710,11 +713,17 @@ public class TopPCE {
                     .sorted((e1, e2) -> e1.getZ().getUrn().compareToIgnoreCase(e2.getZ().getUrn()))
                     .collect(Collectors.toList());
             // (Fix, Junction), (Junction, Fix), (Junction, Fix), ...., (Junction, Fix)
-            List<TopoEdge> azPath = junctionToFixEdges.subList(1, junctionToFixEdges.size());
-            azPath.add(0, fixToJunctionEdges.get(0));
+            List<TopoEdge> azPath = junctionToFixEdges.size() > 1 ? junctionToFixEdges.subList(1, junctionToFixEdges.size()) : new ArrayList<>();
+            if(fixToJunctionEdges.size() > 0) {
+                azPath.add(0, fixToJunctionEdges.get(0));
+            }
+            else{
+                Optional<TopoVertex> junctionVertex = topoService.getMultilayerTopology().getVertexByUrn(junction.getDeviceUrn());
+                junctionVertex.ifPresent(topoVertex -> azPath.add(TopoEdge.builder().a(topoVertex).z(topoVertex).layer(Layer.INTERNAL).metric(0L).build()));
+            }
             // Reverse above list
-            List<TopoEdge> zaPath = fixToJunctionEdges.subList(1, fixToJunctionEdges.size());
-            zaPath.add(junctionToFixEdges.get(0));
+            List<TopoEdge> zaPath = new ArrayList<>(azPath);
+            Collections.reverse(zaPath);
             allPaths.add(BidirectionalPathE.builder()
                     .azPath(convertTopoEdgePathToEdges(azPath))
                     .zaPath(convertTopoEdgePathToEdges(zaPath))
