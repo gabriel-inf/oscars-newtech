@@ -175,10 +175,26 @@ public class TopPCE {
     private List<RequestedVlanPipeE> sortPipes(Set<RequestedVlanPipeE> pipes, Integer minPipes,
                                                Map<String, Map<String, Integer>> bwAvailMap, List<ReservedVlanE> repoVlans) {
 
+        // Sort any pipes with priority less than MAX_INT
+        Set<RequestedVlanPipeE> priorityPipes = pipes.stream()
+                .filter(p -> p.getPriority() < Integer.MAX_VALUE)
+                .collect(Collectors.toSet());
+        Set<RequestedVlanPipeE> otherPipes = pipes.stream()
+                .filter(p -> p.getPriority() == Integer.MAX_VALUE)
+                .collect(Collectors.toSet());
+
+        List<RequestedVlanPipeE> sortedPipes = new ArrayList<>();
+        if(priorityPipes.size() > 0){
+            Comparator<RequestedVlanPipeE> byPriority = Comparator.comparing(RequestedVlanPipeE::getPriority);
+            sortedPipes = priorityPipes.stream().sorted(byPriority).collect(Collectors.toList());
+        }
+
+        // Sort the remaining pipes by hop count, bandwidth, URNs
+
         // Only calculate hop count if you're doing Manycast
         // As indicated by only needing a minimum number of pipes less than the pipe set size
         Map<RequestedVlanPipeE, Integer> hopCountMap = minPipes < pipes.size() ?
-                buildPathHopCountMap(pipes, bwAvailMap, repoVlans) : new HashMap<>();
+                buildPathHopCountMap(otherPipes, bwAvailMap, repoVlans) : new HashMap<>();
 
         Comparator<RequestedVlanPipeE> byPathHopCount = Comparator.comparing(hopCountMap::get);
         // Sort by largest bandwidth first
@@ -193,13 +209,14 @@ public class TopPCE {
 
         // Only compare by hop count if doing manycast
         if(minPipes < pipes.size()){
-            return pipes.stream().sorted(byPathHopCount.thenComparing(byAzMbps).thenComparing(byZaMbps)
-                    .thenComparing(byAJunction).thenComparing(byZJunction)).collect(Collectors.toList());
+            sortedPipes.addAll(otherPipes.stream().sorted(byPathHopCount.thenComparing(byAzMbps).thenComparing(byZaMbps)
+                    .thenComparing(byAJunction).thenComparing(byZJunction)).collect(Collectors.toList()));
         }
         else{
-            return pipes.stream().sorted(byAzMbps.thenComparing(byZaMbps)
-                    .thenComparing(byAJunction).thenComparing(byZJunction)).collect(Collectors.toList());
+            sortedPipes.addAll(otherPipes.stream().sorted(byAzMbps.thenComparing(byZaMbps)
+                    .thenComparing(byAJunction).thenComparing(byZJunction)).collect(Collectors.toList()));
         }
+        return sortedPipes;
     }
 
     private Map<RequestedVlanPipeE, Integer> buildPathHopCountMap(Set<RequestedVlanPipeE> pipes,

@@ -1,8 +1,13 @@
 package net.es.oscars.resv.rest;
 
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.dto.pss.EthPipeType;
 import net.es.oscars.dto.resv.Connection;
 import net.es.oscars.dto.resv.ConnectionFilter;
+import net.es.oscars.dto.spec.PalindromicType;
+import net.es.oscars.dto.spec.RequestedVlanFlow;
+import net.es.oscars.dto.spec.RequestedVlanPipe;
+import net.es.oscars.dto.spec.SurvivabilityType;
 import net.es.oscars.pce.PCEException;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.ent.ConnectionE;
@@ -156,6 +161,7 @@ public class ResvController {
     }
 
     private Connection holdConnection(Connection connection) throws PCEException, PSSException {
+        connection = defineDefaults(connection);
         ConnectionE connE = modelMapper.map(connection, ConnectionE.class);
 
         resvService.hold(connE);
@@ -173,9 +179,33 @@ public class ResvController {
 
     }
 
+    private Connection defineDefaults(Connection connection) {
+        RequestedVlanFlow flow = connection.getSpecification().getRequested().getVlanFlow();
+        if(flow.getMinPipes() == null){flow.setMinPipes(flow.getPipes().size());}
+        if(flow.getMaxPipes() == null){flow.setMaxPipes(flow.getPipes().size());}
+
+        Set<RequestedVlanPipe> pipes = flow.getPipes();
+        for(RequestedVlanPipe pipe : pipes){
+            if(pipe.getAzMbps() == null){pipe.setAzMbps(0);}
+            if(pipe.getZaMbps() == null){pipe.setZaMbps(0);}
+            if(pipe.getAzERO() == null){pipe.setAzERO(new ArrayList<>());}
+            if(pipe.getZaERO() == null){pipe.setZaERO(new ArrayList<>());}
+            if(pipe.getUrnBlacklist() == null){pipe.setUrnBlacklist(new HashSet<>());}
+            if(pipe.getPipeType() == null){pipe.setPipeType(EthPipeType.REQUESTED);}
+            if(pipe.getEroPalindromic() == null){pipe.setEroPalindromic(PalindromicType.PALINDROME);}
+            if(pipe.getEroSurvivability() == null){pipe.setEroSurvivability(SurvivabilityType.SURVIVABILITY_NONE);}
+            if(pipe.getNumDisjoint() == null){pipe.setNumDisjoint(1);}
+            if(pipe.getPriority() == null){pipe.setPriority(Integer.MAX_VALUE);}
+        }
+        flow.setPipes(pipes);
+        connection.getSpecification().getRequested().setVlanFlow(flow);
+        return connection;
+    }
+
     private Connection preCheckConnection(Connection connection) throws PCEException, PSSException
     {
         log.info("Pre-checking ConnectionID: " + connection.getConnectionId());
+        connection = defineDefaults(connection);
         ConnectionE connE = modelMapper.map(connection, ConnectionE.class);
 
         Boolean successful = resvService.preCheck(connE);

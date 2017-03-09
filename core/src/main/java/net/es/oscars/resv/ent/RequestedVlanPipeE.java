@@ -57,5 +57,8 @@ public class RequestedVlanPipeE {
     private Integer numDisjoint;
 
     @NonNull
+    private Integer priority;
+
+    @NonNull
     private final String uniqueID = UUID.randomUUID().toString();
 }

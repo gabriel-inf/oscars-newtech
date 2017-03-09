@@ -251,6 +251,7 @@ public class ConnectionBuilder
                 .urnBlacklist(blacklist)
                 .eroPalindromic(pType)
                 .eroSurvivability(sType)
+                .priority(Integer.MAX_VALUE)
                 .pipeType(EthPipeType.REQUESTED)
                 .build();
     }

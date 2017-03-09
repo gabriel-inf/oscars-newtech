@@ -23,30 +23,23 @@ public class RequestedVlanPipe {
     @NonNull
     private RequestedVlanJunction zJunction;
 
-    @NonNull
     private Integer azMbps;
 
-    @NonNull
     private Integer zaMbps;
 
-    @NonNull
     private List<String> azERO;
 
-    @NonNull
     private List<String> zaERO;
 
-    @NonNull
     private Set<String> urnBlacklist;
 
-    @NonNull
     private EthPipeType pipeType;
 
-    @NonNull
     private PalindromicType eroPalindromic;
 
-    @NonNull
     private SurvivabilityType eroSurvivability;
 
-    @NonNull
     private Integer numDisjoint;
+
+    private Integer priority;
 }

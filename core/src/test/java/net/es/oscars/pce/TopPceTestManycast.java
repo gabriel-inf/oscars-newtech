@@ -67,7 +67,7 @@ public class TopPceTestManycast {
         Integer numPaths = 0;
 
         buildThenEvaluate(aPorts, aDevices, zPorts, zDevices, azMbpsList, zaMbpsList, palindromicList, survivableList,
-                vlanExps, numDisjoints, minPipes, maxPipes, connectionId, numPaths, true);
+                vlanExps, numDisjoints, new ArrayList<>(), minPipes, maxPipes, connectionId, numPaths, true);
 
     }
 
@@ -90,7 +90,7 @@ public class TopPceTestManycast {
         Integer numPaths = 1;
 
         buildThenEvaluate(aPorts, aDevices, zPorts, zDevices, azMbpsList, zaMbpsList, palindromicList, survivableList,
-                vlanExps, numDisjoints, minPipes, maxPipes, connectionId, numPaths, true);
+                vlanExps, numDisjoints, new ArrayList<>(), minPipes, maxPipes, connectionId, numPaths, true);
 
     }
 
@@ -113,7 +113,7 @@ public class TopPceTestManycast {
         Integer numPaths = 2;
 
         buildThenEvaluate(aPorts, aDevices, zPorts, zDevices, azMbpsList, zaMbpsList, palindromicList, survivableList,
-                vlanExps, numDisjoints, minPipes, maxPipes, connectionId, numPaths, true);
+                vlanExps, numDisjoints, new ArrayList<>(), minPipes, maxPipes, connectionId, numPaths, true);
 
     }
 
@@ -136,7 +136,7 @@ public class TopPceTestManycast {
         Integer numPaths = 2;
 
         buildThenEvaluate(aPorts, aDevices, zPorts, zDevices, azMbpsList, zaMbpsList, palindromicList, survivableList,
-                vlanExps, numDisjoints, minPipes, maxPipes, connectionId, numPaths, true);
+                vlanExps, numDisjoints, new ArrayList<>(), minPipes, maxPipes, connectionId, numPaths, true);
     }
 
     @Test
@@ -160,7 +160,7 @@ public class TopPceTestManycast {
         Integer numPaths = 1;
 
         buildThenEvaluate(aPorts, aDevices, zPorts, zDevices, azMbpsList, zaMbpsList, palindromicList, survivableList,
-                vlanExps, numDisjoints, minPipes, maxPipes, connectionId, numPaths, true);
+                vlanExps, numDisjoints, new ArrayList<>(), minPipes, maxPipes, connectionId, numPaths, true);
     }
 
     @Test
@@ -184,7 +184,7 @@ public class TopPceTestManycast {
         Integer numPaths = 2;
 
         buildThenEvaluate(aPorts, aDevices, zPorts, zDevices, azMbpsList, zaMbpsList, palindromicList, survivableList,
-                vlanExps, numDisjoints, minPipes, maxPipes, connectionId, numPaths, true);
+                vlanExps, numDisjoints, new ArrayList<>(), minPipes, maxPipes, connectionId, numPaths, true);
     }
 
     @Test
@@ -208,7 +208,7 @@ public class TopPceTestManycast {
         Integer numPaths = 2;
 
         buildThenEvaluate(aPorts, aDevices, zPorts, zDevices, azMbpsList, zaMbpsList, palindromicList, survivableList,
-                vlanExps, numDisjoints, minPipes, maxPipes, connectionId, numPaths, true);
+                vlanExps, numDisjoints, new ArrayList<>(), minPipes, maxPipes, connectionId, numPaths, true);
     }
 
     @Test
@@ -232,7 +232,7 @@ public class TopPceTestManycast {
         Integer numPaths = 2;
 
         buildThenEvaluate(aPorts, aDevices, zPorts, zDevices, azMbpsList, zaMbpsList, palindromicList, survivableList,
-                vlanExps, numDisjoints, minPipes, maxPipes, connectionId, numPaths, true);
+                vlanExps, numDisjoints, new ArrayList<>(), minPipes, maxPipes, connectionId, numPaths, true);
     }
 
     @Test
@@ -256,7 +256,7 @@ public class TopPceTestManycast {
         Integer numPaths = 0;
 
         buildThenEvaluate(aPorts, aDevices, zPorts, zDevices, azMbpsList, zaMbpsList, palindromicList, survivableList,
-                vlanExps, numDisjoints, minPipes, maxPipes, connectionId, numPaths, false);
+                vlanExps, numDisjoints, new ArrayList<>(), minPipes, maxPipes, connectionId, numPaths, false);
     }
 
     @Test
@@ -280,7 +280,7 @@ public class TopPceTestManycast {
         Integer numPaths = 1;
 
         buildThenEvaluate(aPorts, aDevices, zPorts, zDevices, azMbpsList, zaMbpsList, palindromicList, survivableList,
-                vlanExps, numDisjoints, minPipes, maxPipes, connectionId, numPaths, true);
+                vlanExps, numDisjoints, new ArrayList<>(), minPipes, maxPipes, connectionId, numPaths, true);
     }
 
     @Test
@@ -304,7 +304,7 @@ public class TopPceTestManycast {
         Integer numPaths = 2;
 
         buildThenEvaluate(aPorts, aDevices, zPorts, zDevices, azMbpsList, zaMbpsList, palindromicList, survivableList,
-                vlanExps, numDisjoints, minPipes, maxPipes, connectionId, numPaths, true);
+                vlanExps, numDisjoints, new ArrayList<>(), minPipes, maxPipes, connectionId, numPaths, true);
     }
 
     @Test
@@ -328,7 +328,7 @@ public class TopPceTestManycast {
         Integer numPaths = 3;
 
         buildThenEvaluate(aPorts, aDevices, zPorts, zDevices, azMbpsList, zaMbpsList, palindromicList, survivableList,
-                vlanExps, numDisjoints, minPipes, maxPipes, connectionId, numPaths, true);
+                vlanExps, numDisjoints, new ArrayList<>(), minPipes, maxPipes, connectionId, numPaths, true);
     }
 
     @Test
@@ -352,7 +352,7 @@ public class TopPceTestManycast {
         Integer numPaths = 3;
 
         buildThenEvaluate(aPorts, aDevices, zPorts, zDevices, azMbpsList, zaMbpsList, palindromicList, survivableList,
-                vlanExps, numDisjoints, minPipes, maxPipes, connectionId, numPaths, true);
+                vlanExps, numDisjoints, new ArrayList<>(), minPipes, maxPipes, connectionId, numPaths, true);
     }
 
     @Test
@@ -384,7 +384,7 @@ public class TopPceTestManycast {
         Integer numPaths = 10;
 
         buildThenEvaluate(aPorts, aDevices, zPorts, zDevices, azMbpsList, zaMbpsList, palindromicList, survivableList,
-                vlanExps, numDisjoints, minPipes, maxPipes, connectionId, numPaths, true);
+                vlanExps, numDisjoints, new ArrayList<>(), minPipes, maxPipes, connectionId, numPaths, true);
     }
 
     @Test
@@ -408,7 +408,7 @@ public class TopPceTestManycast {
         Integer numPaths = 1;
 
         buildThenEvaluate(aPorts, aDevices, zPorts, zDevices, azMbpsList, zaMbpsList, palindromicList, survivableList,
-                vlanExps, numDisjoints, minPipes, maxPipes, connectionId, numPaths, true);
+                vlanExps, numDisjoints, new ArrayList<>(), minPipes, maxPipes, connectionId, numPaths, true);
     }
 
     @Test
@@ -432,7 +432,7 @@ public class TopPceTestManycast {
         Integer numPaths = 2;
 
         buildThenEvaluate(aPorts, aDevices, zPorts, zDevices, azMbpsList, zaMbpsList, palindromicList, survivableList,
-                vlanExps, numDisjoints, minPipes, maxPipes, connectionId, numPaths, true);
+                vlanExps, numDisjoints, new ArrayList<>(), minPipes, maxPipes, connectionId, numPaths, true);
     }
 
     @Test
@@ -456,7 +456,7 @@ public class TopPceTestManycast {
         Integer numPaths = 1;
 
         buildThenEvaluate(aPorts, aDevices, zPorts, zDevices, azMbpsList, zaMbpsList, palindromicList, survivableList,
-                vlanExps, numDisjoints, minPipes, maxPipes, connectionId, numPaths, true);
+                vlanExps, numDisjoints, new ArrayList<>(), minPipes, maxPipes, connectionId, numPaths, true);
     }
 
     @Test
@@ -480,7 +480,7 @@ public class TopPceTestManycast {
         Integer numPaths = 1;
 
         buildThenEvaluate(aPorts, aDevices, zPorts, zDevices, azMbpsList, zaMbpsList, palindromicList, survivableList,
-                vlanExps, numDisjoints, minPipes, maxPipes, connectionId, numPaths, true);
+                vlanExps, numDisjoints, new ArrayList<>(), minPipes, maxPipes, connectionId, numPaths, true);
     }
 
     @Test
@@ -504,7 +504,7 @@ public class TopPceTestManycast {
         Integer numPaths = 2;
 
         buildThenEvaluate(aPorts, aDevices, zPorts, zDevices, azMbpsList, zaMbpsList, palindromicList, survivableList,
-                vlanExps, numDisjoints, minPipes, maxPipes, connectionId, numPaths, true);
+                vlanExps, numDisjoints, new ArrayList<>(), minPipes, maxPipes, connectionId, numPaths, true);
     }
 
     @Test
@@ -528,7 +528,7 @@ public class TopPceTestManycast {
         Integer numPaths = 3;
 
         buildThenEvaluate(aPorts, aDevices, zPorts, zDevices, azMbpsList, zaMbpsList, palindromicList, survivableList,
-                vlanExps, numDisjoints, minPipes, maxPipes, connectionId, numPaths, true);
+                vlanExps, numDisjoints, new ArrayList<>(), minPipes, maxPipes, connectionId, numPaths, true);
     }
 
     @Test
@@ -552,7 +552,7 @@ public class TopPceTestManycast {
         Integer numPaths = 4;
 
         buildThenEvaluate(aPorts, aDevices, zPorts, zDevices, azMbpsList, zaMbpsList, palindromicList, survivableList,
-                vlanExps, numDisjoints, minPipes, maxPipes, connectionId, numPaths, true);
+                vlanExps, numDisjoints, new ArrayList<>(), minPipes, maxPipes, connectionId, numPaths, true);
     }
 
     @Test
@@ -576,7 +576,7 @@ public class TopPceTestManycast {
         Integer numPaths = 3;
 
         buildThenEvaluate(aPorts, aDevices, zPorts, zDevices, azMbpsList, zaMbpsList, palindromicList, survivableList,
-                vlanExps, numDisjoints, minPipes, maxPipes, connectionId, numPaths, true);
+                vlanExps, numDisjoints, new ArrayList<>(), minPipes, maxPipes, connectionId, numPaths, true);
     }
 
     @Test
@@ -600,7 +600,7 @@ public class TopPceTestManycast {
         Integer numPaths = 4;
 
         buildThenEvaluate(aPorts, aDevices, zPorts, zDevices, azMbpsList, zaMbpsList, palindromicList, survivableList,
-                vlanExps, numDisjoints, minPipes, maxPipes, connectionId, numPaths, true);
+                vlanExps, numDisjoints, new ArrayList<>(), minPipes, maxPipes, connectionId, numPaths, true);
     }
 
     @Test
@@ -624,7 +624,7 @@ public class TopPceTestManycast {
         Integer numPaths = 6;
 
         buildThenEvaluate(aPorts, aDevices, zPorts, zDevices, azMbpsList, zaMbpsList, palindromicList, survivableList,
-                vlanExps, numDisjoints, minPipes, maxPipes, connectionId, numPaths, true);
+                vlanExps, numDisjoints, new ArrayList<>(), minPipes, maxPipes, connectionId, numPaths, true);
     }
 
     @Test
@@ -648,14 +648,15 @@ public class TopPceTestManycast {
         Integer numPaths = 4;
 
         buildThenEvaluate(aPorts, aDevices, zPorts, zDevices, azMbpsList, zaMbpsList, palindromicList, survivableList,
-                vlanExps, numDisjoints, minPipes, maxPipes, connectionId, numPaths, true);
+                vlanExps, numDisjoints, new ArrayList<>(), minPipes, maxPipes, connectionId, numPaths, true);
     }
 
     private void buildThenEvaluate(List<String> aPorts, List<String> aDevices, List<String> zPorts,
                                    List<String> zDevices, List<Integer> azMbpsList, List<Integer> zaMbpsList,
                                    List<PalindromicType> palindromicList, List<SurvivabilityType> survivableList,
-                                   List<String> vlanExps, List<Integer> numDisjoints, Integer minPipes,
-                                   Integer maxPipes, String connectionId, Integer numPaths, Boolean shouldSucceed){
+                                   List<String> vlanExps, List<Integer> numDisjoints, List<Integer> priorities,
+                                   Integer minPipes, Integer maxPipes, String connectionId, Integer numPaths,
+                                   Boolean shouldSucceed){
         topologyBuilder.buildTopoEsnet();
 
         Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
@@ -663,7 +664,7 @@ public class TopPceTestManycast {
         ScheduleSpecificationE requestedSched = entityBuilder.buildSchedule(startDate, endDate);
         RequestedBlueprintE requestedBlueprint = entityBuilder.buildRequest(aPorts, aDevices, zPorts,
                 zDevices, azMbpsList, zaMbpsList, palindromicList, survivableList, vlanExps,
-                numDisjoints, minPipes, maxPipes, connectionId);
+                numDisjoints, priorities, minPipes, maxPipes, connectionId);
         evaluateSuccess(requestedBlueprint, requestedSched, minPipes, numPaths, shouldSucceed);
     }
 

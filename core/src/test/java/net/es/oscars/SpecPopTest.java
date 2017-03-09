@@ -113,6 +113,7 @@ public class SpecPopTest {
                 .eroSurvivability(SurvivabilityType.SURVIVABILITY_NONE)
                 .pipeType(EthPipeType.REQUESTED)
                 .numDisjoint(1)
+                .priority(Integer.MAX_VALUE)
                 .build();
 
         RequestedVlanFlowE flow = spec.getRequested().getVlanFlow();

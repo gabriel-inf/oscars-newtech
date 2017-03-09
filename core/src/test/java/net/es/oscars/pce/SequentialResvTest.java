@@ -91,7 +91,7 @@ public class SequentialResvTest {
         SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
 
         RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW,
-                palindrome, survivability, vlan, 1);
+                palindrome, survivability, vlan, 1, Integer.MAX_VALUE);
         reqPipes.add(pipeAZ);
 
         requestedBlueprint = testBuilder.buildRequest(reqPipes, 1, 1, "reusedBlueprint");
@@ -195,7 +195,7 @@ public class SequentialResvTest {
         SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
 
         RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW,
-                palindrome, survivability, vlan, 1);
+                palindrome, survivability, vlan, 1, Integer.MAX_VALUE);
         reqPipes.add(pipeAZ);
 
         requestedBlueprint = testBuilder.buildRequest(reqPipes, 1, 1, "reusedBlueprint");
@@ -305,7 +305,7 @@ public class SequentialResvTest {
         SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
 
         RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW,
-                palindrome, survivability, vlan, 1);
+                palindrome, survivability, vlan, 1, Integer.MAX_VALUE);
         reqPipes.add(pipeAZ);
 
         requestedBlueprint = testBuilder.buildRequest(reqPipes, 1, 1, "reusedBlueprint");
@@ -435,7 +435,7 @@ public class SequentialResvTest {
         SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
 
         RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW,
-                palindrome, survivability, vlan, 1);
+                palindrome, survivability, vlan, 1, Integer.MAX_VALUE);
         reqPipes.add(pipeAZ);
 
         requestedBlueprint = testBuilder.buildRequest(reqPipes, 1, 1, "reusedBlueprint");
@@ -567,7 +567,7 @@ public class SequentialResvTest {
         SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
 
         RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW,
-                palindrome, survivability, vlan, 1);
+                palindrome, survivability, vlan, 1, Integer.MAX_VALUE);
         reqPipes.add(pipeAZ);
 
         requestedBlueprint = testBuilder.buildRequest(reqPipes, 1, 1, "reusedBlueprint");
@@ -688,7 +688,7 @@ public class SequentialResvTest {
         SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
 
         RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW,
-                palindrome, survivability, vlan, 1);
+                palindrome, survivability, vlan, 1, Integer.MAX_VALUE);
         reqPipes.add(pipeAZ);
 
         requestedBlueprint = testBuilder.buildRequest(reqPipes, 1, 1, "reusedBlueprint");
@@ -812,7 +812,7 @@ public class SequentialResvTest {
         SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
 
         RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW,
-                palindrome, survivability, vlan, 1);
+                palindrome, survivability, vlan, 1, Integer.MAX_VALUE);
         reqPipes.add(pipeAZ);
 
         requestedBlueprint = testBuilder.buildRequest(reqPipes, 1, 1, "reusedBlueprint");
@@ -918,7 +918,7 @@ public class SequentialResvTest {
         SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
 
         RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW,
-                palindrome, survivability, vlan, 1);
+                palindrome, survivability, vlan, 1, Integer.MAX_VALUE);
         reqPipes.add(pipeAZ);
 
         requestedBlueprint = testBuilder.buildRequest(reqPipes, 1, 1, "reusedBlueprint");
@@ -1063,9 +1063,9 @@ public class SequentialResvTest {
         SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
 
         RequestedVlanPipeE pipeAZ1 = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW,
-                palindrome, survivability, vlan, 1);
+                palindrome, survivability, vlan, 1, Integer.MAX_VALUE);
         RequestedVlanPipeE pipeAZ2 = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW,
-                palindrome, survivability, vlan, 1);
+                palindrome, survivability, vlan, 1, Integer.MAX_VALUE);
         reqPipes.add(pipeAZ1);
         reqPipes.add(pipeAZ2);
 

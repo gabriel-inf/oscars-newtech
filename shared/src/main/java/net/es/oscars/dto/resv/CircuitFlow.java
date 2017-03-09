@@ -1,9 +1,6 @@
 package net.es.oscars.dto.resv;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 import java.util.Set;
@@ -16,10 +13,12 @@ public class CircuitFlow {
 
     Set<String> sourcePorts;
 
+    @NonNull
     String sourceDevice;
 
     Set<String> destPorts;
 
+    @NonNull
     String destDevice;
 
     Integer azMbps;
@@ -41,4 +40,6 @@ public class CircuitFlow {
     String survivability;
 
     Integer numDisjointPaths;
+
+    Integer priority;
 }
