@@ -39,7 +39,7 @@ public class CircuitFlow {
 
     String survivability;
 
-    Integer numDisjointPaths;
+    Integer numPaths;
 
     Integer priority;
 }

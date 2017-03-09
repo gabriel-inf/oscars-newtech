@@ -100,7 +100,7 @@ public class ConnectionGenerationService {
             Set<String> blacklist = flow.getBlacklist() != null ? flow.getBlacklist() : new HashSet<>();
             String palindromic = flow.getPalindromic() != null ? flow.getPalindromic() : "PALINDROME";
             String survivability = flow.getSurvivability() != null ? flow.getSurvivability() : "NONE";
-            Integer numDisjointPaths = flow.getNumDisjointPaths() != null ? flow.getNumDisjointPaths() : 1;
+            Integer numPaths = flow.getNumPaths() != null ? flow.getNumPaths() : 1;
             Integer priority = flow.getPriority() != null ? flow.getPriority() : Integer.MAX_VALUE;
 
             if(sourceDevice.equals(destDevice)){
@@ -108,7 +108,7 @@ public class ConnectionGenerationService {
             }
             else{
                 pipes.add(generateRequestedPipe(sourceDevice, sourcePorts, sourceVlan, destDevice, destPorts, destVlan,
-                        azMbps, zaMbps, azRoute, zaRoute, blacklist, palindromic, survivability, numDisjointPaths,
+                        azMbps, zaMbps, azRoute, zaRoute, blacklist, palindromic, survivability, numPaths,
                         priority));
             }
         }
@@ -137,7 +137,7 @@ public class ConnectionGenerationService {
                                                     String destDevice, Set<String> destPorts, String destVlan,
                                                     Integer azMbps, Integer zaMbps, List<String> azRoute,
                                                     List<String> zaRoute, Set<String> blacklist, String palindromic,
-                                                    String survivability, Integer numDisjointPaths, Integer priority) {
+                                                    String survivability, Integer numPaths, Integer priority) {
 
         return RequestedVlanPipe.builder()
                 .aJunction(generateRequestedJunction(sourceDevice, sourcePorts, sourceVlan, azMbps, zaMbps))
@@ -149,7 +149,7 @@ public class ConnectionGenerationService {
                 .urnBlacklist(blacklist)
                 .eroPalindromic(parsePalindrome(palindromic))
                 .eroSurvivability(parseSurvivability(survivability))
-                .numDisjoint(numDisjointPaths)
+                .numPaths(numPaths)
                 .priority(priority)
                 .pipeType(EthPipeType.REQUESTED)
                 .build();
@@ -233,7 +233,7 @@ public class ConnectionGenerationService {
                                            String destDevice, Set<String> destPorts, String destVlan, Integer azMbps,
                                            Integer zaMbps, List<String> azRoute, List<String> zaRoute,
                                            Set<String> blacklist, String palindromic, String survivability,
-                                           Integer numDisjointPaths, Integer priority){
+                                           Integer numPaths, Integer priority){
 
         return CircuitFlow.builder()
                 .sourceDevice(sourceDevice)
@@ -249,7 +249,7 @@ public class ConnectionGenerationService {
                 .blacklist(blacklist)
                 .palindromic(palindromic)
                 .survivability(survivability)
-                .numDisjointPaths(numDisjointPaths)
+                .numPaths(numPaths)
                 .priority(priority)
                 .build();
     }
