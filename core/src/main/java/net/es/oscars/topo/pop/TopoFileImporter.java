@@ -52,16 +52,9 @@ public class TopoFileImporter implements TopoImporter {
             return;
         }
 
-        String devicesFilename = topoProperties.getDevicesFilename();
-        if (devicesFilename == null) {
-            log.error("No 'topo.devices-filename' entry in application properties! Skipping topology import.");
-            return;
-        }
-        String adjciesFilename = topoProperties.getAdjciesFilename();
-        if (adjciesFilename == null) {
-            log.error("No 'topo.adjcies-filename' entry in application properties! Skipping topology import.");
-            return;
-        }
+        String devicesFilename = "./config/topo/"+topoProperties.getPrefix()+"-devices.json";
+
+        String adjciesFilename = "./config/topo/"+topoProperties.getPrefix()+"-adjcies.json";
 
         try {
             this.importFromFile(false, devicesFilename, adjciesFilename);

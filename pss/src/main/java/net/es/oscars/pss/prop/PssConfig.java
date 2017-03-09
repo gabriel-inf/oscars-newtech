@@ -12,12 +12,33 @@ import org.springframework.stereotype.Component;
 @NoArgsConstructor
 public class PssConfig {
 
+
+    @NonNull
+    private String[] templateDirs;
+
+
     @NonNull
     private String checkFilename;
+
+
+    @NonNull
+    private String cloginrc;
 
     @NonNull
     private String rancidDir;
 
     @NonNull
-    private String cloginrc;
+    private String rancidHost;
+
+
+    @NonNull
+    private Boolean performGetconfig;
+
+    @NonNull
+    private String getconfigHost;
+
+    @NonNull
+    private String localGetconfigPath;
 }
+
+

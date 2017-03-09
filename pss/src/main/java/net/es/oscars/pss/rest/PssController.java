@@ -23,7 +23,7 @@ public class PssController {
 
     @RequestMapping(value = "/pss/command", method = RequestMethod.POST)
     public CommandResponse command(@RequestBody Command cmd) {
-        log.info("received a command, connId: " + cmd.getConnectionId() + " dev: " + cmd.getDevice());
+        log.info("received a command, connId: " + cmd.getConnectionId() + " device: " + cmd.getDevice());
 
         CommandResponse response = CommandResponse.builder().build();
 

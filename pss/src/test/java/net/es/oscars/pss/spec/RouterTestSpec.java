@@ -1,0 +1,23 @@
+package net.es.oscars.pss.spec;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import net.es.oscars.dto.pss.params.alu.AluParams;
+import net.es.oscars.dto.pss.params.ex.ExParams;
+import net.es.oscars.dto.pss.params.mx.MxParams;
+import net.es.oscars.dto.topo.enums.DeviceModel;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class RouterTestSpec {
+    private String device;
+    private DeviceModel model;
+    private AluParams aluParams;
+    private ExParams exParams;
+    private MxParams mxParams;
+
+}

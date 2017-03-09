@@ -10,6 +10,7 @@ import net.es.oscars.pss.ent.UrnAddressE;
 import net.es.oscars.pss.prop.PssConfig;
 import net.es.oscars.pss.tpl.Stringifier;
 import net.es.oscars.topo.pop.Device;
+import net.es.oscars.topo.prop.TopoProperties;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +28,7 @@ import java.util.List;
 public class UrnAddressImporter {
 
     @Autowired
-    private PssConfig pssConfig;
+    private TopoProperties topoProperties;
 
     @Autowired
     private UrnAddressRepository repo;
@@ -40,23 +41,18 @@ public class UrnAddressImporter {
     public void attemptImport() {
 
         log.info("importing IP addresses for URNs");
-        String addrsFilename = pssConfig.getAddressesFilename();
-        if (addrsFilename == null) {
-            log.error("No 'pss.addresses-filename' entry in application properties! Skipping address import.");
-        } else {
-            try {
-                List<UrnAddressE> addrs = importAddrsFromFile(addrsFilename);
-                repo.deleteAll();
-                repo.save(addrs);
+        String addrsFilename = "./config/topo/"+topoProperties.getPrefix()+"-addrs.json";
+        try {
+            List<UrnAddressE> addrs = importAddrsFromFile(addrsFilename);
+            repo.deleteAll();
+            repo.save(addrs);
 
-                Integer num = addrs.size();
-                log.info("imported "+num+" URN addresses");
+            Integer num = addrs.size();
+            log.info("imported "+num+" URN addresses");
 
 
-            } catch (IOException e) {
-                log.error(e.getMessage());
-            }
-
+        } catch (IOException e) {
+            log.error(e.getMessage());
         }
 
     }

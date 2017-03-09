@@ -1,14 +1,14 @@
 package net.es.oscars.dto.pss.params;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.NonNull;
+import lombok.*;
 
 import java.util.List;
 
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class MplsPath {
 
     @NonNull

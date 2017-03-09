@@ -2,10 +2,7 @@ package net.es.oscars.dto.pss.cmd;
 
 
 import lombok.*;
-import net.es.oscars.dto.pss.st.ConfigStatus;
-import net.es.oscars.dto.pss.st.LifecycleStatus;
-import net.es.oscars.dto.pss.st.OperationalStatus;
-import net.es.oscars.dto.pss.st.RollbackStatus;
+import net.es.oscars.dto.pss.st.*;
 
 import java.util.Date;
 
@@ -28,6 +25,7 @@ public class CommandStatus {
 
     private String connectionId;
 
+    private ControlPlaneStatus controlPlaneStatus;
     private LifecycleStatus lifecycleStatus;
     private ConfigStatus configStatus;
     private OperationalStatus operationalStatus;

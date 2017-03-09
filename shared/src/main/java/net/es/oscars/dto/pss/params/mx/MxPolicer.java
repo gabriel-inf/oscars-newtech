@@ -1,20 +1,17 @@
 package net.es.oscars.dto.pss.params.mx;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.NonNull;
+import lombok.*;
 import net.es.oscars.dto.pss.params.Policing;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class MxPolicer {
 
-    @NonNull
     private String name;
 
-    @NonNull
     private Integer mbps;
 
-    @NonNull
     private Policing policing;
 }

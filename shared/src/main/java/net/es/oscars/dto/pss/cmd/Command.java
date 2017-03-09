@@ -3,8 +3,8 @@ package net.es.oscars.dto.pss.cmd;
 
 import lombok.*;
 import net.es.oscars.dto.pss.params.alu.AluParams;
-import net.es.oscars.dto.pss.params.ex.ExGenerationParams;
-import net.es.oscars.dto.pss.params.mx.MxGenerationParams;
+import net.es.oscars.dto.pss.params.ex.ExParams;
+import net.es.oscars.dto.pss.params.mx.MxParams;
 import net.es.oscars.dto.topo.enums.DeviceModel;
 
 @Data
@@ -23,7 +23,7 @@ public class Command {
     private boolean refresh;
 
     private AluParams alu;
-    private MxGenerationParams mx;
-    private ExGenerationParams ex;
+    private MxParams mx;
+    private ExParams ex;
 
 }

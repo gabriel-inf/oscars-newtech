@@ -30,7 +30,7 @@ import java.util.HashSet;
 
 @Slf4j
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes=CoreUnitTestConfiguration.class)
+@SpringBootTest(classes = CoreUnitTestConfiguration.class)
 @Transactional
 public class SpecPopTest {
 
@@ -45,7 +45,7 @@ public class SpecPopTest {
 
     @Before
     public void startup() throws IOException {
-        topoFileImporter.importFromFile(true, "config/devices.json", "config/adjcies.json");
+        topoFileImporter.importFromFile(true, "config/topo/basic-devices.json", "config/topo/basic-adjcies.json");
     }
 
     @Test
@@ -64,8 +64,8 @@ public class SpecPopTest {
 
     public SpecificationE addEndpoints(SpecificationE spec) {
 
-        String startb1 =  "star-tb1";
-        String nersctb1 =  "nersc-tb1";
+        String startb1 = "star-tb1";
+        String nersctb1 = "nersc-tb1";
         String nersctb1_3_1_1 = "nersc-tb1:3/1/1";
         String startb1_1_1_1 = "star-tb1:1/1/1";
 
