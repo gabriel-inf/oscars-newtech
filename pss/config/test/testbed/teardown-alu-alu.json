@@ -1,6 +1,8 @@
 {
   "device": "nersc-tb1.es.net",
   "model": "ALCATEL_SR7750",
+  "shouldFail": false,
+
   "aluParams": {
     "aluVpls": {
       "vcId": 6011,

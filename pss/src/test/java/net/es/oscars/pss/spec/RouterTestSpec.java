@@ -16,6 +16,7 @@ import net.es.oscars.dto.topo.enums.DeviceModel;
 public class RouterTestSpec {
     private String device;
     private DeviceModel model;
+    private Boolean shouldFail;
     private AluParams aluParams;
     private ExParams exParams;
     private MxParams mxParams;
