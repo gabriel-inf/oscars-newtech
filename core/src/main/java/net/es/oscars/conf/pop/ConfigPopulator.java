@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import javax.transaction.Transactional;
 import java.util.Optional;
 
 @Slf4j
@@ -31,6 +32,7 @@ public class ConfigPopulator {
     }
 
     @PostConstruct
+    @Transactional
     public void initDefaults() throws JsonProcessingException {
         log.info("Initializing startup configs for OSCARS modules.");
 

@@ -76,7 +76,11 @@
 
     <dependencyManagement>
         <dependencies>
-
+            <dependency>
+                <groupId>org.postgresql</groupId>
+                <artifactId>postgresql</artifactId>
+                <version>42.0.0</version>
+            </dependency>
             <dependency>
                 <groupId>com.jayway.restassured</groupId>
                 <artifactId>rest-assured</artifactId>

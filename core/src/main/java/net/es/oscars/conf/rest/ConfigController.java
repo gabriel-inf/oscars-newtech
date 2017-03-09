@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -41,6 +42,7 @@ public class ConfigController {
 
     @RequestMapping(value = "/configs/all", method = RequestMethod.GET)
     @ResponseBody
+    @Transactional
     public List<String> listComponents() {
         log.info("listing all");
 
@@ -65,6 +67,7 @@ public class ConfigController {
 
     @RequestMapping(value = "/configs/get/{component}", method = RequestMethod.GET)
     @ResponseBody
+    @Transactional
     public String getConfig(@PathVariable("component") String component) {
         log.info("retrieving " + component);
         Optional<EStartupConfig> maybeConfig = repository.findByName(component);

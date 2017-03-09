@@ -22,8 +22,7 @@ public class RouterCommandsE {
     private String connectionId;
 
     @NonNull
-    @Lob
-    @Column(length = 65535)
+    @Column(length = 65536)
     private String contents;
 
 }
