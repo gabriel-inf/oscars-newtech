@@ -4,21 +4,15 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.authnz.dao.UserRepository;
-import net.es.oscars.authnz.ent.EPermissions;
-import net.es.oscars.authnz.ent.EUser;
-import net.es.oscars.authnz.prop.AuthnzProperties;
 import net.es.oscars.dto.viz.Position;
 import net.es.oscars.helpers.JsonHelper;
-import net.es.oscars.ui.prop.UIProperties;
+import net.es.oscars.topo.prop.TopoProperties;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -26,7 +20,7 @@ import java.util.Map;
 @Data
 public class UIPopulator {
     @Autowired
-    private UIProperties properties;
+    private TopoProperties topoProperties;
 
     private Map<String, Position> positions;
     @Autowired
@@ -37,9 +31,10 @@ public class UIPopulator {
     public void loadPositions() throws IOException {
         ObjectMapper mapper = jsonHelper.mapper();
 
+        String filename = "./config/topo/"+topoProperties.getPrefix()+"-positions.json";
+        File jsonFile = new File(filename);
 
-        File positionsFile = properties.getPositionsFile();
-        positions = mapper.readValue(positionsFile, new TypeReference< Map<String, Position>>() {});
+        positions = mapper.readValue(jsonFile, new TypeReference< Map<String, Position>>() {});
         log.info("positions imported for devices: " + positions.size());
 
     }

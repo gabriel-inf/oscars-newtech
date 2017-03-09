@@ -11,12 +11,10 @@ import net.es.oscars.topo.dao.UrnAdjcyRepository;
 import net.es.oscars.topo.dao.UrnRepository;
 import net.es.oscars.topo.ent.*;
 import net.es.oscars.topo.pop.TopoFileImporter;
-import net.es.oscars.topo.pop.TopoImporter;
 import net.es.oscars.topo.prop.TopoProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
 
@@ -344,8 +342,7 @@ public class RepoEntityBuilder {
 
     public void importEsnet() {
         TopoProperties topoProperties = new TopoProperties();
-        topoProperties.setDevicesFilename("config/esnet-devices.json");
-        topoProperties.setAdjciesFilename("config/esnet-adjacencies.json");
+        topoProperties.setPrefix("esnet");
         log.info("Building ESnet topology");
         TopoFileImporter topoImporter = new TopoFileImporter(urnRepo, adjcyRepo, topoProperties);
     }
