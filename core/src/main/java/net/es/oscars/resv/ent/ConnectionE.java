@@ -37,4 +37,6 @@ public class ConnectionE {
     @OneToOne (cascade = CascadeType.ALL)
     private ReservedBlueprintE reserved;
 
+    @OneToOne (cascade = CascadeType.ALL)
+    private ArchivedBlueprintE archivedResv;
 }

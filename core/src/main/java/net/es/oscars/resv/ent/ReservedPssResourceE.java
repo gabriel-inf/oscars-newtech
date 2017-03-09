@@ -28,6 +28,4 @@ public class ReservedPssResourceE {
     private Instant beginning;
 
     private Instant ending;
-
-
 }

@@ -608,11 +608,11 @@ public class VlanTranslationTest {
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
 
         RequestedVlanPipeE pipeA = testBuilder.buildRequestedPipe(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW,
-                palindrome, survivability, srcVlan, dstVlan, 1);
+                palindrome, survivability, srcVlan, dstVlan, 1, Integer.MAX_VALUE);
         RequestedVlanPipeE pipeB = testBuilder.buildRequestedPipe(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW,
-                palindrome, survivability, "5", "5", 1);
+                palindrome, survivability, "5", "5", 1, Integer.MAX_VALUE);
         RequestedVlanPipeE pipeC = testBuilder.buildRequestedPipe("B:0", "B", "C:1", "C", azBW, zaBW, palindrome,
-                survivability, "2", "2", 1);
+                survivability, "2", "2", 1, Integer.MAX_VALUE);
 
         requestedBlueprint = testBuilder.buildRequest(new HashSet<>(Arrays.asList(pipeA, pipeB, pipeC)), 3, 3, "test");
 

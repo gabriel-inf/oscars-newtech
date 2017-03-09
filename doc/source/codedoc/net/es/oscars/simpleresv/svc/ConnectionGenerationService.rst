@@ -37,7 +37,7 @@ buildConnection
 generateCircuitFlow
 ^^^^^^^^^^^^^^^^^^^
 
-.. java:method:: public CircuitFlow generateCircuitFlow(String sourceDevice, Set<String> sourcePorts, String sourceVlan, String destDevice, Set<String> destPorts, String destVlan, Integer azMbps, Integer zaMbps, List<String> azRoute, List<String> zaRoute, Set<String> blacklist, String palindromic, String survivability, Integer numDisjointPaths)
+.. java:method:: public CircuitFlow generateCircuitFlow(String sourceDevice, Set<String> sourcePorts, String sourceVlan, String destDevice, Set<String> destPorts, String destVlan, Integer azMbps, Integer zaMbps, List<String> azRoute, List<String> zaRoute, Set<String> blacklist, String palindromic, String survivability, Integer numPaths)
    :outertype: ConnectionGenerationService
 
 generateConnection

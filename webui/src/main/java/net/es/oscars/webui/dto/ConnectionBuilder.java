@@ -54,7 +54,7 @@ public class ConnectionBuilder
 
         Map<String, RequestedVlanJunction> junctionMap = buildJunctionMap(minimalJunctionMap);
         Set<RequestedVlanJunction> inPipes = new HashSet<>();
-        Set<RequestedVlanPipe> pipes = new HashSet<>();
+        Set<RequestedVlanPipe> pipes;
         if(advanced){
             pipes = buildRequestedPipesFromAdvanced(advancedPipeMap, inPipes, junctionMap);
         }
@@ -63,7 +63,7 @@ public class ConnectionBuilder
         }
         Set<RequestedVlanJunction> junctions = junctionMap.values().stream().filter(j -> !inPipes.contains(j)).collect(Collectors.toSet());
 
-        RequestedVlanFlow reqvf = buildRequestedVlanFlow(junctions, pipes, 1, 1, connectionId);
+        RequestedVlanFlow reqvf = buildRequestedVlanFlow(junctions, pipes, pipes.size(), pipes.size(), connectionId);
 
         RequestedBlueprint reqbp = buildRequestedBlueprint(layer3Flow, reqvf, connectionId);
 
@@ -237,13 +237,13 @@ public class ConnectionBuilder
         }
     }
 
-    public RequestedVlanPipe buildRequestedPipe(RequestedVlanJunction aJ, RequestedVlanJunction zJ, Integer numDisjoint,
+    public RequestedVlanPipe buildRequestedPipe(RequestedVlanJunction aJ, RequestedVlanJunction zJ, Integer numPaths,
                                                 Integer azBw, Integer zaBw, List<String> azERO, List<String> zaERO,
                                                 Set<String> blacklist, PalindromicType pType, SurvivabilityType sType){
         return RequestedVlanPipe.builder()
                 .aJunction(aJ)
                 .zJunction(zJ)
-                .numDisjoint(numDisjoint)
+                .numPaths(numPaths)
                 .azMbps(azBw)
                 .zaMbps(zaBw)
                 .azERO(azERO)
@@ -251,6 +251,7 @@ public class ConnectionBuilder
                 .urnBlacklist(blacklist)
                 .eroPalindromic(pType)
                 .eroSurvivability(sType)
+                .priority(Integer.MAX_VALUE)
                 .pipeType(EthPipeType.REQUESTED)
                 .build();
     }

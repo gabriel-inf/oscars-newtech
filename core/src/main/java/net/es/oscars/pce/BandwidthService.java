@@ -153,15 +153,15 @@ public class BandwidthService {
      * is empty, then all of the Reservable Bandwidth at that URN is available. Otherwise,
      * subtract the sum Ingress/Egress bandwidth from the maximum reservable bandwidth at that URN.
      *
-     * @param bandwidth - ReservableBandwidthE object, which contains the maximum Ingress/Egress bandwidth for a given URN
+     * @param capacity - ReservableBandwidthE object, which contains the maximum Ingress/Egress bandwidth for a given URN
      * @param resvBwMap - A Mapping from a URN to a list of Reserved Bandwidths at that URN.
      * @return A mapping Ingress/Egress bandwidth availability {Ingress: num, Egress: num}
      */
-    public Map<String, Integer> buildBandwidthAvailabilityMapForUrn(String urn, ReservableBandwidthE bandwidth,
+    public Map<String, Integer> buildBandwidthAvailabilityMapForUrn(String urn, ReservableBandwidthE capacity,
                                                                     Map<String, List<ReservedBandwidthE>> resvBwMap) {
         Map<String, Integer> availBw = new HashMap<>();
-        availBw.put("Ingress", bandwidth.getIngressBw());
-        availBw.put("Egress", bandwidth.getEgressBw());
+        availBw.put("Ingress", capacity.getIngressBw());
+        availBw.put("Egress", capacity.getEgressBw());
         if (resvBwMap.containsKey(urn)) {
             // Sort Reserved bandwidth list by start, and then end
             Comparator<ReservedBandwidthE> byStartTime = Comparator.comparing(ReservedBandwidthE::getBeginning);
@@ -170,35 +170,40 @@ public class BandwidthService {
 
             Integer maxIngress = 0;
             Integer maxEgress = 0;
-            for(ReservedBandwidthE bw1 : resvBwList){
-                Instant bw1Start = bw1.getBeginning();
-                Instant bw1End = bw1.getEnding();
+            Integer ingress = 0;
+            Integer egress = 0;
+            List<ReservedBandwidthE> activeResvList = new ArrayList<>();
+            for(ReservedBandwidthE currBw : resvBwList){
+                Instant currStart = currBw.getBeginning();
 
-                Integer ingress = 0;
-                Integer egress = 0;
-                for(ReservedBandwidthE bw2: resvBwList){
-                    Instant bw2Start = bw2.getBeginning();
-                    Instant bw2End = bw2.getEnding();
-                    // These two reservations overlap in time
-                    // x1 <= y2 && y1 <= x2
-                    if(bw1Start.isBefore(bw2End) && bw2Start.isBefore(bw1End)){
-                        ingress += bw2.getInBandwidth();
-                        egress += bw2.getEgBandwidth();
-                    }
-                    // BW2 starts after BW1 ends. They do not overlap. As the list is sorted, there can be no more
-                    // reserved bandwidths in the list that do overlap
-                    else{
-                        break;
+                // Add ingress and egress from new reservation
+                ingress += currBw.getInBandwidth();
+                egress += currBw.getEgBandwidth();
+
+                // For each previous reservation
+                for(int activeIndex = 0; activeIndex < activeResvList.size(); activeIndex++){
+                    ReservedBandwidthE activeBw = activeResvList.get(activeIndex);
+                    Instant activeEnd = activeBw.getEnding();
+                    // The active reservation has "expired"
+                    // Remove it from the ongoing total
+                    if(currStart.isAfter(activeEnd)){
+                        ingress -= activeBw.getInBandwidth();
+                        egress -= activeBw.getEgBandwidth();
+                        activeResvList.remove(activeIndex);
+                        activeIndex--;
                     }
                 }
                 // If either metric is greater than the current max, it's the new max
                 maxIngress = Math.max(ingress, maxIngress);
                 maxEgress = Math.max(egress, maxEgress);
+
+                // Add the current bandwidth to the active list
+                activeResvList.add(currBw);
             }
 
             // Remove the maximum reserved bandwidth from the available ingress/egress
-            availBw.put("Ingress", Math.max(bandwidth.getIngressBw() - maxIngress, 0));
-            availBw.put("Egress", Math.max(bandwidth.getEgressBw() - maxEgress, 0));
+            availBw.put("Ingress", Math.max(capacity.getIngressBw() - maxIngress, 0));
+            availBw.put("Egress", Math.max(capacity.getEgressBw() - maxEgress, 0));
         }
         return availBw;
     }

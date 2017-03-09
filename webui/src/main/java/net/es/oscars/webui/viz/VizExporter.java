@@ -43,19 +43,18 @@ public class VizExporter {
         // TODO: visualize other things
         ReservedVlanFlow rvf = c.getReserved().getVlanFlow();
 
-        String[] colors = {"blue", "red", "green", "yellow", "purple", "pink", "lightblue", "darkgreen"};
+        String[] colors = {"blue", "red", "green", "yellow", "purple", "pink", "lightblue", "darkgreen", "black",
+                "crimson", "chocolate", "firebrick", "orange", "slategray", "yellowgreen", "sienna", "peachpuff", "olive"};
         int i = 0;
 
-        List<Map<String, Set<String>>> ethEdgeList = this.resvViewEthPipes(rvf, nodes, multilayer);
-        for (Map<String, Set<String>> ethEdges : ethEdgeList) {
-            this.drawEdges(ethEdges, g, colors[i]);
+        List<Map<String, Set<String>>> edgeList = this.resvViewEthPipes(rvf, nodes, multilayer);
+        edgeList.addAll(this.resvViewMplsPipes(rvf, nodes, multilayer));
+        for (Map<String, Set<String>> edges : edgeList) {
+            this.drawEdges(edges, g, colors[i]);
             i++;
-
-        }
-        List<Map<String, Set<String>>> mplsEdgeList = this.resvViewMplsPipes(rvf, nodes, multilayer);
-        for (Map<String, Set<String>> mplsEdges : mplsEdgeList) {
-            this.drawEdges(mplsEdges, g, colors[i]);
-            i++;
+            if(i >= colors.length) {
+                i = 0;
+            }
         }
 
         for (ReservedVlanJunction rvj : rvf.getJunctions()) {

@@ -2,9 +2,10 @@ package net.es.oscars.pce;
 
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.spec.SurvivabilityType;
+import net.es.oscars.dto.topo.TopoVertex;
 import net.es.oscars.dto.topo.enums.DeviceType;
+import net.es.oscars.dto.topo.enums.Layer;
 import net.es.oscars.pss.PSSException;
-import net.es.oscars.resv.dao.ReservedBandwidthRepository;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.dto.topo.TopoEdge;
 import net.es.oscars.dto.spec.PalindromicType;
@@ -82,14 +83,11 @@ public class TopPCE {
         // Retrieve the VLAN flow
         RequestedVlanFlowE req_f = requested.getVlanFlow();
 
-        // Sort the junctions and pipes - provide a consistent ordering
-        List<RequestedVlanJunctionE> reqJunctions = req_f.getJunctions().size()>1 ? sortJunctions(req_f.getJunctions()) : new ArrayList<>(req_f.getJunctions());
-        List<RequestedVlanPipeE> reqPipes = req_f.getPipes().size()>1? sortPipes(req_f.getPipes()) : new ArrayList<>(req_f.getPipes());
-
         // Get flow parameters
         String connId = req_f.getContainerConnectionId();
         Integer minPipes = req_f.getMinPipes();
         Integer maxPipes = req_f.getMaxPipes();
+
 
         // Generate start and end combos from the lists
         List<Date> startDates = schedSpec.getStartDates();
@@ -131,7 +129,7 @@ public class TopPCE {
                 continue;
             }
             // Otherwise, test if the request can be satisfied in this duration
-            Boolean isValid = handleRequestForRange(reqJunctions, reqPipes, minPipes, maxPipes, connId, ranges,
+            Boolean isValid = handleRequestForRange(req_f.getJunctions(), req_f.getPipes(), minPipes, maxPipes, connId, ranges,
                     mplsPipesPerRange, ethPipesPerRange, junctionsPerRange, allPathsPerRange, rangeIndex);
 
             validRanges.set(rangeIndex, isValid);
@@ -150,6 +148,7 @@ public class TopPCE {
         if(chosenRangeIndex == -1){
             return reserved;
         }
+        log.info("PCE success.");
 
         // If you make it to this point, then you must have at least one range where the reservation can be made
         // and meets the minimum duration requirement
@@ -172,23 +171,73 @@ public class TopPCE {
         return reserved;
     }
 
-    private List<RequestedVlanPipeE> sortPipes(Set<RequestedVlanPipeE> pipes) {
+    private List<RequestedVlanPipeE> sortPipes(Set<RequestedVlanPipeE> pipes, Integer minPipes,
+                                               Map<String, Map<String, Integer>> bwAvailMap, List<ReservedVlanE> repoVlans) {
 
-        Comparator<RequestedVlanPipeE> byAJunction = (p1, p2) -> p1.getAJunction().getDeviceUrn().compareToIgnoreCase(p2.getAJunction().getDeviceUrn());
-        Comparator<RequestedVlanPipeE> byZJunction = (p1, p2) -> p1.getZJunction().getDeviceUrn().compareToIgnoreCase(p2.getZJunction().getDeviceUrn());
+        // Sort any pipes with priority less than MAX_INT
+        Set<RequestedVlanPipeE> priorityPipes = pipes.stream()
+                .filter(p -> p.getPriority() < Integer.MAX_VALUE)
+                .collect(Collectors.toSet());
+        Set<RequestedVlanPipeE> otherPipes = pipes.stream()
+                .filter(p -> p.getPriority() == Integer.MAX_VALUE)
+                .collect(Collectors.toSet());
+
+        List<RequestedVlanPipeE> sortedPipes = new ArrayList<>();
+        if(priorityPipes.size() > 0){
+            Comparator<RequestedVlanPipeE> byPriority = Comparator.comparing(RequestedVlanPipeE::getPriority);
+            sortedPipes = priorityPipes.stream().sorted(byPriority).collect(Collectors.toList());
+        }
+
+        // Sort the remaining pipes by hop count, bandwidth, URNs
+
+        // Only calculate hop count if you're doing Manycast
+        // As indicated by only needing a minimum number of pipes less than the pipe set size
+        Map<RequestedVlanPipeE, Integer> hopCountMap = minPipes < pipes.size() ?
+                buildPathHopCountMap(otherPipes, bwAvailMap, repoVlans) : new HashMap<>();
+
+        Comparator<RequestedVlanPipeE> byPathHopCount = Comparator.comparing(hopCountMap::get);
         // Sort by largest bandwidth first
         Comparator<RequestedVlanPipeE> byAzMbps = Comparator.comparing(RequestedVlanPipeE::getAzMbps).reversed();
         // Sort by largest bandwidth first
         Comparator<RequestedVlanPipeE> byZaMbps = Comparator.comparing(RequestedVlanPipeE::getZaMbps).reversed();
-        return pipes.stream().sorted(byAzMbps.thenComparing(byZaMbps).thenComparing(byAJunction).thenComparing(byZJunction)).collect(Collectors.toList());
+
+        Comparator<RequestedVlanPipeE> byAJunction = (p1, p2) ->
+                p1.getAJunction().getDeviceUrn().compareToIgnoreCase(p2.getAJunction().getDeviceUrn());
+        Comparator<RequestedVlanPipeE> byZJunction = (p1, p2) ->
+                p1.getZJunction().getDeviceUrn().compareToIgnoreCase(p2.getZJunction().getDeviceUrn());
+
+        // Only compare by hop count if doing manycast
+        if(minPipes < pipes.size()){
+            sortedPipes.addAll(otherPipes.stream().sorted(byPathHopCount.thenComparing(byAzMbps).thenComparing(byZaMbps)
+                    .thenComparing(byAJunction).thenComparing(byZJunction)).collect(Collectors.toList()));
+        }
+        else{
+            sortedPipes.addAll(otherPipes.stream().sorted(byAzMbps.thenComparing(byZaMbps)
+                    .thenComparing(byAJunction).thenComparing(byZJunction)).collect(Collectors.toList()));
+        }
+        return sortedPipes;
+    }
+
+    private Map<RequestedVlanPipeE, Integer> buildPathHopCountMap(Set<RequestedVlanPipeE> pipes,
+                                                               Map<String, Map<String, Integer>> bwAvailMap,
+                                                               List<ReservedVlanE> rsvVlans) {
+
+        Map<RequestedVlanPipeE, Integer> pathLengthMap = new HashMap<>();
+        for(RequestedVlanPipeE pipe : pipes){
+            // Sum up the hop count for all paths
+            Map<String, List<TopoEdge>> paths = findShortestConstrainedPath(pipe, bwAvailMap, rsvVlans);
+            Integer total = paths!= null ? paths.values().stream().mapToInt(List::size).sum() : Integer.MAX_VALUE;
+            pathLengthMap.put(pipe, total);
+        }
+        return pathLengthMap;
     }
 
     private List<RequestedVlanJunctionE> sortJunctions(Set<RequestedVlanJunctionE> junctions) {
         return junctions.stream().sorted((a, b) -> a.getDeviceUrn().compareToIgnoreCase(b.getDeviceUrn())).collect(Collectors.toList());
     }
 
-    private Boolean handleRequestForRange(List<RequestedVlanJunctionE> reqJunctions,
-                                          List<RequestedVlanPipeE> reqPipes, Integer minPipes, Integer maxPipes,
+    private Boolean handleRequestForRange(Set<RequestedVlanJunctionE> junctions,
+                                          Set<RequestedVlanPipeE> pipes, Integer minPipes, Integer maxPipes,
                                           String connId,
                                           List<List<Date>> ranges,
                                           List<Set<ReservedMplsPipeE>> mplsPipesPerRange,
@@ -205,8 +254,6 @@ public class TopPCE {
         Set<ReservedVlanJunctionE> reservedEthJunctions = new HashSet<>();
         Set<BidirectionalPathE> allPaths = new HashSet<>();
 
-        // Store the min/max number of pipes needed
-        // TODO: Use the minimum/maximum number of pipes needed
 
         // Get map of parent device vertex -> set of port vertices
         Map<String, Set<String>> deviceToPortMap = topoService.buildDeviceToPortMap();
@@ -216,9 +263,18 @@ public class TopPCE {
         List<ReservedBandwidthE> reservedBandwidths = bwService.getReservedBandwidthFromRepo(start, end);
         Map<String, Map<String, Integer>> bwAvailMap = bwService.buildBandwidthAvailabilityMapFromUrnRepo(reservedBandwidths);
 
+        List<ReservedVlanE> repoVlans = vlanService.getReservedVlansFromRepo(start, end);
+
+        // Store the min/max number of pipes needed
+        // Sort the junctions and pipes - provide a consistent ordering
+        List<RequestedVlanJunctionE> reqJunctions = junctions.size()>1 ? sortJunctions(junctions) : new ArrayList<>(junctions);
+        List<RequestedVlanPipeE> reqPipes = pipes.size()>1? sortPipes(pipes, minPipes, bwAvailMap, repoVlans) : new ArrayList<>(pipes);
+
+
         // Attempt to reserve simple junctions
         log.info("Handling Simple Junctions");
-        Set<ReservedVlanJunctionE> simpleJunctions = handleRequestedJunctions(reqJunctions, start, end, deviceToPortMap, portToDeviceMap, connId, bwAvailMap);
+        Set<ReservedVlanJunctionE> simpleJunctions = handleRequestedJunctions(reqJunctions, start, end, deviceToPortMap,
+                portToDeviceMap, connId, bwAvailMap, repoVlans);
         log.info("All simple junctions handled");
         // If not all junctions were able to be reserved, no later range can work
         // Break the loop, then check for any valid ranges
@@ -233,10 +289,12 @@ public class TopPCE {
         // Attempt to reserve all requested pipes
         log.info("Starting to handle pipes");
         Integer numReserved = handleRequestedPipes(reqPipes, start, end, simpleJunctions, reservedMplsPipes, reservedEthPipes,
-                deviceToPortMap, portToDeviceMap, allPaths, connId, clonedAvailMap);
+                deviceToPortMap, portToDeviceMap, allPaths, connId, clonedAvailMap, repoVlans, maxPipes);
 
         // If pipes were not able to be reserved in the original order, try reversing the order pipes are attempted
-        if ((numReserved != reqPipes.size()) && (reqPipes.size() > 1)) {
+        if (numReserved < minPipes && (reqPipes.size() > 1)) {
+            log.info("Insufficient number of pipes reserved, trying reverse order.");
+            log.info("Num reserved: " + numReserved + ", Num Required: " + minPipes);
             Collections.reverse(reqPipes);
             reservedEthPipes = new HashSet<>();
             reservedMplsPipes = new HashSet<>();
@@ -244,12 +302,14 @@ public class TopPCE {
             allPaths = new HashSet<>();
             clonedAvailMap = new HashMap<>(bwAvailMap);
             numReserved = handleRequestedPipes(reqPipes, start, end, simpleJunctions, reservedMplsPipes, reservedEthPipes,
-                    deviceToPortMap, portToDeviceMap, allPaths, connId, clonedAvailMap);
+                    deviceToPortMap, portToDeviceMap, allPaths, connId, clonedAvailMap, repoVlans, maxPipes);
         }
 
         // If the pipes still cannot be reserved, no later range can work
         // Break the loop, then check for any valid ranges
-        if (numReserved != reqPipes.size()) {
+        if (numReserved < minPipes) {
+            log.info("Insufficient number of pipes reserved, request failed.");
+            log.info("Num reserved: " + numReserved + ", Num Required: " + minPipes);
             return false;
         }
         // All pipes were successfully found, store the reserved resources
@@ -276,14 +336,16 @@ public class TopPCE {
     private Set<ReservedVlanJunctionE> handleRequestedJunctions(List<RequestedVlanJunctionE> reqJunctions, Date start, Date end,
                                                                 Map<String, Set<String>> deviceToPortMap,
                                                                 Map<String, String> portToDeviceMap, String connId,
-                                                                Map<String, Map<String, Integer>> bwAvailMap){
+                                                                Map<String, Map<String, Integer>> bwAvailMap,
+                                                                List<ReservedVlanE> repoVlans){
 
         Set<ReservedVlanJunctionE> simpleJunctions = new HashSet<>();
         List<ReservedBandwidthE> newestBandwidths = new ArrayList<>();
         for(RequestedVlanJunctionE reqJunction: reqJunctions) {
 
             // Update list of reserved VLAN IDs
-            List<ReservedVlanE> rsvVlans = vlanService.createReservedVlanList(simpleJunctions, new HashSet<>(), start, end);
+            List<ReservedVlanE> rsvVlans = vlanService.createReservedVlanList(simpleJunctions, new HashSet<>());
+            rsvVlans.addAll(repoVlans);
 
             ReservedVlanJunctionE junction = null;
             try {
@@ -316,25 +378,33 @@ public class TopPCE {
      * @param simpleJunctions   - The currently reserved independent junctions
      * @param reservedMplsPipes - The currently reserved MPLS pipes
      * @param reservedEthPipes  - The currently reserved Ethernet pipes
-     * @param deviceToPortMap
-     * @param portToDeviceMap
+     * @param deviceToPortMap   - Map of matching ports for each device
+     * @param portToDeviceMap   - Map of matching device for each port
      * @param connectionId      - The unique ID of the connection containing the requested pipes
-     * @param bwAvailMap
+     * @param bwAvailMap        - Mapping of Ingress and Egress bandwidth available at each URN
+     * @param maxPipes          - The maximum number of pipes that need to be reserved
      * @return The number of requested pipes which were able to be reserved
      */
     private Integer handleRequestedPipes(List<RequestedVlanPipeE> pipes, Date start, Date end,
                                          Set<ReservedVlanJunctionE> simpleJunctions, Set<ReservedMplsPipeE> reservedMplsPipes,
                                          Set<ReservedEthPipeE> reservedEthPipes, Map<String, Set<String>> deviceToPortMap,
                                          Map<String, String> portToDeviceMap, Set<BidirectionalPathE> allPaths,
-                                         String connectionId, Map<String, Map<String, Integer>> bwAvailMap) {
+                                         String connectionId, Map<String, Map<String, Integer>> bwAvailMap,
+                                         List<ReservedVlanE> repoVlans, Integer maxPipes) {
         // The number of requested pipes successfully reserved
         Integer numReserved = 0;
 
         // Loop through all requested pipes
         for (RequestedVlanPipeE pipe : pipes) {
 
+            // Stop when you've reserved enough pipes
+            if(Objects.equals(numReserved, maxPipes)){
+                break;
+            }
+
             // Update list of reserved VLAN IDs
-            List<ReservedVlanE> rsvVlans = vlanService.createReservedVlanList(simpleJunctions, reservedEthPipes, start, end);
+            List<ReservedVlanE> rsvVlans = vlanService.createReservedVlanList(simpleJunctions, reservedEthPipes);
+            rsvVlans.addAll(repoVlans);
             // Find the shortest path for the pipe, build a map for the AZ and ZA path
             Map<String, List<TopoEdge>> eroMapForPipe = findShortestConstrainedPath(pipe, bwAvailMap, rsvVlans);
 
@@ -430,28 +500,28 @@ public class TopPCE {
     private Map<String, List<TopoEdge>> findShortestConstrainedPath(RequestedVlanPipeE pipe,
                                                                     Map<String, Map<String, Integer>> bwAvailMap,
                                                                     List<ReservedVlanE> rsvVlans) {
-        log.info("Computing Shortest Constrained Path");
+        //log.info("Computing Shortest Constrained Path");
         Map<String, List<TopoEdge>> eroMap = null;
 
         try {
-            if (!pipe.getEroSurvivability().equals(SurvivabilityType.SURVIVABILITY_NONE) && pipe.getNumDisjoint() > 1) {
-                log.info("Entering Survivability PCE");
+            if (!pipe.getEroSurvivability().equals(SurvivabilityType.SURVIVABILITY_NONE) && pipe.getNumPaths() > 1) {
+                //log.info("Entering Survivability PCE");
                 eroMap = survivabilityPCE.computeSurvivableERO(pipe, bwAvailMap, rsvVlans);
-                log.info("Exiting Survivability PCE");
+                //log.info("Exiting Survivability PCE");
             } else if (!pipe.getAzERO().isEmpty() && !pipe.getZaERO().isEmpty()) {
-                log.info("Attempting to reserve specified Explicit Route Object");
+                //log.info("Attempting to reserve specified Explicit Route Object");
                 eroMap = eroPCE.computeSpecifiedERO(pipe, bwAvailMap, rsvVlans);
             } else if (pipe.getEroPalindromic().equals(PalindromicType.PALINDROME)) {
-                log.info("Entering Palindromical PCE");
+                //log.info("Entering Palindromical PCE");
                 eroMap = palindromicalPCE.computePalindromicERO(pipe, bwAvailMap, rsvVlans);       // A->Z ERO is palindrome of Z->A ERO
-                log.info("Exiting Palindromical PCE");
+                //log.info("Exiting Palindromical PCE");
             } else {
-                log.info("Entering NON-Palindromical PCE");
+                //log.info("Entering NON-Palindromical PCE");
                 eroMap = nonPalindromicPCE.computeNonPalindromicERO(pipe, bwAvailMap, rsvVlans);       // A->Z ERO is NOT palindrome of Z->A ERO
-                log.info("Exiting NON-Palindromical PCE");
+                //log.info("Exiting NON-Palindromical PCE");
             }
         } catch (PCEException e) {
-            log.error("PCE Unsuccessful", e.getMessage());
+            log.error("Failed to find shortest constrained path. " + e.getMessage());
         }
 
         return eroMap;
@@ -659,11 +729,17 @@ public class TopPCE {
                     .sorted((e1, e2) -> e1.getZ().getUrn().compareToIgnoreCase(e2.getZ().getUrn()))
                     .collect(Collectors.toList());
             // (Fix, Junction), (Junction, Fix), (Junction, Fix), ...., (Junction, Fix)
-            List<TopoEdge> azPath = junctionToFixEdges.subList(1, junctionToFixEdges.size());
-            azPath.add(0, fixToJunctionEdges.get(0));
+            List<TopoEdge> azPath = junctionToFixEdges.size() > 1 ? junctionToFixEdges.subList(1, junctionToFixEdges.size()) : new ArrayList<>();
+            if(fixToJunctionEdges.size() > 0) {
+                azPath.add(0, fixToJunctionEdges.get(0));
+            }
+            else{
+                Optional<TopoVertex> junctionVertex = topoService.getMultilayerTopology().getVertexByUrn(junction.getDeviceUrn());
+                junctionVertex.ifPresent(topoVertex -> azPath.add(TopoEdge.builder().a(topoVertex).z(topoVertex).layer(Layer.INTERNAL).metric(0L).build()));
+            }
             // Reverse above list
-            List<TopoEdge> zaPath = fixToJunctionEdges.subList(1, fixToJunctionEdges.size());
-            zaPath.add(junctionToFixEdges.get(0));
+            List<TopoEdge> zaPath = new ArrayList<>(azPath);
+            Collections.reverse(zaPath);
             allPaths.add(BidirectionalPathE.builder()
                     .azPath(convertTopoEdgePathToEdges(azPath))
                     .zaPath(convertTopoEdgePathToEdges(zaPath))

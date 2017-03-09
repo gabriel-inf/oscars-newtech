@@ -56,10 +56,10 @@ destVlan
 .. java:field::  String destVlan
    :outertype: CircuitFlow
 
-numDisjointPaths
+numPaths
 ^^^^^^^^^^^^^^^^
 
-.. java:field::  Integer numDisjointPaths
+.. java:field::  Integer numPaths
    :outertype: CircuitFlow
 
 palindromic
