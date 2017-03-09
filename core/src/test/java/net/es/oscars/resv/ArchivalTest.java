@@ -70,7 +70,8 @@ public class ArchivalTest
         PalindromicType palindrome = PalindromicType.PALINDROME;
         SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
 
-        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1);
+        RequestedVlanPipeE pipeAZ = testBuilder.buildRequestedPipe(srcPorts, srcDevice, dstPorts, dstDevice, azBW, zaBW,
+                palindrome, survivability, vlan, 1, Integer.MAX_VALUE);
         reqPipes.add(pipeAZ);
 
         requestedBlueprint = testBuilder.buildRequest(reqPipes, 1, 1, "reusedBlueprint");

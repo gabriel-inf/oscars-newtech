@@ -66,7 +66,7 @@ public class HeavyLoadTest {
         Instant now = Instant.parse("1995-10-23T00:00:00Z");
         Instant requestStartTime = now.plus(1L, ChronoUnit.HOURS);
         Instant requestEndTime = now.plus(5L, ChronoUnit.HOURS);
-        Integer numBandwidthReservations = 100000;
+        Integer numBandwidthReservations = 1000;
 
         String srcPort = "chic-cr5:3/2/1";
         String srcDevice = "chic-cr5";
