@@ -1,8 +1,11 @@
 package net.es.oscars.resv.ent;
 
 import lombok.*;
+import net.es.oscars.dto.resv.ResourceType;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import java.time.Instant;
 
 @Data
@@ -10,16 +13,18 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class ReservedVlanE {
-
+public class ArchivedPssResourceE
+{
     @Id
-    @GeneratedValue
     private Long id;
 
     @NonNull
     private String urn;
 
-    private Integer vlan;
+    @NonNull
+    private ResourceType resourceType;
+
+    private Integer resource;
 
     private Instant beginning;
 

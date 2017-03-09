@@ -13,25 +13,25 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ReservedEthPipeE {
+public class ArchivedEthPipeE
+{
     @Id
-    @GeneratedValue
     private Long id;
 
     @OneToOne(cascade = CascadeType.ALL)
-    private ReservedVlanJunctionE aJunction;
+    private ArchivedVlanJunctionE aJunction;
 
     @OneToOne(cascade = CascadeType.ALL)
-    private ReservedVlanJunctionE zJunction;
+    private ArchivedVlanJunctionE zJunction;
 
     @OneToMany(cascade = CascadeType.ALL)
-    private Set<ReservedBandwidthE> reservedBandwidths;
+    private Set<ArchivedBandwidthE> reservedBandwidths;
 
     @OneToMany(cascade = CascadeType.ALL)
-    private Set<ReservedVlanE> reservedVlans;
+    private Set<ArchivedVlanE> reservedVlans;
 
     @OneToMany(cascade = CascadeType.ALL)
-    private Set<ReservedPssResourceE> reservedPssResources;
+    private Set<ArchivedPssResourceE> reservedPssResources;
 
     @NonNull
     @ElementCollection
@@ -45,5 +45,5 @@ public class ReservedEthPipeE {
     private EthPipeType pipeType;
 
     @NonNull
-    private final String uniqueID = UUID.randomUUID().toString();
+    private String uniqueID;
 }

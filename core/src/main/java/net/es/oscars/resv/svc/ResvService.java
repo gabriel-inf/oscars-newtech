@@ -11,6 +11,7 @@ import net.es.oscars.resv.dao.ConnectionRepository;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.st.prov.ProvState;
 import net.es.oscars.st.resv.ResvState;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -165,6 +166,22 @@ public class ResvService {
 
         log.info("Pre-check on ConnectionID: " + c.getConnectionId() + " Unsuccessful");
         return Boolean.FALSE;
+    }
+
+    /**
+     * Populates the ArchivedBlueprintE of a Connection when it transitions into a final state from a reserved/active one.
+     * This enables freeing of reserved resources but maintains tracking and archival info on the connection.
+     * @param c ConnectionE to archive
+     */
+    public void archiveReservation(ConnectionE c)
+    {
+        ModelMapper modelMapper = new ModelMapper();
+        ArchivedBlueprintE archival = modelMapper.map(c.getReserved(), ArchivedBlueprintE.class);
+
+        log.info("Reservation: " + c.getReserved().toString());
+        log.info("Archive: " + archival.toString());
+
+        c.setArchivedResv(archival);
     }
 
 }

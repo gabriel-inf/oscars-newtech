@@ -2,7 +2,9 @@ package net.es.oscars.resv.ent;
 
 import lombok.*;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import java.time.Instant;
 
 @Data
@@ -10,10 +12,9 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class ReservedBandwidthE {
-
-     @Id
-    @GeneratedValue
+public class ArchivedBandwidthE
+{
+    @Id
     private Long id;
 
     @NonNull

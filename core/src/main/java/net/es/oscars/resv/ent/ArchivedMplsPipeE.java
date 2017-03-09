@@ -1,7 +1,7 @@
 package net.es.oscars.resv.ent;
 
 import lombok.*;
-import net.es.oscars.dto.pss.EthPipeType;
+import net.es.oscars.dto.pss.MplsPipeType;
 
 import javax.persistence.*;
 import java.util.List;
@@ -13,25 +13,22 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ReservedEthPipeE {
+public class ArchivedMplsPipeE
+{
     @Id
-    @GeneratedValue
     private Long id;
 
     @OneToOne(cascade = CascadeType.ALL)
-    private ReservedVlanJunctionE aJunction;
+    private ArchivedVlanJunctionE aJunction;
 
     @OneToOne(cascade = CascadeType.ALL)
-    private ReservedVlanJunctionE zJunction;
+    private ArchivedVlanJunctionE zJunction;
 
     @OneToMany(cascade = CascadeType.ALL)
-    private Set<ReservedBandwidthE> reservedBandwidths;
+    private Set<ArchivedBandwidthE> reservedBandwidths;
 
     @OneToMany(cascade = CascadeType.ALL)
-    private Set<ReservedVlanE> reservedVlans;
-
-    @OneToMany(cascade = CascadeType.ALL)
-    private Set<ReservedPssResourceE> reservedPssResources;
+    private Set<ArchivedPssResourceE> reservedPssResources;
 
     @NonNull
     @ElementCollection
@@ -42,8 +39,8 @@ public class ReservedEthPipeE {
     private List<String> zaERO;
 
     @NonNull
-    private EthPipeType pipeType;
+    private MplsPipeType pipeType;
 
     @NonNull
-    private final String uniqueID = UUID.randomUUID().toString();
+    private String uniqueID;
 }
