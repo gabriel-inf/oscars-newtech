@@ -237,13 +237,13 @@ public class ConnectionBuilder
         }
     }
 
-    public RequestedVlanPipe buildRequestedPipe(RequestedVlanJunction aJ, RequestedVlanJunction zJ, Integer numDisjoint,
+    public RequestedVlanPipe buildRequestedPipe(RequestedVlanJunction aJ, RequestedVlanJunction zJ, Integer numPaths,
                                                 Integer azBw, Integer zaBw, List<String> azERO, List<String> zaERO,
                                                 Set<String> blacklist, PalindromicType pType, SurvivabilityType sType){
         return RequestedVlanPipe.builder()
                 .aJunction(aJ)
                 .zJunction(zJ)
-                .numDisjoint(numDisjoint)
+                .numPaths(numPaths)
                 .azMbps(azBw)
                 .zaMbps(zaBw)
                 .azERO(azERO)

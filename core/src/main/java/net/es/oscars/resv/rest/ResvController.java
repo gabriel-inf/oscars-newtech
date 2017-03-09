@@ -194,7 +194,7 @@ public class ResvController {
             if(pipe.getPipeType() == null){pipe.setPipeType(EthPipeType.REQUESTED);}
             if(pipe.getEroPalindromic() == null){pipe.setEroPalindromic(PalindromicType.PALINDROME);}
             if(pipe.getEroSurvivability() == null){pipe.setEroSurvivability(SurvivabilityType.SURVIVABILITY_NONE);}
-            if(pipe.getNumDisjoint() == null){pipe.setNumDisjoint(1);}
+            if(pipe.getNumPaths() == null){pipe.setNumPaths(1);}
             if(pipe.getPriority() == null){pipe.setPriority(Integer.MAX_VALUE);}
         }
         flow.setPipes(pipes);

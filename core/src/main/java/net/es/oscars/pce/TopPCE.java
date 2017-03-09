@@ -5,7 +5,6 @@ import net.es.oscars.dto.spec.SurvivabilityType;
 import net.es.oscars.dto.topo.TopoVertex;
 import net.es.oscars.dto.topo.enums.DeviceType;
 import net.es.oscars.dto.topo.enums.Layer;
-import net.es.oscars.dto.topo.enums.VertexType;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.dto.topo.TopoEdge;
@@ -505,7 +504,7 @@ public class TopPCE {
         Map<String, List<TopoEdge>> eroMap = null;
 
         try {
-            if (!pipe.getEroSurvivability().equals(SurvivabilityType.SURVIVABILITY_NONE) && pipe.getNumDisjoint() > 1) {
+            if (!pipe.getEroSurvivability().equals(SurvivabilityType.SURVIVABILITY_NONE) && pipe.getNumPaths() > 1) {
                 //log.info("Entering Survivability PCE");
                 eroMap = survivabilityPCE.computeSurvivableERO(pipe, bwAvailMap, rsvVlans);
                 //log.info("Exiting Survivability PCE");

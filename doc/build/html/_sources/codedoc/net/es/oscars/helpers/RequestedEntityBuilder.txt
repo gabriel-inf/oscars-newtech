@@ -55,25 +55,25 @@ buildRequest
 buildRequest
 ^^^^^^^^^^^^
 
-.. java:method:: public RequestedBlueprintE buildRequest(String aPort, String aDevice, String zPort, String zDevice, Integer azMbps, Integer zaMbps, PalindromicType palindromic, SurvivabilityType survivable, String vlanExp, Integer numDisjoint, Integer minPipes, Integer maxPipes, String connectionId)
+.. java:method:: public RequestedBlueprintE buildRequest(String aPort, String aDevice, String zPort, String zDevice, Integer azMbps, Integer zaMbps, PalindromicType palindromic, SurvivabilityType survivable, String vlanExp, Integer numPaths, Integer minPipes, Integer maxPipes, String connectionId)
    :outertype: RequestedEntityBuilder
 
 buildRequest
 ^^^^^^^^^^^^
 
-.. java:method:: public RequestedBlueprintE buildRequest(String aPort, String aDevice, String zPort, String zDevice, Integer azMbps, Integer zaMbps, PalindromicType palindromic, SurvivabilityType survivable, String vlanExp, Set<String> blacklist, Integer numDisjoint, Integer minPipes, Integer maxPipes, String connectionId)
+.. java:method:: public RequestedBlueprintE buildRequest(String aPort, String aDevice, String zPort, String zDevice, Integer azMbps, Integer zaMbps, PalindromicType palindromic, SurvivabilityType survivable, String vlanExp, Set<String> blacklist, Integer numPaths, Integer minPipes, Integer maxPipes, String connectionId)
    :outertype: RequestedEntityBuilder
 
 buildRequest
 ^^^^^^^^^^^^
 
-.. java:method:: public RequestedBlueprintE buildRequest(String aPort, String aDevice, String zPort, String zDevice, Integer azMbps, Integer zaMbps, PalindromicType palindromic, SurvivabilityType survivable, String aVlanExp, String zVlanExp, Integer numDisjoint, Integer minPipes, Integer maxPipes, String connectionId)
+.. java:method:: public RequestedBlueprintE buildRequest(String aPort, String aDevice, String zPort, String zDevice, Integer azMbps, Integer zaMbps, PalindromicType palindromic, SurvivabilityType survivable, String aVlanExp, String zVlanExp, Integer numPaths, Integer minPipes, Integer maxPipes, String connectionId)
    :outertype: RequestedEntityBuilder
 
 buildRequest
 ^^^^^^^^^^^^
 
-.. java:method:: public RequestedBlueprintE buildRequest(List<String> aPorts, String aDevice, List<String> zPorts, String zDevice, Integer azMbps, Integer zaMbps, PalindromicType palindromic, SurvivabilityType survivable, String vlanExp, Integer numDisjoint, Integer minPipes, Integer maxPipes, String connectionId)
+.. java:method:: public RequestedBlueprintE buildRequest(List<String> aPorts, String aDevice, List<String> zPorts, String zDevice, Integer azMbps, Integer zaMbps, PalindromicType palindromic, SurvivabilityType survivable, String vlanExp, Integer numPaths, Integer minPipes, Integer maxPipes, String connectionId)
    :outertype: RequestedEntityBuilder
 
 buildRequest
@@ -115,19 +115,19 @@ buildRequestedJunction
 buildRequestedPipe
 ^^^^^^^^^^^^^^^^^^
 
-.. java:method:: public RequestedVlanPipeE buildRequestedPipe(String aPort, String aDevice, String zPort, String zDevice, Integer azMbps, Integer zaMbps, PalindromicType palindromic, SurvivabilityType survivable, String aVlanExp, String zVlanExp, Integer numDisjoint)
+.. java:method:: public RequestedVlanPipeE buildRequestedPipe(String aPort, String aDevice, String zPort, String zDevice, Integer azMbps, Integer zaMbps, PalindromicType palindromic, SurvivabilityType survivable, String aVlanExp, String zVlanExp, Integer numPaths)
    :outertype: RequestedEntityBuilder
 
 buildRequestedPipe
 ^^^^^^^^^^^^^^^^^^
 
-.. java:method:: public RequestedVlanPipeE buildRequestedPipe(String aPort, String aDevice, String zPort, String zDevice, Integer azMbps, Integer zaMbps, PalindromicType palindromic, SurvivabilityType survivable, String vlanExp, Set<String> blacklist, Integer numDisjoint)
+.. java:method:: public RequestedVlanPipeE buildRequestedPipe(String aPort, String aDevice, String zPort, String zDevice, Integer azMbps, Integer zaMbps, PalindromicType palindromic, SurvivabilityType survivable, String vlanExp, Set<String> blacklist, Integer numPaths)
    :outertype: RequestedEntityBuilder
 
 buildRequestedPipe
 ^^^^^^^^^^^^^^^^^^
 
-.. java:method:: public RequestedVlanPipeE buildRequestedPipe(List<String> aPorts, String aDevice, List<String> zPorts, String zDevice, Integer azMbps, Integer zaMbps, PalindromicType palindromic, SurvivabilityType survivable, String vlanExp, Integer numDisjoint)
+.. java:method:: public RequestedVlanPipeE buildRequestedPipe(List<String> aPorts, String aDevice, List<String> zPorts, String zDevice, Integer azMbps, Integer zaMbps, PalindromicType palindromic, SurvivabilityType survivable, String vlanExp, Integer numPaths)
    :outertype: RequestedEntityBuilder
 
 buildSchedule

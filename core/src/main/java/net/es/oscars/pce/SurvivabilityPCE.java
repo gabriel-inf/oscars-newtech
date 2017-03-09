@@ -3,7 +3,6 @@ package net.es.oscars.pce;
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.spec.SurvivabilityType;
 import net.es.oscars.resv.ent.*;
-import net.es.oscars.servicetopo.ServiceLayerTopology;
 import net.es.oscars.servicetopo.SurvivableServiceLayerTopology;
 import net.es.oscars.dto.topo.TopoEdge;
 import net.es.oscars.dto.topo.TopoVertex;
@@ -98,7 +97,7 @@ public class SurvivabilityPCE
         Topology prunedTopo = pruningService.pruneWithPipeAZ(multiLayerTopo, requestPipe, bwAvailMap, rsvVlanList);
 
         // Disjoint shortest-path routing
-        List<List<TopoEdge>> azPathSet = bhandariPCE.computeDisjointPaths(prunedTopo, srcDevice, dstDevice, requestPipe.getNumDisjoint());
+        List<List<TopoEdge>> azPathSet = bhandariPCE.computeDisjointPaths(prunedTopo, srcDevice, dstDevice, requestPipe.getNumPaths());
 
         log.info(azPathSet.toString());
 
@@ -106,9 +105,9 @@ public class SurvivabilityPCE
         {
             throw new PCEException("Empty path-set in Survivability PCE");
         }
-        else if(azPathSet.size() != requestPipe.getNumDisjoint())
+        else if(azPathSet.size() != requestPipe.getNumPaths())
         {
-            throw new PCEException(requestPipe.getNumDisjoint() + " disjoint paths could not be found in Survivability PCE");
+            throw new PCEException(requestPipe.getNumPaths() + " disjoint paths could not be found in Survivability PCE");
         }
 
 
@@ -141,7 +140,7 @@ public class SurvivabilityPCE
 
         log.info(zaPathSet.toString());
 
-        assert(azPathSet.size() == requestPipe.getNumDisjoint());
+        assert(azPathSet.size() == requestPipe.getNumPaths());
         assert(azPathSet.size() == zaPathSet.size());
 
 

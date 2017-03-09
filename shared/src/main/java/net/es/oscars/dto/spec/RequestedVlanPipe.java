@@ -39,7 +39,7 @@ public class RequestedVlanPipe {
 
     private SurvivabilityType eroSurvivability;
 
-    private Integer numDisjoint;
+    private Integer numPaths;
 
     private Integer priority;
 }

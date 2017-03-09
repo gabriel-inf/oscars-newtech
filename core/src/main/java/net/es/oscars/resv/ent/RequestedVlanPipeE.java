@@ -54,7 +54,7 @@ public class RequestedVlanPipeE {
     private SurvivabilityType eroSurvivability;
 
     @NonNull
-    private Integer numDisjoint;
+    private Integer numPaths;
 
     @NonNull
     private Integer priority;

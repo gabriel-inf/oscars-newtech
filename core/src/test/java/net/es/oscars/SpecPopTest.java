@@ -112,7 +112,7 @@ public class SpecPopTest {
                 .eroPalindromic(PalindromicType.PALINDROME)
                 .eroSurvivability(SurvivabilityType.SURVIVABILITY_NONE)
                 .pipeType(EthPipeType.REQUESTED)
-                .numDisjoint(1)
+                .numPaths(1)
                 .priority(Integer.MAX_VALUE)
                 .build();
 

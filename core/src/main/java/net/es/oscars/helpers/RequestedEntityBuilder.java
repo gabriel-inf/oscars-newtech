@@ -193,7 +193,7 @@ public class RequestedEntityBuilder {
 
     private RequestedVlanPipeE buildRequestedPipe(String aPort, String aDevice, String zPort, String zDevice,
                                                  Integer azMbps, Integer zaMbps, PalindromicType palindromic,
-                                                 SurvivabilityType survivable, String vlanExp, Integer numDisjoint,
+                                                 SurvivabilityType survivable, String vlanExp, Integer numPaths,
                                                   Integer priority){
 
         List<String> aFixNames = new ArrayList<>();
@@ -214,7 +214,7 @@ public class RequestedEntityBuilder {
                 .zaMbps(zaMbps)
                 .eroPalindromic(palindromic)
                 .eroSurvivability(survivable)
-                .numDisjoint(numDisjoint)
+                .numPaths(numPaths)
                 .priority(priority)
                 .urnBlacklist(new HashSet<>())
                 .build();
@@ -223,7 +223,7 @@ public class RequestedEntityBuilder {
     public RequestedVlanPipeE buildRequestedPipe(String aPort, String aDevice, String zPort, String zDevice,
                                                  Integer azMbps, Integer zaMbps, PalindromicType palindromic,
                                                  SurvivabilityType survivable, String aVlanExp, String zVlanExp,
-                                                 Integer numDisjoint, Integer priority){
+                                                 Integer numPaths, Integer priority){
 
         List<String> aFixNames = new ArrayList<>();
         if(!aPort.equals(""))
@@ -243,7 +243,7 @@ public class RequestedEntityBuilder {
                 .zaMbps(zaMbps)
                 .eroPalindromic(palindromic)
                 .eroSurvivability(survivable)
-                .numDisjoint(numDisjoint)
+                .numPaths(numPaths)
                 .priority(priority)
                 .urnBlacklist(new HashSet<>())
                 .build();
@@ -252,7 +252,7 @@ public class RequestedEntityBuilder {
     public RequestedVlanPipeE buildRequestedPipe(String aPort, String aDevice, String zPort, String zDevice,
                                                  Integer azMbps, Integer zaMbps, PalindromicType palindromic,
                                                  SurvivabilityType survivable, String vlanExp, Set<String> blacklist,
-                                                 Integer numDisjoint, Integer priority){
+                                                 Integer numPaths, Integer priority){
 
         List<String> aFixNames = new ArrayList<>();
         if(!aPort.equals(""))
@@ -273,14 +273,14 @@ public class RequestedEntityBuilder {
                 .eroPalindromic(palindromic)
                 .eroSurvivability(survivable)
                 .urnBlacklist(blacklist)
-                .numDisjoint(numDisjoint)
+                .numPaths(numPaths)
                 .priority(priority)
                 .build();
     }
 
     public RequestedVlanPipeE buildRequestedPipe(List<String> aPorts, String aDevice, List<String> zPorts, String zDevice,
                                                  Integer azMbps, Integer zaMbps, PalindromicType palindromic,
-                                                 SurvivabilityType survivable, String vlanExp, Integer numDisjoint,
+                                                 SurvivabilityType survivable, String vlanExp, Integer numPaths,
                                                  Integer priority){
 
 
@@ -294,7 +294,7 @@ public class RequestedEntityBuilder {
                 .zaMbps(zaMbps)
                 .eroPalindromic(palindromic)
                 .eroSurvivability(survivable)
-                .numDisjoint(numDisjoint)
+                .numPaths(numPaths)
                 .priority(priority)
                 .urnBlacklist(new HashSet<>())
                 .build();
@@ -356,7 +356,7 @@ public class RequestedEntityBuilder {
                 .zaMbps(zaMbps)
                 .eroPalindromic(PalindromicType.NON_PALINDROME)
                 .eroSurvivability(SurvivabilityType.SURVIVABILITY_NONE)
-                .numDisjoint(1)
+                .numPaths(1)
                 .priority(Integer.MAX_VALUE)
                 .urnBlacklist(new HashSet<>())
                 .build();
