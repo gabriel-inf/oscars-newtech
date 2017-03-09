@@ -1,6 +1,8 @@
 {
   "device": "nersc-tb1.es.net",
   "model": "ALCATEL_SR7750",
+  "shouldFail": false,
+
   "aluParams": {
     "aluVpls": {
       "vcId": 6011,
@@ -38,7 +40,15 @@
         "type": "SAP_INGRESS",
         "policing": "STRICT",
         "mbps": 100,
-        "policyId": 6511,
+        "policyId": 6011,
+        "policyName": "es.net-1234",
+        "description": "es.net-1234"
+      },
+      {
+        "type": "SAP_EGRESS",
+        "policing": "STRICT",
+        "mbps": 100,
+        "policyId": 6011,
         "policyName": "es.net-1234",
         "description": "es.net-1234"
       }
