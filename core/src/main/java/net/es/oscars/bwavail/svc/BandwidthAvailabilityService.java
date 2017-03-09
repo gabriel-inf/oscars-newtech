@@ -707,64 +707,19 @@ public class BandwidthAvailabilityService {
 
     public PortBandwidthAvailabilityResponse getBandwidthAvailabilityOnAllPorts(PortBandwidthAvailabilityRequest bwRequest)
     {
-        Map<String, List<Integer>> urnBwList = new HashMap<>();
         Map<String, List<Integer>> urnAvailList = new HashMap<>();
         PortBandwidthAvailabilityResponse bwResponse = new PortBandwidthAvailabilityResponse();
 
         Optional<List<ReservedBandwidthE>> allBwOpt = bwRepo.findOverlappingInterval(bwRequest.getStartDate().toInstant(), bwRequest.getEndDate().toInstant());
-        if(allBwOpt.isPresent())
-        {
+        if(allBwOpt.isPresent()) {
             List<ReservedBandwidthE> allBW = allBwOpt.get();
 
-            for(ReservedBandwidthE oneBW : allBW)
-            {
-                String theURN = oneBW.getUrn();
-                Integer inBW = oneBW.getInBandwidth();
-                Integer egBW = oneBW.getEgBandwidth();
-
-                if(urnBwList.containsKey(theURN))
-                {
-                    List<Integer> existingBWs = urnBwList.get(theURN);
-                    Integer existingInBW = existingBWs.get(0);
-                    Integer existingEgBW = existingBWs.get(1);
-                    existingBWs.set(0, existingInBW+inBW);
-                    existingBWs.set(1, existingEgBW+egBW);
-
-                    urnBwList.replace(theURN, existingBWs);
-                }
-                else
-                {
-                    List<Integer> newBWs = new ArrayList<>();
-                    newBWs.add(inBW);
-                    newBWs.add(egBW);
-
-                    urnBwList.put(theURN, newBWs);
-                }
+            Map<String, Map<String, Integer>> bwAvailabilityMap = bwService.buildBandwidthAvailabilityMapFromUrnRepo(allBW);
+            for(String urn : bwAvailabilityMap.keySet()){
+                Map<String, Integer> ingressEgressMap = bwAvailabilityMap.get(urn);
+                List<Integer> ingressEgress = Arrays.asList(ingressEgressMap.get("Ingress"), ingressEgressMap.get("Egress"));
+                urnAvailList.put(urn, ingressEgress);
             }
-        }
-
-        // Now get B/W capacity at each port
-        List<UrnE> allURNs = urnRepo.findAll().stream()
-                .filter(u -> u.getUrnType().equals(UrnType.IFCE))
-                .collect(Collectors.toList());
-
-        // Subtract reserved B/W totals from capacity
-        for(UrnE oneURN : allURNs)
-        {
-            Integer inBW = oneURN.getReservableBandwidth().getIngressBw();
-            Integer egBW = oneURN.getReservableBandwidth().getEgressBw();
-            List<Integer> availBWs = new ArrayList<>();
-
-            if(urnBwList.containsKey(oneURN.getUrn()))
-            {
-                List<Integer> thisUrnBwReserved = urnBwList.get(oneURN.getUrn());
-                inBW -= thisUrnBwReserved.get(0);
-                egBW -= thisUrnBwReserved.get(1);
-            }
-
-            availBWs.add(inBW);
-            availBWs.add(egBW);
-            urnAvailList.put(oneURN.getUrn(), availBWs);
         }
 
         bwResponse.setBwAvailabilityMap(urnAvailList);
