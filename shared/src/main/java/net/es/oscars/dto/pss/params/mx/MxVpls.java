@@ -1,26 +1,22 @@
 package net.es.oscars.dto.pss.params.mx;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.NonNull;
+import lombok.*;
 
 import java.util.List;
 import java.util.Map;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class MxVpls {
 
-    @NonNull
     private Integer vcId;
 
-    @NonNull
     private List<MxIfce> ifces;
 
-    @NonNull
     private String serviceName;
 
-    @NonNull
     private String description;
 
 

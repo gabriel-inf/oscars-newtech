@@ -23,7 +23,7 @@ import java.util.*;
 @Slf4j
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest
-@TestPropertySource(locations = "file:config/test.properties")
+@TestPropertySource(locations = "file:config/test/application.properties")
 public class ControlPlaneTest {
 
     @Autowired

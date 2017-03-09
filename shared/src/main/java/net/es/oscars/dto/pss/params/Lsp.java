@@ -1,12 +1,12 @@
 package net.es.oscars.dto.pss.params;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.NonNull;
+import lombok.*;
 
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Lsp {
 
     @NonNull

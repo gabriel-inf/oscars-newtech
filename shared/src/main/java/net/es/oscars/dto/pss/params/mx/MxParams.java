@@ -14,15 +14,15 @@ import java.util.Map;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MxGenerationParams {
+public class MxParams {
 
 
-    private Map<Lsp, MxFilter> lsps;
+    private Map<String, Lsp> lsps;
 
     private List<MplsPath> paths;
 
 
-    private Map<MxFilter, MxPolicer> policing;
+    private Map<String, MxPolicer> policing;
 
     private MxVpls mxVpls;
 

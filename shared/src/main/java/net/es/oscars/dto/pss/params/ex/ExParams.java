@@ -8,12 +8,10 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ExGenerationParams {
+public class ExParams {
 
-    @NonNull
     private List<ExIfce> ifces;
 
-    @NonNull
     private ExVlan exVlan;
 
 
