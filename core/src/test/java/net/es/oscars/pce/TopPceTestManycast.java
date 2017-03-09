@@ -95,6 +95,30 @@ public class TopPceTestManycast {
     }
 
     @Test
+    public void oneMinOneMaxOfTwoPriorities(){
+
+        List<String> aPorts = Arrays.asList("wash-cr5:10/1/10", "sunn-cr5:10/1/6");
+        List<String> aDevices = Arrays.asList("wash-cr5", "sunn-cr5");
+        List<String> zPorts = Arrays.asList("denv-cr5:10/1/11", "aofa-cr5:10/1/1");
+        List<String> zDevices = Arrays.asList("denv-cr5", "aofa-cr5");
+        List<Integer> azMbpsList = Arrays.asList(25, 25);
+        List<Integer> zaMbpsList = Arrays.asList(25, 25);
+        List<PalindromicType> palindromicList = Arrays.asList(PalindromicType.PALINDROME, PalindromicType.PALINDROME);
+        List<SurvivabilityType> survivableList = Arrays.asList(SurvivabilityType.SURVIVABILITY_NONE, SurvivabilityType.SURVIVABILITY_NONE);
+        List<String> vlanExps = Arrays.asList("any", "any");
+        List<Integer> numDisjoints = Arrays.asList(1, 1);
+        Integer minPipes = 1;
+        Integer maxPipes = 1;
+        String connectionId = "test";
+        Integer numPaths = 1;
+        List<Integer> priorities = Arrays.asList(8, 2);
+
+        buildThenEvaluate(aPorts, aDevices, zPorts, zDevices, azMbpsList, zaMbpsList, palindromicList, survivableList,
+                vlanExps, numDisjoints, priorities, minPipes, maxPipes, connectionId, numPaths, true);
+
+    }
+
+    @Test
     public void oneMinTwoMaxOfTwo(){
 
         List<String> aPorts = Arrays.asList("wash-cr5:10/1/10", "sunn-cr5:10/1/6");
@@ -305,6 +329,31 @@ public class TopPceTestManycast {
 
         buildThenEvaluate(aPorts, aDevices, zPorts, zDevices, azMbpsList, zaMbpsList, palindromicList, survivableList,
                 vlanExps, numDisjoints, new ArrayList<>(), minPipes, maxPipes, connectionId, numPaths, true);
+    }
+
+    @Test
+    public void twoMinTwoMaxOfThreeEqualDistancePriorities(){
+
+        List<String> aPorts = Arrays.asList("kans-cr5:10/1/1", "elpa-cr5:10/1/3", "star-cr5:1/2/1");
+        List<String> aDevices = Arrays.asList("kans-cr5", "elpa-cr5", "star-cr5");
+        List<String> zPorts = Arrays.asList("wash-cr5:10/1/10", "nash-cr5:10/1/3", "newy-cr5:10/1/2");
+        List<String> zDevices = Arrays.asList("wash-cr5", "nash-cr5", "newy-cr5");
+        List<Integer> azMbpsList = Arrays.asList(25, 50, 75);
+        List<Integer> zaMbpsList = Arrays.asList(25, 50, 75);
+        List<PalindromicType> palindromicList = Arrays.asList(PalindromicType.PALINDROME, PalindromicType.PALINDROME,
+                PalindromicType.PALINDROME);
+        List<SurvivabilityType> survivableList = Arrays.asList(SurvivabilityType.SURVIVABILITY_NONE,
+                SurvivabilityType.SURVIVABILITY_NONE, SurvivabilityType.SURVIVABILITY_NONE);
+        List<String> vlanExps = Arrays.asList("any", "any", "any");
+        List<Integer> numDisjoints = Arrays.asList(1, 1, 1);
+        Integer minPipes = 2;
+        Integer maxPipes = 2;
+        String connectionId = "test";
+        Integer numPaths = 2;
+        List<Integer> priorities = Arrays.asList(4, 7, 5);
+
+        buildThenEvaluate(aPorts, aDevices, zPorts, zDevices, azMbpsList, zaMbpsList, palindromicList, survivableList,
+                vlanExps, numDisjoints, priorities, minPipes, maxPipes, connectionId, numPaths, true);
     }
 
     @Test
@@ -530,6 +579,8 @@ public class TopPceTestManycast {
         buildThenEvaluate(aPorts, aDevices, zPorts, zDevices, azMbpsList, zaMbpsList, palindromicList, survivableList,
                 vlanExps, numDisjoints, new ArrayList<>(), minPipes, maxPipes, connectionId, numPaths, true);
     }
+
+
 
     @Test
     public void oneMinTwoMaxOfThreeThreeSurvivable(){
