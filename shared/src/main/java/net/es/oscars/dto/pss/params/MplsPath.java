@@ -11,9 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 public class MplsPath {
 
-    @NonNull
     private String name;
 
-    @NonNull
     private List<MplsHop> hops;
 }

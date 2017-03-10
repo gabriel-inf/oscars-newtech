@@ -5,7 +5,7 @@
 
   "aluParams": {
     "aluVpls": {
-      "vcId": 6011,
+      "svcId": 6011,
       "saps": [
         {
           "port": "3/1/1",

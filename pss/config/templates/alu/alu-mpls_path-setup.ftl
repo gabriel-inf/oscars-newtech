@@ -1,5 +1,5 @@
 <#-- @ftlvariable name="paths" type="java.util.List" -->
-<#-- @ftlvariable name="path" type="net.es.oscars.pss.cmd.MplsPath" -->
+<#-- @ftlvariable name="path" type="net.es.oscars.dto.pss.params.MplsPath" -->
 <#-- @ftlvariable name="protect" type="java.lang.Boolean" -->
 
 <#list paths as path>

@@ -102,4 +102,67 @@ public class AluConfigTest {
 
     }
 
+    @Test
+    @Category(Integrations.class)
+    public void twoAluTest() throws IOException, InterruptedException {
+        log.info("starting two ALU test: setup");
+        List<String> setups = new ArrayList<>();
+        setups.add("./config/test/testbed/setup-2_nersc-star.json");
+        setups.add("./config/test/testbed/setup-2_star-nersc.json");
+
+        for (String setup : setups) {
+            RouterTestSpec setupRts = loader.loadSpec(setup);
+
+            Command setupCmd = Command.builder()
+                    .device(setupRts.getDevice())
+                    .model(setupRts.getModel())
+                    .type(CommandType.SETUP)
+                    .alu(setupRts.getAluParams())
+                    .mx(setupRts.getMxParams())
+                    .ex(setupRts.getExParams())
+                    .build();
+            CommandStatus setupStatus = CommandStatus.builder()
+                    .configStatus(ConfigStatus.SUBMITTING)
+                    .lifecycleStatus(LifecycleStatus.PROCESSING)
+                    .device(setupRts.getDevice())
+                    .type(CommandType.SETUP)
+                    .lastUpdated(new Date())
+                    .commands("")
+                    .output("")
+                    .build();
+
+            runner.run(setupStatus, setupCmd);
+        }
+        Thread.sleep(10000);
+
+        List<String> teardowns = new ArrayList<>();
+        teardowns.add("./config/test/testbed/teardown-2_nersc-star.json");
+        teardowns.add("./config/test/testbed/teardown-2_star-nersc.json");
+
+        for (String teardown : teardowns) {
+            RouterTestSpec setupRts = loader.loadSpec(teardown);
+
+            Command setupCmd = Command.builder()
+                    .device(setupRts.getDevice())
+                    .model(setupRts.getModel())
+                    .type(CommandType.TEARDOWN)
+                    .alu(setupRts.getAluParams())
+                    .mx(setupRts.getMxParams())
+                    .ex(setupRts.getExParams())
+                    .build();
+            CommandStatus setupStatus = CommandStatus.builder()
+                    .configStatus(ConfigStatus.SUBMITTING)
+                    .lifecycleStatus(LifecycleStatus.PROCESSING)
+                    .device(setupRts.getDevice())
+                    .type(CommandType.TEARDOWN)
+                    .lastUpdated(new Date())
+                    .commands("")
+                    .output("")
+                    .build();
+
+            runner.run(setupStatus, setupCmd);
+        }
+
+    }
+
 }

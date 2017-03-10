@@ -3,6 +3,7 @@ package net.es.oscars.dto.pss.params.alu;
 import lombok.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Data
 @Builder
@@ -10,7 +11,9 @@ import java.util.List;
 @AllArgsConstructor
 public class AluVpls {
 
-    private Integer vcId;
+    private Integer svcId;
+
+    private List<AluSdpToVcId> sdpToVcIds;
 
     private List<AluSap> saps;
 
@@ -19,13 +22,5 @@ public class AluVpls {
     private String description;
 
     private String endpointName;
-
-    private AluSdp sdp;
-
-    private Integer protectVcId;
-
-    private AluSdp protectSdp;
-
-
 
 }

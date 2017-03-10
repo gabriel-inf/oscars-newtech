@@ -9,10 +9,8 @@ import lombok.*;
 @AllArgsConstructor
 public class MplsHop {
 
-    @NonNull
     private Integer order;
 
-    @NonNull
     private String address;
 
 }
