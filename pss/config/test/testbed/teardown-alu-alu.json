@@ -5,12 +5,12 @@
 
   "aluParams": {
     "aluVpls": {
-      "vcId": 6011,
+      "vcId": 6322,
       "saps": [
         {
           "port": "1/1/1",
           "vlan": 333,
-          "ingressQosId": 6011,
+          "ingressQosId": 6511,
           "egressQosId": 6011,
           "description": ""
         }
@@ -41,6 +41,14 @@
         "policing": "STRICT",
         "mbps": 100,
         "policyId": 6511,
+        "policyName": "es.net-1234",
+        "description": "es.net-1234"
+      },
+      {
+        "type": "SAP_EGRESS",
+        "policing": "STRICT",
+        "mbps": 100,
+        "policyId": 6011,
         "policyName": "es.net-1234",
         "description": "es.net-1234"
       }

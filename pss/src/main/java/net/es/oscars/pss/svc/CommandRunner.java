@@ -29,6 +29,8 @@ public class CommandRunner {
     }
 
     public void run(CommandStatus status, Command command) {
+        ConfigResult confRes;
+        RancidArguments args;
         try {
 
             switch (command.getType()) {
@@ -42,37 +44,39 @@ public class CommandRunner {
                     break;
                 case SETUP:
                     status.setConfigStatus(ConfigStatus.SUBMITTING);
-                    ConfigResult confRes = setup(command, status);
+                    args = builder.setup(command);
+                    confRes = configure(args);
                     status.setConfigStatus(confRes.getStatus());
                     break;
                 case TEARDOWN:
+                    status.setConfigStatus(ConfigStatus.SUBMITTING);
+                    args = builder.teardown(command);
+                    confRes = configure(args);
+                    status.setConfigStatus(confRes.getStatus());
                     break;
 
             }
-        } catch (ControlPlaneException ex) {
-            log.error("CPE", ex);
+        } catch (ControlPlaneException | ConfigException ex) {
+            log.error("error", ex);
             status.setControlPlaneStatus(ControlPlaneStatus.UNKNOWN);
         }
     }
 
-    private ConfigResult setup(Command command, CommandStatus status) {
+    private ConfigResult configure(RancidArguments args) {
 
         ConfigResult result = ConfigResult.builder().build();
 
         try {
-            RancidArguments args = builder.setup(command);
             rancidRunner.runRancid(args);
             result.setStatus(ConfigStatus.VERIFIED);
 
-        } catch (IOException | InterruptedException | TimeoutException | ControlPlaneException | ConfigException ex) {
+        } catch (IOException | InterruptedException | TimeoutException | ControlPlaneException ex) {
             log.error("Rancid error", ex);
             result.setStatus(ConfigStatus.FAILED);
 
         }
         return result;
-
     }
-
 
     private ControlPlaneResult cplStatus(String device, DeviceModel model) throws ControlPlaneException {
 

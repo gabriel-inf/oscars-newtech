@@ -10,6 +10,7 @@
 
 <#assign vcId = vpls.vcId >
 /configure service vpls ${vcId} customer 1 create
+exit
 /configure service vpls ${vcId} shutdown
 /configure service vpls ${vcId} description "${vpls.description}"
 /configure service vpls ${vcId} service-name "${vpls.serviceName}"
@@ -30,6 +31,7 @@
 <#list vpls.saps as sap>
 <#assign sapId = sap.port+":"+sap.vlan>
 /configure service vpls ${vcId} sap ${sapId} create
+exit
 /configure service vpls ${vcId} sap ${sapId} auto-learn-mac-protect
 /configure service vpls ${vcId} sap ${sapId} restrict-protected-src discard-frame
 /configure service vpls ${vcId} sap ${sapId} description "${sap.description}"
@@ -41,6 +43,7 @@
 <#if vpls.sdp??>
 <#assign sdp = vpls.sdp>
 /configure service vpls ${vcId} spoke-sdp ${sdp.sdpId}:${vcId} vc-type vlan ${endpointSnippet} create
+exit
 /configure service vpls ${vcId} spoke-sdp ${sdp.sdpId}:${vcId} restrict-protected-src discard-frame
 /configure service vpls ${vcId} spoke-sdp ${sdp.sdpId}:${vcId} precedence primary
 /configure service vpls ${vcId} spoke-sdp ${sdp.sdpId}:${vcId} no shutdown
@@ -51,6 +54,7 @@
 <#assign sdp = vpls.protectSdp>
 <#assign protectVcId = vpls.protectVcId>
 /configure service vpls ${vcId} spoke-sdp ${sdp.sdpId}:${protectVcId} vc-type vlan ${endpointSnippet} create
+exit
 /configure service vpls ${vcId} spoke-sdp ${sdp.sdpId}:${protectVcId} egress qos 3 port-redirect-group "best-effort-vc" instance 1
 /configure service vpls ${vcId} spoke-sdp ${sdp.sdpId}:${protectVcId} restrict-protected-src discard-frame
 /configure service vpls ${vcId} spoke-sdp ${sdp.sdpId}:${protectVcId} no shutdown

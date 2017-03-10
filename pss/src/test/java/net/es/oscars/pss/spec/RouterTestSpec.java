@@ -14,6 +14,7 @@ import net.es.oscars.dto.topo.enums.DeviceModel;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RouterTestSpec {
+    private String filename;
     private String device;
     private DeviceModel model;
     private Boolean shouldFail;

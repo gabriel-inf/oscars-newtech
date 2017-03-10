@@ -11,7 +11,7 @@
 /configure service vpls ${vcId} no spoke-sdp ${sdp.sdpId}:${vcId}
 </#if>
 
-<#if vpls.hasProtect>
+<#if vpls.hasProtect??>
 <#assign sdp = vpls.protectSdp>
 /configure service vpls ${vcId} spoke-sdp ${sdp.sdpId}:${vpls.protectVcId} shutdown
 /configure service vpls ${vcId} no spoke-sdp ${sdp.sdpId}:${vpls.protectVcId}
@@ -19,11 +19,11 @@
 
 <#list vpls.saps as sap>
 <#assign sapId = sap.port+":"+sap.vlan>
-configure service vpls ${vcId} sap ${sapId} shutdown
-configure service vpls ${vcId} no sap ${sapId}
+/configure service vpls ${vcId} sap ${sapId} shutdown
+/configure service vpls ${vcId} no sap ${sapId}
 </#list>
 
-configure service no vpls ${vcId}
+/configure service no vpls ${vcId}
 
 
 

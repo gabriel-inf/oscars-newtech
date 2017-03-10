@@ -28,21 +28,24 @@
 /configure qos ${sapType} ${qosId} policy-name "${qos.policyName}"
 /configure qos ${sapType} ${qosId} queue 1 create
 /configure qos ${sapType} ${qosId} fc "ef" create
-/configure qos ${sapType} ${qosId} fc "ef" queue 2
 /configure qos ${sapType} ${qosId} fc "l1" create
-/configure qos ${sapType} ${qosId} fc "l1" queue 3
 
 
 <#-- ingress only -->
 <#if qos.type == "SAP_INGRESS">
 /configure qos ${sapType} ${qosId} queue 2 create
+exit
+/configure qos ${sapType} ${qosId} fc "ef" queue 2
 /configure qos ${sapType} ${qosId} queue 3 create
+exit
+/configure qos ${sapType} ${qosId} fc "l1" queue 3
 /configure qos ${sapType} ${qosId} queue 11 multipoint create
+exit
 
 <#-- ingress, only when we apply QoS-->
 <#if apply>
 /configure qos ${sapType} ${qosId} default-fc "ef"
-/configure qos ${sapType} ${qosId} queue 2 ${max} max cir ${bps}
+/configure qos ${sapType} ${qosId} queue 2 rate ${max} cir ${bps}
 <#else>
 /configure qos ${sapType} ${qosId} default-fc "l1"
 /configure qos ${sapType} ${qosId} queue 3 rate max cir 0
@@ -52,7 +55,9 @@
 <#-- egress only -->
 <#else>
 /configure qos ${sapType} ${qosId} queue 2 expedite create
+exit
 /configure qos ${sapType} ${qosId} queue 3 best-effort create
+exit
 
 <#-- egress only,when protect is set TODO: check w chin -->
 <#if protect??>
@@ -61,7 +66,7 @@
 
 <#-- egress only, depending on whether we apply QoS -->
 <#if apply>
-/configure qos ${sapType} ${qosId} queue 2 ${max} max cir ${bps}
+/configure qos ${sapType} ${qosId} queue 2 rate ${max} cir ${bps}
 <#else>
 /configure qos ${sapType} ${qosId} queue 3 rate max cir 0
 </#if>
@@ -69,4 +74,3 @@
 </#if>
 
 </#list>
-
