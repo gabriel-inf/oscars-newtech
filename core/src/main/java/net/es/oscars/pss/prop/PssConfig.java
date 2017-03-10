@@ -13,21 +13,18 @@ import org.springframework.stereotype.Component;
 public class PssConfig {
 
     @NonNull
-    private String defaultTemplateDir;
-
-    @NonNull
-    private String templateExtension;
-
-    @NonNull
     private String addressesFilename;
 
     @NonNull
     private String vcidRange;
 
     @NonNull
-    private String sdpidRange;
+    private String aluSvcidRange;
 
     @NonNull
-    private String qosidRange;
+    private String aluSdpidRange;
+
+    @NonNull
+    private String aluQosidRange;
 
 }
