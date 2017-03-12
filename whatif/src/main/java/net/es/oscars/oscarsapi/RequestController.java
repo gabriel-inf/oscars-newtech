@@ -4,8 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.resv.Connection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
 @Slf4j
@@ -72,6 +71,19 @@ public class RequestController {
             log.info("Query Failed");
             log.info("Exception: " + e.getMessage());
             return null;
+        }
+        return c;
+    }
+
+    public Connection preCheck(@RequestBody Connection conn){
+        String restPath = oscarsUrl + "/resv/connection/precheck";
+        log.info("Prechecking a Connection.");
+        Connection c;
+        try {
+            c = restTemplate.postForObject(restPath, conn, Connection.class);
+            log.info("Received Connection Response from OSCARS");
+        } catch(Exception e){
+            c = handleException(e, "Precheck", conn.getConnectionId());
         }
         return c;
     }

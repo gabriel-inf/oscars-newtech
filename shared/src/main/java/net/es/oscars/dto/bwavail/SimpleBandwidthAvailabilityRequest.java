@@ -3,6 +3,7 @@ package net.es.oscars.dto.bwavail;
 import lombok.*;
 
 import java.util.List;
+import java.util.Set;
 
 @Data
 @Builder
@@ -24,9 +25,9 @@ public class SimpleBandwidthAvailabilityRequest {
     private List<List<String>> zaEros;
 
     private String srcDevice;
-    private List<String> srcPorts;
+    private Set<String> srcPorts;
     private String dstDevice;
-    private List<String> dstPorts;
+    private Set<String> dstPorts;
 
     private Boolean disjointPaths;
     private Integer numPaths;
