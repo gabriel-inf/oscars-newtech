@@ -11,5 +11,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class MinimalFixture {
     private String vlan;
-    private String bw;
+    private String azbw;
+    private String zabw;
 }

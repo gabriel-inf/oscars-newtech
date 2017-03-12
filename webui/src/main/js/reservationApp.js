@@ -14,7 +14,7 @@ class ReservationApp extends React.Component{
         super(props);
         // Junction: {id: ~~, label: ~~, fixtures: {}}
         // fixtures: {id: {id: ~~, selected: true or false, bandwidth: ~~, vlan: ~~}, id: ~~, ....}
-        // Pipe: {id: ~~, a: ~~, z: ~~, bw: ~~}
+        // Pipe: {id: ~~, a: ~~, z: ~~, azbw: ~~}
 
         // Initialize default start/end date times
         let startAt = new Date();
@@ -274,13 +274,14 @@ class ReservationApp extends React.Component{
     }
 
     // Each fixture looks like this:
-    // {id: ~~, selected: true or false, bw: ~~, vlan: ~~}
+    // {id: ~~, selected: true or false, azbw: ~~, vlan: ~~}
     createFixtureSet(junctionName, junctionDict){
         let fixtureNames = junctionDict[junctionName];
         let fixtureSet = {};
         for(let i = 0; i < fixtureNames.length; i++){
             let fixtureName = fixtureNames[i];
-            fixtureSet[fixtureName] = {id: fixtureName, selected: false, bw: 0, vlan: "2-4094"};
+            fixtureSet[fixtureName] = {id: fixtureName, selected: false, azbw: 0, zabw: 0,
+                symmetricBw: true, vlan: "2-4094"};
         }
         return fixtureSet;
     }
@@ -454,6 +455,36 @@ class ReservationApp extends React.Component{
         this.setState({reservation: reservation});
     }
 
+    handleFixtureAzBw(fixture, junction, reservation, event){
+        fixture.azbw = event.target.value;
+        if(fixture.symmetricBw){
+            fixture.zabw = event.target.value;
+        }
+        junction.fixtures[fixture.id] = fixture;
+        reservation.junctions[junction.id] = junction;
+        this.setState({reservation: reservation});
+    }
+
+    handleFixtureZaBw(fixture, junction, reservation, event){
+        fixture.zabw = event.target.value;
+        if(fixture.symmetricBw){
+            fixture.azbw = event.target.value;
+        }
+        junction.fixtures[fixture.id] = fixture;
+        reservation.junctions[junction.id] = junction;
+        this.setState({reservation: reservation});
+    }
+
+    handleFixtureSymmetricBw(fixture, junction, reservation, event){
+        fixture.symmetricBw = !fixture.symmetricBw;
+        if(fixture.symmetricBw){
+            fixture.zabw = fixture.azbw;
+        }
+        junction.fixtures[fixture.id] = fixture;
+        reservation.junctions[junction.id] = junction;
+        this.setState({reservation: reservation});
+    }
+
     handleFixtureVlanChange(fixture, junction, reservation, event){
         fixture.vlan = event.target.value;
         junction.fixtures[fixture.id] = fixture;
@@ -538,7 +569,9 @@ class ReservationApp extends React.Component{
                                          handleNumPaths={this.handleNumPaths}
                                          survivabilityTypes={this.state.survivabilityTypes}
                                          handleFixtureSelection={this.handleFixtureSelection}
-                                         handleFixtureBwChange={this.handleFixtureBwChange}
+                                         handleFixtureAzBw={this.handleFixtureAzBw}
+                                         handleFixtureZaBw={this.handleFixtureZaBw}
+                                         handleFixtureSymmetricBw={this.handleFixtureSymmetricBw}
                                          handleFixtureVlanChange={this.handleFixtureVlanChange}
                                          handleStartDateChange={this.handleStartDateChange}
                                          handleEndDateChange={this.handleEndDateChange}
@@ -680,7 +713,9 @@ class ReservationDetailsPanel extends React.Component{
                             key={selectedJunction.id}
                             style={(this.props.showJunctionPanel) ? {} : { display: "none" }}
                             handleFixtureSelection={this.props.handleFixtureSelection}
-                            handleFixtureBwChange={this.props.handleFixtureBwChange}
+                            handleFixtureAzBw={this.props.handleFixtureAzBw}
+                            handleFixtureZaBw={this.props.handleFixtureZaBw}
+                            handleFixtureSymmetricBw={this.props.handleFixtureSymmetricBw}
                             handleFixtureVlanChange={this.props.handleFixtureVlanChange}
                         /> : null
                     }
@@ -760,7 +795,9 @@ class JunctionPanel extends React.Component{
                     junction={this.props.junction}
                     key={fixture.id}
                     handleFixtureSelection={this.props.handleFixtureSelection}
-                    handleFixtureBwChange={this.props.handleFixtureBwChange}
+                    handleFixtureAzBw={this.props.handleFixtureAzBw}
+                    handleFixtureZaBw={this.props.handleFixtureZaBw}
+                    handleFixtureSymmetricBw={this.props.handleFixtureSymmetricBw}
                     handleFixtureVlanChange={this.props.handleFixtureVlanChange}
                 />
             );
@@ -777,7 +814,8 @@ class JunctionPanel extends React.Component{
                             <tr>
                                 <td>URN</td>
                                 <td>Use</td>
-                                <td>Bandwidth</td>
+                                <td>Src -> Dest Bandwidth</td>
+                                <td>Dest -> Src Bandwidth <br /> (Check to enable editing)</td>
                                 <td>VLAN</td>
                             </tr>
                             </thead>
@@ -819,9 +857,20 @@ class FixtureRow extends React.Component{
                     <input id={bwInputId}
                            type="text"
                            disabled={!this.props.fixture.selected}
-                           value={this.props.fixture.bw}
+                           value={this.props.fixture.azbw}
                            className="form-control input-sm"
-                           onChange={this.props.handleFixtureBwChange.bind(this, this.props.fixture, this.props.junction, this.props.reservation)}
+                           onChange={this.props.handleFixtureAzBw.bind(this, this.props.fixture, this.props.junction, this.props.reservation)}
+                    />
+                </td>
+                <td>
+                    <input type="checkbox" className="form-check-input" checked={!this.props.fixture.symmetricBw}
+                           onChange={this.props.handleFixtureSymmetricBw.bind(this, this.props.fixture, this.props.junction, this.props.reservation)}/>
+                    <input id={bwInputId}
+                           type="text"
+                           disabled={!this.props.fixture.selected || this.props.fixture.symmetricBw}
+                           value={this.props.fixture.zabw}
+                           className="form-control input-sm"
+                           onChange={this.props.handleFixtureZaBw.bind(this, this.props.fixture, this.props.junction, this.props.reservation)}
                     />
                 </td>
                 <td>

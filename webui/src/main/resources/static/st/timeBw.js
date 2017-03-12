@@ -281,7 +281,7 @@ function initializeBandwidthMap()
     bwViz = document.getElementById('bwVisualization');
 
     var nowDate = Date.now();
-    var furthestDate = nowDate + 1000 * 60 * 60 * 24 * 365 * 2  // 2 years in the future
+    var furthestDate = nowDate + 1000 * 60 * 60 * 24 * 365 * 2;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  // 2 years in the future
 
     bwOptions = {
         style:'line',
@@ -303,7 +303,7 @@ function initializeBandwidthMap()
         legend: {enabled: false, icons: false},
         interpolation: {enabled: false},
         dataAxis: {left: {range: {min: 0, max: 10000},},},
-    }
+    };;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
     bwData = new vis.DataSet();
 
@@ -590,7 +590,7 @@ function resetBandwidthAvailabilityMap()
     bwData.remove(oldBwValues);
 
     var nowDate = Date.now();
-    var furthestDate = nowDate + 1000 * 60 * 60 * 24 * 365 * 2  // 2 years in the future
+    var furthestDate = nowDate + 1000 * 60 * 60 * 24 * 365 * 2;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  // 2 years in the future
 
     bwData.add({x: nowDate, y: -10, group: 'avail'});
     bwData.add({x: furthestDate, y: -10, group: 'avail'});
@@ -800,7 +800,6 @@ function computeFullERO()
 
     if(numNodes === 0)          // Empty
     {
-        ;
     }
     else if(numNodes === 1)     // Single Device
     {
@@ -929,7 +928,7 @@ function updatePorts()
                 var a = document.createElement('a');
                 a.setAttribute("href", "#");
                 a.innerHTML = portID;
-                li.appendChild(a)
+                li.appendChild(a);;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
                 srcList.appendChild(li);
             }
         });
@@ -946,7 +945,7 @@ function updatePorts()
                 var a = document.createElement('a');
                 a.setAttribute("href", "#");
                 a.innerHTML = portID;
-                li.appendChild(a)
+                li.appendChild(a);;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
                 dstList.appendChild(li);
             }
         });
@@ -988,9 +987,9 @@ function precheckRequestedReservation()
         "startAt": startSeconds,
         "endAt": endSeconds,
         "description": "What-If UI Reservation",
-        "junctions": {},        //fixtures: bw,vlan
-        "pipes": {},            //bw, a, z
-    }
+        "junctions": {},        //fixtures: azbw,vlan
+        "pipes": {},            //azbw, a, z
+    };;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
     var forwardERO = fullERO.slice();
     forwardERO.shift();     // Remove source port
@@ -1142,7 +1141,7 @@ function resetRefreshTimer()
         console.log("Refreshing Availability...");
         removeOutdatedPortsFromERO();
         getPathMinAvailability();
-    }, 30000);     // Wait 30 seconds of idle time before refreshing bw/availability map
+    }, 30000);     // Wait 30 seconds of idle time before refreshing azbw/availability map
 }
 
 

@@ -152,7 +152,7 @@ class ReservationHeatMap extends React.Component{
 
         //TODO: Filter Bandwidth consumption by display-time set by user
 
-        // 2. Sum up bw at each port //
+        // 2. Sum up azbw at each port //
         let portConsumptionMap = new Map();
         let filteredPorts = [];
 

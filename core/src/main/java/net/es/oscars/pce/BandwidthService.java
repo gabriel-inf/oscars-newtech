@@ -489,7 +489,7 @@ public class BandwidthService {
     public boolean evaluateBandwidthURN(String urn, Map<String, Map<String, Integer>> availBwMap,
                                         Integer inMbps, Integer egMbps) {
         if (!availBwMap.keySet().contains(urn)) {
-            log.error("could not locate available bw map for urn " + urn);
+            log.error("could not locate available azbw map for urn " + urn);
             return false;
         }
         Map<String, Integer> bwAvail = availBwMap.get(urn);
@@ -590,7 +590,7 @@ public class BandwidthService {
      * @param zaBw                      - The requested bandwidth in the other direction.
      * @param urnMap                    - Map of URN name to UrnE object.
      * @param availBwMap                - Map of UrnE objects to "Ingress" and "Egress" Available Bandwidth
-     * @param requestedFixtureBwMap     - Map of requested bandwidth for each fixture. Can be different from az and za bw.
+     * @param requestedFixtureBwMap     - Map of requested bandwidth for each fixture. Can be different from az and za azbw.
      * @return True if there is sufficient reservable bandwidth, False otherwise.
      */
     public boolean evaluateBandwidthEdge(TopoEdge edge, Integer azBw, Integer zaBw, Map<String, UrnE> urnMap,
@@ -643,7 +643,7 @@ public class BandwidthService {
      * @param theBw                      - The requested bandwidth in one direction.
      * @param urnMap                    - Map of URN name to UrnE object.
      * @param availBwMap                - Map of UrnE objects to "Ingress" and "Egress" Available Bandwidth
-     * @param requestedFixtureBwMap     - Map of requested bandwidth for each fixture. Can be different from az and za bw.
+     * @param requestedFixtureBwMap     - Map of requested bandwidth for each fixture. Can be different from az and za azbw.
      * @return True if there is sufficient reservable bandwidth, False otherwise.
      */
     public boolean evaluateBandwidthEdgeUni(TopoEdge edge, Integer theBw, Map<String, UrnE> urnMap,
