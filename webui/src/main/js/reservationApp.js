@@ -814,8 +814,8 @@ class JunctionPanel extends React.Component{
                             <tr>
                                 <td>URN</td>
                                 <td>Use</td>
-                                <td>Src -> Dest Bandwidth</td>
-                                <td>Dest -> Src Bandwidth <br /> (Check to enable editing)</td>
+                                <td>Ingress (In to network) Bandwidth</td>
+                                <td>Egress (Out of network) Bandwidth <br /> (Check to enable editing)</td>
                                 <td>VLAN</td>
                             </tr>
                             </thead>
