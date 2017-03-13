@@ -25,7 +25,7 @@ public class SuggestionController {
     @RequestMapping(value = "/whatif/suggestion/volume", method = RequestMethod.POST)
     @ResponseBody
     public List<Connection> submitSpec(@RequestBody VolumeRequestSpecification spec){
-
+        System.out.println("Processing volume request: " + spec.toString());
         return suggestionService.generateSuggestions(spec);
     }
 }
