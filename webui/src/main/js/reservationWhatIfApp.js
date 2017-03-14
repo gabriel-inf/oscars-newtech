@@ -921,10 +921,10 @@ function buildPipesAndJunctions(src, srcPort, dst, dstPort, bandwidth, ERO){
         let aFixtures = {};
         let zFixtures = {};
         if(currName == src){
-            aFixtures[srcPort] =  {id: srcPort, selected: true, bw: bandwidth, vlan: "2-4094"};
+            aFixtures[srcPort] =  {id: srcPort, selected: true, azbw: bandwidth, zabw: bandwidth, vlan: "2-4094"};
         }
         if(nextName == dst){
-            zFixtures[dstPort] =  {id: dstPort, selected: true, bw: bandwidth, vlan: "2-4094"};
+            zFixtures[dstPort] =  {id: dstPort, selected: true, azbw: bandwidth, zabw:bandwidth, vlan: "2-4094"};
         }
         if(!junctions.hasOwnProperty(currName)){
             junctions[currName] = {id: currName, label: currName, fixtures: aFixtures};
