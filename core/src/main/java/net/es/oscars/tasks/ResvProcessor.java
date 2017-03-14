@@ -25,6 +25,11 @@ public class ResvProcessor {
     @Autowired
     private ProcessingProperties processingProperties;
 
+    private boolean started = false;
+
+    public void startup() {
+        this.started = true;
+    }
 
     @Autowired
     public ResvProcessor(ResvService resvService) {
@@ -34,6 +39,10 @@ public class ResvProcessor {
     @Scheduled(fixedDelay = 5000)
     @Transactional
     public void processingLoop() {
+        if (!started) {
+            log.info("processing loop not started");
+            return;
+        }
         log.info("entering processing loop");
 
         // process aborting reservations

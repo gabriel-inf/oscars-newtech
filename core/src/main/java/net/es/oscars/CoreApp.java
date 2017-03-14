@@ -16,7 +16,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @Slf4j
 public class CoreApp {
     public static void main(String[] args) {
-        SpringApplication.run(CoreApp.class, args);
         ConfigurableApplicationContext app = SpringApplication.run(CoreApp.class, args);
         Startup startup = (Startup)app.getBean("startup");
         try {

@@ -19,6 +19,7 @@ import java.util.Optional;
 @Slf4j
 @Component
 public class ConfigPopulator {
+    private boolean started = false;
     private StartupConfigContainer startup;
 
     private ConfigRepository repository;
@@ -30,10 +31,12 @@ public class ConfigPopulator {
         this.repository = repository;
         this.startup = startup;
     }
+    public boolean isStarted() {
+        return this.started;
+    }
 
-    @PostConstruct
     @Transactional
-    public void initDefaults() throws JsonProcessingException {
+    public void startup() throws JsonProcessingException {
         log.info("Initializing startup configs for OSCARS modules.");
 
         StartupConfigEntry defaultCfg = startup.getDefaults();
@@ -70,6 +73,7 @@ public class ConfigPopulator {
             }
 
         }
+        started = true;
 
     }
 }
