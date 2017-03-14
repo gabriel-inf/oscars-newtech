@@ -9,7 +9,6 @@ import net.es.oscars.topo.prop.TopoProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -29,8 +28,7 @@ public class UrnAddressImporter {
     private JsonHelper jsonHelper;
 
 
-    @PostConstruct
-    public void attemptImport() {
+    public void startup() {
 
         log.info("importing IP addresses for URNs");
         String addrsFilename = "./config/topo/"+topoProperties.getPrefix()+"-addrs.json";

@@ -11,7 +11,7 @@ import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.dao.SpecificationRepository;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.topo.dao.UrnRepository;
-import net.es.oscars.topo.pop.TopoImporter;
+import net.es.oscars.topo.pop.TopoFileImporter;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,7 +35,7 @@ import java.util.HashSet;
 public class SpecPopTest {
 
     @Autowired
-    private TopoImporter topoFileImporter;
+    private TopoFileImporter topoFileImporter;
 
     @Autowired
     private SpecificationRepository specRepo;

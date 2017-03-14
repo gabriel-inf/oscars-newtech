@@ -8,7 +8,7 @@ import net.es.oscars.pss.PSSException;
 import net.es.oscars.helpers.RequestedEntityBuilder;
 import net.es.oscars.resv.dao.ReservedBandwidthRepository;
 import net.es.oscars.resv.ent.*;
-import net.es.oscars.helpers.test.MultipointTopologyBuilder;
+import net.es.oscars.pce.helpers.MultipointTopologyBuilder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

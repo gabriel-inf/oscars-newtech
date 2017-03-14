@@ -1,10 +1,11 @@
-package net.es.oscars.helpers.test;
+package net.es.oscars.pce.helpers;
 
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.topo.TopoEdge;
 import net.es.oscars.dto.topo.TopoVertex;
 import net.es.oscars.dto.topo.enums.VertexType;
 import net.es.oscars.dto.topo.enums.*;
+import net.es.oscars.helpers.JsonHelper;
 import net.es.oscars.resv.dao.ReservedBandwidthRepository;
 import net.es.oscars.resv.ent.ReservedBandwidthE;
 import net.es.oscars.topo.dao.UrnAdjcyRepository;
@@ -344,7 +345,9 @@ public class RepoEntityBuilder {
         TopoProperties topoProperties = new TopoProperties();
         topoProperties.setPrefix("esnet");
         log.info("Building ESnet topology");
-        TopoFileImporter topoImporter = new TopoFileImporter(urnRepo, adjcyRepo, topoProperties);
+        JsonHelper helper = new JsonHelper();
+        TopoFileImporter topoImporter = new TopoFileImporter(urnRepo, adjcyRepo, topoProperties, helper);
+        topoImporter.startup();
     }
 
     public void reserveBandwidth(List<String> reservedPortNames, List<Instant> reservedStartTimes,
