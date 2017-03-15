@@ -93,8 +93,13 @@ public class ResvService {
 
     public void commit(ConnectionE c) {
         c.getStates().setResv(ResvState.IDLE_WAIT);
-        pssResourceService.reserve(c);
-        c.getStates().setProv(ProvState.READY_TO_GENERATE);
+        try {
+            pssResourceService.reserve(c);
+            c.getStates().setProv(ProvState.READY_TO_GENERATE);
+        } catch (PSSException ex) {
+            log.error("PSS resource reservation error", ex);
+            c.getStates().setProv(ProvState.FAILED);
+        }
 
         connRepo.save(c);
     }
