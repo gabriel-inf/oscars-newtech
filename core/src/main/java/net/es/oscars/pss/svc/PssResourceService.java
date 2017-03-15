@@ -200,15 +200,6 @@ public class PssResourceService {
         return reservedResources;
     }
 
-    private Optional<Integer> chooseNewId(Integer floor, Integer ceiling, Set<Integer> reserved) {
-        for (Integer i = floor; i <= ceiling; i++) {
-            if (!reserved.contains(i)) {
-                return Optional.of(i);
-            }
-        }
-        return Optional.empty();
-    }
-
 
     private ReservedPssResourceE makeQosIdResource(String deviceUrn, Integer qosId, ResourceType rt,
                                                    Instant beginning, Instant ending) {
