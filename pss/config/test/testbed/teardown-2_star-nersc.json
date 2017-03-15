@@ -23,7 +23,8 @@
     },
     "sdps": [
       {
-        "sdpId": 6511
+        "sdpId": 6511,
+        "lspName": "OKI9R5-lsp"
       }
     ],
     "qoses": [
@@ -38,7 +39,8 @@
     ],
     "lsps": [
       {
-        "name": "OKI9R5-lsp"
+        "name": "OKI9R5-lsp",
+        "pathName": "OKI9R5-path"
       }
     ],
     "paths": [

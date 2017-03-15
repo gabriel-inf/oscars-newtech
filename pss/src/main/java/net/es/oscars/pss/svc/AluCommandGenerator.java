@@ -2,6 +2,7 @@ package net.es.oscars.pss.svc;
 
 import freemarker.template.TemplateException;
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.dto.pss.params.*;
 import net.es.oscars.dto.pss.params.alu.*;
 import net.es.oscars.pss.beans.AluTemplatePaths;
 import net.es.oscars.pss.beans.ConfigException;
@@ -24,7 +25,11 @@ public class AluCommandGenerator {
     private Assembler assembler;
 
     public String teardown(AluParams params) throws ConfigException {
-        this.verifyAluQosParams(params.getQoses(), params.getAluVpls().getSaps());
+        this.protectVsNulls(params);
+        this.verifyAluQosParams(params);
+        this.verifySdpIds(params);
+        this.verifyPaths(params);
+
         AluTemplatePaths atp = AluTemplatePaths.builder()
                 .lsp("alu/alu-mpls_lsp-teardown.ftl")
                 .qos("alu/alu-qos-teardown.ftl")
@@ -37,8 +42,11 @@ public class AluCommandGenerator {
     }
 
     public String setup(AluParams params) throws ConfigException {
+        this.protectVsNulls(params);
+        this.verifyAluQosParams(params);
+        this.verifySdpIds(params);
+        this.verifyPaths(params);
 
-        this.verifyAluQosParams(params.getQoses(), params.getAluVpls().getSaps());
         AluTemplatePaths atp = AluTemplatePaths.builder()
                 .lsp("alu/alu-mpls_lsp-setup.ftl")
                 .qos("alu/alu-qos-setup.ftl")
@@ -143,8 +151,75 @@ public class AluCommandGenerator {
         }
     }
 
+    private void protectVsNulls(AluParams params) {
+        if (params.getSdps() == null) {
+            params.setSdps(new ArrayList<>());
+        }
+        if (params.getAluVpls().getSdpToVcIds() == null) {
+            params.getAluVpls().setSdpToVcIds(new ArrayList<>());
+        }
+        if (params.getSdps() == null) {
+            params.setSdps(new ArrayList<>());
+        }
+        if (params.getPaths() == null) {
+            params.setPaths(new ArrayList<>());
+        }
+        if (params.getLsps() == null) {
+            params.setLsps(new ArrayList<>());
+        }
+    }
 
-    private void verifyAluQosParams(List<AluQos> qoses, List<AluSap> saps) throws ConfigException {
+    private void verifyPaths(AluParams params) throws ConfigException {
+
+
+        Set<String> lspNamesFromSdps  = new HashSet<>();
+        Set<String> lspNamesFromLsps = new HashSet<>();
+
+        Set<String> pathNamesFromLsps = new HashSet<>();
+        Set<String> pathNamesFromPaths = new HashSet<>();
+
+
+
+
+        for (AluSdp sdp : params.getSdps()) {
+            lspNamesFromSdps.add(sdp.getLspName());
+        }
+        for (Lsp lsp : params.getLsps()) {
+            lspNamesFromLsps.add(lsp.getName());
+            pathNamesFromLsps.add(lsp.getPathName());
+        }
+        for (MplsPath path : params.getPaths()) {
+            pathNamesFromPaths.add(path.getName());
+        }
+        if (!lspNamesFromLsps.equals(lspNamesFromSdps)) {
+            throw new ConfigException("LSP name mismatch");
+        }
+        if (!pathNamesFromLsps.equals(pathNamesFromPaths)) {
+            throw new ConfigException("Path name mismatch");
+        }
+
+
+    }
+
+    private void verifySdpIds(AluParams params) throws ConfigException {
+        List<AluSdpToVcId> aluSdpToVcIds = params.getAluVpls().getSdpToVcIds();
+        Set<Integer> sdpIdsA = new HashSet<>();
+        Set<Integer> sdpIdsB = new HashSet<>();
+        for (AluSdpToVcId aluSdpToVcId : aluSdpToVcIds) {
+            sdpIdsA.add(aluSdpToVcId.getSdpId());
+        }
+        for (AluSdp sdp : params.getSdps()) {
+            sdpIdsB.add(sdp.getSdpId());
+        }
+        if (!sdpIdsA.equals(sdpIdsB)) {
+            throw new ConfigException("SDP ID mismatch!");
+        }
+
+    }
+
+    private void verifyAluQosParams(AluParams params) throws ConfigException {
+        List<AluSap> saps = params.getAluVpls().getSaps();
+        List<AluQos> qoses = params.getQoses();
         Set<Integer> sapInQosIds = new HashSet<>();
         Set<Integer> sapEgQosIds = new HashSet<>();
         saps.forEach(sap -> {
