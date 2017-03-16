@@ -5,17 +5,16 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.pce.BhandariPCE;
-import net.es.oscars.pce.PruningService;
-import net.es.oscars.resv.ent.RequestedVlanPipeE;
-import net.es.oscars.resv.ent.ReservedBandwidthE;
-import net.es.oscars.resv.ent.ReservedVlanE;
 import net.es.oscars.dto.topo.TopoEdge;
 import net.es.oscars.dto.topo.TopoVertex;
 import net.es.oscars.dto.topo.Topology;
-import net.es.oscars.topo.ent.UrnE;
 import net.es.oscars.dto.topo.enums.Layer;
 import net.es.oscars.dto.topo.enums.VertexType;
+import net.es.oscars.pce.BhandariPCE;
+import net.es.oscars.pce.PruningService;
+import net.es.oscars.resv.ent.RequestedVlanPipeE;
+import net.es.oscars.resv.ent.ReservedVlanE;
+import net.es.oscars.topo.ent.UrnE;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -466,7 +465,6 @@ public class SurvivableServiceLayerTopology
         {
             return;
         }
-
 
         TopoVertex virtualSrcDevice = new TopoVertex(srcDevice.getUrn() + "-virtual", VertexType.VIRTUAL);
         TopoVertex virtualSrcPort = new TopoVertex(srcInPort.getUrn() + "-virtual", VertexType.VIRTUAL);

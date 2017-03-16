@@ -5,17 +5,17 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.pce.DijkstraPCE;
-import net.es.oscars.pce.PruningService;
-import net.es.oscars.resv.ent.RequestedVlanPipeE;
-import net.es.oscars.resv.ent.ReservedBandwidthE;
-import net.es.oscars.resv.ent.ReservedVlanE;
 import net.es.oscars.dto.topo.TopoEdge;
 import net.es.oscars.dto.topo.TopoVertex;
 import net.es.oscars.dto.topo.Topology;
-import net.es.oscars.topo.ent.UrnE;
 import net.es.oscars.dto.topo.enums.Layer;
+import net.es.oscars.dto.topo.enums.PortLayer;
 import net.es.oscars.dto.topo.enums.VertexType;
+import net.es.oscars.pce.DijkstraPCE;
+import net.es.oscars.pce.PruningService;
+import net.es.oscars.resv.ent.RequestedVlanPipeE;
+import net.es.oscars.resv.ent.ReservedVlanE;
+import net.es.oscars.topo.ent.UrnE;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -237,13 +237,9 @@ public class ServiceLayerTopology
      * @param bwAvailMap - Map of available bandwidth for "Ingress" and "Egress" direction for each URN.
      * @param rsvVlanList - List of currently reserved VLAN elements (during request schedule)
      */
-    public void calculateLogicalLinkWeights(RequestedVlanPipeE requestedVlanPipe, List<UrnE> urnList,
-                                            Map<String, Map<String, Integer>> bwAvailMap, List<ReservedVlanE> rsvVlanList)
+    public void calculateLogicalLinkWeights(RequestedVlanPipeE requestedVlanPipe, List<UrnE> urnList, Map<String, Map<String, Integer>> bwAvailMap, List<ReservedVlanE> rsvVlanList)
     {
-        //if(requestedVlanPipe.getAzMbps() == requestedVlanPipe.getZaMbps())
-        //    this.calculateLogicalLinkWeightsSymmetric(requestedVlanPipe, requestedSchedule, urnList, rsvBwList, rsvVlanList);
-        //else
-            this.calculateLogicalLinkWeightsAsymmetric(requestedVlanPipe, urnList, bwAvailMap, rsvVlanList);
+        this.calculateLogicalLinkWeightsAsymmetric(requestedVlanPipe, urnList, bwAvailMap, rsvVlanList);
     }
 
 
@@ -446,8 +442,8 @@ public class ServiceLayerTopology
             return;
         }
 
-        TopoVertex virtualSrcDevice = new TopoVertex(srcDevice.getUrn() + "-virtual", VertexType.VIRTUAL);
-        TopoVertex virtualSrcPort = new TopoVertex(srcInPort.getUrn() + "-virtual", VertexType.VIRTUAL);
+        TopoVertex virtualSrcDevice = new TopoVertex(srcDevice.getUrn() + "-virtual", VertexType.VIRTUAL, PortLayer.NONE);
+        TopoVertex virtualSrcPort = new TopoVertex(srcInPort.getUrn() + "-virtual", VertexType.VIRTUAL, PortLayer.ETHERNET);
 
         serviceLayerDevices.add(virtualSrcDevice);
         serviceLayerPorts.add(virtualSrcPort);
@@ -484,8 +480,8 @@ public class ServiceLayerTopology
         }
 
 
-        TopoVertex virtualDstDevice = new TopoVertex(dstDevice.getUrn() + "-virtual", VertexType.VIRTUAL);
-        TopoVertex virtualDstPort = new TopoVertex(dstOutPort.getUrn() + "-virtual", VertexType.VIRTUAL);
+        TopoVertex virtualDstDevice = new TopoVertex(dstDevice.getUrn() + "-virtual", VertexType.VIRTUAL, PortLayer.NONE);
+        TopoVertex virtualDstPort = new TopoVertex(dstOutPort.getUrn() + "-virtual", VertexType.VIRTUAL, PortLayer.ETHERNET);
 
         serviceLayerDevices.add(virtualDstDevice);
         serviceLayerPorts.add(virtualDstPort);

@@ -41,7 +41,7 @@ public class DijkstraPCE {
 
         Graph<TopoVertex, TopoEdge> graph = new DirectedSparseMultigraph<>();
 
-        Transformer<TopoEdge, Double> wtTransformer = edge -> edge.getMetric().doubleValue();
+         Transformer<TopoEdge, Double> wtTransformer = edge -> edge.getMetric().doubleValue();
 
         this.addToGraph(topology, graph);
 
@@ -103,7 +103,7 @@ public class DijkstraPCE {
     private void addToGraph(Topology topo, Graph<TopoVertex, TopoEdge> g) {
         topo.getVertices().stream()
                 .forEach(v -> {
-                            //log.info("adding vertex to Dijkstra graph: " + v.getUrn());
+                            //log.info("adding vertex to Dijkstra graph: " + v.toString());
                             g.addVertex(v);
                         }
                 );

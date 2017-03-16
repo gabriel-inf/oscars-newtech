@@ -75,10 +75,10 @@ public class TopoService {
                 {
                     vertType = VertexType.PORT;
 
-                    if(urnCapabilities.contains(Layer.ETHERNET))
-                        portLayer = PortLayer.ETHERNET;
-                    else
+                    if(urnCapabilities.contains(Layer.MPLS))
                         portLayer = PortLayer.MPLS;
+                    else
+                        portLayer = PortLayer.ETHERNET;
                 }
                 else
                 {
@@ -224,6 +224,27 @@ public class TopoService {
             return VertexType.SWITCH;
         else
             return VertexType.ROUTER;
+    }
+
+    public PortLayer lookupPortLayer(String portURN)
+    {
+        Optional<UrnE> thePortOpt = urnRepo.findAll().stream()
+                .filter(p -> p.getUrn().equals(portURN))
+                .findFirst();
+
+        if(thePortOpt.isPresent())
+        {
+            UrnE thePort = thePortOpt.get();
+
+            if(thePort.getUrnType().equals(UrnType.DEVICE))
+                return PortLayer.NONE;
+            else if(thePort.getCapabilities().contains(Layer.MPLS))
+                return PortLayer.MPLS;
+            else
+                return PortLayer.ETHERNET;
+        }
+
+        return null;
     }
 
     public Map<String, Set<String>> buildDeviceToPortMap() {

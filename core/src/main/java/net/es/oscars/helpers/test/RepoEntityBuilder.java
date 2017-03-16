@@ -38,7 +38,7 @@ public class RepoEntityBuilder {
         urnRepo.deleteAll();
         adjcyRepo.deleteAll();
 
-        populatePortLayers(vertices, portToDeviceMap);
+        populatePortLayers(vertices, portToDeviceMap, null, null, null);
 
         List<Integer> floors = Arrays.asList(1, 10, 20, 30);
         List<Integer> ceilings = Arrays.asList(9, 19, 29, 39);
@@ -69,7 +69,7 @@ public class RepoEntityBuilder {
         urnRepo.deleteAll();
         adjcyRepo.deleteAll();
 
-        populatePortLayers(vertices, portToDeviceMap);
+        populatePortLayers(vertices, portToDeviceMap, portBWs, null, null);
 
         List<Integer> floors = Arrays.asList(1, 10, 20, 30);
         List<Integer> ceilings = Arrays.asList(9, 19, 29, 39);
@@ -100,7 +100,7 @@ public class RepoEntityBuilder {
         urnRepo.deleteAll();
         adjcyRepo.deleteAll();
 
-        populatePortLayers(vertices, portToDeviceMap);
+        populatePortLayers(vertices, portToDeviceMap, null, floorMap, ceilingMap);
 
         List<UrnE> urnList = new ArrayList<>();
         List<UrnAdjcyE> adjcyList = new ArrayList<>();
@@ -129,7 +129,7 @@ public class RepoEntityBuilder {
         urnRepo.deleteAll();
         adjcyRepo.deleteAll();
 
-        populatePortLayers(vertices, portToDeviceMap);
+        populatePortLayers(vertices, portToDeviceMap, portBWs, floorMap, ceilingMap);
 
         List<UrnE> urnList = new ArrayList<>();
         List<UrnAdjcyE> adjcyList = new ArrayList<>();
@@ -371,7 +371,7 @@ public class RepoEntityBuilder {
         reservedBandwidthRepo.save(reservedBandwidths);
     }
 
-    private void populatePortLayers(Collection<TopoVertex> vertices, Map<TopoVertex,TopoVertex> portToDeviceMap)
+    private void populatePortLayers(Collection<TopoVertex> vertices, Map<TopoVertex,TopoVertex> portToDeviceMap, Map<TopoVertex, List<Integer>> bandwidthMap, Map<TopoVertex, List<Integer>> floorMap, Map<TopoVertex, List<Integer>> ceilingMap)
     {
         for(TopoVertex onePort : vertices)
         {
@@ -382,14 +382,33 @@ public class RepoEntityBuilder {
                 continue;
 
             TopoVertex correspondingDevice = portToDeviceMap.remove(onePort);
+            List<Integer> floors = null;
+            List<Integer> ceilings = null;
+            List<Integer> portBWs = null;
+
             VertexType deviceType = correspondingDevice.getVertexType();
 
+            if(bandwidthMap != null)
+                portBWs = bandwidthMap.remove(onePort);
+            if(floorMap != null)
+                floors = floorMap.remove(onePort);
+            if(ceilingMap != null)
+                 ceilings = ceilingMap.remove(onePort);
+
+            // Set Port Layer //
             if(deviceType.equals(VertexType.SWITCH))
                 onePort.setPortLayer(PortLayer.ETHERNET);
             else if(deviceType.equals(VertexType.ROUTER))
                 onePort.setPortLayer(PortLayer.MPLS);
 
             portToDeviceMap.put(onePort, correspondingDevice);
+
+            if(bandwidthMap != null)
+                bandwidthMap.put(onePort, portBWs);
+            if(floorMap != null)
+                floorMap.put(onePort, floors);
+            if(ceilingMap != null)
+                ceilingMap.put(onePort, ceilings);
         }
     }
 }

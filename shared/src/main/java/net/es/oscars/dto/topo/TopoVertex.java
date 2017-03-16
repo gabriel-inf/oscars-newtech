@@ -22,4 +22,5 @@ public class TopoVertex {
         vertexType = theVertexType;
         portLayer = PortLayer.NONE;
     }
+
 }

@@ -1,18 +1,18 @@
 package net.es.oscars.pce;
 
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.resv.ent.RequestedVlanFixtureE;
-import net.es.oscars.resv.ent.RequestedVlanPipeE;
-import net.es.oscars.resv.ent.ReservedBandwidthE;
-import net.es.oscars.resv.ent.ReservedVlanE;
-import net.es.oscars.servicetopo.ServiceLayerTopology;
 import net.es.oscars.dto.topo.TopoEdge;
 import net.es.oscars.dto.topo.TopoVertex;
 import net.es.oscars.dto.topo.Topology;
+import net.es.oscars.dto.topo.enums.Layer;
+import net.es.oscars.dto.topo.enums.PortLayer;
+import net.es.oscars.dto.topo.enums.VertexType;
+import net.es.oscars.resv.ent.RequestedVlanFixtureE;
+import net.es.oscars.resv.ent.RequestedVlanPipeE;
+import net.es.oscars.resv.ent.ReservedVlanE;
+import net.es.oscars.servicetopo.ServiceLayerTopology;
 import net.es.oscars.topo.dao.UrnRepository;
 import net.es.oscars.topo.ent.UrnE;
-import net.es.oscars.dto.topo.enums.Layer;
-import net.es.oscars.dto.topo.enums.VertexType;
 import net.es.oscars.topo.svc.TopoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -104,12 +104,34 @@ public class NonPalindromicalPCE {
         Set<RequestedVlanFixtureE> srcFixtures = requestPipe.getAJunction().getFixtures();
         Set<RequestedVlanFixtureE> dstFixtures = requestPipe.getZJunction().getFixtures();
 
-        TopoVertex srcPort = srcFixtures.size() > 0 ?
-                new TopoVertex(srcFixtures.iterator().next().getPortUrn(), VertexType.PORT) :
-                new TopoVertex("fix" + srcDevice.getUrn(), VertexType.PORT);
-        TopoVertex dstPort = dstFixtures.size() > 0 ?
-                new TopoVertex(dstFixtures.iterator().next().getPortUrn(), VertexType.PORT) :
-                new TopoVertex("fix" + dstDevice.getUrn(), VertexType.PORT);
+        TopoVertex srcPort = null;
+        TopoVertex dstPort = null;
+
+        if(srcFixtures.size() > 0)
+        {
+            RequestedVlanFixtureE srcFix = srcFixtures.iterator().next();
+            String srcFixURN = srcFix.getPortUrn();
+            PortLayer srcFixLayer = topoService.lookupPortLayer(srcFixURN);
+
+            srcPort = new TopoVertex(srcFixURN, VertexType.PORT, srcFixLayer);
+        }
+        else
+        {
+            srcPort = new TopoVertex("fix" + srcDevice.getUrn(), VertexType.PORT, PortLayer.ETHERNET);
+        }
+
+        if(dstFixtures.size() > 0)
+        {
+            RequestedVlanFixtureE dstFix = dstFixtures.iterator().next();
+            String dstFixURN = dstFix.getPortUrn();
+            PortLayer dstFixLayer = topoService.lookupPortLayer(dstFixURN);
+
+            dstPort = new TopoVertex(dstFixURN, VertexType.PORT, dstFixLayer);
+        }
+        else
+        {
+            dstPort = new TopoVertex("fix" + dstDevice.getUrn(), VertexType.PORT, PortLayer.ETHERNET);
+        }
 
         // Handle MPLS-layer source/destination devices
         serviceLayerTopology.buildLogicalLayerSrcNodes(srcDevice, srcPort);
