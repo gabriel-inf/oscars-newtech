@@ -1,5 +1,10 @@
 language: java
 jdk:
   - oraclejdk8
-script:
+
+install:
   - mvn -q -B clean install
+
+cache:
+  directories:
+    - $HOME/.m2
