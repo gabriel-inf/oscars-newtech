@@ -110,6 +110,8 @@ public class ServiceLayerTopology
         serviceLayerPorts.addAll(allEthernetPorts);
         serviceLayerLinks.addAll(allEthernetEdges);
         serviceLayerLinks.addAll(allInternalEthernetEdges);
+
+        serviceLayerPorts.stream().forEach(p -> log.info(p.toString()));
     }
 
     /**
@@ -148,6 +150,8 @@ public class ServiceLayerTopology
         mplsLayerPorts.addAll(allMplsPorts);
         mplsLayerLinks.addAll(allMplsEdges);
         mplsLayerLinks.addAll(allInternalMPLSEdges);
+
+        mplsLayerPorts.stream().forEach(p -> log.info(p.toString()));
     }
 
     /**

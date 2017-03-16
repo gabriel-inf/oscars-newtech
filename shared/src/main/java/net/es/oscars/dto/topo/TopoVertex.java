@@ -23,4 +23,5 @@ public class TopoVertex {
         portLayer = PortLayer.NONE;
     }
 
+
 }

@@ -161,22 +161,28 @@ public class RepoEntityBuilder {
     public UrnE addUrnToList(TopoVertex v, List<UrnE> urnList, Map<TopoVertex,TopoVertex> portToDeviceMap,
                              Map<TopoVertex, List<Integer>> portBWs, List<Integer> floors, List<Integer> ceilings){
         UrnE urn = getFromUrnList(v.getUrn(), urnList);
-        if(urn == null){
+        if(urn == null)
+        {
+            VertexType vType = v.getVertexType();
             Set<Layer> capabilities = new HashSet<>();
             capabilities.add(Layer.INTERNAL);
             capabilities.add(Layer.ETHERNET);
-            // If vertex is a port, get it's parent's type instead
-            VertexType typeOfParentOrSelf = v.getVertexType().equals(VertexType.PORT) ? portToDeviceMap.get(v).getVertexType() : v.getVertexType();
-            if(typeOfParentOrSelf.equals(VertexType.ROUTER)){
-                capabilities.add(Layer.MPLS);
-            }
 
-            if(v.getVertexType().equals(VertexType.PORT)){
+            // If vertex is a port, get it's PortLayer info to determine capabilities. Not all Router ports will have MPLS capability!
+            if(vType.equals(VertexType.PORT))
+            {
+                if(v.getPortLayer().equals(PortLayer.MPLS))
+                    capabilities.add(Layer.MPLS);
+
                 List<Integer> portInEgBw = portBWs != null ? portBWs.get(v) : Arrays.asList(1000, 1000);
-                urn = buildPortUrn(v, typeOfParentOrSelf, capabilities, portInEgBw.get(0), portInEgBw.get(1), floors, ceilings);
+                urn = buildPortUrn(v, vType, capabilities, portInEgBw.get(0), portInEgBw.get(1), floors, ceilings);
             }
-            else{
-                urn = buildUrn(v, typeOfParentOrSelf, capabilities, floors, ceilings);
+            else
+            {
+                if(vType.equals(VertexType.ROUTER))
+                    capabilities.add(Layer.MPLS);
+
+                urn = buildUrn(v, vType, capabilities, floors, ceilings);
             }
 
             urnList.add(urn);

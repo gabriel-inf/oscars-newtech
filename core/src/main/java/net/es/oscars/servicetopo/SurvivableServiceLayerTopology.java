@@ -9,6 +9,7 @@ import net.es.oscars.dto.topo.TopoEdge;
 import net.es.oscars.dto.topo.TopoVertex;
 import net.es.oscars.dto.topo.Topology;
 import net.es.oscars.dto.topo.enums.Layer;
+import net.es.oscars.dto.topo.enums.PortLayer;
 import net.es.oscars.dto.topo.enums.VertexType;
 import net.es.oscars.pce.BhandariPCE;
 import net.es.oscars.pce.PruningService;
@@ -111,6 +112,8 @@ public class SurvivableServiceLayerTopology
         serviceLayerPorts.addAll(allEthernetPorts);
         serviceLayerLinks.addAll(allEthernetEdges);
         serviceLayerLinks.addAll(allInternalEthernetEdges);
+
+        serviceLayerPorts.stream().forEach(p -> log.info(p.toString()));
     }
 
     /**
@@ -466,8 +469,8 @@ public class SurvivableServiceLayerTopology
             return;
         }
 
-        TopoVertex virtualSrcDevice = new TopoVertex(srcDevice.getUrn() + "-virtual", VertexType.VIRTUAL);
-        TopoVertex virtualSrcPort = new TopoVertex(srcInPort.getUrn() + "-virtual", VertexType.VIRTUAL);
+        TopoVertex virtualSrcDevice = new TopoVertex(srcDevice.getUrn() + "-virtual", VertexType.VIRTUAL, PortLayer.NONE);
+        TopoVertex virtualSrcPort = new TopoVertex(srcInPort.getUrn() + "-virtual", VertexType.VIRTUAL, PortLayer.ETHERNET);
 
         serviceLayerDevices.add(virtualSrcDevice);
         serviceLayerPorts.add(virtualSrcPort);
@@ -503,9 +506,8 @@ public class SurvivableServiceLayerTopology
             return;
         }
 
-
-        TopoVertex virtualDstDevice = new TopoVertex(dstDevice.getUrn() + "-virtual", VertexType.VIRTUAL);
-        TopoVertex virtualDstPort = new TopoVertex(dstOutPort.getUrn() + "-virtual", VertexType.VIRTUAL);
+        TopoVertex virtualDstDevice = new TopoVertex(dstDevice.getUrn() + "-virtual", VertexType.VIRTUAL, PortLayer.NONE);
+        TopoVertex virtualDstPort = new TopoVertex(dstOutPort.getUrn() + "-virtual", VertexType.VIRTUAL, PortLayer.ETHERNET);
 
         serviceLayerDevices.add(virtualDstDevice);
         serviceLayerPorts.add(virtualDstPort);

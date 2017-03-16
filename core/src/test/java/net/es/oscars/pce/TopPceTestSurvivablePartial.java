@@ -1631,9 +1631,9 @@ public class TopPceTestSurvivablePartial
     }
 
     @Test
-    public void survivablePceTestDualLayerDevices()
+    public void survivablePceTestNonUniformPorts()
     {
-        log.info("Initializing test: 'survivablePceTestDualLayerDevices'.");
+        log.info("Initializing test: 'survivablePceTestNonUniformPorts'.");
 
         RequestedBlueprintE requestedBlueprint;
         Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
@@ -1652,11 +1652,11 @@ public class TopPceTestSurvivablePartial
         SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_PARTIAL;
         String vlan = "any";
 
-        topologyBuilder.buildTopoWithDualLayerDevices();
+        topologyBuilder.buildTopoWithNonUniformPorts();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
         requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 2, 1, 1, "test");
 
-        log.info("Beginning test: 'survivablePceTestDualLayerDevices'.");
+        log.info("Beginning test: 'survivablePceTestNonUniformPorts'.");
 
         try
         {
@@ -1669,6 +1669,6 @@ public class TopPceTestSurvivablePartial
 
         assert (reservedBlueprint.isPresent());
 
-        log.info("test 'survivablePceTestDualLayerDevices' passed.");
+        log.info("test 'survivablePceTestNonUniformPorts' passed.");
     }
 }

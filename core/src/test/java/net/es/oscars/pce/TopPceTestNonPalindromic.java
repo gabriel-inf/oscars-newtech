@@ -5004,4 +5004,46 @@ public class TopPceTestNonPalindromic
 
         log.info("test 'multiMplsPipeTestNonPal' passed.");
     }
+
+    @Test
+    public void nonPalWithNonUniformPortsTest()
+    {
+        log.info("Initializing test: 'nonPalWithNonUniformPortsTest'.");
+
+        RequestedBlueprintE requestedBlueprint;
+        Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
+        ScheduleSpecificationE requestedSched;
+
+        Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
+        Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
+
+        String srcPort = "portP:1";
+        String srcDevice = "nodeP";
+        String dstPort = "portQ:1";
+        String dstDevice = "nodeQ";
+        Integer azBW = 25;
+        Integer zaBW = 25;
+        PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
+        String vlan = "any";
+
+        topologyBuilder.buildTopoWithNonUniformPorts();
+        requestedSched = testBuilder.buildSchedule(startDate, endDate);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 2, 1, 1, "test");
+
+        log.info("Beginning test: 'nonPalWithNonUniformPortsTest'.");
+
+        try
+        {
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
+        }
+        catch(PCEException | PSSException pceE)
+        {
+            log.error("", pceE);
+        }
+
+        assert (reservedBlueprint.isPresent());
+
+        log.info("test 'nonPalWithNonUniformPortsTest' passed.");
+    }
 }

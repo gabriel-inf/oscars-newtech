@@ -2729,7 +2729,7 @@ public class TopologyBuilder
     }
 
 
-    public void buildTopoWithDualLayerDevices()
+    public void buildTopoWithNonUniformPorts()
     {
         log.info("Building Test Topology with Dual-Layer Devices");
 

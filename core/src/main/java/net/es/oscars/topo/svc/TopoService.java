@@ -53,9 +53,8 @@ public class TopoService {
         this.bwResRepo = bwResRepo;
     }
 
-    public Topology layer(Layer layer) throws NoSuchElementException {
-
-        //log.info("topology for layer " + layer);
+    public Topology layer(Layer layer) throws NoSuchElementException
+    {
         Topology topo = new Topology();
         topo.setLayer(layer);
         List<UrnE> urns = urnRepo.findAll();
@@ -76,7 +75,10 @@ public class TopoService {
                     vertType = VertexType.PORT;
 
                     if(urnCapabilities.contains(Layer.MPLS))
+                    {
+                        log.info("Port " + u.getUrn() + " has MPLS capabilities.");
                         portLayer = PortLayer.MPLS;
+                    }
                     else
                         portLayer = PortLayer.ETHERNET;
                 }

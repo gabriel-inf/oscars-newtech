@@ -48,31 +48,51 @@ public class NonPalindromicalPCE {
      * @return A two-element Map containing both the forward-direction (A->Z) ERO and the reverse-direction (Z->A) ERO
      * @throws PCEException
      */
-    public Map<String, List<TopoEdge>> computeNonPalindromicERO(RequestedVlanPipeE requestPipe,
-                                                                Map<String, Map<String, Integer>> bwAvailMap,
-                                                                List<ReservedVlanE> rsvVlanList) throws PCEException {
+    public Map<String, List<TopoEdge>> computeNonPalindromicERO(RequestedVlanPipeE requestPipe, Map<String, Map<String, Integer>> bwAvailMap, List<ReservedVlanE> rsvVlanList) throws PCEException
+    {
         Topology ethTopo = topoService.layer(Layer.ETHERNET);
         Topology intTopo = topoService.layer(Layer.INTERNAL);
         Topology mplsTopo = topoService.layer(Layer.MPLS);
+
+        log.info("ETHERNET Topology:");
+        ethTopo.getVertices().stream().forEach(v -> log.info(v.toString()));
+        log.info("MPLS Topology:");
+        mplsTopo.getVertices().stream().forEach(v -> log.info(v.toString()));
 
         // Filter MPLS-ports and MPLS-devices out of ethTopo
         Set<TopoVertex> portsOnly = ethTopo.getVertices().stream()
                 .filter(v -> v.getVertexType().equals(VertexType.PORT))
                 .collect(Collectors.toSet());
 
-        for (TopoEdge intEdge : intTopo.getEdges()) {
+        for (TopoEdge intEdge : intTopo.getEdges())
+        {
             TopoVertex vertA = intEdge.getA();
             TopoVertex vertZ = intEdge.getZ();
 
-            if (portsOnly.isEmpty()) {
+            if (portsOnly.isEmpty())
+            {
                 break;
             }
 
-            if (portsOnly.contains(vertA)) {
-                if (!vertZ.getVertexType().equals(VertexType.ROUTER)) {
+            /*
+            if (portsOnly.contains(vertA))
+            {
+                /*if (!vertZ.getVertexType().equals(VertexType.ROUTER))
+                {
                     portsOnly.remove(vertA);
-                }
+                }*/
+            //}
+
+            if(portsOnly.contains(vertA))
+            {
+                log.info(vertA.toString());
+                if(vertA.getPortLayer().equals(PortLayer.MPLS))
+                    portsOnly.remove(vertA);
             }
+
+            if(portsOnly.contains(vertZ) && vertZ.getPortLayer().equals(PortLayer.MPLS))
+                portsOnly.remove(vertZ);
+
         }
 
         ethTopo.getVertices().removeIf(v -> v.getVertexType().equals(VertexType.ROUTER));
