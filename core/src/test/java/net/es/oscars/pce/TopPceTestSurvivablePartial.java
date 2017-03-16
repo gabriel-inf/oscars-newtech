@@ -1629,4 +1629,46 @@ public class TopPceTestSurvivablePartial
 
         log.info("test 'survivablePartialPceTestESnet' passed.");
     }
+
+    @Test
+    public void survivablePceTestDualLayerDevices()
+    {
+        log.info("Initializing test: 'survivablePceTestDualLayerDevices'.");
+
+        RequestedBlueprintE requestedBlueprint;
+        Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
+        ScheduleSpecificationE requestedSched;
+
+        Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
+        Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
+
+        String srcPort = "portP:1";
+        String srcDevice = "nodeP";
+        String dstPort = "portQ:1";
+        String dstDevice = "nodeQ";
+        Integer azBW = 25;
+        Integer zaBW = 25;
+        PalindromicType palindrome = PalindromicType.PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_PARTIAL;
+        String vlan = "any";
+
+        topologyBuilder.buildTopoWithDualLayerDevices();
+        requestedSched = testBuilder.buildSchedule(startDate, endDate);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 2, 1, 1, "test");
+
+        log.info("Beginning test: 'survivablePceTestDualLayerDevices'.");
+
+        try
+        {
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
+        }
+        catch(PCEException | PSSException pceE)
+        {
+            log.error("", pceE);
+        }
+
+        assert (reservedBlueprint.isPresent());
+
+        log.info("test 'survivablePceTestDualLayerDevices' passed.");
+    }
 }

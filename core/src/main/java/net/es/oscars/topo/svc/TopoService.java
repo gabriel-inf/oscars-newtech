@@ -6,11 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.topo.TopoEdge;
 import net.es.oscars.dto.topo.TopoVertex;
 import net.es.oscars.dto.topo.Topology;
-import net.es.oscars.dto.topo.enums.VertexType;
-import net.es.oscars.dto.topo.enums.DeviceModel;
-import net.es.oscars.dto.topo.enums.DeviceType;
-import net.es.oscars.dto.topo.enums.Layer;
-import net.es.oscars.dto.topo.enums.UrnType;
+import net.es.oscars.dto.topo.enums.*;
 import net.es.oscars.resv.dao.ReservedBandwidthRepository;
 import net.es.oscars.resv.ent.ReservedBandwidthE;
 import net.es.oscars.topo.dao.ReservableBandwidthRepository;
@@ -66,24 +62,43 @@ public class TopoService {
         List<UrnAdjcyE> adjcies = adjcyRepo.findAll();
 
         urns.stream()
-                .filter(u -> u.getCapabilities().contains(layer) || layer.equals(Layer.INTERNAL))
-                .forEach(u -> {
-                    VertexType type = null;
-                    if (u.getDeviceType() == null && u.getIfceType() != null) {
-                        type = VertexType.PORT;
-                    } else {
-                        switch (u.getDeviceType()) {
-                            case ROUTER:
-                                type = VertexType.ROUTER;
-                                break;
-                            case SWITCH:
-                                type = VertexType.SWITCH;
-                                break;
-                        }
+            .forEach(u ->
+            {
+                Set<Layer> urnCapabilities = u.getCapabilities();
+                DeviceType urnDeviceType = u.getDeviceType();
+                IfceType urnInterfaceType = u.getIfceType();
+
+                VertexType vertType = null;
+                PortLayer portLayer = PortLayer.NONE;
+
+                if(urnDeviceType == null && urnInterfaceType != null)
+                {
+                    vertType = VertexType.PORT;
+
+                    if(urnCapabilities.contains(Layer.ETHERNET))
+                        portLayer = PortLayer.ETHERNET;
+                    else
+                        portLayer = PortLayer.MPLS;
+                }
+                else
+                {
+                    switch (urnDeviceType)
+                    {
+                        case ROUTER:
+                            vertType = VertexType.ROUTER;
+                            break;
+                        case SWITCH:
+                            vertType = VertexType.SWITCH;
+                            break;
                     }
-                    TopoVertex dev = new TopoVertex(u.getUrn(), type);
+                }
+
+                if(urnCapabilities.contains(layer) || layer.equals(Layer.INTERNAL))
+                {
+                    TopoVertex dev = new TopoVertex(u.getUrn(), vertType, portLayer);
                     topo.getVertices().add(dev);
-                });
+                }
+        });
 
         adjcies.stream()
                 .filter(adj -> adj.getMetrics().containsKey(layer))
@@ -96,7 +111,8 @@ public class TopoService {
                         Optional<TopoVertex> a = topo.getVertexByUrn(adj.getA().getUrn());
                         Optional<TopoVertex> z = topo.getVertexByUrn(adj.getZ().getUrn());
 
-                        if (a.isPresent() && z.isPresent()) {
+                        if (a.isPresent() && z.isPresent())
+                        {
                             TopoEdge edge = TopoEdge.builder()
                                     .a(a.get())
                                     .z(z.get())

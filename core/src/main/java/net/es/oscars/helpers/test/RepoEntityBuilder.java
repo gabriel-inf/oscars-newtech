@@ -38,6 +38,8 @@ public class RepoEntityBuilder {
         urnRepo.deleteAll();
         adjcyRepo.deleteAll();
 
+        populatePortLayers(vertices, portToDeviceMap);
+
         List<Integer> floors = Arrays.asList(1, 10, 20, 30);
         List<Integer> ceilings = Arrays.asList(9, 19, 29, 39);
 
@@ -66,6 +68,8 @@ public class RepoEntityBuilder {
 
         urnRepo.deleteAll();
         adjcyRepo.deleteAll();
+
+        populatePortLayers(vertices, portToDeviceMap);
 
         List<Integer> floors = Arrays.asList(1, 10, 20, 30);
         List<Integer> ceilings = Arrays.asList(9, 19, 29, 39);
@@ -96,6 +100,8 @@ public class RepoEntityBuilder {
         urnRepo.deleteAll();
         adjcyRepo.deleteAll();
 
+        populatePortLayers(vertices, portToDeviceMap);
+
         List<UrnE> urnList = new ArrayList<>();
         List<UrnAdjcyE> adjcyList = new ArrayList<>();
         for(TopoEdge edge : edges){
@@ -122,6 +128,8 @@ public class RepoEntityBuilder {
 
         urnRepo.deleteAll();
         adjcyRepo.deleteAll();
+
+        populatePortLayers(vertices, portToDeviceMap);
 
         List<UrnE> urnList = new ArrayList<>();
         List<UrnAdjcyE> adjcyList = new ArrayList<>();
@@ -361,5 +369,27 @@ public class RepoEntityBuilder {
                     .build());
         }
         reservedBandwidthRepo.save(reservedBandwidths);
+    }
+
+    private void populatePortLayers(Collection<TopoVertex> vertices, Map<TopoVertex,TopoVertex> portToDeviceMap)
+    {
+        for(TopoVertex onePort : vertices)
+        {
+            if(!onePort.getVertexType().equals(VertexType.PORT))
+                continue;
+
+            if(!onePort.getPortLayer().equals(PortLayer.NONE))
+                continue;
+
+            TopoVertex correspondingDevice = portToDeviceMap.remove(onePort);
+            VertexType deviceType = correspondingDevice.getVertexType();
+
+            if(deviceType.equals(VertexType.SWITCH))
+                onePort.setPortLayer(PortLayer.ETHERNET);
+            else if(deviceType.equals(VertexType.ROUTER))
+                onePort.setPortLayer(PortLayer.MPLS);
+
+            portToDeviceMap.put(onePort, correspondingDevice);
+        }
     }
 }

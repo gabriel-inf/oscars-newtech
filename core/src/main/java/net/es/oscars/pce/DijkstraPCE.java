@@ -110,8 +110,8 @@ public class DijkstraPCE {
 
         topo.getEdges().stream()
                 .forEach(e -> {
-                            TopoVertex nodeA = new TopoVertex(e.getA().getUrn(), e.getA().getVertexType());
-                            TopoVertex nodeZ = new TopoVertex(e.getZ().getUrn(), e.getZ().getVertexType());
+                            TopoVertex nodeA = new TopoVertex(e.getA().getUrn(), e.getA().getVertexType(), e.getA().getPortLayer());
+                            TopoVertex nodeZ = new TopoVertex(e.getZ().getUrn(), e.getZ().getVertexType(), e.getZ().getPortLayer());
                             TopoEdge az = TopoEdge.builder().a(nodeA).z(nodeZ).build();
 
                             az.setMetric(e.getMetric());
