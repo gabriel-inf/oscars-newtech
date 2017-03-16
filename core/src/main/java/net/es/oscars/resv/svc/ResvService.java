@@ -183,8 +183,8 @@ public class ResvService {
         ModelMapper modelMapper = new ModelMapper();
         ArchivedBlueprintE archival = modelMapper.map(c.getReserved(), ArchivedBlueprintE.class);
 
-        log.info("Reservation: " + c.getReserved().toString());
-        log.info("Archive: " + archival.toString());
+        log.debug("Reservation: " + c.getReserved().toString());
+        log.debug("Archive: " + archival.toString());
 
         c.setArchivedResv(archival);
     }

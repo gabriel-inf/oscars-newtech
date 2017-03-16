@@ -9,7 +9,6 @@ import net.es.oscars.helpers.IntRangeParsing;
 import net.es.oscars.helpers.ResourceChooser;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.pss.prop.PssConfig;
-import net.es.oscars.resv.dao.ConnectionRepository;
 import net.es.oscars.resv.dao.ReservedPssResourceRepository;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.topo.ent.UrnE;
@@ -29,20 +28,24 @@ import java.util.Set;
 @Transactional
 @Slf4j
 public class PssResourceService {
-    @Autowired
     private ResourceChooser chooser;
 
-    @Autowired
     private TopoService topoService;
 
-    @Autowired
-    private ConnectionRepository connRepo;
-
-    @Autowired
     private ReservedPssResourceRepository pssResRepo;
 
-    @Autowired
     private PssConfig pssConfig;
+
+    @Autowired
+    public PssResourceService(ResourceChooser chooser,
+                              TopoService topoService,
+                              ReservedPssResourceRepository pssResRepo,
+                              PssConfig pssConfig) {
+        this.chooser = chooser;
+        this.topoService = topoService;
+        this.pssResRepo = pssResRepo;
+        this.pssConfig = pssConfig;
+    }
 
     public void generateConfig(ConnectionE conn) throws PSSException {
     }
@@ -65,11 +68,10 @@ public class PssResourceService {
         rvf.getEthPipes().forEach(rep -> {
             this.reserveEthPipe(rep, beginning, ending);
         });
-        connRepo.save(conn);
-        log.info("saved PSS all resources, connection is now:");
         try {
+            log.debug("allocated PSS resources, connection is now:");
             String pretty = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(conn);
-            log.info(pretty); // commented for output readability
+            log.debug (pretty);
 
         } catch (JsonProcessingException e) {
             e.printStackTrace();

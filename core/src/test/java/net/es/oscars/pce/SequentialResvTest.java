@@ -1,6 +1,7 @@
 package net.es.oscars.pce;
 
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.AbstractCoreTest;
 import net.es.oscars.CoreUnitTestConfiguration;
 import net.es.oscars.dto.spec.PalindromicType;
 import net.es.oscars.dto.spec.SurvivabilityType;
@@ -33,10 +34,8 @@ import java.util.stream.Stream;
  */
 
 @Slf4j
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes=CoreUnitTestConfiguration.class)
 @Transactional
-public class SequentialResvTest {
+public class SequentialResvTest extends AbstractCoreTest {
     @Autowired
     private ResvService resvService;
 

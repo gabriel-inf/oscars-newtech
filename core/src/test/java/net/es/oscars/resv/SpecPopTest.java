@@ -1,6 +1,7 @@
-package net.es.oscars;
+package net.es.oscars.resv;
 
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.AbstractCoreTest;
 import net.es.oscars.dto.pss.EthFixtureType;
 import net.es.oscars.dto.pss.EthJunctionType;
 import net.es.oscars.dto.pss.EthPipeType;
@@ -29,10 +30,8 @@ import java.util.Date;
 import java.util.HashSet;
 
 @Slf4j
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = CoreUnitTestConfiguration.class)
 @Transactional
-public class SpecPopTest {
+public class SpecPopTest extends AbstractCoreTest {
 
     @Autowired
     private TopoFileImporter topoFileImporter;
@@ -40,8 +39,6 @@ public class SpecPopTest {
     @Autowired
     private SpecificationRepository specRepo;
 
-    @Autowired
-    private UrnRepository urnRepo;
 
     @Before
     public void startup() throws IOException {
