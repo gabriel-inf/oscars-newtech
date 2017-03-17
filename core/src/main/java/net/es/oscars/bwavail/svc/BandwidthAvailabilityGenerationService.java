@@ -1,8 +1,8 @@
-package net.es.oscars.simplebwavail.svc;
+package net.es.oscars.bwavail.svc;
 
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.bwavail.*;
-import net.es.oscars.simpleresv.svc.DateService;
+import net.es.oscars.resv.svc.DateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

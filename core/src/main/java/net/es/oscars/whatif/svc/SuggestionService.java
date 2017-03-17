@@ -1,16 +1,18 @@
-package net.es.oscars.requestSuggestion.svc;
+package net.es.oscars.whatif.svc;
 
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.bwavail.svc.BandwidthAvailabilityGenerationService;
+import net.es.oscars.bwavail.svc.BandwidthAvailabilityService;
 import net.es.oscars.dto.bwavail.BandwidthAvailabilityRequest;
 import net.es.oscars.dto.bwavail.BandwidthAvailabilityResponse;
 import net.es.oscars.dto.resv.Connection;
 import net.es.oscars.dto.spec.Specification;
-import net.es.oscars.oscarsapi.BandwidthController;
-import net.es.oscars.oscarsapi.RequestController;
-import net.es.oscars.requestSuggestion.dto.VolumeRequestSpecification;
-import net.es.oscars.simplebwavail.svc.BandwidthAvailabilityGenerationService;
-import net.es.oscars.simpleresv.svc.ConnectionGenerationService;
-import net.es.oscars.simpleresv.svc.DateService;
+import net.es.oscars.pce.PCEException;
+import net.es.oscars.pss.PSSException;
+import net.es.oscars.resv.rest.ResvController;
+import net.es.oscars.resv.svc.ConnectionGenerationService;
+import net.es.oscars.resv.svc.DateService;
+import net.es.oscars.whatif.dto.VolumeRequestSpecification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,13 +32,13 @@ public class SuggestionService {
     ConnectionGenerationService connectionGenerationService;
 
     @Autowired
-    RequestController requestController;
-
-    @Autowired
-    BandwidthController bandwidthController;
-
-    @Autowired
     BandwidthAvailabilityGenerationService bwAvailGenService;
+
+    @Autowired
+    BandwidthAvailabilityService bwAvailService;
+
+    @Autowired
+    ResvController resvController;
 
     /**
      * Generate a list of suggested Connections given a VolumeRequestSpecification.
@@ -58,7 +60,7 @@ public class SuggestionService {
         // Get the bandwidth availability along a path from srcDevice to dstDevice
         BandwidthAvailabilityRequest bwAvailRequest = createBwAvailRequest(srcDevice, srcPorts, dstDevice, dstPorts,
                 0, 0, startDate, endDate);
-        BandwidthAvailabilityResponse bwResponse = bandwidthController.getBandwidthPath(bwAvailRequest);
+        BandwidthAvailabilityResponse bwResponse = bwAvailService.getBandwidthAvailabilityMap(bwAvailRequest);
 
         // TODO: Generate a number of values for azMbps and zaMbps.
 
@@ -76,12 +78,20 @@ public class SuggestionService {
                 connectionId, startDate, endDate);
 
         // Run a precheck
-        Connection result = requestController.preCheck(initialConn);
-
-        // Determine if result is successful. If so, consider storing it as an option
-        if(result.getReserved().getVlanFlow().getAllPaths().size() > 0){
-            // Success!
+        Connection result = null;
+        try {
+            result = resvController.preCheck(initialConn);
+            if(result != null){
+                // Determine if result is successful. If so, consider storing it as an option
+                if(result.getReserved().getVlanFlow().getAllPaths().size() > 0){
+                    // Success!
+                }
+            }
         }
+        catch(PCEException|PSSException e){
+            log.info("Connection precheck caused an exception.");
+        }
+
 
         return suggestions;
     }

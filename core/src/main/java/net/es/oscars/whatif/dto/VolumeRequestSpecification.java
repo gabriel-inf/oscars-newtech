@@ -1,4 +1,4 @@
-package net.es.oscars.requestSuggestion.dto;
+package net.es.oscars.whatif.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

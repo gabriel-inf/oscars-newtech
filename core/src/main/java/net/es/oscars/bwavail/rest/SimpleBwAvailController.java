@@ -1,9 +1,8 @@
-package net.es.oscars.simplebwavail.rest;
+package net.es.oscars.bwavail.rest;
 
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.bwavail.*;
-import net.es.oscars.oscarsapi.BandwidthController;
-import net.es.oscars.simplebwavail.svc.BandwidthAvailabilityGenerationService;
+import net.es.oscars.bwavail.svc.BandwidthAvailabilityGenerationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,22 +18,22 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class SimpleBwAvailController {
 
     @Autowired
-    BandwidthController bandwidthController;
+    BandwidthAvailabilityController bwAvailController;
 
     @Autowired
     BandwidthAvailabilityGenerationService bwAvailGenService;
 
-    @RequestMapping(value = "/whatif/bwavail/path", method = RequestMethod.POST)
+    @RequestMapping(value = "/simple_bwavail/path", method = RequestMethod.POST)
     @ResponseBody
     public BandwidthAvailabilityResponse getPathAvailability(@RequestBody SimpleBandwidthAvailabilityRequest request) {
         BandwidthAvailabilityRequest bwAvailRequest = bwAvailGenService.generateBandwidthAvailabilityRequest(request);
-        return bandwidthController.getBandwidthPath(bwAvailRequest);
+        return bwAvailController.getPathAvailability(bwAvailRequest);
     }
 
-    @RequestMapping(value = "/whatif/bwavail/ports", method = RequestMethod.POST)
+    @RequestMapping(value = "/simple_bwavail/ports", method = RequestMethod.POST)
     @ResponseBody
     public PortBandwidthAvailabilityResponse getAllPortAvailability(@RequestBody SimplePortBandwidthAvailabilityRequest request) {
         PortBandwidthAvailabilityRequest bwAvailRequest = bwAvailGenService.generatePortBandwidthAvailabilityRequest(request);
-        return bandwidthController.getBandwidthPorts(bwAvailRequest);
+        return bwAvailController.getAllPortAvailability(bwAvailRequest);
     }
 }

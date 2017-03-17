@@ -1,11 +1,9 @@
-package net.es.oscars.requestSuggestion.rest;
+package net.es.oscars.whatif.rest;
 
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.dto.resv.CircuitSpecification;
 import net.es.oscars.dto.resv.Connection;
-import net.es.oscars.dto.resv.ReservationDetails;
-import net.es.oscars.requestSuggestion.dto.VolumeRequestSpecification;
-import net.es.oscars.requestSuggestion.svc.SuggestionService;
+import net.es.oscars.whatif.dto.VolumeRequestSpecification;
+import net.es.oscars.whatif.svc.SuggestionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;

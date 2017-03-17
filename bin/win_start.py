@@ -51,20 +51,8 @@ try:
     processes.append(core_proc)
 
     # Keep polling core until curl exist OK, then it's safe to start the other processes
-    poll_for_module("https://oscars:oscars-shared@localhost:8000/configs/get/whatif")
-    print("\nWhat-if config polled")
     poll_for_module("https://oscars:oscars-shared@localhost:8000/configs/get/webui")
     print("\nWebUI config polled")
-
-    # Launch whatif
-    whatif_dir = os.path.join(top_dir, "whatif")
-    os.chdir(whatif_dir)
-    whatif_target = os.path.join(whatif_dir, "target", "whatif-0.7.0.jar")
-    whatif_cfg = requests.get("https://localhost:8000/configs/get/whatif", auth=("oscars", "oscars-shared"), verify=False).text
-    whatif_cfg = whatif_cfg.replace('"', '\"')
-    whatif_cmd = ['java', "-Dspring.application.json=" + whatif_cfg,  "-jar", whatif_target]
-    whatif_proc = execute_cmd(whatif_cmd)
-    processes.append(whatif_proc)
 
     # Launch webui
     webui_dir = os.path.join(top_dir, "webui")

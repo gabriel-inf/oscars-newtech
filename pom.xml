@@ -29,7 +29,6 @@
         <module>shared</module>
         <module>pss</module>
         <module>webui</module>
-        <module>whatif</module>
     </modules>
     <profiles>
         <profile>

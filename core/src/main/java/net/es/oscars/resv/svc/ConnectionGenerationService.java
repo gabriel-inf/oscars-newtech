@@ -1,4 +1,4 @@
-package net.es.oscars.simpleresv.svc;
+package net.es.oscars.resv.svc;
 
 
 import lombok.extern.slf4j.Slf4j;
