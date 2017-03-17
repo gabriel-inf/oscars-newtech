@@ -23,7 +23,6 @@ import java.util.List;
 public class LogicalEdge extends TopoEdge
 {
     private TopoVertex a;
-
     private TopoVertex z;
 
     private Long metric;

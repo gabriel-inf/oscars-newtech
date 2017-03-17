@@ -37,7 +37,6 @@ public class DijkstraPCE {
      * @return path as List of TopoEdge objects
      */
     public List<TopoEdge> computeShortestPathEdges(Topology topology, TopoVertex srcVertex, TopoVertex dstVertex) {
-        //log.info("finding shortest path between " + srcVertex.getUrn() + " -- " + dstVertex.getUrn());
 
         Graph<TopoVertex, TopoEdge> graph = new DirectedSparseMultigraph<>();
 

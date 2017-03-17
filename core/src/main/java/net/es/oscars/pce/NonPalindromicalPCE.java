@@ -54,11 +54,6 @@ public class NonPalindromicalPCE {
         Topology intTopo = topoService.layer(Layer.INTERNAL);
         Topology mplsTopo = topoService.layer(Layer.MPLS);
 
-        log.info("ETHERNET Topology:");
-        ethTopo.getVertices().stream().forEach(v -> log.info(v.toString()));
-        log.info("MPLS Topology:");
-        mplsTopo.getVertices().stream().forEach(v -> log.info(v.toString()));
-
         // Filter MPLS-ports and MPLS-devices out of ethTopo
         Set<TopoVertex> portsOnly = ethTopo.getVertices().stream()
                 .filter(v -> v.getVertexType().equals(VertexType.PORT))
@@ -74,56 +69,35 @@ public class NonPalindromicalPCE {
                 break;
             }
 
-            /*
-            if (portsOnly.contains(vertA))
-            {
-                /*if (!vertZ.getVertexType().equals(VertexType.ROUTER))
-                {
-                    portsOnly.remove(vertA);
-                }*/
-            //}
+            if(portsOnly.contains(vertA) && !vertA.getPortLayer().equals(PortLayer.MPLS))
+                portsOnly.remove(vertA);
 
-            if(portsOnly.contains(vertA))
-            {
-                log.info(vertA.toString());
-                if(vertA.getPortLayer().equals(PortLayer.MPLS))
-                    portsOnly.remove(vertA);
-            }
-
-            if(portsOnly.contains(vertZ) && vertZ.getPortLayer().equals(PortLayer.MPLS))
+            if(portsOnly.contains(vertZ) && !vertZ.getPortLayer().equals(PortLayer.MPLS))
                 portsOnly.remove(vertZ);
-
         }
 
-        ethTopo.getVertices().removeIf(v -> v.getVertexType().equals(VertexType.ROUTER));
+        ethTopo.getVertices().removeIf(v -> v.getVertexType().equals(VertexType.ROUTER) && !topoService.determineIfRouterHasEthernetPorts(v.getUrn()));
         ethTopo.getVertices().removeAll(portsOnly);
 
         // Filter Devices and Ports out of intTopo
         intTopo.getVertices().removeAll(intTopo.getVertices());
 
-        /* These calls only need to be made once when topology is updated */
+        /* Initialize Service-Layer Topology */
         serviceLayerTopology.setTopology(ethTopo);
         serviceLayerTopology.setTopology(intTopo);
         serviceLayerTopology.setTopology(mplsTopo);
 
         serviceLayerTopology.createMultilayerTopology();
-        /* * */
-
         serviceLayerTopology.resetLogicalLinks();
-
 
         UrnE srcDeviceURN = topoService.getUrn(requestPipe.getAJunction().getDeviceUrn());
         UrnE dstDeviceURN = topoService.getUrn(requestPipe.getZJunction().getDeviceUrn());
-
         VertexType srcType = topoService.getVertexTypeFromDeviceType(srcDeviceURN.getDeviceType());
         VertexType dstType = topoService.getVertexTypeFromDeviceType(dstDeviceURN.getDeviceType());
-
         TopoVertex srcDevice = new TopoVertex(srcDeviceURN.getUrn(), srcType);
         TopoVertex dstDevice = new TopoVertex(dstDeviceURN.getUrn(), dstType);
-
         Set<RequestedVlanFixtureE> srcFixtures = requestPipe.getAJunction().getFixtures();
         Set<RequestedVlanFixtureE> dstFixtures = requestPipe.getZJunction().getFixtures();
-
         TopoVertex srcPort = null;
         TopoVertex dstPort = null;
 
@@ -157,37 +131,40 @@ public class NonPalindromicalPCE {
         serviceLayerTopology.buildLogicalLayerSrcNodes(srcDevice, srcPort);
         serviceLayerTopology.buildLogicalLayerDstNodes(dstDevice, dstPort);
 
-        // Add the fake port to Service Layer Topology's MPLS topology
-        // Only do this if the source/dest is a router and if no fixtures are defined
-        if(srcDevice.getVertexType().equals(VertexType.ROUTER) && srcFixtures.size() == 0){
+        // Add the virtual port to Service Layer Topology's MPLS topology
+        // Only do this if the source/dest is a ROUTER and if no fixtures are defined
+        if(srcDevice.getVertexType().equals(VertexType.ROUTER) && srcFixtures.size() == 0)
             addPortToServiceMplsTopology(serviceLayerTopology, srcPort, srcDevice);
-        }
-        if(dstDevice.getVertexType().equals(VertexType.ROUTER) && dstFixtures.size() == 0){
+
+        if(dstDevice.getVertexType().equals(VertexType.ROUTER) && dstFixtures.size() == 0)
             addPortToServiceMplsTopology(serviceLayerTopology, dstPort, dstDevice);
-        }
+
 
         // Performs shortest path routing on MPLS-layer to properly assign weights to each logical link on Service-Layer
         serviceLayerTopology.calculateLogicalLinkWeights(requestPipe, urnRepo.findAll(), bwAvailMap, rsvVlanList);
 
-        Topology slTopo;
-
-        slTopo = serviceLayerTopology.getSLTopology();
-
+        Topology slTopo = serviceLayerTopology.getSLTopology();
         Topology prunedSlTopo = pruningService.pruneWithPipe(slTopo, requestPipe, bwAvailMap, rsvVlanList);
 
         TopoVertex serviceLayerSrcNode;
         TopoVertex serviceLayerDstNode;
 
-        if (srcDevice.getVertexType().equals(VertexType.SWITCH)) {
+        if (srcDevice.getVertexType().equals(VertexType.SWITCH) || topoService.determineIfRouterHasEthernetPorts(srcDevice.getUrn()))
+        {
             serviceLayerSrcNode = srcDevice;
-        } else {
+        }
+        else
+        {
             serviceLayerSrcNode = serviceLayerTopology.getVirtualNode(srcDevice);
             assert (serviceLayerSrcNode != null);
         }
 
-        if (dstDevice.getVertexType().equals(VertexType.SWITCH)) {
+        if (dstDevice.getVertexType().equals(VertexType.SWITCH) || topoService.determineIfRouterHasEthernetPorts(dstDevice.getUrn()))
+        {
             serviceLayerDstNode = dstDevice;
-        } else {
+        }
+        else
+        {
             serviceLayerDstNode = serviceLayerTopology.getVirtualNode(dstDevice);
             assert (serviceLayerDstNode != null);
         }
@@ -223,9 +200,35 @@ public class NonPalindromicalPCE {
         List<TopoEdge> azERO;
         List<TopoEdge> zaERO;
 
+        log.info("SERVICE LAYER ROUTES: ");
+        String azPath = "AZ Path: ";
+        for(TopoEdge azEdge : azServiceLayerERO)
+            azPath += azEdge.getA().getUrn() + " --- ";
+        azPath += azServiceLayerERO.get(azServiceLayerERO.size()-1).getZ().getUrn();
+        log.info(azPath);
+
+        String zaPath = "ZA Path: ";
+        for(TopoEdge zaEdge : zaServiceLayerERO)
+            zaPath += zaEdge.getA().getUrn() + " --- ";
+        zaPath += zaServiceLayerERO.get(zaServiceLayerERO.size()-1).getZ().getUrn();
+        log.info(zaPath);
+
         // Obtain physical ERO from Service-Layer EROs
         azERO = serviceLayerTopology.getActualEROAZ(azServiceLayerERO);
         zaERO = serviceLayerTopology.getActualEROZA(zaServiceLayerERO);
+
+        log.info("PHYSICAL ROUTES: ");
+        azPath = "AZ Path: ";
+        for(TopoEdge azEdge : azERO)
+            azPath += azEdge.getA().getUrn() + " --- ";
+        azPath += azERO.get(azERO.size()-1).getZ().getUrn();
+        log.info(azPath);
+
+        zaPath = "ZA Path: ";
+        for(TopoEdge zaEdge : zaERO)
+            zaPath += zaEdge.getA().getUrn() + " --- ";
+        zaPath += zaERO.get(zaERO.size()-1).getZ().getUrn();
+        log.info(zaPath);
 
         // Remove starting and ending ports
         if(azERO.get(0).getA().getVertexType().equals(VertexType.PORT)){
@@ -249,7 +252,8 @@ public class NonPalindromicalPCE {
         return theMap;
     }
 
-    private void addPortToServiceMplsTopology(ServiceLayerTopology serviceLayerTopology, TopoVertex port, TopoVertex device) {
+    private void addPortToServiceMplsTopology(ServiceLayerTopology serviceLayerTopology, TopoVertex port, TopoVertex device)
+    {
         serviceLayerTopology.getMplsLayerPorts().add(port);
         TopoEdge portToDeviceEdge = new TopoEdge(port, device, 0L, Layer.MPLS);
         TopoEdge deviceToPortEdge = new TopoEdge(device, port, 0L, Layer.MPLS);

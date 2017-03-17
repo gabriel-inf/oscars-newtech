@@ -174,8 +174,10 @@ public class RepoEntityBuilder {
                 if(v.getPortLayer().equals(PortLayer.MPLS))
                     capabilities.add(Layer.MPLS);
 
+                VertexType parentType = portToDeviceMap.get(v).getVertexType();
+
                 List<Integer> portInEgBw = portBWs != null ? portBWs.get(v) : Arrays.asList(1000, 1000);
-                urn = buildPortUrn(v, vType, capabilities, portInEgBw.get(0), portInEgBw.get(1), floors, ceilings);
+                urn = buildPortUrn(v, vType, parentType, capabilities, portInEgBw.get(0), portInEgBw.get(1), floors, ceilings);
             }
             else
             {
@@ -216,7 +218,7 @@ public class RepoEntityBuilder {
         return urn;
     }
 
-    public UrnE buildPortUrn(TopoVertex vertex, VertexType parentType, Set<Layer> capabilities, Integer inBW, Integer egBW,
+    public UrnE buildPortUrn(TopoVertex vertex, VertexType portType, VertexType parentType, Set<Layer> capabilities, Integer inBW, Integer egBW,
                          List<Integer> floors, List<Integer> ceilings){
         VertexType vertexType = vertex.getVertexType();
         UrnType urnType = determineUrnType(vertexType);
@@ -237,7 +239,8 @@ public class RepoEntityBuilder {
 
         ReservableBandwidthE resvBw = buildReservableBandwidth(inBW, egBW);
         urn.setReservableBandwidth(resvBw);
-        if(parentType.equals(VertexType.ROUTER)){
+        if(parentType.equals(VertexType.ROUTER))
+        {
             ReservableVlanE resvVlan = buildReservableVlan(buildIntRanges(floors, ceilings));
             urn.setReservableVlans(resvVlan);
         }

@@ -76,7 +76,6 @@ public class TopoService {
 
                     if(urnCapabilities.contains(Layer.MPLS))
                     {
-                        log.info("Port " + u.getUrn() + " has MPLS capabilities.");
                         portLayer = PortLayer.MPLS;
                     }
                     else
@@ -296,5 +295,35 @@ public class TopoService {
     public List<ReservedBandwidthE> reservedBandwidths()
     {
         return bwResRepo.findAll();
+    }
+
+    public boolean determineIfRouterHasEthernetPorts(String deviceURN)
+    {
+        List<UrnE> deviceList = urnRepo.findAll().stream().filter(u -> u.getUrn().equals(deviceURN)).collect(Collectors.toList());
+
+        if(deviceList.isEmpty())
+            return false;
+
+        assert(deviceList.size() == 1);
+        assert(deviceList.get(0).getDeviceType().equals(DeviceType.ROUTER));
+
+        Map<String, Set<String>> dToPMap = this.buildDeviceToPortMap();
+        Set<String> portsOnDevice = dToPMap.get(deviceURN);
+
+        for(String onePort : portsOnDevice)
+        {
+            Optional<UrnE> portUrnOpt = urnRepo.findByUrn(onePort);
+            assert(portUrnOpt.isPresent());
+
+            UrnE portURN = portUrnOpt.get();
+
+            if(portURN.getCapabilities().contains(Layer.ETHERNET))
+            {
+                //log.info(deviceList.get(0).getDeviceType() + deviceURN + " has ports with ETHERNET capability");
+                return true;
+            }
+        }
+
+        return false;
     }
 }
