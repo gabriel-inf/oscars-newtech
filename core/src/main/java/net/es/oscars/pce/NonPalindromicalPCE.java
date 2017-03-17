@@ -150,31 +150,24 @@ public class NonPalindromicalPCE {
         TopoVertex serviceLayerDstNode;
 
         if (srcDevice.getVertexType().equals(VertexType.SWITCH) || topoService.determineIfRouterHasEthernetPorts(srcDevice.getUrn()))
-        {
-            serviceLayerSrcNode = srcDevice;
-        }
+            serviceLayerSrcNode = srcPort;
         else
-        {
-            serviceLayerSrcNode = serviceLayerTopology.getVirtualNode(srcDevice);
-            assert (serviceLayerSrcNode != null);
-        }
+            serviceLayerSrcNode = serviceLayerTopology.getVirtualNode(srcPort);
+
 
         if (dstDevice.getVertexType().equals(VertexType.SWITCH) || topoService.determineIfRouterHasEthernetPorts(dstDevice.getUrn()))
-        {
-            serviceLayerDstNode = dstDevice;
-        }
+            serviceLayerDstNode = dstPort;
         else
-        {
-            serviceLayerDstNode = serviceLayerTopology.getVirtualNode(dstDevice);
-            assert (serviceLayerDstNode != null);
-        }
+            serviceLayerDstNode = serviceLayerTopology.getVirtualNode(dstPort);
+
+        assert (serviceLayerSrcNode != null);
+        assert (serviceLayerDstNode != null);
 
         // Shortest path routing on Service-Layer
         List<TopoEdge> azServiceLayerERO = dijkstraPCE.computeShortestPathEdges(prunedSlTopo, serviceLayerSrcNode, serviceLayerDstNode);
 
-        if (azServiceLayerERO.isEmpty()) {
+        if (azServiceLayerERO.isEmpty())
             throw new PCEException("Empty path NonPalindromic PCE");
-        }
 
         // Get palindromic Service-Layer path in reverse-direction
         List<TopoEdge> zaServiceLayerERO = new LinkedList<>();
@@ -231,18 +224,17 @@ public class NonPalindromicalPCE {
         log.info(zaPath);
 
         // Remove starting and ending ports
-        if(azERO.get(0).getA().getVertexType().equals(VertexType.PORT)){
+        if(azERO.get(0).getA().getVertexType().equals(VertexType.PORT))
             azERO.remove(0);
-        }
-        if(azERO.get(azERO.size()-1).getZ().getVertexType().equals(VertexType.PORT)){
+
+        if(azERO.get(azERO.size()-1).getZ().getVertexType().equals(VertexType.PORT))
             azERO.remove(azERO.size()-1);
-        }
-        if(zaERO.get(0).getA().getVertexType().equals(VertexType.PORT)){
+
+        if(zaERO.get(0).getA().getVertexType().equals(VertexType.PORT))
             zaERO.remove(0);
-        }
-        if(zaERO.get(zaERO.size()-1).getZ().getVertexType().equals(VertexType.PORT)){
+
+        if(zaERO.get(zaERO.size()-1).getZ().getVertexType().equals(VertexType.PORT))
             zaERO.remove(zaERO.size()-1);
-        }
 
         theMap.put("az", azERO);
         theMap.put("za", zaERO);

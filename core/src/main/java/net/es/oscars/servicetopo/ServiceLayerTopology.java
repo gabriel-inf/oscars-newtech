@@ -445,20 +445,13 @@ public class ServiceLayerTopology
         if(serviceLayerPorts.contains(srcInPort))
             return;
 
-        TopoVertex virtualSrcDevice = new TopoVertex(srcDevice.getUrn() + "-virtual", VertexType.VIRTUAL, PortLayer.NONE);
         TopoVertex virtualSrcPort = new TopoVertex(srcInPort.getUrn() + "-virtual", VertexType.VIRTUAL, PortLayer.ETHERNET);
 
-        serviceLayerDevices.add(virtualSrcDevice);
         serviceLayerPorts.add(virtualSrcPort);
-
-        TopoEdge portToDevice = new TopoEdge(virtualSrcPort, virtualSrcDevice, 0L, Layer.ETHERNET);
-        TopoEdge devicetoPort = new TopoEdge(virtualSrcDevice, virtualSrcPort, 0L, Layer.ETHERNET);
 
         TopoEdge vPortToPort = new TopoEdge(virtualSrcPort, srcInPort, 0L, Layer.ETHERNET);
         TopoEdge portToVPort = new TopoEdge(srcInPort, virtualSrcPort, 0L, Layer.ETHERNET);
 
-        serviceLayerLinks.add(portToDevice);
-        serviceLayerLinks.add(devicetoPort);
         serviceLayerLinks.add(vPortToPort);
         serviceLayerLinks.add(portToVPort);
 
@@ -483,20 +476,13 @@ public class ServiceLayerTopology
         if(serviceLayerPorts.contains(dstOutPort))
             return;
 
-        TopoVertex virtualDstDevice = new TopoVertex(dstDevice.getUrn() + "-virtual", VertexType.VIRTUAL, PortLayer.NONE);
         TopoVertex virtualDstPort = new TopoVertex(dstOutPort.getUrn() + "-virtual", VertexType.VIRTUAL, PortLayer.ETHERNET);
 
-        serviceLayerDevices.add(virtualDstDevice);
         serviceLayerPorts.add(virtualDstPort);
-
-        TopoEdge portToDevice = new TopoEdge(virtualDstPort, virtualDstDevice, 0L, Layer.ETHERNET);
-        TopoEdge devicetoPort = new TopoEdge(virtualDstDevice, virtualDstPort, 0L, Layer.ETHERNET);
 
         TopoEdge vPortToPort = new TopoEdge(virtualDstPort, dstOutPort, 0L, Layer.ETHERNET);
         TopoEdge portToVPort = new TopoEdge(dstOutPort, virtualDstPort, 0L, Layer.ETHERNET);
 
-        serviceLayerLinks.add(portToDevice);
-        serviceLayerLinks.add(devicetoPort);
         serviceLayerLinks.add(vPortToPort);
         serviceLayerLinks.add(portToVPort);
 
@@ -601,7 +587,7 @@ public class ServiceLayerTopology
      */
     public TopoVertex getVirtualNode(TopoVertex realNode)
     {
-        for(TopoVertex oneNode : serviceLayerDevices)
+        for(TopoVertex oneNode : serviceLayerPorts)
         {
             if(oneNode.getVertexType().equals(VertexType.VIRTUAL))
             {
