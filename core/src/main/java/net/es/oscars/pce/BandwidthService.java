@@ -650,6 +650,9 @@ public class BandwidthService {
                                             Map<String, Map<String, Integer>> availBwMap,
                                             Map<String, Map<String, Integer>> requestedFixtureBwMap) {
 
+        if(edge == null){
+            System.out.println("Yo");
+        }
         if (!edge.getA().getVertexType().equals(VertexType.PORT) || !edge.getZ().getVertexType().equals(VertexType.PORT))
             return true;
 
