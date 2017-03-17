@@ -197,21 +197,37 @@ public class ServiceLayerTopology
 
             // ETHERNET -> MPLS edge
             if(serviceLayerPorts.contains(vertA) && !serviceLayerPorts.contains(vertZ))
-            {
                 nonAdjacentPorts.add(vertA);
-            }
 
-            // MPLS -> Ethernet edge
+            // MPLS -> ETHERNET edge
             if(!serviceLayerPorts.contains(vertA) && serviceLayerPorts.contains(vertZ))
-            {
                 nonAdjacentPorts.add(vertZ);
-            }
         }
 
         // Ports which are not on any ETHERNET edges (edge ports) should be added to set
         serviceLayerPorts.stream()
                 .filter(p -> !nonAdjacentPorts.contains(p))
-                .forEach(p -> nonAdjacentPorts.add(p));
+                .forEach(p ->
+                {
+                    List<TopoEdge> ethLinkscontainingP =  serviceLayerLinks.stream()
+                            .filter(l -> l.getLayer().equals(Layer.ETHERNET) && (l.getA().equals(p) || l.getZ().equals(p)))
+                            .collect(Collectors.toList());
+
+                    if(ethLinkscontainingP.isEmpty())
+                    {
+                        List<TopoEdge> linksConnectingSwitchToP = serviceLayerLinks.stream()
+                                .filter(l -> l.getLayer().equals(Layer.INTERNAL) && (l.getA().equals(p) || l.getZ().equals(p)))
+                                .filter(l -> l.getA().getVertexType().equals(VertexType.SWITCH) || l.getZ().getVertexType().equals(VertexType.SWITCH))
+                                .collect(Collectors.toList());
+
+                        if(linksConnectingSwitchToP.isEmpty())
+                        {
+                            log.info("Adding " + p.getUrn());
+                            log.info(ethLinkscontainingP.toString());
+                            nonAdjacentPorts.add(p);
+                        }
+                    }
+                });
     }
 
 
@@ -238,6 +254,24 @@ public class ServiceLayerTopology
 
                 if(!slEdgeWithTheseEndpoints.isEmpty())
                     continue;
+
+                // Do NOT build logical link between ETHERNET ports on the same device
+                List<TopoEdge> internalEdgesFromA = serviceLayerLinks.stream()
+                        .filter(l -> l.getA().equals(nonAdjacentA) && l.getLayer().equals(Layer.INTERNAL))
+                        .collect(Collectors.toList());
+
+                List<TopoEdge> internalEdgesFromZ = serviceLayerLinks.stream()
+                        .filter(l -> l.getA().equals(nonAdjacentZ) && l.getLayer().equals(Layer.INTERNAL))
+                        .collect(Collectors.toList());
+
+                assert(internalEdgesFromA.size() == 1 || nonAdjacentA.getVertexType().equals(VertexType.VIRTUAL));
+                assert(internalEdgesFromZ.size() == 1 || nonAdjacentZ.getVertexType().equals(VertexType.VIRTUAL));
+
+                if(!nonAdjacentA.getVertexType().equals(VertexType.VIRTUAL) && !nonAdjacentZ.getVertexType().equals(VertexType.VIRTUAL))
+                {
+                    if(internalEdgesFromA.get(0).getZ().equals(internalEdgesFromZ.get(0).getZ()))
+                        continue;
+                }
 
                 LogicalEdge azLogicalEdge = new LogicalEdge(nonAdjacentA,nonAdjacentZ, 0L, 0L, 0L, Layer.LOGICAL, new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
                 LogicalEdge zaLogicalEdge = new LogicalEdge(nonAdjacentZ,nonAdjacentA, 0L, 0L, 0L, Layer.LOGICAL, new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
@@ -304,10 +338,20 @@ public class ServiceLayerTopology
             TopoVertex srcEthPort = oneLogicalLink.getA();      //Ethernet-source of logical link
             TopoVertex dstEthPort = oneLogicalLink.getZ();      //Ethernet-dest of logical link
 
+            boolean srcIsOnSwitch = false;
+            boolean dstIsOnSwitch = false;
+            boolean srcIsVirtual = srcEthPort.getVertexType().equals(VertexType.VIRTUAL);
+            boolean dstIsVirtual = dstEthPort.getVertexType().equals(VertexType.VIRTUAL);
+
             TopoEdge physEdgeAtoRouter = null;      // Edge srcEthPort --> Router
             TopoEdge physEdgeZtoRouter = null;      // Edge dstEthPort --> Router
             TopoEdge physEdgeRoutertoA = null;      // Edge Router --> srcEthPort
             TopoEdge physEdgeRoutertoZ = null;      // Edge Router --> dstEthPort
+
+            TopoEdge physEdgeAtoMplsPort = null;      // Edge srcEthPort --> MPLS-Layer port
+            TopoEdge physEdgeZtoMplsPort = null;      // Edge dstEthPort --> MPLS-Layer port
+            TopoEdge physEdgeMplsPorttoA = null;      // Edge MPLS-Layer port --> srcEthPort
+            TopoEdge physEdgeMplsPorttoZ = null;      // Edge MPLS-Layer port --> dstEthPort
 
             List<TopoEdge> pathAZ = null;
             List<TopoEdge> pathZA = null;
@@ -326,26 +370,85 @@ public class ServiceLayerTopology
                 else if(slZ.equals(srcEthPort) && slA.getVertexType().equals(VertexType.ROUTER))
                     physEdgeRoutertoA = oneSLLink;
 
-                if(slZ.equals(dstEthPort)  && slA.getVertexType().equals(VertexType.ROUTER))
+                if(slZ.equals(dstEthPort) && slA.getVertexType().equals(VertexType.ROUTER))
                     physEdgeRoutertoZ = oneSLLink;
-                else if(slA.equals(dstEthPort)  && slZ.getVertexType().equals(VertexType.ROUTER))
+                else if(slA.equals(dstEthPort) && slZ.getVertexType().equals(VertexType.ROUTER))
                     physEdgeZtoRouter = oneSLLink;
+
+                if((slA.equals(srcEthPort) && slZ.getVertexType().equals(VertexType.SWITCH)) || (slZ.equals(srcEthPort) && slA.getVertexType().equals(VertexType.SWITCH)))
+                {
+                    srcIsOnSwitch = true;
+                    physEdgeAtoMplsPort = serviceLayerLinks.stream().filter(l -> l.getA().equals(srcEthPort) && l.getZ().getVertexType().equals(VertexType.PORT)).findFirst().get();
+                    physEdgeMplsPorttoA = serviceLayerLinks.stream().filter(l -> l.getZ().equals(srcEthPort) && l.getA().getVertexType().equals(VertexType.PORT)).findFirst().get();
+                }
+
+                if((slA.equals(dstEthPort) && slZ.getVertexType().equals(VertexType.SWITCH)) || (slZ.equals(dstEthPort) && slA.getVertexType().equals(VertexType.SWITCH)))
+                {
+                    dstIsOnSwitch = true;
+                    physEdgeZtoMplsPort = serviceLayerLinks.stream().filter(l -> l.getA().equals(dstEthPort) && l.getZ().getVertexType().equals(VertexType.PORT)).findFirst().get();
+                    physEdgeMplsPorttoZ = serviceLayerLinks.stream().filter(l -> l.getZ().equals(dstEthPort) && l.getA().getVertexType().equals(VertexType.PORT)).findFirst().get();
+                }
             }
 
             if(physEdgeAtoRouter == null || physEdgeZtoRouter == null || physEdgeRoutertoA == null || physEdgeRoutertoZ == null)
             {
-                log.error("Service-layer topology has incorrectly identified adaptation edges");
-                assert false;
+                if(!srcIsOnSwitch && !dstIsOnSwitch)
+                {
+                    if(!srcIsVirtual && !dstIsVirtual)
+                    {
+                        log.error("Service-layer topology has incorrectly identified adaptation edges");
+                        assert false;
+                    }
+                }
             }
 
 
             // Step 3: Add ETHERNET src/dst ports and adaptation edges to MPLS-Layer topology
             mplsLayerTopo.getVertices().add(srcEthPort);
             mplsLayerTopo.getVertices().add(dstEthPort);
-            mplsLayerTopo.getEdges().add(physEdgeAtoRouter);
-            mplsLayerTopo.getEdges().add(physEdgeZtoRouter);
-            mplsLayerTopo.getEdges().add(physEdgeRoutertoA);
-            mplsLayerTopo.getEdges().add(physEdgeRoutertoZ);
+
+            log.info("Added " + srcEthPort.getUrn());
+            log.info("Added " + dstEthPort.getUrn());
+
+            if(!srcIsVirtual)
+            {
+                if(!srcIsOnSwitch)
+                {
+                    mplsLayerTopo.getEdges().add(physEdgeAtoRouter);
+                    mplsLayerTopo.getEdges().add(physEdgeRoutertoA);
+                    log.info("Added " + physEdgeAtoRouter.toString());
+                    log.info("Added " + physEdgeRoutertoA.toString());
+                }
+                else
+                {
+                    mplsLayerTopo.getEdges().add(physEdgeAtoMplsPort);
+                    mplsLayerTopo.getEdges().add(physEdgeMplsPorttoA);
+                    log.info("Added " + physEdgeAtoMplsPort.toString());
+                    log.info("Added " + physEdgeMplsPorttoA.toString());
+                }
+            }
+
+            if(!dstIsVirtual)
+            {
+                if(!dstIsOnSwitch)
+                {
+                    mplsLayerTopo.getEdges().add(physEdgeZtoRouter);
+                    mplsLayerTopo.getEdges().add(physEdgeRoutertoZ);
+                    log.info("Added " + physEdgeZtoRouter.toString());
+                    log.info("Added " + physEdgeRoutertoZ.toString());
+                }
+                else
+                {
+                    mplsLayerTopo.getEdges().add(physEdgeZtoMplsPort);
+                    mplsLayerTopo.getEdges().add(physEdgeMplsPorttoZ);
+                    log.info("Added " + physEdgeZtoMplsPort.toString());
+                    log.info("Added " + physEdgeMplsPorttoZ.toString());
+                }
+            }
+
+            serviceLayerLinks.stream()
+                    .filter(l -> l.getA().getVertexType().equals(VertexType.VIRTUAL) || l.getZ().getVertexType().equals(VertexType.VIRTUAL))
+                   .forEach(l -> mplsLayerTopo.getEdges().add(l));
 
             // Step 4: Prune updated MPLS-Layer topology before pathfinding. Operation must be done in two directions since requested bandwidth may be asymmetric from A->Z and Z->A
             log.info("Computing MPLS-Layer path-pair between " + srcEthPort + " <---> " + dstEthPort);
@@ -363,6 +466,14 @@ public class ServiceLayerTopology
             mplsLayerTopo.getEdges().remove(physEdgeZtoRouter);
             mplsLayerTopo.getEdges().remove(physEdgeRoutertoA);
             mplsLayerTopo.getEdges().remove(physEdgeRoutertoZ);
+            mplsLayerTopo.getEdges().remove(physEdgeAtoMplsPort);
+            mplsLayerTopo.getEdges().remove(physEdgeZtoMplsPort);
+            mplsLayerTopo.getEdges().remove(physEdgeMplsPorttoA);
+            mplsLayerTopo.getEdges().remove(physEdgeMplsPorttoZ);
+            mplsLayerTopo.getEdges().removeIf(l -> l.getA().getVertexType().equals(VertexType.VIRTUAL) || l.getZ().getVertexType().equals(VertexType.VIRTUAL));
+
+            log.info(pathAZ.toString());
+            log.info(pathZA.toString());
 
             if(pathAZ.isEmpty() && pathZA.isEmpty())
             {
@@ -371,7 +482,7 @@ public class ServiceLayerTopology
             }
 
             assert(pathAZ.get(0).getZ().equals(pathZA.get(pathZA.size()-1).getA()));
-            assert(pathZA.get(0).getZ().equals(pathAZ.get(pathZA.size()-1).getA()));
+            assert(pathZA.get(0).getZ().equals(pathAZ.get(pathAZ.size()-1).getA()));
 
             String azPath = "AZ Path: ";
             for(TopoEdge azEdge : pathAZ)

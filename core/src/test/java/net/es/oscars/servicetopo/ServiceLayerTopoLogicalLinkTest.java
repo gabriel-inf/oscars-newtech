@@ -5,6 +5,7 @@ import net.es.oscars.CoreUnitTestConfiguration;
 import net.es.oscars.dto.pss.EthFixtureType;
 import net.es.oscars.dto.pss.EthJunctionType;
 import net.es.oscars.dto.pss.EthPipeType;
+import net.es.oscars.dto.topo.enums.PortLayer;
 import net.es.oscars.pce.BandwidthService;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.dto.topo.TopoEdge;
@@ -114,6 +115,7 @@ public class ServiceLayerTopoLogicalLinkTest
         llBackup = serviceLayerTopo.getLlBackup();
 
         assert(serviceLayerTopo.getNonAdjacentPorts().size() == 2);
+        log.info(logicalLinks.toString());
         assert(logicalLinks.size() == 2);   // No change after assigning weights
         assert(llBackup.size() == 2);
 
@@ -537,21 +539,21 @@ public class ServiceLayerTopoLogicalLinkTest
         Set<LogicalEdge> logicalLinks = serviceLayerTopo.getLogicalLinks();
         Set<LogicalEdge> llBackup = serviceLayerTopo.getLlBackup();
 
-        assert(logicalLinks.size() == 12);
-        assert(llBackup.size() == 12);
+        assert(logicalLinks.size() == 8);
+        assert(llBackup.size() == 8);
 
         serviceLayerTopo.getLogicalLinks().stream()
                 .forEach(ll -> {
                     String aURN = ll.getA().getUrn();
                     String zURN = ll.getZ().getUrn();
                     if(aURN.equals("switchA:2"))
-                        assert(zURN.equals("switchE:1") || zURN.equals("switchA:3") || zURN.equals("switchE:3"));
+                        assert(zURN.equals("switchE:1") || zURN.equals("switchE:3"));
                     else if(aURN.equals("switchE:1"))
-                        assert(zURN.equals("switchA:2") || zURN.equals("switchA:3") || zURN.equals("switchE:3"));
+                        assert(zURN.equals("switchA:2") || zURN.equals("switchA:3"));
                     else if(aURN.equals("switchA:3"))
-                        assert(zURN.equals("switchA:2") || zURN.equals("switchE:1") || zURN.equals("switchE:3"));
+                        assert(zURN.equals("switchE:1") || zURN.equals("switchE:3"));
                     else if(aURN.equals("switchE:3"))
-                        assert(zURN.equals("switchA:2") || zURN.equals("switchA:3") || zURN.equals("switchE:1"));
+                        assert(zURN.equals("switchA:2") || zURN.equals("switchA:3"));
                     else
                         assert false;
                 });
@@ -581,8 +583,11 @@ public class ServiceLayerTopoLogicalLinkTest
         llBackup = serviceLayerTopo.getLlBackup();
 
         assert(serviceLayerTopo.getNonAdjacentPorts().size() == 4);
-        assert(logicalLinks.size() == 4);   // No logical link between (switchA:2 <--> switchA:3) or (switchE:1 <--> switchE:3) or (switchA:2 <--> switchE:3) or (switchA:3 <--> switchE:1)
-        assert(llBackup.size() == 12);
+
+        logicalLinks.stream().forEach(l -> log.info(l.toString()));
+
+        assert(logicalLinks.size() == 4);   // No logical link between (switchA:2 <--> switchE:3) or (switchA:3 <--> switchE:2) because of connectivity
+        assert(llBackup.size() == 8);
 
         TopoVertex portA2 = null;
         TopoVertex portA3 = null;
@@ -718,8 +723,8 @@ public class ServiceLayerTopoLogicalLinkTest
 
         assert(logicalLinks.size() == 2);       // From VIRTUAL src -> dest and VIRTUAL dest -> src
         assert(llBackup.size() == 0);
-        assert(serviceLayerTopo.getServiceLayerLinks().size() == 8);
-        assert(serviceLayerTopo.getServiceLayerDevices().size() == 2);
+        assert(serviceLayerTopo.getServiceLayerLinks().size() == 4);
+        assert(serviceLayerTopo.getServiceLayerDevices().size() == 0);
         assert(serviceLayerTopo.getServiceLayerPorts().size() == 2);
         assert(serviceLayerTopo.getMplsLayerDevices().size() == 5);     // No change
         assert(serviceLayerTopo.getMplsLayerPorts().size() == 10);      // No change
@@ -746,8 +751,8 @@ public class ServiceLayerTopoLogicalLinkTest
         assert(serviceLayerTopo.getNonAdjacentPorts().size() == 2);
         assert(logicalLinks.size() == 2);   // No change after assigning weights
         assert(llBackup.size() == 0);
-        assert(serviceLayerTopo.getServiceLayerLinks().size() == 8);    // No change
-        assert(serviceLayerTopo.getServiceLayerDevices().size() == 2);  // No change
+        assert(serviceLayerTopo.getServiceLayerLinks().size() == 4);    // No change
+        assert(serviceLayerTopo.getServiceLayerDevices().size() == 0);  // No change
         assert(serviceLayerTopo.getServiceLayerPorts().size() == 2);    // No change
         assert(serviceLayerTopo.getMplsLayerDevices().size() == 5);     // Still no change
         assert(serviceLayerTopo.getMplsLayerPorts().size() == 10);      // Still no change
@@ -818,11 +823,13 @@ public class ServiceLayerTopoLogicalLinkTest
             else if(v.getUrn().equals("routerE:1"))
             {
                 v.setUrn("switchE:1");
+                v.setPortLayer(PortLayer.ETHERNET);
                 relevantNode = true;
             }
             else if(v.getUrn().equals("routerE:2"))
             {
                 v.setUrn("switchE:2");
+                v.setPortLayer(PortLayer.ETHERNET);
                 relevantNode = true;
             }
 
@@ -907,8 +914,9 @@ public class ServiceLayerTopoLogicalLinkTest
 
         assert(logicalLinks.size() == 2);       // From VIRTUAL src -> dest and dest -> VIRTUAL src
         assert(llBackup.size() == 0);
-        assert(serviceLayerTopo.getServiceLayerLinks().size() == 10);
-        assert(serviceLayerTopo.getServiceLayerDevices().size() == 2);
+        serviceLayerTopo.getServiceLayerLinks().stream().forEach(l -> log.info(l.getA().getUrn() + " --> " + l.getZ().getUrn()));
+        assert(serviceLayerTopo.getServiceLayerLinks().size() == 8);
+        assert(serviceLayerTopo.getServiceLayerDevices().size() == 1);
         assert(serviceLayerTopo.getServiceLayerPorts().size() == 3);
         assert(serviceLayerTopo.getMplsLayerDevices().size() == 4);     // No change
         assert(serviceLayerTopo.getMplsLayerPorts().size() == 8);       // No change
@@ -936,8 +944,8 @@ public class ServiceLayerTopoLogicalLinkTest
         assert(serviceLayerTopo.getNonAdjacentPorts().size() == 2);
         assert(logicalLinks.size() == 2);   // No change after assigning weights
         assert(llBackup.size() == 0);
-        assert(serviceLayerTopo.getServiceLayerLinks().size() == 10);   // No change
-        assert(serviceLayerTopo.getServiceLayerDevices().size() == 2);  // No change
+        assert(serviceLayerTopo.getServiceLayerLinks().size() == 8);   // No change
+        assert(serviceLayerTopo.getServiceLayerDevices().size() == 1);  // No change
         assert(serviceLayerTopo.getServiceLayerPorts().size() == 3);    // No change
         assert(serviceLayerTopo.getMplsLayerDevices().size() == 4);     // Still no change
         assert(serviceLayerTopo.getMplsLayerPorts().size() == 8);       // Still no change
@@ -1007,11 +1015,13 @@ public class ServiceLayerTopoLogicalLinkTest
             else if(v.getUrn().equals("routerA:1"))
             {
                 v.setUrn("switchA:1");
+                v.setPortLayer(PortLayer.ETHERNET);
                 relevantNode = true;
             }
             else if(v.getUrn().equals("routerA:2"))
             {
                 v.setUrn("switchA:2");
+                v.setPortLayer(PortLayer.ETHERNET);
                 relevantNode = true;
             }
 
@@ -1096,8 +1106,8 @@ public class ServiceLayerTopoLogicalLinkTest
 
         assert(logicalLinks.size() == 2);       // From src -> VIRTUAL dest and VIRTUAL dest -> src
         assert(llBackup.size() == 0);
-        assert(serviceLayerTopo.getServiceLayerLinks().size() == 10);
-        assert(serviceLayerTopo.getServiceLayerDevices().size() == 2);
+        assert(serviceLayerTopo.getServiceLayerLinks().size() == 8);
+        assert(serviceLayerTopo.getServiceLayerDevices().size() == 1);
         assert(serviceLayerTopo.getServiceLayerPorts().size() == 3);
         assert(serviceLayerTopo.getMplsLayerDevices().size() == 4);     // No change
         assert(serviceLayerTopo.getMplsLayerPorts().size() == 8);       // No change
@@ -1125,8 +1135,8 @@ public class ServiceLayerTopoLogicalLinkTest
         assert(serviceLayerTopo.getNonAdjacentPorts().size() == 2);
         assert(logicalLinks.size() == 2);   // No change after assigning weights
         assert(llBackup.size() == 0);
-        assert(serviceLayerTopo.getServiceLayerLinks().size() == 10);   // No change
-        assert(serviceLayerTopo.getServiceLayerDevices().size() == 2);  // No change
+        assert(serviceLayerTopo.getServiceLayerLinks().size() == 8);   // No change
+        assert(serviceLayerTopo.getServiceLayerDevices().size() == 1);  // No change
         assert(serviceLayerTopo.getServiceLayerPorts().size() == 3);    // No change
         assert(serviceLayerTopo.getMplsLayerDevices().size() == 4);     // Still no change
         assert(serviceLayerTopo.getMplsLayerPorts().size() == 8);       // Still no change
@@ -1222,16 +1232,16 @@ public class ServiceLayerTopoLogicalLinkTest
         TopoVertex nodeE = new TopoVertex("switchE", VertexType.SWITCH);
 
         //Ports
-        TopoVertex portA1 = new TopoVertex("switchA:1", VertexType.PORT);
-        TopoVertex portA2 = new TopoVertex("switchA:2", VertexType.PORT);
-        TopoVertex portB1 = new TopoVertex("routerB:1", VertexType.PORT);
-        TopoVertex portB2 = new TopoVertex("routerB:2", VertexType.PORT);
-        TopoVertex portC1 = new TopoVertex("routerC:1", VertexType.PORT);
-        TopoVertex portC2 = new TopoVertex("routerC:2", VertexType.PORT);
-        TopoVertex portD1 = new TopoVertex("routerD:1", VertexType.PORT);
-        TopoVertex portD2 = new TopoVertex("routerD:2", VertexType.PORT);
-        TopoVertex portE1 = new TopoVertex("switchE:1", VertexType.PORT);
-        TopoVertex portE2 = new TopoVertex("switchE:2", VertexType.PORT);
+        TopoVertex portA1 = new TopoVertex("switchA:1", VertexType.PORT, PortLayer.ETHERNET);
+        TopoVertex portA2 = new TopoVertex("switchA:2", VertexType.PORT, PortLayer.ETHERNET);
+        TopoVertex portB1 = new TopoVertex("routerB:1", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portB2 = new TopoVertex("routerB:2", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portC1 = new TopoVertex("routerC:1", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portC2 = new TopoVertex("routerC:2", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portD1 = new TopoVertex("routerD:1", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portD2 = new TopoVertex("routerD:2", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portE1 = new TopoVertex("switchE:1", VertexType.PORT, PortLayer.ETHERNET);
+        TopoVertex portE2 = new TopoVertex("switchE:2", VertexType.PORT, PortLayer.ETHERNET);
 
         //Internal Links
         TopoEdge edgeInt_A1_A = new TopoEdge(portA1, nodeA, 0L, Layer.INTERNAL);
@@ -1336,16 +1346,16 @@ public class ServiceLayerTopoLogicalLinkTest
         TopoVertex nodeE = new TopoVertex("routerE", VertexType.ROUTER);
 
         //Ports
-        TopoVertex portA1 = new TopoVertex("routerA:1", VertexType.PORT);
-        TopoVertex portA2 = new TopoVertex("routerA:2", VertexType.PORT);
-        TopoVertex portB1 = new TopoVertex("routerB:1", VertexType.PORT);
-        TopoVertex portB2 = new TopoVertex("routerB:2", VertexType.PORT);
-        TopoVertex portC1 = new TopoVertex("routerC:1", VertexType.PORT);
-        TopoVertex portC2 = new TopoVertex("routerC:2", VertexType.PORT);
-        TopoVertex portD1 = new TopoVertex("routerD:1", VertexType.PORT);
-        TopoVertex portD2 = new TopoVertex("routerD:2", VertexType.PORT);
-        TopoVertex portE1 = new TopoVertex("routerE:1", VertexType.PORT);
-        TopoVertex portE2 = new TopoVertex("routerE:2", VertexType.PORT);
+        TopoVertex portA1 = new TopoVertex("routerA:1", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portA2 = new TopoVertex("routerA:2", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portB1 = new TopoVertex("routerB:1", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portB2 = new TopoVertex("routerB:2", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portC1 = new TopoVertex("routerC:1", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portC2 = new TopoVertex("routerC:2", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portD1 = new TopoVertex("routerD:1", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portD2 = new TopoVertex("routerD:2", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portE1 = new TopoVertex("routerE:1", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portE2 = new TopoVertex("routerE:2", VertexType.PORT, PortLayer.MPLS);
 
         //Internal Links
         TopoEdge edgeInt_A1_A = new TopoEdge(portA1, nodeA, 0L, Layer.INTERNAL);
@@ -1454,18 +1464,18 @@ public class ServiceLayerTopoLogicalLinkTest
         TopoVertex nodeH = new TopoVertex("routerH", VertexType.ROUTER);
 
         //Additional Ports
-        TopoVertex portB3 = new TopoVertex("routerB:3", VertexType.PORT);
-        TopoVertex portB4 = new TopoVertex("routerB:4", VertexType.PORT);
-        TopoVertex portC3 = new TopoVertex("routerC:3", VertexType.PORT);
-        TopoVertex portC4 = new TopoVertex("routerC:4", VertexType.PORT);
-        TopoVertex portD3 = new TopoVertex("routerD:3", VertexType.PORT);
-        TopoVertex portD4 = new TopoVertex("routerD:4", VertexType.PORT);
-        TopoVertex portF1 = new TopoVertex("routerF:1", VertexType.PORT);
-        TopoVertex portF2 = new TopoVertex("routerF:2", VertexType.PORT);
-        TopoVertex portG1 = new TopoVertex("routerG:1", VertexType.PORT);
-        TopoVertex portG2 = new TopoVertex("routerG:2", VertexType.PORT);
-        TopoVertex portH1 = new TopoVertex("routerH:1", VertexType.PORT);
-        TopoVertex portH2 = new TopoVertex("routerH:2", VertexType.PORT);
+        TopoVertex portB3 = new TopoVertex("routerB:3", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portB4 = new TopoVertex("routerB:4", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portC3 = new TopoVertex("routerC:3", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portC4 = new TopoVertex("routerC:4", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portD3 = new TopoVertex("routerD:3", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portD4 = new TopoVertex("routerD:4", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portF1 = new TopoVertex("routerF:1", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portF2 = new TopoVertex("routerF:2", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portG1 = new TopoVertex("routerG:1", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portG2 = new TopoVertex("routerG:2", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portH1 = new TopoVertex("routerH:1", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portH2 = new TopoVertex("routerH:2", VertexType.PORT, PortLayer.MPLS);
 
         //Additional Internal Links
         TopoEdge edgeInt_B3_B = new TopoEdge(portB3, nodeB, 0L, Layer.INTERNAL);
@@ -1588,12 +1598,12 @@ public class ServiceLayerTopoLogicalLinkTest
         TopoVertex nodeG = new TopoVertex("routerG", VertexType.ROUTER);
 
         //Additional Ports
-        TopoVertex portA3 = new TopoVertex("switchA:3", VertexType.PORT);
-        TopoVertex portE3 = new TopoVertex("switchE:3", VertexType.PORT);
-        TopoVertex portF1 = new TopoVertex("routerF:1", VertexType.PORT);
-        TopoVertex portF2 = new TopoVertex("routerF:2", VertexType.PORT);
-        TopoVertex portG1 = new TopoVertex("routerG:1", VertexType.PORT);
-        TopoVertex portG2 = new TopoVertex("routerG:2", VertexType.PORT);
+        TopoVertex portA3 = new TopoVertex("switchA:3", VertexType.PORT, PortLayer.ETHERNET);
+        TopoVertex portE3 = new TopoVertex("switchE:3", VertexType.PORT, PortLayer.ETHERNET);
+        TopoVertex portF1 = new TopoVertex("routerF:1", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portF2 = new TopoVertex("routerF:2", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portG1 = new TopoVertex("routerG:1", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portG2 = new TopoVertex("routerG:2", VertexType.PORT, PortLayer.MPLS);
 
         //Additional Internal Links
         TopoEdge edgeInt_A3_A = new TopoEdge(portA3, nodeA, 0L, Layer.INTERNAL);
@@ -1885,17 +1895,32 @@ public class ServiceLayerTopoLogicalLinkTest
 
             UrnType urnType;
 
+            Set<Layer> urnCapabilities = new HashSet<>();
+            urnCapabilities.add(Layer.INTERNAL);
+            urnCapabilities.add(Layer.ETHERNET);
+
             if(oneVert.getVertexType().equals(VertexType.SWITCH))
                 urnType = UrnType.DEVICE;
             else if(oneVert.getVertexType().equals(VertexType.ROUTER))
+            {
                 urnType = UrnType.DEVICE;
+                urnCapabilities.add(Layer.MPLS);
+            }
             else
+            {
                 urnType = UrnType.IFCE;
+                mplsTopoVertices.stream()
+                        .forEach(ev -> {
+                            if(ev.getUrn().equals(oneVert.getUrn()))
+                                urnCapabilities.add(Layer.MPLS);
+                        });
+            }
 
             UrnE oneURN = UrnE.builder()
                     .urn(oneVert.getUrn())
                     .reservableBandwidth(resBW)
                     .reservableVlans(resVLAN)
+                    .capabilities(urnCapabilities)
                     .urnType(urnType)
                     .valid(true)
                     .build();
