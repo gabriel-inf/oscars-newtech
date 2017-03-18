@@ -8,7 +8,7 @@ import net.es.oscars.dto.pss.MplsPipeType;
 import net.es.oscars.dto.spec.PalindromicType;
 import net.es.oscars.dto.spec.SurvivabilityType;
 import net.es.oscars.helpers.RequestedEntityBuilder;
-import net.es.oscars.pce.helpers.TopologyBuilder;
+import net.es.oscars.helpers.test.TopologyBuilder;
 import net.es.oscars.pce.PCEException;
 import net.es.oscars.pce.TopPCE;
 import net.es.oscars.pss.PSSException;

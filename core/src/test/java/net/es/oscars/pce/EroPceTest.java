@@ -9,7 +9,7 @@ import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.dao.ReservedBandwidthRepository;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.resv.svc.ResvService;
-import net.es.oscars.pce.helpers.TopologyBuilder;
+import net.es.oscars.helpers.test.TopologyBuilder;
 import net.es.oscars.dto.topo.TopoEdge;
 import net.es.oscars.dto.topo.TopoVertex;
 import net.es.oscars.topo.svc.TopoService;

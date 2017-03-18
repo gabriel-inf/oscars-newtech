@@ -5,8 +5,8 @@ import net.es.oscars.CoreUnitTestConfiguration;
 import net.es.oscars.dto.spec.PalindromicType;
 import net.es.oscars.dto.spec.SurvivabilityType;
 import net.es.oscars.helpers.RequestedEntityBuilder;
-import net.es.oscars.pce.helpers.RepoEntityBuilder;
-import net.es.oscars.pce.helpers.TopologyBuilder;
+import net.es.oscars.helpers.test.RepoEntityBuilder;
+import net.es.oscars.helpers.test.TopologyBuilder;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.dao.ReservedBandwidthRepository;
 import net.es.oscars.resv.ent.RequestedBlueprintE;
@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RunWith(SpringJUnit4ClassRunner.class)
