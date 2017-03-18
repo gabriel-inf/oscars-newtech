@@ -1,6 +1,7 @@
 package net.es.oscars.pce;
 
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.AbstractCoreTest;
 import net.es.oscars.CoreUnitTestConfiguration;
 import net.es.oscars.dto.spec.PalindromicType;
 import net.es.oscars.dto.spec.SurvivabilityType;
@@ -9,10 +10,9 @@ import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.dao.ReservedBandwidthRepository;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.resv.svc.ResvService;
-import net.es.oscars.helpers.test.TopologyBuilder;
+import net.es.oscars.pce.helpers.TopologyBuilder;
 import net.es.oscars.dto.topo.TopoEdge;
 import net.es.oscars.dto.topo.TopoVertex;
-import net.es.oscars.topo.svc.TopoService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,24 +28,15 @@ import java.util.stream.Stream;
 
 /**
  * Created by jeremy on 7/22/16.
- *
+ * <p>
  * Tests End-to-End correctness of the PCE modules with specified EROs
  */
 
 @Slf4j
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes=CoreUnitTestConfiguration.class)
 @Transactional
-public class EroPceTest
-{
+public class EroPceTest extends AbstractCoreTest {
     @Autowired
     private ReservedBandwidthRepository bwRepo;
-
-    @Autowired
-    private PruningService pruningService;
-
-    @Autowired
-    private TopoService topoService;
 
     @Autowired
     private ResvService resvService;
@@ -69,8 +60,7 @@ public class EroPceTest
     private BandwidthService bwService;
 
     @Test
-    public void eroPceTestPalindrome()
-    {
+    public void eroPceTestPalindrome() throws PCEException {
         String testName = "eroPceTestPalindrome";
         log.info("Initializing test: \'" + testName + "\'.");
 
@@ -126,13 +116,9 @@ public class EroPceTest
 
         Map<String, Map<String, Integer>> bwAvailMap = bwService.buildBandwidthAvailabilityMapFromUrnRepo(new ArrayList<>());
 
-        try
-        {
-            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, bwAvailMap, new ArrayList<>());
-        }
-        catch(PCEException pceE){ log.error("", pceE); }
+        computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, bwAvailMap, new ArrayList<>());
 
-        assert(computedPaths != null);
+        assert (computedPaths != null);
 
         List<TopoEdge> computedAzEro = computedPaths.get("az");
         List<TopoEdge> computedZaEro = computedPaths.get("za");
@@ -142,15 +128,14 @@ public class EroPceTest
         List<String> azString = dijkstraPCE.translatePathVerticesToStrings(azVerts);
         List<String> zaString = dijkstraPCE.translatePathVerticesToStrings(zaVerts);
 
-        assert(azString.equals(azERO));
-        assert(zaString.equals(zaERO));
+        assert (azString.equals(azERO));
+        assert (zaString.equals(zaERO));
 
         log.info("test \'" + testName + "\' passed.");
     }
 
     @Test
-    public void eroPceTestNonPalindrome()
-    {
+    public void eroPceTestNonPalindrome() throws PCEException {
         String testName = "eroPceTestNonPalindrome";
         log.info("Initializing test: \'" + testName + "\'.");
 
@@ -211,13 +196,9 @@ public class EroPceTest
         Map<String, List<TopoEdge>> computedPaths = null;
 
         Map<String, Map<String, Integer>> bwAvailMap = bwService.buildBandwidthAvailabilityMapFromUrnRepo(new ArrayList<>());
-        try
-        {
-            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, bwAvailMap, new ArrayList<>());
-        }
-        catch(PCEException pceE){ log.error("", pceE); }
+        computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, bwAvailMap, new ArrayList<>());
 
-        assert(computedPaths != null);
+        assert (computedPaths != null);
 
         List<TopoEdge> computedAzEro = computedPaths.get("az");
         List<TopoEdge> computedZaEro = computedPaths.get("za");
@@ -227,15 +208,14 @@ public class EroPceTest
         List<String> azString = dijkstraPCE.translatePathVerticesToStrings(azVerts);
         List<String> zaString = dijkstraPCE.translatePathVerticesToStrings(zaVerts);
 
-        assert(azString.equals(azERO));
-        assert(zaString.equals(zaERO));
+        assert (azString.equals(azERO));
+        assert (zaString.equals(zaERO));
 
         log.info("test \'" + testName + "\' passed.");
     }
 
-    @Test
-    public void eroPceTestBadNonPalindrome1()
-    {
+    @Test(expected = PCEException.class)
+    public void eroPceTestBadNonPalindrome1() throws PCEException {
         String testName = "eroPceTestBadNonPalindrome1";
         log.info("Initializing test: \'" + testName + "\'.");
 
@@ -298,20 +278,11 @@ public class EroPceTest
 
         Map<String, Map<String, Integer>> bwAvailMap = bwService.buildBandwidthAvailabilityMapFromUrnRepo(new ArrayList<>());
 
-        try
-        {
-            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, bwAvailMap, new ArrayList<>());
-        }
-        catch(PCEException pceE){ log.error("", pceE); }
-
-        assert(computedPaths == null);
-
-        log.info("test \'" + testName + "\' passed.");
+        computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, bwAvailMap, new ArrayList<>());
     }
 
-    @Test
-    public void eroPceTestBadNonPalindrome2()
-    {
+    @Test(expected = PCEException.class)
+    public void eroPceTestBadNonPalindrome2() throws PCEException {
         String testName = "eroPceTestBadNonPalindrome2";
         log.info("Initializing test: \'" + testName + "\'.");
 
@@ -367,20 +338,11 @@ public class EroPceTest
 
         Map<String, Map<String, Integer>> bwAvailMap = bwService.buildBandwidthAvailabilityMapFromUrnRepo(new ArrayList<>());
 
-        try
-        {
-            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, bwAvailMap, new ArrayList<>());
-        }
-        catch(PCEException pceE){ log.error("", pceE); }
-
-        assert(computedPaths == null);
-
-        log.info("test \'" + testName + "\' passed.");
+        computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, bwAvailMap, new ArrayList<>());
     }
 
     @Test
-    public void eroPceTestNonPalindrome2()
-    {
+    public void eroPceTestNonPalindrome2() throws PCEException {
         String testName = "eroPceTestNonPalindrome2";
         log.info("Initializing test: \'" + testName + "\'.");
 
@@ -434,13 +396,9 @@ public class EroPceTest
         Map<String, List<TopoEdge>> computedPaths = null;
 
         Map<String, Map<String, Integer>> bwAvailMap = bwService.buildBandwidthAvailabilityMapFromUrnRepo(new ArrayList<>());
-        try
-        {
-            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, bwAvailMap, new ArrayList<>());
-        }
-        catch(PCEException pceE){ log.error("", pceE); }
+        computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, bwAvailMap, new ArrayList<>());
 
-        assert(computedPaths != null);
+        assert (computedPaths != null);
 
         List<TopoEdge> computedAzEro = computedPaths.get("az");
         List<TopoEdge> computedZaEro = computedPaths.get("za");
@@ -450,15 +408,14 @@ public class EroPceTest
         List<String> azString = dijkstraPCE.translatePathVerticesToStrings(azVerts);
         List<String> zaString = dijkstraPCE.translatePathVerticesToStrings(zaVerts);
 
-        assert(azString.equals(azERO));
-        assert(zaString.equals(zaERO));
+        assert (azString.equals(azERO));
+        assert (zaString.equals(zaERO));
 
         log.info("test \'" + testName + "\' passed.");
     }
 
     @Test
-    public void eroPceTestSharedLink()
-    {
+    public void eroPceTestSharedLink() throws PCEException {
         String testName = "eroPceTestSharedLink";
         log.info("Initializing test: \'" + testName + "\'.");
         bwRepo.deleteAll();
@@ -516,13 +473,9 @@ public class EroPceTest
         Map<String, List<TopoEdge>> computedPaths = null;
 
         Map<String, Map<String, Integer>> bwAvailMap = bwService.buildBandwidthAvailabilityMapFromUrnRepo(new ArrayList<>());
-        try
-        {
-            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, bwAvailMap, new ArrayList<>());
-        }
-        catch(PCEException pceE){ log.error("", pceE); }
+        computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, bwAvailMap, new ArrayList<>());
 
-        assert(computedPaths != null);
+        assert (computedPaths != null);
 
         List<TopoEdge> computedAzEro = computedPaths.get("az");
         List<TopoEdge> computedZaEro = computedPaths.get("za");
@@ -532,15 +485,14 @@ public class EroPceTest
         List<String> azString = dijkstraPCE.translatePathVerticesToStrings(azVerts);
         List<String> zaString = dijkstraPCE.translatePathVerticesToStrings(zaVerts);
 
-        assert(azString.equals(azERO));
-        assert(zaString.equals(zaERO));
+        assert (azString.equals(azERO));
+        assert (zaString.equals(zaERO));
 
         log.info("test \'" + testName + "\' passed.");
     }
 
     @Test
-    public void eroSpecTestSharedLinkSufficientBW()
-    {
+    public void eroSpecTestSharedLinkSufficientBW() throws PCEException, PSSException {
         String testName = "eroPceTestSharedLinkSufficientBW";
         log.info("Initializing test: \'" + testName + "\'.");
 
@@ -620,17 +572,11 @@ public class EroPceTest
 
         log.info("Beginning test: \'" + testName + "\'.");
         Map<String, List<TopoEdge>> computedPaths = null;
+        resvService.hold(connectionBig);
+        resvService.hold(connectionTest);
 
-        try
-        {
-            resvService.hold(connectionBig);
-            resvService.hold(connectionTest);
-        }
-        catch(PCEException pceE){ log.error("", pceE); }
-        catch(PSSException pssE){ log.error("", pssE); }
-
-        assert(!connectionBig.getReserved().getVlanFlow().getMplsPipes().isEmpty());
-        assert(!connectionTest.getReserved().getVlanFlow().getMplsPipes().isEmpty());
+        assert (!connectionBig.getReserved().getVlanFlow().getMplsPipes().isEmpty());
+        assert (!connectionTest.getReserved().getVlanFlow().getMplsPipes().isEmpty());
 
         List<String> computedAZEro = connectionTest.getReserved().getVlanFlow().getMplsPipes().iterator().next().getAzERO();
         List<String> computedZAEro = connectionTest.getReserved().getVlanFlow().getMplsPipes().iterator().next().getZaERO();
@@ -642,8 +588,8 @@ public class EroPceTest
         computedZAEro.add(0, dstDevice);
         computedZAEro.add(srcDevice);
 
-        assert(azERO.equals(computedAZEro));
-        assert(zaERO.equals(computedZAEro));
+        assert (azERO.equals(computedAZEro));
+        assert (zaERO.equals(computedZAEro));
 
         // Why on Earth do these two statements fail?!
         //assert(computedAZEro.equals(azERO));
@@ -653,8 +599,7 @@ public class EroPceTest
     }
 
     @Test
-    public void eroSpecTestSharedLinkInsufficientBW()
-    {
+    public void eroSpecTestSharedLinkInsufficientBW() throws PCEException, PSSException {
         String testName = "eroPceTestSharedLinkInsufficientBW";
         log.info("Initializing test: \'" + testName + "\'.");
 
@@ -735,26 +680,20 @@ public class EroPceTest
         log.info("Beginning test: \'" + testName + "\'.");
         Map<String, List<TopoEdge>> computedPaths = null;
 
-        try
-        {
-            resvService.hold(connectionBig);
-            resvService.hold(connectionTest);
-        }
-        catch(PCEException pceE){ log.error("", pceE); }
-        catch(PSSException pssE){ log.error("", pssE); }
+        resvService.hold(connectionBig);
+        resvService.hold(connectionTest);
 
-        assert(!connectionBig.getReserved().getVlanFlow().getMplsPipes().isEmpty());
-        assert(connectionTest.getReserved().getVlanFlow().getEthPipes().isEmpty());
-        assert(connectionTest.getReserved().getVlanFlow().getMplsPipes().isEmpty());
-        assert(connectionTest.getReserved().getVlanFlow().getJunctions().isEmpty());
-        assert(connectionTest.getReserved().getVlanFlow().getAllPaths().isEmpty());
+        assert (!connectionBig.getReserved().getVlanFlow().getMplsPipes().isEmpty());
+        assert (connectionTest.getReserved().getVlanFlow().getEthPipes().isEmpty());
+        assert (connectionTest.getReserved().getVlanFlow().getMplsPipes().isEmpty());
+        assert (connectionTest.getReserved().getVlanFlow().getJunctions().isEmpty());
+        assert (connectionTest.getReserved().getVlanFlow().getAllPaths().isEmpty());
 
         log.info("test \'" + testName + "\' passed.");
     }
 
-    @Test
-    public void eroPceTestDuplicateNode1()
-    {
+    @Test(expected = PCEException.class)
+    public void eroPceTestDuplicateNode1() throws PCEException {
         String testName = "eroPceTestDuplicateNode1";
         log.info("Initializing test: \'" + testName + "\'.");
 
@@ -816,20 +755,15 @@ public class EroPceTest
         Map<String, List<TopoEdge>> computedPaths = null;
 
         Map<String, Map<String, Integer>> bwAvailMap = bwService.buildBandwidthAvailabilityMapFromUrnRepo(new ArrayList<>());
-        try
-        {
-            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, bwAvailMap, new ArrayList<>());
-        }
-        catch(PCEException pceE){ log.error("", pceE); }
+        computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, bwAvailMap, new ArrayList<>());
 
-        assert(computedPaths == null);
+        assert (computedPaths == null);
 
         log.info("test \'" + testName + "\' passed.");
     }
 
-    @Test
-    public void eroPceTestDuplicateNode2()
-    {
+    @Test(expected = PCEException.class)
+    public void eroPceTestDuplicateNode2() throws PCEException {
         String testName = "eroPceTestDuplicateNode2";
         log.info("Initializing test: \'" + testName + "\'.");
 
@@ -891,20 +825,15 @@ public class EroPceTest
         Map<String, List<TopoEdge>> computedPaths = null;
 
         Map<String, Map<String, Integer>> bwAvailMap = bwService.buildBandwidthAvailabilityMapFromUrnRepo(new ArrayList<>());
-        try
-        {
-            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, bwAvailMap, new ArrayList<>());
-        }
-        catch(PCEException pceE){ log.error("", pceE); }
+        computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, bwAvailMap, new ArrayList<>());
 
-        assert(computedPaths == null);
+        assert (computedPaths == null);
 
         log.info("test \'" + testName + "\' passed.");
     }
 
     @Test
-    public void eroSpecTestEmptyAZ()
-    {
+    public void eroSpecTestEmptyAZ() throws PCEException, PSSException {
         String testName = "eroPceTestEmptyAZ";
         log.info("Initializing test: \'" + testName + "\'.");
 
@@ -959,31 +888,24 @@ public class EroPceTest
         log.info("Beginning test: \'" + testName + "\'.");
 
         Map<String, List<TopoEdge>> computedPaths = null;
-
-        try
-        {
-            resvService.hold(connection);
-        }
-        catch(PCEException pceE){ log.error("", pceE); }
-        catch(PSSException pssE){ log.error("", pssE); }
+        resvService.hold(connection);
 
         reservedBlueprint = connection.getReserved();
 
-        assert(reservedBlueprint != null);
+        assert (reservedBlueprint != null);
         List<String> computedZaEro = reservedBlueprint.getVlanFlow().getMplsPipes().iterator().next().getZaERO();
 
         // Each reserved pipe will have EROs not containing src/dst devices. Add those for comparison with requested EROs
         computedZaEro.add(0, dstDevice);
         computedZaEro.add(srcDevice);
 
-        assert(!zaERO.equals(computedZaEro));
+        assert (!zaERO.equals(computedZaEro));
 
         log.info("test \'" + testName + "\' passed.");
     }
 
     @Test
-    public void eroSpecTestEmptyZA()
-    {
+    public void eroSpecTestEmptyZA() throws PCEException, PSSException {
         String testName = "eroPceTestEmptyZA";
         log.info("Initializing test: \'" + testName + "\'.");
 
@@ -1036,32 +958,24 @@ public class EroPceTest
 
         log.info("Beginning test: \'" + testName + "\'.");
 
-        Map<String, List<TopoEdge>> computedPaths = null;
-
-        try
-        {
-            resvService.hold(connection);
-        }
-        catch(PCEException pceE){ log.error("", pceE); }
-        catch(PSSException pssE){ log.error("", pssE); }
+        resvService.hold(connection);
 
         reservedBlueprint = connection.getReserved();
 
-        assert(reservedBlueprint != null);
+        assert (reservedBlueprint != null);
         List<String> computedAzEro = reservedBlueprint.getVlanFlow().getMplsPipes().iterator().next().getAzERO();
 
         // Each reserved pipe will have EROs not containing src/dst devices. Add those for comparison with requested EROs
         computedAzEro.add(0, srcDevice);
         computedAzEro.add(dstDevice);
 
-        assert(!azERO.equals(computedAzEro));
+        assert (!azERO.equals(computedAzEro));
 
         log.info("test \'" + testName + "\' passed.");
     }
 
     @Test
-    public void multiMplsPipeTestNonPal()
-    {
+    public void multiMplsPipeTestNonPal() throws PCEException, PSSException {
         log.info("Initializing test: 'multiMplsPipeTestNonPal'.");
 
         RequestedBlueprintE requestedBlueprint;
@@ -1123,7 +1037,7 @@ public class EroPceTest
         zaRequested.add("nodeM:1");
         zaRequested.add("nodeK:2");
         zaRequested.add("nodeK");
-        
+
         topologyBuilder.buildMultiMplsTopo2();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
 
@@ -1137,14 +1051,7 @@ public class EroPceTest
 
         log.info("Beginning test: 'multiMplsPipeTestNonPal'.");
 
-        try
-        {
-            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
-        }
-        catch(PCEException | PSSException pceE)
-        {
-            log.error("", pceE);
-        }
+        reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
 
         assert (reservedBlueprint.isPresent());
 
@@ -1159,8 +1066,7 @@ public class EroPceTest
         assert (allResMplsPipes.size() == 2);
 
         // Ethernet Pipes
-        for(ReservedEthPipeE ethPipe : allResEthPipes)
-        {
+        for (ReservedEthPipeE ethPipe : allResEthPipes) {
             ReservedVlanJunctionE aJunc = ethPipe.getAJunction();
             ReservedVlanJunctionE zJunc = ethPipe.getZJunction();
             Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
@@ -1170,13 +1076,11 @@ public class EroPceTest
             String actualAzERO = aJunc.getDeviceUrn() + "-";
             String actualZaERO = zJunc.getDeviceUrn() + "-";
 
-            for(String x : azERO)
-            {
+            for (String x : azERO) {
                 actualAzERO = actualAzERO + x + "-";
             }
 
-            for(String x : zaERO)
-            {
+            for (String x : zaERO) {
                 actualZaERO = actualZaERO + x + "-";
             }
 
@@ -1192,21 +1096,16 @@ public class EroPceTest
             String expectedAzERO;
             String expectedZaERO;
 
-            if(aJunc.getDeviceUrn().equals("nodeL"))
-            {
-                assert(zJunc.getDeviceUrn().equals("nodeP"));
+            if (aJunc.getDeviceUrn().equals("nodeL")) {
+                assert (zJunc.getDeviceUrn().equals("nodeP"));
                 expectedAzERO = "nodeL-nodeL:3-nodeP:1-nodeP";
                 expectedZaERO = "nodeP-nodeP:1-nodeL:3-nodeL";
-            }
-            else if(aJunc.getDeviceUrn().equals("nodeP"))
-            {
-                assert(zJunc.getDeviceUrn().equals("nodeQ"));
+            } else if (aJunc.getDeviceUrn().equals("nodeP")) {
+                assert (zJunc.getDeviceUrn().equals("nodeQ"));
                 expectedAzERO = "nodeP-nodeP:2-nodeQ:1-nodeQ";
                 expectedZaERO = "nodeQ-nodeQ:1-nodeP:2-nodeP";
-            }
-            else
-            {
-                assert(zJunc.getDeviceUrn().equals("nodeS"));
+            } else {
+                assert (zJunc.getDeviceUrn().equals("nodeS"));
                 expectedAzERO = "nodeQ-nodeQ:3-nodeS:1-nodeS";
                 expectedZaERO = "nodeS-nodeS:1-nodeQ:3-nodeQ";
             }
@@ -1216,8 +1115,7 @@ public class EroPceTest
         }
 
         // Mpls Pipes
-        for(ReservedMplsPipeE mplsPipe : allResMplsPipes)
-        {
+        for (ReservedMplsPipeE mplsPipe : allResMplsPipes) {
             ReservedVlanJunctionE aJunc = mplsPipe.getAJunction();
             ReservedVlanJunctionE zJunc = mplsPipe.getZJunction();
             Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
@@ -1227,13 +1125,11 @@ public class EroPceTest
             String actualAzERO = aJunc.getDeviceUrn() + "-";
             String actualZaERO = zJunc.getDeviceUrn() + "-";
 
-            for(String x : azERO)
-            {
+            for (String x : azERO) {
                 actualAzERO = actualAzERO + x + "-";
             }
 
-            for(String x : zaERO)
-            {
+            for (String x : zaERO) {
                 actualZaERO = actualZaERO + x + "-";
             }
 
@@ -1243,8 +1139,7 @@ public class EroPceTest
             assert ((aJunc.getDeviceUrn().equals("nodeK") && zJunc.getDeviceUrn().equals("nodeL"))
                     || (aJunc.getDeviceUrn().equals("nodeS") && zJunc.getDeviceUrn().equals("nodeT")));
 
-            if(aJunc.getDeviceUrn().equals("nodeK"))
-            {
+            if (aJunc.getDeviceUrn().equals("nodeK")) {
                 assert (aFixes.size() == 1);
                 assert (zFixes.size() == 0);
                 ReservedVlanFixtureE theFix = aFixes.iterator().next();
@@ -1258,9 +1153,7 @@ public class EroPceTest
 
                 assert (actualAzERO.equals(expectedAzERO));
                 assert (actualZaERO.equals(expectedZaERO));
-            }
-            else
-            {
+            } else {
                 assert (aFixes.size() == 0);
                 assert (zFixes.size() == 1);
                 ReservedVlanFixtureE theFix = zFixes.iterator().next();
@@ -1281,7 +1174,7 @@ public class EroPceTest
     }
 
     @Test
-    public void partialEroOneIntermediateTest(){
+    public void partialEroOneIntermediateTest() throws PCEException {
         String testName = "partialEroOneIntermediateTest";
         log.info("Initializing test: \'" + testName + "\'.");
 
@@ -1325,13 +1218,9 @@ public class EroPceTest
 
         Map<String, Map<String, Integer>> bwAvailMap = bwService.buildBandwidthAvailabilityMapFromUrnRepo(new ArrayList<>());
 
-        try
-        {
-            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, bwAvailMap, new ArrayList<>());
-        }
-        catch(PCEException pceE){ log.error("", pceE); }
+        computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, bwAvailMap, new ArrayList<>());
 
-        assert(computedPaths != null);
+        assert (computedPaths != null);
 
         List<TopoEdge> computedAzEro = computedPaths.get("az");
         List<TopoEdge> computedZaEro = computedPaths.get("za");
@@ -1345,14 +1234,14 @@ public class EroPceTest
         log.info("Actual AZ ERO: " + azString);
         log.info("Requested ZA ERO: " + zaERO);
         log.info("Actual ZA ERO: " + zaString);
-        assert(azERO.stream().allMatch(eroString -> azString.stream().anyMatch(vString -> vString.equals(eroString))));
-        assert(zaERO.stream().allMatch(eroString -> zaString.stream().anyMatch(vString -> vString.equals(eroString))));
+        assert (azERO.stream().allMatch(eroString -> azString.stream().anyMatch(vString -> vString.equals(eroString))));
+        assert (zaERO.stream().allMatch(eroString -> zaString.stream().anyMatch(vString -> vString.equals(eroString))));
 
         log.info("test \'" + testName + "\' passed.");
     }
 
     @Test
-    public void partialEroTwoIntermediateTest(){
+    public void partialEroTwoIntermediateTest() throws PCEException {
         String testName = "partialEroTwoIntermediateTest";
         log.info("Initializing test: \'" + testName + "\'.");
 
@@ -1399,13 +1288,9 @@ public class EroPceTest
 
         Map<String, Map<String, Integer>> bwAvailMap = bwService.buildBandwidthAvailabilityMapFromUrnRepo(new ArrayList<>());
 
-        try
-        {
-            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, bwAvailMap, new ArrayList<>());
-        }
-        catch(PCEException pceE){ log.error("", pceE); }
+        computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, bwAvailMap, new ArrayList<>());
 
-        assert(computedPaths != null);
+        assert (computedPaths != null);
 
         List<TopoEdge> computedAzEro = computedPaths.get("az");
         List<TopoEdge> computedZaEro = computedPaths.get("za");
@@ -1420,14 +1305,14 @@ public class EroPceTest
         log.info("Actual AZ ERO: " + azString);
         log.info("Requested ZA ERO: " + zaERO);
         log.info("Actual ZA ERO: " + zaString);
-        assert(azERO.stream().allMatch(eroString -> azString.stream().anyMatch(vString -> vString.equals(eroString))));
-        assert(zaERO.stream().allMatch(eroString -> zaString.stream().anyMatch(vString -> vString.equals(eroString))));
+        assert (azERO.stream().allMatch(eroString -> azString.stream().anyMatch(vString -> vString.equals(eroString))));
+        assert (zaERO.stream().allMatch(eroString -> zaString.stream().anyMatch(vString -> vString.equals(eroString))));
 
         log.info("test \'" + testName + "\' passed.");
     }
 
     @Test
-    public void partialEroMultiIntermediateTest(){
+    public void partialEroMultiIntermediateTest() throws PCEException {
         String testName = "partialEroMultiIntermediateTest";
         log.info("Initializing test: \'" + testName + "\'.");
 
@@ -1474,13 +1359,9 @@ public class EroPceTest
         Map<String, List<TopoEdge>> computedPaths = null;
 
         Map<String, Map<String, Integer>> bwAvailMap = bwService.buildBandwidthAvailabilityMapFromUrnRepo(new ArrayList<>());
-        try
-        {
-            computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, bwAvailMap, new ArrayList<>());
-        }
-        catch(PCEException pceE){ log.error("", pceE); }
+        computedPaths = eroPCE.computeSpecifiedERO(pipeAZ, bwAvailMap, new ArrayList<>());
 
-        assert(computedPaths != null);
+        assert (computedPaths != null);
 
         List<TopoEdge> computedAzEro = computedPaths.get("az");
         List<TopoEdge> computedZaEro = computedPaths.get("za");
@@ -1495,14 +1376,14 @@ public class EroPceTest
         log.info("Actual AZ ERO: " + azString);
         log.info("Requested ZA ERO: " + zaERO);
         log.info("Actual ZA ERO: " + zaString);
-        assert(azERO.stream().allMatch(eroString -> azString.stream().anyMatch(vString -> vString.equals(eroString))));
-        assert(zaERO.stream().allMatch(eroString -> zaString.stream().anyMatch(vString -> vString.equals(eroString))));
+        assert (azERO.stream().allMatch(eroString -> azString.stream().anyMatch(vString -> vString.equals(eroString))));
+        assert (zaERO.stream().allMatch(eroString -> zaString.stream().anyMatch(vString -> vString.equals(eroString))));
 
         log.info("test \'" + testName + "\' passed.");
     }
 
     @Test
-    public void pceSubmitPartialEroMultiIntermediateTest(){
+    public void pceSubmitPartialEroMultiIntermediateTest() throws PCEException, PSSException {
         String testName = "pceSubmitPartialEroMultiIntermediateTest";
         log.info("Initializing test: \'" + testName + "\'.");
 
@@ -1547,21 +1428,17 @@ public class EroPceTest
         log.info("Beginning test: \'" + testName + "\'.");
 
         ReservedBlueprintE resBlueprint = null;
-        try{
-            Optional<ReservedBlueprintE> opt = topPCE.makeReserved(reqBlueprint, requestedSched, new ArrayList<>());
-            assert(opt.isPresent());
-            resBlueprint = opt.get();
-        } catch (Exception e){
-            log.error(e.toString());
-        }
+        Optional<ReservedBlueprintE> opt = topPCE.makeReserved(reqBlueprint, requestedSched, new ArrayList<>());
+        assert (opt.isPresent());
+        resBlueprint = opt.get();
 
-        assert(resBlueprint != null);
+        assert (resBlueprint != null);
         Set<ReservedEthPipeE> ethPipes = resBlueprint.getVlanFlow().getEthPipes();
         Set<ReservedMplsPipeE> mplsPipes = resBlueprint.getVlanFlow().getMplsPipes();
 
         Set<String> azString = new HashSet<>();
         Set<String> zaString = new HashSet<>();
-        for(ReservedEthPipeE ethPipe : ethPipes){
+        for (ReservedEthPipeE ethPipe : ethPipes) {
             azString.addAll(ethPipe.getAJunction().getFixtures().stream().map(fix -> fix.getIfceUrn()).collect(Collectors.toList()));
             azString.add(ethPipe.getAJunction().getDeviceUrn());
             azString.addAll(ethPipe.getAzERO());
@@ -1574,7 +1451,7 @@ public class EroPceTest
             zaString.add(ethPipe.getAJunction().getDeviceUrn());
             zaString.addAll(ethPipe.getAJunction().getFixtures().stream().map(fix -> fix.getIfceUrn()).collect(Collectors.toList()));
         }
-        for(ReservedMplsPipeE mplsPipe : mplsPipes){
+        for (ReservedMplsPipeE mplsPipe : mplsPipes) {
             azString.addAll(mplsPipe.getAJunction().getFixtures().stream().map(fix -> fix.getIfceUrn()).collect(Collectors.toList()));
             azString.add(mplsPipe.getAJunction().getDeviceUrn());
             azString.addAll(mplsPipe.getAzERO());
@@ -1598,8 +1475,8 @@ public class EroPceTest
         log.info("Actual AZ ERO: " + azString);
         log.info("Requested ZA ERO: " + zaERO);
         log.info("Actual ZA ERO: " + zaString);
-        assert(azERO.stream().allMatch(eroString -> azString.stream().anyMatch(vString -> vString.equals(eroString))));
-        assert(zaERO.stream().allMatch(eroString -> zaString.stream().anyMatch(vString -> vString.equals(eroString))));
+        assert (azERO.stream().allMatch(eroString -> azString.stream().anyMatch(vString -> vString.equals(eroString))));
+        assert (zaERO.stream().allMatch(eroString -> zaString.stream().anyMatch(vString -> vString.equals(eroString))));
 
         log.info("test \'" + testName + "\' passed.");
     }

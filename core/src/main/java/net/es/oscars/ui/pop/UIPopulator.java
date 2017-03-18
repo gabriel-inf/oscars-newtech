@@ -22,13 +22,12 @@ public class UIPopulator {
     @Autowired
     private TopoProperties topoProperties;
 
-    private Map<String, Position> positions;
     @Autowired
     private JsonHelper jsonHelper;
 
+    private Map<String, Position> positions;
 
-    @PostConstruct
-    public void loadPositions() throws IOException {
+    public void startup() throws IOException {
         ObjectMapper mapper = jsonHelper.mapper();
 
         String filename = "./config/topo/"+topoProperties.getPrefix()+"-positions.json";

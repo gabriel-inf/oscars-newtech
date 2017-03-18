@@ -2,7 +2,9 @@ package net.es.oscars.pss.svc;
 
 import freemarker.template.TemplateException;
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.dto.pss.params.*;
 import net.es.oscars.dto.pss.params.alu.*;
+import net.es.oscars.pss.beans.AluTemplatePaths;
 import net.es.oscars.pss.beans.ConfigException;
 import net.es.oscars.pss.tpl.Assembler;
 import net.es.oscars.pss.tpl.Stringifier;
@@ -22,35 +24,61 @@ public class AluCommandGenerator {
     @Autowired
     private Assembler assembler;
 
+    public String teardown(AluParams params) throws ConfigException {
+        this.protectVsNulls(params);
+        this.verifyAluQosParams(params);
+        this.verifySdpIds(params);
+        this.verifyPaths(params);
+
+        AluTemplatePaths atp = AluTemplatePaths.builder()
+                .lsp("alu/alu-mpls_lsp-teardown.ftl")
+                .qos("alu/alu-qos-teardown.ftl")
+                .sdp("alu/alu-sdp-teardown.ftl")
+                .path("alu/alu-mpls_path-teardown.ftl")
+                .vpls("alu/alu-vpls_service-teardown.ftl")
+                .loopback("alu/alu-vpls_loopback-teardown.ftl")
+                .build();
+        return fill(atp, params, true);
+    }
 
     public String setup(AluParams params) throws ConfigException {
-        AluVpls vpls = params.getAluVpls();
+        this.protectVsNulls(params);
+        this.verifyAluQosParams(params);
+        this.verifySdpIds(params);
+        this.verifyPaths(params);
 
+        AluTemplatePaths atp = AluTemplatePaths.builder()
+                .lsp("alu/alu-mpls_lsp-setup.ftl")
+                .qos("alu/alu-qos-setup.ftl")
+                .sdp("alu/alu-sdp-setup.ftl")
+                .path("alu/alu-mpls_path-setup.ftl")
+                .vpls("alu/alu-vpls_service-setup.ftl")
+                .loopback("alu/alu-vpls_loopback-setup.ftl")
+                .build();
+        return fill(atp, params, false);
+    }
 
-        String sdpTpl = "alu/alu-sdp-setup.ftl";
-        String pathTpl = "alu/alu-mpls_path-setup.ftl";
-        String lspTpl = "alu/alu-mpls_lsp-setup.ftl";
-        String qosTpl = "alu/alu-qos-setup.ftl";
-        String vplsServiceTpl = "alu/alu-vpls_service-setup.ftl";
-        String menderTemplate = "alu/alu-top.ftl";
-        params.setAluVpls(vpls);
+    private String fill(AluTemplatePaths atp, AluParams params, boolean reverse) throws ConfigException {
 
+        String top = "alu/alu-top.ftl";
 
         Map<String, Object> root = new HashMap<>();
 
         List<String> fragments = new ArrayList<>();
 
         try {
-            this.verifyAluQosParams(params.getQoses(), params.getAluVpls().getSaps());
 
             if (params.getQoses() == null || params.getQoses().isEmpty()) {
                 log.info("No QOS config (weird!)");
             } else {
                 root.put("qosList", params.getQoses());
                 root.put("apply", params.getApplyQos());
-                String qosConfig = stringifier.stringify(root, qosTpl);
-                fragments.add(qosConfig);
-
+                String qosConfig = stringifier.stringify(root, atp.getQos());
+                if (reverse) {
+                    fragments.add(0, qosConfig);
+                } else {
+                    fragments.add(qosConfig);
+                }
             }
 
             if (params.getPaths() == null || params.getPaths().isEmpty()) {
@@ -59,9 +87,12 @@ public class AluCommandGenerator {
             } else {
                 root = new HashMap<>();
                 root.put("paths", params.getPaths());
-                String pathConfig = stringifier.stringify(root, pathTpl);
-                fragments.add(pathConfig);
-
+                String pathConfig = stringifier.stringify(root, atp.getPath());
+                if (reverse) {
+                    fragments.add(0, pathConfig);
+                } else {
+                    fragments.add(pathConfig);
+                }
             }
 
             if (params.getLsps() == null || params.getLsps().isEmpty()) {
@@ -69,8 +100,12 @@ public class AluCommandGenerator {
             } else {
                 root = new HashMap<>();
                 root.put("lsps", params.getLsps());
-                String lspConfig = stringifier.stringify(root, lspTpl);
-                fragments.add(lspConfig);
+                String lspConfig = stringifier.stringify(root, atp.getLsp());
+                if (reverse) {
+                    fragments.add(0, lspConfig);
+                } else {
+                    fragments.add(lspConfig);
+                }
             }
 
             if (params.getSdps() == null || params.getSdps().isEmpty()) {
@@ -78,25 +113,113 @@ public class AluCommandGenerator {
             } else {
                 root = new HashMap<>();
                 root.put("sdps", params.getSdps());
-                String sdpConfig = stringifier.stringify(root, sdpTpl);
-                fragments.add(sdpConfig);
+                String sdpConfig = stringifier.stringify(root, atp.getSdp());
+                if (reverse) {
+                    fragments.add(0, sdpConfig);
+                } else {
+                    fragments.add(sdpConfig);
+                }
+            }
+
+            if (params.getLoopbackInterface() == null) {
+                log.info("No loopback, skipping..");
+            } else {
+                root = new HashMap<>();
+                root.put("loopback_ifce_name", params.getLoopbackInterface());
+                root.put("loopback_address", params.getLoopbackAddress());
+                String loopbackCfg = stringifier.stringify(root, atp.getLoopback());
+                if (reverse) {
+                    fragments.add(0, loopbackCfg);
+                } else {
+                    fragments.add(loopbackCfg);
+                }
             }
 
 
             root = new HashMap<>();
             root.put("vpls", params.getAluVpls());
-            String vplsServiceConfig = stringifier.stringify(root, vplsServiceTpl);
-            fragments.add(vplsServiceConfig);
-
-            return assembler.assemble(fragments, menderTemplate);
+            String vplsServiceConfig = stringifier.stringify(root, atp.getVpls());
+            if (reverse) {
+                fragments.add(0, vplsServiceConfig);
+            } else {
+                fragments.add(vplsServiceConfig);
+            }
+            return assembler.assemble(fragments, top);
         } catch (IOException | TemplateException ex) {
             log.error("templating error", ex);
             throw new ConfigException("template system error");
         }
+    }
+
+    private void protectVsNulls(AluParams params) {
+        if (params.getSdps() == null) {
+            params.setSdps(new ArrayList<>());
+        }
+        if (params.getAluVpls().getSdpToVcIds() == null) {
+            params.getAluVpls().setSdpToVcIds(new ArrayList<>());
+        }
+        if (params.getSdps() == null) {
+            params.setSdps(new ArrayList<>());
+        }
+        if (params.getPaths() == null) {
+            params.setPaths(new ArrayList<>());
+        }
+        if (params.getLsps() == null) {
+            params.setLsps(new ArrayList<>());
+        }
+    }
+
+    private void verifyPaths(AluParams params) throws ConfigException {
+
+
+        Set<String> lspNamesFromSdps  = new HashSet<>();
+        Set<String> lspNamesFromLsps = new HashSet<>();
+
+        Set<String> pathNamesFromLsps = new HashSet<>();
+        Set<String> pathNamesFromPaths = new HashSet<>();
+
+
+
+
+        for (AluSdp sdp : params.getSdps()) {
+            lspNamesFromSdps.add(sdp.getLspName());
+        }
+        for (Lsp lsp : params.getLsps()) {
+            lspNamesFromLsps.add(lsp.getName());
+            pathNamesFromLsps.add(lsp.getPathName());
+        }
+        for (MplsPath path : params.getPaths()) {
+            pathNamesFromPaths.add(path.getName());
+        }
+        if (!lspNamesFromLsps.equals(lspNamesFromSdps)) {
+            throw new ConfigException("LSP name mismatch");
+        }
+        if (!pathNamesFromLsps.equals(pathNamesFromPaths)) {
+            throw new ConfigException("Path name mismatch");
+        }
+
 
     }
 
-    private void verifyAluQosParams(List<AluQos> qoses, List<AluSap> saps) throws ConfigException {
+    private void verifySdpIds(AluParams params) throws ConfigException {
+        List<AluSdpToVcId> aluSdpToVcIds = params.getAluVpls().getSdpToVcIds();
+        Set<Integer> sdpIdsA = new HashSet<>();
+        Set<Integer> sdpIdsB = new HashSet<>();
+        for (AluSdpToVcId aluSdpToVcId : aluSdpToVcIds) {
+            sdpIdsA.add(aluSdpToVcId.getSdpId());
+        }
+        for (AluSdp sdp : params.getSdps()) {
+            sdpIdsB.add(sdp.getSdpId());
+        }
+        if (!sdpIdsA.equals(sdpIdsB)) {
+            throw new ConfigException("SDP ID mismatch!");
+        }
+
+    }
+
+    private void verifyAluQosParams(AluParams params) throws ConfigException {
+        List<AluSap> saps = params.getAluVpls().getSaps();
+        List<AluQos> qoses = params.getQoses();
         Set<Integer> sapInQosIds = new HashSet<>();
         Set<Integer> sapEgQosIds = new HashSet<>();
         saps.forEach(sap -> {
@@ -132,20 +255,18 @@ public class AluCommandGenerator {
         String error = "";
         if (!sapInQosIds.equals(inQosIds)) {
             ok = false;
-            error = "defined ingress qos ids do not match SAP qos ids";
+            error = "Ingress qos id mismatch";
         }
         if (!sapEgQosIds.equals(egQosIds)) {
             ok = false;
-            error += " defined egress qos ids do not match SAP qos ids";
+            error += " Egress qos id mismatch";
         }
         if (!ok) {
             throw new ConfigException(error);
         }
 
 
-
     }
-
 
 
 }

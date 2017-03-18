@@ -26,25 +26,26 @@ import java.util.*;
 
 @Slf4j
 @Service
-public class TopoFileImporter implements TopoImporter {
+public class TopoFileImporter {
     private UrnRepository urnRepo;
 
     private UrnAdjcyRepository adjcyRepo;
 
     private TopoProperties topoProperties;
 
-    @Autowired
-    private JsonHelper jsonHelper;
+    private JsonHelper helper;
+
 
     @Autowired
-    public TopoFileImporter(UrnRepository urnRepo, UrnAdjcyRepository adjcyRepo, TopoProperties topoProperties) {
+    public TopoFileImporter(UrnRepository urnRepo, UrnAdjcyRepository adjcyRepo,
+                            TopoProperties topoProperties, JsonHelper helper) {
         this.urnRepo = urnRepo;
         this.adjcyRepo = adjcyRepo;
         this.topoProperties = topoProperties;
+        this.helper = helper;
     }
 
-
-    @PostConstruct
+    @Transactional
     public void startup() {
         log.info("Startup. Will attempt import from files set in topo.[devices|adcjies].filename properties.");
         if (topoProperties == null) {
@@ -52,9 +53,9 @@ public class TopoFileImporter implements TopoImporter {
             return;
         }
 
-        String devicesFilename = "./config/topo/"+topoProperties.getPrefix()+"-devices.json";
+        String devicesFilename = "./config/topo/" + topoProperties.getPrefix() + "-devices.json";
 
-        String adjciesFilename = "./config/topo/"+topoProperties.getPrefix()+"-adjcies.json";
+        String adjciesFilename = "./config/topo/" + topoProperties.getPrefix() + "-adjcies.json";
 
         try {
             this.importFromFile(false, devicesFilename, adjciesFilename);
@@ -75,7 +76,7 @@ public class TopoFileImporter implements TopoImporter {
         List<Device> devices = importDevicesFromFile(devicesFilename, overwrite);
         log.info("Devices defined in file " + devicesFilename + " : " + devices.size());
 
-        if (urnRepo.count() == 0 ) {
+        if (urnRepo.count() == 0) {
             log.info("URN DB empty. Will replace with input from devices file " + devicesFilename);
             List<UrnE> newUrns = this.urnsFromDevices(devices);
 
@@ -179,7 +180,6 @@ public class TopoFileImporter implements TopoImporter {
             }
 
 
-
             urns.add(deviceUrn);
 
 
@@ -220,14 +220,13 @@ public class TopoFileImporter implements TopoImporter {
 
     private List<Device> importDevicesFromFile(String filename, boolean overwrite) throws IOException {
         File jsonFile = new File(filename);
-        String workingDirectory = System.getProperty("user.dir");
-        ObjectMapper mapper = jsonHelper.mapper();
+        ObjectMapper mapper = helper.mapper();
         return Arrays.asList(mapper.readValue(jsonFile, Device[].class));
     }
 
     private List<UrnAdjcyE> importAdjciesFromFile(String filename, boolean overwrite) throws IOException {
         File jsonFile = new File(filename);
-        ObjectMapper mapper = jsonHelper.mapper();
+        ObjectMapper mapper = helper.mapper();
         List<UrnAdjcy> fromFile = Arrays.asList(mapper.readValue(jsonFile, UrnAdjcy[].class));
         List<UrnAdjcyE> result = new ArrayList<>();
         fromFile.forEach(t -> {

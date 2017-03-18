@@ -1,13 +1,14 @@
 package net.es.oscars.pce;
 
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.AbstractCoreTest;
 import net.es.oscars.CoreUnitTestConfiguration;
 import net.es.oscars.dto.spec.SurvivabilityType;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.helpers.RequestedEntityBuilder;
 import net.es.oscars.resv.ent.*;
-import net.es.oscars.helpers.test.AsymmTopologyBuilder;
-import net.es.oscars.helpers.test.TopologyBuilder;
+import net.es.oscars.pce.helpers.AsymmTopologyBuilder;
+import net.es.oscars.pce.helpers.TopologyBuilder;
 import net.es.oscars.topo.dao.UrnAdjcyRepository;
 import net.es.oscars.topo.dao.UrnRepository;
 import net.es.oscars.topo.ent.UrnE;
@@ -33,10 +34,8 @@ import java.util.*;
  */
 
 @Slf4j
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes=CoreUnitTestConfiguration.class)
 @Transactional
-public class TopPceTestNonPalindromic
+public class TopPceTestNonPalindromic extends AbstractCoreTest
 {
     @Autowired
     private TopPCE topPCE;

@@ -55,6 +55,22 @@ public class RouterConfigBuilder {
         return buildRouterConfig(routerConfig, command.getDevice(), command.getModel());
     }
 
+    public RancidArguments teardown(Command command) throws ConfigException {
+        String routerConfig = "";
+        DeviceModel model = command.getModel();
+        switch (model) {
+            case ALCATEL_SR7750:
+                routerConfig = acg.teardown(command.getAlu());
+                break;
+            case JUNIPER_MX:
+            case JUNIPER_EX:
+                break;
+            default:
+                throw new ConfigException("unknown model");
+        }
+
+        return buildRouterConfig(routerConfig, command.getDevice(), command.getModel());
+    }
 
     public RancidArguments buildRouterConfig(String routerConfig, String device, DeviceModel model) throws ConfigException {
         String execPath;

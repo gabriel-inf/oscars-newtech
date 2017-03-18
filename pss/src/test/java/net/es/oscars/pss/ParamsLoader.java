@@ -55,10 +55,23 @@ public class ParamsLoader {
         while (files.hasNext()) {
             File f = files.next();
             if (f.getName().startsWith(prefix)) {
+                log.info(f.getName() + " does start with "+prefix);
+                log.info("loading spec from "+f.getName());
                 RouterTestSpec spec = mapper.readValue(f, RouterTestSpec.class);
+                spec.setFilename(f.getName());
                 result.add(spec);
             }
         }
         return result;
     }
+
+    public RouterTestSpec loadSpec(String path) throws IOException{
+        ObjectMapper mapper = new ObjectMapper();
+
+        File f = new File(path);
+        RouterTestSpec spec = mapper.readValue(f, RouterTestSpec.class);
+        spec.setFilename(path);
+        return spec;
+    }
+
 }

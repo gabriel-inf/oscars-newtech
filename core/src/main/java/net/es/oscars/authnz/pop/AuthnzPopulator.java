@@ -24,8 +24,7 @@ public class AuthnzPopulator {
 
     private AuthnzProperties properties;
 
-    @PostConstruct
-    public void initializeUserDb() {
+    public void startup() {
 
         List<EUser> users = userRepo.findAll();
 

@@ -10,6 +10,7 @@ public enum ResourceType {
     VC_ID("VC_ID"),
     ALU_INGRESS_POLICY_ID("ALU_INGRESS_POLICY_ID"),
     ALU_EGRESS_POLICY_ID("ALU_EGRESS_POLICY_ID"),
+    ALU_SVC_ID("ALU_SVC_ID"),
     ALU_SDP_ID("ALU_SDP_ID");
 
     private String code;
@@ -25,7 +26,7 @@ public enum ResourceType {
     }
 
 
-    private static final Map<String, ResourceType> lookup = new HashMap<String, ResourceType>();
+    private static final Map<String, ResourceType> lookup = new HashMap<>();
 
     static {
         for (ResourceType pc : EnumSet.allOf(ResourceType.class)) {

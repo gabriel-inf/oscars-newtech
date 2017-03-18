@@ -5,7 +5,7 @@
 
   "aluParams": {
     "aluVpls": {
-      "vcId": 6011,
+      "svcId": 6011,
       "saps": [
         {
           "port": "1/1/1",
@@ -18,14 +18,12 @@
       "serviceName": "es.net-1234",
       "description": "es.net-1234, to someplace",
       "endpointName": "es.net-1234_endpoint",
-      "sdp": {
-        "sdpId": 6511,
-        "lspName": "es.net-1234",
-        "description": "es.net-1234_sdp",
-        "farEnd": "134.55.200.99"
-      },
-      "protectVcId": null,
-      "protectSdp": null
+      "sdpToVcIds": [
+        {
+          "sdpId": 6511,
+          "vcId": 6011
+        }
+      ]
     },
     "sdps": [
       {

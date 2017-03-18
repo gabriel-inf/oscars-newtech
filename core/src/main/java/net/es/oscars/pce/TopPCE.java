@@ -433,7 +433,8 @@ public class TopPCE {
                 // If it failed, decrement the number reserved
                 catch (Exception e) {
                     log.info(e.getMessage());
-                    e.printStackTrace();
+                    // commented out as I don't like stack traces in normal operation
+                    // e.printStackTrace();
                     numReserved--;
                 }
             }

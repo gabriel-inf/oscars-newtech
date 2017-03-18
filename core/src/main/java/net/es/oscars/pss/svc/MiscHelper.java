@@ -1,14 +1,13 @@
 package net.es.oscars.pss.svc;
 
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.dto.pss.params.MplsHop;
+import net.es.oscars.dto.pss.params.MplsPath;
 import net.es.oscars.dto.resv.ResourceType;
 import net.es.oscars.pss.PSSException;
-import net.es.oscars.pss.cmd.MplsHop;
-import net.es.oscars.pss.cmd.MplsPath;
 import net.es.oscars.pss.dao.UrnAddressRepository;
 import net.es.oscars.pss.ent.UrnAddressE;
 import net.es.oscars.resv.ent.*;
-import net.es.oscars.topo.ent.UrnE;
 import net.es.oscars.topo.svc.TopoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

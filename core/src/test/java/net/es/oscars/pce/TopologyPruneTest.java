@@ -1,8 +1,9 @@
 package net.es.oscars.pce;
 
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.AbstractCoreTest;
 import net.es.oscars.CoreUnitTestConfiguration;
-import net.es.oscars.helpers.test.TopologyBuilder;
+import net.es.oscars.pce.helpers.TopologyBuilder;
 import net.es.oscars.dto.topo.TopoEdge;
 import net.es.oscars.dto.topo.TopoVertex;
 import net.es.oscars.dto.topo.Topology;
@@ -26,10 +27,8 @@ import java.util.stream.Collectors;
  */
 
 @Slf4j
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes=CoreUnitTestConfiguration.class)
 @Transactional
-public class TopologyPruneTest
+public class TopologyPruneTest extends AbstractCoreTest
 {
     @Autowired
     private TopoService topoService;

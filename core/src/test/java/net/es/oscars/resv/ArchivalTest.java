@@ -1,6 +1,7 @@
 package net.es.oscars.resv;
 
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.AbstractCoreTest;
 import net.es.oscars.CoreUnitTestConfiguration;
 import net.es.oscars.dto.pss.EthFixtureType;
 import net.es.oscars.dto.pss.EthJunctionType;
@@ -8,7 +9,7 @@ import net.es.oscars.dto.pss.MplsPipeType;
 import net.es.oscars.dto.spec.PalindromicType;
 import net.es.oscars.dto.spec.SurvivabilityType;
 import net.es.oscars.helpers.RequestedEntityBuilder;
-import net.es.oscars.helpers.test.TopologyBuilder;
+import net.es.oscars.pce.helpers.TopologyBuilder;
 import net.es.oscars.pce.PCEException;
 import net.es.oscars.pce.TopPCE;
 import net.es.oscars.pss.PSSException;
@@ -33,10 +34,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Slf4j
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes=CoreUnitTestConfiguration.class)
 @Transactional
-public class ArchivalTest
+public class ArchivalTest extends AbstractCoreTest
 {
     @Autowired
     private ResvService resvService;

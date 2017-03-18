@@ -1,6 +1,7 @@
 package net.es.oscars.servicetopo;
 
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.AbstractCoreTest;
 import net.es.oscars.CoreUnitTestConfiguration;
 import net.es.oscars.dto.pss.EthFixtureType;
 import net.es.oscars.dto.pss.EthJunctionType;
@@ -38,10 +39,8 @@ import java.util.stream.Collectors;
  */
 
 @Slf4j
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes=CoreUnitTestConfiguration.class)
 @Transactional
-public class ServiceLayerTopoLogicalLinkTest
+public class ServiceLayerTopoLogicalLinkTest extends AbstractCoreTest
 {
     @Autowired
     private ServiceLayerTopology serviceLayerTopo;

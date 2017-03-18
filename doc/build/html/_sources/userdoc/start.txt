@@ -31,7 +31,7 @@ To build the project, run the following commands from the main project directory
 
    mvn install
 
-This will require all unit tests included with the project to pass as a condition of a successful build. This is the recommended command.
+This will require all unit tests included with the project to pass as a condition of a successful build. This is the recommended routerConfig.
 
 Alternatively, you may skip these tests:
 
@@ -49,7 +49,7 @@ The unit tests can be run separately if desired:
 Starting OSCARS Modules
 -----------------------
 
-OSCARS is pre-packaged with a start script, which initializes all modules of the system easily and conveniently. From the main project directory, run the command:
+OSCARS is pre-packaged with a start script, which initializes all modules of the system easily and conveniently. From the main project directory, run the routerConfig:
 
 .. code-block:: bash
 
