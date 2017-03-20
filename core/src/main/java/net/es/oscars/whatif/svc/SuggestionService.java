@@ -40,6 +40,7 @@ public class SuggestionService {
     @Autowired
     ResvController resvController;
 
+
     /**
      * Generate a list of suggested Connections given a VolumeRequestSpecification.
      * @param volumeSpec - Specification containing the source, destination, start date, end date, and data volume.
@@ -55,7 +56,6 @@ public class SuggestionService {
         String dstDevice = volumeSpec.getDstDevice();
         Set<String> dstPorts = volumeSpec.getDstPorts();
 
-        System.out.println("hello worlds!");
 
         // Get the bandwidth availability along a path from srcDevice to dstDevice
         BandwidthAvailabilityRequest bwAvailRequest = createBwAvailRequest(srcDevice, srcPorts, dstDevice, dstPorts,

@@ -75,6 +75,7 @@ The main application. Handles reservation requests, determines which path (if an
 * **servicetopo** - Abstracts the network topology to create unique "Service Level" views of the topology for a given request.
 * **tasks** - Services which run in the background and perform tasks at certain intervals (e.g. Select a submitted request to begin the reservation process).
 * **topo** - Maintain topology information.
+* **whatif** - Generate reservation suggestion for users on-demand.
 
 ### shared 
 A collection of shared classes used by the different modules. 
@@ -82,5 +83,3 @@ A collection of shared classes used by the different modules.
 ### webui 
 The web interface through which users can view their current and past reservations, and submit reservation requests. The WebUI is built using the [React](https://facebook.github.io/react/) framework. 
 
-### whatif
-A module that can generate reservation suggestions for users on-demand. 
