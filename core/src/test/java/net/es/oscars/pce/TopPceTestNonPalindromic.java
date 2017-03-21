@@ -3214,7 +3214,7 @@ public class TopPceTestNonPalindromic extends AbstractCoreTest
     @Test
     public void asymmPceTestNoFixtures()
     {
-        log.info("Initializing test: 'asymmPceTest12'.");
+        log.info("Initializing test: 'asymmPceTestNoFixtures'.");
 
         RequestedBlueprintE requestedBlueprint;
         Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
@@ -3235,7 +3235,7 @@ public class TopPceTestNonPalindromic extends AbstractCoreTest
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
         requestedBlueprint = testBuilder.buildRequest("", srcDevice, "", dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1, 1, 1, "nonPalTest");
 
-        log.info("Beginning test: 'asymmPceTest12'.");
+        log.info("Beginning test: 'asymmPceTestNoFixtures'.");
 
         try
         {
@@ -3306,7 +3306,7 @@ public class TopPceTestNonPalindromic extends AbstractCoreTest
             }
         }
 
-        log.info("test 'asymmPceTest12' passed.");
+        log.info("test 'asymmPceTestNoFixtures' passed.");
     }
 
     @Test
@@ -5001,9 +5001,9 @@ public class TopPceTestNonPalindromic extends AbstractCoreTest
     }
 
     @Test
-    public void nonPalWithNonUniformPortsTest()
+    public void nonPalWithEthPortsOnRoutersTest()
     {
-        log.info("Initializing test: 'nonPalWithNonUniformPortsTest'.");
+        log.info("Initializing test: 'nonPalWithEthPortsOnRoutersTest'.");
 
         RequestedBlueprintE requestedBlueprint;
         Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
@@ -5012,9 +5012,9 @@ public class TopPceTestNonPalindromic extends AbstractCoreTest
         Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
         Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
 
-        String srcPort = "portP:1";
+        String srcPort = "nodeP:1";
         String srcDevice = "nodeP";
-        String dstPort = "portQ:1";
+        String dstPort = "nodeQ:1";
         String dstDevice = "nodeQ";
         Integer azBW = 25;
         Integer zaBW = 25;
@@ -5022,11 +5022,11 @@ public class TopPceTestNonPalindromic extends AbstractCoreTest
         SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
         String vlan = "any";
 
-        topologyBuilder.buildTopoWithNonUniformPorts();
+        asymmTopologyBuilder.buildTopoWithEthPortsOnRouters();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
         requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 2, 1, 1, "test");
 
-        log.info("Beginning test: 'nonPalWithNonUniformPortsTest'.");
+        log.info("Beginning test: 'nonPalWithEthPortsOnRoutersTest'.");
 
         try
         {
@@ -5039,6 +5039,50 @@ public class TopPceTestNonPalindromic extends AbstractCoreTest
 
         assert (reservedBlueprint.isPresent());
 
-        log.info("test 'nonPalWithNonUniformPortsTest' passed.");
+        ReservedVlanFlowE reservedFlow = reservedBlueprint.get().getVlanFlow();
+
+        Set<ReservedEthPipeE> allResEthPipes = reservedFlow.getEthPipes();
+        Set<ReservedMplsPipeE> allResMplsPipes = reservedFlow.getMplsPipes();
+        Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
+
+        assert (allResJunctions.size() == 0);
+        assert (allResEthPipes.size() == 0);
+        assert (allResMplsPipes.size() == 1);
+
+        // Ethernet Pipes
+        for(ReservedMplsPipeE mplsPipe : allResMplsPipes)
+        {
+            ReservedVlanJunctionE aJunc = mplsPipe.getAJunction();
+            ReservedVlanJunctionE zJunc = mplsPipe.getZJunction();
+            Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
+            Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
+            List<String> azERO = mplsPipe.getAzERO();
+            List<String> zaERO = mplsPipe.getZaERO();
+            String actualAzERO = aJunc.getDeviceUrn() + "-";
+            String actualZaERO = zJunc.getDeviceUrn() + "-";
+
+            for(String x : azERO)
+                actualAzERO = actualAzERO + x + "-";
+
+            for(String x : zaERO)
+                actualZaERO = actualZaERO + x + "-";
+
+            actualAzERO = actualAzERO + zJunc.getDeviceUrn();
+            actualZaERO = actualZaERO + aJunc.getDeviceUrn();
+
+            assert(aJunc.getDeviceUrn().equals("nodeP"));
+            assert(zJunc.getDeviceUrn().equals("nodeQ"));
+
+            assert (aFixes.size() == 1);
+            assert (zFixes.size() == 1);
+
+            String expectedAzERO = "nodeP-nodeP:2-nodeQ:2-nodeQ";
+            String expectedZaERO = "nodeQ-nodeQ:6-nodeR:2-nodeR-nodeR:1-nodeP:6-nodeP";
+
+            assert (actualAzERO.equals(expectedAzERO));
+            assert (actualZaERO.equals(expectedZaERO));
+        }
+
+        log.info("test 'nonPalWithEthPortsOnRoutersTest' passed.");
     }
 }

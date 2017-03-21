@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.topo.TopoEdge;
 import net.es.oscars.dto.topo.TopoVertex;
 import net.es.oscars.dto.topo.Topology;
+import net.es.oscars.dto.topo.enums.PortLayer;
+import net.es.oscars.dto.topo.enums.VertexType;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -95,12 +97,6 @@ public class BellmanFordPCE {
                     log.info("Edge: " + edge);
                     return new HashMap<>();
                 }
-                /*if(!distanceMap.containsKey(a)){
-                    distanceMap.put(a, 999999999L);
-                }
-                if(!distanceMap.containsKey(z)){
-                    distanceMap.put(z, 999999999L);
-                }*/
 
                 Long weight = distanceMap.get(a) + edge.getMetric();
                 if(weight < distanceMap.get(z)){
@@ -125,5 +121,46 @@ public class BellmanFordPCE {
         }*/
 
         return edgeMap;
+    }
+
+    private void populatePortLayers(Collection<TopoVertex> vertices, Map<TopoVertex,TopoVertex> portToDeviceMap, Map<TopoVertex, List<Integer>> bandwidthMap, Map<TopoVertex, List<Integer>> floorMap, Map<TopoVertex, List<Integer>> ceilingMap)
+    {
+        for(TopoVertex onePort : vertices)
+        {
+            if(!onePort.getVertexType().equals(VertexType.PORT))
+                continue;
+
+            if(!onePort.getPortLayer().equals(PortLayer.NONE))
+                continue;
+
+            TopoVertex correspondingDevice = portToDeviceMap.remove(onePort);
+            List<Integer> floors = null;
+            List<Integer> ceilings = null;
+            List<Integer> portBWs = null;
+
+            VertexType deviceType = correspondingDevice.getVertexType();
+
+            if(bandwidthMap != null)
+                portBWs = bandwidthMap.remove(onePort);
+            if(floorMap != null)
+                floors = floorMap.remove(onePort);
+            if(ceilingMap != null)
+                ceilings = ceilingMap.remove(onePort);
+
+            // Set Port Layer //
+            if(deviceType.equals(VertexType.SWITCH))
+                onePort.setPortLayer(PortLayer.ETHERNET);
+            else if(deviceType.equals(VertexType.ROUTER))
+                onePort.setPortLayer(PortLayer.MPLS);
+
+            portToDeviceMap.put(onePort, correspondingDevice);
+
+            if(bandwidthMap != null)
+                bandwidthMap.put(onePort, portBWs);
+            if(floorMap != null)
+                floorMap.put(onePort, floors);
+            if(ceilingMap != null)
+                ceilingMap.put(onePort, ceilings);
+        }
     }
 }

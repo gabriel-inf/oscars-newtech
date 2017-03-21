@@ -316,8 +316,6 @@ public class TopoService {
             assert(portUrnOpt.isPresent());
 
             UrnE portURN = portUrnOpt.get();
-            log.info("Port: " + portURN.getUrn());
-            log.info("Capabilities: " + portURN.getCapabilities().toString());
 
             if(!portURN.getCapabilities().contains(Layer.MPLS))
                 return true;
@@ -328,27 +326,23 @@ public class TopoService {
 
     public Set<String> identifyEdgePortURNs()
     {
-        List<UrnE> urns = urnRepo.findAll();
+        Topology fullTopo = getMultilayerTopology();
         Set<String> edgePortURNs = new HashSet<>();
 
-        Set<UrnE> allPorts = urnRepo.findAll().stream()
-                .filter(p -> p.getDeviceType() == null && p.getIfceType().equals(IfceType.PORT))
+        Set<TopoVertex> allPorts = fullTopo.getVertices().stream()
+                .filter(v -> v.getVertexType().equals(VertexType.PORT))
                 .collect(Collectors.toSet());
 
-        Set<UrnAdjcyE> allExternalLinks = adjcyRepo.findAll().stream()
-                .filter(l -> !l.getMetrics().containsKey(Layer.INTERNAL))
+        Set<TopoEdge> allExternalLinks = fullTopo.getEdges().stream()
+                .filter(l -> !l.getLayer().equals(Layer.INTERNAL))
                 .collect(Collectors.toSet());
 
-        Set<UrnAdjcyE> allInternalLinks = adjcyRepo.findAll().stream()
-                .filter(l -> l.getMetrics().containsKey(Layer.INTERNAL))
-                .collect(Collectors.toSet());
-
-        for(UrnE onePort : allPorts)
+        for(TopoVertex onePort : allPorts)
         {
             String portURN = onePort.getUrn();
             boolean portNotOnAnyLink = true;
 
-            for(UrnAdjcyE oneExtAdjcy : allExternalLinks)
+            for(TopoEdge oneExtAdjcy : allExternalLinks)
             {
                 if(oneExtAdjcy.getA().equals(onePort) || oneExtAdjcy.getZ().equals(onePort))    // The port doesn't exist on an external (ETHERNET/MPLS) edge
                 {

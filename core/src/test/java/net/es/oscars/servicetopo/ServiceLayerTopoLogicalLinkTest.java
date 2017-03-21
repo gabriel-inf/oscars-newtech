@@ -2,29 +2,28 @@ package net.es.oscars.servicetopo;
 
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.AbstractCoreTest;
-import net.es.oscars.CoreUnitTestConfiguration;
 import net.es.oscars.dto.pss.EthFixtureType;
 import net.es.oscars.dto.pss.EthJunctionType;
 import net.es.oscars.dto.pss.EthPipeType;
-import net.es.oscars.dto.topo.enums.PortLayer;
-import net.es.oscars.pce.BandwidthService;
-import net.es.oscars.resv.ent.*;
+import net.es.oscars.dto.spec.PalindromicType;
 import net.es.oscars.dto.topo.TopoEdge;
 import net.es.oscars.dto.topo.TopoVertex;
 import net.es.oscars.dto.topo.Topology;
+import net.es.oscars.dto.topo.enums.Layer;
+import net.es.oscars.dto.topo.enums.PortLayer;
+import net.es.oscars.dto.topo.enums.UrnType;
+import net.es.oscars.dto.topo.enums.VertexType;
+import net.es.oscars.pce.BandwidthService;
+import net.es.oscars.pce.PruningService;
+import net.es.oscars.pce.helpers.TopologyBuilder;
+import net.es.oscars.resv.ent.*;
 import net.es.oscars.topo.ent.IntRangeE;
 import net.es.oscars.topo.ent.ReservableBandwidthE;
 import net.es.oscars.topo.ent.ReservableVlanE;
 import net.es.oscars.topo.ent.UrnE;
-import net.es.oscars.dto.topo.enums.Layer;
-import net.es.oscars.dto.spec.PalindromicType;
-import net.es.oscars.dto.topo.enums.UrnType;
-import net.es.oscars.dto.topo.enums.VertexType;
+import net.es.oscars.topo.svc.TopoService;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
@@ -37,7 +36,6 @@ import java.util.stream.Collectors;
  *
  * Primarily tests correctness of Logical Link construction and end-point assignment in service-layer topology
  */
-
 @Slf4j
 @Transactional
 public class ServiceLayerTopoLogicalLinkTest extends AbstractCoreTest
@@ -48,9 +46,17 @@ public class ServiceLayerTopoLogicalLinkTest extends AbstractCoreTest
     @Autowired
     private BandwidthService bwService;
 
+    @Autowired
+    private PruningService pruningService;
+
+    @Autowired
+    private TopoService topoService;
+
+    @Autowired
+    private TopologyBuilder topologyBuilder;
+
     private Set<TopoVertex> ethernetTopoVertices;
     private Set<TopoVertex> mplsTopoVertices;
-    private Set<TopoVertex> internalTopoVertices;
 
     private Set<TopoEdge> ethernetTopoEdges;
     private Set<TopoEdge> mplsTopoEdges;
@@ -67,7 +73,7 @@ public class ServiceLayerTopoLogicalLinkTest extends AbstractCoreTest
     {
         buildLinearTopo();
         constructLayeredTopology();
-        buildLinearRequestPipeEth2Eth();
+        buildLinearRequestPipeEth2Eth("switchA", "switchE", "switchA:1", "switchE:2");
         buildDummySchedule();
 
 
@@ -175,7 +181,7 @@ public class ServiceLayerTopoLogicalLinkTest extends AbstractCoreTest
     {
         buildLinearTopoWithMultipleMPLSBranch();
         constructLayeredTopology();
-        buildLinearRequestPipeEth2Eth();
+        buildLinearRequestPipeEth2Eth("switchA", "switchE", "switchA:1", "switchE:2");
         buildDummySchedule();
 
         Set<LogicalEdge> logicalLinks = serviceLayerTopo.getLogicalLinks();
@@ -297,7 +303,7 @@ public class ServiceLayerTopoLogicalLinkTest extends AbstractCoreTest
         }
 
         constructLayeredTopology();
-        buildLinearRequestPipeEth2Eth();
+        buildLinearRequestPipeEth2Eth("switchA", "switchE", "switchA:1", "switchE:2");
         buildDummySchedule();
 
         Set<LogicalEdge> logicalLinks = serviceLayerTopo.getLogicalLinks();
@@ -421,7 +427,7 @@ public class ServiceLayerTopoLogicalLinkTest extends AbstractCoreTest
         }
 
         constructLayeredTopology();
-        buildLinearRequestPipeEth2Eth();
+        buildLinearRequestPipeEth2Eth("switchA", "switchE", "switchA:1", "switchE:2");
         buildDummySchedule();
 
         Set<LogicalEdge> logicalLinks = serviceLayerTopo.getLogicalLinks();
@@ -532,7 +538,7 @@ public class ServiceLayerTopoLogicalLinkTest extends AbstractCoreTest
     {
         buildTwoMPlsPathTopo();
         constructLayeredTopology();
-        buildLinearRequestPipeEth2Eth();
+        buildLinearRequestPipeEth2Eth("switchA", "switchE", "switchA:1", "switchE:2");
         buildDummySchedule();
 
         Set<LogicalEdge> logicalLinks = serviceLayerTopo.getLogicalLinks();
@@ -1182,6 +1188,142 @@ public class ServiceLayerTopoLogicalLinkTest extends AbstractCoreTest
     }
 
 
+    @Test
+    public void verifyLogicalLinksEthPortsOnRouters()
+    {
+        String srcDevice = "nodeP";
+        String dstDevice = "nodeQ";
+        String srcPort = "nodeP:1";
+        String dstPort = "nodeQ:1";
+
+        topologyBuilder.buildTopoWithEthPortsOnRouters();
+        this.buildDummySchedule();
+        this.buildLinearRequestPipeEth2Eth(srcDevice, dstDevice, srcPort, dstPort);
+
+        Set<String> fixtureURNs = new HashSet<>();
+        fixtureURNs.add(srcPort);
+        fixtureURNs.add(dstPort);
+
+        log.info("Beginning test: 'verifyLogicalLinksEthPortsOnRouters'.");
+
+        Topology ethernetTopo = topoService.layer(Layer.ETHERNET);
+        Topology internalTopo = topoService.layer(Layer.INTERNAL);
+        Topology mplsTopo = topoService.layer(Layer.MPLS);
+
+        /* Recreate NonPalindromicPCE behavior to correctly build service-layer topology */
+        Set<TopoVertex> portsOnly = ethernetTopo.getVertices().stream()
+                .filter(v -> v.getVertexType().equals(VertexType.PORT))
+                .collect(Collectors.toSet());
+
+        for (TopoEdge intEdge : internalTopo.getEdges())
+        {
+            TopoVertex vertA = intEdge.getA();
+            TopoVertex vertZ = intEdge.getZ();
+
+            if (portsOnly.isEmpty())
+            {
+                break;
+            }
+
+            if(portsOnly.contains(vertA) && !vertA.getPortLayer().equals(PortLayer.MPLS))
+                portsOnly.remove(vertA);
+
+            if(portsOnly.contains(vertZ) && !vertZ.getPortLayer().equals(PortLayer.MPLS))
+                portsOnly.remove(vertZ);
+        }
+
+        ethernetTopo.getVertices().removeIf(v -> v.getVertexType().equals(VertexType.ROUTER) && !topoService.determineIfRouterHasEthernetPorts(v.getUrn()));
+        ethernetTopo.getVertices().removeAll(portsOnly);
+
+        internalTopo.getVertices().removeAll(internalTopo.getVertices());
+        /* */
+
+
+        // Construct service-layer topology
+        serviceLayerTopo.setTopology(ethernetTopo);
+        serviceLayerTopo.setTopology(internalTopo);
+        serviceLayerTopo.setTopology(mplsTopo);
+        serviceLayerTopo.createMultilayerTopology();
+
+        assert(serviceLayerTopo.getLogicalLinks().size() == 16);
+        assert(serviceLayerTopo.getLlBackup().size() == 16);
+        assert(serviceLayerTopo.getServiceLayerLinks().size() == 20);
+        assert(serviceLayerTopo.getServiceLayerDevices().size() == 3);
+        assert(serviceLayerTopo.getServiceLayerPorts().size() == 7);
+        assert(serviceLayerTopo.getMplsLayerDevices().size() == 3);
+        assert(serviceLayerTopo.getMplsLayerPorts().size() == 8);
+        assert(serviceLayerTopo.getMplsLayerLinks().size() == 22);
+
+        // Remove unneeded edge-ports for simpler service-layer topology construction and begin again
+        pruningService.pruneTopologyOfEdgePortsExcept(ethernetTopo, fixtureURNs);
+        pruningService.pruneTopologyOfEdgePortsExcept(internalTopo, fixtureURNs);
+        pruningService.pruneTopologyOfEdgePortsExcept(mplsTopo, fixtureURNs);
+
+        serviceLayerTopo = new ServiceLayerTopology();
+        serviceLayerTopo.setTopology(ethernetTopo);
+        serviceLayerTopo.setTopology(internalTopo);
+        serviceLayerTopo.setTopology(mplsTopo);
+        serviceLayerTopo.createMultilayerTopology();
+
+        assert(serviceLayerTopo.getLogicalLinks().size() == 8);
+        assert(serviceLayerTopo.getLlBackup().size() == 8);
+        assert(serviceLayerTopo.getServiceLayerLinks().size() == 18);
+        assert(serviceLayerTopo.getServiceLayerDevices().size() == 3);
+        assert(serviceLayerTopo.getServiceLayerPorts().size() == 6);
+        assert(serviceLayerTopo.getMplsLayerDevices().size() == 3);
+        assert(serviceLayerTopo.getMplsLayerPorts().size() == 8);
+        assert(serviceLayerTopo.getMplsLayerLinks().size() == 22);
+
+        TopoVertex srcDeviceVertex = null, dstDeviceVertex = null, srcPortVertex = null, dstPortVertex = null;
+
+        for(TopoVertex v : ethernetTopo.getVertices())
+        {
+            if(v.getUrn().equals("nodeP"))
+                srcDeviceVertex = v;
+            else if(v.getUrn().equals("nodeP:1"))
+                srcPortVertex = v;
+        }
+
+        for(TopoVertex v : ethernetTopo.getVertices())
+        {
+            if(v.getUrn().equals("nodeQ"))
+                dstDeviceVertex = v;
+            else if(v.getUrn().equals("nodeQ:1"))
+                dstPortVertex = v;
+        }
+
+        serviceLayerTopo.buildLogicalLayerSrcNodes(srcDeviceVertex, srcPortVertex);     // should NOT create VIRTUAL nodes
+        serviceLayerTopo.buildLogicalLayerDstNodes(dstDeviceVertex, dstPortVertex);     // should NOT create VIRTUAL nodes
+
+        // No change //
+        assert(serviceLayerTopo.getLogicalLinks().size() == 8);
+        assert(serviceLayerTopo.getLlBackup().size() == 8);
+        assert(serviceLayerTopo.getServiceLayerLinks().size() == 18);
+        assert(serviceLayerTopo.getServiceLayerDevices().size() == 3);
+        assert(serviceLayerTopo.getServiceLayerPorts().size() == 6);
+        assert(serviceLayerTopo.getMplsLayerDevices().size() == 3);
+        assert(serviceLayerTopo.getMplsLayerPorts().size() == 8);
+        assert(serviceLayerTopo.getMplsLayerLinks().size() == 22);
+
+        serviceLayerTopo.getLogicalLinks().stream()
+            .forEach(ll -> {
+                String aURN = ll.getA().getUrn();
+                String zURN = ll.getZ().getUrn();
+                if(aURN.equals("nodeP:1"))
+                    assert(zURN.equals("nodeQ:1") || zURN.equals("nodeQ:4"));
+                else if(aURN.equals("nodeP:3"))
+                    assert(zURN.equals("nodeQ:1") || zURN.equals("nodeQ:4"));
+                else if(aURN.equals("nodeQ:1"))
+                    assert(zURN.equals("nodeP:1") || zURN.equals("nodeP:3"));
+                else if(aURN.equals("nodeQ:4"))
+                    assert(zURN.equals("nodeP:1") || zURN.equals("nodeP:3"));
+                else
+                    assert false;
+        });
+
+        log.info("test 'verifyLogicalLinksEthPortsOnRouters' passed.");
+    }
+
     private void constructLayeredTopology()
     {
         Topology dummyEthernetTopo = new Topology();
@@ -1193,7 +1335,7 @@ public class ServiceLayerTopoLogicalLinkTest extends AbstractCoreTest
         dummyEthernetTopo.setEdges(ethernetTopoEdges);
 
         dummyInternalTopo.setLayer(Layer.INTERNAL);
-        dummyInternalTopo.setVertices(internalTopoVertices);
+        dummyInternalTopo.setVertices(new HashSet<>());
         dummyInternalTopo.setEdges(internalTopoEdges);
 
         dummyMPLSTopo.setLayer(Layer.MPLS);
@@ -1216,7 +1358,6 @@ public class ServiceLayerTopoLogicalLinkTest extends AbstractCoreTest
     {
         ethernetTopoVertices = new HashSet<>();
         mplsTopoVertices = new HashSet<>();
-        internalTopoVertices = new HashSet<>();
 
         ethernetTopoEdges = new HashSet<>();
         mplsTopoEdges = new HashSet<>();
@@ -1330,7 +1471,6 @@ public class ServiceLayerTopoLogicalLinkTest extends AbstractCoreTest
     {
         ethernetTopoVertices = new HashSet<>();
         mplsTopoVertices = new HashSet<>();
-        internalTopoVertices = new HashSet<>();
 
         ethernetTopoEdges = new HashSet<>();
         mplsTopoEdges = new HashSet<>();
@@ -1661,7 +1801,7 @@ public class ServiceLayerTopoLogicalLinkTest extends AbstractCoreTest
     }
 
 
-    private void buildLinearRequestPipeEth2Eth()
+    private void buildLinearRequestPipeEth2Eth(String srcDevice, String dstDevice, String srcPort, String dstPort)
     {
         requestedPipe = new RequestedVlanPipeE();
 
@@ -1671,13 +1811,13 @@ public class ServiceLayerTopoLogicalLinkTest extends AbstractCoreTest
         RequestedVlanFixtureE aFix = new RequestedVlanFixtureE();
         RequestedVlanFixtureE zFix = new RequestedVlanFixtureE();
 
-        aFix.setPortUrn("switchA:1");
+        aFix.setPortUrn(srcPort);
         aFix.setVlanExpression("1234");
         aFix.setFixtureType(EthFixtureType.JUNOS_IFCE);
         aFix.setInMbps(100);
         aFix.setEgMbps(100);
 
-        zFix.setPortUrn("switchE:2");
+        zFix.setPortUrn(dstPort);
         zFix.setVlanExpression("1234");
         zFix.setFixtureType(EthFixtureType.JUNOS_IFCE);
         zFix.setInMbps(100);
@@ -1689,11 +1829,11 @@ public class ServiceLayerTopoLogicalLinkTest extends AbstractCoreTest
         aFixes.add(aFix);
         zFixes.add(zFix);
 
-        aJunc.setDeviceUrn("switchA");
+        aJunc.setDeviceUrn(srcDevice);
         aJunc.setJunctionType(EthJunctionType.JUNOS_SWITCH);
         aJunc.setFixtures(aFixes);
 
-        zJunc.setDeviceUrn("switchE");
+        zJunc.setDeviceUrn(dstDevice);
         zJunc.setJunctionType(EthJunctionType.JUNOS_SWITCH);
         zJunc.setFixtures(zFixes);
 

@@ -53,6 +53,7 @@ public class ServiceLayerTopology
     private Topology mplsTopology;
     private Topology internalTopology;
 
+
     /**
      * Managing method in charge of constructing the multi-layer service-topology.
      * Divides physical topology into two layers: MPLS-only layer, and Service-layer:
@@ -441,6 +442,7 @@ public class ServiceLayerTopology
             Topology prunedMPLSTopoAZ = pruningService.pruneWithPipeAZ(mplsLayerTopo, requestedVlanPipe, urnList, bwAvailMap, rsvVlanList);
             Topology prunedMPLSTopoZA = pruningService.pruneWithPipeZA(mplsLayerTopo, requestedVlanPipe, urnList, bwAvailMap, rsvVlanList);
 
+
             // Step 5: Compute MPLS-Layer routes beginning and ending at ETHERNET src/dst ports to construct physical paths corresponding to this logical link (one for each direction because of bandwidth asymmetry)
             pathAZ = dijkstraPCE.computeShortestPathEdges(prunedMPLSTopoAZ, srcEthPort, dstEthPort);
             pathZA = dijkstraPCE.computeShortestPathEdges(prunedMPLSTopoZA, srcEthPort, dstEthPort);
@@ -458,15 +460,11 @@ public class ServiceLayerTopology
             mplsLayerTopo.getEdges().remove(physEdgeMplsPorttoZ);
             mplsLayerTopo.getEdges().removeIf(l -> l.getA().getVertexType().equals(VertexType.VIRTUAL) || l.getZ().getVertexType().equals(VertexType.VIRTUAL));
 
-
             if(pathAZ.isEmpty() && pathZA.isEmpty())
             {
                 logicalLinksToRemoveFromServiceLayer.add(oneLogicalLink);
                 continue;
             }
-
-            assert(pathAZ.get(0).getA().equals(pathZA.get(0).getA()));
-            assert(pathAZ.get(pathAZ.size()-1).getZ().equals(pathZA.get(pathZA.size()-1).getZ()));
 
 
             // Step 7: Calculate total cost-metric for logical link (in both directions).
@@ -788,16 +786,12 @@ public class ServiceLayerTopology
             }
             else    // This link is logical - Get corresponding physical ERO
             {
-                log.info("Edge: " + oneEdge.getA().getUrn() + " --> " + oneEdge.getZ().getUrn() + " is LOGICAL");
                 List<LogicalEdge> matchingLogicalEdges = logicalLinks.stream()
                         .filter(ll -> ll.getA().equals(physicalA) && ll.getZ().equals(physicalZ))
                         .collect(Collectors.toList());
 
                 assert(matchingLogicalEdges.size() == 1);
                 LogicalEdge matchingEdge = matchingLogicalEdges.get(0);
-
-                log.info("Found matching edge: " + matchingEdge.getA().getUrn() + " --> " + matchingEdge.getZ().getUrn());
-                matchingEdge.getCorrespondingZATopoEdges().stream().forEach(link -> log.info("Physical edge: " + link.getA().getUrn() + " --> " + link.getZ().getUrn()));
 
                 actualERO.addAll(matchingEdge.getCorrespondingZATopoEdges());
             }

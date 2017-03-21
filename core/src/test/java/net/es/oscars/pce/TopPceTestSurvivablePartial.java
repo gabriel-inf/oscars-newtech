@@ -11,6 +11,7 @@ import net.es.oscars.pce.helpers.TopologyBuilder;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.topo.ent.BidirectionalPathE;
+import net.es.oscars.topo.svc.TopoService;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +35,9 @@ public class TopPceTestSurvivablePartial extends AbstractCoreTest  {
 
     @Autowired
     private AsymmTopologyBuilder asymmTopologyBuilder;
+
+    @Autowired
+    private TopoService topoService;
 
     @Test
     public void survivablePceTest1()
@@ -1647,7 +1651,7 @@ public class TopPceTestSurvivablePartial extends AbstractCoreTest  {
         SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_PARTIAL;
         String vlan = "any";
 
-        topologyBuilder.buildTopoWithNonUniformPorts();
+        topologyBuilder.buildTopoWithEthPortsOnRouters();
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
         requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 2, 1, 1, "test");
 

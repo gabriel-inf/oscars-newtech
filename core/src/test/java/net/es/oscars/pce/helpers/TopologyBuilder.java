@@ -2752,31 +2752,37 @@ public class TopologyBuilder
         testBuilder.populateRepos(topoNodes, topoLinks, portToDeviceMap);
     }
 
-    public void buildTopoWithNonUniformPorts()
+    public void buildTopoWithEthPortsOnRouters()
     {
-        log.info("Building Test Topology with Dual-Layer Devices");
+        log.info("Building Test Topology with Ethernet-Layer Ports on MPLS-Layer devices");
 
         Map<TopoVertex, TopoVertex> portDeviceMap = new HashMap<>();
         Map<TopoVertex, List<Integer>> floorMap = new HashMap<>();
         Map<TopoVertex, List<Integer>> ceilingMap = new HashMap<>();
 
-
         // Devices //
         TopoVertex nodeP = new TopoVertex("nodeP", VertexType.ROUTER);
         TopoVertex nodeQ = new TopoVertex("nodeQ", VertexType.ROUTER);
+        TopoVertex nodeR = new TopoVertex("nodeR", VertexType.ROUTER);
 
         // Ports //
-        TopoVertex portP1 = new TopoVertex("portP:1", VertexType.PORT, PortLayer.ETHERNET);
-        TopoVertex portP2 = new TopoVertex("portP:2", VertexType.PORT, PortLayer.MPLS);
-        TopoVertex portP3 = new TopoVertex("portP:3", VertexType.PORT, PortLayer.ETHERNET);
-        TopoVertex portP4 = new TopoVertex("portP:4", VertexType.PORT, PortLayer.MPLS);
-        TopoVertex portP5 = new TopoVertex("portP:5", VertexType.PORT, PortLayer.ETHERNET);
+        TopoVertex portP1 = new TopoVertex("nodeP:1", VertexType.PORT, PortLayer.ETHERNET);
+        TopoVertex portP2 = new TopoVertex("nodeP:2", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portP3 = new TopoVertex("nodeP:3", VertexType.PORT, PortLayer.ETHERNET);
+        TopoVertex portP4 = new TopoVertex("nodeP:4", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portP5 = new TopoVertex("nodeP:5", VertexType.PORT, PortLayer.ETHERNET);
+        TopoVertex portP6 = new TopoVertex("nodeP:6", VertexType.PORT, PortLayer.MPLS);
 
-        TopoVertex portQ1 = new TopoVertex("portQ:1", VertexType.PORT, PortLayer.ETHERNET);
-        TopoVertex portQ2 = new TopoVertex("portQ:2", VertexType.PORT, PortLayer.MPLS);
-        TopoVertex portQ3 = new TopoVertex("portQ:3", VertexType.PORT, PortLayer.MPLS);
-        TopoVertex portQ4 = new TopoVertex("portQ:4", VertexType.PORT, PortLayer.ETHERNET);
-        TopoVertex portQ5 = new TopoVertex("portQ:5", VertexType.PORT, PortLayer.ETHERNET);
+        TopoVertex portQ1 = new TopoVertex("nodeQ:1", VertexType.PORT, PortLayer.ETHERNET);
+        TopoVertex portQ2 = new TopoVertex("nodeQ:2", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portQ3 = new TopoVertex("nodeQ:3", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portQ4 = new TopoVertex("nodeQ:4", VertexType.PORT, PortLayer.ETHERNET);
+        TopoVertex portQ5 = new TopoVertex("nodeQ:5", VertexType.PORT, PortLayer.ETHERNET);
+        TopoVertex portQ6 = new TopoVertex("nodeQ:6", VertexType.PORT, PortLayer.MPLS);
+
+        TopoVertex portR1 = new TopoVertex("nodeR:1", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portR2 = new TopoVertex("nodeR:2", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portR3 = new TopoVertex("nodeR:3", VertexType.PORT, PortLayer.ETHERNET);
 
         // Internal Links //
         TopoEdge edgeInt_P1_P = new TopoEdge(portP1, nodeP, 0L, Layer.INTERNAL);
@@ -2784,22 +2790,32 @@ public class TopologyBuilder
         TopoEdge edgeInt_P3_P = new TopoEdge(portP3, nodeP, 0L, Layer.INTERNAL);
         TopoEdge edgeInt_P4_P = new TopoEdge(portP4, nodeP, 0L, Layer.INTERNAL);
         TopoEdge edgeInt_P5_P = new TopoEdge(portP5, nodeP, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_P6_P = new TopoEdge(portP6, nodeP, 0L, Layer.INTERNAL);
         TopoEdge edgeInt_Q1_Q = new TopoEdge(portQ1, nodeQ, 0L, Layer.INTERNAL);
         TopoEdge edgeInt_Q2_Q = new TopoEdge(portQ2, nodeQ, 0L, Layer.INTERNAL);
         TopoEdge edgeInt_Q3_Q = new TopoEdge(portQ3, nodeQ, 0L, Layer.INTERNAL);
         TopoEdge edgeInt_Q4_Q = new TopoEdge(portQ4, nodeQ, 0L, Layer.INTERNAL);
         TopoEdge edgeInt_Q5_Q = new TopoEdge(portQ5, nodeQ, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_Q6_Q = new TopoEdge(portQ6, nodeQ, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_R1_R = new TopoEdge(portR1, nodeR, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_R2_R = new TopoEdge(portR2, nodeR, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_R3_R = new TopoEdge(portR3, nodeR, 0L, Layer.INTERNAL);
 
         TopoEdge edgeInt_P_P1 = new TopoEdge(nodeP, portP1, 0L, Layer.INTERNAL);
         TopoEdge edgeInt_P_P2 = new TopoEdge(nodeP, portP2, 0L, Layer.INTERNAL);
         TopoEdge edgeInt_P_P3 = new TopoEdge(nodeP, portP3, 0L, Layer.INTERNAL);
         TopoEdge edgeInt_P_P4 = new TopoEdge(nodeP, portP4, 0L, Layer.INTERNAL);
         TopoEdge edgeInt_P_P5 = new TopoEdge(nodeP, portP5, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_P_P6 = new TopoEdge(nodeP, portP6, 0L, Layer.INTERNAL);
         TopoEdge edgeInt_Q_Q1 = new TopoEdge(nodeQ, portQ1, 0L, Layer.INTERNAL);
         TopoEdge edgeInt_Q_Q2 = new TopoEdge(nodeQ, portQ2, 0L, Layer.INTERNAL);
         TopoEdge edgeInt_Q_Q3 = new TopoEdge(nodeQ, portQ3, 0L, Layer.INTERNAL);
         TopoEdge edgeInt_Q_Q4 = new TopoEdge(nodeQ, portQ4, 0L, Layer.INTERNAL);
         TopoEdge edgeInt_Q_Q5 = new TopoEdge(nodeQ, portQ5, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_Q_Q6 = new TopoEdge(nodeQ, portQ6, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_R_R1 = new TopoEdge(nodeR, portR1, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_R_R2 = new TopoEdge(nodeR, portR2, 0L, Layer.INTERNAL);
+        TopoEdge edgeInt_R_R3 = new TopoEdge(nodeR, portR3, 0L, Layer.INTERNAL);
 
         // Network Links //
         TopoEdge edgeMpls_P2_Q2 = new TopoEdge(portP2, portQ2, 100L, Layer.MPLS);
@@ -2812,6 +2828,11 @@ public class TopologyBuilder
         TopoEdge edgeEth_Q4_P4 = new TopoEdge(portQ4, portP4, 100L, Layer.ETHERNET);
         TopoEdge edgeEth_Q5_P5 = new TopoEdge(portQ5, portP5, 100L, Layer.ETHERNET);
 
+        TopoEdge edgeMpls_P6_R1 = new TopoEdge(portP6, portR1, 100L, Layer.MPLS);
+        TopoEdge edgeMpls_Q6_R2 = new TopoEdge(portQ6, portR2, 100L, Layer.MPLS);
+        TopoEdge edgeMpls_R1_P6 = new TopoEdge(portR1, portP6, 100L, Layer.MPLS);
+        TopoEdge edgeMpls_R2_Q6 = new TopoEdge(portR2, portQ6, 100L, Layer.MPLS);
+
 
         List<TopoVertex> topoNodes = new ArrayList<>();
         List<TopoEdge> topoLinks = new ArrayList<>();
@@ -2820,49 +2841,70 @@ public class TopologyBuilder
 
         topoNodes.add(nodeP);
         topoNodes.add(nodeQ);
+        topoNodes.add(nodeR);
 
         topoNodes.add(portP1);
         topoNodes.add(portP2);
         topoNodes.add(portP3);
         topoNodes.add(portP4);
         topoNodes.add(portP5);
+        topoNodes.add(portP6);
         topoNodes.add(portQ1);
         topoNodes.add(portQ2);
         topoNodes.add(portQ3);
         topoNodes.add(portQ4);
         topoNodes.add(portQ5);
+        topoNodes.add(portQ6);
+        topoNodes.add(portR1);
+        topoNodes.add(portR2);
+        topoNodes.add(portR3);
 
         topoLinks.add(edgeInt_P1_P);
         topoLinks.add(edgeInt_P2_P);
         topoLinks.add(edgeInt_P3_P);
         topoLinks.add(edgeInt_P4_P);
         topoLinks.add(edgeInt_P5_P);
+        topoLinks.add(edgeInt_P6_P);
         topoLinks.add(edgeInt_Q1_Q);
         topoLinks.add(edgeInt_Q2_Q);
         topoLinks.add(edgeInt_Q3_Q);
         topoLinks.add(edgeInt_Q4_Q);
         topoLinks.add(edgeInt_Q5_Q);
+        topoLinks.add(edgeInt_Q6_Q);
+        topoLinks.add(edgeInt_R1_R);
+        topoLinks.add(edgeInt_R2_R);
+        topoLinks.add(edgeInt_R3_R);
 
         topoLinks.add(edgeInt_P_P1);
         topoLinks.add(edgeInt_P_P2);
         topoLinks.add(edgeInt_P_P3);
         topoLinks.add(edgeInt_P_P4);
         topoLinks.add(edgeInt_P_P5);
+        topoLinks.add(edgeInt_P_P6);
         topoLinks.add(edgeInt_Q_Q1);
         topoLinks.add(edgeInt_Q_Q2);
         topoLinks.add(edgeInt_Q_Q3);
         topoLinks.add(edgeInt_Q_Q4);
         topoLinks.add(edgeInt_Q_Q5);
+        topoLinks.add(edgeInt_Q_Q6);
+        topoLinks.add(edgeInt_R_R1);
+        topoLinks.add(edgeInt_R_R2);
+        topoLinks.add(edgeInt_R_R3);
 
         topoLinks.add(edgeMpls_P2_Q2);
         topoLinks.add(edgeEth_P3_Q3);
         topoLinks.add(edgeEth_P4_Q4);
         topoLinks.add(edgeEth_P5_Q5);
+        topoLinks.add(edgeMpls_P6_R1);
 
         topoLinks.add(edgeMpls_Q2_P2);
         topoLinks.add(edgeEth_Q3_P3);
         topoLinks.add(edgeEth_Q4_P4);
         topoLinks.add(edgeEth_Q5_P5);
+        topoLinks.add(edgeMpls_Q6_R2);
+
+        topoLinks.add(edgeMpls_R1_P6);
+        topoLinks.add(edgeMpls_R2_Q6);
 
         // Map Ports to Devices for simplicity in utility class //
         for(TopoEdge oneEdge : topoLinks)
@@ -2885,7 +2927,8 @@ public class TopologyBuilder
         testBuilder.populateRepos(topoNodes, topoLinks, portDeviceMap, floorMap, ceilingMap);
     }
 
-    public void buildTopoEsnet() {
+    public void buildTopoEsnet()
+    {
         testBuilder.importEsnet();
     }
 }
