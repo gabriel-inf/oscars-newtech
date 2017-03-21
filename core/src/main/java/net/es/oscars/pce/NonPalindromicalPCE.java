@@ -54,6 +54,16 @@ public class NonPalindromicalPCE {
         Topology intTopo = topoService.layer(Layer.INTERNAL);
         Topology mplsTopo = topoService.layer(Layer.MPLS);
 
+        // Identify URNs of each fixture
+        Set<String> fixtureURNs = new HashSet<>();
+        requestPipe.getAJunction().getFixtures().stream().forEach(f -> fixtureURNs.add(f.getPortUrn()));
+        requestPipe.getZJunction().getFixtures().stream().forEach(f -> fixtureURNs.add(f.getPortUrn()));
+
+        // Remove unneeded edge-ports for simpler service-layer topology construction
+        pruningService.pruneTopologyOfEdgePortsExcept(ethTopo, fixtureURNs);
+        pruningService.pruneTopologyOfEdgePortsExcept(intTopo, fixtureURNs);
+        pruningService.pruneTopologyOfEdgePortsExcept(mplsTopo, fixtureURNs);
+
         // Filter MPLS-ports and MPLS-devices out of ethTopo
         Set<TopoVertex> portsOnly = ethTopo.getVertices().stream()
                 .filter(v -> v.getVertexType().equals(VertexType.PORT))
@@ -149,19 +159,32 @@ public class NonPalindromicalPCE {
         TopoVertex serviceLayerSrcNode;
         TopoVertex serviceLayerDstNode;
 
-        if (srcDevice.getVertexType().equals(VertexType.SWITCH) || topoService.determineIfRouterHasEthernetPorts(srcDevice.getUrn()))
+        if(srcDevice.getVertexType().equals(VertexType.SWITCH))
             serviceLayerSrcNode = srcPort;
         else
-            serviceLayerSrcNode = serviceLayerTopology.getVirtualNode(srcPort);
+        {
+            if(topoService.determineIfRouterHasEthernetPorts(srcDevice.getUrn()))
+                serviceLayerSrcNode = srcPort;
+            else
+                serviceLayerSrcNode = serviceLayerTopology.getVirtualNode(srcPort);
+        }
 
-
-        if (dstDevice.getVertexType().equals(VertexType.SWITCH) || topoService.determineIfRouterHasEthernetPorts(dstDevice.getUrn()))
+        if(dstDevice.getVertexType().equals(VertexType.SWITCH))
             serviceLayerDstNode = dstPort;
         else
-            serviceLayerDstNode = serviceLayerTopology.getVirtualNode(dstPort);
+        {
+            if(topoService.determineIfRouterHasEthernetPorts(dstDevice.getUrn()))
+                serviceLayerDstNode = dstPort;
+            else
+                serviceLayerDstNode = serviceLayerTopology.getVirtualNode(dstPort);
+        }
 
         assert (serviceLayerSrcNode != null);
         assert (serviceLayerDstNode != null);
+
+
+        log.info("Src: " + serviceLayerSrcNode.getUrn());
+        log.info("Dst: " + serviceLayerDstNode.getUrn());
 
         // Shortest path routing on Service-Layer
         List<TopoEdge> azServiceLayerERO = dijkstraPCE.computeShortestPathEdges(prunedSlTopo, serviceLayerSrcNode, serviceLayerDstNode);
@@ -173,7 +196,8 @@ public class NonPalindromicalPCE {
         List<TopoEdge> zaServiceLayerERO = new LinkedList<>();
 
         // 1. Reverse the links
-        for (TopoEdge azEdge : azServiceLayerERO) {
+        for (TopoEdge azEdge : azServiceLayerERO)
+        {
             Optional<TopoEdge> reverseEdge = prunedSlTopo.getEdges().stream()
                     .filter(r -> r.getA().equals(azEdge.getZ()))
                     .filter(r -> r.getZ().equals(azEdge.getA()))
@@ -182,8 +206,11 @@ public class NonPalindromicalPCE {
             reverseEdge.ifPresent(zaServiceLayerERO::add);
         }
 
+
         // 2. Reverse the order
         Collections.reverse(zaServiceLayerERO);
+        azServiceLayerERO.stream().forEach(e -> log.info("Forward edge: " + e.getA().getUrn() + " --> " + e.getZ().getUrn() + ", Layer: " + e.getLayer()));
+        zaServiceLayerERO.stream().forEach(e -> log.info("Reverse edge: " + e.getA().getUrn() + " --> " + e.getZ().getUrn() + ", Layer: " + e.getLayer()));
 
         Map<String, List<TopoEdge>> theMap = new HashMap<>();
 
@@ -193,35 +220,13 @@ public class NonPalindromicalPCE {
         List<TopoEdge> azERO;
         List<TopoEdge> zaERO;
 
-        log.info("SERVICE LAYER ROUTES: ");
-        String azPath = "AZ Path: ";
-        for(TopoEdge azEdge : azServiceLayerERO)
-            azPath += azEdge.getA().getUrn() + " --- ";
-        azPath += azServiceLayerERO.get(azServiceLayerERO.size()-1).getZ().getUrn();
-        log.info(azPath);
-
-        String zaPath = "ZA Path: ";
-        for(TopoEdge zaEdge : zaServiceLayerERO)
-            zaPath += zaEdge.getA().getUrn() + " --- ";
-        zaPath += zaServiceLayerERO.get(zaServiceLayerERO.size()-1).getZ().getUrn();
-        log.info(zaPath);
-
         // Obtain physical ERO from Service-Layer EROs
         azERO = serviceLayerTopology.getActualEROAZ(azServiceLayerERO);
         zaERO = serviceLayerTopology.getActualEROZA(zaServiceLayerERO);
 
-        log.info("PHYSICAL ROUTES: ");
-        azPath = "AZ Path: ";
-        for(TopoEdge azEdge : azERO)
-            azPath += azEdge.getA().getUrn() + " --- ";
-        azPath += azERO.get(azERO.size()-1).getZ().getUrn();
-        log.info(azPath);
-
-        zaPath = "ZA Path: ";
-        for(TopoEdge zaEdge : zaERO)
-            zaPath += zaEdge.getA().getUrn() + " --- ";
-        zaPath += zaERO.get(zaERO.size()-1).getZ().getUrn();
-        log.info(zaPath);
+        log.info("\n\n");
+        azERO.stream().forEach(e -> log.info("Forward physical edge: " + e.getA().getUrn() + " --> " + e.getZ().getUrn()));
+        zaERO.stream().forEach(e -> log.info("Reverse physical edge: " + e.getA().getUrn() + " --> " + e.getZ().getUrn()));
 
         // Remove starting and ending ports
         if(azERO.get(0).getA().getVertexType().equals(VertexType.PORT))

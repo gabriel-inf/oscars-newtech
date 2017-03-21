@@ -2,30 +2,27 @@ package net.es.oscars.servicetopo;
 
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.AbstractCoreTest;
-import net.es.oscars.CoreUnitTestConfiguration;
 import net.es.oscars.dto.pss.EthFixtureType;
 import net.es.oscars.dto.pss.EthJunctionType;
 import net.es.oscars.dto.pss.EthPipeType;
+import net.es.oscars.dto.spec.PalindromicType;
+import net.es.oscars.dto.topo.TopoEdge;
+import net.es.oscars.dto.topo.TopoVertex;
+import net.es.oscars.dto.topo.Topology;
+import net.es.oscars.dto.topo.enums.Layer;
+import net.es.oscars.dto.topo.enums.PortLayer;
+import net.es.oscars.dto.topo.enums.UrnType;
+import net.es.oscars.dto.topo.enums.VertexType;
 import net.es.oscars.pce.BandwidthService;
 import net.es.oscars.pce.DijkstraPCE;
 import net.es.oscars.pce.PruningService;
 import net.es.oscars.resv.ent.*;
-import net.es.oscars.dto.topo.TopoEdge;
-import net.es.oscars.dto.topo.TopoVertex;
-import net.es.oscars.dto.topo.Topology;
 import net.es.oscars.topo.ent.IntRangeE;
 import net.es.oscars.topo.ent.ReservableBandwidthE;
 import net.es.oscars.topo.ent.ReservableVlanE;
 import net.es.oscars.topo.ent.UrnE;
-import net.es.oscars.dto.topo.enums.Layer;
-import net.es.oscars.dto.spec.PalindromicType;
-import net.es.oscars.dto.topo.enums.UrnType;
-import net.es.oscars.dto.topo.enums.VertexType;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
@@ -105,8 +102,8 @@ public class ServiceLayerEROTest extends AbstractCoreTest  {
 
         assert(virtSrc.getVertexType().equals(VertexType.VIRTUAL));
         assert(virtDst.getVertexType().equals(VertexType.VIRTUAL));
-        assert(virtSrc.getUrn().equals(srcDevice.getUrn() + "-virtual"));
-        assert(virtDst.getUrn().equals(dstDevice.getUrn() + "-virtual"));
+        assert(virtSrc.getUrn().equals(srcPort.getUrn() + "-virtual"));
+        assert(virtDst.getUrn().equals(dstPort.getUrn() + "-virtual"));
 
 
         Topology slTopo = serviceLayerTopo.getSLTopology();
@@ -116,8 +113,8 @@ public class ServiceLayerEROTest extends AbstractCoreTest  {
         Set<TopoEdge> correctEdges = serviceLayerTopo.getServiceLayerLinks().stream().collect(Collectors.toSet());
         correctEdges.addAll(serviceLayerTopo.getLogicalLinks());
 
-        assert(slTopo.getVertices().size() == 4);
-        assert(slTopo.getEdges().size() == 10);
+        assert(slTopo.getVertices().size() == 2);
+        assert(slTopo.getEdges().size() == 6);
         assert(slTopo.getVertices().equals(correctVertices));
         assert(slTopo.getEdges().equals(correctEdges));
         assert (slTopo.getLayer().equals(Layer.ETHERNET));
@@ -167,7 +164,7 @@ public class ServiceLayerEROTest extends AbstractCoreTest  {
 
         assert(virtSrc == null);
         assert(virtDst.getVertexType().equals(VertexType.VIRTUAL));
-        assert(virtDst.getUrn().equals(dstDevice.getUrn() + "-virtual"));
+        assert(virtDst.getUrn().equals(dstPort.getUrn() + "-virtual"));
 
         Topology slTopo = serviceLayerTopo.getSLTopology();
         Set<TopoVertex> correctVertices = serviceLayerTopo.getServiceLayerDevices().stream().collect(Collectors.toSet());
@@ -176,8 +173,8 @@ public class ServiceLayerEROTest extends AbstractCoreTest  {
         Set<TopoEdge> correctEdges = serviceLayerTopo.getServiceLayerLinks().stream().collect(Collectors.toSet());
         correctEdges.addAll(serviceLayerTopo.getLogicalLinks());
 
-        assert(slTopo.getVertices().size() == 5);
-        assert(slTopo.getEdges().size() == 12);
+        assert(slTopo.getVertices().size() == 4);
+        assert(slTopo.getEdges().size() == 10);
         assert(slTopo.getVertices().equals(correctVertices));
         assert(slTopo.getEdges().equals(correctEdges));
         assert (slTopo.getLayer().equals(Layer.ETHERNET));
@@ -227,7 +224,7 @@ public class ServiceLayerEROTest extends AbstractCoreTest  {
 
 
         assert(virtSrc.getVertexType().equals(VertexType.VIRTUAL));
-        assert(virtSrc.getUrn().equals(srcDevice.getUrn() + "-virtual"));
+        assert(virtSrc.getUrn().equals(srcPort.getUrn() + "-virtual"));
         assert(virtDst == null);
 
         Topology slTopo = serviceLayerTopo.getSLTopology();
@@ -237,8 +234,8 @@ public class ServiceLayerEROTest extends AbstractCoreTest  {
         Set<TopoEdge> correctEdges = serviceLayerTopo.getServiceLayerLinks().stream().collect(Collectors.toSet());
         correctEdges.addAll(serviceLayerTopo.getLogicalLinks());
 
-        assert(slTopo.getVertices().size() == 5);
-        assert(slTopo.getEdges().size() == 12);
+        assert(slTopo.getVertices().size() == 4);
+        assert(slTopo.getEdges().size() == 10);
         assert(slTopo.getVertices().equals(correctVertices));
         assert(slTopo.getEdges().equals(correctEdges));
         assert (slTopo.getLayer().equals(Layer.ETHERNET));
@@ -683,16 +680,16 @@ public class ServiceLayerEROTest extends AbstractCoreTest  {
         TopoVertex nodeE = new TopoVertex("switchE", VertexType.SWITCH);
 
         //Ports
-        TopoVertex portA1 = new TopoVertex("switchA:1", VertexType.PORT);
-        TopoVertex portA2 = new TopoVertex("switchA:2", VertexType.PORT);
-        TopoVertex portB1 = new TopoVertex("routerB:1", VertexType.PORT);
-        TopoVertex portB2 = new TopoVertex("routerB:2", VertexType.PORT);
-        TopoVertex portC1 = new TopoVertex("routerC:1", VertexType.PORT);
-        TopoVertex portC2 = new TopoVertex("routerC:2", VertexType.PORT);
-        TopoVertex portD1 = new TopoVertex("routerD:1", VertexType.PORT);
-        TopoVertex portD2 = new TopoVertex("routerD:2", VertexType.PORT);
-        TopoVertex portE1 = new TopoVertex("switchE:1", VertexType.PORT);
-        TopoVertex portE2 = new TopoVertex("switchE:2", VertexType.PORT);
+        TopoVertex portA1 = new TopoVertex("switchA:1", VertexType.PORT, PortLayer.ETHERNET);
+        TopoVertex portA2 = new TopoVertex("switchA:2", VertexType.PORT, PortLayer.ETHERNET);
+        TopoVertex portB1 = new TopoVertex("routerB:1", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portB2 = new TopoVertex("routerB:2", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portC1 = new TopoVertex("routerC:1", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portC2 = new TopoVertex("routerC:2", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portD1 = new TopoVertex("routerD:1", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portD2 = new TopoVertex("routerD:2", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portE1 = new TopoVertex("switchE:1", VertexType.PORT, PortLayer.ETHERNET);
+        TopoVertex portE2 = new TopoVertex("switchE:2", VertexType.PORT, PortLayer.ETHERNET);
 
         //Internal Links
         TopoEdge edgeInt_A1_A = new TopoEdge(portA1, nodeA, 0L, Layer.INTERNAL);
@@ -797,16 +794,16 @@ public class ServiceLayerEROTest extends AbstractCoreTest  {
         TopoVertex nodeE = new TopoVertex("switchE", VertexType.SWITCH);
 
         //Ports
-        TopoVertex portA1 = new TopoVertex("switchA:1", VertexType.PORT);
-        TopoVertex portA2 = new TopoVertex("switchA:2", VertexType.PORT);
-        TopoVertex portB1 = new TopoVertex("switchB:1", VertexType.PORT);
-        TopoVertex portB2 = new TopoVertex("switchB:2", VertexType.PORT);
-        TopoVertex portC1 = new TopoVertex("switchC:1", VertexType.PORT);
-        TopoVertex portC2 = new TopoVertex("switchC:2", VertexType.PORT);
-        TopoVertex portD1 = new TopoVertex("switchD:1", VertexType.PORT);
-        TopoVertex portD2 = new TopoVertex("switchD:2", VertexType.PORT);
-        TopoVertex portE1 = new TopoVertex("switchE:1", VertexType.PORT);
-        TopoVertex portE2 = new TopoVertex("switchE:2", VertexType.PORT);
+        TopoVertex portA1 = new TopoVertex("switchA:1", VertexType.PORT, PortLayer.ETHERNET);
+        TopoVertex portA2 = new TopoVertex("switchA:2", VertexType.PORT, PortLayer.ETHERNET);
+        TopoVertex portB1 = new TopoVertex("switchB:1", VertexType.PORT, PortLayer.ETHERNET);
+        TopoVertex portB2 = new TopoVertex("switchB:2", VertexType.PORT, PortLayer.ETHERNET);
+        TopoVertex portC1 = new TopoVertex("switchC:1", VertexType.PORT, PortLayer.ETHERNET);
+        TopoVertex portC2 = new TopoVertex("switchC:2", VertexType.PORT, PortLayer.ETHERNET);
+        TopoVertex portD1 = new TopoVertex("switchD:1", VertexType.PORT, PortLayer.ETHERNET);
+        TopoVertex portD2 = new TopoVertex("switchD:2", VertexType.PORT, PortLayer.ETHERNET);
+        TopoVertex portE1 = new TopoVertex("switchE:1", VertexType.PORT, PortLayer.ETHERNET);
+        TopoVertex portE2 = new TopoVertex("switchE:2", VertexType.PORT, PortLayer.ETHERNET);
 
         //Internal Links
         TopoEdge edgeInt_A1_A = new TopoEdge(portA1, nodeA, 0L, Layer.INTERNAL);
@@ -909,16 +906,16 @@ public class ServiceLayerEROTest extends AbstractCoreTest  {
         TopoVertex nodeE = new TopoVertex("routerE", VertexType.ROUTER);
 
         //Ports
-        TopoVertex portA1 = new TopoVertex("routerA:1", VertexType.PORT);
-        TopoVertex portA2 = new TopoVertex("routerA:2", VertexType.PORT);
-        TopoVertex portB1 = new TopoVertex("routerB:1", VertexType.PORT);
-        TopoVertex portB2 = new TopoVertex("routerB:2", VertexType.PORT);
-        TopoVertex portC1 = new TopoVertex("routerC:1", VertexType.PORT);
-        TopoVertex portC2 = new TopoVertex("routerC:2", VertexType.PORT);
-        TopoVertex portD1 = new TopoVertex("routerD:1", VertexType.PORT);
-        TopoVertex portD2 = new TopoVertex("routerD:2", VertexType.PORT);
-        TopoVertex portE1 = new TopoVertex("routerE:1", VertexType.PORT);
-        TopoVertex portE2 = new TopoVertex("routerE:2", VertexType.PORT);
+        TopoVertex portA1 = new TopoVertex("routerA:1", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portA2 = new TopoVertex("routerA:2", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portB1 = new TopoVertex("routerB:1", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portB2 = new TopoVertex("routerB:2", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portC1 = new TopoVertex("routerC:1", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portC2 = new TopoVertex("routerC:2", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portD1 = new TopoVertex("routerD:1", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portD2 = new TopoVertex("routerD:2", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portE1 = new TopoVertex("routerE:1", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portE2 = new TopoVertex("routerE:2", VertexType.PORT, PortLayer.MPLS);
 
         //Internal Links
         TopoEdge edgeInt_A1_A = new TopoEdge(portA1, nodeA, 0L, Layer.INTERNAL);
@@ -1021,16 +1018,16 @@ public class ServiceLayerEROTest extends AbstractCoreTest  {
         TopoVertex nodeE = new TopoVertex("routerE", VertexType.ROUTER);
 
         //Ports
-        TopoVertex portA1 = new TopoVertex("switchA:1", VertexType.PORT);
-        TopoVertex portA2 = new TopoVertex("switchA:2", VertexType.PORT);
-        TopoVertex portB1 = new TopoVertex("routerB:1", VertexType.PORT);
-        TopoVertex portB2 = new TopoVertex("routerB:2", VertexType.PORT);
-        TopoVertex portC1 = new TopoVertex("routerC:1", VertexType.PORT);
-        TopoVertex portC2 = new TopoVertex("routerC:2", VertexType.PORT);
-        TopoVertex portD1 = new TopoVertex("routerD:1", VertexType.PORT);
-        TopoVertex portD2 = new TopoVertex("routerD:2", VertexType.PORT);
-        TopoVertex portE1 = new TopoVertex("routerE:1", VertexType.PORT);
-        TopoVertex portE2 = new TopoVertex("routerE:2", VertexType.PORT);
+        TopoVertex portA1 = new TopoVertex("switchA:1", VertexType.PORT, PortLayer.ETHERNET);
+        TopoVertex portA2 = new TopoVertex("switchA:2", VertexType.PORT, PortLayer.ETHERNET);
+        TopoVertex portB1 = new TopoVertex("routerB:1", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portB2 = new TopoVertex("routerB:2", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portC1 = new TopoVertex("routerC:1", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portC2 = new TopoVertex("routerC:2", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portD1 = new TopoVertex("routerD:1", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portD2 = new TopoVertex("routerD:2", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portE1 = new TopoVertex("routerE:1", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portE2 = new TopoVertex("routerE:2", VertexType.PORT, PortLayer.MPLS);
 
         //Internal Links
         TopoEdge edgeInt_A1_A = new TopoEdge(portA1, nodeA, 0L, Layer.INTERNAL);
@@ -1136,16 +1133,16 @@ public class ServiceLayerEROTest extends AbstractCoreTest  {
         TopoVertex nodeE = new TopoVertex("switchE", VertexType.SWITCH);
 
         //Ports
-        TopoVertex portA1 = new TopoVertex("routerA:1", VertexType.PORT);
-        TopoVertex portA2 = new TopoVertex("routerA:2", VertexType.PORT);
-        TopoVertex portB1 = new TopoVertex("routerB:1", VertexType.PORT);
-        TopoVertex portB2 = new TopoVertex("routerB:2", VertexType.PORT);
-        TopoVertex portC1 = new TopoVertex("routerC:1", VertexType.PORT);
-        TopoVertex portC2 = new TopoVertex("routerC:2", VertexType.PORT);
-        TopoVertex portD1 = new TopoVertex("routerD:1", VertexType.PORT);
-        TopoVertex portD2 = new TopoVertex("routerD:2", VertexType.PORT);
-        TopoVertex portE1 = new TopoVertex("switchE:1", VertexType.PORT);
-        TopoVertex portE2 = new TopoVertex("switchE:2", VertexType.PORT);
+        TopoVertex portA1 = new TopoVertex("routerA:1", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portA2 = new TopoVertex("routerA:2", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portB1 = new TopoVertex("routerB:1", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portB2 = new TopoVertex("routerB:2", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portC1 = new TopoVertex("routerC:1", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portC2 = new TopoVertex("routerC:2", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portD1 = new TopoVertex("routerD:1", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portD2 = new TopoVertex("routerD:2", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portE1 = new TopoVertex("switchE:1", VertexType.PORT, PortLayer.ETHERNET);
+        TopoVertex portE2 = new TopoVertex("switchE:2", VertexType.PORT, PortLayer.ETHERNET);
 
         //Internal Links
         TopoEdge edgeInt_A1_A = new TopoEdge(portA1, nodeA, 0L, Layer.INTERNAL);
@@ -1255,18 +1252,18 @@ public class ServiceLayerEROTest extends AbstractCoreTest  {
         TopoVertex nodeH = new TopoVertex("routerH", VertexType.ROUTER);
 
         //Additional Ports
-        TopoVertex portB3 = new TopoVertex("routerB:3", VertexType.PORT);
-        TopoVertex portB4 = new TopoVertex("routerB:4", VertexType.PORT);
-        TopoVertex portC3 = new TopoVertex("routerC:3", VertexType.PORT);
-        TopoVertex portC4 = new TopoVertex("routerC:4", VertexType.PORT);
-        TopoVertex portD3 = new TopoVertex("routerD:3", VertexType.PORT);
-        TopoVertex portD4 = new TopoVertex("routerD:4", VertexType.PORT);
-        TopoVertex portF1 = new TopoVertex("routerF:1", VertexType.PORT);
-        TopoVertex portF2 = new TopoVertex("routerF:2", VertexType.PORT);
-        TopoVertex portG1 = new TopoVertex("routerG:1", VertexType.PORT);
-        TopoVertex portG2 = new TopoVertex("routerG:2", VertexType.PORT);
-        TopoVertex portH1 = new TopoVertex("routerH:1", VertexType.PORT);
-        TopoVertex portH2 = new TopoVertex("routerH:2", VertexType.PORT);
+        TopoVertex portB3 = new TopoVertex("routerB:3", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portB4 = new TopoVertex("routerB:4", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portC3 = new TopoVertex("routerC:3", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portC4 = new TopoVertex("routerC:4", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portD3 = new TopoVertex("routerD:3", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portD4 = new TopoVertex("routerD:4", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portF1 = new TopoVertex("routerF:1", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portF2 = new TopoVertex("routerF:2", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portG1 = new TopoVertex("routerG:1", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portG2 = new TopoVertex("routerG:2", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portH1 = new TopoVertex("routerH:1", VertexType.PORT, PortLayer.MPLS);
+        TopoVertex portH2 = new TopoVertex("routerH:2", VertexType.PORT, PortLayer.MPLS);
 
         //Additional Internal Links
         TopoEdge edgeInt_B3_B = new TopoEdge(portB3, nodeB, 0L, Layer.INTERNAL);

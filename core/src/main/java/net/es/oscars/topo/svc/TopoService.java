@@ -316,14 +316,51 @@ public class TopoService {
             assert(portUrnOpt.isPresent());
 
             UrnE portURN = portUrnOpt.get();
+            log.info("Port: " + portURN.getUrn());
+            log.info("Capabilities: " + portURN.getCapabilities().toString());
 
-            if(portURN.getCapabilities().contains(Layer.ETHERNET))
-            {
-                //log.info(deviceList.get(0).getDeviceType() + deviceURN + " has ports with ETHERNET capability");
+            if(!portURN.getCapabilities().contains(Layer.MPLS))
                 return true;
-            }
         }
 
         return false;
+    }
+
+    public Set<String> identifyEdgePortURNs()
+    {
+        List<UrnE> urns = urnRepo.findAll();
+        Set<String> edgePortURNs = new HashSet<>();
+
+        Set<UrnE> allPorts = urnRepo.findAll().stream()
+                .filter(p -> p.getDeviceType() == null && p.getIfceType().equals(IfceType.PORT))
+                .collect(Collectors.toSet());
+
+        Set<UrnAdjcyE> allExternalLinks = adjcyRepo.findAll().stream()
+                .filter(l -> !l.getMetrics().containsKey(Layer.INTERNAL))
+                .collect(Collectors.toSet());
+
+        Set<UrnAdjcyE> allInternalLinks = adjcyRepo.findAll().stream()
+                .filter(l -> l.getMetrics().containsKey(Layer.INTERNAL))
+                .collect(Collectors.toSet());
+
+        for(UrnE onePort : allPorts)
+        {
+            String portURN = onePort.getUrn();
+            boolean portNotOnAnyLink = true;
+
+            for(UrnAdjcyE oneExtAdjcy : allExternalLinks)
+            {
+                if(oneExtAdjcy.getA().equals(onePort) || oneExtAdjcy.getZ().equals(onePort))    // The port doesn't exist on an external (ETHERNET/MPLS) edge
+                {
+                    portNotOnAnyLink = false;
+                    break;
+                }
+            }
+
+            if(portNotOnAnyLink)
+                edgePortURNs.add(portURN);
+        }
+
+        return edgePortURNs;
     }
 }

@@ -222,8 +222,6 @@ public class ServiceLayerTopology
 
                         if(linksConnectingSwitchToP.isEmpty())
                         {
-                            log.info("Adding " + p.getUrn());
-                            log.info(ethLinkscontainingP.toString());
                             nonAdjacentPorts.add(p);
                         }
                     }
@@ -407,24 +405,17 @@ public class ServiceLayerTopology
             mplsLayerTopo.getVertices().add(srcEthPort);
             mplsLayerTopo.getVertices().add(dstEthPort);
 
-            log.info("Added " + srcEthPort.getUrn());
-            log.info("Added " + dstEthPort.getUrn());
-
             if(!srcIsVirtual)
             {
                 if(!srcIsOnSwitch)
                 {
                     mplsLayerTopo.getEdges().add(physEdgeAtoRouter);
                     mplsLayerTopo.getEdges().add(physEdgeRoutertoA);
-                    log.info("Added " + physEdgeAtoRouter.toString());
-                    log.info("Added " + physEdgeRoutertoA.toString());
                 }
                 else
                 {
                     mplsLayerTopo.getEdges().add(physEdgeAtoMplsPort);
                     mplsLayerTopo.getEdges().add(physEdgeMplsPorttoA);
-                    log.info("Added " + physEdgeAtoMplsPort.toString());
-                    log.info("Added " + physEdgeMplsPorttoA.toString());
                 }
             }
 
@@ -434,15 +425,11 @@ public class ServiceLayerTopology
                 {
                     mplsLayerTopo.getEdges().add(physEdgeZtoRouter);
                     mplsLayerTopo.getEdges().add(physEdgeRoutertoZ);
-                    log.info("Added " + physEdgeZtoRouter.toString());
-                    log.info("Added " + physEdgeRoutertoZ.toString());
                 }
                 else
                 {
                     mplsLayerTopo.getEdges().add(physEdgeZtoMplsPort);
                     mplsLayerTopo.getEdges().add(physEdgeMplsPorttoZ);
-                    log.info("Added " + physEdgeZtoMplsPort.toString());
-                    log.info("Added " + physEdgeMplsPorttoZ.toString());
                 }
             }
 
@@ -451,13 +438,12 @@ public class ServiceLayerTopology
                    .forEach(l -> mplsLayerTopo.getEdges().add(l));
 
             // Step 4: Prune updated MPLS-Layer topology before pathfinding. Operation must be done in two directions since requested bandwidth may be asymmetric from A->Z and Z->A
-            log.info("Computing MPLS-Layer path-pair between " + srcEthPort + " <---> " + dstEthPort);
             Topology prunedMPLSTopoAZ = pruningService.pruneWithPipeAZ(mplsLayerTopo, requestedVlanPipe, urnList, bwAvailMap, rsvVlanList);
             Topology prunedMPLSTopoZA = pruningService.pruneWithPipeZA(mplsLayerTopo, requestedVlanPipe, urnList, bwAvailMap, rsvVlanList);
 
-            // Step 5: Compute MPLS-Layer routes beginning and ending at ETHERNET src/dst ports to construct physical paths corresponding to this logical link
+            // Step 5: Compute MPLS-Layer routes beginning and ending at ETHERNET src/dst ports to construct physical paths corresponding to this logical link (one for each direction because of bandwidth asymmetry)
             pathAZ = dijkstraPCE.computeShortestPathEdges(prunedMPLSTopoAZ, srcEthPort, dstEthPort);
-            pathZA = dijkstraPCE.computeShortestPathEdges(prunedMPLSTopoZA, dstEthPort, srcEthPort);
+            pathZA = dijkstraPCE.computeShortestPathEdges(prunedMPLSTopoZA, srcEthPort, dstEthPort);
 
             // Step 6: Delete ETHERNET src/dst ports and adaptation edges from MPLS-Layer topology so they can't be used in pathfinding for unrelated logical links
             mplsLayerTopo.getVertices().remove(srcEthPort);
@@ -472,8 +458,6 @@ public class ServiceLayerTopology
             mplsLayerTopo.getEdges().remove(physEdgeMplsPorttoZ);
             mplsLayerTopo.getEdges().removeIf(l -> l.getA().getVertexType().equals(VertexType.VIRTUAL) || l.getZ().getVertexType().equals(VertexType.VIRTUAL));
 
-            log.info(pathAZ.toString());
-            log.info(pathZA.toString());
 
             if(pathAZ.isEmpty() && pathZA.isEmpty())
             {
@@ -481,20 +465,9 @@ public class ServiceLayerTopology
                 continue;
             }
 
-            assert(pathAZ.get(0).getZ().equals(pathZA.get(pathZA.size()-1).getA()));
-            assert(pathZA.get(0).getZ().equals(pathAZ.get(pathAZ.size()-1).getA()));
+            assert(pathAZ.get(0).getA().equals(pathZA.get(0).getA()));
+            assert(pathAZ.get(pathAZ.size()-1).getZ().equals(pathZA.get(pathZA.size()-1).getZ()));
 
-            String azPath = "AZ Path: ";
-            for(TopoEdge azEdge : pathAZ)
-                azPath += azEdge.getA().getUrn() + " --- ";
-            azPath += pathAZ.get(pathAZ.size()-1).getZ().getUrn();
-            log.info(azPath);
-
-            String zaPath = "ZA Path: ";
-            for(TopoEdge zaEdge : pathZA)
-                zaPath += zaEdge.getA().getUrn() + " --- ";
-            zaPath += pathZA.get(pathZA.size()-1).getZ().getUrn();
-            log.info(zaPath);
 
             // Step 7: Calculate total cost-metric for logical link (in both directions).
             for(TopoEdge pathEdge : pathAZ)
@@ -507,8 +480,6 @@ public class ServiceLayerTopology
             oneLogicalLink.setMetricZA(weightMetricZA);
 
             oneLogicalLink.setMetric(weightMetricAZ);   // The calling function expects metric to be set. Pathfinding is done in the forward direction, so we use that value here
-
-            log.info("Metric: " + oneLogicalLink.getMetric());
 
 
             // Step 8: Map the physical path-pair to the corresponding logical link
@@ -771,27 +742,21 @@ public class ServiceLayerTopology
             TopoVertex physicalA = oneEdge.getA();
             TopoVertex physicalZ = oneEdge.getZ();
 
-            boolean edgeIsLogical = false;
-
-            for(LogicalEdge oneLogical : logicalLinks)
-            {
-                TopoVertex logicalA = oneLogical.getA();
-                TopoVertex logicalZ = oneLogical.getZ();
-
-                // This link is logical - Get corresponding physical ERO
-                if(physicalA.equals(logicalA) && physicalZ.equals(logicalZ))
-                {
-                    actualERO.addAll(oneLogical.getCorrespondingAZTopoEdges());
-                    edgeIsLogical = true;
-
-                    break;
-                }
-            }
-
-            // This link is NOT logical - Part of actual ERO
-            if(!edgeIsLogical)
+            // This link is physical - Part of actual ERO
+            if(!oneEdge.getLayer().equals(Layer.LOGICAL))
             {
                 actualERO.add(oneEdge);
+            }
+            else    // This link is logical - Get corresponding physical ERO
+            {
+                List<LogicalEdge> matchingLogicalEdges = logicalLinks.stream()
+                        .filter(ll -> ll.getA().equals(physicalA) && ll.getZ().equals(physicalZ))
+                        .collect(Collectors.toList());
+
+                assert(matchingLogicalEdges.size() == 1);
+                LogicalEdge matchingEdge = matchingLogicalEdges.get(0);
+
+                actualERO.addAll(matchingEdge.getCorrespondingAZTopoEdges());
             }
         }
 
@@ -816,27 +781,25 @@ public class ServiceLayerTopology
             TopoVertex physicalA = oneEdge.getA();
             TopoVertex physicalZ = oneEdge.getZ();
 
-            boolean edgeIsLogical = false;
-
-            for(LogicalEdge oneLogical : logicalLinks)
-            {
-                TopoVertex logicalA = oneLogical.getA();
-                TopoVertex logicalZ = oneLogical.getZ();
-
-                // This link is logical - Get corresponding physical ERO
-                if(physicalA.equals(logicalA) && physicalZ.equals(logicalZ))
-                {
-                    actualERO.addAll(oneLogical.getCorrespondingZATopoEdges());
-                    edgeIsLogical = true;
-
-                    break;
-                }
-            }
-
-            // This link is NOT logical - Part of actual ERO
-            if(!edgeIsLogical)
+            // This link is physical - Part of actual ERO
+            if(!oneEdge.getLayer().equals(Layer.LOGICAL))
             {
                 actualERO.add(oneEdge);
+            }
+            else    // This link is logical - Get corresponding physical ERO
+            {
+                log.info("Edge: " + oneEdge.getA().getUrn() + " --> " + oneEdge.getZ().getUrn() + " is LOGICAL");
+                List<LogicalEdge> matchingLogicalEdges = logicalLinks.stream()
+                        .filter(ll -> ll.getA().equals(physicalA) && ll.getZ().equals(physicalZ))
+                        .collect(Collectors.toList());
+
+                assert(matchingLogicalEdges.size() == 1);
+                LogicalEdge matchingEdge = matchingLogicalEdges.get(0);
+
+                log.info("Found matching edge: " + matchingEdge.getA().getUrn() + " --> " + matchingEdge.getZ().getUrn());
+                matchingEdge.getCorrespondingZATopoEdges().stream().forEach(link -> log.info("Physical edge: " + link.getA().getUrn() + " --> " + link.getZ().getUrn()));
+
+                actualERO.addAll(matchingEdge.getCorrespondingZATopoEdges());
             }
         }
 

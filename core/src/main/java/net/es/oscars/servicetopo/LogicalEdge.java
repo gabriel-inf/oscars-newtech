@@ -26,12 +26,12 @@ public class LogicalEdge extends TopoEdge
     private TopoVertex z;
 
     private Long metric;
-    private Long metricAZ;
-    private Long metricZA;
+    private Long metricAZ;  // For asymmetrical bandwidth only
+    private Long metricZA;  // For asymmetrical bandwidth only
 
     private Layer layer;
 
     private List<TopoEdge> correspondingTopoEdges;
-    private List<TopoEdge> correspondingAZTopoEdges;
-    private List<TopoEdge> correspondingZATopoEdges;
+    private List<TopoEdge> correspondingAZTopoEdges;    // For asymmetrical bandwidth only
+    private List<TopoEdge> correspondingZATopoEdges;    // For asymmetrical bandwidth only
 }

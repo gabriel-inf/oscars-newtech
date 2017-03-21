@@ -354,4 +354,12 @@ public class PruningService {
         return blacklistedEdges;
     }
 
+    public void pruneTopologyOfEdgePortsExcept(Topology topo, Set<String> portsToKeep)
+    {
+        Set<String> edgePorts = topoService.identifyEdgePortURNs();
+
+        topo.getVertices().removeIf(p -> edgePorts.contains(p.getUrn()) && !portsToKeep.contains(p.getUrn()));
+        topo.getEdges().removeIf(e -> edgePorts.contains(e.getA().getUrn()) && !portsToKeep.contains(e.getA().getUrn()));
+        topo.getEdges().removeIf(e -> edgePorts.contains(e.getZ().getUrn()) && !portsToKeep.contains(e.getZ().getUrn()));
+    }
 }
