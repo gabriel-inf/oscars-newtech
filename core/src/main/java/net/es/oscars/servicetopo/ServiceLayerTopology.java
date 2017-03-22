@@ -320,9 +320,7 @@ public class ServiceLayerTopology
      * @param bwAvailMap - Map of available bandwidth for "Ingress" and "Egress" direction for each URN.
      * @param rsvVlanList - List of currently reserved VLAN elements (during request schedule)
      */
-    private void calculateLogicalLinkWeightsAsymmetric(RequestedVlanPipeE requestedVlanPipe,
-                                                       List<UrnE> urnList, Map<String, Map<String, Integer>> bwAvailMap,
-                                                       List<ReservedVlanE> rsvVlanList)
+    private void calculateLogicalLinkWeightsAsymmetric(RequestedVlanPipeE requestedVlanPipe, List<UrnE> urnList, Map<String, Map<String, Integer>> bwAvailMap, List<ReservedVlanE> rsvVlanList)
     {
         Set<LogicalEdge> logicalLinksToRemoveFromServiceLayer = new HashSet<>();
 
@@ -352,8 +350,10 @@ public class ServiceLayerTopology
             TopoEdge physEdgeMplsPorttoA = null;      // Edge MPLS-Layer port --> srcEthPort
             TopoEdge physEdgeMplsPorttoZ = null;      // Edge MPLS-Layer port --> dstEthPort
 
-            List<TopoEdge> pathAZ = null;
-            List<TopoEdge> pathZA = null;
+            Set<TopoEdge> adaptationEdgeSet = new HashSet<>();
+
+            List<TopoEdge> pathAZ;
+            List<TopoEdge> pathZA;
 
             long weightMetricAZ = 0;
             long weightMetricZA = 0;
@@ -403,20 +403,17 @@ public class ServiceLayerTopology
 
 
             // Step 3: Add ETHERNET src/dst ports and adaptation edges to MPLS-Layer topology
-            mplsLayerTopo.getVertices().add(srcEthPort);
-            mplsLayerTopo.getVertices().add(dstEthPort);
-
             if(!srcIsVirtual)
             {
                 if(!srcIsOnSwitch)
                 {
-                    mplsLayerTopo.getEdges().add(physEdgeAtoRouter);
-                    mplsLayerTopo.getEdges().add(physEdgeRoutertoA);
+                    adaptationEdgeSet.add(physEdgeAtoRouter);
+                    adaptationEdgeSet.add(physEdgeRoutertoA);
                 }
                 else
                 {
-                    mplsLayerTopo.getEdges().add(physEdgeAtoMplsPort);
-                    mplsLayerTopo.getEdges().add(physEdgeMplsPorttoA);
+                    adaptationEdgeSet.add(physEdgeAtoMplsPort);
+                    adaptationEdgeSet.add(physEdgeMplsPorttoA);
                 }
             }
 
@@ -424,19 +421,24 @@ public class ServiceLayerTopology
             {
                 if(!dstIsOnSwitch)
                 {
-                    mplsLayerTopo.getEdges().add(physEdgeZtoRouter);
-                    mplsLayerTopo.getEdges().add(physEdgeRoutertoZ);
+                    adaptationEdgeSet.add(physEdgeZtoRouter);
+                    adaptationEdgeSet.add(physEdgeRoutertoZ);
                 }
                 else
                 {
-                    mplsLayerTopo.getEdges().add(physEdgeZtoMplsPort);
-                    mplsLayerTopo.getEdges().add(physEdgeMplsPorttoZ);
+                    adaptationEdgeSet.add(physEdgeZtoMplsPort);
+                    adaptationEdgeSet.add(physEdgeMplsPorttoZ);
                 }
             }
 
             serviceLayerLinks.stream()
                     .filter(l -> l.getA().getVertexType().equals(VertexType.VIRTUAL) || l.getZ().getVertexType().equals(VertexType.VIRTUAL))
-                   .forEach(l -> mplsLayerTopo.getEdges().add(l));
+                   .forEach(l -> adaptationEdgeSet.add(l));
+
+            mplsLayerTopo.getVertices().add(srcEthPort);
+            mplsLayerTopo.getVertices().add(dstEthPort);
+            mplsLayerTopo.getEdges().addAll(adaptationEdgeSet);
+
 
             // Step 4: Prune updated MPLS-Layer topology before pathfinding. Operation must be done in two directions since requested bandwidth may be asymmetric from A->Z and Z->A
             Topology prunedMPLSTopoAZ = pruningService.pruneWithPipeAZ(mplsLayerTopo, requestedVlanPipe, urnList, bwAvailMap, rsvVlanList);
@@ -450,15 +452,8 @@ public class ServiceLayerTopology
             // Step 6: Delete ETHERNET src/dst ports and adaptation edges from MPLS-Layer topology so they can't be used in pathfinding for unrelated logical links
             mplsLayerTopo.getVertices().remove(srcEthPort);
             mplsLayerTopo.getVertices().remove(dstEthPort);
-            mplsLayerTopo.getEdges().remove(physEdgeAtoRouter);
-            mplsLayerTopo.getEdges().remove(physEdgeZtoRouter);
-            mplsLayerTopo.getEdges().remove(physEdgeRoutertoA);
-            mplsLayerTopo.getEdges().remove(physEdgeRoutertoZ);
-            mplsLayerTopo.getEdges().remove(physEdgeAtoMplsPort);
-            mplsLayerTopo.getEdges().remove(physEdgeZtoMplsPort);
-            mplsLayerTopo.getEdges().remove(physEdgeMplsPorttoA);
-            mplsLayerTopo.getEdges().remove(physEdgeMplsPorttoZ);
-            mplsLayerTopo.getEdges().removeIf(l -> l.getA().getVertexType().equals(VertexType.VIRTUAL) || l.getZ().getVertexType().equals(VertexType.VIRTUAL));
+            mplsLayerTopo.getEdges().removeAll(adaptationEdgeSet);
+
 
             if(pathAZ.isEmpty() && pathZA.isEmpty())
             {
@@ -510,7 +505,7 @@ public class ServiceLayerTopology
     }
 
     /**
-     * Adds a VIRTUAL device and port onto the Service-layer to represent a request's starting node which is on the MPLS-layer.
+     * Adds a VIRTUAL port onto the Service-layer to represent a request's starting node which is on the MPLS-layer.
      * This is necessary since if the request is sourced on the MPLS-layer, it has no foothold on the service-layer; VIRTUAL nodes are dummy hooks.
      * A bidirectional zero-cost link is added between the VIRTUAL port and MPLS-layer srcInPort.
      * If the specified topology nodes are already on the Service-layer, this method does nothing to modify the Service-layer topology.
@@ -541,7 +536,7 @@ public class ServiceLayerTopology
     }
 
     /**
-     * Adds a VIRTUAL device and port onto the Service-layer to represent a request's terminating node which is on the MPLS-layer.
+     * Adds a VIRTUAL port onto the Service-layer to represent a request's terminating node which is on the MPLS-layer.
      * This is necessary since if the request is destined on the MPLS-layer, it has no foothold on the service-layer; VIRTUAL nodes are dummy hooks.
      * A bidirectional zero-cost link is added between the VIRTUAL port and MPLS-layer dstOutPort.
      * If the specified topology nodes are already on the Service-layer, this method does nothing to modify the Service-layer topology.

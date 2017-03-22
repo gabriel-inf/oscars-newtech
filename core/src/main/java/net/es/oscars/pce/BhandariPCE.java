@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.topo.TopoEdge;
 import net.es.oscars.dto.topo.TopoVertex;
 import net.es.oscars.dto.topo.Topology;
+import net.es.oscars.dto.topo.enums.Layer;
+import net.es.oscars.dto.topo.enums.VertexType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -26,6 +28,143 @@ public class BhandariPCE {
         }
 
         return computePaths(topo, source, dest, k);
+    }
+
+    /** A specialized version of the BhandariPCE controller for supporting solutions requested by the SurvivableServiceLayerTopology.
+     * The source and destination are ETHERNET-capable ports adjacent either to MPLS-capable ports OR adjacent to MPLS-capable devices.
+     * Bhandari's algorithm would fail if the source and destination were to be port nodes because each can only be connected to one network link.
+     * Therefore, this method identifies the nearest MPLS-capable devices to the incoming ETHERNET-capable ports, and passes them to the Bhandari algorithm code.
+     * @param topo Topology consisting ONLY of MPLS-layer ports/devices, and some adjacencies to the ETHERNET=layer source/dest ports
+     * @param source Ethernet-capable source port
+     * @param dest Ethernet-capable destination port
+     * @param k Number of disjoint paths requested between source and destination
+     * @param edgesToIgnore A set of adjacencies connecting the MPLS-layer topology to the Ethernet-capable ports
+     * @return
+     */
+    public List<List<TopoEdge>> computeDisjointPaths(Topology topo, TopoVertex source, TopoVertex dest, Integer k, Set<TopoEdge> edgesToIgnore)
+    {
+        if(k == 0)
+            return new ArrayList<>();
+
+        Set<TopoVertex> allTopoVertices = topo.getVertices();
+        Set<TopoEdge> allTopoEdges = topo.getEdges();
+        Set<TopoEdge> edgesRemoved = new HashSet<>();
+        List<TopoEdge> initialEdges = new ArrayList<>();
+        List<TopoEdge> terminalEdges = new ArrayList<>();
+        TopoVertex newSrc = source;
+        TopoVertex newDst = dest;
+
+        // Determine which edges connect source to topology and mark them for removal. Set newSrc equal to node adjacent to source.
+        for(TopoEdge ignoredEdge : edgesToIgnore)
+        {
+            if(ignoredEdge == null)
+                continue;
+
+            if(ignoredEdge.getA().equals(source) || ignoredEdge.getZ().equals(source))
+            {
+                edgesRemoved.add(ignoredEdge);
+                if(ignoredEdge.getA().equals(source))
+                {
+                    newSrc = ignoredEdge.getZ();
+                    initialEdges.add(ignoredEdge);
+                }
+            }
+        }
+
+        // Determine which edges connect dest to topology and mark them for removal. Set newDst equal to node adjacent to dest.
+        for(TopoEdge ignoredEdge : edgesToIgnore)
+        {
+            if(ignoredEdge == null)
+                continue;
+
+            if(ignoredEdge.getA().equals(dest) || ignoredEdge.getZ().equals(dest))
+            {
+                edgesRemoved.add(ignoredEdge);
+                if(ignoredEdge.getZ().equals(dest))
+                {
+                    newDst = ignoredEdge.getA();
+                    terminalEdges.add(ignoredEdge);
+                }
+            }
+        }
+
+        assert(allTopoVertices.contains(newSrc));
+        assert(allTopoVertices.contains(newDst));
+
+
+        // If the newSrc is a port, find adjacent device and mark relevant adjacencies for removal.
+        if(newSrc.getVertexType().equals(VertexType.PORT))
+        {
+            Set<TopoEdge> portToDeviceEdges = new HashSet<>();
+
+            for(TopoEdge oneEdge : allTopoEdges)
+            {
+                if(oneEdge.getLayer().equals(Layer.INTERNAL) && (oneEdge.getA().equals(newSrc) || oneEdge.getZ().equals(newSrc)))
+                    portToDeviceEdges.add(oneEdge);
+            }
+
+            for(TopoEdge oneRelevantEdge : portToDeviceEdges)
+            {
+                if(oneRelevantEdge.getA().equals(newSrc))
+                {
+                    newSrc = oneRelevantEdge.getZ();
+                    initialEdges.add(oneRelevantEdge);
+                    break;
+
+                }
+            }
+
+            edgesRemoved.addAll(portToDeviceEdges);
+        }
+
+        // If the newDst is a port, find adjacent device and mark relevant adjacencies for removal.
+        if(newDst.getVertexType().equals(VertexType.PORT))
+        {
+            Set<TopoEdge> portToDeviceEdges = new HashSet<>();
+
+            for(TopoEdge oneEdge : allTopoEdges)
+            {
+                if(oneEdge.getLayer().equals(Layer.INTERNAL) && (oneEdge.getA().equals(newDst) || oneEdge.getZ().equals(newDst)))
+                    portToDeviceEdges.add(oneEdge);
+            }
+
+            for(TopoEdge oneRelevantEdge : portToDeviceEdges)
+            {
+                if(oneRelevantEdge.getZ().equals(newDst))
+                {
+                    newDst = oneRelevantEdge.getA();
+                    terminalEdges.add(oneRelevantEdge);
+                    break;
+                }
+            }
+
+            edgesRemoved.addAll(portToDeviceEdges);
+        }
+
+        assert(allTopoVertices.contains(newSrc));
+        assert(allTopoVertices.contains(newDst));
+
+        // Remove affected edges from topology so they aren't used in solution
+        allTopoEdges.removeAll(edgesRemoved);
+
+        // Bhandari's algorithm
+        List<List<TopoEdge>> pathSet = computePaths(topo, newSrc, newDst, k);
+
+        // Put the removed edges (which are not survivable) back into the solution path set
+        for(List<TopoEdge> onePath : pathSet)
+        {
+            for(int edge = initialEdges.size()-1; edge >= 0; edge--)
+                onePath.add(0, initialEdges.get(edge));
+
+            for(int edge = terminalEdges.size()-1; edge >= 0; edge--)
+                onePath.add(terminalEdges.get(edge));
+
+        }
+
+        // Reset topology to original format
+        allTopoEdges.addAll(edgesRemoved);
+
+        return pathSet;
     }
 
     private List<List<TopoEdge>> computePaths(Topology topo, TopoVertex source, TopoVertex dest, Integer k){

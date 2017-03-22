@@ -131,7 +131,6 @@ public class NonPalindromicalPCE {
                 srcPort = new TopoVertex("fix" + srcDevice.getUrn(), VertexType.PORT, PortLayer.ETHERNET);
                 addPortToServiceEthernetTopology(serviceLayerTopology, srcPort, srcDevice);
             }
-
         }
 
         if(dstFixtures.size() > 0)
@@ -154,7 +153,6 @@ public class NonPalindromicalPCE {
                 dstPort = new TopoVertex("fix" + dstDevice.getUrn(), VertexType.PORT, PortLayer.ETHERNET);
                 addPortToServiceEthernetTopology(serviceLayerTopology, dstPort, dstDevice);
             }
-
         }
 
         // Handle MPLS-layer source/destination devices

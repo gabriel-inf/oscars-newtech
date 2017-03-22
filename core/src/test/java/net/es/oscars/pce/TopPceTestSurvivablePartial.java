@@ -1305,6 +1305,9 @@ public class TopPceTestSurvivablePartial extends AbstractCoreTest  {
             assert (actualAzERO.equals(expectedAzERO1) || actualAzERO.equals(expectedAzERO2));
             assert (actualZaERO.equals(expectedZaERO1) || actualZaERO.equals(expectedZaERO2));
 
+            log.info("ACTUAL AZ: " + actualAzERO.toString());
+            log.info("ACTUAL ZA: " + actualZaERO.toString());
+
             if(actualAzERO.equals(expectedAzERO1))
             {
                 assert(actualZaERO.equals(expectedZaERO1));
@@ -1630,9 +1633,9 @@ public class TopPceTestSurvivablePartial extends AbstractCoreTest  {
     }
 
     @Test
-    public void survivablePceTestNonUniformPorts()
+    public void survPartialWithEthPortsOnRoutersTest1()
     {
-        log.info("Initializing test: 'survivablePceTestNonUniformPorts'.");
+        log.info("Initializing test: 'survPartialWithEthPortsOnRoutersTest1'.");
 
         RequestedBlueprintE requestedBlueprint;
         Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
@@ -1641,13 +1644,13 @@ public class TopPceTestSurvivablePartial extends AbstractCoreTest  {
         Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
         Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
 
-        String srcPort = "portP:1";
+        String srcPort = "nodeP:1";
         String srcDevice = "nodeP";
-        String dstPort = "portQ:1";
+        String dstPort = "nodeQ:1";
         String dstDevice = "nodeQ";
         Integer azBW = 25;
         Integer zaBW = 25;
-        PalindromicType palindrome = PalindromicType.PALINDROME;
+        PalindromicType palindrome = PalindromicType.NON_PALINDROME;
         SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_PARTIAL;
         String vlan = "any";
 
@@ -1655,7 +1658,7 @@ public class TopPceTestSurvivablePartial extends AbstractCoreTest  {
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
         requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 2, 1, 1, "test");
 
-        log.info("Beginning test: 'survivablePceTestNonUniformPorts'.");
+        log.info("Beginning test: 'survPartialWithEthPortsOnRoutersTest1'.");
 
         try
         {
@@ -1668,6 +1671,216 @@ public class TopPceTestSurvivablePartial extends AbstractCoreTest  {
 
         assert (reservedBlueprint.isPresent());
 
-        log.info("test 'survivablePceTestNonUniformPorts' passed.");
+        ReservedVlanFlowE reservedFlow = reservedBlueprint.get().getVlanFlow();
+
+        Set<ReservedEthPipeE> allResEthPipes = reservedFlow.getEthPipes();
+        Set<ReservedMplsPipeE> allResMplsPipes = reservedFlow.getMplsPipes();
+        Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
+
+        assert (allResJunctions.size() == 0);
+        assert (allResEthPipes.size() == 0);
+        assert (allResMplsPipes.size() == 2);
+
+        // Ethernet Pipes
+        for(ReservedMplsPipeE mplsPipe : allResMplsPipes)
+        {
+            ReservedVlanJunctionE aJunc = mplsPipe.getAJunction();
+            ReservedVlanJunctionE zJunc = mplsPipe.getZJunction();
+            Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
+            Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
+            List<String> azERO = mplsPipe.getAzERO();
+            List<String> zaERO = mplsPipe.getZaERO();
+            String actualAzERO = aJunc.getDeviceUrn() + "-";
+            String actualZaERO = zJunc.getDeviceUrn() + "-";
+
+            for(String x : azERO)
+                actualAzERO = actualAzERO + x + "-";
+
+            for(String x : zaERO)
+                actualZaERO = actualZaERO + x + "-";
+
+            actualAzERO = actualAzERO + zJunc.getDeviceUrn();
+            actualZaERO = actualZaERO + aJunc.getDeviceUrn();
+
+            assert(aJunc.getDeviceUrn().equals("nodeP"));
+            assert(zJunc.getDeviceUrn().equals("nodeQ"));
+
+            assert(aFixes.size() == 1);
+            assert(zFixes.size() == 1);
+
+            String expectedAzERO1 = "nodeP-nodeP:2-nodeQ:2-nodeQ";
+            String expectedAzERO2 = "nodeP-nodeP:6-nodeR:1-nodeR-nodeR:2-nodeQ:6-nodeQ";
+            String expectedZaERO1 = "nodeQ-nodeQ:2-nodeP:2-nodeP";
+            String expectedZaERO2 = "nodeQ-nodeQ:6-nodeR:2-nodeR-nodeR:1-nodeP:6-nodeP";
+
+            assert(actualAzERO.equals(expectedAzERO1) || actualAzERO.equals(expectedAzERO2));
+            assert(actualZaERO.equals(expectedZaERO1) || actualZaERO.equals(expectedZaERO2));
+
+            if(actualAzERO.equals(expectedAzERO1))
+                assert(actualZaERO.equals(expectedZaERO1));
+            else
+                assert(actualZaERO.equals(expectedZaERO2));
+        }
+
+        log.info("test 'survPartialWithEthPortsOnRoutersTest1' passed.");
+    }
+
+    @Test
+    public void survPartialWithEthPortsOnRoutersTest2()
+    {
+        log.info("Initializing test: 'survPartialWithEthPortsOnRoutersTest2'.");
+
+        RequestedBlueprintE requestedBlueprint;
+        Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
+        ScheduleSpecificationE requestedSched;
+
+        Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
+        Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
+
+        String srcPort = "nodeP:1";
+        String srcDevice = "nodeP";
+        String dstPort = "nodeQ:1";
+        String dstDevice = "nodeQ";
+        Integer azBW = 50;
+        Integer zaBW = 25;
+        PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_PARTIAL;
+        String vlan = "any";
+
+        topologyBuilder.buildTopoWithEthPortsOnRouters();
+        requestedSched = testBuilder.buildSchedule(startDate, endDate);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 2, 1, 1, "test");
+
+        log.info("Beginning test: 'survPartialWithEthPortsOnRoutersTest2'.");
+
+        try
+        {
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
+        }
+        catch(PCEException | PSSException pceE)
+        {
+            log.error("", pceE);
+        }
+
+        assert (reservedBlueprint.isPresent());
+
+        ReservedVlanFlowE reservedFlow = reservedBlueprint.get().getVlanFlow();
+
+        Set<ReservedEthPipeE> allResEthPipes = reservedFlow.getEthPipes();
+        Set<ReservedMplsPipeE> allResMplsPipes = reservedFlow.getMplsPipes();
+        Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
+
+        assert (allResJunctions.size() == 0);
+        assert (allResEthPipes.size() == 0);
+        assert (allResMplsPipes.size() == 2);
+
+        // Ethernet Pipes
+        for(ReservedMplsPipeE mplsPipe : allResMplsPipes)
+        {
+            ReservedVlanJunctionE aJunc = mplsPipe.getAJunction();
+            ReservedVlanJunctionE zJunc = mplsPipe.getZJunction();
+            Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
+            Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
+            List<String> azERO = mplsPipe.getAzERO();
+            List<String> zaERO = mplsPipe.getZaERO();
+            String actualAzERO = aJunc.getDeviceUrn() + "-";
+            String actualZaERO = zJunc.getDeviceUrn() + "-";
+
+            for(String x : azERO)
+                actualAzERO = actualAzERO + x + "-";
+
+            for(String x : zaERO)
+                actualZaERO = actualZaERO + x + "-";
+
+            actualAzERO = actualAzERO + zJunc.getDeviceUrn();
+            actualZaERO = actualZaERO + aJunc.getDeviceUrn();
+
+            assert(aJunc.getDeviceUrn().equals("nodeP"));
+            assert(zJunc.getDeviceUrn().equals("nodeQ"));
+
+            assert(aFixes.size() == 1);
+            assert(zFixes.size() == 1);
+
+            String expectedAzERO1 = "nodeP-nodeP:2-nodeQ:2-nodeQ";
+            String expectedAzERO2 = "nodeP-nodeP:6-nodeR:1-nodeR-nodeR:2-nodeQ:6-nodeQ";
+            String expectedZaERO1 = "nodeQ-nodeQ:2-nodeP:2-nodeP";
+            String expectedZaERO2 = "nodeQ-nodeQ:6-nodeR:2-nodeR-nodeR:1-nodeP:6-nodeP";
+
+            assert(actualAzERO.equals(expectedAzERO1) || actualAzERO.equals(expectedAzERO2));
+            assert(actualZaERO.equals(expectedZaERO1) || actualZaERO.equals(expectedZaERO2));
+
+            if(actualAzERO.equals(expectedAzERO1))
+                assert(actualZaERO.equals(expectedZaERO1));
+            else
+                assert(actualZaERO.equals(expectedZaERO2));
+
+            assert((mplsPipe.getReservedBandwidths().size() == 2) || (mplsPipe.getReservedBandwidths().size() == 4));
+
+            for(ReservedBandwidthE oneResBW : mplsPipe.getReservedBandwidths())
+            {
+                String bwURN = oneResBW.getUrn();
+                Integer bwIN = oneResBW.getInBandwidth();
+                Integer bwEG = oneResBW.getEgBandwidth();
+
+                log.info("URN: " + bwURN + ", IN: " + bwIN + ", EG: " + bwEG);
+
+                if(bwURN.equals("nodeP:2"))
+                    assert(bwIN == 25 && bwEG == 50);
+                else if(bwURN.equals("nodeP:6"))
+                    assert(bwIN == 25 && bwEG == 50);
+                else if(bwURN.equals("nodeQ:2"))
+                    assert(bwIN == 50 && bwEG == 25);
+                else if(bwURN.equals("nodeQ:6"))
+                    assert(bwIN == 50 && bwEG == 25);
+                else if(bwURN.equals("nodeR:1"))
+                    assert(bwIN == 50 && bwEG == 25);
+                else if(bwURN.equals("nodeR:2"))
+                    assert(bwIN == 25 && bwEG == 50);
+            }
+        }
+
+        log.info("test 'survPartialWithEthPortsOnRoutersTest2' passed.");
+    }
+
+    @Test
+    public void survPartialWithEthPortsOnRoutersTest3()
+    {
+        log.info("Initializing test: 'survPartialWithEthPortsOnRoutersTest3'.");
+
+        RequestedBlueprintE requestedBlueprint;
+        Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
+        ScheduleSpecificationE requestedSched;
+
+        Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
+        Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
+
+        String srcPort = "nodeP:1";
+        String srcDevice = "nodeP";
+        String dstPort = "nodeQ:1";
+        String dstDevice = "nodeQ";
+        Integer azBW = 25;
+        Integer zaBW = 25;
+        PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_PARTIAL;
+        String vlan = "any";
+
+        asymmTopologyBuilder.buildTopoWithEthPortsOnRouters();
+        requestedSched = testBuilder.buildSchedule(startDate, endDate);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 2, 1, 1, "test");
+
+        log.info("Beginning test: 'survPartialWithEthPortsOnRoutersTest3'.");
+
+        try
+        {
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
+        }
+        catch(PCEException | PSSException pceE)
+        {
+            log.error("", pceE);
+        }
+
+        assert (!reservedBlueprint.isPresent());
+
+        log.info("test 'survPartialWithEthPortsOnRoutersTest3' passed.");
     }
 }

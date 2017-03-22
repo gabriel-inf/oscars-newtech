@@ -45,7 +45,7 @@ public class SurvivableServiceLayerTopology
     private Set<TopoEdge> mplsLayerLinks;           // MPLS edges
 
     private Set<TopoVertex> nonAdjacentPorts;       // Service-layer ports which connect to MPLS-layer ports
-    private Set<SurvivableLogicalEdge> logicalLinks;          // Abstraction of survivable path between two nonadjacent ports
+    private Set<SurvivableLogicalEdge> logicalLinks;          // Abstraction of path between two nonadjacent ports
     private Set<SurvivableLogicalEdge> llBackup;              // Copy of logicalLinks, used for resetting, etc.
 
     // Set by calling object - Refer to NonPalindromicPCE for details //
@@ -68,11 +68,9 @@ public class SurvivableServiceLayerTopology
         mplsLayerPorts = new HashSet<>();
         mplsLayerLinks = new HashSet<>();
 
-        log.info("decomposing topology into Service-Layer and MPLS-Layer.");
         buildServiceLayerTopo();
         buildMplsLayerTopo();
 
-        log.info("building logical edges for Service-Layer topology.");
         buildLogicalLayerTopo();
     }
 
@@ -91,7 +89,7 @@ public class SurvivableServiceLayerTopology
 
         // Parse the Devices
         Set<TopoVertex> allEthernetDevices = ethernetVertices.stream()
-                .filter(d -> d.getVertexType().equals(VertexType.SWITCH))
+                .filter(d -> !d.getVertexType().equals(VertexType.PORT))
                 .collect(Collectors.toSet());
 
 
@@ -102,18 +100,25 @@ public class SurvivableServiceLayerTopology
 
 
         // Parse the INTERNAL Edges
-        Set<TopoEdge> allInternalEthernetEdges = allInternalEdges.stream()
-                .filter(e -> !e.getA().getVertexType().equals(VertexType.ROUTER) && !e.getZ().getVertexType().equals(VertexType.ROUTER))
-                .collect(Collectors.toSet());
+        Set<TopoEdge> allInternalEthernetEdges = new HashSet<>();
+        for(TopoEdge oneIntEdge : allInternalEdges)
+        {
+            TopoVertex aVert = oneIntEdge.getA();
+            TopoVertex zVert = oneIntEdge.getZ();
+            VertexType aType = aVert.getVertexType();
+            VertexType zType = zVert.getVertexType();
+            PortLayer aLayer = aVert.getPortLayer();
+            PortLayer zLayer = zVert.getPortLayer();
 
+            if((aType.equals(VertexType.PORT) && aLayer.equals(PortLayer.ETHERNET)) || (zType.equals(VertexType.PORT) && zLayer.equals(PortLayer.ETHERNET)))
+                allInternalEthernetEdges.add(oneIntEdge);
+        }
 
         // Compose Service-Layer
         serviceLayerDevices.addAll(allEthernetDevices);
         serviceLayerPorts.addAll(allEthernetPorts);
         serviceLayerLinks.addAll(allEthernetEdges);
         serviceLayerLinks.addAll(allInternalEthernetEdges);
-
-        serviceLayerPorts.stream().forEach(p -> log.info(p.toString()));
     }
 
     /**
@@ -131,7 +136,7 @@ public class SurvivableServiceLayerTopology
 
         // Parse the Devices
         Set<TopoVertex> allMplsDevices = mplsVertices.stream()
-                .filter(d -> d.getVertexType().equals(VertexType.ROUTER))
+                .filter(d -> !d.getVertexType().equals(VertexType.PORT))
                 .collect(Collectors.toSet());
 
 
@@ -142,9 +147,19 @@ public class SurvivableServiceLayerTopology
 
 
         // Parse the INTERNAL Edges
-        Set<TopoEdge> allInternalMPLSEdges = allInternalEdges.stream()
-                .filter(e -> !e.getA().getVertexType().equals(VertexType.SWITCH) && !e.getZ().getVertexType().equals(VertexType.SWITCH))
-                .collect(Collectors.toSet());
+        Set<TopoEdge> allInternalMPLSEdges = new HashSet<>();
+        for(TopoEdge oneIntEdge : allInternalEdges)
+        {
+            TopoVertex aVert = oneIntEdge.getA();
+            TopoVertex zVert = oneIntEdge.getZ();
+            VertexType aType = aVert.getVertexType();
+            VertexType zType = zVert.getVertexType();
+            PortLayer aLayer = aVert.getPortLayer();
+            PortLayer zLayer = zVert.getPortLayer();
+
+            if((aType.equals(VertexType.PORT) && aLayer.equals(PortLayer.MPLS)) || (zType.equals(VertexType.PORT) && zLayer.equals(PortLayer.MPLS)))
+                allInternalMPLSEdges.add(oneIntEdge);
+        }
 
 
         // Compose MPLS Mesh Layer
@@ -152,7 +167,6 @@ public class SurvivableServiceLayerTopology
         mplsLayerPorts.addAll(allMplsPorts);
         mplsLayerLinks.addAll(allMplsEdges);
         mplsLayerLinks.addAll(allInternalMPLSEdges);
-
     }
 
     /**
@@ -174,27 +188,44 @@ public class SurvivableServiceLayerTopology
 
         for(TopoEdge serviceLink : serviceLayerLinks)
         {
-            TopoVertex portA = serviceLink.getA();
-            TopoVertex portZ = serviceLink.getZ();
+            TopoVertex vertA = serviceLink.getA();
+            TopoVertex vertZ = serviceLink.getZ();
 
             // Skip INTERNAL edges
             if(serviceLink.getLayer().equals(Layer.INTERNAL))
-            {
                 continue;
-            }
 
             // ETHERNET -> MPLS edge
-            if(serviceLayerPorts.contains(portA) && !serviceLayerPorts.contains(portZ))
-            {
-                nonAdjacentPorts.add(portA);
-            }
+            if(serviceLayerPorts.contains(vertA) && !serviceLayerPorts.contains(vertZ))
+                nonAdjacentPorts.add(vertA);
 
-            // MPLS -> Ethernet edge
-            if(!serviceLayerPorts.contains(portA) && serviceLayerPorts.contains(portZ))
-            {
-                nonAdjacentPorts.add(portZ);
-            }
+            // MPLS -> ETHERNET edge
+            if(!serviceLayerPorts.contains(vertA) && serviceLayerPorts.contains(vertZ))
+                nonAdjacentPorts.add(vertZ);
         }
+
+        // Ports which are not on any ETHERNET edges (edge ports) should be added to set
+        serviceLayerPorts.stream()
+                .filter(p -> !nonAdjacentPorts.contains(p))
+                .forEach(p ->
+                {
+                    List<TopoEdge> ethLinkscontainingP =  serviceLayerLinks.stream()
+                            .filter(l -> l.getLayer().equals(Layer.ETHERNET) && (l.getA().equals(p) || l.getZ().equals(p)))
+                            .collect(Collectors.toList());
+
+                    if(ethLinkscontainingP.isEmpty())
+                    {
+                        List<TopoEdge> linksConnectingSwitchToP = serviceLayerLinks.stream()
+                                .filter(l -> l.getLayer().equals(Layer.INTERNAL) && (l.getA().equals(p) || l.getZ().equals(p)))
+                                .filter(l -> l.getA().getVertexType().equals(VertexType.SWITCH) || l.getZ().getVertexType().equals(VertexType.SWITCH))
+                                .collect(Collectors.toList());
+
+                        if(linksConnectingSwitchToP.isEmpty())
+                        {
+                            nonAdjacentPorts.add(p);
+                        }
+                    }
+                });
     }
 
 
@@ -214,14 +245,40 @@ public class SurvivableServiceLayerTopology
                     continue;
                 }
 
-                SurvivableLogicalEdge azLogicalEdge = new SurvivableLogicalEdge(nonAdjacentA,nonAdjacentZ, 0L, 0L, Layer.LOGICAL, new ArrayList<>(), new ArrayList<>());
-                SurvivableLogicalEdge zaLogicalEdge = new SurvivableLogicalEdge(nonAdjacentZ,nonAdjacentA, 0L, 0L, Layer.LOGICAL, new ArrayList<>(), new ArrayList<>());
+                // Do NOT build logical link between physically connected ETHERNET ports
+                List<TopoEdge> slEdgeWithTheseEndpoints = serviceLayerLinks.stream()
+                        .filter(l -> l.getA().equals(nonAdjacentA) && l.getZ().equals(nonAdjacentZ))
+                        .collect(Collectors.toList());
 
-                azLogicalEdge.setMetric(0L);
-                zaLogicalEdge.setMetric(0L);
+                if(!slEdgeWithTheseEndpoints.isEmpty())
+                    continue;
+
+                // Do NOT build logical link between ETHERNET ports on the same device
+                List<TopoEdge> internalEdgesFromA = serviceLayerLinks.stream()
+                        .filter(l -> l.getA().equals(nonAdjacentA) && l.getLayer().equals(Layer.INTERNAL))
+                        .collect(Collectors.toList());
+
+                List<TopoEdge> internalEdgesFromZ = serviceLayerLinks.stream()
+                        .filter(l -> l.getA().equals(nonAdjacentZ) && l.getLayer().equals(Layer.INTERNAL))
+                        .collect(Collectors.toList());
+
+                assert(internalEdgesFromA.size() == 1 || nonAdjacentA.getVertexType().equals(VertexType.VIRTUAL));
+                assert(internalEdgesFromZ.size() == 1 || nonAdjacentZ.getVertexType().equals(VertexType.VIRTUAL));
+
+                if(!nonAdjacentA.getVertexType().equals(VertexType.VIRTUAL) && !nonAdjacentZ.getVertexType().equals(VertexType.VIRTUAL))
+                {
+                    if(internalEdgesFromA.get(0).getZ().equals(internalEdgesFromZ.get(0).getZ()))
+                        continue;
+                }
+
+                List<Long> kMetrics = new ArrayList<>();     // Set of metrics for each K-path
+                List<List<TopoEdge>> kPaths = new ArrayList<>();   // Set of K-paths
+
+                SurvivableLogicalEdge azLogicalEdge = new SurvivableLogicalEdge(nonAdjacentA,nonAdjacentZ, kMetrics, Layer.LOGICAL, kPaths);
+                //SurvivableLogicalEdge zaLogicalEdge = new SurvivableLogicalEdge(nonAdjacentZ,nonAdjacentA, kMetrics, Layer.LOGICAL, kPaths);
 
                 logicalLinks.add(azLogicalEdge);
-                logicalLinks.add(zaLogicalEdge);
+                //logicalLinks.add(zaLogicalEdge);
             }
         }
 
@@ -241,196 +298,176 @@ public class SurvivableServiceLayerTopology
      * @param bwAvailMap - A map of available "Ingress" and 'Egress" bandwidth for each URN.
      * @param rsvVlanList - List of currently reserved VLAN elements (during request schedule)
      */
-    public void calculateLogicalLinkWeights(RequestedVlanPipeE requestedVlanPipe, List<UrnE> urnList,
-                                            Map<String, Map<String, Integer>> bwAvailMap, List<ReservedVlanE> rsvVlanList){
+    public void calculateLogicalLinkWeights(RequestedVlanPipeE requestedVlanPipe, List<UrnE> urnList, Map<String, Map<String, Integer>> bwAvailMap, List<ReservedVlanE> rsvVlanList, int numDisjoint)
+    {
         Set<SurvivableLogicalEdge> logicalLinksToRemoveFromServiceLayer = new HashSet<>();
 
+        // Step 1: Construct MPLS-Layer topology
         Topology mplsLayerTopo = new Topology();
         mplsLayerTopo.getVertices().addAll(mplsLayerDevices);
         mplsLayerTopo.getVertices().addAll(mplsLayerPorts);
         mplsLayerTopo.getEdges().addAll(mplsLayerLinks);
 
-        // Step 1: Prune MPLS-Layer topology once before considering any logical links.
-        Topology prunedMPLSTopo = pruningService.pruneWithPipe(mplsLayerTopo, requestedVlanPipe, urnList, bwAvailMap, rsvVlanList);
-
         for(SurvivableLogicalEdge oneLogicalLink : logicalLinks)
         {
             TopoVertex srcEthPort = oneLogicalLink.getA();      //Ethernet-source of logical link
             TopoVertex dstEthPort = oneLogicalLink.getZ();      //Ethernet-dest of logical link
-            TopoVertex mplsSrcPort;                             //MPLS port adjacent to srcEthPort
-            TopoVertex mplsDstPort;                             //MPLS port adjacent to dstEthPort
-            TopoVertex mplsSrcDevice = null;                           //MPLS device adjacent to mplsSrcPort
-            TopoVertex mplsDstDevice = null;                           //MPLS device adjacent to mplsDstPort
 
-            TopoEdge physEdgeAtoMpls = null;
-            TopoEdge physEdgeZtoMpls = null;
-            TopoEdge physEdgeMplstoA = null;
-            TopoEdge physEdgeMplstoZ = null;
+            boolean srcIsOnSwitch = false;
+            boolean dstIsOnSwitch = false;
+            boolean srcIsVirtual = srcEthPort.getVertexType().equals(VertexType.VIRTUAL);
+            boolean dstIsVirtual = dstEthPort.getVertexType().equals(VertexType.VIRTUAL);
 
-            TopoEdge physEdgeMplsSrcPortToDevice = null;
-            TopoEdge physEdgeMplsDstDeviceToPort = null;
+            TopoEdge physEdgeAtoRouter = null;      // Edge srcEthPort --> Router
+            TopoEdge physEdgeZtoRouter = null;      // Edge dstEthPort --> Router
+            TopoEdge physEdgeRoutertoA = null;      // Edge Router --> srcEthPort
+            TopoEdge physEdgeRoutertoZ = null;      // Edge Router --> dstEthPort
 
-            Set<TopoVertex> adaptationPorts = new HashSet<>();
-            Set<TopoEdge> adaptationEdges = new HashSet<>();
+            TopoEdge physEdgeAtoMplsPort = null;      // Edge srcEthPort --> MPLS-Layer port
+            TopoEdge physEdgeZtoMplsPort = null;      // Edge dstEthPort --> MPLS-Layer port
+            TopoEdge physEdgeMplsPorttoA = null;      // Edge MPLS-Layer port --> srcEthPort
+            TopoEdge physEdgeMplsPorttoZ = null;      // Edge MPLS-Layer port --> dstEthPort
 
-            Topology adaptationTopo = new Topology();
+            Set<TopoEdge> adaptationEdgeSet = new HashSet<>();
 
-            long weightMetricPrimary = 0;
-            long weightMetricSecondary = 0;
-
+            // Step 2: Identify adaptation edges between ETHERNET ports and MPLS ports/devices
             for(TopoEdge oneSLLink : serviceLayerLinks)
             {
-                if(oneSLLink.getA().equals(srcEthPort))
+                TopoVertex slA = oneSLLink.getA();
+                TopoVertex slZ = oneSLLink.getZ();
+
+                if(slA.equals(srcEthPort) && slZ.getVertexType().equals(VertexType.ROUTER))
+                    physEdgeAtoRouter = oneSLLink;
+                else if(slZ.equals(srcEthPort) && slA.getVertexType().equals(VertexType.ROUTER))
+                    physEdgeRoutertoA = oneSLLink;
+
+                if(slZ.equals(dstEthPort) && slA.getVertexType().equals(VertexType.ROUTER))
+                    physEdgeRoutertoZ = oneSLLink;
+                else if(slA.equals(dstEthPort) && slZ.getVertexType().equals(VertexType.ROUTER))
+                    physEdgeZtoRouter = oneSLLink;
+
+
+                if((slA.equals(srcEthPort) && slZ.getVertexType().equals(VertexType.SWITCH)) || (slZ.equals(srcEthPort) && slA.getVertexType().equals(VertexType.SWITCH)))
                 {
-                    if(oneSLLink.getZ().getVertexType().equals(VertexType.PORT))
-                    {
-                        physEdgeAtoMpls = oneSLLink;
-                    }
-                }
-                else if(oneSLLink.getZ().equals(srcEthPort))
-                {
-                    if(oneSLLink.getA().getVertexType().equals(VertexType.PORT))
-                    {
-                        physEdgeMplstoA = oneSLLink;
-                    }
+                    srcIsOnSwitch = true;
+                    physEdgeAtoMplsPort = serviceLayerLinks.stream().filter(l -> l.getA().equals(srcEthPort) && l.getZ().getVertexType().equals(VertexType.PORT)).findFirst().get();
+                    physEdgeMplsPorttoA = serviceLayerLinks.stream().filter(l -> l.getZ().equals(srcEthPort) && l.getA().getVertexType().equals(VertexType.PORT)).findFirst().get();
                 }
 
-                if(oneSLLink.getZ().equals(dstEthPort))
+                if((slA.equals(dstEthPort) && slZ.getVertexType().equals(VertexType.SWITCH)) || (slZ.equals(dstEthPort) && slA.getVertexType().equals(VertexType.SWITCH)))
                 {
-                    if (oneSLLink.getA().getVertexType().equals(VertexType.PORT)) {
-                        physEdgeMplstoZ = oneSLLink;
-                    }
-                }
-                else if(oneSLLink.getA().equals(dstEthPort))
-                {
-                    if(oneSLLink.getZ().getVertexType().equals(VertexType.PORT))
-                    {
-                        physEdgeZtoMpls = oneSLLink;
-                    }
+                    dstIsOnSwitch = true;
+                    physEdgeZtoMplsPort = serviceLayerLinks.stream().filter(l -> l.getA().equals(dstEthPort) && l.getZ().getVertexType().equals(VertexType.PORT)).findFirst().get();
+                    physEdgeMplsPorttoZ = serviceLayerLinks.stream().filter(l -> l.getZ().equals(dstEthPort) && l.getA().getVertexType().equals(VertexType.PORT)).findFirst().get();
                 }
             }
 
-            if(physEdgeAtoMpls == null || physEdgeZtoMpls == null || physEdgeMplstoA == null || physEdgeMplstoZ == null)
+            if(physEdgeAtoRouter == null || physEdgeZtoRouter == null || physEdgeRoutertoA == null || physEdgeRoutertoZ == null)
             {
-                log.error("service-layer topology has incorrectly identified adaptation edges");
-                assert false;
+                if(!srcIsOnSwitch && !dstIsOnSwitch)
+                {
+                    if(!srcIsVirtual && !dstIsVirtual)
+                    {
+                        log.error("Service-layer topology has incorrectly identified adaptation edges");
+                        assert false;
+                    }
+                }
             }
 
 
-            mplsSrcPort = physEdgeAtoMpls.getZ();
-            mplsDstPort = physEdgeMplstoZ.getA();
-
-            for(TopoEdge oneMplsLink : mplsLayerLinks)
+            if(!srcIsVirtual)
             {
-                if(oneMplsLink.getA().equals(mplsSrcPort))
+                if(!srcIsOnSwitch)
                 {
-                    if(oneMplsLink.getZ().getVertexType().equals(VertexType.ROUTER))
-                    {
-                        mplsSrcDevice = oneMplsLink.getZ();
-                        physEdgeMplsSrcPortToDevice = oneMplsLink;
-                    }
+                    adaptationEdgeSet.add(physEdgeAtoRouter);
+                    adaptationEdgeSet.add(physEdgeRoutertoA);
                 }
-                else if(oneMplsLink.getZ().equals(mplsDstPort))
+                else
                 {
-                    if(oneMplsLink.getA().getVertexType().equals(VertexType.ROUTER))
-                    {
-                        mplsDstDevice = oneMplsLink.getA();
-                        physEdgeMplsDstDeviceToPort = oneMplsLink;
-                    }
+                    adaptationEdgeSet.add(physEdgeAtoMplsPort);
+                    adaptationEdgeSet.add(physEdgeMplsPorttoA);
                 }
             }
 
-            assert(mplsSrcDevice != null);
-            assert(mplsDstDevice != null);
+            if(!dstIsVirtual)
+            {
+                if(!dstIsOnSwitch)
+                {
+                    adaptationEdgeSet.add(physEdgeZtoRouter);
+                    adaptationEdgeSet.add(physEdgeRoutertoZ);
+                }
+                else
+                {
+                    adaptationEdgeSet.add(physEdgeZtoMplsPort);
+                    adaptationEdgeSet.add(physEdgeMplsPorttoZ);
+                }
+            }
 
-            // Step 2: Prune the adaptation (Ethernet-MPLS) edges and ports to ensure this logical link is worth building.
-            adaptationPorts.add(srcEthPort);
-            adaptationPorts.add(dstEthPort);
-            adaptationPorts.add(mplsSrcPort);
-            adaptationPorts.add(mplsDstPort);
+            // Only add links to VIRTUAL ports if these ports are end-points of the current logical link
+            for(TopoEdge oneSlLink : serviceLayerLinks)
+            {
+                if(oneSlLink.getA().getVertexType().equals(VertexType.VIRTUAL))
+                {
+                    if(oneSlLink.getA().equals(srcEthPort) || oneSlLink.getA().equals(dstEthPort))
+                        adaptationEdgeSet.add(oneSlLink);
+                }
 
-            adaptationEdges.add(physEdgeAtoMpls);
-            adaptationEdges.add(physEdgeZtoMpls);
-            adaptationEdges.add(physEdgeMplstoA);
-            adaptationEdges.add(physEdgeMplstoZ);
+                if(oneSlLink.getZ().getVertexType().equals(VertexType.VIRTUAL))
+                {
+                    if(oneSlLink.getZ().equals(srcEthPort) || oneSlLink.getZ().equals(dstEthPort))
+                        adaptationEdgeSet.add(oneSlLink);
+                }
+            }
 
-            adaptationTopo.setVertices(adaptationPorts);
-            adaptationTopo.setEdges(adaptationEdges);
+            // Step 3: Add ETHERNET src/dst ports and adaptation edges to MPLS-Layer topology
+            mplsLayerTopo.getVertices().add(srcEthPort);
+            mplsLayerTopo.getVertices().add(dstEthPort);
+            mplsLayerTopo.getEdges().addAll(adaptationEdgeSet);
 
-            Topology prunedAdaptationTopo = pruningService.pruneWithPipe(adaptationTopo, requestedVlanPipe, bwAvailMap, rsvVlanList);
 
-            if(!prunedAdaptationTopo.equals(adaptationTopo))
+            // Step 4: Prune updated MPLS-Layer topology before pathfinding.
+            Topology prunedMPLSTopo = pruningService.pruneWithPipe(mplsLayerTopo, requestedVlanPipe, urnList, bwAvailMap, rsvVlanList);
+
+
+            // Step 5: Compute MPLS-Layer routes to construct physical survivable paths corresponding to this logical link. Bhandari will modify the input to perform disjoint routing between MPLS devices (port src/dst would always result in failures).
+            List<List<TopoEdge>> pathSet = bhandariPCE.computeDisjointPaths(prunedMPLSTopo, srcEthPort, dstEthPort, numDisjoint, adaptationEdgeSet);
+
+            // Step 6: Delete ETHERNET src/dst ports and adaptation edges from MPLS-Layer topology so they can't be used in pathfinding for unrelated logical links
+            mplsLayerTopo.getVertices().remove(srcEthPort);
+            mplsLayerTopo.getVertices().remove(dstEthPort);
+            mplsLayerTopo.getEdges().removeAll(adaptationEdgeSet);
+
+
+            if(pathSet.isEmpty() || (pathSet.size() != numDisjoint))
             {
                 logicalLinksToRemoveFromServiceLayer.add(oneLogicalLink);
                 continue;
             }
 
-            // Step 3: Perform routing on MPLS layer to construct physical routes corresponding to the logical link.
+            assert(pathSet.size() == numDisjoint);
 
-            List<List<TopoEdge>> pathPair = bhandariPCE.computeDisjointPaths(prunedMPLSTopo, mplsSrcDevice, mplsDstDevice, 2);
-
-            if(pathPair.isEmpty())
+            // Step 7: Calculate total cost-metric for logical link and Step 8: map the physical path-set to the corresponding logical link.
+            for(int p = 0; p < pathSet.size(); p++)
             {
-                logicalLinksToRemoveFromServiceLayer.add(oneLogicalLink);
-                continue;
-            }
-            else if(pathPair.size() != 2)
-            {
-                logicalLinksToRemoveFromServiceLayer.add(oneLogicalLink);
-                continue;
-            }
+                List<TopoEdge> onePath = pathSet.get(p);
+                Long oneMetric = 0L;
 
-            // Step 4: Calculate total cost-metric for logical link.
+                for(TopoEdge oneEdge : onePath)
+                    oneMetric += oneEdge.getMetric();
 
-            List<TopoEdge> primaryPath = pathPair.get(0);
-            List<TopoEdge> secondaryPath = pathPair.get(1);
+                // The calling function expects metric to be set. Pathfinding is done in consideration of the primary path, so we set that value here.
+                if(p == 0)
+                    oneLogicalLink.setMetric(oneMetric);
 
-
-            // Add the src/dst ports back onto the paths
-            for(List<TopoEdge> path : pathPair)
-            {
-                path.add(0, physEdgeMplsSrcPortToDevice);
-                path.add(physEdgeMplsDstDeviceToPort);
+                oneLogicalLink.getKMetrics().add(oneMetric);
+                oneLogicalLink.getKCorrespondingTopoEdges().add(onePath);
             }
 
-            // Primary
-            for(TopoEdge pathEdge : primaryPath)
-            {
-                weightMetricPrimary += pathEdge.getMetric();
-            }
-
-            // Add *uni-directional* cost of adaptation links to Logical Link weight since these are ETHERNET links, but will implicitly be used in BOTH directions across two logical links
-            weightMetricPrimary += physEdgeAtoMpls.getMetric();
-            weightMetricPrimary += physEdgeMplstoZ.getMetric();
-
-            oneLogicalLink.setMetricPrimary(weightMetricPrimary);
-
-            // Secondary
-            for(TopoEdge pathEdge : secondaryPath)
-            {
-                weightMetricSecondary += pathEdge.getMetric();
-            }
-
-            // Add *uni-directional* cost of adaptation links to Logical Link weight since these are ETHERNET links, but will implicitly be used in BOTH directions across two logical links
-            weightMetricSecondary += physEdgeAtoMpls.getMetric();
-            weightMetricSecondary += physEdgeMplstoZ.getMetric();
-
-            oneLogicalLink.setMetricSecondary(weightMetricSecondary);
-
-            oneLogicalLink.setMetric(weightMetricPrimary);   // The calling function expects metric to be set. Pathfinding is done based on shortest primary path, so we use that value here
-
-            // Step 5: Store the physical route corresponding to this logical link
-            for(List<TopoEdge> path : pathPair)
-            {
-                path.add(0, physEdgeAtoMpls);
-                path.add(physEdgeMplstoZ);
-            }
-
-            oneLogicalLink.setCorrespondingPrimaryTopoEdges(pathPair.get(0));
-            oneLogicalLink.setCorrespondingSecondaryTopoEdges(pathPair.get(1));
+            assert(oneLogicalLink.getKMetrics().size() == numDisjoint);
+            assert(oneLogicalLink.getKCorrespondingTopoEdges().size() == numDisjoint);
         }
 
-        // Step 6: If any logical links cannot be built, remove them from the Service-Layer Topology for this request.
+        // Step 9: If any logical links cannot be built, remove them from the Service-Layer Topology for this request.
         logicalLinks.removeAll(logicalLinksToRemoveFromServiceLayer);
     }
 
@@ -443,11 +480,9 @@ public class SurvivableServiceLayerTopology
     {
         llBackup.stream()
                 .forEach(ll -> {
-                    ll.getCorrespondingPrimaryTopoEdges().clear();
-                    ll.getCorrespondingSecondaryTopoEdges().clear();
+                    ll.getKCorrespondingTopoEdges().clear();
                     ll.setMetric(0L);
-                    ll.setMetricPrimary(0L);
-                    ll.setMetricSecondary(0L);
+                    ll.getKCorrespondingTopoEdges().clear();
                 });
 
         logicalLinks.clear();
@@ -455,7 +490,7 @@ public class SurvivableServiceLayerTopology
     }
 
     /**
-     * Adds a VIRTUAL device and port onto the Service-layer to represent a request's starting node which is on the MPLS-layer.
+     * Adds a VIRTUAL port onto the Service-layer to represent a request's starting node which is on the MPLS-layer.
      * This is necessary since if the request is sourced on the MPLS-layer, it has no foothold on the service-layer; VIRTUAL nodes are dummy hooks.
      * A bidirectional zero-cost link is added between the VIRTUAL port and MPLS-layer srcInPort.
      * If the specified topology nodes are already on the Service-layer, this method does nothing to modify the Service-layer topology.
@@ -465,24 +500,18 @@ public class SurvivableServiceLayerTopology
     public void buildLogicalLayerSrcNodes(TopoVertex srcDevice, TopoVertex srcInPort)
     {
         if(srcDevice.getVertexType().equals(VertexType.SWITCH))
-        {
             return;
-        }
 
-        TopoVertex virtualSrcDevice = new TopoVertex(srcDevice.getUrn() + "-virtual", VertexType.VIRTUAL, PortLayer.NONE);
+        if(serviceLayerPorts.contains(srcInPort))
+            return;
+
         TopoVertex virtualSrcPort = new TopoVertex(srcInPort.getUrn() + "-virtual", VertexType.VIRTUAL, PortLayer.ETHERNET);
 
-        serviceLayerDevices.add(virtualSrcDevice);
         serviceLayerPorts.add(virtualSrcPort);
-
-        TopoEdge portToDevice = new TopoEdge(virtualSrcPort, virtualSrcDevice, 0L, Layer.ETHERNET);
-        TopoEdge devicetoPort = new TopoEdge(virtualSrcDevice, virtualSrcPort, 0L, Layer.ETHERNET);
 
         TopoEdge vPortToPort = new TopoEdge(virtualSrcPort, srcInPort, 0L, Layer.ETHERNET);
         TopoEdge portToVPort = new TopoEdge(srcInPort, virtualSrcPort, 0L, Layer.ETHERNET);
 
-        serviceLayerLinks.add(portToDevice);
-        serviceLayerLinks.add(devicetoPort);
         serviceLayerLinks.add(vPortToPort);
         serviceLayerLinks.add(portToVPort);
 
@@ -492,7 +521,7 @@ public class SurvivableServiceLayerTopology
     }
 
     /**
-     * Adds a VIRTUAL device and port onto the Service-layer to represent a request's terminating node which is on the MPLS-layer.
+     * Adds a VIRTUAL port onto the Service-layer to represent a request's terminating node which is on the MPLS-layer.
      * This is necessary since if the request is destined on the MPLS-layer, it has no foothold on the service-layer; VIRTUAL nodes are dummy hooks.
      * A bidirectional zero-cost link is added between the VIRTUAL port and MPLS-layer dstOutPort.
      * If the specified topology nodes are already on the Service-layer, this method does nothing to modify the Service-layer topology.
@@ -502,24 +531,18 @@ public class SurvivableServiceLayerTopology
     public void buildLogicalLayerDstNodes(TopoVertex dstDevice, TopoVertex dstOutPort)
     {
         if(dstDevice.getVertexType().equals(VertexType.SWITCH))
-        {
             return;
-        }
 
-        TopoVertex virtualDstDevice = new TopoVertex(dstDevice.getUrn() + "-virtual", VertexType.VIRTUAL, PortLayer.NONE);
+        if(serviceLayerPorts.contains(dstOutPort))
+            return;
+
         TopoVertex virtualDstPort = new TopoVertex(dstOutPort.getUrn() + "-virtual", VertexType.VIRTUAL, PortLayer.ETHERNET);
 
-        serviceLayerDevices.add(virtualDstDevice);
         serviceLayerPorts.add(virtualDstPort);
-
-        TopoEdge portToDevice = new TopoEdge(virtualDstPort, virtualDstDevice, 0L, Layer.ETHERNET);
-        TopoEdge devicetoPort = new TopoEdge(virtualDstDevice, virtualDstPort, 0L, Layer.ETHERNET);
 
         TopoEdge vPortToPort = new TopoEdge(virtualDstPort, dstOutPort, 0L, Layer.ETHERNET);
         TopoEdge portToVPort = new TopoEdge(dstOutPort, virtualDstPort, 0L, Layer.ETHERNET);
 
-        serviceLayerLinks.add(portToDevice);
-        serviceLayerLinks.add(devicetoPort);
         serviceLayerLinks.add(vPortToPort);
         serviceLayerLinks.add(portToVPort);
 
@@ -577,7 +600,7 @@ public class SurvivableServiceLayerTopology
      */
     public TopoVertex getVirtualNode(TopoVertex realNode)
     {
-        for(TopoVertex oneNode : serviceLayerDevices)
+        for(TopoVertex oneNode : serviceLayerPorts)
         {
             if(oneNode.getVertexType().equals(VertexType.VIRTUAL))
             {
@@ -592,92 +615,63 @@ public class SurvivableServiceLayerTopology
     }
 
     /**
-     * Gets MPLS-Layer Primary ERO given a Service-layer ERO, which possibly contains LOGICAL edges
+     * Gets MPLS-Layer A-Z ERO given a Service-layer ERO, which possibly contains LOGICAL edges
      * @param serviceLayerERO - Service-layer ERO; may contain LOGICAL edges
+     * @param numDisjoint - Request's K-disjoint path requirement
      * @return Corresponding physical ERO
      */
-    public List<TopoEdge> getActualPrimaryERO(List<TopoEdge> serviceLayerERO)
+    public List<List<TopoEdge>> getActualEroList(List<TopoEdge> serviceLayerERO, int numDisjoint)
     {
-        List<TopoEdge> actualERO = new LinkedList<>();
+        List<List<TopoEdge>> actualEroList = new ArrayList<>();
+
+        for(int k = 1; k <= numDisjoint; k++)
+        {
+            List<TopoEdge> oneActualERO = new ArrayList<>();
+            actualEroList.add(oneActualERO);
+        }
 
         for(TopoEdge oneEdge : serviceLayerERO)
         {
             TopoVertex physicalA = oneEdge.getA();
             TopoVertex physicalZ = oneEdge.getZ();
 
-            boolean edgeIsLogical = false;
-
-            for(SurvivableLogicalEdge oneLogical : logicalLinks)
+            // This link is physical - Part of actual ERO
+            if(!oneEdge.getLayer().equals(Layer.LOGICAL))
             {
-                TopoVertex logicalA = oneLogical.getA();
-                TopoVertex logicalZ = oneLogical.getZ();
-
-                // This link is logical - Get corresponding physical ERO
-                if(physicalA.equals(logicalA) && physicalZ.equals(logicalZ))
+                for(int k = 1; k <= numDisjoint; k++)
                 {
-                    actualERO.addAll(oneLogical.getCorrespondingPrimaryTopoEdges());
-                    edgeIsLogical = true;
-
-                    break;
+                    List<TopoEdge> oneActualERO = actualEroList.get(k-1);
+                    oneActualERO.add(oneEdge);
                 }
             }
-
-            // This link is NOT logical - Part of actual ERO
-            if(!edgeIsLogical)
+            else    // This link is logical - Get corresponding physical EROs
             {
-                actualERO.add(oneEdge);
+                List<SurvivableLogicalEdge> matchingLogicalEdges = logicalLinks.stream()
+                        .filter(ll -> ll.getA().equals(physicalA) && ll.getZ().equals(physicalZ))
+                        .collect(Collectors.toList());
+
+                assert(matchingLogicalEdges.size() == 1);
+                SurvivableLogicalEdge matchingEdge = matchingLogicalEdges.get(0);
+
+                for(int k = 1; k <= numDisjoint; k++)
+                {
+                    List<TopoEdge> oneActualERO = actualEroList.get(k-1);
+                    oneActualERO.addAll(matchingEdge.getKCorrespondingTopoEdges().get(k-1));
+                }
             }
         }
 
-        // Remove any edges containing VIRTUAL nodes - they don't exist in the actual ERO
-        actualERO.removeIf(e -> e.getA().getVertexType().equals(VertexType.VIRTUAL));
-        actualERO.removeIf(e -> e.getZ().getVertexType().equals(VertexType.VIRTUAL));
-
-        return  actualERO;
-    }
-
-    /**
-     * Gets MPLS-Layer Secondary ERO given a Service-layer ERO, which possibly contains LOGICAL edges
-     * @param serviceLayerERO - Service-layer ERO; may contain LOGICAL edges
-     * @return Corresponding physical ERO
-     */
-    public List<TopoEdge> getActualSecondaryERO(List<TopoEdge> serviceLayerERO)
-    {
-        List<TopoEdge> actualERO = new LinkedList<>();
-
-        for(TopoEdge oneEdge : serviceLayerERO)
+        // Remove any edges containing VIRTUAL nodes - they don't exist in the actual EROs
+        for(int k = 1; k <= numDisjoint; k++)
         {
-            TopoVertex physicalA = oneEdge.getA();
-            TopoVertex physicalZ = oneEdge.getZ();
-
-            boolean edgeIsLogical = false;
-
-            for(SurvivableLogicalEdge oneLogical : logicalLinks)
-            {
-                TopoVertex logicalA = oneLogical.getA();
-                TopoVertex logicalZ = oneLogical.getZ();
-
-                // This link is logical - Get corresponding physical ERO
-                if(physicalA.equals(logicalA) && physicalZ.equals(logicalZ))
-                {
-                    actualERO.addAll(oneLogical.getCorrespondingSecondaryTopoEdges());
-                    edgeIsLogical = true;
-
-                    break;
-                }
-            }
-
-            // This link is NOT logical - Part of actual ERO
-            if(!edgeIsLogical)
-            {
-                actualERO.add(oneEdge);
-            }
+            List<TopoEdge> oneActualERO = actualEroList.get(k-1);
+            oneActualERO.removeIf(e -> e.getA().getVertexType().equals(VertexType.VIRTUAL));
+            oneActualERO.removeIf(e -> e.getZ().getVertexType().equals(VertexType.VIRTUAL));
         }
 
-        // Remove any edges containing VIRTUAL nodes - they don't exist in the actual ERO
-        actualERO.removeIf(e -> e.getA().getVertexType().equals(VertexType.VIRTUAL));
-        actualERO.removeIf(e -> e.getZ().getVertexType().equals(VertexType.VIRTUAL));
+        assert(actualEroList.size() == numDisjoint);
+        actualEroList.stream().forEach(ero -> {assert(!ero.isEmpty());});
 
-        return  actualERO;
+        return  actualEroList;
     }
 }

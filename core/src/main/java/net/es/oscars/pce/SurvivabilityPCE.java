@@ -167,70 +167,70 @@ public class SurvivabilityPCE
     }
 
 
-    //TODO: Make this work with a set number of disjoint paths
     // Number of disjoint paths requested specified in the requestPipe
-    private Map<String, List<TopoEdge>> computeSurvivableEroPartial(RequestedVlanPipeE requestPipe,
-                                                                    Map<String, Map<String, Integer>> bwAvailMap,
-                                                                    List<ReservedVlanE> rsvVlanList) throws PCEException
+    private Map<String, List<TopoEdge>> computeSurvivableEroPartial(RequestedVlanPipeE requestPipe, Map<String, Map<String, Integer>> bwAvailMap, List<ReservedVlanE> rsvVlanList) throws PCEException
     {
         Topology ethTopo = topoService.layer(Layer.ETHERNET);
         Topology intTopo = topoService.layer(Layer.INTERNAL);
         Topology mplsTopo = topoService.layer(Layer.MPLS);
+        Topology prunedFullTopo = pruningService.pruneWithPipe(topoService.getMultilayerTopology(), requestPipe, bwAvailMap, rsvVlanList);
 
+        // Identify URNs of each fixture
+        Set<String> fixtureURNs = new HashSet<>();
+        requestPipe.getAJunction().getFixtures().stream().forEach(f -> fixtureURNs.add(f.getPortUrn()));
+        requestPipe.getZJunction().getFixtures().stream().forEach(f -> fixtureURNs.add(f.getPortUrn()));
 
-        Topology physTopo = topoService.getMultilayerTopology();
+        // Remove unneeded edge-ports for simpler service-layer topology construction
+        pruningService.pruneTopologyOfEdgePortsExcept(ethTopo, fixtureURNs);
+        pruningService.pruneTopologyOfEdgePortsExcept(intTopo, fixtureURNs);
+        pruningService.pruneTopologyOfEdgePortsExcept(mplsTopo, fixtureURNs);
 
         // Filter MPLS-ports and MPLS-devices out of ethTopo
         Set<TopoVertex> portsOnly = ethTopo.getVertices().stream()
                 .filter(v -> v.getVertexType().equals(VertexType.PORT))
                 .collect(Collectors.toSet());
 
-        for(TopoEdge intEdge : intTopo.getEdges())
+        for (TopoEdge intEdge : intTopo.getEdges())
         {
             TopoVertex vertA = intEdge.getA();
             TopoVertex vertZ = intEdge.getZ();
 
-            if(portsOnly.isEmpty())
+            if (portsOnly.isEmpty())
             {
                 break;
             }
 
-            if(portsOnly.contains(vertA))
-            {
-                if(!vertZ.getVertexType().equals(VertexType.ROUTER))
-                {
-                    portsOnly.remove(vertA);
-                }
-            }
+            if(portsOnly.contains(vertA) && !vertA.getPortLayer().equals(PortLayer.MPLS))
+                portsOnly.remove(vertA);
+
+            if(portsOnly.contains(vertZ) && !vertZ.getPortLayer().equals(PortLayer.MPLS))
+                portsOnly.remove(vertZ);
         }
 
-        ethTopo.getVertices().removeIf(v -> v.getVertexType().equals(VertexType.ROUTER));
+        ethTopo.getVertices().removeIf(v -> v.getVertexType().equals(VertexType.ROUTER) && !topoService.determineIfRouterHasEthernetPorts(v.getUrn()));
         ethTopo.getVertices().removeAll(portsOnly);
 
         // Filter Devices and Ports out of intTopo
         intTopo.getVertices().removeAll(intTopo.getVertices());
 
-        // Initialize Service-Layer Topology
+        /* Initialize Service-Layer Topology */
         serviceLayerTopology.setTopology(ethTopo);
         serviceLayerTopology.setTopology(intTopo);
         serviceLayerTopology.setTopology(mplsTopo);
+
         serviceLayerTopology.createMultilayerTopology();
         serviceLayerTopology.resetLogicalLinks();
 
-        UrnE srcDeviceURN = urnRepo.findByUrn(requestPipe.getAJunction().getDeviceUrn()).orElseThrow(NoSuchElementException::new);
-        UrnE dstDeviceURN = urnRepo.findByUrn(requestPipe.getZJunction().getDeviceUrn()).orElseThrow(NoSuchElementException::new);
-
+        UrnE srcDeviceURN = topoService.getUrn(requestPipe.getAJunction().getDeviceUrn());
+        UrnE dstDeviceURN = topoService.getUrn(requestPipe.getZJunction().getDeviceUrn());
         VertexType srcType = topoService.getVertexTypeFromDeviceType(srcDeviceURN.getDeviceType());
         VertexType dstType = topoService.getVertexTypeFromDeviceType(dstDeviceURN.getDeviceType());
-
         TopoVertex srcDevice = new TopoVertex(srcDeviceURN.getUrn(), srcType);
         TopoVertex dstDevice = new TopoVertex(dstDeviceURN.getUrn(), dstType);
-
         Set<RequestedVlanFixtureE> srcFixtures = requestPipe.getAJunction().getFixtures();
         Set<RequestedVlanFixtureE> dstFixtures = requestPipe.getZJunction().getFixtures();
-
-        TopoVertex srcPort = null;
-        TopoVertex dstPort = null;
+        TopoVertex srcPort;
+        TopoVertex dstPort;
 
         if(srcFixtures.size() > 0)
         {
@@ -240,9 +240,18 @@ public class SurvivabilityPCE
 
             srcPort = new TopoVertex(srcFixURN, VertexType.PORT, srcFixLayer);
         }
-        else
+        else // Add a dummy fixture-port to Service Layer Topology.
         {
-            srcPort = new TopoVertex("fix" + srcDevice.getUrn(), VertexType.PORT, PortLayer.ETHERNET);
+            if(srcDevice.getVertexType().equals(VertexType.ROUTER))
+            {
+                srcPort = new TopoVertex("fix" + srcDevice.getUrn(), VertexType.PORT, PortLayer.MPLS);
+                addPortToServiceMplsTopology(serviceLayerTopology, srcPort, srcDevice);
+            }
+            else
+            {
+                srcPort = new TopoVertex("fix" + srcDevice.getUrn(), VertexType.PORT, PortLayer.ETHERNET);
+                addPortToServiceEthernetTopology(serviceLayerTopology, srcPort, srcDevice);
+            }
         }
 
         if(dstFixtures.size() > 0)
@@ -253,179 +262,139 @@ public class SurvivabilityPCE
 
             dstPort = new TopoVertex(dstFixURN, VertexType.PORT, dstFixLayer);
         }
-        else
+        else // Add a dummy fixture-port to Service Layer Topology.
         {
-            dstPort = new TopoVertex("fix" + dstDevice.getUrn(), VertexType.PORT, PortLayer.ETHERNET);
+            if(dstDevice.getVertexType().equals(VertexType.ROUTER))
+            {
+                dstPort = new TopoVertex("fix" + dstDevice.getUrn(), VertexType.PORT, PortLayer.MPLS);
+                addPortToServiceMplsTopology(serviceLayerTopology, dstPort, dstDevice);
+            }
+            else
+            {
+                dstPort = new TopoVertex("fix" + dstDevice.getUrn(), VertexType.PORT, PortLayer.ETHERNET);
+                addPortToServiceEthernetTopology(serviceLayerTopology, dstPort, dstDevice);
+            }
         }
 
         // Handle MPLS-layer source/destination devices
         serviceLayerTopology.buildLogicalLayerSrcNodes(srcDevice, srcPort);
         serviceLayerTopology.buildLogicalLayerDstNodes(dstDevice, dstPort);
-        // Add the fake port to Service Layer Topology's MPLS topology
-        // Only do this if the source/dest is a router and if no fixtures are defined
-        if(srcDevice.getVertexType().equals(VertexType.ROUTER) && srcFixtures.size() == 0){
-            addPortToServiceMplsTopology(serviceLayerTopology, srcPort, srcDevice);
-        }
-        if(dstDevice.getVertexType().equals(VertexType.ROUTER) && dstFixtures.size() == 0){
-            addPortToServiceMplsTopology(serviceLayerTopology, dstPort, dstDevice);
-        }
 
         // Performs shortest path routing on MPLS-layer to properly assign weights to each logical link on Service-Layer
-        serviceLayerTopology.calculateLogicalLinkWeights(requestPipe, urnRepo.findAll(), bwAvailMap, rsvVlanList);
+        serviceLayerTopology.calculateLogicalLinkWeights(requestPipe, urnRepo.findAll(), bwAvailMap, rsvVlanList, requestPipe.getNumPaths());
 
-        Topology slTopo;
-
-        slTopo = serviceLayerTopology.getSLTopology();
-
+        Topology slTopo = serviceLayerTopology.getSLTopology();
         Topology prunedSlTopo = pruningService.pruneWithPipe(slTopo, requestPipe, bwAvailMap, rsvVlanList);
-        Topology prunedPhysicalTopo = pruningService.pruneWithPipe(physTopo, requestPipe, bwAvailMap, rsvVlanList);
 
         TopoVertex serviceLayerSrcNode;
         TopoVertex serviceLayerDstNode;
 
         if(srcDevice.getVertexType().equals(VertexType.SWITCH))
-        {
             serviceLayerSrcNode = srcPort;
-        }
         else
         {
-            serviceLayerSrcNode = serviceLayerTopology.getVirtualNode(srcDevice);
-            assert(serviceLayerSrcNode != null);
+            if(topoService.determineIfRouterHasEthernetPorts(srcDevice.getUrn()))
+                serviceLayerSrcNode = srcPort;
+            else
+                serviceLayerSrcNode = serviceLayerTopology.getVirtualNode(srcPort);
         }
 
         if(dstDevice.getVertexType().equals(VertexType.SWITCH))
-        {
             serviceLayerDstNode = dstPort;
-        }
         else
         {
-            serviceLayerDstNode = serviceLayerTopology.getVirtualNode(dstDevice);
-            assert(serviceLayerDstNode != null);
+            if(topoService.determineIfRouterHasEthernetPorts(dstDevice.getUrn()))
+                serviceLayerDstNode = dstPort;
+            else
+                serviceLayerDstNode = serviceLayerTopology.getVirtualNode(dstPort);
         }
+
+        assert (serviceLayerSrcNode != null);
+        assert (serviceLayerDstNode != null);
 
         // Shortest path routing on Service-Layer
         List<TopoEdge> azServiceLayerERO = dijkstraPCE.computeShortestPathEdges(prunedSlTopo, serviceLayerSrcNode, serviceLayerDstNode);
 
         if (azServiceLayerERO.isEmpty())
-        {
-            throw new PCEException("Empty path NonPalindromic PCE");
-        }
+            throw new PCEException("Empty path Survivability PCE");
 
         // Get palindromic Service-Layer path in reverse-direction
-        List<TopoEdge> zaServiceLayerERO = new LinkedList<>();
+        List<TopoEdge> zaServiceLayerERO = this.getReverseERO(azServiceLayerERO, prunedSlTopo);
 
-        // 1. Reverse the links
-        for(TopoEdge azEdge : azServiceLayerERO)
-        {
-            Optional<TopoEdge> reverseEdge = prunedSlTopo.getEdges().stream()
-                    .filter(r -> r.getA().equals(azEdge.getZ()))
-                    .filter(r -> r.getZ().equals(azEdge.getA()))
-                    .findFirst();
-
-            reverseEdge.ifPresent(zaServiceLayerERO::add);
-        }
-
-        // 2. Reverse the order
-        Collections.reverse(zaServiceLayerERO);
 
         Map<String, List<TopoEdge>> theMap = new HashMap<>();
 
-        // AZ Primary paths: Remove starting and ending ports
-        if(azServiceLayerERO.get(0).getA().getVertexType().equals(VertexType.PORT)){
-            azServiceLayerERO.remove(0);
-        }
-        if(azServiceLayerERO.get(azServiceLayerERO.size()-1).getZ().getVertexType().equals(VertexType.PORT)){
-            azServiceLayerERO.remove(azServiceLayerERO.size()-1);
-        }
-
-
-        // ZA Primary Paths: remove starting and ending ports
-        if(zaServiceLayerERO.get(0).getA().getVertexType().equals(VertexType.PORT)){
-            zaServiceLayerERO.remove(0);
-        }
-        if(zaServiceLayerERO.get(zaServiceLayerERO.size()-1).getZ().getVertexType().equals(VertexType.PORT)){
-            zaServiceLayerERO.remove(zaServiceLayerERO.size()-1);
-        }
-
-        if(!(azServiceLayerERO.size() == zaServiceLayerERO.size()))
-            return  theMap;
+        if (azServiceLayerERO.size() != zaServiceLayerERO.size())
+            return theMap;
 
         // Obtain physical ERO from Service-Layer EROs
+        List<List<TopoEdge>> azEroList = serviceLayerTopology.getActualEroList(azServiceLayerERO, requestPipe.getNumPaths());
 
-        List<TopoEdge> azEROPrimary = serviceLayerTopology.getActualPrimaryERO(azServiceLayerERO);
-        List<TopoEdge> azEROSecondary = serviceLayerTopology.getActualSecondaryERO(azServiceLayerERO);
-
-        // AZ Primary paths: Remove starting and ending ports
-        if(azEROPrimary.get(0).getA().getVertexType().equals(VertexType.PORT)){
-            azEROPrimary.remove(0);
-        }
-        if(azEROPrimary.get(azEROPrimary.size()-1).getZ().getVertexType().equals(VertexType.PORT)){
-            azEROPrimary.remove(azEROPrimary.size()-1);
-        }
-
-        // ZA Primary Paths: remove starting and ending ports
-        if(azEROSecondary.get(0).getA().getVertexType().equals(VertexType.PORT)){
-            azEROSecondary.remove(0);
-        }
-        if(azEROSecondary.get(azEROSecondary.size()-1).getZ().getVertexType().equals(VertexType.PORT)){
-            azEROSecondary.remove(azEROSecondary.size()-1);
-        }
-        // No logical edges were used in this path - Only a single non-survivable Ethernet-only ERO will be returned
-        if(azEROPrimary.equals(azEROSecondary))
+        // Get palindromic Physical path in reverse-direction
+        List<List<TopoEdge>> zaEroList = new ArrayList<>();
+        for(List<TopoEdge> oneAzERO : azEroList)
         {
-            theMap.put("az", azServiceLayerERO);
-            theMap.put("za", zaServiceLayerERO);
+            zaEroList.add(this.getReverseERO(oneAzERO, prunedFullTopo));
+        }
+
+        if(azEroList.size() != zaEroList.size())
+            return theMap;
+
+
+        // Remove starting and ending ports from all EROs
+        for(List<TopoEdge> oneAzEro : azEroList)
+        {
+            int pathSize = oneAzEro.size();
+
+            if(oneAzEro.get(pathSize-1).getZ().getVertexType().equals(VertexType.PORT))
+                oneAzEro.remove(pathSize-1);
+
+            if(oneAzEro.get(0).getA().getVertexType().equals(VertexType.PORT))
+                oneAzEro.remove(0);
+        }
+
+        for(List<TopoEdge> oneZaEro : zaEroList)
+        {
+            int pathSize = oneZaEro.size();
+
+            if(oneZaEro.get(pathSize-1).getZ().getVertexType().equals(VertexType.PORT))
+                oneZaEro.remove(pathSize-1);
+
+            if(oneZaEro.get(0).getA().getVertexType().equals(VertexType.PORT))
+                oneZaEro.remove(0);
+        }
+
+
+        // No logical edges were used in this path - Only a single non-survivable ERO will be returned
+        if(azEroList.size() == 1)
+        {
+            theMap.put("az", azEroList.get(0));
+            theMap.put("za", zaEroList.get(0));
 
             return theMap;
         }
 
+        int numPathsSoFar = 0;
 
-        // Get palindromic Physical-Layer path in reverse-direction
-        List<TopoEdge> zaEROPrimary = new LinkedList<>();
-        List<TopoEdge> zaEROSecondary = new LinkedList<>();
-
-        // 1. Reverse the links
-        for(TopoEdge azEdge : azEROPrimary)
+        // Put all EROs into map in order
+        for(List<TopoEdge> oneAzEro : azEroList)
         {
-            Optional<TopoEdge> reverseEdge = prunedPhysicalTopo.getEdges().stream()
-                    .filter(r -> r.getA().equals(azEdge.getZ()))
-                    .filter(r -> r.getZ().equals(azEdge.getA()))
-                    .findFirst();
-
-            reverseEdge.ifPresent(zaEROPrimary::add);
+            numPathsSoFar += 1;
+            theMap.put("az" + numPathsSoFar, oneAzEro);
         }
 
-        for(TopoEdge azEdge : azEROSecondary)
+        numPathsSoFar = 0;
+        for(List<TopoEdge> oneZaEro : zaEroList)
         {
-            Optional<TopoEdge> reverseEdge = prunedPhysicalTopo.getEdges().stream()
-                    .filter(r -> r.getA().equals(azEdge.getZ()))
-                    .filter(r -> r.getZ().equals(azEdge.getA()))
-                    .findFirst();
-
-            reverseEdge.ifPresent(zaEROSecondary::add);
+            numPathsSoFar += 1;
+            theMap.put("za" + numPathsSoFar, oneZaEro);
         }
-
-        // 2. Reverse the order
-        Collections.reverse(zaEROPrimary);
-        Collections.reverse(zaEROSecondary);
-
-
-
-        if(!(azEROPrimary.size() == zaEROPrimary.size()))
-            return  theMap;
-        if(!(azEROSecondary.size() == zaEROSecondary.size()))
-            return  theMap;
-
-
-        theMap.put("az1", azEROPrimary);
-        theMap.put("za1", zaEROPrimary);
-        theMap.put("az2", azEROSecondary);
-        theMap.put("za2", zaEROSecondary);
 
         return theMap;
     }
 
-    private void addPortToServiceMplsTopology(SurvivableServiceLayerTopology serviceLayerTopology, TopoVertex port, TopoVertex device) {
+    private void addPortToServiceMplsTopology(SurvivableServiceLayerTopology serviceLayerTopology, TopoVertex port, TopoVertex device)
+    {
         serviceLayerTopology.getMplsLayerPorts().add(port);
         TopoEdge portToDeviceEdge = new TopoEdge(port, device, 0L, Layer.MPLS);
         TopoEdge deviceToPortEdge = new TopoEdge(device, port, 0L, Layer.MPLS);
@@ -434,5 +403,38 @@ public class SurvivabilityPCE
         serviceLayerTopology.getMplsTopology().getVertices().add(port);
         serviceLayerTopology.getMplsTopology().getEdges().add(portToDeviceEdge);
         serviceLayerTopology.getMplsTopology().getEdges().add(deviceToPortEdge);
+    }
+
+    private void addPortToServiceEthernetTopology(SurvivableServiceLayerTopology serviceLayerTopology, TopoVertex port, TopoVertex device)
+    {
+        serviceLayerTopology.getServiceLayerPorts().add(port);
+        TopoEdge portToDeviceEdge = new TopoEdge(port, device, 0L, Layer.ETHERNET);
+        TopoEdge deviceToPortEdge = new TopoEdge(device, port, 0L, Layer.ETHERNET);
+        serviceLayerTopology.getServiceLayerLinks().add(portToDeviceEdge);
+        serviceLayerTopology.getServiceLayerLinks().add(deviceToPortEdge);
+        serviceLayerTopology.getEthernetTopology().getVertices().add(port);
+        serviceLayerTopology.getEthernetTopology().getEdges().add(portToDeviceEdge);
+        serviceLayerTopology.getEthernetTopology().getEdges().add(deviceToPortEdge);
+    }
+
+    private List<TopoEdge> getReverseERO(List<TopoEdge> originalERO, Topology topology)
+    {
+        List<TopoEdge> reverseERO = new ArrayList<>();
+
+        // Reverse each link
+        for (TopoEdge originalEdge : originalERO)
+        {
+            Optional<TopoEdge> reverseEdge = topology.getEdges().stream()
+                    .filter(r -> r.getA().equals(originalEdge.getZ()))
+                    .filter(r -> r.getZ().equals(originalEdge.getA()))
+                    .findFirst();
+
+            reverseEdge.ifPresent(reverseERO::add);
+        }
+
+        // Reverse the order
+        Collections.reverse(reverseERO);
+
+        return reverseERO;
     }
 }
