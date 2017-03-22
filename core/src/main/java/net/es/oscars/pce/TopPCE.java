@@ -394,6 +394,7 @@ public class TopPCE {
         // The number of requested pipes successfully reserved
         Integer numReserved = 0;
 
+
         // Loop through all requested pipes
         for (RequestedVlanPipeE pipe : pipes) {
 
@@ -402,89 +403,83 @@ public class TopPCE {
                 break;
             }
 
+            // Clone the initial map, each pipe will use an updated version of the previous pipe's BW map
+            Map<String, Map<String, Integer>> pipeBwAvailMap = new HashMap<>(bwAvailMap);
+
             // Update list of reserved VLAN IDs
             List<ReservedVlanE> rsvVlans = vlanService.createReservedVlanList(simpleJunctions, reservedEthPipes);
             rsvVlans.addAll(repoVlans);
-            // Find the shortest path for the pipe, build a map for the AZ and ZA path
-            Map<String, List<TopoEdge>> eroMapForPipe = findShortestConstrainedPath(pipe, bwAvailMap, rsvVlans);
 
-            // Store the response from translation PCE
-            TranslationPCEResponse transPceResponse = null;
+            // Find the shortest path(s) for the pipe, build a map for the AZ and ZA path(s)
+            Map<String, List<TopoEdge>> eroMapForPipe = findShortestConstrainedPath(pipe, pipeBwAvailMap, rsvVlans);
 
             // If the paths are valid, attempt to reserve the resources
             if (verifyEros(eroMapForPipe)) {
-                // Increment the number reserved
-                numReserved++;
-                // Get the AZ and ZA paths
-                List<TopoEdge> azEros = eroMapForPipe.get("az");
-                List<TopoEdge> zaEros = eroMapForPipe.get("za");
+                // Set of reserved pipes for this requested pipe
+                Set<ReservedEthPipeE> newEthPipes = new HashSet<>();
+                Set<ReservedMplsPipeE> newMplsPipes = new HashSet<>();
 
-                // Store the paths
-                allPaths.add(BidirectionalPathE.builder()
-                        .azPath(includeFixtures(convertTopoEdgePathToEdges(azEros), pipe, true))
-                        .zaPath(includeFixtures(convertTopoEdgePathToEdges(zaEros), pipe, false))
-                        .build());
-
-                // Try to get the reserved resources
-                try {
-                    transPceResponse = transPCE.reserveRequestedPipe(pipe, azEros, zaEros, bwAvailMap, rsvVlans,
-                            deviceToPortMap, portToDeviceMap, start, end, connectionId);
-                }
-                // If it failed, decrement the number reserved
-                catch (Exception e) {
-                    log.info(e.getMessage());
-                    // commented out as I don't like stack traces in normal operation
-                    // e.printStackTrace();
-                    numReserved--;
-                }
-            }
-            // If the survivable paths are valid, attempt to reserve the resources
-            else if (verifySurvEros(eroMapForPipe)) {
-                // Increment the number reserved
-                numReserved++;
-                // Get the AZ and ZA paths
-
-                List<List<TopoEdge>> azEROs = new ArrayList<>();
-                List<List<TopoEdge>> zaEROs = new ArrayList<>();
-
+                boolean successful = true;
+                // Go through all AZ/ZA pairs. May just be one.
                 for (Integer i = 1; i < eroMapForPipe.size() / 2 + 1; i++) {
-
-                    azEROs.add(eroMapForPipe.get("az" + i));
-                    zaEROs.add(eroMapForPipe.get("za" + i));
+                    // Get the AZ and ZA paths
+                    List<TopoEdge> azERO = eroMapForPipe.size() == 2 ? eroMapForPipe.get("az") : eroMapForPipe.get("az" + i);
+                    List<TopoEdge> zaERO = eroMapForPipe.size() == 2 ? eroMapForPipe.get("za") : eroMapForPipe.get("za" + i);
 
                     // Store the paths
                     allPaths.add(BidirectionalPathE.builder()
-                            .azPath(includeFixtures(convertTopoEdgePathToEdges(eroMapForPipe.get("az" + i)), pipe, true))
-                            .zaPath(includeFixtures(convertTopoEdgePathToEdges(eroMapForPipe.get("za" + i)), pipe, false))
+                            .azPath(includeFixtures(convertTopoEdgePathToEdges(azERO), pipe, true))
+                            .zaPath(includeFixtures(convertTopoEdgePathToEdges(zaERO), pipe, false))
                             .build());
+
+                    // Store the response from translation PCE
+                    TranslationPCEResponse transPceResponse;
+
+                    // Try to get the reserved resources
+                    try {
+                        transPceResponse = transPCE.reserveRequestedPipe(pipe, azERO, zaERO, pipeBwAvailMap, rsvVlans,
+                                deviceToPortMap, portToDeviceMap, start, end, connectionId);
+                        // Check if
+                        if(transPceResponse != null){
+                            newEthPipes.addAll(transPceResponse.getEthPipes());
+                            newMplsPipes.addAll(transPceResponse.getMplsPipes());
+
+                            // Update the pipe's bandwidth availability map
+                            List<ReservedBandwidthE> newBandwidths = bwService.getReservedBandwidthsFromEthPipes(newEthPipes);
+                            newBandwidths.addAll(bwService.getReservedBandwidthsFromMplsPipes(newMplsPipes));
+                            bwService.amendBandwidthAvailabilityMap(pipeBwAvailMap, newBandwidths);
+                        }
+                        else{
+                            successful = false;
+                            break;
+                        }
+                    }
+                    // If it failed, decrement the number reserved
+                    catch (Exception e) {
+                        log.info(e.getMessage());
+                        // commented out as I don't like stack traces in normal operation
+                        // e.printStackTrace();
+                        successful = false;
+                        break;
+                    }
+
                 }
 
-                // Try to get the reserved resources
-                try {
-                    transPceResponse = transPCE.reserveRequestedPipeWithPairs(pipe, azEROs, zaEROs, bwAvailMap, rsvVlans,
-                            deviceToPortMap, portToDeviceMap, start, end, connectionId);
-                }
-                // If it failed, decrement the number reserved
-                catch (Exception e) {
-                    log.info(e.getMessage());
-                    numReserved--;
+                // If you successfully reserved all paths for the requested pipe
+                if(successful){
+                    // Update the bandwidth availability map for subsequent pipes
+                    bwAvailMap = new HashMap<>(pipeBwAvailMap);
+
+                    // Store the new reserved pipes
+                    reservedEthPipes.addAll(newEthPipes);
+                    reservedMplsPipes.addAll(newMplsPipes);
+
+                    // Update the number of reserved pipes
+                    numReserved++;
                 }
             }
 
-            // Retrieve the new Reserved Ethernet and MPLS pipes
-            if(transPceResponse != null){
-                Set<ReservedEthPipeE> newEthPipes = transPceResponse.getEthPipes();
-                Set<ReservedMplsPipeE> newMplsPipes = transPceResponse.getMplsPipes();
 
-                // Update the bandwidth availability map
-                List<ReservedBandwidthE> newBandwidths = bwService.getReservedBandwidthsFromEthPipes(newEthPipes);
-                newBandwidths.addAll(bwService.getReservedBandwidthsFromMplsPipes(newMplsPipes));
-                bwService.amendBandwidthAvailabilityMap(bwAvailMap, newBandwidths);
-
-                // Store the new reserved pipes
-                reservedEthPipes.addAll(newEthPipes);
-                reservedMplsPipes.addAll(newMplsPipes);
-            }
         }
         return numReserved;
     }
@@ -537,7 +532,7 @@ public class TopPCE {
      */
     private boolean verifyEros(Map<String, List<TopoEdge>> eroMap) {
         if (eroMap != null) {
-            if (eroMap.size() == 2) {
+            if (eroMap.size() % 2 == 0) {
                 return eroMap.values().stream().allMatch(l -> l.size() > 0);
             }
         }
