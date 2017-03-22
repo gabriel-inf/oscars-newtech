@@ -4,19 +4,19 @@ package net.es.oscars.pss.svc;
 import net.es.oscars.dto.pss.cmd.Command;
 import net.es.oscars.dto.topo.enums.DeviceModel;
 import net.es.oscars.pss.beans.ConfigException;
-import net.es.oscars.pss.prop.PssConfig;
+import net.es.oscars.pss.prop.RancidProps;
 import net.es.oscars.pss.rancid.RancidArguments;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class RouterConfigBuilder {
-    private PssConfig config;
+    private RancidProps props;
     private AluCommandGenerator acg;
 
     @Autowired
-    public RouterConfigBuilder(PssConfig config, AluCommandGenerator acg) {
-        this.config = config;
+    public RouterConfigBuilder(RancidProps props, AluCommandGenerator acg) {
+        this.props = props;
         this.acg = acg;
     }
 
@@ -74,20 +74,24 @@ public class RouterConfigBuilder {
 
     public RancidArguments buildRouterConfig(String routerConfig, String device, DeviceModel model) throws ConfigException {
         String execPath;
+        String cloginrc = props.getCloginrc();
+        String dir = props.getDir();
+
+
         switch (model) {
             case ALCATEL_SR7750:
-                execPath = config.getRancidDir() + "/alulogin";
+                execPath = dir + "/alulogin";
                 break;
             case JUNIPER_MX:
             case JUNIPER_EX:
-                execPath = config.getRancidDir() + "/jlogin";
+                execPath = dir + "/jlogin";
                 break;
             default:
                 throw new ConfigException("unknown model");
         }
 
         return RancidArguments.builder()
-                .cloginrc(config.getCloginrc())
+                .cloginrc(cloginrc)
                 .executable(execPath)
                 .routerConfig(routerConfig)
                 .router(device)

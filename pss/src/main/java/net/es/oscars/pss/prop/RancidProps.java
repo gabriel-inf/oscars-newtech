@@ -6,28 +6,24 @@ import lombok.NonNull;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-@ConfigurationProperties(prefix = "pss")
+@ConfigurationProperties(prefix = "rancid")
 @Data
 @Component
 @NoArgsConstructor
-public class PssConfig {
+public class RancidProps {
+
+
 
     @NonNull
-    private String url;
+    private String dir;
 
     @NonNull
-    private String addressesFilename;
+    private String host;
 
     @NonNull
-    private String vcidRange;
+    private String cloginrc;
 
-    @NonNull
-    private String aluSvcidRange;
-
-    @NonNull
-    private String aluSdpidRange;
-
-    @NonNull
-    private String aluQosidRange;
 
 }
+
+

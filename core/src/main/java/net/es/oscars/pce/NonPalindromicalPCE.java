@@ -1,9 +1,9 @@
 package net.es.oscars.pce;
 
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.pce.exc.PCEException;
 import net.es.oscars.resv.ent.RequestedVlanFixtureE;
 import net.es.oscars.resv.ent.RequestedVlanPipeE;
-import net.es.oscars.resv.ent.ReservedBandwidthE;
 import net.es.oscars.resv.ent.ReservedVlanE;
 import net.es.oscars.servicetopo.ServiceLayerTopology;
 import net.es.oscars.dto.topo.TopoEdge;

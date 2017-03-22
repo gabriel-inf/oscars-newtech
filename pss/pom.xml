@@ -28,6 +28,12 @@
                 <testcase.groups>net.es.oscars.pss.Integrations</testcase.groups>
             </properties>
         </profile>
+        <profile>
+            <id>noTest</id>
+            <properties>
+                <maven.test.skip>true</maven.test.skip>
+            </properties>
+        </profile>
     </profiles>
 
 

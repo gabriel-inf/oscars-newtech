@@ -14,13 +14,18 @@ import net.es.oscars.webui.dto.MinimalRequest;
 import net.es.oscars.webui.ipc.ConnectionProvider;
 import net.es.oscars.webui.ipc.PreChecker;
 import net.es.oscars.webui.ipc.Requester;
+import org.apache.commons.lang3.StringUtils;
 import org.hashids.Hashids;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.*;
 
 @Slf4j
@@ -40,6 +45,19 @@ public class ReservationController {
     private ConnectionProvider connectionProvider;
 
     private final String oscarsUrl = "https://localhost:8000";
+
+
+    @ResponseBody
+    @ExceptionHandler(RestClientException.class)
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+    public Map<String,Object> handleRestError(RestClientException ex) {
+        log.error(ex.getMessage());
+        HashMap<String, Object> result = new HashMap<>();
+        result.put("error", true);
+        result.put("error_message", ex.getMessage());
+        return result;
+    }
+
 
     @RequestMapping("/resv/view/{connectionId}")
     public String resv_view(@PathVariable String connectionId, Model model) {
@@ -182,11 +200,6 @@ public class ReservationController {
     @ResponseBody
     public Map<String, String> resv_advanced_hold(@RequestBody AdvancedRequest request) {
         Connection c = requester.holdAdvanced(request);
-        try {
-            Thread.sleep(500L);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         Map<String, String> res = new HashMap<>();
         res.put("connectionId", c.getConnectionId());
 

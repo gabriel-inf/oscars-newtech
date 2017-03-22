@@ -27,6 +27,12 @@
                 <testcase.groups>net.es.oscars.SlowTests</testcase.groups>
             </properties>
         </profile>
+        <profile>
+            <id>noTest</id>
+            <properties>
+                <maven.test.skip>true</maven.test.skip>
+            </properties>
+        </profile>
     </profiles>
 
 
