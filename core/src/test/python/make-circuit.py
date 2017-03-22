@@ -30,6 +30,13 @@ args = parser.parse_args()
 if args.verbose:
     print "Arguments: " + str(args)
 
+
+# Don't spam stderr with warnings about unverifiable certificates.  This is also the
+# reason for any verify=False parameters in calls to the requests module in
+# code below.  This is undocumented but mentioned in:
+# https://github.com/kennethreitz/requests/issues/2214
+requests.packages.urllib3.disable_warnings()
+
 # Slurp in input file if given
 if (args.file):
     indatalines = fileinput.input(args.file)
@@ -101,12 +108,16 @@ outdata = json.dumps(connection)
 r = requests.post(args.url + '/resv/connection/add', auth=HTTPBasicAuth(args.user, args.password), data=outdata, verify=False, headers={'Content-Type' : 'application/json'})
 if args.verbose:
     print "status " + str(r.status_code) + ": " + r.text
-r.raise_for_status()
+if r.status_code != requests.codes.ok:
+    print "error:  " + r.text
+    exit(1)
 
 r = requests.get(args.url + 'resv/commit/' + connection['connectionId'], auth=HTTPBasicAuth(args.user, args.password), verify=False)
 if args.verbose:
     print "status " + str(r.status_code) + ": " + r.text
-r.raise_for_status()
+if r.status_code != requests.codes.ok:
+    print "error:  " + r.text
+    exit(1)
 
 r = requests.get(args.url + '/resv/all', auth=HTTPBasicAuth(args.user, args.password), verify=False)
 if args.verbose:
