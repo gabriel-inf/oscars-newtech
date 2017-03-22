@@ -8,7 +8,7 @@ import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.pss.prop.PssConfig;
+import net.es.oscars.pss.prop.StartupProps;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -26,10 +26,17 @@ import java.util.Map;
 public class Stringifier {
 
     private Configuration fmCfg;
-    private PssConfig config;
+
+    private StartupProps props;
 
     @Autowired
-    public Stringifier(PssConfig config) {
+    public Stringifier(StartupProps props) {
+        this.props = props;
+        this.configureTemplates();
+    }
+
+    public void configureTemplates() {
+
         fmCfg = new Configuration(Configuration.VERSION_2_3_22);
         fmCfg.setDefaultEncoding("UTF-8");
         fmCfg.setObjectWrapper(new DefaultObjectWrapper(Configuration.VERSION_2_3_22));
@@ -38,7 +45,7 @@ public class Stringifier {
         List<TemplateLoader> loaderList = new ArrayList<>();
 
 
-        for (String templatePath : config.getTemplateDirs()) {
+        for (String templatePath : this.props.getTemplateDirs()) {
             try {
                 FileTemplateLoader ftl = new FileTemplateLoader(new File(templatePath));
                 loaderList.add(ftl);

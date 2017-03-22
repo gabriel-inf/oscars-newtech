@@ -6,28 +6,20 @@ import lombok.NonNull;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-@ConfigurationProperties(prefix = "pss")
+@ConfigurationProperties(prefix = "getconfig")
 @Data
 @Component
 @NoArgsConstructor
-public class PssConfig {
+public class GetConfigProps {
 
     @NonNull
-    private String url;
+    private Boolean perform;
 
     @NonNull
-    private String addressesFilename;
+    private String host;
 
     @NonNull
-    private String vcidRange;
-
-    @NonNull
-    private String aluSvcidRange;
-
-    @NonNull
-    private String aluSdpidRange;
-
-    @NonNull
-    private String aluQosidRange;
-
+    private String path;
 }
+
+

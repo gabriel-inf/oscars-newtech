@@ -1,7 +1,7 @@
 package net.es.oscars.tasks;
 
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.pce.PCEException;
+import net.es.oscars.pce.exc.PCEException;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.pss.svc.PssResourceService;
 import net.es.oscars.resv.svc.ResvService;

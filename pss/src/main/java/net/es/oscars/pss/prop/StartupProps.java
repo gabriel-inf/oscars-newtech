@@ -6,28 +6,22 @@ import lombok.NonNull;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-@ConfigurationProperties(prefix = "pss")
+@ConfigurationProperties(prefix = "startup")
 @Data
 @Component
 @NoArgsConstructor
-public class PssConfig {
+public class StartupProps {
+
 
     @NonNull
-    private String url;
+    private String[] templateDirs;
 
     @NonNull
-    private String addressesFilename;
+    private Boolean performControlPlaneCheck;
 
     @NonNull
-    private String vcidRange;
-
-    @NonNull
-    private String aluSvcidRange;
-
-    @NonNull
-    private String aluSdpidRange;
-
-    @NonNull
-    private String aluQosidRange;
+    private String controlPlaneCheckFilename;
 
 }
+
+

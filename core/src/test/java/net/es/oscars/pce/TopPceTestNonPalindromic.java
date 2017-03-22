@@ -2,8 +2,8 @@ package net.es.oscars.pce;
 
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.AbstractCoreTest;
-import net.es.oscars.CoreUnitTestConfiguration;
 import net.es.oscars.dto.spec.SurvivabilityType;
+import net.es.oscars.pce.exc.PCEException;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.helpers.RequestedEntityBuilder;
 import net.es.oscars.resv.ent.*;
@@ -16,10 +16,7 @@ import net.es.oscars.dto.topo.enums.Layer;
 import net.es.oscars.dto.spec.PalindromicType;
 import net.es.oscars.dto.topo.enums.UrnType;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;

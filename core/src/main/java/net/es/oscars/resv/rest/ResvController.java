@@ -8,11 +8,13 @@ import net.es.oscars.dto.spec.PalindromicType;
 import net.es.oscars.dto.spec.RequestedVlanFlow;
 import net.es.oscars.dto.spec.RequestedVlanPipe;
 import net.es.oscars.dto.spec.SurvivabilityType;
-import net.es.oscars.pce.PCEException;
+import net.es.oscars.pce.exc.InvalidUrnException;
+import net.es.oscars.pce.exc.PCEException;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.ent.ConnectionE;
 import net.es.oscars.resv.svc.ResvService;
 import net.es.oscars.st.resv.ResvState;
+import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -43,10 +45,23 @@ public class ResvController {
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
-    @ResponseStatus(value = HttpStatus.CONFLICT)
+    @ResponseStatus(value = HttpStatus.CONFLICT ,reason="duplicate connection id")
     public void handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
         // LOG.warn("user requested a strResource which didn't exist", ex);
     }
+
+    @ExceptionHandler(InvalidUrnException.class)
+    @ResponseStatus(value = HttpStatus.NOT_FOUND)
+    @ResponseBody
+    public Map<String,Object> handleInvalidUrn(InvalidUrnException ex) {
+        HashMap<String, Object> result = new HashMap<>();
+        result.put("error", true);
+        String message = "One or more requested URNs not found: "+ StringUtils.join(ex.getBadUrns(), ",");
+        result.put("error_message", message);
+        log.error(message);
+        return result;
+    }
+
 
 
     @RequestMapping(value = "/resv/get/{connectionId}", method = RequestMethod.GET)

@@ -17,6 +17,7 @@ import net.es.oscars.dto.topo.enums.VertexType;
 import net.es.oscars.helpers.RequestedEntityBuilder;
 import net.es.oscars.helpers.ReservedEntityDecomposer;
 import net.es.oscars.pce.*;
+import net.es.oscars.pce.exc.PCEException;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.dao.ReservedBandwidthRepository;
 import net.es.oscars.resv.ent.*;

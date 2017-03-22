@@ -3,7 +3,7 @@ package net.es.oscars.pss.svc;
 
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.pss.beans.ControlPlaneException;
-import net.es.oscars.pss.prop.PssConfig;
+import net.es.oscars.pss.prop.RancidProps;
 import net.es.oscars.pss.rancid.RancidArguments;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.LoggerFactory;
@@ -20,11 +20,11 @@ import java.util.concurrent.TimeoutException;
 @Slf4j
 @Component
 public class RancidRunner {
-    private PssConfig config;
+    private RancidProps props;
 
     @Autowired
-    public RancidRunner(PssConfig config) {
-        this.config = config;
+    public RancidRunner(RancidProps props) {
+        this.props = props;
     }
 
     public void runRancid(RancidArguments arguments)
@@ -37,12 +37,14 @@ public class RancidRunner {
         FileUtils.writeStringToFile(temp, arguments.getRouterConfig());
         String tmpPath = temp.getAbsolutePath();
         log.info("created temp file" + tmpPath);
+        String host = props.getHost();
+        String cloginrc = props.getCloginrc();
 
-        if (config.getRancidHost().equals("localhost")) {
+        if (host.equals("localhost")) {
             String[] rancidCliArgs = {
                     arguments.getExecutable(),
                     "-x", tmpPath,
-                    "-f", config.getCloginrc(),
+                    "-f", cloginrc,
                     arguments.getRouter()
             };
 
@@ -54,7 +56,7 @@ public class RancidRunner {
         } else {
 
             String remotePath = "/tmp/" + temp.getName();
-            String scpTo = config.getRancidHost() + ":" + remotePath;
+            String scpTo = host + ":" + remotePath;
 
             // scp the file to remote host: /tmp/
             try {
@@ -65,9 +67,9 @@ public class RancidRunner {
 
                 // run remote rancid..
                 new ProcessExecutor().command("ssh",
-                        config.getRancidHost(), arguments.getExecutable(),
+                        host, arguments.getExecutable(),
                         "-x", remotePath,
-                        "-f", config.getCloginrc(),
+                        "-f", cloginrc,
                         arguments.getRouter())
                         .exitValue(0)
                         .redirectOutput(Slf4jStream.of(LoggerFactory.getLogger(getClass().getName() + ".rancid"))
@@ -78,7 +80,7 @@ public class RancidRunner {
                 log.debug("deleting: " + scpTo);
 
                 String remoteDelete = "rm " + remotePath;
-                new ProcessExecutor().command("ssh", config.getRancidHost(), remoteDelete)
+                new ProcessExecutor().command("ssh", host, remoteDelete)
                         .exitValue(0).execute();
 
 

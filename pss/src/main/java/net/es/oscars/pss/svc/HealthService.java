@@ -1,13 +1,13 @@
-package net.es.oscars.pss.pop;
+package net.es.oscars.pss.svc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.pss.cmd.Command;
 import net.es.oscars.dto.pss.cmd.CommandType;
-import net.es.oscars.pss.prop.PssConfig;
-import net.es.oscars.pss.svc.CommandQueuer;
+import net.es.oscars.dto.pss.cp.ControlPlaneHealth;
+import net.es.oscars.pss.beans.DeviceEntry;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,22 +15,19 @@ import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
-@Component
-public class Startup {
+@Service
+public class HealthService {
 
-    private CommandQueuer queuer;
-    private PssConfig config;
+    private ControlPlaneHealth health = new ControlPlaneHealth();
 
-    @Autowired
-    public void CommandPopulator(CommandQueuer queuer, PssConfig config) {
-        this.queuer = queuer;
-        this.config = config;
+    public ControlPlaneHealth getHealth() {
+        return this.health;
     }
 
-    public void onStart() {
+    public void queueControlPlaneCheck(CommandQueuer queuer, String filename) {
 
         ObjectMapper mapper = new ObjectMapper();
-        File jsonFile = new File(config.getCheckFilename());
+        File jsonFile = new File(filename);
         try {
             List<DeviceEntry> devicesToCheck = Arrays.asList(mapper.readValue(jsonFile, DeviceEntry[].class));
 
@@ -55,6 +52,4 @@ public class Startup {
         }
 
     }
-
-
 }
