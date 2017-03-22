@@ -3,6 +3,7 @@ package net.es.oscars.resv.svc;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.pce.exc.DuplicateConnectionIdException;
 import net.es.oscars.pce.exc.PCEException;
 import net.es.oscars.pce.TopPCE;
 import net.es.oscars.pss.PSSException;
@@ -105,6 +106,11 @@ public class ResvService {
     }
 
     public void hold(ConnectionE c) throws PSSException, PCEException {
+
+        Optional<ConnectionE> maybeDuplicate = connRepo.findByConnectionId(c.getConnectionId());
+        if (maybeDuplicate.isPresent()) {
+            throw new DuplicateConnectionIdException("Duplicate connection id "+c.getConnectionId());
+        }
 
         RequestedBlueprintE req = c.getSpecification().getRequested();
 
