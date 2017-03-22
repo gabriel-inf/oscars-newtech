@@ -532,23 +532,7 @@ public class TopPCE {
      */
     private boolean verifyEros(Map<String, List<TopoEdge>> eroMap) {
         if (eroMap != null) {
-            if (eroMap.size() % 2 == 0) {
-                return eroMap.values().stream().allMatch(l -> l.size() > 0);
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Verify that primary and secondary AZ and ZA paths were found given a map of shortest paths.
-     *
-     * @param eroMap The map containing the AZ and ZA shortest paths (keys: "azPrimary", "zaPrimary", "azSecondary", "zaSecondary")
-     * @return True if both paths found, False otherwise.
-     */
-    private boolean verifySurvEros(Map<String, List<TopoEdge>> eroMap) {
-        if (eroMap != null) {
-            if (eroMap.size() > 2 && eroMap.size() % 2 == 0) {
+            if (eroMap.size() % 2 == 0 && eroMap.size() >= 2) {
                 return eroMap.values().stream().allMatch(l -> l.size() > 0);
             }
         }
