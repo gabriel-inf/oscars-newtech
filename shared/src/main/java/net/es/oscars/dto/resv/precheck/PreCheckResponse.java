@@ -19,5 +19,6 @@ public class PreCheckResponse {
     }
     private String connectionId;
     private PrecheckResult precheckResult;
-    private List<String> allAzPaths = new ArrayList<>();
+    private List<String> nodesToHighlight = new ArrayList<>();
+    private List<String> linksToHighlight = new ArrayList<>();
 }

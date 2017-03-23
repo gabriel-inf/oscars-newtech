@@ -225,7 +225,8 @@ public class ReservationController {
     private PreCheckResponse processPrecheckResponse(String connectionId, Connection c) {
         PreCheckResponse response = PreCheckResponse.builder()
                 .connectionId(connectionId)
-                .allAzPaths(new ArrayList<>())
+                .linksToHighlight(new ArrayList<>())
+                .nodesToHighlight(new ArrayList<>())
                 .precheckResult(PreCheckResponse.PrecheckResult.SUCCESS)
                 .build();
 
@@ -241,16 +242,46 @@ public class ReservationController {
             for (BidirectionalPath biPath : allPaths) {
                 List<Edge> oneAzPath = biPath.getAzPath();
 
-                for (Edge oneEdge : oneAzPath) {
-                    response.getAllAzPaths().add(oneEdge.getOrigin()+","+oneEdge.getTarget());
+                // path always goes:
+                // port -> device (always first)
+                // device -> port
+                // port -> port
+                // ...
+                //
+                // port -> port
+                // port -> device
+                // device -> port
+                // index 0 mod 3: origin is port, target is device
+                // index 1 mod 3: origin is device , target is port
+                // index 2 mod 3: origin is port, target is port
+
+                Integer idx = 0;
+                Set<String> nodesToHighlight = new HashSet<>();
+                Set<String> linksToHighlight = new HashSet<>();
+
+                for (Edge edge : oneAzPath) {
+                    if (idx % 3 == 0) {
+                        nodesToHighlight.add(edge.getTarget());
+                        log.info("highlight device " + edge.getTarget());
+                    } else if (idx % 3 == 2) {
+                        String linkName = edge.getOrigin() + " -- "+edge.getTarget();
+                        linksToHighlight.add(linkName);
+                        log.info("highlight link " + linkName);
+                    } else {
+                        log.info("highlight device " + edge.getOrigin());
+                        nodesToHighlight.add(edge.getOrigin());
+
+                    }
+                    idx++;
                 }
+                response.getNodesToHighlight().addAll(nodesToHighlight);
+                response.getLinksToHighlight().addAll(linksToHighlight);
             }
 
         }
-        ObjectMapper mapper = new ObjectMapper();
-        String pretty = null;
         try {
-            pretty = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response);
+            ObjectMapper mapper = new ObjectMapper();
+            String pretty = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response);
             log.info(pretty);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
