@@ -1,4 +1,4 @@
-package net.es.oscars.pss;
+package net.es.oscars.pss.ctg;
 
 public interface UnitTests {
 }

@@ -7,6 +7,8 @@ import net.es.oscars.pss.svc.HealthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+
 @Slf4j
 @Component
 public class Startup {
@@ -22,7 +24,7 @@ public class Startup {
         this.healthService = healthService;
     }
 
-    public void onStart() {
+    public void onStart() throws IOException {
         if (!props.getPerformControlPlaneCheck()) {
             log.info("config declines start up control plane check");
         } else {

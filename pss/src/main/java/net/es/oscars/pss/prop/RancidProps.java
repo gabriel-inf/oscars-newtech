@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 public class RancidProps {
 
 
+    @NonNull
+    private Boolean execute;
 
     @NonNull
     private String dir;

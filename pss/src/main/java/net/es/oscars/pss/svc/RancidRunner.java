@@ -30,6 +30,10 @@ public class RancidRunner {
     public void runRancid(RancidArguments arguments)
             throws ControlPlaneException, IOException, InterruptedException, TimeoutException {
 
+        if (!props.getExecute()) {
+            log.info("configured to not actually run rancid");
+            return;
+        }
         File temp = File.createTempFile("oscars-routerConfig-", ".tmp");
 
         log.info("routerConfig: " + arguments.getRouterConfig());

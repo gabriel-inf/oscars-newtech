@@ -1,68 +1,71 @@
-package net.es.oscars.pss;
+package net.es.oscars.pss.rtr;
 
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.dto.pss.cmd.Command;
 import net.es.oscars.dto.pss.cmd.CommandStatus;
-import net.es.oscars.dto.pss.cmd.CommandType;
 import net.es.oscars.dto.pss.st.ControlPlaneStatus;
 import net.es.oscars.dto.pss.st.LifecycleStatus;
-import net.es.oscars.dto.topo.enums.DeviceModel;
+import net.es.oscars.pss.AbstractPssTest;
 import net.es.oscars.pss.beans.ControlPlaneException;
+import net.es.oscars.pss.beans.DeviceEntry;
+import net.es.oscars.pss.ctg.ControlPlaneTests;
+import net.es.oscars.pss.ctg.RouterTests;
+import net.es.oscars.pss.help.PssTestConfig;
+import net.es.oscars.pss.prop.RancidProps;
 import net.es.oscars.pss.svc.CommandQueuer;
+import net.es.oscars.pss.svc.HealthService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.io.IOException;
 import java.util.*;
 
 @Slf4j
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest
-@TestPropertySource(locations = "file:config/test/application.properties")
-public class ControlPlaneTest {
+public class ControlPlaneTest extends AbstractPssTest {
 
     @Autowired
     private CommandQueuer queuer;
 
+    @Autowired
+    private RancidProps rancidProps;
+
+    @Autowired
+    private PssTestConfig pssTestConfig;
+
+    @Autowired
+    private HealthService healthService;
 
     @Before
     public void before() throws InterruptedException {
         System.out.println("==============================================================================");
-        System.out.println("Ready to run integration tests! These WILL attempt to configure routers.");
+        System.out.println("Ready to run control plane tests! These WILL attempt to contact routers.");
         System.out.println("Make sure you have configured test.properties correctly. ");
         System.out.println("Starting in 3 seconds. Ctrl-C to abort.");
         System.out.println("==============================================================================");
         Thread.sleep(3000);
+
+        rancidProps.setExecute(true);
     }
 
     @Test
-    @Category(Integrations.class)
-    public void basicTest() throws NoSuchElementException, ControlPlaneException, InterruptedException {
-        Map<String, DeviceModel> devices = new HashMap<>();
-        devices.put("nersc-asw1", DeviceModel.JUNIPER_EX);
-        devices.put("nersc-tb1", DeviceModel.ALCATEL_SR7750);
+    @Category({RouterTests.class, ControlPlaneTests.class})
+    public void basicTest() throws NoSuchElementException, ControlPlaneException, InterruptedException, IOException {
+        log.info("starting control plane test");
+        String prefix = pssTestConfig.getCaseDirectory();
+
+        Map<DeviceEntry, String> entryCommands = healthService.queueControlPlaneCheck(queuer, prefix+"/control-plane-check.json");
 
         Map<String, ControlPlaneStatus> statusMap = new HashMap<>();
+
         Set<String> commandIds = new HashSet<>();
+        Set<String> waitingFor = new HashSet<>();
 
-        devices.entrySet().forEach(e -> {
-            Command cmd = Command.builder()
-                    .device(e.getKey())
-                    .model(e.getValue())
-                    .type(CommandType.CONTROL_PLANE_STATUS)
-                    .build();
-
-            String commandId = queuer.newCommand(cmd);
-            commandIds.add(commandId);
+        entryCommands.entrySet().forEach(e -> {
+            waitingFor.add(e.getKey().getDevice());
+            commandIds.add(e.getValue());
 
         });
-        Set<String> waitingFor = new HashSet<>();
-        waitingFor.addAll(devices.keySet());
 
         int totalMs = 0;
         while (waitingFor.size() > 0 && totalMs < 60000) {
