@@ -8,8 +8,10 @@ import net.es.oscars.dto.spec.PalindromicType;
 import net.es.oscars.dto.spec.RequestedVlanFlow;
 import net.es.oscars.dto.spec.RequestedVlanPipe;
 import net.es.oscars.dto.spec.SurvivabilityType;
+import net.es.oscars.pce.exc.DuplicateConnectionIdException;
 import net.es.oscars.pce.exc.InvalidUrnException;
 import net.es.oscars.pce.exc.PCEException;
+import net.es.oscars.pce.exc.VlanNotFoundException;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.ent.ConnectionE;
 import net.es.oscars.resv.svc.ResvService;
@@ -44,25 +46,51 @@ public class ResvController {
         // LOG.warn("user requested a strResource which didn't exist", ex);
     }
 
-    @ExceptionHandler(DataIntegrityViolationException.class)
-    @ResponseStatus(value = HttpStatus.CONFLICT ,reason="duplicate connection id")
-    public void handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
-        // LOG.warn("user requested a strResource which didn't exist", ex);
-    }
 
-    @ExceptionHandler(InvalidUrnException.class)
-    @ResponseStatus(value = HttpStatus.NOT_FOUND)
+    @ExceptionHandler(VlanNotFoundException.class)
+    @ResponseStatus(value = HttpStatus.NOT_FOUND, reason = "VLAN not available")
     @ResponseBody
-    public Map<String,Object> handleInvalidUrn(InvalidUrnException ex) {
+    public Map<String, Object> handleNoVlanFound(VlanNotFoundException ex) {
+        String message = "Requested VLANs not available at these URNs: " + StringUtils.join(ex.getBadUrns(), ",");
         HashMap<String, Object> result = new HashMap<>();
         result.put("error", true);
-        String message = "One or more requested URNs not found: "+ StringUtils.join(ex.getBadUrns(), ",");
         result.put("error_message", message);
         log.error(message);
         return result;
     }
 
+    @ExceptionHandler(DuplicateConnectionIdException.class)
+    @ResponseStatus(value = HttpStatus.CONFLICT, reason = "Duplicate connection id")
+    @ResponseBody
+    public Map<String, Object> handleDuplicateConnId(DuplicateConnectionIdException ex) {
+        HashMap<String, Object> result = new HashMap<>();
+        result.put("error", true);
+        result.put("error_message", ex.getMessage());
+        log.error(ex.getMessage());
+        return result;
+    }
 
+    @ExceptionHandler(InvalidUrnException.class)
+    @ResponseStatus(value = HttpStatus.NOT_FOUND)
+    @ResponseBody
+    public Map<String, Object> handleInvalidUrn(InvalidUrnException ex) {
+        String message = "One or more requested URNs not found: " + StringUtils.join(ex.getBadUrns(), ",");
+
+        HashMap<String, Object> result = new HashMap<>();
+        result.put("error", true);
+        result.put("error_message", message);
+        log.error(message);
+        return result;
+    }
+
+    @RequestMapping(value = "/resv/exists/{connectionId}", method = RequestMethod.GET)
+    @ResponseBody
+    public Boolean exists(@PathVariable("connectionId") String connectionId) {
+        log.info("checking if " + connectionId+" exists");
+        Optional<ConnectionE> connE = resvService.findByConnectionId(connectionId);
+        return connE.isPresent();
+
+    }
 
     @RequestMapping(value = "/resv/get/{connectionId}", method = RequestMethod.GET)
     @ResponseBody
@@ -92,19 +120,15 @@ public class ResvController {
 
     @RequestMapping(value = "/resv/filter", method = RequestMethod.POST)
     @ResponseBody
-    public Set<Connection> resvFilter(@RequestBody ConnectionFilter filter)
-    {
+    public Set<Connection> resvFilter(@RequestBody ConnectionFilter filter) {
         Set<Connection> result = new HashSet<>();
-        if (filter.getConnectionId() != null)
-        {
+        if (filter.getConnectionId() != null) {
 
             Optional<ConnectionE> c = resvService.findByConnectionId(filter.getConnectionId());
             if (c.isPresent()) {
                 result.add(this.convertConnToDto(c.get()));
             }
-        }
-        else if (filter.getResvStates() != null)
-        {
+        } else if (filter.getResvStates() != null) {
             filter.getResvStates().forEach(st -> {
                 resvService.ofResvState(st).forEach(ce -> {
                     Connection c = this.convertConnToDto(ce);
@@ -113,11 +137,8 @@ public class ResvController {
 
             });
 
-        }
-        else
-        {
-            for (ConnectionE eItem : resvService.findAll())
-            {
+        } else {
+            for (ConnectionE eItem : resvService.findAll()) {
                 Connection dtoItem = convertConnToDto(eItem);
                 result.add(dtoItem);
             }
@@ -139,8 +160,7 @@ public class ResvController {
     // Endpoint for pre-check on a connection
     @RequestMapping(value = "/resv/connection/precheck", method = RequestMethod.POST)
     @ResponseBody
-    public Connection preCheck(@RequestBody Connection connection) throws PSSException, PCEException
-    {
+    public Connection preCheck(@RequestBody Connection connection) throws PSSException, PCEException {
         log.info("Pre-check initialized for ConnectionID: " + connection.getConnectionId());
 
         return preCheckConnection(connection); // may be null
@@ -185,7 +205,6 @@ public class ResvController {
         log.info(connE.toString());
 
 
-
         Connection conn = modelMapper.map(connE, Connection.class);
         log.info(conn.toString());
 
@@ -196,29 +215,52 @@ public class ResvController {
 
     private Connection defineDefaults(Connection connection) {
         RequestedVlanFlow flow = connection.getSpecification().getRequested().getVlanFlow();
-        if(flow.getMinPipes() == null){flow.setMinPipes(flow.getPipes().size());}
-        if(flow.getMaxPipes() == null){flow.setMaxPipes(flow.getPipes().size());}
+        if (flow.getMinPipes() == null) {
+            flow.setMinPipes(flow.getPipes().size());
+        }
+        if (flow.getMaxPipes() == null) {
+            flow.setMaxPipes(flow.getPipes().size());
+        }
 
         Set<RequestedVlanPipe> pipes = flow.getPipes();
-        for(RequestedVlanPipe pipe : pipes){
-            if(pipe.getAzMbps() == null){pipe.setAzMbps(0);}
-            if(pipe.getZaMbps() == null){pipe.setZaMbps(0);}
-            if(pipe.getAzERO() == null){pipe.setAzERO(new ArrayList<>());}
-            if(pipe.getZaERO() == null){pipe.setZaERO(new ArrayList<>());}
-            if(pipe.getUrnBlacklist() == null){pipe.setUrnBlacklist(new HashSet<>());}
-            if(pipe.getPipeType() == null){pipe.setPipeType(EthPipeType.REQUESTED);}
-            if(pipe.getEroPalindromic() == null){pipe.setEroPalindromic(PalindromicType.PALINDROME);}
-            if(pipe.getEroSurvivability() == null){pipe.setEroSurvivability(SurvivabilityType.SURVIVABILITY_NONE);}
-            if(pipe.getNumPaths() == null){pipe.setNumPaths(1);}
-            if(pipe.getPriority() == null){pipe.setPriority(Integer.MAX_VALUE);}
+        for (RequestedVlanPipe pipe : pipes) {
+            if (pipe.getAzMbps() == null) {
+                pipe.setAzMbps(0);
+            }
+            if (pipe.getZaMbps() == null) {
+                pipe.setZaMbps(0);
+            }
+            if (pipe.getAzERO() == null) {
+                pipe.setAzERO(new ArrayList<>());
+            }
+            if (pipe.getZaERO() == null) {
+                pipe.setZaERO(new ArrayList<>());
+            }
+            if (pipe.getUrnBlacklist() == null) {
+                pipe.setUrnBlacklist(new HashSet<>());
+            }
+            if (pipe.getPipeType() == null) {
+                pipe.setPipeType(EthPipeType.REQUESTED);
+            }
+            if (pipe.getEroPalindromic() == null) {
+                pipe.setEroPalindromic(PalindromicType.PALINDROME);
+            }
+            if (pipe.getEroSurvivability() == null) {
+                pipe.setEroSurvivability(SurvivabilityType.SURVIVABILITY_NONE);
+            }
+            if (pipe.getNumPaths() == null) {
+                pipe.setNumPaths(1);
+            }
+            if (pipe.getPriority() == null) {
+                pipe.setPriority(Integer.MAX_VALUE);
+            }
         }
         flow.setPipes(pipes);
         connection.getSpecification().getRequested().setVlanFlow(flow);
         return connection;
     }
 
-    private Connection preCheckConnection(Connection connection) throws PCEException, PSSException
-    {
+    private Connection preCheckConnection(Connection connection) throws PCEException, PSSException {
         log.info("Pre-checking ConnectionID: " + connection.getConnectionId());
         connection = defineDefaults(connection);
         ConnectionE connE = modelMapper.map(connection, ConnectionE.class);
@@ -227,13 +269,10 @@ public class ResvController {
 
         Connection conn = modelMapper.map(connE, Connection.class);
 
-        if(successful)
-        {
+        if (successful) {
             log.info("Pre-check result: SUCCESS");
             return conn;
-        }
-        else
-        {
+        } else {
             log.info("Pre-check result: UNSUCCESSFUL");
             return null;
         }

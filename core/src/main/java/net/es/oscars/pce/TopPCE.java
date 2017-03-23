@@ -246,7 +246,7 @@ public class TopPCE {
                                           List<Set<ReservedMplsPipeE>> mplsPipesPerRange,
                                           List<Set<ReservedEthPipeE>> ethPipesPerRange,
                                           List<Set<ReservedVlanJunctionE>> junctionsPerRange,
-                                          List<Set<BidirectionalPathE>> allPathsPerRange,  Integer rangeIndex) {
+                                          List<Set<BidirectionalPathE>> allPathsPerRange,  Integer rangeIndex) throws PCEException, PSSException {
         // Get the start and end date
         Date start = ranges.get(rangeIndex).get(0);
         Date end = ranges.get(rangeIndex).get(1);
@@ -340,7 +340,7 @@ public class TopPCE {
                                                                 Map<String, Set<String>> deviceToPortMap,
                                                                 Map<String, String> portToDeviceMap, String connId,
                                                                 Map<String, Map<String, Integer>> bwAvailMap,
-                                                                List<ReservedVlanE> repoVlans){
+                                                                List<ReservedVlanE> repoVlans) throws PCEException, PSSException {
 
         Set<ReservedVlanJunctionE> simpleJunctions = new HashSet<>();
         List<ReservedBandwidthE> newestBandwidths = new ArrayList<>();
@@ -351,13 +351,9 @@ public class TopPCE {
             rsvVlans.addAll(repoVlans);
 
             ReservedVlanJunctionE junction = null;
-            try {
-                junction = transPCE.reserveSimpleJunction(reqJunction, bwAvailMap, rsvVlans, deviceToPortMap, portToDeviceMap, start, end, connId);
-                if (junction != null) {
-                    simpleJunctions.add(junction);
-                }
-            } catch (PCEException | PSSException e) {
-                log.info(e.getMessage());
+            junction = transPCE.reserveSimpleJunction(reqJunction, bwAvailMap, rsvVlans, deviceToPortMap, portToDeviceMap, start, end, connId);
+            if (junction != null) {
+                simpleJunctions.add(junction);
             }
 
             // Update list of reserved bandwidths

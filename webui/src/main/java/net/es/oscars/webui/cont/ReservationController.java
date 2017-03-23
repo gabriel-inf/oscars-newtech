@@ -1,11 +1,13 @@
 package net.es.oscars.webui.cont;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.bwavail.PortBandwidthAvailabilityRequest;
 import net.es.oscars.dto.bwavail.PortBandwidthAvailabilityResponse;
 import net.es.oscars.dto.resv.Connection;
 import net.es.oscars.dto.resv.ConnectionFilter;
+import net.es.oscars.dto.resv.precheck.PreCheckResponse;
 import net.es.oscars.dto.spec.RequestedVlanPipe;
 import net.es.oscars.dto.topo.BidirectionalPath;
 import net.es.oscars.dto.topo.Edge;
@@ -50,7 +52,7 @@ public class ReservationController {
     @ResponseBody
     @ExceptionHandler(RestClientException.class)
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
-    public Map<String,Object> handleRestError(RestClientException ex) {
+    public Map<String, Object> handleRestError(RestClientException ex) {
         log.error(ex.getMessage());
         HashMap<String, Object> result = new HashMap<>();
         result.put("error", true);
@@ -61,18 +63,8 @@ public class ReservationController {
 
     @RequestMapping("/resv/view/{connectionId}")
     public String resv_view(@PathVariable String connectionId, Model model) {
-        String restPath = oscarsUrl + "/resv/get/" + connectionId;
 
-        Connection conn = restTemplate.getForObject(restPath, Connection.class);
-        ObjectMapper mapper = new ObjectMapper();
-/*
-        String pretty = null;
-        try {
-            pretty = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(conn);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-        */
+        Connection conn = requester.getConnection(connectionId);
         model.addAttribute("connectionId", conn.getConnectionId());
 
 
@@ -80,28 +72,26 @@ public class ReservationController {
         return "resv_view";
     }
 
-    @RequestMapping(value = "/resv/get/{connectionId}", method=RequestMethod.GET)
+    @RequestMapping(value = "/resv/get/{connectionId}", method = RequestMethod.GET)
     @ResponseBody
     public Connection resv_get_details(@PathVariable String connectionId) {
-        String restPath = oscarsUrl + "/resv/get/" + connectionId;
-
-        return restTemplate.getForObject(restPath, Connection.class);
+        return requester.getConnection(connectionId);
     }
 
 
     @RequestMapping("/resv/list")
-    public String resv_list(Model model) { return "resv_list"; }
+    public String resv_list(Model model) {
+        return "resv_list";
+    }
 
 
     @RequestMapping(value = "/resv/list/allconnections", method = RequestMethod.GET)
     @ResponseBody
-    public Set<Connection> resv_list_connections()
-    {
+    public Set<Connection> resv_list_connections() {
         ConnectionFilter f = ConnectionFilter.builder().build();
         Set<Connection> filteredConnections = connectionProvider.filtered(f);
 
-        for(Connection c : filteredConnections)
-        {
+        for (Connection c : filteredConnections) {
             Set<RequestedVlanPipe> pipes = c.getSpecification().getRequested().getVlanFlow().getPipes();
         }
 
@@ -140,20 +130,27 @@ public class ReservationController {
     }
 
 
-    @RequestMapping("/resv/newConnectionId")
+    @RequestMapping(value = "/resv/newConnectionId", method = RequestMethod.GET)
     @ResponseBody
     public Map<String, String> new_connection_id() {
         Map<String, String> result = new HashMap<>();
 
-        Hashids hashids = new Hashids("a salt");
+        Hashids hashids = new Hashids("oscars");
 
-        // todo: better random or something, also poke the backend
+        boolean found = false;
         Random rand = new Random();
-        Integer id = rand.nextInt();
-        if (id < 0 ) {
-            id = -1 * id;
+        String connectionId = "";
+        while (!found) {
+            Integer id = rand.nextInt();
+            if (id < 0) {
+                id = -1 * id;
+            }
+            connectionId = hashids.encode(id);
+            if (!requester.connectionIdExists(connectionId)) {
+                // it's good that it doesn't exist, means we can use it
+                found = true;
+            }
         }
-        String connectionId = hashids.encode(id);
 
         result.put("connectionId", connectionId);
         log.info("provided new connection id: " + result.get("connectionId"));
@@ -209,8 +206,7 @@ public class ReservationController {
 
     @RequestMapping(value = "/resv/precheck", method = RequestMethod.POST)
     @ResponseBody
-    public Map<String, String> resv_preCheck(@RequestBody MinimalRequest request)
-    {
+    public PreCheckResponse resv_preCheck(@RequestBody MinimalRequest request) {
         Connection c = preChecker.preCheckMinimal(request);
         log.info("Request Details: " + request.toString());
 
@@ -219,55 +215,52 @@ public class ReservationController {
 
     @RequestMapping(value = "/resv/advanced_precheck", method = RequestMethod.POST)
     @ResponseBody
-    public Map<String, String> resv_precheck_advanced(@RequestBody AdvancedRequest request){
+    public PreCheckResponse resv_precheck_advanced(@RequestBody AdvancedRequest request) {
         Connection c = preChecker.preCheckAdvanced(request);
         log.info("Request Details: " + request.toString());
 
         return processPrecheckResponse(request.getConnectionId(), c);
     }
 
-    private Map<String, String> processPrecheckResponse(String connectionId, Connection c){
-        Map<String, String> res = new HashMap<>();
-
-        res.put("connectionId", connectionId);
+    private PreCheckResponse processPrecheckResponse(String connectionId, Connection c) {
+        PreCheckResponse response = PreCheckResponse.builder()
+                .connectionId(connectionId)
+                .allAzPaths(new ArrayList<>())
+                .precheckResult(PreCheckResponse.PrecheckResult.SUCCESS)
+                .build();
 
         //TODO: Pass back reservation with all details
-        if(c == null)
-        {
-            res.put("preCheckResult", "UNSUCCESSFUL");
+        if (c == null) {
+            response.setPrecheckResult(PreCheckResponse.PrecheckResult.UNSUCCESSFUL);
             log.info("Pre-Check Result: UNSUCCESSFUL");
-        }
-        else
-        {
-            res.put("preCheckResult", "SUCCESS");
+        } else {
             log.info("Pre-Check Result: SUCCESS");
 
             Set<BidirectionalPath> allPaths = c.getReserved().getVlanFlow().getAllPaths();
 
-            String pathList = "";
-
-            for(BidirectionalPath biPath : allPaths)
-            {
+            for (BidirectionalPath biPath : allPaths) {
                 List<Edge> oneAzPath = biPath.getAzPath();
 
-                for(Edge oneEdge : oneAzPath)
-                {
-                    pathList += oneEdge.getOrigin() + "," + oneEdge.getTarget() + ",";
+                for (Edge oneEdge : oneAzPath) {
+                    response.getAllAzPaths().add(oneEdge.getOrigin()+","+oneEdge.getTarget());
                 }
-
-                pathList += ";";
             }
 
-            res.put("allAzPaths", pathList);
         }
-
-        return res;
+        ObjectMapper mapper = new ObjectMapper();
+        String pretty = null;
+        try {
+            pretty = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response);
+            log.info(pretty);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return response;
     }
 
     @RequestMapping(value = "/resv/topo/bwAvailAllPorts/", method = RequestMethod.POST)
     @ResponseBody
-    public PortBandwidthAvailabilityResponse queryPortBwAvailability(@RequestBody MinimalRequest request)
-    {
+    public PortBandwidthAvailabilityResponse queryPortBwAvailability(@RequestBody MinimalRequest request) {
         log.info("Querying for Port Bandwdidth Availability");
         PortBandwidthAvailabilityRequest bwRequest = new PortBandwidthAvailabilityRequest();
         Date startDate = new Date(request.getStartAt() * 1000L);
@@ -277,7 +270,7 @@ public class ReservationController {
         bwRequest.setEndDate(endDate);
 
         String submitUrl = "/bwavail/ports";
-        String restPath = oscarsUrl  + submitUrl;
+        String restPath = oscarsUrl + submitUrl;
 
         PortBandwidthAvailabilityResponse bwResponse = restTemplate.postForObject(restPath, bwRequest, PortBandwidthAvailabilityResponse.class);
 

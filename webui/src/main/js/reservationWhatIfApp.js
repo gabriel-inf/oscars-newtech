@@ -145,7 +145,7 @@ class ReservationWhatIfApp extends React.Component{
 
     processPrecheck(response){
         let data = JSON.parse(response);
-        let preCheckRes = data["preCheckResult"];
+        let preCheckRes = data["precheckResult"];
         if(preCheckRes === "UNSUCCESSFUL"){
             this.setState({
                 message: "Precheck Failed: Cannot establish reservation with current parameters!",
