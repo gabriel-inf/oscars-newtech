@@ -54,24 +54,24 @@ if args.verbose:
     
 # Set submitted time
 if args.submitTime:
-    submitTime = int(args.submitTime)
+    submitTime = int(args.submitTime) * 1000
 else:
-    submitTime = int(time.time())
+    submitTime = int(time.time()) * 1000
 connection['schedule']['submitted'] = submitTime
 
 # Set setup time
 if args.setupTime:
-    setupTime = int(args.setupTime)
+    setupTime = int(args.setupTime) * 1000
 else:
-    setupTime = int(time.time())
+    setupTime = int(time.time()) * 1000
 connection['schedule']['setup'] = setupTime
 connection['specification']['scheduleSpec']['startDates'][0] = setupTime
 
 # Set teardown time
 if args.teardownTime:
-    teardownTime = int(args.teardownTime)
+    teardownTime = int(args.teardownTime) * 1000
 else:
-    teardownTime = int(time.time() + 3600)
+    teardownTime = int(time.time() + 3600) * 1000
 connection['schedule']['teardown'] = teardownTime
 connection['specification']['scheduleSpec']['endDates'][0] = teardownTime
 
