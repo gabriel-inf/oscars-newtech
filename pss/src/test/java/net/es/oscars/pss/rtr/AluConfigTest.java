@@ -1,40 +1,38 @@
-package net.es.oscars.pss;
+package net.es.oscars.pss.rtr;
 
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.pss.cmd.Command;
 import net.es.oscars.dto.pss.cmd.CommandStatus;
 import net.es.oscars.dto.pss.cmd.CommandType;
-import net.es.oscars.dto.pss.params.alu.AluParams;
 import net.es.oscars.dto.pss.st.ConfigStatus;
-import net.es.oscars.dto.pss.st.ControlPlaneStatus;
 import net.es.oscars.dto.pss.st.LifecycleStatus;
-import net.es.oscars.dto.topo.enums.DeviceModel;
-import net.es.oscars.pss.beans.ControlPlaneException;
-import net.es.oscars.pss.spec.RouterTestSpec;
-import net.es.oscars.pss.svc.CommandQueuer;
+import net.es.oscars.pss.AbstractPssTest;
+import net.es.oscars.pss.ctg.AluTests;
+import net.es.oscars.pss.ctg.RouterTests;
+import net.es.oscars.pss.help.PssTestConfig;
+import net.es.oscars.pss.prop.RancidProps;
+import net.es.oscars.pss.help.ParamsLoader;
+import net.es.oscars.pss.help.RouterTestSpec;
 import net.es.oscars.pss.svc.CommandRunner;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.IOException;
 import java.util.*;
 
 @Slf4j
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest
-@TestPropertySource(locations = "file:config/test/application.properties")
-public class AluConfigTest {
+public class AluConfigTest extends AbstractPssTest {
 
     @Autowired
     private CommandRunner runner;
     @Autowired
     private ParamsLoader loader;
+    @Autowired
+    private RancidProps rancidProps;
+    @Autowired
+    private PssTestConfig pssTestConfig;
 
     @Before
     public void before() throws InterruptedException {
@@ -44,15 +42,18 @@ public class AluConfigTest {
         System.out.println("Starting in 3 seconds. Ctrl-C to abort.");
         System.out.println("==============================================================================");
         Thread.sleep(3000);
+        rancidProps.setExecute(true);
+
     }
 
     @Test
-    @Category(Integrations.class)
+    @Category({RouterTests.class, AluTests.class})
     public void singleAluTest() throws IOException {
         log.info("starting single ALU test");
+        String prefix = pssTestConfig.getCaseDirectory();
 
 
-        RouterTestSpec setupRts = loader.loadSpec("./config/test/testbed/setup-alu-single.json");
+        RouterTestSpec setupRts = loader.loadSpec(prefix + "/setup-alu-single.json");
 
 
         Command setupCmd = Command.builder()
@@ -76,7 +77,7 @@ public class AluConfigTest {
 
         runner.run(setupStatus, setupCmd);
 
-        RouterTestSpec tdRts = loader.loadSpec("./config/test/testbed/teardown-alu-single.json");
+        RouterTestSpec tdRts = loader.loadSpec(prefix + "/teardown-alu-single.json");
 
 
         Command tdCmd = Command.builder()
@@ -103,16 +104,18 @@ public class AluConfigTest {
     }
 
     @Test
-    @Category(Integrations.class)
+    @Category({RouterTests.class, AluTests.class})
     public void twoAluTest() throws IOException, InterruptedException {
+        String prefix = pssTestConfig.getCaseDirectory();
+
+
         log.info("starting two ALU test: setup");
         List<String> setups = new ArrayList<>();
-        setups.add("./config/test/testbed/setup-2_nersc-star.json");
-        setups.add("./config/test/testbed/setup-2_star-nersc.json");
+        setups.add(prefix + "/setup-2_a-z.json");
+        setups.add(prefix + "/setup-2_z-a.json");
 
         for (String setup : setups) {
             RouterTestSpec setupRts = loader.loadSpec(setup);
-
             Command setupCmd = Command.builder()
                     .device(setupRts.getDevice())
                     .model(setupRts.getModel())
@@ -132,12 +135,14 @@ public class AluConfigTest {
                     .build();
 
             runner.run(setupStatus, setupCmd);
+
+
         }
         Thread.sleep(10000);
 
         List<String> teardowns = new ArrayList<>();
-        teardowns.add("./config/test/testbed/teardown-2_nersc-star.json");
-        teardowns.add("./config/test/testbed/teardown-2_star-nersc.json");
+        teardowns.add(prefix + "/teardown-2_a-z.json");
+        teardowns.add(prefix + "/teardown-2_z-a.json");
 
         for (String teardown : teardowns) {
             RouterTestSpec setupRts = loader.loadSpec(teardown);
@@ -161,8 +166,8 @@ public class AluConfigTest {
                     .build();
 
             runner.run(setupStatus, setupCmd);
-        }
 
+        }
     }
 
 }

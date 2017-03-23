@@ -1,11 +1,9 @@
-package net.es.oscars.pss;
+package net.es.oscars.pss.help;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.pss.cmd.CommandType;
 import net.es.oscars.pss.beans.ConfigException;
-import net.es.oscars.pss.prop.PssTestConfig;
-import net.es.oscars.pss.spec.RouterTestSpec;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

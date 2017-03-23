@@ -1,10 +1,10 @@
 [
   {
-    "device": "nersc-tb1",
+    "device": "sunn-cr5",
     "model": "ALCATEL_SR7750"
   },
   {
-    "device": "xo-osf-rt1",
+    "device": "lbl-mr2",
     "model": "JUNIPER_MX"
   },
   {

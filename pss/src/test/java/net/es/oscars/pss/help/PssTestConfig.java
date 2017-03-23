@@ -1,4 +1,4 @@
-package net.es.oscars.pss.prop;
+package net.es.oscars.pss.help;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

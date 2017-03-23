@@ -9,7 +9,7 @@
         <version>0.7.0</version>
     </parent>
     <properties>
-        <testcase.groups>net.es.oscars.pss.UnitTests</testcase.groups>
+        <testcase.groups>net.es.oscars.pss.ctg.UnitTests</testcase.groups>
     </properties>
 
 
@@ -19,13 +19,25 @@
         <profile>
             <id>unit</id>
             <properties>
-                <testcase.groups>net.es.oscars.pss.UnitTests</testcase.groups>
+                <testcase.groups>net.es.oscars.pss.ctg.UnitTests</testcase.groups>
             </properties>
         </profile>
         <profile>
-            <id>integration</id>
+            <id>router</id>
             <properties>
-                <testcase.groups>net.es.oscars.pss.Integrations</testcase.groups>
+                <testcase.groups>net.es.oscars.pss.ctg.RouterTests</testcase.groups>
+            </properties>
+        </profile>
+        <profile>
+            <id>alu</id>
+            <properties>
+                <testcase.groups>net.es.oscars.pss.ctg.AluTests</testcase.groups>
+            </properties>
+        </profile>
+        <profile>
+            <id>controlplane</id>
+            <properties>
+                <testcase.groups>net.es.oscars.pss.ctg.ControlPlaneTests</testcase.groups>
             </properties>
         </profile>
         <profile>

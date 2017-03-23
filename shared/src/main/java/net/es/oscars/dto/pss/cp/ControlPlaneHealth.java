@@ -4,6 +4,7 @@ package net.es.oscars.dto.pss.cp;
 import lombok.*;
 import net.es.oscars.dto.pss.st.*;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @Data
