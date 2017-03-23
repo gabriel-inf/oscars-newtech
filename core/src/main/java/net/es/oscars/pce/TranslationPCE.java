@@ -9,6 +9,7 @@ import net.es.oscars.dto.topo.enums.Layer;
 import net.es.oscars.dto.topo.enums.UrnType;
 import net.es.oscars.dto.topo.enums.VertexType;
 import net.es.oscars.pce.exc.PCEException;
+import net.es.oscars.pce.exc.VlanNotFoundException;
 import net.es.oscars.pss.PCEAssistant;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.ent.*;
@@ -83,7 +84,10 @@ public class TranslationPCE {
                 deviceToPortMap, portToDeviceMap, urnMap);
         if (urnVlanMap.keySet().stream().anyMatch(urn -> urnVlanMap.get(urn).isEmpty())) {
             log.error("could not choose VLAN id");
-            return null;
+
+            VlanNotFoundException ex = new VlanNotFoundException("could not choose VLAN id");
+            ex.getBadUrns().addAll(urnVlanMap.keySet());
+            throw ex;
         }
         log.info("Chosen VLAN Map: " + urnVlanMap);
 

@@ -6,7 +6,8 @@
     <!-- magic line: ties to spring logging.file property -->
     <property name="LOG_FILE" value="${LOG_FILE:-${LOG_PATH:-${LOG_TEMP:-${java.io.tmpdir:-/tmp}}/}spring.log}"/>
 
-    <logger name="net.es.oscars" level="DEBUG"/>
+    <logger name="net.es.oscars" level="debug"/>
+    <logger name="org.hibernate.tool.hbm2ddl.SchemaExport" level="off" />
 
     <root level="INFO">
         <appender-ref ref="FILE"/>

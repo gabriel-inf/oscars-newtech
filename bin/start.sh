@@ -19,16 +19,10 @@ java -jar target/core-0.7.0.jar &
 
 # keep polling core until curl exits OK, then it's safe to start the other processes
 
-curl -k -s https://oscars:oscars-shared@localhost:8000/configs/get/whatif > /dev/null
+curl -k -s https://oscars:oscars-shared@localhost:8000/configs/ready > /dev/null
 while [ $? -ne 0 ]; do
   sleep 1
-  curl -k -s https://oscars:oscars-shared@localhost:8000/configs/get/whatif > /dev/null
-done
-
-curl -k -s https://oscars:oscars-shared@localhost:8000/configs/get/webui > /dev/null
-while [ $? -ne 0 ]; do
-  sleep 1
-  curl -k -s https://oscars:oscars-shared@localhost:8000/configs/get/webui > /dev/null
+  curl -k -s https://oscars:oscars-shared@localhost:8000/configs/ready > /dev/null
 done
 
 echo "Starting What-If.."

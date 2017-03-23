@@ -109,13 +109,12 @@ function drawPathOnNetwork(vizNetwork, allAzPaths)
     highlight_devices(vizNetwork.datasource, Object.keys(vizNetwork.datasource.nodes._data), true, "white");
     highlight_links(vizNetwork.datasource, Object.keys(vizNetwork.datasource.edges._data), true, "blue");
 
-    let eachAzPath = allAzPaths.split(";");
     let nodesToReserve = [];
     let linksToReserve = [];
 
-    for(let i = 0; i < eachAzPath.length-1; i++)
+    for(let i = 0; i < allAzPaths.length-1; i++)
     {
-        let eachAzNode = eachAzPath[i].split(",");
+        let eachAzNode = allAzPaths[i].split(",");
         let prevNode = "";
         let prevNodeIsDevice = false;
         for(let j = 0; j < eachAzNode.length-1; j++)

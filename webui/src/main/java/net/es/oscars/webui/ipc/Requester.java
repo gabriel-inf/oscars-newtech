@@ -1,5 +1,6 @@
 package net.es.oscars.webui.ipc;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.resv.Connection;
 import net.es.oscars.webui.dto.AdvancedRequest;
@@ -19,6 +20,33 @@ public class Requester {
     private RestTemplate restTemplate;
 
     private final String oscarsUrl = "https://localhost:8000";
+
+    public Connection getConnection(String connectionId) throws RestClientException {
+        String restPath = oscarsUrl + "/resv/get/" + connectionId;
+
+        Connection conn = restTemplate.getForObject(restPath, Connection.class);
+
+        /*
+
+        ObjectMapper mapper = new ObjectMapper();
+        String pretty = null;
+        try {
+            pretty = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(conn);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        */
+
+        return conn;
+
+    }
+
+    public Boolean connectionIdExists(String connectionId) throws RestClientException {
+        String restPath = oscarsUrl + "/resv/exists/" + connectionId;
+
+        return restTemplate.getForObject(restPath, Boolean.class);
+    }
+
 
     public Connection holdMinimal(MinimalRequest minimalRequest) throws RestClientException {
         log.info("holding minimal " + minimalRequest.toString());
