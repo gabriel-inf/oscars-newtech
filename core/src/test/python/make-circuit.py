@@ -30,6 +30,13 @@ args = parser.parse_args()
 if args.verbose:
     print "Arguments: " + str(args)
 
+
+# Don't spam stderr with warnings about unverifiable certificates.  This is also the
+# reason for any verify=False parameters in calls to the requests module in
+# code below.  This is undocumented but mentioned in:
+# https://github.com/kennethreitz/requests/issues/2214
+requests.packages.urllib3.disable_warnings()
+
 # Slurp in input file if given
 if (args.file):
     indatalines = fileinput.input(args.file)
@@ -47,24 +54,24 @@ if args.verbose:
     
 # Set submitted time
 if args.submitTime:
-    submitTime = int(args.submitTime)
+    submitTime = int(args.submitTime) * 1000
 else:
-    submitTime = int(time.time())
+    submitTime = int(time.time()) * 1000
 connection['schedule']['submitted'] = submitTime
 
 # Set setup time
 if args.setupTime:
-    setupTime = int(args.setupTime)
+    setupTime = int(args.setupTime) * 1000
 else:
-    setupTime = int(time.time())
+    setupTime = int(time.time()) * 1000
 connection['schedule']['setup'] = setupTime
 connection['specification']['scheduleSpec']['startDates'][0] = setupTime
 
 # Set teardown time
 if args.teardownTime:
-    teardownTime = int(args.teardownTime)
+    teardownTime = int(args.teardownTime) * 1000
 else:
-    teardownTime = int(time.time() + 3600)
+    teardownTime = int(time.time() + 3600) * 1000
 connection['schedule']['teardown'] = teardownTime
 connection['specification']['scheduleSpec']['endDates'][0] = teardownTime
 
@@ -101,12 +108,16 @@ outdata = json.dumps(connection)
 r = requests.post(args.url + '/resv/connection/add', auth=HTTPBasicAuth(args.user, args.password), data=outdata, verify=False, headers={'Content-Type' : 'application/json'})
 if args.verbose:
     print "status " + str(r.status_code) + ": " + r.text
-r.raise_for_status()
+if r.status_code != requests.codes.ok:
+    print "error:  " + r.text
+    exit(1)
 
 r = requests.get(args.url + 'resv/commit/' + connection['connectionId'], auth=HTTPBasicAuth(args.user, args.password), verify=False)
 if args.verbose:
     print "status " + str(r.status_code) + ": " + r.text
-r.raise_for_status()
+if r.status_code != requests.codes.ok:
+    print "error:  " + r.text
+    exit(1)
 
 r = requests.get(args.url + '/resv/all', auth=HTTPBasicAuth(args.user, args.password), verify=False)
 if args.verbose:

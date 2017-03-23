@@ -4,8 +4,6 @@ import argparse
 import fileinput
 import requests
 from requests.auth import HTTPBasicAuth
-import json
-
 
 parser = argparse.ArgumentParser(description='OSCARS circuit creator')
 parser.add_argument('-p', '--password', help='password for authorization', default='oscars-shared')
@@ -16,6 +14,12 @@ parser.add_argument('-v', '--verbose', help='verbose', action='store_true')
 parser.add_argument('--id', help='set connection ID for new request')
 
 args = parser.parse_args()
+
+# Don't spam stderr with warnings about unverifiable certificates.  This is also the
+# reason for any verify=False parameters in calls to the requests module in
+# code below.  This is undocumented but mentioned in:
+# https://github.com/kennethreitz/requests/issues/2214
+requests.packages.urllib3.disable_warnings()
 
 if args.id:
     r = requests.get(args.url + '/resv/get/' + args.id, auth=HTTPBasicAuth(args.user, args.password), verify=False)

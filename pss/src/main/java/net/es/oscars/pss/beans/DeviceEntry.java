@@ -1,4 +1,4 @@
-package net.es.oscars.pss.pop;
+package net.es.oscars.pss.beans;
 
 
 import lombok.AllArgsConstructor;

@@ -69,21 +69,20 @@ public class ConfigController {
     }
 
 
-    @RequestMapping(value = "/configs/get/{component}", method = RequestMethod.GET)
+
+    @RequestMapping(value = "/configs/ready", method = RequestMethod.GET)
     @ResponseBody
     @Transactional
-    public String getConfig(@PathVariable("component") String component) {
-        log.info("retrieving " + component);
+    public void ready() {
+        log.info("checking if ready...");
         int maxTimeout = 30000;
         int waitedFor = 0;
 
         while (!this.populator.isStarted() && waitedFor < maxTimeout) {
             try {
-                log.error("config for " + component + " is still loading");
                 Thread.sleep(5000);
             } catch (InterruptedException ex) {
                 log.error("interrupted", ex);
-
             }
             waitedFor += 5000;
         }
@@ -91,12 +90,22 @@ public class ConfigController {
         if (!this.populator.isStarted()) {
             throw new NoSuchElementException("could not populate configs");
         }
+    }
+
+
+    @RequestMapping(value = "/configs/get/{component}", method = RequestMethod.GET)
+    @ResponseBody
+    @Transactional
+    public String getConfig(@PathVariable("component") String component) {
+        log.info("retrieving " + component);
 
         Optional<EStartupConfig> maybeConfig = repository.findByName(component);
-        maybeConfig.orElseThrow(NoSuchElementException::new);
-        EStartupConfig configEnt = maybeConfig.get();
-
-        return configEnt.getConfigJson();
+        if (maybeConfig.isPresent()) {
+            EStartupConfig configEnt = maybeConfig.get();
+            return configEnt.getConfigJson();
+        } else {
+            throw new NoSuchElementException();
+        }
     }
 
     @RequestMapping(value = "/configs/delete/{component}", method = RequestMethod.GET)

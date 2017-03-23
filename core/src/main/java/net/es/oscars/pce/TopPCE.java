@@ -5,6 +5,8 @@ import net.es.oscars.dto.spec.SurvivabilityType;
 import net.es.oscars.dto.topo.TopoVertex;
 import net.es.oscars.dto.topo.enums.DeviceType;
 import net.es.oscars.dto.topo.enums.Layer;
+import net.es.oscars.pce.exc.InvalidUrnException;
+import net.es.oscars.pce.exc.PCEException;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.dto.topo.TopoEdge;
@@ -16,6 +18,7 @@ import net.es.oscars.topo.ent.ReservableVlanE;
 import net.es.oscars.topo.ent.UrnE;
 import net.es.oscars.topo.svc.TopoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.method.P;
 import org.springframework.stereotype.Component;
 
 import java.time.temporal.ChronoUnit;
@@ -243,7 +246,7 @@ public class TopPCE {
                                           List<Set<ReservedMplsPipeE>> mplsPipesPerRange,
                                           List<Set<ReservedEthPipeE>> ethPipesPerRange,
                                           List<Set<ReservedVlanJunctionE>> junctionsPerRange,
-                                          List<Set<BidirectionalPathE>> allPathsPerRange,  Integer rangeIndex) {
+                                          List<Set<BidirectionalPathE>> allPathsPerRange,  Integer rangeIndex) throws PCEException, PSSException {
         // Get the start and end date
         Date start = ranges.get(rangeIndex).get(0);
         Date end = ranges.get(rangeIndex).get(1);
@@ -337,7 +340,7 @@ public class TopPCE {
                                                                 Map<String, Set<String>> deviceToPortMap,
                                                                 Map<String, String> portToDeviceMap, String connId,
                                                                 Map<String, Map<String, Integer>> bwAvailMap,
-                                                                List<ReservedVlanE> repoVlans){
+                                                                List<ReservedVlanE> repoVlans) throws PCEException, PSSException {
 
         Set<ReservedVlanJunctionE> simpleJunctions = new HashSet<>();
         List<ReservedBandwidthE> newestBandwidths = new ArrayList<>();
@@ -348,13 +351,9 @@ public class TopPCE {
             rsvVlans.addAll(repoVlans);
 
             ReservedVlanJunctionE junction = null;
-            try {
-                junction = transPCE.reserveSimpleJunction(reqJunction, bwAvailMap, rsvVlans, deviceToPortMap, portToDeviceMap, start, end, connId);
-                if (junction != null) {
-                    simpleJunctions.add(junction);
-                }
-            } catch (PCEException | PSSException e) {
-                log.info(e.getMessage());
+            junction = transPCE.reserveSimpleJunction(reqJunction, bwAvailMap, rsvVlans, deviceToPortMap, portToDeviceMap, start, end, connId);
+            if (junction != null) {
+                simpleJunctions.add(junction);
             }
 
             // Update list of reserved bandwidths
@@ -571,20 +570,23 @@ public class TopPCE {
 
         for (RequestedVlanJunctionE junction : allJunctions) {
             // throws exception if device not found in topology
+            List<String> badUrns = new ArrayList<>();
             try {
                 topoService.device(junction.getDeviceUrn());
             } catch (NoSuchElementException ex) {
-                throw new PCEException("device not found in topology");
+                badUrns.add(junction.getDeviceUrn());
+            }
+            for (RequestedVlanFixtureE fixture : junction.getFixtures()) {
+                try {
+                    topoService.getUrn(fixture.getPortUrn());
+                } catch (NoSuchElementException ex) {
+                    badUrns.add(fixture.getPortUrn());
+                }
+            }
+            if (!badUrns.isEmpty()) {
+                throw new InvalidUrnException("Some requested urns not found.", badUrns);
             }
             validVlanRequest(junction);
-        }
-
-        Set<String> junctionsWithNoFixtures = allJunctions.stream().
-                filter(t -> t.getFixtures().isEmpty()).
-                map(RequestedVlanJunctionE::getDeviceUrn).collect(Collectors.toSet());
-
-        if (!junctionsWithNoFixtures.isEmpty()) {
-            // throw new PCEException("Junctions with no fixtures found: " + String.join(" ", junctionsWithNoFixtures));
         }
 
         log.info("all junctions & pipes are ok");

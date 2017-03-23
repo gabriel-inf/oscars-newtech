@@ -3,6 +3,7 @@ package net.es.oscars.pce;
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.spec.SurvivabilityType;
 import net.es.oscars.dto.topo.enums.PortLayer;
+import net.es.oscars.pce.exc.PCEException;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.servicetopo.SurvivableServiceLayerTopology;
 import net.es.oscars.dto.topo.TopoEdge;

@@ -7,6 +7,7 @@ import net.es.oscars.dto.topo.Topology;
 import net.es.oscars.dto.topo.enums.Layer;
 import net.es.oscars.dto.topo.enums.PortLayer;
 import net.es.oscars.dto.topo.enums.VertexType;
+import net.es.oscars.pce.exc.PCEException;
 import net.es.oscars.resv.ent.RequestedVlanFixtureE;
 import net.es.oscars.resv.ent.RequestedVlanPipeE;
 import net.es.oscars.resv.ent.ReservedVlanE;

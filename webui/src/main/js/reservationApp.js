@@ -121,7 +121,7 @@ class ReservationApp extends React.Component{
 
     processPrecheck(response){
         let data = JSON.parse(response);
-        let preCheckRes = data["preCheckResult"];
+        let preCheckRes = data["precheckResult"];
         if(preCheckRes === "UNSUCCESSFUL"){
             this.setState({
                     message: "Precheck Failed: Cannot establish reservation with current parameters! Updating topology. Please wait...",
@@ -131,8 +131,9 @@ class ReservationApp extends React.Component{
             this.setState({message: "Precheck Failed: Cannot establish reservation with current parameters! Topology elements with insufficient bandwidth colored red."});
         }
         else{
-            let azPaths = data["allAzPaths"];
-            networkVis.drawPathOnNetwork(this.state.networkVis, azPaths);
+            let nodesToHighlight = data["nodesToHighlight"];
+            let linksToHighlight = data["linksToHighlight"];
+            networkVis.drawPathOnNetwork(this.state.networkVis, nodesToHighlight, linksToHighlight);
             this.setState({
                 message: "Precheck Passed: Prospective route(s) added to topology. Click Hold to reserve!",
                 messageBoxClass: "alert-success",

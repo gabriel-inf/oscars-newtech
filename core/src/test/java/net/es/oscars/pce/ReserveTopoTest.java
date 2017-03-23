@@ -3,6 +3,7 @@ package net.es.oscars.pce;
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.IntRange;
 import net.es.oscars.dto.resv.ResourceType;
+import net.es.oscars.pce.exc.PCEException;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.dto.topo.enums.Layer;
 import net.es.oscars.dto.topo.TopoEdge;
@@ -10,8 +11,6 @@ import net.es.oscars.dto.topo.TopoVertex;
 import net.es.oscars.helpers.IntRangeParsing;
 import net.es.oscars.pss.PCEAssistant;
 import net.es.oscars.pss.PSSException;
-import net.es.oscars.topo.ent.UrnE;
-import net.es.oscars.dto.topo.enums.UrnType;
 import org.junit.Test;
 
 import java.time.Instant;

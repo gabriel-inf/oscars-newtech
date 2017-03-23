@@ -17,12 +17,13 @@ trap 'kill %1; kill %2 echo -e "\nExiting.."; exit' SIGINT
 echo "Starting core.."
 java -jar target/core-0.7.0.jar &
 
-# keep polling core until curl exits OK, then it's safe to start the other module
 
-curl -k -s https://oscars:oscars-shared@localhost:8000/configs/get/webui > /dev/null
+# keep polling core until curl exits OK, then it's safe to start the other processes
+
+curl -k -s https://oscars:oscars-shared@localhost:8000/configs/ready > /dev/null
 while [ $? -ne 0 ]; do
   sleep 1
-  curl -k -s https://oscars:oscars-shared@localhost:8000/configs/get/webui > /dev/null
+  curl -k -s https://oscars:oscars-shared@localhost:8000/configs/ready > /dev/null
 done
 
 

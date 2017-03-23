@@ -6,15 +6,26 @@ import lombok.NonNull;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-@ConfigurationProperties(prefix = "pss_test")
+@ConfigurationProperties(prefix = "rancid")
 @Data
 @Component
 @NoArgsConstructor
-public class PssTestConfig {
+public class RancidProps {
 
 
     @NonNull
-    private String caseDirectory;
+    private Boolean execute;
+
+    @NonNull
+    private String dir;
+
+    @NonNull
+    private String host;
+
+    @NonNull
+    private String cloginrc;
+
+
 }
 
 

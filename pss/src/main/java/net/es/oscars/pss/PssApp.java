@@ -1,12 +1,14 @@
 package net.es.oscars.pss;
 
-import net.es.oscars.pss.pop.Startup;
+import net.es.oscars.pss.go.Startup;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
+
+import java.io.IOException;
 
 @SpringBootApplication
 @EnableConfigurationProperties
@@ -17,8 +19,13 @@ public class PssApp {
         ConfigurableApplicationContext app = SpringApplication.run(PssApp.class, args);
 
         Startup startup = (Startup)app.getBean("startup");
-
-        startup.onStart();
+        try {
+            startup.onStart();
+        } catch (IOException ex) {
+            System.err.print("Startup error");
+            ex.printStackTrace();
+            System.exit(1);
+        }
 
 
 

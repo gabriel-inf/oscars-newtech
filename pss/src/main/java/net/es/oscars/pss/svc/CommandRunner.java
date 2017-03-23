@@ -21,11 +21,13 @@ import java.util.concurrent.TimeoutException;
 public class CommandRunner {
     private RouterConfigBuilder builder;
     private RancidRunner rancidRunner;
+    private HealthService healthService;
 
     @Autowired
-    public CommandRunner(RancidRunner rancidRunner, RouterConfigBuilder builder) {
+    public CommandRunner(RancidRunner rancidRunner, RouterConfigBuilder builder, HealthService healthService) {
         this.rancidRunner = rancidRunner;
         this.builder = builder;
+        this.healthService = healthService;
     }
 
     public void run(CommandStatus status, Command command) {
@@ -85,10 +87,12 @@ public class CommandRunner {
         try {
             RancidArguments args = builder.controlPlaneCheck(device, model);
             rancidRunner.runRancid(args);
+            healthService.getHealth().getDeviceStatus().put(device, ControlPlaneStatus.VERIFIED);
             result.setStatus(ControlPlaneStatus.VERIFIED);
 
         } catch (IOException | InterruptedException | TimeoutException | ControlPlaneException | ConfigException ex) {
             log.error("Rancid error", ex);
+            healthService.getHealth().getDeviceStatus().put(device, ControlPlaneStatus.FAILED);
             result.setStatus(ControlPlaneStatus.FAILED);
         }
         return result;

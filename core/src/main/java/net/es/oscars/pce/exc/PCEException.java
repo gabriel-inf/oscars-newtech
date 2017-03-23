@@ -1,4 +1,4 @@
-package net.es.oscars.pce;
+package net.es.oscars.pce.exc;
 
 public class PCEException extends Exception {
     public PCEException(String msg) {

@@ -13,6 +13,9 @@ import org.springframework.stereotype.Component;
 public class PssConfig {
 
     @NonNull
+    private String url;
+
+    @NonNull
     private String addressesFilename;
 
     @NonNull
