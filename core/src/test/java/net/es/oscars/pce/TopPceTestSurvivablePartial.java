@@ -5,6 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.AbstractCoreTest;
 import net.es.oscars.dto.spec.PalindromicType;
 import net.es.oscars.dto.spec.SurvivabilityType;
+import net.es.oscars.dto.topo.enums.Layer;
+import net.es.oscars.dto.topo.enums.PortLayer;
+import net.es.oscars.dto.topo.enums.VertexType;
 import net.es.oscars.helpers.RequestedEntityBuilder;
 import net.es.oscars.pce.helpers.AsymmTopologyBuilder;
 import net.es.oscars.pce.helpers.TopologyBuilder;
@@ -172,7 +175,7 @@ public class TopPceTestSurvivablePartial extends AbstractCoreTest  {
         log.info("MPLS: " + allResMplsPipes.size());
 
         assert (allResJunctions.size() == 0);
-        assert (allResEthPipes.size() == 1);
+        assert (allResEthPipes.size() == 2);
         assert (allResMplsPipes.size() == 2);
 
         boolean usedEro1 = false;
@@ -327,7 +330,7 @@ public class TopPceTestSurvivablePartial extends AbstractCoreTest  {
         Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
 
         assert (allResJunctions.size() == 0);
-        assert (allResEthPipes.size() == 2);
+        assert (allResEthPipes.size() == 4);
         assert (allResMplsPipes.size() == 2);
 
         boolean usedEro1 = false;
@@ -654,7 +657,7 @@ public class TopPceTestSurvivablePartial extends AbstractCoreTest  {
         Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
 
         assert (allResJunctions.size() == 0);
-        assert (allResEthPipes.size() == 2);
+        assert (allResEthPipes.size() == 4);
         assert (allResMplsPipes.size() == 2);
 
         boolean usedEro1 = false;
@@ -869,7 +872,7 @@ public class TopPceTestSurvivablePartial extends AbstractCoreTest  {
         Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
 
         assert (allResJunctions.size() == 0);
-        assert (allResEthPipes.size() == 1);
+        assert (allResEthPipes.size() == 2);
         assert (allResMplsPipes.size() == 0);
 
         // Ethernet Pipes
@@ -1050,7 +1053,7 @@ public class TopPceTestSurvivablePartial extends AbstractCoreTest  {
         Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
 
         assert (allResJunctions.size() == 0);
-        assert (allResEthPipes.size() == 2);
+        assert (allResEthPipes.size() == 4);
         assert (allResMplsPipes.size() == 0);
 
         // Ethernet Pipes
@@ -1415,7 +1418,7 @@ public class TopPceTestSurvivablePartial extends AbstractCoreTest  {
 
 
         assert (allResJunctions.size() == 0);
-        assert (allResEthPipes.size() == 3);
+        assert (allResEthPipes.size() == 6);
         assert (allResMplsPipes.size() == 4);
 
         boolean usedEro1_1 = false;
@@ -1774,7 +1777,7 @@ public class TopPceTestSurvivablePartial extends AbstractCoreTest  {
         assert (allResEthPipes.size() == 0);
         assert (allResMplsPipes.size() == 2);
 
-        // Ethernet Pipes
+        // MPLS Pipes
         for(ReservedMplsPipeE mplsPipe : allResMplsPipes)
         {
             ReservedVlanJunctionE aJunc = mplsPipe.getAJunction();
@@ -1882,5 +1885,1607 @@ public class TopPceTestSurvivablePartial extends AbstractCoreTest  {
         assert (!reservedBlueprint.isPresent());
 
         log.info("test 'survPartialWithEthPortsOnRoutersTest3' passed.");
+    }
+
+    @Test
+    public void survPartialThreeDisjointAllMPLSK2Fail()
+    {
+        log.info("Initializing test: 'survPartialThreeDisjointAllMPLSK2Fail'.");
+
+        RequestedBlueprintE requestedBlueprint;
+        Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
+        ScheduleSpecificationE requestedSched;
+
+        Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
+        Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
+
+        String srcPort = "nodeK:1";
+        String srcDevice = "nodeK";
+        String dstPort = "nodeL:1";
+        String dstDevice = "nodeL";
+        Integer azBW = 50;
+        Integer zaBW = 50;
+        PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_PARTIAL;
+        String vlan = "any";
+        int numDisjoint = 2;
+
+        List<VertexType> vertexTypes = new ArrayList<>();
+        vertexTypes.add(VertexType.ROUTER);     // nodeK
+        vertexTypes.add(VertexType.ROUTER);     // nodeL
+        vertexTypes.add(VertexType.ROUTER);     // nodeP
+        vertexTypes.add(VertexType.ROUTER);     // nodeQ
+        vertexTypes.add(VertexType.ROUTER);     // nodeR
+        vertexTypes.add(VertexType.ROUTER);     // nodeS
+        vertexTypes.add(VertexType.ROUTER);     // nodeT
+
+        List<PortLayer> portLayers = new ArrayList<>();
+        portLayers.add(PortLayer.MPLS);         // nodeK:1
+        portLayers.add(PortLayer.MPLS);         // nodeK:2
+        portLayers.add(PortLayer.MPLS);         // nodeL:1
+        portLayers.add(PortLayer.MPLS);         // nodeL:2
+        portLayers.add(PortLayer.MPLS);         // nodeP:1
+        portLayers.add(PortLayer.MPLS);         // nodeP:2
+        portLayers.add(PortLayer.MPLS);         // nodeP:3
+        portLayers.add(PortLayer.MPLS);         // nodeP:4
+        portLayers.add(PortLayer.MPLS);         // nodeQ:1
+        portLayers.add(PortLayer.MPLS);         // nodeQ:2
+        portLayers.add(PortLayer.MPLS);         // nodeQ:3
+        portLayers.add(PortLayer.MPLS);         // nodeQ:4
+        portLayers.add(PortLayer.MPLS);         // nodeR:1
+        portLayers.add(PortLayer.MPLS);         // nodeR:2
+        portLayers.add(PortLayer.MPLS);         // nodeS:1
+        portLayers.add(PortLayer.MPLS);         // nodeS:2
+        portLayers.add(PortLayer.MPLS);         // nodeT:1
+        portLayers.add(PortLayer.MPLS);         // nodeT:2
+
+        List<Layer> linkLayers = new ArrayList<>();
+        linkLayers.add(Layer.MPLS);             // nodeK:2 --> nodeP:1
+        linkLayers.add(Layer.MPLS);             // nodeL:2 --> nodeQ:1
+        linkLayers.add(Layer.MPLS);             // nodeP:1 --> nodeK:2
+        linkLayers.add(Layer.MPLS);             // nodeP:2 --> nodeQ:2
+        linkLayers.add(Layer.MPLS);             // nodeP:3 --> nodeR:1
+        linkLayers.add(Layer.MPLS);             // nodeP:4 --> nodeS:1
+        linkLayers.add(Layer.MPLS);             // nodeQ:1 --> nodeL:2
+        linkLayers.add(Layer.MPLS);             // nodeQ:2 --> nodeP:2
+        linkLayers.add(Layer.MPLS);             // nodeQ:3 --> nodeR:2
+        linkLayers.add(Layer.MPLS);             // nodeQ:4 --> nodeT:2
+        linkLayers.add(Layer.MPLS);             // nodeR:1 --> nodeP:3
+        linkLayers.add(Layer.MPLS);             // nodeR:2 --> nodeQ:3
+        linkLayers.add(Layer.MPLS);             // nodeS:1 --> nodeP:4
+        linkLayers.add(Layer.MPLS);             // nodeS:2 --> nodeT:2
+        linkLayers.add(Layer.MPLS);             // nodeT:1 --> nodeQ:4
+        linkLayers.add(Layer.MPLS);             // nodeT:2 --> nodeS:2
+
+        asymmTopologyBuilder.buildTopoWithThreePartialDisjointPaths(vertexTypes, portLayers, linkLayers);
+        requestedSched = testBuilder.buildSchedule(startDate, endDate);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, numDisjoint, 1, 1, "test");
+
+        log.info("Beginning test: 'survPartialThreeDisjointAllMPLSK2Fail'.");
+
+        try
+        {
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
+        }
+        catch(PCEException | PSSException pceE)
+        {
+            log.error("", pceE);
+        }
+
+        assert (!reservedBlueprint.isPresent());
+
+        log.info("test 'survPartialThreeDisjointAllMPLSK2Fail' passed.");
+    }
+
+    @Test
+    public void survPartialThreeDisjointAllMPLSK3Fail()
+    {
+        log.info("Initializing test: 'survPartialThreeDisjointAllMPLSK3Fail'.");
+
+        RequestedBlueprintE requestedBlueprint;
+        Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
+        ScheduleSpecificationE requestedSched;
+
+        Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
+        Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
+
+        String srcPort = "nodeK:1";
+        String srcDevice = "nodeK";
+        String dstPort = "nodeL:1";
+        String dstDevice = "nodeL";
+        Integer azBW = 50;
+        Integer zaBW = 50;
+        PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_PARTIAL;
+        String vlan = "any";
+        int numDisjoint = 3;
+
+        List<VertexType> vertexTypes = new ArrayList<>();
+        vertexTypes.add(VertexType.ROUTER);     // nodeK
+        vertexTypes.add(VertexType.ROUTER);     // nodeL
+        vertexTypes.add(VertexType.ROUTER);     // nodeP
+        vertexTypes.add(VertexType.ROUTER);     // nodeQ
+        vertexTypes.add(VertexType.ROUTER);     // nodeR
+        vertexTypes.add(VertexType.ROUTER);     // nodeS
+        vertexTypes.add(VertexType.ROUTER);     // nodeT
+
+        List<PortLayer> portLayers = new ArrayList<>();
+        portLayers.add(PortLayer.MPLS);         // nodeK:1
+        portLayers.add(PortLayer.MPLS);         // nodeK:2
+        portLayers.add(PortLayer.MPLS);         // nodeL:1
+        portLayers.add(PortLayer.MPLS);         // nodeL:2
+        portLayers.add(PortLayer.MPLS);         // nodeP:1
+        portLayers.add(PortLayer.MPLS);         // nodeP:2
+        portLayers.add(PortLayer.MPLS);         // nodeP:3
+        portLayers.add(PortLayer.MPLS);         // nodeP:4
+        portLayers.add(PortLayer.MPLS);         // nodeQ:1
+        portLayers.add(PortLayer.MPLS);         // nodeQ:2
+        portLayers.add(PortLayer.MPLS);         // nodeQ:3
+        portLayers.add(PortLayer.MPLS);         // nodeQ:4
+        portLayers.add(PortLayer.MPLS);         // nodeR:1
+        portLayers.add(PortLayer.MPLS);         // nodeR:2
+        portLayers.add(PortLayer.MPLS);         // nodeS:1
+        portLayers.add(PortLayer.MPLS);         // nodeS:2
+        portLayers.add(PortLayer.MPLS);         // nodeT:1
+        portLayers.add(PortLayer.MPLS);         // nodeT:2
+
+        List<Layer> linkLayers = new ArrayList<>();
+        linkLayers.add(Layer.MPLS);             // nodeK:2 --> nodeP:1
+        linkLayers.add(Layer.MPLS);             // nodeL:2 --> nodeQ:1
+        linkLayers.add(Layer.MPLS);             // nodeP:1 --> nodeK:2
+        linkLayers.add(Layer.MPLS);             // nodeP:2 --> nodeQ:2
+        linkLayers.add(Layer.MPLS);             // nodeP:3 --> nodeR:1
+        linkLayers.add(Layer.MPLS);             // nodeP:4 --> nodeS:1
+        linkLayers.add(Layer.MPLS);             // nodeQ:1 --> nodeL:2
+        linkLayers.add(Layer.MPLS);             // nodeQ:2 --> nodeP:2
+        linkLayers.add(Layer.MPLS);             // nodeQ:3 --> nodeR:2
+        linkLayers.add(Layer.MPLS);             // nodeQ:4 --> nodeT:2
+        linkLayers.add(Layer.MPLS);             // nodeR:1 --> nodeP:3
+        linkLayers.add(Layer.MPLS);             // nodeR:2 --> nodeQ:3
+        linkLayers.add(Layer.MPLS);             // nodeS:1 --> nodeP:4
+        linkLayers.add(Layer.MPLS);             // nodeS:2 --> nodeT:2
+        linkLayers.add(Layer.MPLS);             // nodeT:1 --> nodeQ:4
+        linkLayers.add(Layer.MPLS);             // nodeT:2 --> nodeS:2
+
+        asymmTopologyBuilder.buildTopoWithThreePartialDisjointPaths(vertexTypes, portLayers, linkLayers);
+        requestedSched = testBuilder.buildSchedule(startDate, endDate);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, numDisjoint, 1, 1, "test");
+
+        log.info("Beginning test: 'survPartialThreeDisjointAllMPLSK3Fail'.");
+
+        try
+        {
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
+        }
+        catch(PCEException | PSSException pceE)
+        {
+            log.error("", pceE);
+        }
+
+        assert (!reservedBlueprint.isPresent());
+
+        log.info("test 'survPartialThreeDisjointAllMPLSK3Fail' passed.");
+    }
+
+    @Test
+    public void survPartialThreeDisjointAllMPLSK2Pass()
+    {
+        log.info("Initializing test: 'survPartialThreeDisjointAllMPLSK2Pass'.");
+
+        RequestedBlueprintE requestedBlueprint;
+        Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
+        ScheduleSpecificationE requestedSched;
+
+        Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
+        Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
+
+        String srcPort = "nodeP:1";
+        String srcDevice = "nodeP";
+        String dstPort = "nodeQ:1";
+        String dstDevice = "nodeQ";
+        Integer azBW = 50;
+        Integer zaBW = 50;
+        PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_PARTIAL;
+        String vlan = "any";
+        int numDisjoint = 2;
+
+        List<VertexType> vertexTypes = new ArrayList<>();
+        vertexTypes.add(VertexType.ROUTER);     // nodeK
+        vertexTypes.add(VertexType.ROUTER);     // nodeL
+        vertexTypes.add(VertexType.ROUTER);     // nodeP
+        vertexTypes.add(VertexType.ROUTER);     // nodeQ
+        vertexTypes.add(VertexType.ROUTER);     // nodeR
+        vertexTypes.add(VertexType.ROUTER);     // nodeS
+        vertexTypes.add(VertexType.ROUTER);     // nodeT
+
+        List<PortLayer> portLayers = new ArrayList<>();
+        portLayers.add(PortLayer.MPLS);         // nodeK:1
+        portLayers.add(PortLayer.MPLS);         // nodeK:2
+        portLayers.add(PortLayer.MPLS);         // nodeL:1
+        portLayers.add(PortLayer.MPLS);         // nodeL:2
+        portLayers.add(PortLayer.MPLS);         // nodeP:1
+        portLayers.add(PortLayer.MPLS);         // nodeP:2
+        portLayers.add(PortLayer.MPLS);         // nodeP:3
+        portLayers.add(PortLayer.MPLS);         // nodeP:4
+        portLayers.add(PortLayer.MPLS);         // nodeQ:1
+        portLayers.add(PortLayer.MPLS);         // nodeQ:2
+        portLayers.add(PortLayer.MPLS);         // nodeQ:3
+        portLayers.add(PortLayer.MPLS);         // nodeQ:4
+        portLayers.add(PortLayer.MPLS);         // nodeR:1
+        portLayers.add(PortLayer.MPLS);         // nodeR:2
+        portLayers.add(PortLayer.MPLS);         // nodeS:1
+        portLayers.add(PortLayer.MPLS);         // nodeS:2
+        portLayers.add(PortLayer.MPLS);         // nodeT:1
+        portLayers.add(PortLayer.MPLS);         // nodeT:2
+
+        List<Layer> linkLayers = new ArrayList<>();
+        linkLayers.add(Layer.MPLS);             // nodeK:2 --> nodeP:1
+        linkLayers.add(Layer.MPLS);             // nodeL:2 --> nodeQ:1
+        linkLayers.add(Layer.MPLS);             // nodeP:1 --> nodeK:2
+        linkLayers.add(Layer.MPLS);             // nodeP:2 --> nodeQ:2
+        linkLayers.add(Layer.MPLS);             // nodeP:3 --> nodeR:1
+        linkLayers.add(Layer.MPLS);             // nodeP:4 --> nodeS:1
+        linkLayers.add(Layer.MPLS);             // nodeQ:1 --> nodeL:2
+        linkLayers.add(Layer.MPLS);             // nodeQ:2 --> nodeP:2
+        linkLayers.add(Layer.MPLS);             // nodeQ:3 --> nodeR:2
+        linkLayers.add(Layer.MPLS);             // nodeQ:4 --> nodeT:2
+        linkLayers.add(Layer.MPLS);             // nodeR:1 --> nodeP:3
+        linkLayers.add(Layer.MPLS);             // nodeR:2 --> nodeQ:3
+        linkLayers.add(Layer.MPLS);             // nodeS:1 --> nodeP:4
+        linkLayers.add(Layer.MPLS);             // nodeS:2 --> nodeT:2
+        linkLayers.add(Layer.MPLS);             // nodeT:1 --> nodeQ:4
+        linkLayers.add(Layer.MPLS);             // nodeT:2 --> nodeS:2
+
+        asymmTopologyBuilder.buildTopoWithThreePartialDisjointPaths(vertexTypes, portLayers, linkLayers);
+        requestedSched = testBuilder.buildSchedule(startDate, endDate);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, numDisjoint, 1, 1, "test");
+
+        log.info("Beginning test: 'survPartialThreeDisjointAllMPLSK2Pass'.");
+
+        try
+        {
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
+        }
+        catch(PCEException | PSSException pceE)
+        {
+            log.error("", pceE);
+        }
+
+        assert(reservedBlueprint.isPresent());
+
+        ReservedVlanFlowE reservedFlow = reservedBlueprint.get().getVlanFlow();
+
+        Set<ReservedEthPipeE> allResEthPipes = reservedFlow.getEthPipes();
+        Set<ReservedMplsPipeE> allResMplsPipes = reservedFlow.getMplsPipes();
+        Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
+
+        assert (allResJunctions.size() == 0);
+        assert (allResEthPipes.size() == 0);
+        assert (allResMplsPipes.size() == 2);
+
+        // MPLS Pipes
+        for(ReservedMplsPipeE mplsPipe : allResMplsPipes)
+        {
+            ReservedVlanJunctionE aJunc = mplsPipe.getAJunction();
+            ReservedVlanJunctionE zJunc = mplsPipe.getZJunction();
+            Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
+            Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
+            List<String> azERO = mplsPipe.getAzERO();
+            List<String> zaERO = mplsPipe.getZaERO();
+            String actualAzERO = aJunc.getDeviceUrn() + "-";
+            String actualZaERO = zJunc.getDeviceUrn() + "-";
+
+            for(String x : azERO)
+                actualAzERO = actualAzERO + x + "-";
+
+            for(String x : zaERO)
+                actualZaERO = actualZaERO + x + "-";
+
+            actualAzERO = actualAzERO + zJunc.getDeviceUrn();
+            actualZaERO = actualZaERO + aJunc.getDeviceUrn();
+
+            assert(aJunc.getDeviceUrn().equals("nodeP"));
+            assert(zJunc.getDeviceUrn().equals("nodeQ"));
+
+            assert(aFixes.size() == 1);
+            assert(zFixes.size() == 1);
+
+            String expectedAzERO1 = "nodeP-nodeP:2-nodeQ:2-nodeQ";
+            String expectedAzERO2 = "nodeP-nodeP:3-nodeR:1-nodeR-nodeR:2-nodeQ:3-nodeQ";
+            String expectedZaERO1 = "nodeQ-nodeQ:2-nodeP:2-nodeP";
+            String expectedZaERO2 = "nodeQ-nodeQ:3-nodeR:2-nodeR-nodeR:1-nodeP:3-nodeP";
+
+            assert(actualAzERO.equals(expectedAzERO1) || actualAzERO.equals(expectedAzERO2));
+            assert(actualZaERO.equals(expectedZaERO1) || actualZaERO.equals(expectedZaERO2));
+
+            if(actualAzERO.equals(expectedAzERO1))
+                assert(actualZaERO.equals(expectedZaERO1));
+            else
+                assert(actualZaERO.equals(expectedZaERO2));
+        }
+
+        log.info("test 'survPartialThreeDisjointAllMPLSK2Pass' passed.");
+    }
+
+    @Test
+    public void survPartialThreeDisjointAllMPLSK3Pass()
+    {
+        log.info("Initializing test: 'survPartialThreeDisjointAllMPLSK3Pass'.");
+
+        RequestedBlueprintE requestedBlueprint;
+        Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
+        ScheduleSpecificationE requestedSched;
+
+        Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
+        Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
+
+        String srcPort = "nodeP:1";
+        String srcDevice = "nodeP";
+        String dstPort = "nodeQ:1";
+        String dstDevice = "nodeQ";
+        Integer azBW = 50;
+        Integer zaBW = 50;
+        PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_PARTIAL;
+        String vlan = "any";
+        int numDisjoint = 3;
+
+        List<VertexType> vertexTypes = new ArrayList<>();
+        vertexTypes.add(VertexType.ROUTER);     // nodeK
+        vertexTypes.add(VertexType.ROUTER);     // nodeL
+        vertexTypes.add(VertexType.ROUTER);     // nodeP
+        vertexTypes.add(VertexType.ROUTER);     // nodeQ
+        vertexTypes.add(VertexType.ROUTER);     // nodeR
+        vertexTypes.add(VertexType.ROUTER);     // nodeS
+        vertexTypes.add(VertexType.ROUTER);     // nodeT
+
+        List<PortLayer> portLayers = new ArrayList<>();
+        portLayers.add(PortLayer.MPLS);         // nodeK:1
+        portLayers.add(PortLayer.MPLS);         // nodeK:2
+        portLayers.add(PortLayer.MPLS);         // nodeL:1
+        portLayers.add(PortLayer.MPLS);         // nodeL:2
+        portLayers.add(PortLayer.MPLS);         // nodeP:1
+        portLayers.add(PortLayer.MPLS);         // nodeP:2
+        portLayers.add(PortLayer.MPLS);         // nodeP:3
+        portLayers.add(PortLayer.MPLS);         // nodeP:4
+        portLayers.add(PortLayer.MPLS);         // nodeQ:1
+        portLayers.add(PortLayer.MPLS);         // nodeQ:2
+        portLayers.add(PortLayer.MPLS);         // nodeQ:3
+        portLayers.add(PortLayer.MPLS);         // nodeQ:4
+        portLayers.add(PortLayer.MPLS);         // nodeR:1
+        portLayers.add(PortLayer.MPLS);         // nodeR:2
+        portLayers.add(PortLayer.MPLS);         // nodeS:1
+        portLayers.add(PortLayer.MPLS);         // nodeS:2
+        portLayers.add(PortLayer.MPLS);         // nodeT:1
+        portLayers.add(PortLayer.MPLS);         // nodeT:2
+
+        List<Layer> linkLayers = new ArrayList<>();
+        linkLayers.add(Layer.MPLS);             // nodeK:2 --> nodeP:1
+        linkLayers.add(Layer.MPLS);             // nodeL:2 --> nodeQ:1
+        linkLayers.add(Layer.MPLS);             // nodeP:1 --> nodeK:2
+        linkLayers.add(Layer.MPLS);             // nodeP:2 --> nodeQ:2
+        linkLayers.add(Layer.MPLS);             // nodeP:3 --> nodeR:1
+        linkLayers.add(Layer.MPLS);             // nodeP:4 --> nodeS:1
+        linkLayers.add(Layer.MPLS);             // nodeQ:1 --> nodeL:2
+        linkLayers.add(Layer.MPLS);             // nodeQ:2 --> nodeP:2
+        linkLayers.add(Layer.MPLS);             // nodeQ:3 --> nodeR:2
+        linkLayers.add(Layer.MPLS);             // nodeQ:4 --> nodeT:2
+        linkLayers.add(Layer.MPLS);             // nodeR:1 --> nodeP:3
+        linkLayers.add(Layer.MPLS);             // nodeR:2 --> nodeQ:3
+        linkLayers.add(Layer.MPLS);             // nodeS:1 --> nodeP:4
+        linkLayers.add(Layer.MPLS);             // nodeS:2 --> nodeT:2
+        linkLayers.add(Layer.MPLS);             // nodeT:1 --> nodeQ:4
+        linkLayers.add(Layer.MPLS);             // nodeT:2 --> nodeS:2
+
+        asymmTopologyBuilder.buildTopoWithThreePartialDisjointPaths(vertexTypes, portLayers, linkLayers);
+        requestedSched = testBuilder.buildSchedule(startDate, endDate);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, numDisjoint, 1, 1, "test");
+
+        log.info("Beginning test: 'survPartialThreeDisjointAllMPLSK3Pass'.");
+
+        try
+        {
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
+        }
+        catch(PCEException | PSSException pceE)
+        {
+            log.error("", pceE);
+        }
+
+        assert(reservedBlueprint.isPresent());
+
+        ReservedVlanFlowE reservedFlow = reservedBlueprint.get().getVlanFlow();
+
+        Set<ReservedEthPipeE> allResEthPipes = reservedFlow.getEthPipes();
+        Set<ReservedMplsPipeE> allResMplsPipes = reservedFlow.getMplsPipes();
+        Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
+
+        assert (allResJunctions.size() == 0);
+        assert (allResEthPipes.size() == 0);
+        assert (allResMplsPipes.size() == 3);
+
+        // MPLS Pipes
+        for(ReservedMplsPipeE mplsPipe : allResMplsPipes)
+        {
+            ReservedVlanJunctionE aJunc = mplsPipe.getAJunction();
+            ReservedVlanJunctionE zJunc = mplsPipe.getZJunction();
+            Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
+            Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
+            List<String> azERO = mplsPipe.getAzERO();
+            List<String> zaERO = mplsPipe.getZaERO();
+            String actualAzERO = aJunc.getDeviceUrn() + "-";
+            String actualZaERO = zJunc.getDeviceUrn() + "-";
+
+            for(String x : azERO)
+                actualAzERO = actualAzERO + x + "-";
+
+            for(String x : zaERO)
+                actualZaERO = actualZaERO + x + "-";
+
+            actualAzERO = actualAzERO + zJunc.getDeviceUrn();
+            actualZaERO = actualZaERO + aJunc.getDeviceUrn();
+
+            assert(aJunc.getDeviceUrn().equals("nodeP"));
+            assert(zJunc.getDeviceUrn().equals("nodeQ"));
+
+            assert(aFixes.size() == 1);
+            assert(zFixes.size() == 1);
+
+            String expectedAzERO1 = "nodeP-nodeP:2-nodeQ:2-nodeQ";
+            String expectedAzERO2 = "nodeP-nodeP:3-nodeR:1-nodeR-nodeR:2-nodeQ:3-nodeQ";
+            String expectedAzERO3 = "nodeP-nodeP:4-nodeS:1-nodeS-nodeS:2-nodeT:2-nodeT-nodeT:1-nodeQ:4-nodeQ";
+            String expectedZaERO1 = "nodeQ-nodeQ:2-nodeP:2-nodeP";
+            String expectedZaERO2 = "nodeQ-nodeQ:3-nodeR:2-nodeR-nodeR:1-nodeP:3-nodeP";
+            String expectedZaERO3 = "nodeQ-nodeQ:4-nodeT:1-nodeT-nodeT:2-nodeS:2-nodeS-nodeS:1-nodeP:4-nodeP";
+
+            assert(actualAzERO.equals(expectedAzERO1) || actualAzERO.equals(expectedAzERO2) || actualAzERO.equals(expectedAzERO3));
+            assert(actualZaERO.equals(expectedZaERO1) || actualZaERO.equals(expectedZaERO2) || actualZaERO.equals(expectedZaERO3));
+
+            if(actualAzERO.equals(expectedAzERO1))
+                assert(actualZaERO.equals(expectedZaERO1));
+            else if(actualAzERO.equals(expectedAzERO2))
+                assert(actualZaERO.equals(expectedZaERO2));
+            else
+                assert(actualZaERO.equals(expectedZaERO3));
+        }
+
+        log.info("test 'survPartialThreeDisjointAllMPLSK3Pass' passed.");
+    }
+
+    @Test
+    public void survPartialThreeDisjointEdgeEthK2Pass()
+    {
+        log.info("Initializing test: 'survPartialThreeDisjointEdgeEthK2Pass'.");
+
+        RequestedBlueprintE requestedBlueprint;
+        Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
+        ScheduleSpecificationE requestedSched;
+
+        Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
+        Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
+
+        String srcPort = "nodeK:1";
+        String srcDevice = "nodeK";
+        String dstPort = "nodeL:1";
+        String dstDevice = "nodeL";
+        Integer azBW = 50;
+        Integer zaBW = 50;
+        PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_PARTIAL;
+        String vlan = "any";
+        int numDisjoint = 2;
+
+        List<VertexType> vertexTypes = new ArrayList<>();
+        vertexTypes.add(VertexType.SWITCH);     // nodeK
+        vertexTypes.add(VertexType.SWITCH);     // nodeL
+        vertexTypes.add(VertexType.ROUTER);     // nodeP
+        vertexTypes.add(VertexType.ROUTER);     // nodeQ
+        vertexTypes.add(VertexType.ROUTER);     // nodeR
+        vertexTypes.add(VertexType.ROUTER);     // nodeS
+        vertexTypes.add(VertexType.ROUTER);     // nodeT
+
+        List<PortLayer> portLayers = new ArrayList<>();
+        portLayers.add(PortLayer.ETHERNET);         // nodeK:1
+        portLayers.add(PortLayer.ETHERNET);         // nodeK:2
+        portLayers.add(PortLayer.ETHERNET);         // nodeL:1
+        portLayers.add(PortLayer.ETHERNET);         // nodeL:2
+        portLayers.add(PortLayer.MPLS);         // nodeP:1
+        portLayers.add(PortLayer.MPLS);         // nodeP:2
+        portLayers.add(PortLayer.MPLS);         // nodeP:3
+        portLayers.add(PortLayer.MPLS);         // nodeP:4
+        portLayers.add(PortLayer.MPLS);         // nodeQ:1
+        portLayers.add(PortLayer.MPLS);         // nodeQ:2
+        portLayers.add(PortLayer.MPLS);         // nodeQ:3
+        portLayers.add(PortLayer.MPLS);         // nodeQ:4
+        portLayers.add(PortLayer.MPLS);         // nodeR:1
+        portLayers.add(PortLayer.MPLS);         // nodeR:2
+        portLayers.add(PortLayer.MPLS);         // nodeS:1
+        portLayers.add(PortLayer.MPLS);         // nodeS:2
+        portLayers.add(PortLayer.MPLS);         // nodeT:1
+        portLayers.add(PortLayer.MPLS);         // nodeT:2
+
+        List<Layer> linkLayers = new ArrayList<>();
+        linkLayers.add(Layer.ETHERNET);             // nodeK:2 --> nodeP:1
+        linkLayers.add(Layer.ETHERNET);             // nodeL:2 --> nodeQ:1
+        linkLayers.add(Layer.ETHERNET);             // nodeP:1 --> nodeK:2
+        linkLayers.add(Layer.MPLS);             // nodeP:2 --> nodeQ:2
+        linkLayers.add(Layer.MPLS);             // nodeP:3 --> nodeR:1
+        linkLayers.add(Layer.MPLS);             // nodeP:4 --> nodeS:1
+        linkLayers.add(Layer.ETHERNET);             // nodeQ:1 --> nodeL:2
+        linkLayers.add(Layer.MPLS);             // nodeQ:2 --> nodeP:2
+        linkLayers.add(Layer.MPLS);             // nodeQ:3 --> nodeR:2
+        linkLayers.add(Layer.MPLS);             // nodeQ:4 --> nodeT:2
+        linkLayers.add(Layer.MPLS);             // nodeR:1 --> nodeP:3
+        linkLayers.add(Layer.MPLS);             // nodeR:2 --> nodeQ:3
+        linkLayers.add(Layer.MPLS);             // nodeS:1 --> nodeP:4
+        linkLayers.add(Layer.MPLS);             // nodeS:2 --> nodeT:2
+        linkLayers.add(Layer.MPLS);             // nodeT:1 --> nodeQ:4
+        linkLayers.add(Layer.MPLS);             // nodeT:2 --> nodeS:2
+
+        asymmTopologyBuilder.buildTopoWithThreePartialDisjointPaths(vertexTypes, portLayers, linkLayers);
+        requestedSched = testBuilder.buildSchedule(startDate, endDate);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, numDisjoint, 1, 1, "test");
+
+        log.info("Beginning test: 'survPartialThreeDisjointEdgeEthK2Pass'.");
+
+        try
+        {
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
+        }
+        catch(PCEException | PSSException pceE)
+        {
+            log.error("", pceE);
+        }
+
+        assert(reservedBlueprint.isPresent());
+
+        ReservedVlanFlowE reservedFlow = reservedBlueprint.get().getVlanFlow();
+
+        Set<ReservedEthPipeE> allResEthPipes = reservedFlow.getEthPipes();
+        Set<ReservedMplsPipeE> allResMplsPipes = reservedFlow.getMplsPipes();
+        Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
+
+        assert (allResJunctions.size() == 0);
+        assert (allResEthPipes.size() == 4);
+        assert (allResMplsPipes.size() == 2);
+
+        // ETHERNET Pipes
+        for(ReservedEthPipeE ethPipe : allResEthPipes)
+        {
+            ReservedVlanJunctionE aJunc = ethPipe.getAJunction();
+            ReservedVlanJunctionE zJunc = ethPipe.getZJunction();
+            Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
+            Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
+            List<String> azERO = ethPipe.getAzERO();
+            List<String> zaERO = ethPipe.getZaERO();
+            String actualAzERO = aJunc.getDeviceUrn() + "-";
+            String actualZaERO = zJunc.getDeviceUrn() + "-";
+
+            for(String x : azERO)
+                actualAzERO = actualAzERO + x + "-";
+
+            for(String x : zaERO)
+                actualZaERO = actualZaERO + x + "-";
+
+            actualAzERO = actualAzERO + zJunc.getDeviceUrn();
+            actualZaERO = actualZaERO + aJunc.getDeviceUrn();
+
+            assert((aJunc.getDeviceUrn().equals("nodeK") && zJunc.getDeviceUrn().equals("nodeP")) || (aJunc.getDeviceUrn().equals("nodeQ") && zJunc.getDeviceUrn().equals("nodeL")));
+
+            if(aJunc.getDeviceUrn().equals("nodeK"))
+                assert(aFixes.size() == 1 && zFixes.size() == 0);
+            else
+                assert(aFixes.size() == 0 && zFixes.size() == 1);
+
+            String expectedAzEroKP = "nodeK-nodeK:2-nodeP:1-nodeP";
+            String expectedAzEroQL = "nodeQ-nodeQ:1-nodeL:2-nodeL";
+            String expectedZaEroKP = "nodeP-nodeP:1-nodeK:2-nodeK";
+            String expectedZaEroQL = "nodeL-nodeL:2-nodeQ:1-nodeQ";
+
+
+            assert((actualAzERO.equals(expectedAzEroKP) && actualZaERO.equals(expectedZaEroKP)) || (actualAzERO.equals(expectedAzEroQL) && actualZaERO.equals(expectedZaEroQL)));
+        }
+
+
+        // MPLS Pipes
+        for(ReservedMplsPipeE mplsPipe : allResMplsPipes)
+        {
+            ReservedVlanJunctionE aJunc = mplsPipe.getAJunction();
+            ReservedVlanJunctionE zJunc = mplsPipe.getZJunction();
+            Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
+            Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
+            List<String> azERO = mplsPipe.getAzERO();
+            List<String> zaERO = mplsPipe.getZaERO();
+            String actualAzERO = aJunc.getDeviceUrn() + "-";
+            String actualZaERO = zJunc.getDeviceUrn() + "-";
+
+            for(String x : azERO)
+                actualAzERO = actualAzERO + x + "-";
+
+            for(String x : zaERO)
+                actualZaERO = actualZaERO + x + "-";
+
+            actualAzERO = actualAzERO + zJunc.getDeviceUrn();
+            actualZaERO = actualZaERO + aJunc.getDeviceUrn();
+
+            assert(aJunc.getDeviceUrn().equals("nodeP"));
+            assert(zJunc.getDeviceUrn().equals("nodeQ"));
+
+            assert(aFixes.size() == 0);
+            assert(zFixes.size() == 0);
+
+            String expectedAzERO1 = "nodeP-nodeP:2-nodeQ:2-nodeQ";
+            String expectedAzERO2 = "nodeP-nodeP:3-nodeR:1-nodeR-nodeR:2-nodeQ:3-nodeQ";
+            String expectedZaERO1 = "nodeQ-nodeQ:2-nodeP:2-nodeP";
+            String expectedZaERO2 = "nodeQ-nodeQ:3-nodeR:2-nodeR-nodeR:1-nodeP:3-nodeP";
+
+            assert(actualAzERO.equals(expectedAzERO1) || actualAzERO.equals(expectedAzERO2));
+            assert(actualZaERO.equals(expectedZaERO1) || actualZaERO.equals(expectedZaERO2));
+
+            if(actualAzERO.equals(expectedAzERO1))
+                assert(actualZaERO.equals(expectedZaERO1));
+            else
+                assert(actualZaERO.equals(expectedZaERO2));
+        }
+
+        log.info("test 'survPartialThreeDisjointEdgeEthK2Pass' passed.");
+    }
+
+    @Test
+    public void survPartialThreeDisjointEdgeEthK3Pass()
+    {
+        log.info("Initializing test: 'survPartialThreeDisjointEdgeEthK3Pass'.");
+
+        RequestedBlueprintE requestedBlueprint;
+        Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
+        ScheduleSpecificationE requestedSched;
+
+        Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
+        Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
+
+        String srcPort = "nodeK:1";
+        String srcDevice = "nodeK";
+        String dstPort = "nodeL:1";
+        String dstDevice = "nodeL";
+        Integer azBW = 50;
+        Integer zaBW = 50;
+        PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_PARTIAL;
+        String vlan = "any";
+        int numDisjoint = 3;
+
+        List<VertexType> vertexTypes = new ArrayList<>();
+        vertexTypes.add(VertexType.SWITCH);     // nodeK
+        vertexTypes.add(VertexType.SWITCH);     // nodeL
+        vertexTypes.add(VertexType.ROUTER);     // nodeP
+        vertexTypes.add(VertexType.ROUTER);     // nodeQ
+        vertexTypes.add(VertexType.ROUTER);     // nodeR
+        vertexTypes.add(VertexType.ROUTER);     // nodeS
+        vertexTypes.add(VertexType.ROUTER);     // nodeT
+
+        List<PortLayer> portLayers = new ArrayList<>();
+        portLayers.add(PortLayer.ETHERNET);         // nodeK:1
+        portLayers.add(PortLayer.ETHERNET);         // nodeK:2
+        portLayers.add(PortLayer.ETHERNET);         // nodeL:1
+        portLayers.add(PortLayer.ETHERNET);         // nodeL:2
+        portLayers.add(PortLayer.MPLS);         // nodeP:1
+        portLayers.add(PortLayer.MPLS);         // nodeP:2
+        portLayers.add(PortLayer.MPLS);         // nodeP:3
+        portLayers.add(PortLayer.MPLS);         // nodeP:4
+        portLayers.add(PortLayer.MPLS);         // nodeQ:1
+        portLayers.add(PortLayer.MPLS);         // nodeQ:2
+        portLayers.add(PortLayer.MPLS);         // nodeQ:3
+        portLayers.add(PortLayer.MPLS);         // nodeQ:4
+        portLayers.add(PortLayer.MPLS);         // nodeR:1
+        portLayers.add(PortLayer.MPLS);         // nodeR:2
+        portLayers.add(PortLayer.MPLS);         // nodeS:1
+        portLayers.add(PortLayer.MPLS);         // nodeS:2
+        portLayers.add(PortLayer.MPLS);         // nodeT:1
+        portLayers.add(PortLayer.MPLS);         // nodeT:2
+
+        List<Layer> linkLayers = new ArrayList<>();
+        linkLayers.add(Layer.ETHERNET);             // nodeK:2 --> nodeP:1
+        linkLayers.add(Layer.ETHERNET);             // nodeL:2 --> nodeQ:1
+        linkLayers.add(Layer.ETHERNET);             // nodeP:1 --> nodeK:2
+        linkLayers.add(Layer.MPLS);             // nodeP:2 --> nodeQ:2
+        linkLayers.add(Layer.MPLS);             // nodeP:3 --> nodeR:1
+        linkLayers.add(Layer.MPLS);             // nodeP:4 --> nodeS:1
+        linkLayers.add(Layer.ETHERNET);             // nodeQ:1 --> nodeL:2
+        linkLayers.add(Layer.MPLS);             // nodeQ:2 --> nodeP:2
+        linkLayers.add(Layer.MPLS);             // nodeQ:3 --> nodeR:2
+        linkLayers.add(Layer.MPLS);             // nodeQ:4 --> nodeT:2
+        linkLayers.add(Layer.MPLS);             // nodeR:1 --> nodeP:3
+        linkLayers.add(Layer.MPLS);             // nodeR:2 --> nodeQ:3
+        linkLayers.add(Layer.MPLS);             // nodeS:1 --> nodeP:4
+        linkLayers.add(Layer.MPLS);             // nodeS:2 --> nodeT:2
+        linkLayers.add(Layer.MPLS);             // nodeT:1 --> nodeQ:4
+        linkLayers.add(Layer.MPLS);             // nodeT:2 --> nodeS:2
+
+        asymmTopologyBuilder.buildTopoWithThreePartialDisjointPaths(vertexTypes, portLayers, linkLayers);
+        requestedSched = testBuilder.buildSchedule(startDate, endDate);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, numDisjoint, 1, 1, "test");
+
+        log.info("Beginning test: 'survPartialThreeDisjointEdgeEthK3Pass'.");
+
+        try
+        {
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
+        }
+        catch(PCEException | PSSException pceE)
+        {
+            log.error("", pceE);
+        }
+
+        assert(reservedBlueprint.isPresent());
+
+        ReservedVlanFlowE reservedFlow = reservedBlueprint.get().getVlanFlow();
+
+        Set<ReservedEthPipeE> allResEthPipes = reservedFlow.getEthPipes();
+        Set<ReservedMplsPipeE> allResMplsPipes = reservedFlow.getMplsPipes();
+        Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
+
+        assert (allResJunctions.size() == 0);
+        assert (allResEthPipes.size() == 6);
+        assert (allResMplsPipes.size() == 3);
+
+        // ETHERNET Pipes
+        for(ReservedEthPipeE ethPipe : allResEthPipes)
+        {
+            ReservedVlanJunctionE aJunc = ethPipe.getAJunction();
+            ReservedVlanJunctionE zJunc = ethPipe.getZJunction();
+            Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
+            Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
+            List<String> azERO = ethPipe.getAzERO();
+            List<String> zaERO = ethPipe.getZaERO();
+            String actualAzERO = aJunc.getDeviceUrn() + "-";
+            String actualZaERO = zJunc.getDeviceUrn() + "-";
+
+            for(String x : azERO)
+                actualAzERO = actualAzERO + x + "-";
+
+            for(String x : zaERO)
+                actualZaERO = actualZaERO + x + "-";
+
+            actualAzERO = actualAzERO + zJunc.getDeviceUrn();
+            actualZaERO = actualZaERO + aJunc.getDeviceUrn();
+
+            assert((aJunc.getDeviceUrn().equals("nodeK") && zJunc.getDeviceUrn().equals("nodeP")) || (aJunc.getDeviceUrn().equals("nodeQ") && zJunc.getDeviceUrn().equals("nodeL")));
+
+            if(aJunc.getDeviceUrn().equals("nodeK"))
+                assert(aFixes.size() == 1 && zFixes.size() == 0);
+            else
+                assert(aFixes.size() == 0 && zFixes.size() == 1);
+
+            String expectedAzEroKP = "nodeK-nodeK:2-nodeP:1-nodeP";
+            String expectedAzEroQL = "nodeQ-nodeQ:1-nodeL:2-nodeL";
+            String expectedZaEroKP = "nodeP-nodeP:1-nodeK:2-nodeK";
+            String expectedZaEroQL = "nodeL-nodeL:2-nodeQ:1-nodeQ";
+
+
+            assert((actualAzERO.equals(expectedAzEroKP) && actualZaERO.equals(expectedZaEroKP)) || (actualAzERO.equals(expectedAzEroQL) && actualZaERO.equals(expectedZaEroQL)));
+        }
+
+
+        // MPLS Pipes
+        for(ReservedMplsPipeE mplsPipe : allResMplsPipes)
+        {
+            ReservedVlanJunctionE aJunc = mplsPipe.getAJunction();
+            ReservedVlanJunctionE zJunc = mplsPipe.getZJunction();
+            Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
+            Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
+            List<String> azERO = mplsPipe.getAzERO();
+            List<String> zaERO = mplsPipe.getZaERO();
+            String actualAzERO = aJunc.getDeviceUrn() + "-";
+            String actualZaERO = zJunc.getDeviceUrn() + "-";
+
+            for(String x : azERO)
+                actualAzERO = actualAzERO + x + "-";
+
+            for(String x : zaERO)
+                actualZaERO = actualZaERO + x + "-";
+
+            actualAzERO = actualAzERO + zJunc.getDeviceUrn();
+            actualZaERO = actualZaERO + aJunc.getDeviceUrn();
+
+            assert(aJunc.getDeviceUrn().equals("nodeP"));
+            assert(zJunc.getDeviceUrn().equals("nodeQ"));
+
+            assert(aFixes.size() == 0);
+            assert(zFixes.size() == 0);
+
+            String expectedAzERO1 = "nodeP-nodeP:2-nodeQ:2-nodeQ";
+            String expectedAzERO2 = "nodeP-nodeP:3-nodeR:1-nodeR-nodeR:2-nodeQ:3-nodeQ";
+            String expectedAzERO3 = "nodeP-nodeP:4-nodeS:1-nodeS-nodeS:2-nodeT:2-nodeT-nodeT:1-nodeQ:4-nodeQ";
+            String expectedZaERO1 = "nodeQ-nodeQ:2-nodeP:2-nodeP";
+            String expectedZaERO2 = "nodeQ-nodeQ:3-nodeR:2-nodeR-nodeR:1-nodeP:3-nodeP";
+            String expectedZaERO3 = "nodeQ-nodeQ:4-nodeT:1-nodeT-nodeT:2-nodeS:2-nodeS-nodeS:1-nodeP:4-nodeP";
+
+            assert(actualAzERO.equals(expectedAzERO1) || actualAzERO.equals(expectedAzERO2) || actualAzERO.equals(expectedAzERO3));
+            assert(actualZaERO.equals(expectedZaERO1) || actualZaERO.equals(expectedZaERO2) || actualZaERO.equals(expectedZaERO3));
+
+            if(actualAzERO.equals(expectedAzERO1))
+                assert(actualZaERO.equals(expectedZaERO1));
+            else if(actualAzERO.equals(expectedAzERO2))
+                assert(actualZaERO.equals(expectedZaERO2));
+            else
+                assert(actualZaERO.equals(expectedZaERO3));
+        }
+
+        log.info("test 'survPartialThreeDisjointEdgeEthK3Pass' passed.");
+    }
+
+    @Test
+    public void survPartialThreeDisjointEdgeEthK4Fail()
+    {
+        log.info("Initializing test: 'survPartialThreeDisjointEdgeEthK4Fail'.");
+
+        RequestedBlueprintE requestedBlueprint;
+        Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
+        ScheduleSpecificationE requestedSched;
+
+        Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
+        Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
+
+        String srcPort = "nodeK:1";
+        String srcDevice = "nodeK";
+        String dstPort = "nodeL:1";
+        String dstDevice = "nodeL";
+        Integer azBW = 50;
+        Integer zaBW = 50;
+        PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_PARTIAL;
+        String vlan = "any";
+        int numDisjoint = 4;
+
+        List<VertexType> vertexTypes = new ArrayList<>();
+        vertexTypes.add(VertexType.SWITCH);     // nodeK
+        vertexTypes.add(VertexType.SWITCH);     // nodeL
+        vertexTypes.add(VertexType.ROUTER);     // nodeP
+        vertexTypes.add(VertexType.ROUTER);     // nodeQ
+        vertexTypes.add(VertexType.ROUTER);     // nodeR
+        vertexTypes.add(VertexType.ROUTER);     // nodeS
+        vertexTypes.add(VertexType.ROUTER);     // nodeT
+
+        List<PortLayer> portLayers = new ArrayList<>();
+        portLayers.add(PortLayer.ETHERNET);         // nodeK:1
+        portLayers.add(PortLayer.ETHERNET);         // nodeK:2
+        portLayers.add(PortLayer.ETHERNET);         // nodeL:1
+        portLayers.add(PortLayer.ETHERNET);         // nodeL:2
+        portLayers.add(PortLayer.MPLS);         // nodeP:1
+        portLayers.add(PortLayer.MPLS);         // nodeP:2
+        portLayers.add(PortLayer.MPLS);         // nodeP:3
+        portLayers.add(PortLayer.MPLS);         // nodeP:4
+        portLayers.add(PortLayer.MPLS);         // nodeQ:1
+        portLayers.add(PortLayer.MPLS);         // nodeQ:2
+        portLayers.add(PortLayer.MPLS);         // nodeQ:3
+        portLayers.add(PortLayer.MPLS);         // nodeQ:4
+        portLayers.add(PortLayer.MPLS);         // nodeR:1
+        portLayers.add(PortLayer.MPLS);         // nodeR:2
+        portLayers.add(PortLayer.MPLS);         // nodeS:1
+        portLayers.add(PortLayer.MPLS);         // nodeS:2
+        portLayers.add(PortLayer.MPLS);         // nodeT:1
+        portLayers.add(PortLayer.MPLS);         // nodeT:2
+
+        List<Layer> linkLayers = new ArrayList<>();
+        linkLayers.add(Layer.ETHERNET);             // nodeK:2 --> nodeP:1
+        linkLayers.add(Layer.ETHERNET);             // nodeL:2 --> nodeQ:1
+        linkLayers.add(Layer.ETHERNET);             // nodeP:1 --> nodeK:2
+        linkLayers.add(Layer.MPLS);             // nodeP:2 --> nodeQ:2
+        linkLayers.add(Layer.MPLS);             // nodeP:3 --> nodeR:1
+        linkLayers.add(Layer.MPLS);             // nodeP:4 --> nodeS:1
+        linkLayers.add(Layer.ETHERNET);             // nodeQ:1 --> nodeL:2
+        linkLayers.add(Layer.MPLS);             // nodeQ:2 --> nodeP:2
+        linkLayers.add(Layer.MPLS);             // nodeQ:3 --> nodeR:2
+        linkLayers.add(Layer.MPLS);             // nodeQ:4 --> nodeT:2
+        linkLayers.add(Layer.MPLS);             // nodeR:1 --> nodeP:3
+        linkLayers.add(Layer.MPLS);             // nodeR:2 --> nodeQ:3
+        linkLayers.add(Layer.MPLS);             // nodeS:1 --> nodeP:4
+        linkLayers.add(Layer.MPLS);             // nodeS:2 --> nodeT:2
+        linkLayers.add(Layer.MPLS);             // nodeT:1 --> nodeQ:4
+        linkLayers.add(Layer.MPLS);             // nodeT:2 --> nodeS:2
+
+        asymmTopologyBuilder.buildTopoWithThreePartialDisjointPaths(vertexTypes, portLayers, linkLayers);
+        requestedSched = testBuilder.buildSchedule(startDate, endDate);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, numDisjoint, 1, 1, "test");
+
+        log.info("Beginning test: 'survPartialThreeDisjointEdgeEthK4Fail'.");
+
+        try
+        {
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
+        }
+        catch(PCEException | PSSException pceE)
+        {
+            log.error("", pceE);
+        }
+
+        assert(!reservedBlueprint.isPresent());
+
+        log.info("test 'survPartialThreeDisjointEdgeEthK4Fail' passed.");
+    }
+
+    @Test
+    public void survPartialThreeDisjointEdgeEthInternalEthK2Pass()
+    {
+        log.info("Initializing test: 'survPartialThreeDisjointEdgeEthInternalEthK2Pass'.");
+
+        RequestedBlueprintE requestedBlueprint;
+        Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
+        ScheduleSpecificationE requestedSched;
+
+        Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
+        Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
+
+        String srcPort = "nodeK:1";
+        String srcDevice = "nodeK";
+        String dstPort = "nodeL:1";
+        String dstDevice = "nodeL";
+        Integer azBW = 50;
+        Integer zaBW = 50;
+        PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_PARTIAL;
+        String vlan = "any";
+        int numDisjoint = 2;
+
+        List<VertexType> vertexTypes = new ArrayList<>();
+        vertexTypes.add(VertexType.SWITCH);     // nodeK
+        vertexTypes.add(VertexType.SWITCH);     // nodeL
+        vertexTypes.add(VertexType.ROUTER);     // nodeP
+        vertexTypes.add(VertexType.ROUTER);     // nodeQ
+        vertexTypes.add(VertexType.SWITCH);     // nodeR
+        vertexTypes.add(VertexType.ROUTER);     // nodeS
+        vertexTypes.add(VertexType.ROUTER);     // nodeT
+
+        List<PortLayer> portLayers = new ArrayList<>();
+        portLayers.add(PortLayer.ETHERNET);         // nodeK:1
+        portLayers.add(PortLayer.ETHERNET);         // nodeK:2
+        portLayers.add(PortLayer.ETHERNET);         // nodeL:1
+        portLayers.add(PortLayer.ETHERNET);         // nodeL:2
+        portLayers.add(PortLayer.MPLS);         // nodeP:1
+        portLayers.add(PortLayer.MPLS);         // nodeP:2
+        portLayers.add(PortLayer.MPLS);         // nodeP:3
+        portLayers.add(PortLayer.MPLS);         // nodeP:4
+        portLayers.add(PortLayer.MPLS);         // nodeQ:1
+        portLayers.add(PortLayer.MPLS);         // nodeQ:2
+        portLayers.add(PortLayer.MPLS);         // nodeQ:3
+        portLayers.add(PortLayer.MPLS);         // nodeQ:4
+        portLayers.add(PortLayer.ETHERNET);         // nodeR:1
+        portLayers.add(PortLayer.ETHERNET);         // nodeR:2
+        portLayers.add(PortLayer.MPLS);         // nodeS:1
+        portLayers.add(PortLayer.MPLS);         // nodeS:2
+        portLayers.add(PortLayer.MPLS);         // nodeT:1
+        portLayers.add(PortLayer.MPLS);         // nodeT:2
+
+        List<Layer> linkLayers = new ArrayList<>();
+        linkLayers.add(Layer.ETHERNET);             // nodeK:2 --> nodeP:1
+        linkLayers.add(Layer.ETHERNET);             // nodeL:2 --> nodeQ:1
+        linkLayers.add(Layer.ETHERNET);             // nodeP:1 --> nodeK:2
+        linkLayers.add(Layer.MPLS);             // nodeP:2 --> nodeQ:2
+        linkLayers.add(Layer.ETHERNET);             // nodeP:3 --> nodeR:1
+        linkLayers.add(Layer.MPLS);             // nodeP:4 --> nodeS:1
+        linkLayers.add(Layer.ETHERNET);             // nodeQ:1 --> nodeL:2
+        linkLayers.add(Layer.MPLS);             // nodeQ:2 --> nodeP:2
+        linkLayers.add(Layer.ETHERNET);             // nodeQ:3 --> nodeR:2
+        linkLayers.add(Layer.MPLS);             // nodeQ:4 --> nodeT:2
+        linkLayers.add(Layer.ETHERNET);             // nodeR:1 --> nodeP:3
+        linkLayers.add(Layer.ETHERNET);             // nodeR:2 --> nodeQ:3
+        linkLayers.add(Layer.MPLS);             // nodeS:1 --> nodeP:4
+        linkLayers.add(Layer.MPLS);             // nodeS:2 --> nodeT:2
+        linkLayers.add(Layer.MPLS);             // nodeT:1 --> nodeQ:4
+        linkLayers.add(Layer.MPLS);             // nodeT:2 --> nodeS:2
+
+        asymmTopologyBuilder.buildTopoWithThreePartialDisjointPaths(vertexTypes, portLayers, linkLayers);
+        requestedSched = testBuilder.buildSchedule(startDate, endDate);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, numDisjoint, 1, 1, "test");
+
+        log.info("Beginning test: 'survPartialThreeDisjointEdgeEthInternalEthK2Pass'.");
+
+        try
+        {
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
+        }
+        catch(PCEException | PSSException pceE)
+        {
+            log.error("", pceE);
+        }
+
+        assert(reservedBlueprint.isPresent());
+
+        ReservedVlanFlowE reservedFlow = reservedBlueprint.get().getVlanFlow();
+
+        Set<ReservedEthPipeE> allResEthPipes = reservedFlow.getEthPipes();
+        Set<ReservedMplsPipeE> allResMplsPipes = reservedFlow.getMplsPipes();
+        Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
+
+        assert (allResJunctions.size() == 0);
+        assert (allResEthPipes.size() == 4);
+        assert (allResMplsPipes.size() == 2);
+
+        // ETHERNET Pipes
+        for(ReservedEthPipeE ethPipe : allResEthPipes)
+        {
+            ReservedVlanJunctionE aJunc = ethPipe.getAJunction();
+            ReservedVlanJunctionE zJunc = ethPipe.getZJunction();
+            Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
+            Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
+            List<String> azERO = ethPipe.getAzERO();
+            List<String> zaERO = ethPipe.getZaERO();
+            String actualAzERO = aJunc.getDeviceUrn() + "-";
+            String actualZaERO = zJunc.getDeviceUrn() + "-";
+
+            for(String x : azERO)
+                actualAzERO = actualAzERO + x + "-";
+
+            for(String x : zaERO)
+                actualZaERO = actualZaERO + x + "-";
+
+            actualAzERO = actualAzERO + zJunc.getDeviceUrn();
+            actualZaERO = actualZaERO + aJunc.getDeviceUrn();
+
+            assert((aJunc.getDeviceUrn().equals("nodeK") && zJunc.getDeviceUrn().equals("nodeP")) || (aJunc.getDeviceUrn().equals("nodeQ") && zJunc.getDeviceUrn().equals("nodeL")));
+
+            if(aJunc.getDeviceUrn().equals("nodeK"))
+                assert(aFixes.size() == 1 && zFixes.size() == 0);
+            else
+                assert(aFixes.size() == 0 && zFixes.size() == 1);
+
+            String expectedAzEroKP = "nodeK-nodeK:2-nodeP:1-nodeP";
+            String expectedAzEroQL = "nodeQ-nodeQ:1-nodeL:2-nodeL";
+            String expectedZaEroKP = "nodeP-nodeP:1-nodeK:2-nodeK";
+            String expectedZaEroQL = "nodeL-nodeL:2-nodeQ:1-nodeQ";
+
+
+            assert((actualAzERO.equals(expectedAzEroKP) && actualZaERO.equals(expectedZaEroKP)) || (actualAzERO.equals(expectedAzEroQL) && actualZaERO.equals(expectedZaEroQL)));
+        }
+
+
+        // MPLS Pipes
+        for(ReservedMplsPipeE mplsPipe : allResMplsPipes)
+        {
+            ReservedVlanJunctionE aJunc = mplsPipe.getAJunction();
+            ReservedVlanJunctionE zJunc = mplsPipe.getZJunction();
+            Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
+            Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
+            List<String> azERO = mplsPipe.getAzERO();
+            List<String> zaERO = mplsPipe.getZaERO();
+            String actualAzERO = aJunc.getDeviceUrn() + "-";
+            String actualZaERO = zJunc.getDeviceUrn() + "-";
+
+            for(String x : azERO)
+                actualAzERO = actualAzERO + x + "-";
+
+            for(String x : zaERO)
+                actualZaERO = actualZaERO + x + "-";
+
+            actualAzERO = actualAzERO + zJunc.getDeviceUrn();
+            actualZaERO = actualZaERO + aJunc.getDeviceUrn();
+
+            assert(aJunc.getDeviceUrn().equals("nodeP"));
+            assert(zJunc.getDeviceUrn().equals("nodeQ"));
+
+            assert(aFixes.size() == 0);
+            assert(zFixes.size() == 0);
+
+            String expectedAzERO1 = "nodeP-nodeP:2-nodeQ:2-nodeQ";
+            String expectedAzERO2 = "nodeP-nodeP:4-nodeS:1-nodeS-nodeS:2-nodeT:2-nodeT-nodeT:1-nodeQ:4-nodeQ";
+            String expectedZaERO1 = "nodeQ-nodeQ:2-nodeP:2-nodeP";
+            String expectedZaERO2 = "nodeQ-nodeQ:4-nodeT:1-nodeT-nodeT:2-nodeS:2-nodeS-nodeS:1-nodeP:4-nodeP";
+
+            assert(actualAzERO.equals(expectedAzERO1) || actualAzERO.equals(expectedAzERO2));
+            assert(actualZaERO.equals(expectedZaERO1) || actualZaERO.equals(expectedZaERO2));
+
+            if(actualAzERO.equals(expectedAzERO1))
+                assert(actualZaERO.equals(expectedZaERO1));
+            else
+                assert(actualZaERO.equals(expectedZaERO2));
+        }
+
+        log.info("test 'survPartialThreeDisjointEdgeEthInternalEthK2Pass' passed.");
+    }
+
+    @Test
+    public void survPartialThreeDisjointEdgeEthInternalEthK3Fail()
+    {
+        log.info("Initializing test: 'survPartialThreeDisjointEdgeEthInternalEthK3Fail'.");
+
+        RequestedBlueprintE requestedBlueprint;
+        Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
+        ScheduleSpecificationE requestedSched;
+
+        Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
+        Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
+
+        String srcPort = "nodeK:1";
+        String srcDevice = "nodeK";
+        String dstPort = "nodeL:1";
+        String dstDevice = "nodeL";
+        Integer azBW = 50;
+        Integer zaBW = 50;
+        PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_PARTIAL;
+        String vlan = "any";
+        int numDisjoint = 3;
+
+        List<VertexType> vertexTypes = new ArrayList<>();
+        vertexTypes.add(VertexType.SWITCH);     // nodeK
+        vertexTypes.add(VertexType.SWITCH);     // nodeL
+        vertexTypes.add(VertexType.ROUTER);     // nodeP
+        vertexTypes.add(VertexType.ROUTER);     // nodeQ
+        vertexTypes.add(VertexType.SWITCH);     // nodeR
+        vertexTypes.add(VertexType.ROUTER);     // nodeS
+        vertexTypes.add(VertexType.ROUTER);     // nodeT
+
+        List<PortLayer> portLayers = new ArrayList<>();
+        portLayers.add(PortLayer.ETHERNET);         // nodeK:1
+        portLayers.add(PortLayer.ETHERNET);         // nodeK:2
+        portLayers.add(PortLayer.ETHERNET);         // nodeL:1
+        portLayers.add(PortLayer.ETHERNET);         // nodeL:2
+        portLayers.add(PortLayer.MPLS);         // nodeP:1
+        portLayers.add(PortLayer.MPLS);         // nodeP:2
+        portLayers.add(PortLayer.MPLS);         // nodeP:3
+        portLayers.add(PortLayer.MPLS);         // nodeP:4
+        portLayers.add(PortLayer.MPLS);         // nodeQ:1
+        portLayers.add(PortLayer.MPLS);         // nodeQ:2
+        portLayers.add(PortLayer.MPLS);         // nodeQ:3
+        portLayers.add(PortLayer.MPLS);         // nodeQ:4
+        portLayers.add(PortLayer.ETHERNET);         // nodeR:1
+        portLayers.add(PortLayer.ETHERNET);         // nodeR:2
+        portLayers.add(PortLayer.MPLS);         // nodeS:1
+        portLayers.add(PortLayer.MPLS);         // nodeS:2
+        portLayers.add(PortLayer.MPLS);         // nodeT:1
+        portLayers.add(PortLayer.MPLS);         // nodeT:2
+
+        List<Layer> linkLayers = new ArrayList<>();
+        linkLayers.add(Layer.ETHERNET);             // nodeK:2 --> nodeP:1
+        linkLayers.add(Layer.ETHERNET);             // nodeL:2 --> nodeQ:1
+        linkLayers.add(Layer.ETHERNET);             // nodeP:1 --> nodeK:2
+        linkLayers.add(Layer.MPLS);             // nodeP:2 --> nodeQ:2
+        linkLayers.add(Layer.ETHERNET);             // nodeP:3 --> nodeR:1
+        linkLayers.add(Layer.MPLS);             // nodeP:4 --> nodeS:1
+        linkLayers.add(Layer.ETHERNET);             // nodeQ:1 --> nodeL:2
+        linkLayers.add(Layer.MPLS);             // nodeQ:2 --> nodeP:2
+        linkLayers.add(Layer.ETHERNET);             // nodeQ:3 --> nodeR:2
+        linkLayers.add(Layer.MPLS);             // nodeQ:4 --> nodeT:2
+        linkLayers.add(Layer.ETHERNET);             // nodeR:1 --> nodeP:3
+        linkLayers.add(Layer.ETHERNET);             // nodeR:2 --> nodeQ:3
+        linkLayers.add(Layer.MPLS);             // nodeS:1 --> nodeP:4
+        linkLayers.add(Layer.MPLS);             // nodeS:2 --> nodeT:2
+        linkLayers.add(Layer.MPLS);             // nodeT:1 --> nodeQ:4
+        linkLayers.add(Layer.MPLS);             // nodeT:2 --> nodeS:2
+
+        asymmTopologyBuilder.buildTopoWithThreePartialDisjointPaths(vertexTypes, portLayers, linkLayers);
+        requestedSched = testBuilder.buildSchedule(startDate, endDate);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, numDisjoint, 1, 1, "test");
+
+        log.info("Beginning test: 'survPartialThreeDisjointEdgeEthInternalEthK3Fail'.");
+
+        try
+        {
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
+        }
+        catch(PCEException | PSSException pceE)
+        {
+            log.error("", pceE);
+        }
+
+        assert(!reservedBlueprint.isPresent());
+
+        log.info("test 'survPartialThreeDisjointEdgeEthInternalEthK3Fail' passed.");
+    }
+
+        @Test
+    public void survPartialThreeDisjointEdgeEthPortOnRoutersK3Pass()
+    {
+        log.info("Initializing test: 'survPartialThreeDisjointEdgeEthPortOnRoutersK3Pass'.");
+
+        RequestedBlueprintE requestedBlueprint;
+        Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
+        ScheduleSpecificationE requestedSched;
+
+        Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
+        Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
+
+        String srcPort = "nodeP:1";
+        String srcDevice = "nodeP";
+        String dstPort = "nodeQ:1";
+        String dstDevice = "nodeQ";
+        Integer azBW = 50;
+        Integer zaBW = 50;
+        PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_PARTIAL;
+        String vlan = "any";
+        int numDisjoint = 3;
+
+        List<VertexType> vertexTypes = new ArrayList<>();
+        vertexTypes.add(VertexType.ROUTER);     // nodeK
+        vertexTypes.add(VertexType.ROUTER);     // nodeL
+        vertexTypes.add(VertexType.ROUTER);     // nodeP
+        vertexTypes.add(VertexType.ROUTER);     // nodeQ
+        vertexTypes.add(VertexType.ROUTER);     // nodeR
+        vertexTypes.add(VertexType.ROUTER);     // nodeS
+        vertexTypes.add(VertexType.ROUTER);     // nodeT
+
+        List<PortLayer> portLayers = new ArrayList<>();
+        portLayers.add(PortLayer.MPLS);         // nodeK:1
+        portLayers.add(PortLayer.MPLS);         // nodeK:2
+        portLayers.add(PortLayer.MPLS);         // nodeL:1
+        portLayers.add(PortLayer.MPLS);         // nodeL:2
+        portLayers.add(PortLayer.ETHERNET);         // nodeP:1
+        portLayers.add(PortLayer.MPLS);         // nodeP:2
+        portLayers.add(PortLayer.MPLS);         // nodeP:3
+        portLayers.add(PortLayer.MPLS);         // nodeP:4
+        portLayers.add(PortLayer.ETHERNET);         // nodeQ:1
+        portLayers.add(PortLayer.MPLS);         // nodeQ:2
+        portLayers.add(PortLayer.MPLS);         // nodeQ:3
+        portLayers.add(PortLayer.MPLS);         // nodeQ:4
+        portLayers.add(PortLayer.MPLS);         // nodeR:1
+        portLayers.add(PortLayer.MPLS);         // nodeR:2
+        portLayers.add(PortLayer.MPLS);         // nodeS:1
+        portLayers.add(PortLayer.MPLS);         // nodeS:2
+        portLayers.add(PortLayer.MPLS);         // nodeT:1
+        portLayers.add(PortLayer.MPLS);         // nodeT:2
+
+        List<Layer> linkLayers = new ArrayList<>();
+        linkLayers.add(Layer.ETHERNET);             // nodeK:2 --> nodeP:1
+        linkLayers.add(Layer.ETHERNET);             // nodeL:2 --> nodeQ:1
+        linkLayers.add(Layer.ETHERNET);             // nodeP:1 --> nodeK:2
+        linkLayers.add(Layer.MPLS);             // nodeP:2 --> nodeQ:2
+        linkLayers.add(Layer.MPLS);             // nodeP:3 --> nodeR:1
+        linkLayers.add(Layer.MPLS);             // nodeP:4 --> nodeS:1
+        linkLayers.add(Layer.ETHERNET);             // nodeQ:1 --> nodeL:2
+        linkLayers.add(Layer.MPLS);             // nodeQ:2 --> nodeP:2
+        linkLayers.add(Layer.MPLS);             // nodeQ:3 --> nodeR:2
+        linkLayers.add(Layer.MPLS);             // nodeQ:4 --> nodeT:2
+        linkLayers.add(Layer.MPLS);             // nodeR:1 --> nodeP:3
+        linkLayers.add(Layer.MPLS);             // nodeR:2 --> nodeQ:3
+        linkLayers.add(Layer.MPLS);             // nodeS:1 --> nodeP:4
+        linkLayers.add(Layer.MPLS);             // nodeS:2 --> nodeT:2
+        linkLayers.add(Layer.MPLS);             // nodeT:1 --> nodeQ:4
+        linkLayers.add(Layer.MPLS);             // nodeT:2 --> nodeS:2
+
+        asymmTopologyBuilder.buildTopoWithThreePartialDisjointPaths(vertexTypes, portLayers, linkLayers);
+        requestedSched = testBuilder.buildSchedule(startDate, endDate);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, numDisjoint, 1, 1, "test");
+
+        log.info("Beginning test: 'survPartialThreeDisjointEdgeEthPortOnRoutersK3Pass'.");
+
+        try
+        {
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
+        }
+        catch(PCEException | PSSException pceE)
+        {
+            log.error("", pceE);
+        }
+
+        assert(reservedBlueprint.isPresent());
+
+        ReservedVlanFlowE reservedFlow = reservedBlueprint.get().getVlanFlow();
+
+        Set<ReservedEthPipeE> allResEthPipes = reservedFlow.getEthPipes();
+        Set<ReservedMplsPipeE> allResMplsPipes = reservedFlow.getMplsPipes();
+        Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
+
+        assert (allResJunctions.size() == 0);
+        assert (allResEthPipes.size() == 0);
+        assert (allResMplsPipes.size() == 3);
+
+        // MPLS Pipes
+        for(ReservedMplsPipeE mplsPipe : allResMplsPipes)
+        {
+            ReservedVlanJunctionE aJunc = mplsPipe.getAJunction();
+            ReservedVlanJunctionE zJunc = mplsPipe.getZJunction();
+            Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
+            Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
+            List<String> azERO = mplsPipe.getAzERO();
+            List<String> zaERO = mplsPipe.getZaERO();
+            String actualAzERO = aJunc.getDeviceUrn() + "-";
+            String actualZaERO = zJunc.getDeviceUrn() + "-";
+
+            for(String x : azERO)
+                actualAzERO = actualAzERO + x + "-";
+
+            for(String x : zaERO)
+                actualZaERO = actualZaERO + x + "-";
+
+            actualAzERO = actualAzERO + zJunc.getDeviceUrn();
+            actualZaERO = actualZaERO + aJunc.getDeviceUrn();
+
+            assert(aJunc.getDeviceUrn().equals("nodeP"));
+            assert(zJunc.getDeviceUrn().equals("nodeQ"));
+
+            assert(aFixes.size() == 1);
+            assert(zFixes.size() == 1);
+
+            String expectedAzERO1 = "nodeP-nodeP:2-nodeQ:2-nodeQ";
+            String expectedAzERO2 = "nodeP-nodeP:3-nodeR:1-nodeR-nodeR:2-nodeQ:3-nodeQ";
+            String expectedAzERO3 = "nodeP-nodeP:4-nodeS:1-nodeS-nodeS:2-nodeT:2-nodeT-nodeT:1-nodeQ:4-nodeQ";
+            String expectedZaERO1 = "nodeQ-nodeQ:2-nodeP:2-nodeP";
+            String expectedZaERO2 = "nodeQ-nodeQ:3-nodeR:2-nodeR-nodeR:1-nodeP:3-nodeP";
+            String expectedZaERO3 = "nodeQ-nodeQ:4-nodeT:1-nodeT-nodeT:2-nodeS:2-nodeS-nodeS:1-nodeP:4-nodeP";
+
+            assert(actualAzERO.equals(expectedAzERO1) || actualAzERO.equals(expectedAzERO2) || actualAzERO.equals(expectedAzERO3));
+            assert(actualZaERO.equals(expectedZaERO1) || actualZaERO.equals(expectedZaERO2) || actualZaERO.equals(expectedZaERO3));
+
+            if(actualAzERO.equals(expectedAzERO1))
+                assert(actualZaERO.equals(expectedZaERO1));
+            else if(actualAzERO.equals(expectedAzERO2))
+                assert(actualZaERO.equals(expectedZaERO2));
+            else
+                assert(actualZaERO.equals(expectedZaERO3));
+        }
+
+        log.info("test 'survPartialThreeDisjointEdgeEthPortOnRoutersK3Pass' passed.");
+    }
+
+
+    @Test
+    public void survPartialThreeDisjointEdgeAsymmK2Pass()
+    {
+        log.info("Initializing test: 'survPartialThreeDisjointEdgeAsymmK2Pass'.");
+
+        RequestedBlueprintE requestedBlueprint;
+        Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
+        ScheduleSpecificationE requestedSched;
+
+        Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
+        Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
+
+        String srcPort = "nodeK:1";
+        String srcDevice = "nodeK";
+        String dstPort = "nodeL:1";
+        String dstDevice = "nodeL";
+        Integer azBW = 100;
+        Integer zaBW = 75;      // Too much B/W
+        PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_PARTIAL;
+        String vlan = "any";
+        int numDisjoint = 2;
+
+        List<VertexType> vertexTypes = new ArrayList<>();
+        vertexTypes.add(VertexType.SWITCH);     // nodeK
+        vertexTypes.add(VertexType.SWITCH);     // nodeL
+        vertexTypes.add(VertexType.ROUTER);     // nodeP
+        vertexTypes.add(VertexType.ROUTER);     // nodeQ
+        vertexTypes.add(VertexType.ROUTER);     // nodeR
+        vertexTypes.add(VertexType.ROUTER);     // nodeS
+        vertexTypes.add(VertexType.ROUTER);     // nodeT
+
+        List<PortLayer> portLayers = new ArrayList<>();
+        portLayers.add(PortLayer.ETHERNET);         // nodeK:1
+        portLayers.add(PortLayer.ETHERNET);         // nodeK:2
+        portLayers.add(PortLayer.ETHERNET);         // nodeL:1
+        portLayers.add(PortLayer.ETHERNET);         // nodeL:2
+        portLayers.add(PortLayer.MPLS);         // nodeP:1
+        portLayers.add(PortLayer.MPLS);         // nodeP:2
+        portLayers.add(PortLayer.MPLS);         // nodeP:3
+        portLayers.add(PortLayer.MPLS);         // nodeP:4
+        portLayers.add(PortLayer.MPLS);         // nodeQ:1
+        portLayers.add(PortLayer.MPLS);         // nodeQ:2
+        portLayers.add(PortLayer.MPLS);         // nodeQ:3
+        portLayers.add(PortLayer.MPLS);         // nodeQ:4
+        portLayers.add(PortLayer.MPLS);         // nodeR:1
+        portLayers.add(PortLayer.MPLS);         // nodeR:2
+        portLayers.add(PortLayer.MPLS);         // nodeS:1
+        portLayers.add(PortLayer.MPLS);         // nodeS:2
+        portLayers.add(PortLayer.MPLS);         // nodeT:1
+        portLayers.add(PortLayer.MPLS);         // nodeT:2
+
+        List<Layer> linkLayers = new ArrayList<>();
+        linkLayers.add(Layer.ETHERNET);             // nodeK:2 --> nodeP:1
+        linkLayers.add(Layer.ETHERNET);             // nodeL:2 --> nodeQ:1
+        linkLayers.add(Layer.ETHERNET);             // nodeP:1 --> nodeK:2
+        linkLayers.add(Layer.MPLS);             // nodeP:2 --> nodeQ:2
+        linkLayers.add(Layer.MPLS);             // nodeP:3 --> nodeR:1
+        linkLayers.add(Layer.MPLS);             // nodeP:4 --> nodeS:1
+        linkLayers.add(Layer.ETHERNET);             // nodeQ:1 --> nodeL:2
+        linkLayers.add(Layer.MPLS);             // nodeQ:2 --> nodeP:2
+        linkLayers.add(Layer.MPLS);             // nodeQ:3 --> nodeR:2
+        linkLayers.add(Layer.MPLS);             // nodeQ:4 --> nodeT:2
+        linkLayers.add(Layer.MPLS);             // nodeR:1 --> nodeP:3
+        linkLayers.add(Layer.MPLS);             // nodeR:2 --> nodeQ:3
+        linkLayers.add(Layer.MPLS);             // nodeS:1 --> nodeP:4
+        linkLayers.add(Layer.MPLS);             // nodeS:2 --> nodeT:2
+        linkLayers.add(Layer.MPLS);             // nodeT:1 --> nodeQ:4
+        linkLayers.add(Layer.MPLS);             // nodeT:2 --> nodeS:2
+
+        asymmTopologyBuilder.buildTopoWithThreePartialDisjointPaths(vertexTypes, portLayers, linkLayers);
+        requestedSched = testBuilder.buildSchedule(startDate, endDate);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, numDisjoint, 1, 1, "test");
+
+        log.info("Beginning test: 'survPartialThreeDisjointEdgeAsymmK2Pass'.");
+
+        try
+        {
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
+        }
+        catch(PCEException | PSSException pceE)
+        {
+            log.error("", pceE);
+        }
+
+        assert(reservedBlueprint.isPresent());
+
+        ReservedVlanFlowE reservedFlow = reservedBlueprint.get().getVlanFlow();
+
+        Set<ReservedEthPipeE> allResEthPipes = reservedFlow.getEthPipes();
+        Set<ReservedMplsPipeE> allResMplsPipes = reservedFlow.getMplsPipes();
+        Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
+
+        assert (allResJunctions.size() == 0);
+        assert (allResEthPipes.size() == 4);
+        assert (allResMplsPipes.size() == 2);
+
+        // ETHERNET Pipes
+        for(ReservedEthPipeE ethPipe : allResEthPipes)
+        {
+            ReservedVlanJunctionE aJunc = ethPipe.getAJunction();
+            ReservedVlanJunctionE zJunc = ethPipe.getZJunction();
+            Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
+            Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
+            List<String> azERO = ethPipe.getAzERO();
+            List<String> zaERO = ethPipe.getZaERO();
+            String actualAzERO = aJunc.getDeviceUrn() + "-";
+            String actualZaERO = zJunc.getDeviceUrn() + "-";
+
+            for(String x : azERO)
+                actualAzERO = actualAzERO + x + "-";
+
+            for(String x : zaERO)
+                actualZaERO = actualZaERO + x + "-";
+
+            actualAzERO = actualAzERO + zJunc.getDeviceUrn();
+            actualZaERO = actualZaERO + aJunc.getDeviceUrn();
+
+            assert((aJunc.getDeviceUrn().equals("nodeK") && zJunc.getDeviceUrn().equals("nodeP")) || (aJunc.getDeviceUrn().equals("nodeQ") && zJunc.getDeviceUrn().equals("nodeL")));
+
+            if(aJunc.getDeviceUrn().equals("nodeK"))
+                assert(aFixes.size() == 1 && zFixes.size() == 0);
+            else
+                assert(aFixes.size() == 0 && zFixes.size() == 1);
+
+            String expectedAzEroKP = "nodeK-nodeK:2-nodeP:1-nodeP";
+            String expectedAzEroQL = "nodeQ-nodeQ:1-nodeL:2-nodeL";
+            String expectedZaEroKP = "nodeP-nodeP:1-nodeK:2-nodeK";
+            String expectedZaEroQL = "nodeL-nodeL:2-nodeQ:1-nodeQ";
+
+
+            assert((actualAzERO.equals(expectedAzEroKP) && actualZaERO.equals(expectedZaEroKP)) || (actualAzERO.equals(expectedAzEroQL) && actualZaERO.equals(expectedZaEroQL)));
+        }
+
+
+        // MPLS Pipes
+        for(ReservedMplsPipeE mplsPipe : allResMplsPipes)
+        {
+            ReservedVlanJunctionE aJunc = mplsPipe.getAJunction();
+            ReservedVlanJunctionE zJunc = mplsPipe.getZJunction();
+            Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
+            Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
+            List<String> azERO = mplsPipe.getAzERO();
+            List<String> zaERO = mplsPipe.getZaERO();
+            String actualAzERO = aJunc.getDeviceUrn() + "-";
+            String actualZaERO = zJunc.getDeviceUrn() + "-";
+
+            for(String x : azERO)
+                actualAzERO = actualAzERO + x + "-";
+
+            for(String x : zaERO)
+                actualZaERO = actualZaERO + x + "-";
+
+            actualAzERO = actualAzERO + zJunc.getDeviceUrn();
+            actualZaERO = actualZaERO + aJunc.getDeviceUrn();
+
+            assert(aJunc.getDeviceUrn().equals("nodeP"));
+            assert(zJunc.getDeviceUrn().equals("nodeQ"));
+
+            assert(aFixes.size() == 0);
+            assert(zFixes.size() == 0);
+
+            String expectedAzERO1 = "nodeP-nodeP:2-nodeQ:2-nodeQ";
+            String expectedAzERO2 = "nodeP-nodeP:4-nodeS:1-nodeS-nodeS:2-nodeT:2-nodeT-nodeT:1-nodeQ:4-nodeQ";
+            String expectedZaERO1 = "nodeQ-nodeQ:2-nodeP:2-nodeP";
+            String expectedZaERO2 = "nodeQ-nodeQ:4-nodeT:1-nodeT-nodeT:2-nodeS:2-nodeS-nodeS:1-nodeP:4-nodeP";
+
+            assert(actualAzERO.equals(expectedAzERO1) || actualAzERO.equals(expectedAzERO2));
+            assert(actualZaERO.equals(expectedZaERO1) || actualZaERO.equals(expectedZaERO2));
+
+            if(actualAzERO.equals(expectedAzERO1))
+                assert(actualZaERO.equals(expectedZaERO1));
+            else
+                assert(actualZaERO.equals(expectedZaERO2));
+        }
+
+        log.info("test 'survPartialThreeDisjointEdgeAsymmK2Pass' passed.");
+    }
+
+    @Test
+    public void survPartialThreeDisjointEdgeAsymmK3Fail()
+    {
+        log.info("Initializing test: 'survPartialThreeDisjointEdgeAsymmK3Fail'.");
+
+        RequestedBlueprintE requestedBlueprint;
+        Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
+        ScheduleSpecificationE requestedSched;
+
+        Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
+        Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
+
+        String srcPort = "nodeK:1";
+        String srcDevice = "nodeK";
+        String dstPort = "nodeL:1";
+        String dstDevice = "nodeL";
+        Integer azBW = 100;
+        Integer zaBW = 75;      // Too much B/W
+        PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_PARTIAL;
+        String vlan = "any";
+        int numDisjoint = 3;
+
+        List<VertexType> vertexTypes = new ArrayList<>();
+        vertexTypes.add(VertexType.SWITCH);     // nodeK
+        vertexTypes.add(VertexType.SWITCH);     // nodeL
+        vertexTypes.add(VertexType.ROUTER);     // nodeP
+        vertexTypes.add(VertexType.ROUTER);     // nodeQ
+        vertexTypes.add(VertexType.ROUTER);     // nodeR
+        vertexTypes.add(VertexType.ROUTER);     // nodeS
+        vertexTypes.add(VertexType.ROUTER);     // nodeT
+
+        List<PortLayer> portLayers = new ArrayList<>();
+        portLayers.add(PortLayer.ETHERNET);         // nodeK:1
+        portLayers.add(PortLayer.ETHERNET);         // nodeK:2
+        portLayers.add(PortLayer.ETHERNET);         // nodeL:1
+        portLayers.add(PortLayer.ETHERNET);         // nodeL:2
+        portLayers.add(PortLayer.MPLS);         // nodeP:1
+        portLayers.add(PortLayer.MPLS);         // nodeP:2
+        portLayers.add(PortLayer.MPLS);         // nodeP:3
+        portLayers.add(PortLayer.MPLS);         // nodeP:4
+        portLayers.add(PortLayer.MPLS);         // nodeQ:1
+        portLayers.add(PortLayer.MPLS);         // nodeQ:2
+        portLayers.add(PortLayer.MPLS);         // nodeQ:3
+        portLayers.add(PortLayer.MPLS);         // nodeQ:4
+        portLayers.add(PortLayer.MPLS);         // nodeR:1
+        portLayers.add(PortLayer.MPLS);         // nodeR:2
+        portLayers.add(PortLayer.MPLS);         // nodeS:1
+        portLayers.add(PortLayer.MPLS);         // nodeS:2
+        portLayers.add(PortLayer.MPLS);         // nodeT:1
+        portLayers.add(PortLayer.MPLS);         // nodeT:2
+
+        List<Layer> linkLayers = new ArrayList<>();
+        linkLayers.add(Layer.ETHERNET);             // nodeK:2 --> nodeP:1
+        linkLayers.add(Layer.ETHERNET);             // nodeL:2 --> nodeQ:1
+        linkLayers.add(Layer.ETHERNET);             // nodeP:1 --> nodeK:2
+        linkLayers.add(Layer.MPLS);             // nodeP:2 --> nodeQ:2
+        linkLayers.add(Layer.MPLS);             // nodeP:3 --> nodeR:1
+        linkLayers.add(Layer.MPLS);             // nodeP:4 --> nodeS:1
+        linkLayers.add(Layer.ETHERNET);             // nodeQ:1 --> nodeL:2
+        linkLayers.add(Layer.MPLS);             // nodeQ:2 --> nodeP:2
+        linkLayers.add(Layer.MPLS);             // nodeQ:3 --> nodeR:2
+        linkLayers.add(Layer.MPLS);             // nodeQ:4 --> nodeT:2
+        linkLayers.add(Layer.MPLS);             // nodeR:1 --> nodeP:3
+        linkLayers.add(Layer.MPLS);             // nodeR:2 --> nodeQ:3
+        linkLayers.add(Layer.MPLS);             // nodeS:1 --> nodeP:4
+        linkLayers.add(Layer.MPLS);             // nodeS:2 --> nodeT:2
+        linkLayers.add(Layer.MPLS);             // nodeT:1 --> nodeQ:4
+        linkLayers.add(Layer.MPLS);             // nodeT:2 --> nodeS:2
+
+        asymmTopologyBuilder.buildTopoWithThreePartialDisjointPaths(vertexTypes, portLayers, linkLayers);
+        requestedSched = testBuilder.buildSchedule(startDate, endDate);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, numDisjoint, 1, 1, "test");
+
+        log.info("Beginning test: 'survPartialThreeDisjointEdgeAsymmK3Fail'.");
+
+        try
+        {
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
+        }
+        catch(PCEException | PSSException pceE)
+        {
+            log.error("", pceE);
+        }
+
+        assert(!reservedBlueprint.isPresent());
+
+        log.info("test 'survPartialThreeDisjointEdgeAsymmK3Fail' passed.");
     }
 }

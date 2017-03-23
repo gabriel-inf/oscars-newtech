@@ -206,26 +206,26 @@ public class SurvivableServiceLayerTopology
 
         // Ports which are not on any ETHERNET edges (edge ports) should be added to set
         serviceLayerPorts.stream()
-                .filter(p -> !nonAdjacentPorts.contains(p))
-                .forEach(p ->
+            .filter(p -> !nonAdjacentPorts.contains(p))
+            .forEach(p ->
+            {
+                List<TopoEdge> ethLinkscontainingP =  serviceLayerLinks.stream()
+                        .filter(l -> l.getLayer().equals(Layer.ETHERNET) && (l.getA().equals(p) || l.getZ().equals(p)))
+                        .collect(Collectors.toList());
+
+                if(ethLinkscontainingP.isEmpty())
                 {
-                    List<TopoEdge> ethLinkscontainingP =  serviceLayerLinks.stream()
-                            .filter(l -> l.getLayer().equals(Layer.ETHERNET) && (l.getA().equals(p) || l.getZ().equals(p)))
+                    List<TopoEdge> linksConnectingSwitchToP = serviceLayerLinks.stream()
+                            .filter(l -> l.getLayer().equals(Layer.INTERNAL) && (l.getA().equals(p) || l.getZ().equals(p)))
+                            .filter(l -> l.getA().getVertexType().equals(VertexType.SWITCH) || l.getZ().getVertexType().equals(VertexType.SWITCH))
                             .collect(Collectors.toList());
 
-                    if(ethLinkscontainingP.isEmpty())
+                    if(linksConnectingSwitchToP.isEmpty())
                     {
-                        List<TopoEdge> linksConnectingSwitchToP = serviceLayerLinks.stream()
-                                .filter(l -> l.getLayer().equals(Layer.INTERNAL) && (l.getA().equals(p) || l.getZ().equals(p)))
-                                .filter(l -> l.getA().getVertexType().equals(VertexType.SWITCH) || l.getZ().getVertexType().equals(VertexType.SWITCH))
-                                .collect(Collectors.toList());
-
-                        if(linksConnectingSwitchToP.isEmpty())
-                        {
-                            nonAdjacentPorts.add(p);
-                        }
+                        nonAdjacentPorts.add(p);
                     }
-                });
+                }
+        });
     }
 
 
@@ -275,10 +275,8 @@ public class SurvivableServiceLayerTopology
                 List<List<TopoEdge>> kPaths = new ArrayList<>();   // Set of K-paths
 
                 SurvivableLogicalEdge azLogicalEdge = new SurvivableLogicalEdge(nonAdjacentA,nonAdjacentZ, kMetrics, Layer.LOGICAL, kPaths);
-                //SurvivableLogicalEdge zaLogicalEdge = new SurvivableLogicalEdge(nonAdjacentZ,nonAdjacentA, kMetrics, Layer.LOGICAL, kPaths);
 
                 logicalLinks.add(azLogicalEdge);
-                //logicalLinks.add(zaLogicalEdge);
             }
         }
 
