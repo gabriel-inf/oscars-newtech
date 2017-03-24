@@ -7,7 +7,7 @@ import net.es.oscars.dto.bwavail.BandwidthAvailabilityRequest;
 import net.es.oscars.dto.bwavail.BandwidthAvailabilityResponse;
 import net.es.oscars.dto.resv.Connection;
 import net.es.oscars.dto.spec.Specification;
-import net.es.oscars.pce.PCEException;
+import net.es.oscars.pce.exc.PCEException;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.rest.ResvController;
 import net.es.oscars.resv.svc.ConnectionGenerationService;
@@ -88,7 +88,7 @@ public class SuggestionService {
                 }
             }
         }
-        catch(PCEException|PSSException e){
+        catch(PCEException |PSSException e){
             log.info("Connection precheck caused an exception.");
         }
 

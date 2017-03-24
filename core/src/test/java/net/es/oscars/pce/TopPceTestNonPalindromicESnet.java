@@ -5,6 +5,7 @@ import net.es.oscars.CoreUnitTestConfiguration;
 import net.es.oscars.dto.spec.PalindromicType;
 import net.es.oscars.dto.spec.SurvivabilityType;
 import net.es.oscars.helpers.RequestedEntityBuilder;
+import net.es.oscars.pce.exc.PCEException;
 import net.es.oscars.pce.helpers.RepoEntityBuilder;
 import net.es.oscars.pce.helpers.TopologyBuilder;
 import net.es.oscars.pss.PSSException;
