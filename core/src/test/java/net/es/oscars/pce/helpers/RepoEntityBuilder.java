@@ -39,6 +39,8 @@ public class RepoEntityBuilder {
         urnRepo.deleteAll();
         adjcyRepo.deleteAll();
 
+        populatePortLayers(vertices, portToDeviceMap, null, null, null);
+
         List<Integer> floors = Arrays.asList(1, 10, 20, 30);
         List<Integer> ceilings = Arrays.asList(9, 19, 29, 39);
 
@@ -67,6 +69,8 @@ public class RepoEntityBuilder {
 
         urnRepo.deleteAll();
         adjcyRepo.deleteAll();
+
+        populatePortLayers(vertices, portToDeviceMap, portBWs, null, null);
 
         List<Integer> floors = Arrays.asList(1, 10, 20, 30);
         List<Integer> ceilings = Arrays.asList(9, 19, 29, 39);
@@ -97,6 +101,8 @@ public class RepoEntityBuilder {
         urnRepo.deleteAll();
         adjcyRepo.deleteAll();
 
+        populatePortLayers(vertices, portToDeviceMap, null, floorMap, ceilingMap);
+
         List<UrnE> urnList = new ArrayList<>();
         List<UrnAdjcyE> adjcyList = new ArrayList<>();
         for(TopoEdge edge : edges){
@@ -123,6 +129,8 @@ public class RepoEntityBuilder {
 
         urnRepo.deleteAll();
         adjcyRepo.deleteAll();
+
+        populatePortLayers(vertices, portToDeviceMap, portBWs, floorMap, ceilingMap);
 
         List<UrnE> urnList = new ArrayList<>();
         List<UrnAdjcyE> adjcyList = new ArrayList<>();
@@ -152,24 +160,34 @@ public class RepoEntityBuilder {
     }
 
     public UrnE addUrnToList(TopoVertex v, List<UrnE> urnList, Map<TopoVertex,TopoVertex> portToDeviceMap,
-                             Map<TopoVertex, List<Integer>> portBWs, List<Integer> floors, List<Integer> ceilings){
+                             Map<TopoVertex, List<Integer>> portBWs, List<Integer> floors, List<Integer> ceilings)
+    {
         UrnE urn = getFromUrnList(v.getUrn(), urnList);
-        if(urn == null){
+
+        if(urn == null)
+        {
+            VertexType vType = v.getVertexType();
             Set<Layer> capabilities = new HashSet<>();
             capabilities.add(Layer.INTERNAL);
             capabilities.add(Layer.ETHERNET);
-            // If vertex is a port, get it's parent's type instead
-            VertexType typeOfParentOrSelf = v.getVertexType().equals(VertexType.PORT) ? portToDeviceMap.get(v).getVertexType() : v.getVertexType();
-            if(typeOfParentOrSelf.equals(VertexType.ROUTER)){
-                capabilities.add(Layer.MPLS);
-            }
 
-            if(v.getVertexType().equals(VertexType.PORT)){
+            // If vertex is a port, get it's PortLayer info to determine capabilities. Not all Router ports will have MPLS capability!
+            if(vType.equals(VertexType.PORT))
+            {
+                if(v.getPortLayer().equals(PortLayer.MPLS))
+                    capabilities.add(Layer.MPLS);
+
+                VertexType parentType = portToDeviceMap.get(v).getVertexType();
+
                 List<Integer> portInEgBw = portBWs != null ? portBWs.get(v) : Arrays.asList(1000, 1000);
-                urn = buildPortUrn(v, typeOfParentOrSelf, capabilities, portInEgBw.get(0), portInEgBw.get(1), floors, ceilings);
+                urn = buildPortUrn(v, parentType, capabilities, portInEgBw.get(0), portInEgBw.get(1), floors, ceilings);
             }
-            else{
-                urn = buildUrn(v, typeOfParentOrSelf, capabilities, floors, ceilings);
+            else
+            {
+                if(vType.equals(VertexType.ROUTER))
+                    capabilities.add(Layer.MPLS);
+
+                urn = buildUrn(v, vType, capabilities, floors, ceilings);
             }
 
             urnList.add(urn);
@@ -178,8 +196,8 @@ public class RepoEntityBuilder {
     }
 
     public UrnE buildUrn(TopoVertex vertex, VertexType vertexType, Set<Layer> capabilities,
-                         List<Integer> floors, List<Integer> ceilings){
-
+                         List<Integer> floors, List<Integer> ceilings)
+    {
         DeviceType deviceType = determineDeviceType(vertexType);
         UrnType urnType = determineUrnType(vertexType);
         DeviceModel deviceModel = determineDeviceModel(vertexType);
@@ -196,15 +214,19 @@ public class RepoEntityBuilder {
                 .capabilities(capabilities)
                 .build();
 
-        if(deviceType.equals(DeviceType.SWITCH)) {
+        if(deviceType.equals(DeviceType.SWITCH))
+        {
             ReservableVlanE resvVlan = buildReservableVlan(buildIntRanges(floors, ceilings));
             urn.setReservableVlans(resvVlan);
         }
+
         return urn;
     }
 
+
     public UrnE buildPortUrn(TopoVertex vertex, VertexType parentType, Set<Layer> capabilities, Integer inBW, Integer egBW,
-                         List<Integer> floors, List<Integer> ceilings){
+                             List<Integer> floors, List<Integer> ceilings)
+    {
         VertexType vertexType = vertex.getVertexType();
         UrnType urnType = determineUrnType(vertexType);
         DeviceType deviceType = determineDeviceType(vertexType);
@@ -224,10 +246,12 @@ public class RepoEntityBuilder {
 
         ReservableBandwidthE resvBw = buildReservableBandwidth(inBW, egBW);
         urn.setReservableBandwidth(resvBw);
-        if(parentType.equals(VertexType.ROUTER)){
+        if(parentType.equals(VertexType.ROUTER))
+        {
             ReservableVlanE resvVlan = buildReservableVlan(buildIntRanges(floors, ceilings));
             urn.setReservableVlans(resvVlan);
         }
+
         return urn;
     }
 
@@ -351,7 +375,7 @@ public class RepoEntityBuilder {
     }
 
     public void reserveBandwidth(List<String> reservedPortNames, List<Instant> reservedStartTimes,
-                                  List<Instant> reservedEndTimes, List<Integer> inBandwidths, List<Integer> egBandwidths) {
+                                 List<Instant> reservedEndTimes, List<Integer> inBandwidths, List<Integer> egBandwidths) {
         List<ReservedBandwidthE> reservedBandwidths = new ArrayList<>();
         for(Integer index = 0; index < reservedPortNames.size(); index++){
             reservedBandwidths.add(ReservedBandwidthE.builder()
@@ -364,5 +388,46 @@ public class RepoEntityBuilder {
                     .build());
         }
         reservedBandwidthRepo.save(reservedBandwidths);
+    }
+
+    private void populatePortLayers(Collection<TopoVertex> vertices, Map<TopoVertex,TopoVertex> portToDeviceMap, Map<TopoVertex, List<Integer>> bandwidthMap, Map<TopoVertex, List<Integer>> floorMap, Map<TopoVertex, List<Integer>> ceilingMap)
+    {
+        for(TopoVertex onePort : vertices)
+        {
+            if(!onePort.getVertexType().equals(VertexType.PORT))
+                continue;
+
+            if(!onePort.getPortLayer().equals(PortLayer.NONE))
+                continue;
+
+            TopoVertex correspondingDevice = portToDeviceMap.remove(onePort);
+            List<Integer> floors = null;
+            List<Integer> ceilings = null;
+            List<Integer> portBWs = null;
+
+            VertexType deviceType = correspondingDevice.getVertexType();
+
+            if(bandwidthMap != null)
+                portBWs = bandwidthMap.remove(onePort);
+            if(floorMap != null)
+                floors = floorMap.remove(onePort);
+            if(ceilingMap != null)
+                ceilings = ceilingMap.remove(onePort);
+
+            // Set Port Layer //
+            if(deviceType.equals(VertexType.SWITCH))
+                onePort.setPortLayer(PortLayer.ETHERNET);
+            else if(deviceType.equals(VertexType.ROUTER))
+                onePort.setPortLayer(PortLayer.MPLS);
+
+            portToDeviceMap.put(onePort, correspondingDevice);
+
+            if(bandwidthMap != null)
+                bandwidthMap.put(onePort, portBWs);
+            if(floorMap != null)
+                floorMap.put(onePort, floors);
+            if(ceilingMap != null)
+                ceilingMap.put(onePort, ceilings);
+        }
     }
 }

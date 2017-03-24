@@ -177,72 +177,6 @@ public class TranslationPCE {
         return TranslationPCEResponse.builder().ethPipes(reservedEthPipes).mplsPipes(reservedMplsPipes).build();
     }
 
-    public TranslationPCEResponse reserveRequestedPipeWithPairs(RequestedVlanPipeE reqPipe, List<List<TopoEdge>> azEROs,
-                                              List<List<TopoEdge>> zaEROs, Map<String, Map<String, Integer>> bwAvailMap,
-                                              List<ReservedVlanE> reservedVlans,
-                                              Map<String, Set<String>> deviceToPortMap,
-                                              Map<String, String> portToDeviceMap, Date start, Date end, String connectionId) throws PSSException, PCEException {
-
-        List<TopoEdge> combinedAzERO = combineEROs(azEROs);
-        List<TopoEdge> combinedZaERO = combineEROs(zaEROs);
-
-        // Build a urn map
-        Map<String, UrnE> urnMap = new HashMap<>();
-        urnRepository.findAll().forEach(u -> {
-            urnMap.put(u.getUrn(), u);
-        });
-
-        Map<TopoVertex, Map<String, Integer>> requestedBandwidthMap = evaluateRequestedBandwidth(bwAvailMap,
-                combinedAzERO, combinedZaERO, reqPipe, urnMap);
-
-
-        Map<String, Set<Integer>> chosenVlanMap = vlanService.selectVlansForPipe(reqPipe, urnMap, reservedVlans,
-                combinedAzERO, combinedZaERO, deviceToPortMap, portToDeviceMap);
-
-        Boolean validVlanAssignment = evaluateAssignedVlanMapMultiplePaths(chosenVlanMap, reqPipe, azEROs, zaEROs);
-        if(!validVlanAssignment){
-            throw new PCEException(("VLAN could not not be found for all URNs"));
-        }
-
-        Map<TopoVertex, ReservedVlanJunctionE> junctionMap = new HashMap<>();
-
-        Set<ReservedEthPipeE> tempEthPipes = new HashSet<>();
-        Set<ReservedMplsPipeE> tempMplsPipes = new HashSet<>();
-        for (Integer pairIndex = 0; pairIndex < azEROs.size(); pairIndex++) {
-            List<TopoEdge> azERO = azEROs.get(pairIndex);
-            List<TopoEdge> zaERO = zaEROs.get(pairIndex);
-
-            List<Map<Layer, List<TopoVertex>>> azSegments = PCEAssistant.decompose(azERO);
-            List<Map<Layer, List<TopoVertex>>> zaSegments = PCEAssistant.decompose(zaERO);
-            if (azSegments.size() > 0 && zaSegments.size() > 0) {
-                reserveEntities(reqPipe, azSegments, zaSegments, urnMap, requestedBandwidthMap,
-                        chosenVlanMap, tempEthPipes, tempMplsPipes, junctionMap, portToDeviceMap, start, end, connectionId);
-            }
-        }
-
-        Set<ReservedEthPipeE> filteredEthPipes = pceAssistant.filterEthPipeSet(tempEthPipes);
-        Set<ReservedMplsPipeE> filteredMplsPipes = pceAssistant.filterMplsPipeSet(tempMplsPipes);
-
-        return TranslationPCEResponse.builder().ethPipes(filteredEthPipes).mplsPipes(filteredMplsPipes).build();
-    }
-
-    private Boolean evaluateAssignedVlanMapMultiplePaths(Map<String, Set<Integer>> chosenVlanMap,  RequestedVlanPipeE pipe,
-                                            List<List<TopoEdge>> azEROs, List<List<TopoEdge>> zaEROs) {
-        Boolean valid = true;
-        for (String urn : chosenVlanMap.keySet()) {
-            // It's only okay for no VLANs to be assigned if the port is on a router
-            // and it is not in AZ path, ZA path, or fixtures.
-            if (chosenVlanMap.get(urn).isEmpty()) {
-                List<Boolean> inAzPaths = azEROs.stream().map(path -> evaluateIfInPath(urn, path)).collect(Collectors.toList());
-                List<Boolean> inZaPaths = zaEROs.stream().map(path -> evaluateIfInPath(urn, path)).collect(Collectors.toList());
-                Boolean inFixtures = evaluateIfInFixtures(urn, pipe);
-                if(inAzPaths.contains(true) || inZaPaths.contains(true) || inFixtures){
-                    valid = false;
-                }
-            }
-        }
-        return valid;
-    }
 
     private Boolean evaluateAssignedVlanMap(Map<String, Set<Integer>> chosenVlanMap,  RequestedVlanPipeE pipe,
                                             List<TopoEdge> azERO, List<TopoEdge> zaERO) {
@@ -423,23 +357,6 @@ public class TranslationPCE {
         }
     }
 
-    private List<TopoEdge> combineEROs(List<List<TopoEdge>> EROs) {
-        List<TopoEdge> combinedERO = new ArrayList<>();
-        TopoEdge firstEdge = null;
-        TopoEdge lastEdge = null;
-        for (List<TopoEdge> ero : EROs) {
-            if (firstEdge == null) {
-                firstEdge = ero.get(0);
-                combinedERO.add(firstEdge);
-            }
-            combinedERO.addAll(ero.subList(1, ero.size() - 1).stream().distinct().collect(Collectors.toList()));
-            if (lastEdge == null) {
-                lastEdge = ero.get(ero.size() - 1);
-            }
-        }
-        combinedERO.add(lastEdge);
-        return combinedERO;
-    }
 
     /**
      * Given two lists of EROS in the AZ and ZA direction, a map of URNs, a map of the requested bandwidth at each URN,

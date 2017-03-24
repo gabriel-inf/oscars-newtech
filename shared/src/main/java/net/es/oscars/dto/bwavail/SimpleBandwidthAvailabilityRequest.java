@@ -2,21 +2,19 @@ package net.es.oscars.dto.bwavail;
 
 import lombok.*;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
-
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class BandwidthAvailabilityRequest {
+public class SimpleBandwidthAvailabilityRequest {
 
     @NonNull
-    private Date startDate;
+    private String startDate;
     @NonNull
-    private Date endDate;
+    private String endDate;
 
     @NonNull
     private Integer minAzBandwidth;

@@ -150,14 +150,14 @@ function show_pipe_card(edgeId) {
 
     // populate
     if (!(edgeId in pipes)) {
-        console.log("new pipe, setting bw to 0 for: " + edgeId);
+        console.log("new pipe, setting azbw to 0 for: " + edgeId);
         pipes[edgeId] = {"bw": 0};
     }
     var prev_bw = pipes[edgeId]["bw"];
     var prev_a = pipes[edgeId]["a"];
     var prev_z = pipes[edgeId]["z"];
 
-    console.log("updating form for edge: " + edgeId + " to bw: " + prev_bw);
+    console.log("updating form for edge: " + edgeId + " to azbw: " + prev_bw);
     // detach previous event handlers
     $("#pipe_bw").off("change");
     $("#pipe_bw").val(prev_bw);
@@ -170,7 +170,7 @@ function show_pipe_card(edgeId) {
         stateChanged("Pipe updated.");
 
         var bw = $("#pipe_bw").val();
-        console.log("saving bw for pipe: " + edgeId + " : " + bw);
+        console.log("saving azbw for pipe: " + edgeId + " : " + bw);
         pipes[edgeId]["bw"] = bw;
         console.log(reservation_request);
     });
@@ -301,9 +301,7 @@ function populate_junction(nodeId, fixtures) {
             $("#bw_" + index).val(bw);
         }
     });
-};
-
-
+}
 function update_junction(nodeId, fixtures) {
 
     stateChanged("Junction updated.");
@@ -384,7 +382,7 @@ var resv_precheck = function()
     display_viz.network.unselectAll();
 
     highlight_devices(display_viz.datasource, highlightedNodes, false, "");
-    highlight_devices(display_viz.datasource, insufficientNodes, false, "")
+    highlight_devices(display_viz.datasource, insufficientNodes, false, "");;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     highlight_links(display_viz.datasource, highlightedEdges, false, "");
     highlight_links(display_viz.datasource, insufficientEdges, false, "");
 
@@ -464,7 +462,6 @@ var resv_precheck = function()
 
                 if(mostRecentPrecheckID !== reservation_request["connectionId"])
                 {
-                    ;
                 }
                 else
                 {
@@ -608,7 +605,7 @@ function drawFailedLinksOnNetwork(resRequest)
 
                 if(minBW >= maxPipeBW)                  // 3. If minimum >= b/w requested, continue.
                 {
-                    continue;
+
                 }
                 else
                 {

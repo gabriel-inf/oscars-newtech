@@ -1,4 +1,4 @@
-package net.es.oscars.simpleresv.svc;
+package net.es.oscars.resv.svc;
 
 
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +35,7 @@ public class ConnectionGenerationService {
         return buildConnection(spec);
     }
 
+
     public Connection buildConnection(Specification spec){
         return Connection.builder()
                 .connectionId(spec.getContainerConnectionId())
@@ -59,6 +60,27 @@ public class ConnectionGenerationService {
                 .scheduleSpec(generateScheduleSpecification(bcs.getStart(), bcs.getEnd()))
                 .containerConnectionId(bcs.getConnectionId())
                 .description(bcs.getDescription())
+                .requested(reqBlueprint)
+                .username("What-If")
+                .version(0)
+                .build();
+    }
+
+    public Specification generateSpecification(String srcDevice, Set<String> srcPorts, String dstDevice, Set<String> dstPorts,
+                                               String srcVlan, String dstVlan, Integer azMbps, Integer zaMbps,
+                                               List<String> azRoute, List<String> zaRoute, Set<String> blacklist,
+                                               String palindromic, String survivability, Integer numPaths, Integer priority,
+                                               Integer minFlows, Integer maxFlows, String connectionId, String startDate,
+                                               String endDate){
+        Set<CircuitFlow> flows = new HashSet<>();
+        CircuitFlow flow = generateCircuitFlow(srcDevice, srcPorts, srcVlan, dstDevice, dstPorts, dstVlan,
+                azMbps, zaMbps, azRoute, zaRoute, blacklist, palindromic, survivability, numPaths, priority);
+        flows.add(flow);
+        RequestedBlueprint reqBlueprint = generateRequestedBlueprint(flows, maxFlows, minFlows, connectionId);
+        return  Specification.builder()
+                .scheduleSpec(generateScheduleSpecification(startDate, endDate))
+                .containerConnectionId(connectionId)
+                .description("What-if Request")
                 .requested(reqBlueprint)
                 .username("What-If")
                 .version(0)

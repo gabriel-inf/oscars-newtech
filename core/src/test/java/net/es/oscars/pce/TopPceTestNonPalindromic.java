@@ -2,19 +2,19 @@ package net.es.oscars.pce;
 
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.AbstractCoreTest;
+import net.es.oscars.dto.spec.PalindromicType;
 import net.es.oscars.dto.spec.SurvivabilityType;
+import net.es.oscars.dto.topo.enums.Layer;
+import net.es.oscars.dto.topo.enums.UrnType;
 import net.es.oscars.pce.exc.PCEException;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.helpers.RequestedEntityBuilder;
-import net.es.oscars.resv.ent.*;
 import net.es.oscars.pce.helpers.AsymmTopologyBuilder;
 import net.es.oscars.pce.helpers.TopologyBuilder;
+import net.es.oscars.resv.ent.*;
 import net.es.oscars.topo.dao.UrnAdjcyRepository;
 import net.es.oscars.topo.dao.UrnRepository;
 import net.es.oscars.topo.ent.UrnE;
-import net.es.oscars.dto.topo.enums.Layer;
-import net.es.oscars.dto.spec.PalindromicType;
-import net.es.oscars.dto.topo.enums.UrnType;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -3215,7 +3215,7 @@ public class TopPceTestNonPalindromic extends AbstractCoreTest
     @Test
     public void asymmPceTestNoFixtures()
     {
-        log.info("Initializing test: 'asymmPceTest12'.");
+        log.info("Initializing test: 'asymmPceTestNoFixtures'.");
 
         RequestedBlueprintE requestedBlueprint;
         Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
@@ -3236,7 +3236,7 @@ public class TopPceTestNonPalindromic extends AbstractCoreTest
         requestedSched = testBuilder.buildSchedule(startDate, endDate);
         requestedBlueprint = testBuilder.buildRequest("", srcDevice, "", dstDevice, azBW, zaBW, palindrome, survivability, vlan, 1, 1, 1, "nonPalTest");
 
-        log.info("Beginning test: 'asymmPceTest12'.");
+        log.info("Beginning test: 'asymmPceTestNoFixtures'.");
 
         try
         {
@@ -3307,7 +3307,7 @@ public class TopPceTestNonPalindromic extends AbstractCoreTest
             }
         }
 
-        log.info("test 'asymmPceTest12' passed.");
+        log.info("test 'asymmPceTestNoFixtures' passed.");
     }
 
     @Test
@@ -4999,5 +4999,91 @@ public class TopPceTestNonPalindromic extends AbstractCoreTest
         }
 
         log.info("test 'multiMplsPipeTestNonPal' passed.");
+    }
+
+    @Test
+    public void nonPalWithEthPortsOnRoutersTest()
+    {
+        log.info("Initializing test: 'nonPalWithEthPortsOnRoutersTest'.");
+
+        RequestedBlueprintE requestedBlueprint;
+        Optional<ReservedBlueprintE> reservedBlueprint = Optional.empty();
+        ScheduleSpecificationE requestedSched;
+
+        Date startDate = new Date(Instant.now().plus(15L, ChronoUnit.MINUTES).getEpochSecond());
+        Date endDate = new Date(Instant.now().plus(1L, ChronoUnit.DAYS).getEpochSecond());
+
+        String srcPort = "nodeP:1";
+        String srcDevice = "nodeP";
+        String dstPort = "nodeQ:1";
+        String dstDevice = "nodeQ";
+        Integer azBW = 25;
+        Integer zaBW = 25;
+        PalindromicType palindrome = PalindromicType.NON_PALINDROME;
+        SurvivabilityType survivability = SurvivabilityType.SURVIVABILITY_NONE;
+        String vlan = "any";
+
+        asymmTopologyBuilder.buildTopoWithEthPortsOnRouters();
+        requestedSched = testBuilder.buildSchedule(startDate, endDate);
+        requestedBlueprint = testBuilder.buildRequest(srcPort, srcDevice, dstPort, dstDevice, azBW, zaBW, palindrome, survivability, vlan, 2, 1, 1, "test");
+
+        log.info("Beginning test: 'nonPalWithEthPortsOnRoutersTest'.");
+
+        try
+        {
+            reservedBlueprint = topPCE.makeReserved(requestedBlueprint, requestedSched, new ArrayList<>());
+        }
+        catch(PCEException | PSSException pceE)
+        {
+            log.error("", pceE);
+        }
+
+        assert (reservedBlueprint.isPresent());
+
+        ReservedVlanFlowE reservedFlow = reservedBlueprint.get().getVlanFlow();
+
+        Set<ReservedEthPipeE> allResEthPipes = reservedFlow.getEthPipes();
+        Set<ReservedMplsPipeE> allResMplsPipes = reservedFlow.getMplsPipes();
+        Set<ReservedVlanJunctionE> allResJunctions = reservedFlow.getJunctions();
+
+        assert (allResJunctions.size() == 0);
+        assert (allResEthPipes.size() == 0);
+        assert (allResMplsPipes.size() == 1);
+
+        // Ethernet Pipes
+        for(ReservedMplsPipeE mplsPipe : allResMplsPipes)
+        {
+            ReservedVlanJunctionE aJunc = mplsPipe.getAJunction();
+            ReservedVlanJunctionE zJunc = mplsPipe.getZJunction();
+            Set<ReservedVlanFixtureE> aFixes = aJunc.getFixtures();
+            Set<ReservedVlanFixtureE> zFixes = zJunc.getFixtures();
+            List<String> azERO = mplsPipe.getAzERO();
+            List<String> zaERO = mplsPipe.getZaERO();
+            String actualAzERO = aJunc.getDeviceUrn() + "-";
+            String actualZaERO = zJunc.getDeviceUrn() + "-";
+
+            for(String x : azERO)
+                actualAzERO = actualAzERO + x + "-";
+
+            for(String x : zaERO)
+                actualZaERO = actualZaERO + x + "-";
+
+            actualAzERO = actualAzERO + zJunc.getDeviceUrn();
+            actualZaERO = actualZaERO + aJunc.getDeviceUrn();
+
+            assert(aJunc.getDeviceUrn().equals("nodeP"));
+            assert(zJunc.getDeviceUrn().equals("nodeQ"));
+
+            assert (aFixes.size() == 1);
+            assert (zFixes.size() == 1);
+
+            String expectedAzERO = "nodeP-nodeP:2-nodeQ:2-nodeQ";
+            String expectedZaERO = "nodeQ-nodeQ:6-nodeR:2-nodeR-nodeR:1-nodeP:6-nodeP";
+
+            assert (actualAzERO.equals(expectedAzERO));
+            assert (actualZaERO.equals(expectedZaERO));
+        }
+
+        log.info("test 'nonPalWithEthPortsOnRoutersTest' passed.");
     }
 }

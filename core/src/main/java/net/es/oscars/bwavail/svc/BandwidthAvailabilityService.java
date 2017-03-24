@@ -277,8 +277,10 @@ public class BandwidthAvailabilityService {
                 if (request.getDisjointPaths() == null || request.getDisjointPaths() || !request.getDisjointPaths()) {
                     sType = SurvivabilityType.SURVIVABILITY_TOTAL;
                 }
-                blueprints.add(entityBuilder.buildRequest(request.getSrcPorts(), request.getSrcDevice(),
-                        request.getDstPorts(), request.getDstDevice(), request.getMinAzBandwidth(), request.getMinZaBandwidth(),
+                List<String> srcPortList = new ArrayList<>(request.getSrcPorts());
+                List<String> dstPortList = new ArrayList<>(request.getDstPorts());
+                blueprints.add(entityBuilder.buildRequest(srcPortList, request.getSrcDevice(),
+                        dstPortList, request.getDstDevice(), request.getMinAzBandwidth(), request.getMinZaBandwidth(),
                         PalindromicType.PALINDROME, sType, "any", request.getNumPaths(), 1, 1, "bwReq"));
             }
 

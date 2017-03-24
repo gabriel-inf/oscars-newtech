@@ -23,14 +23,12 @@ import java.util.List;
 public class SurvivableLogicalEdge extends TopoEdge
 {
     private TopoVertex a;
-
     private TopoVertex z;
 
-    private Long metricPrimary;
-    private Long metricSecondary;
+    private List<Long> kMetrics;
 
     private Layer layer;
 
-    private List<TopoEdge> correspondingPrimaryTopoEdges;
-    private List<TopoEdge> correspondingSecondaryTopoEdges;
+    private List<List<TopoEdge>> kCorrespondingTopoEdges;    // In order: Element 1 = Primary path, Element 2 = Secondary path, etc.
+                                                            // Must be PALINDROMIC
 }

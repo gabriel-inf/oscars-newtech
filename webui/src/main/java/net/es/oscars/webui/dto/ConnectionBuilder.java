@@ -154,14 +154,15 @@ public class ConnectionBuilder
                     .build();
             for (String port : junctions.get(nodeId).getFixtures().keySet()) {
                 MinimalFixture fix = junctions.get(nodeId).getFixtures().get(port);
-                Integer bw = Integer.parseInt(fix.getBw());
+                Integer azBw = Integer.parseInt(fix.getAzbw());
+                Integer zaBw = Integer.parseInt(fix.getZabw());
                 String vlan = fix.getVlan();
 
                 RequestedVlanFixture rvfix = RequestedVlanFixture.builder()
                         .fixtureType(EthFixtureType.REQUESTED)
                         .portUrn(port)
-                        .egMbps(bw)
-                        .inMbps(bw)
+                        .egMbps(zaBw)
+                        .inMbps(azBw)
                         .vlanExpression(vlan)
                         .build();
                 rvj.getFixtures().add(rvfix);

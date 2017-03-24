@@ -22,7 +22,7 @@ class ReservationWhatIfApp extends React.Component{
 
         // Junction: {id: ~~, label: ~~, fixtures: {}}
         // fixtures: {id: {id: ~~, selected: true or false, bandwidth: ~~, vlan: ~~}, id: ~~, ....}
-        // Pipe: {id: ~~, a: ~~, z: ~~, bw: ~~}
+        // Pipe: {id: ~~, a: ~~, z: ~~, azbw: ~~}
         let reservation = {
             junctions: {},
             pipes: {},
@@ -99,7 +99,7 @@ class ReservationWhatIfApp extends React.Component{
     }
 
     componentDidUpdate(prevProps, prevState){
-        // Only do verification and bw avail request if relevant state has changed
+        // Only do verification and azbw avail request if relevant state has changed
         let bwAvailRequest = this.state.bwAvailRequest;
         let pathChange = !deepEqual(prevState.bwAvailRequest, bwAvailRequest);
         let portChange = prevState.srcPort != this.state.srcPort || prevState.dstPort != this.state.dstPort;
@@ -895,7 +895,7 @@ function bandwidthMapUnion(azBwMap, zaBwMap){
 function buildReservation(bandwidth, azERO, start, end, src, srcPort, dst, dstPort, connectionId){
     // Junction: {id: ~~, label: ~~, fixtures: {}}
     // fixtures: {id: {id: ~~, selected: true or false, bandwidth: ~~, vlan: ~~}, id: ~~, ....}
-    // Pipe: {id: ~~, a: ~~, z: ~~, bw: ~~}
+    // Pipe: {id: ~~, a: ~~, z: ~~, azbw: ~~}
 
     // Build a pipe for each Pair in the AZ ERO sequence
     let pipesAndJunctions = buildPipesAndJunctions(src, srcPort, dst, dstPort, bandwidth, azERO);
@@ -921,10 +921,10 @@ function buildPipesAndJunctions(src, srcPort, dst, dstPort, bandwidth, ERO){
         let aFixtures = {};
         let zFixtures = {};
         if(currName == src){
-            aFixtures[srcPort] =  {id: srcPort, selected: true, bw: bandwidth, vlan: "2-4094"};
+            aFixtures[srcPort] =  {id: srcPort, selected: true, azbw: bandwidth, zabw: bandwidth, vlan: "2-4094"};
         }
         if(nextName == dst){
-            zFixtures[dstPort] =  {id: dstPort, selected: true, bw: bandwidth, vlan: "2-4094"};
+            zFixtures[dstPort] =  {id: dstPort, selected: true, azbw: bandwidth, zabw:bandwidth, vlan: "2-4094"};
         }
         if(!junctions.hasOwnProperty(currName)){
             junctions[currName] = {id: currName, label: currName, fixtures: aFixtures};

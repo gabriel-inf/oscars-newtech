@@ -6,11 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.topo.TopoEdge;
 import net.es.oscars.dto.topo.TopoVertex;
 import net.es.oscars.dto.topo.Topology;
-import net.es.oscars.dto.topo.enums.VertexType;
-import net.es.oscars.dto.topo.enums.DeviceModel;
-import net.es.oscars.dto.topo.enums.DeviceType;
-import net.es.oscars.dto.topo.enums.Layer;
-import net.es.oscars.dto.topo.enums.UrnType;
+import net.es.oscars.dto.topo.enums.*;
 import net.es.oscars.resv.dao.ReservedBandwidthRepository;
 import net.es.oscars.resv.ent.ReservedBandwidthE;
 import net.es.oscars.topo.dao.ReservableBandwidthRepository;
@@ -57,33 +53,53 @@ public class TopoService {
         this.bwResRepo = bwResRepo;
     }
 
-    public Topology layer(Layer layer) throws NoSuchElementException {
-
-        //log.info("topology for layer " + layer);
+    public Topology layer(Layer layer) throws NoSuchElementException
+    {
         Topology topo = new Topology();
         topo.setLayer(layer);
         List<UrnE> urns = urnRepo.findAll();
         List<UrnAdjcyE> adjcies = adjcyRepo.findAll();
 
         urns.stream()
-                .filter(u -> u.getCapabilities().contains(layer) || layer.equals(Layer.INTERNAL))
-                .forEach(u -> {
-                    VertexType type = null;
-                    if (u.getDeviceType() == null && u.getIfceType() != null) {
-                        type = VertexType.PORT;
-                    } else {
-                        switch (u.getDeviceType()) {
-                            case ROUTER:
-                                type = VertexType.ROUTER;
-                                break;
-                            case SWITCH:
-                                type = VertexType.SWITCH;
-                                break;
-                        }
+            .forEach(u ->
+            {
+                Set<Layer> urnCapabilities = u.getCapabilities();
+                DeviceType urnDeviceType = u.getDeviceType();
+                IfceType urnInterfaceType = u.getIfceType();
+
+                VertexType vertType = null;
+                PortLayer portLayer = PortLayer.NONE;
+
+                if(urnDeviceType == null && urnInterfaceType != null)
+                {
+                    vertType = VertexType.PORT;
+
+                    if(urnCapabilities.contains(Layer.MPLS))
+                    {
+                        portLayer = PortLayer.MPLS;
                     }
-                    TopoVertex dev = new TopoVertex(u.getUrn(), type);
+                    else
+                        portLayer = PortLayer.ETHERNET;
+                }
+                else
+                {
+                    switch (urnDeviceType)
+                    {
+                        case ROUTER:
+                            vertType = VertexType.ROUTER;
+                            break;
+                        case SWITCH:
+                            vertType = VertexType.SWITCH;
+                            break;
+                    }
+                }
+
+                if(urnCapabilities.contains(layer) || layer.equals(Layer.INTERNAL))
+                {
+                    TopoVertex dev = new TopoVertex(u.getUrn(), vertType, portLayer);
                     topo.getVertices().add(dev);
-                });
+                }
+        });
 
         adjcies.stream()
                 .filter(adj -> adj.getMetrics().containsKey(layer))
@@ -96,7 +112,8 @@ public class TopoService {
                         Optional<TopoVertex> a = topo.getVertexByUrn(adj.getA().getUrn());
                         Optional<TopoVertex> z = topo.getVertexByUrn(adj.getZ().getUrn());
 
-                        if (a.isPresent() && z.isPresent()) {
+                        if (a.isPresent() && z.isPresent())
+                        {
                             TopoEdge edge = TopoEdge.builder()
                                     .a(a.get())
                                     .z(z.get())
@@ -210,6 +227,27 @@ public class TopoService {
             return VertexType.ROUTER;
     }
 
+    public PortLayer lookupPortLayer(String portURN)
+    {
+        Optional<UrnE> thePortOpt = urnRepo.findAll().stream()
+                .filter(p -> p.getUrn().equals(portURN))
+                .findFirst();
+
+        if(thePortOpt.isPresent())
+        {
+            UrnE thePort = thePortOpt.get();
+
+            if(thePort.getUrnType().equals(UrnType.DEVICE))
+                return PortLayer.NONE;
+            else if(thePort.getCapabilities().contains(Layer.MPLS))
+                return PortLayer.MPLS;
+            else
+                return PortLayer.ETHERNET;
+        }
+
+        return null;
+    }
+
     public Map<String, Set<String>> buildDeviceToPortMap() {
         Topology topo = getMultilayerTopology();
         Map<String, Set<String>> deviceToPortMap = new HashMap<>();
@@ -257,5 +295,66 @@ public class TopoService {
     public List<ReservedBandwidthE> reservedBandwidths()
     {
         return bwResRepo.findAll();
+    }
+
+    public boolean determineIfRouterHasEthernetPorts(String deviceURN)
+    {
+        List<UrnE> deviceList = urnRepo.findAll().stream().filter(u -> u.getUrn().equals(deviceURN)).collect(Collectors.toList());
+
+        if(deviceList.isEmpty())
+            return false;
+
+        assert(deviceList.size() == 1);
+        assert(deviceList.get(0).getDeviceType().equals(DeviceType.ROUTER));
+
+        Map<String, Set<String>> dToPMap = this.buildDeviceToPortMap();
+        Set<String> portsOnDevice = dToPMap.get(deviceURN);
+
+        for(String onePort : portsOnDevice)
+        {
+            Optional<UrnE> portUrnOpt = urnRepo.findByUrn(onePort);
+            assert(portUrnOpt.isPresent());
+
+            UrnE portURN = portUrnOpt.get();
+
+            if(!portURN.getCapabilities().contains(Layer.MPLS))
+                return true;
+        }
+
+        return false;
+    }
+
+    public Set<String> identifyEdgePortURNs()
+    {
+        Topology fullTopo = getMultilayerTopology();
+        Set<String> edgePortURNs = new HashSet<>();
+
+        Set<TopoVertex> allPorts = fullTopo.getVertices().stream()
+                .filter(v -> v.getVertexType().equals(VertexType.PORT))
+                .collect(Collectors.toSet());
+
+        Set<TopoEdge> allExternalLinks = fullTopo.getEdges().stream()
+                .filter(l -> !l.getLayer().equals(Layer.INTERNAL))
+                .collect(Collectors.toSet());
+
+        for(TopoVertex onePort : allPorts)
+        {
+            String portURN = onePort.getUrn();
+            boolean portNotOnAnyLink = true;
+
+            for(TopoEdge oneExtAdjcy : allExternalLinks)
+            {
+                if(oneExtAdjcy.getA().equals(onePort) || oneExtAdjcy.getZ().equals(onePort))    // The port doesn't exist on an external (ETHERNET/MPLS) edge
+                {
+                    portNotOnAnyLink = false;
+                    break;
+                }
+            }
+
+            if(portNotOnAnyLink)
+                edgePortURNs.add(portURN);
+        }
+
+        return edgePortURNs;
     }
 }

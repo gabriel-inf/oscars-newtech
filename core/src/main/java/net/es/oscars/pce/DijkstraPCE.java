@@ -37,11 +37,10 @@ public class DijkstraPCE {
      * @return path as List of TopoEdge objects
      */
     public List<TopoEdge> computeShortestPathEdges(Topology topology, TopoVertex srcVertex, TopoVertex dstVertex) {
-        //log.info("finding shortest path between " + srcVertex.getUrn() + " -- " + dstVertex.getUrn());
 
         Graph<TopoVertex, TopoEdge> graph = new DirectedSparseMultigraph<>();
 
-        Transformer<TopoEdge, Double> wtTransformer = edge -> edge.getMetric().doubleValue();
+         Transformer<TopoEdge, Double> wtTransformer = edge -> edge.getMetric().doubleValue();
 
         this.addToGraph(topology, graph);
 
@@ -103,15 +102,15 @@ public class DijkstraPCE {
     private void addToGraph(Topology topo, Graph<TopoVertex, TopoEdge> g) {
         topo.getVertices().stream()
                 .forEach(v -> {
-                            //log.info("adding vertex to Dijkstra graph: " + v.getUrn());
+                            //log.info("adding vertex to Dijkstra graph: " + v.toString());
                             g.addVertex(v);
                         }
                 );
 
         topo.getEdges().stream()
                 .forEach(e -> {
-                            TopoVertex nodeA = new TopoVertex(e.getA().getUrn(), e.getA().getVertexType());
-                            TopoVertex nodeZ = new TopoVertex(e.getZ().getUrn(), e.getZ().getVertexType());
+                            TopoVertex nodeA = new TopoVertex(e.getA().getUrn(), e.getA().getVertexType(), e.getA().getPortLayer());
+                            TopoVertex nodeZ = new TopoVertex(e.getZ().getUrn(), e.getZ().getVertexType(), e.getZ().getPortLayer());
                             TopoEdge az = TopoEdge.builder().a(nodeA).z(nodeZ).build();
 
                             az.setMetric(e.getMetric());
