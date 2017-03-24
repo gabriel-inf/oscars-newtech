@@ -68,10 +68,6 @@
     "urn": "aofa-cr5:1/1/1"
   },
   {
-    "ipv4Address": "134.55.200.153",
-    "urn": "paix-pa-rt3"
-  },
-  {
     "ipv4Address": "134.55.222.14",
     "urn": "lond-cr5:2/1/1"
   },
@@ -232,10 +228,6 @@
     "urn": "ornl-rt4:xe-1/2/0"
   },
   {
-    "ipv4Address": "127.0.0.1",
-    "urn": "lvk-rt2"
-  },
-  {
     "ipv4Address": "134.55.217.114",
     "urn": "ameslab-rt3:xe-1/0/0"
   },
@@ -286,10 +278,6 @@
   {
     "ipv4Address": "134.55.38.74",
     "urn": "nash-cr5:2/1/1"
-  },
-  {
-    "ipv4Address": "127.0.0.1",
-    "urn": "esnet-rt5"
   },
   {
     "ipv4Address": "134.55.40.201",
@@ -672,10 +660,6 @@
     "urn": "newy-cr5:4/1/1"
   },
   {
-    "ipv4Address": "198.124.245.1",
-    "urn": "bnl-rt3"
-  },
-  {
     "ipv4Address": "134.55.200.103",
     "urn": "ornl-rt4"
   },
@@ -846,10 +830,6 @@
   {
     "ipv4Address": "134.55.222.13",
     "urn": "amst-cr5:2/1/1"
-  },
-  {
-    "ipv4Address": "134.55.41.73",
-    "urn": "paix-pa-rt3:ae0"
   },
   {
     "ipv4Address": "134.55.42.30",
