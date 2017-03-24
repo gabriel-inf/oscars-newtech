@@ -53,53 +53,45 @@ public class TopoService {
         this.bwResRepo = bwResRepo;
     }
 
-    public Topology layer(Layer layer) throws NoSuchElementException
-    {
+    public Topology layer(Layer layer) throws NoSuchElementException {
         Topology topo = new Topology();
         topo.setLayer(layer);
         List<UrnE> urns = urnRepo.findAll();
         List<UrnAdjcyE> adjcies = adjcyRepo.findAll();
 
         urns.stream()
-            .forEach(u ->
-            {
-                Set<Layer> urnCapabilities = u.getCapabilities();
-                DeviceType urnDeviceType = u.getDeviceType();
-                IfceType urnInterfaceType = u.getIfceType();
-
-                VertexType vertType = null;
-                PortLayer portLayer = PortLayer.NONE;
-
-                if(urnDeviceType == null && urnInterfaceType != null)
+                .forEach(u ->
                 {
-                    vertType = VertexType.PORT;
+                    Set<Layer> urnCapabilities = u.getCapabilities();
+                    DeviceType urnDeviceType = u.getDeviceType();
+                    IfceType urnInterfaceType = u.getIfceType();
 
-                    if(urnCapabilities.contains(Layer.MPLS))
-                    {
-                        portLayer = PortLayer.MPLS;
+                    VertexType vertType = null;
+                    PortLayer portLayer = PortLayer.NONE;
+
+                    if (urnDeviceType == null && urnInterfaceType != null) {
+                        vertType = VertexType.PORT;
+
+                        if (urnCapabilities.contains(Layer.MPLS)) {
+                            portLayer = PortLayer.MPLS;
+                        } else
+                            portLayer = PortLayer.ETHERNET;
+                    } else {
+                        switch (urnDeviceType) {
+                            case ROUTER:
+                                vertType = VertexType.ROUTER;
+                                break;
+                            case SWITCH:
+                                vertType = VertexType.SWITCH;
+                                break;
+                        }
                     }
-                    else
-                        portLayer = PortLayer.ETHERNET;
-                }
-                else
-                {
-                    switch (urnDeviceType)
-                    {
-                        case ROUTER:
-                            vertType = VertexType.ROUTER;
-                            break;
-                        case SWITCH:
-                            vertType = VertexType.SWITCH;
-                            break;
-                    }
-                }
 
-                if(urnCapabilities.contains(layer) || layer.equals(Layer.INTERNAL))
-                {
-                    TopoVertex dev = new TopoVertex(u.getUrn(), vertType, portLayer);
-                    topo.getVertices().add(dev);
-                }
-        });
+                    if (urnCapabilities.contains(layer) || layer.equals(Layer.INTERNAL)) {
+                        TopoVertex dev = new TopoVertex(u.getUrn(), vertType, portLayer);
+                        topo.getVertices().add(dev);
+                    }
+                });
 
         adjcies.stream()
                 .filter(adj -> adj.getMetrics().containsKey(layer))
@@ -112,8 +104,7 @@ public class TopoService {
                         Optional<TopoVertex> a = topo.getVertexByUrn(adj.getA().getUrn());
                         Optional<TopoVertex> z = topo.getVertexByUrn(adj.getZ().getUrn());
 
-                        if (a.isPresent() && z.isPresent())
-                        {
+                        if (a.isPresent() && z.isPresent()) {
                             TopoEdge edge = TopoEdge.builder()
                                     .a(a.get())
                                     .z(z.get())
@@ -203,8 +194,8 @@ public class TopoService {
         return adjcies.stream()
                 .filter(adj ->
                         adj.getMetrics().containsKey(Layer.INTERNAL)
-                        && adj.getA().getUrn().equals(device)
-                        && adj.getZ().getCapabilities().contains(layer))
+                                && adj.getA().getUrn().equals(device)
+                                && adj.getZ().getCapabilities().contains(layer))
                 .map(adj -> adj.getZ().getUrn())
                 .collect(Collectors.toList());
 
@@ -227,19 +218,17 @@ public class TopoService {
             return VertexType.ROUTER;
     }
 
-    public PortLayer lookupPortLayer(String portURN)
-    {
+    public PortLayer lookupPortLayer(String portURN) {
         Optional<UrnE> thePortOpt = urnRepo.findAll().stream()
                 .filter(p -> p.getUrn().equals(portURN))
                 .findFirst();
 
-        if(thePortOpt.isPresent())
-        {
+        if (thePortOpt.isPresent()) {
             UrnE thePort = thePortOpt.get();
 
-            if(thePort.getUrnType().equals(UrnType.DEVICE))
+            if (thePort.getUrnType().equals(UrnType.DEVICE))
                 return PortLayer.NONE;
-            else if(thePort.getCapabilities().contains(Layer.MPLS))
+            else if (thePort.getCapabilities().contains(Layer.MPLS))
                 return PortLayer.MPLS;
             else
                 return PortLayer.ETHERNET;
@@ -292,40 +281,36 @@ public class TopoService {
         return portToDeviceMap;
     }
 
-    public List<ReservedBandwidthE> reservedBandwidths()
-    {
+    public List<ReservedBandwidthE> reservedBandwidths() {
         return bwResRepo.findAll();
     }
 
-    public boolean determineIfRouterHasEthernetPorts(String deviceURN)
-    {
+    public boolean determineIfRouterHasEthernetPorts(String deviceURN) {
         List<UrnE> deviceList = urnRepo.findAll().stream().filter(u -> u.getUrn().equals(deviceURN)).collect(Collectors.toList());
 
-        if(deviceList.isEmpty())
+        if (deviceList.isEmpty())
             return false;
 
-        assert(deviceList.size() == 1);
-        assert(deviceList.get(0).getDeviceType().equals(DeviceType.ROUTER));
+        assert (deviceList.size() == 1);
+        assert (deviceList.get(0).getDeviceType().equals(DeviceType.ROUTER));
 
         Map<String, Set<String>> dToPMap = this.buildDeviceToPortMap();
         Set<String> portsOnDevice = dToPMap.get(deviceURN);
 
-        for(String onePort : portsOnDevice)
-        {
+        for (String onePort : portsOnDevice) {
             Optional<UrnE> portUrnOpt = urnRepo.findByUrn(onePort);
-            assert(portUrnOpt.isPresent());
+            assert (portUrnOpt.isPresent());
 
             UrnE portURN = portUrnOpt.get();
 
-            if(!portURN.getCapabilities().contains(Layer.MPLS))
+            if (!portURN.getCapabilities().contains(Layer.MPLS))
                 return true;
         }
 
         return false;
     }
 
-    public Set<String> identifyEdgePortURNs()
-    {
+    public Set<String> identifyEdgePortURNs() {
         Topology fullTopo = getMultilayerTopology();
         Set<String> edgePortURNs = new HashSet<>();
 
@@ -337,21 +322,19 @@ public class TopoService {
                 .filter(l -> !l.getLayer().equals(Layer.INTERNAL))
                 .collect(Collectors.toSet());
 
-        for(TopoVertex onePort : allPorts)
-        {
+        for (TopoVertex onePort : allPorts) {
             String portURN = onePort.getUrn();
             boolean portNotOnAnyLink = true;
 
-            for(TopoEdge oneExtAdjcy : allExternalLinks)
-            {
-                if(oneExtAdjcy.getA().equals(onePort) || oneExtAdjcy.getZ().equals(onePort))    // The port doesn't exist on an external (ETHERNET/MPLS) edge
+            for (TopoEdge oneExtAdjcy : allExternalLinks) {
+                if (oneExtAdjcy.getA().equals(onePort) || oneExtAdjcy.getZ().equals(onePort))    // The port doesn't exist on an external (ETHERNET/MPLS) edge
                 {
                     portNotOnAnyLink = false;
                     break;
                 }
             }
 
-            if(portNotOnAnyLink)
+            if (portNotOnAnyLink)
                 edgePortURNs.add(portURN);
         }
 

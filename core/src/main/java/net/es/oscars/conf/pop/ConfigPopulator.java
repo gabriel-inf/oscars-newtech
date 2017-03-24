@@ -7,12 +7,10 @@ import net.es.oscars.conf.dao.ConfigRepository;
 import net.es.oscars.conf.ent.EStartupConfig;
 import net.es.oscars.conf.prop.StartupConfigContainer;
 import net.es.oscars.conf.prop.StartupConfigEntry;
-import net.es.oscars.helpers.JsonHelper;
 import org.apache.commons.lang3.SerializationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 import java.util.Optional;
 
@@ -20,11 +18,9 @@ import java.util.Optional;
 @Component
 public class ConfigPopulator {
     private boolean started = false;
-    private StartupConfigContainer startup;
 
+    private StartupConfigContainer startup;
     private ConfigRepository repository;
-    @Autowired
-    private JsonHelper jsonHelper;
 
     @Autowired
     public ConfigPopulator(ConfigRepository repository, StartupConfigContainer startup) {
@@ -62,7 +58,7 @@ public class ConfigPopulator {
 
             } else {
                 log.info("Startup config for OSCARS module " + name + " missing from DB; saving a new one from defaults.");
-                ObjectMapper mapper = jsonHelper.mapper();
+                ObjectMapper mapper = new ObjectMapper();
                 String jsonString = mapper.writeValueAsString(cfg);
 
                 EStartupConfig configEnt = new EStartupConfig();

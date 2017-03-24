@@ -16,9 +16,6 @@ public class PssConfig {
     private String url;
 
     @NonNull
-    private String addressesFilename;
-
-    @NonNull
     private String vcidRange;
 
     @NonNull

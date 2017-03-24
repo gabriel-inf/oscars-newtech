@@ -2,11 +2,9 @@ package net.es.oscars.pss.pop;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.helpers.JsonHelper;
 import net.es.oscars.pss.dao.UrnAddressRepository;
 import net.es.oscars.pss.ent.UrnAddressE;
 import net.es.oscars.topo.prop.TopoProperties;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -17,16 +15,15 @@ import java.util.List;
 @Slf4j
 @Component
 public class UrnAddressImporter {
-
-    @Autowired
     private TopoProperties topoProperties;
 
-    @Autowired
     private UrnAddressRepository repo;
 
-    @Autowired
-    private JsonHelper jsonHelper;
 
+    public UrnAddressImporter(TopoProperties topoProperties, UrnAddressRepository repo) {
+        this.topoProperties = topoProperties;
+        this.repo = repo;
+    }
 
     public void startup() {
 
@@ -48,7 +45,7 @@ public class UrnAddressImporter {
     }
     private List<UrnAddressE> importAddrsFromFile(String filename) throws IOException {
         File jsonFile = new File(filename);
-        ObjectMapper mapper = jsonHelper.mapper();
+        ObjectMapper mapper = new ObjectMapper();
         return Arrays.asList(mapper.readValue(jsonFile, UrnAddressE[].class));
     }
 
