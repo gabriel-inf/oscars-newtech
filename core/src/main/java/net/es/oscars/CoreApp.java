@@ -18,9 +18,13 @@ public class CoreApp {
     public static void main(String[] args) {
         ConfigurableApplicationContext app = SpringApplication.run(CoreApp.class, args);
         Startup startup = (Startup)app.getBean("startup");
-        try {
 
-            startup.onStart();
+        try {
+            Boolean consistent = startup.onStart();
+            if (!consistent) {
+                log.error("topology consistency error!");
+                System.exit(1);
+            }
         } catch (Exception ex) {
             log.error("startup error!", ex);
             System.exit(1);

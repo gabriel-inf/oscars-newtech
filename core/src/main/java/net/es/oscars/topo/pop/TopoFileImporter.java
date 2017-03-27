@@ -3,7 +3,6 @@ package net.es.oscars.topo.pop;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.topo.enums.Layer;
-import net.es.oscars.helpers.JsonHelper;
 import net.es.oscars.topo.dao.UrnAdjcyRepository;
 import net.es.oscars.topo.dao.UrnRepository;
 import net.es.oscars.topo.ent.ReservableBandwidthE;
@@ -18,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -33,16 +31,12 @@ public class TopoFileImporter {
 
     private TopoProperties topoProperties;
 
-    private JsonHelper helper;
-
-
     @Autowired
     public TopoFileImporter(UrnRepository urnRepo, UrnAdjcyRepository adjcyRepo,
-                            TopoProperties topoProperties, JsonHelper helper) {
+                            TopoProperties topoProperties) {
         this.urnRepo = urnRepo;
         this.adjcyRepo = adjcyRepo;
         this.topoProperties = topoProperties;
-        this.helper = helper;
     }
 
     @Transactional
@@ -220,13 +214,13 @@ public class TopoFileImporter {
 
     private List<Device> importDevicesFromFile(String filename, boolean overwrite) throws IOException {
         File jsonFile = new File(filename);
-        ObjectMapper mapper = helper.mapper();
+        ObjectMapper mapper = new ObjectMapper();
         return Arrays.asList(mapper.readValue(jsonFile, Device[].class));
     }
 
     private List<UrnAdjcyE> importAdjciesFromFile(String filename, boolean overwrite) throws IOException {
         File jsonFile = new File(filename);
-        ObjectMapper mapper = helper.mapper();
+        ObjectMapper mapper = new ObjectMapper();
         List<UrnAdjcy> fromFile = Arrays.asList(mapper.readValue(jsonFile, UrnAdjcy[].class));
         List<UrnAdjcyE> result = new ArrayList<>();
         fromFile.forEach(t -> {

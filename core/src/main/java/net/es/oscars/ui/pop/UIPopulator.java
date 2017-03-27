@@ -5,12 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.viz.Position;
-import net.es.oscars.helpers.JsonHelper;
 import net.es.oscars.topo.prop.TopoProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
@@ -19,16 +17,17 @@ import java.util.Map;
 @Component
 @Data
 public class UIPopulator {
-    @Autowired
     private TopoProperties topoProperties;
 
     @Autowired
-    private JsonHelper jsonHelper;
+    public UIPopulator(TopoProperties topoProperties) {
+        this.topoProperties = topoProperties;
+    }
 
     private Map<String, Position> positions;
 
     public void startup() throws IOException {
-        ObjectMapper mapper = jsonHelper.mapper();
+        ObjectMapper mapper = new ObjectMapper();
 
         String filename = "./config/topo/"+topoProperties.getPrefix()+"-positions.json";
         File jsonFile = new File(filename);
@@ -37,9 +36,6 @@ public class UIPopulator {
         log.info("positions imported for devices: " + positions.size());
 
     }
-
-
-
 
 
 }
