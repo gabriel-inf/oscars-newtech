@@ -19,18 +19,22 @@ import java.util.*;
 @Slf4j
 public class SuggestionService {
 
-    @Autowired
     DateService dateService;
 
-    @Autowired
     BandwidthAvailabilityGenerationService bwAvailGenService;
 
-    @Autowired
     BandwidthAvailabilityService bwAvailService;
 
+    SuggestionGenerator suggestionGenerator;
 
     @Autowired
-    SuggestionGenerator suggestionGenerator;
+    public SuggestionService(DateService dateService, BandwidthAvailabilityGenerationService bwAvailGenService,
+                             BandwidthAvailabilityService bwAvailService, SuggestionGenerator suggestionGenerator) {
+        this.dateService = dateService;
+        this.bwAvailGenService = bwAvailGenService;
+        this.bwAvailService = bwAvailService;
+        this.suggestionGenerator = suggestionGenerator;
+    }
 
 
     /**

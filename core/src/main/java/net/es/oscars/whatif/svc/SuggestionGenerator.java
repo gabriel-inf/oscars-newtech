@@ -19,15 +19,19 @@ import java.util.*;
 public class SuggestionGenerator {
 
 
-    @Autowired
     ConnectionGenerationService connectionGenerationService;
 
-    @Autowired
     ResvController resvController;
 
 
-    @Autowired
     DateService dateService;
+
+    @Autowired
+    public SuggestionGenerator(ConnectionGenerationService connectionGenerationService, ResvController resvController, DateService dateService) {
+        this.connectionGenerationService = connectionGenerationService;
+        this.resvController = resvController;
+        this.dateService = dateService;
+    }
 
 
     /**

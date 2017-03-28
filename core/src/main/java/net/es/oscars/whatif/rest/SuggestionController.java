@@ -18,8 +18,12 @@ import java.util.List;
 @Controller
 public class SuggestionController {
 
-    @Autowired
     SuggestionService suggestionService;
+
+    @Autowired
+    public SuggestionController(SuggestionService suggestionService) {
+        this.suggestionService = suggestionService;
+    }
 
     @RequestMapping(value = "/whatif/suggestion/volume", method = RequestMethod.POST)
     @ResponseBody
