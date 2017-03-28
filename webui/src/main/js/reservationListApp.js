@@ -17,8 +17,8 @@ class ReservationListApp extends React.Component{
             reservations: [],
             timeoutId: -1,
             filters: [],
-            newFilter: {id: 0, name: "", type: "user"},
-            filterTypes: ["Reservation Status", "Provisioning Status", "Operation Status", "Bandwidth", "User",
+            newFilter: {id: 0, name: "", type: "User Name"},
+            filterTypes: ["Reservation Status", "Provisioning Status", "Operation Status", "Bandwidth", "User Name",
                 "Start After Date", "End Before Date"],
             updateHeatMap: false
         };
@@ -111,44 +111,32 @@ class FilterPanel extends React.Component{
     render(){
         return(
             <div>
-                <input className="form-control input-md" value={this.props.newFilter.name} onChange={this.props.handleFilterNameChange}/>
-                <input type="button" className="btn btn-primary" value="Add" onClick={this.props.handleAddFilter} />
-                <FilterDropdown
-                    filterTypes={this.props.filterTypes}
-                    newFilter={this.props.newFilter}
-                    handleFilterTypeSelect={this.props.handleFilterTypeSelect}
-                />
+                <p>Filter Reservations By: </p>
+                <div style={{ display: "flex" }}>
+                    <input style={{ width: "10%" }} className="form-control input-md" value={this.props.newFilter.name} onChange={this.props.handleFilterNameChange}/>
+                    <Dropdown options={this.props.filterTypes}
+                              value={this.props.newFilter.type}
+                              placeholder="Select a filter type"
+                              onChange={this.props.handleFilterTypeSelect}
+                              style={{ width: "10%"}}
+                    />
+                    <input type="button" className="btn btn-primary" value="Add" onClick={this.props.handleAddFilter} />
+                </div>
                 <FilterList filters={this.props.filters} handleDeleteFilter={this.props.handleDeleteFilter}/>
             </div>
         );
     }
 }
 
-class FilterDropdown extends React.Component{
-
-    render(){
-        return(
-            <div className="dropdown">
-                <p style={{fontSize: "16px"}}>Select Filter Type</p>
-                <Dropdown options={this.props.filterTypes}
-                          value={this.props.newFilter.type}
-                          placeholder="Select a filter type"
-                          onChange={this.props.handleFilterTypeSelect}
-                />
-            </div>
-        );
-    }
-}
 
 class FilterList extends React.Component{
 
     render(){
         let listItems = this.props.filters.map((filter) => <FilterItem key={filter.id} filter={filter} handleDeleteFilter={this.props.handleDeleteFilter}/>);
         return(
-            <div>
-                <ul>
-                    {listItems}
-                </ul>
+            <div style={{ display: "flex" , marginTop: "20px"}}>
+                <p>Filter tags: <br/> (Click to delete)</p>
+                <ul style={{ display: "flex" , flexDirection: "row", listStyle: "none"}}>{listItems}</ul>
             </div>
         );
     }
@@ -159,7 +147,10 @@ class FilterItem extends React.Component{
     render(){
         return(
             <li key={this.props.filter.id}
-                onClick={this.props.handleDeleteFilter.bind(this, this.props.filter)}>{this.props.filter.name}</li>
+                onClick={this.props.handleDeleteFilter.bind(this, this.props.filter)}
+                className="btn btn-secondary"
+                style={{marginRight: "10px", backgroundColor: "lightBlue"}}
+            >{this.props.filter.name}</li>
         );
     }
 }
