@@ -100,27 +100,41 @@ public class ReservationController {
 
     @RequestMapping(value = "/resv/list/filter", method = RequestMethod.POST)
     @ResponseBody
-    public Set<Connection> resv_filter_connections(Filter filter) {
+    public Set<Connection> resv_filter_connections(@RequestBody Filter filter) {
         ConnectionFilter f = makeConnectionFilter(filter);
         return connectionProvider.filtered(f);
     }
 
     private ConnectionFilter makeConnectionFilter(Filter filter) {
+        Set<String> connectionIds = filter.getConnectionIds() == null ? new HashSet<>() : filter.getConnectionIds();
 
-        Set<Date> startDates = filter.getStartDates().stream().map(d-> new Date(d * 1000L)).collect(Collectors.toSet());
-        Set<Date> endDates = filter.getStartDates().stream().map(d-> new Date(d * 1000L)).collect(Collectors.toSet());
-        Set<ResvState> resvStates = filter.getResvStates().stream().map(s -> ResvState.get(s).orElse(ResvState.IDLE_WAIT)).collect(Collectors.toSet());
-        Set<ProvState> provStates = filter.getProvStates().stream().map(s -> ProvState.get(s).orElse(ProvState.BUILT_AUTO)).collect(Collectors.toSet());
-        Set<OperState> operStates = filter.getOperStates().stream().map(s -> OperState.get(s).orElse(OperState.ADMIN_UP_OPER_UP)).collect(Collectors.toSet());
+        Set<String> userNames = filter.getUserNames() == null ? new HashSet<>() : filter.getUserNames();
+
+        Set<Date> startDates = filter.getStartDates() == null ? new HashSet<>() :
+                filter.getStartDates().stream().map(d-> new Date(d * 1000L)).collect(Collectors.toSet()) ;
+
+        Set<Date> endDates = filter.getEndDates() == null ? new HashSet<>() :
+                filter.getStartDates().stream().map(d-> new Date(d * 1000L)).collect(Collectors.toSet()) ;
+
+        Set<ResvState> resvStates = filter.getResvStates() == null ? new HashSet<>() :
+                filter.getResvStates().stream().map(s -> ResvState.get(s).orElse(ResvState.IDLE_WAIT)).collect(Collectors.toSet());
+
+        Set<ProvState> provStates = filter.getProvStates() == null ? new HashSet<>() :
+                filter.getProvStates().stream().map(s -> ProvState.get(s).orElse(ProvState.BUILT_AUTO)).collect(Collectors.toSet());
+
+        Set<OperState> operStates = filter.getOperStates() == null ? new HashSet<>() :
+                filter.getOperStates().stream().map(s -> OperState.get(s).orElse(OperState.ADMIN_UP_OPER_UP)).collect(Collectors.toSet());
+
+        Set<Integer> bandwidths = filter.getBandwidths() == null ? new HashSet<>() : filter.getBandwidths();
         return ConnectionFilter.builder()
-                .connectionIds(filter.getConnectionIds())
-                .userNames(filter.getUserNames())
+                .connectionIds(connectionIds)
+                .userNames(userNames)
                 .resvStates(resvStates)
                 .provStates(provStates)
                 .operStates(operStates)
                 .startDates(startDates)
                 .endDates(endDates)
-                .bandwidths(filter.getBandwidths())
+                .bandwidths(bandwidths)
                 .build();
     }
 

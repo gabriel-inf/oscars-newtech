@@ -9,6 +9,15 @@ const ReservationList = require("./reservationList");
 import Dropdown from 'react-dropdown';
 
 let timeoutId = -1;
+let resStatusFilter = "Reservation Status";
+let provStatusFilter = "Provision Status";
+let operStatusFilter = "Operation Status";
+let bandwidthFilter = "Bandwidth";
+let userNameFilter = "User Name";
+let startFilter = "Start After Date";
+let endFilter = "End After Date";
+let idFilter = "Connection ID";
+
 class ReservationListApp extends React.Component{
 
     constructor(props){
@@ -17,9 +26,9 @@ class ReservationListApp extends React.Component{
             reservations: [],
             timeoutId: -1,
             filters: [],
-            newFilter: {id: 0, name: "", type: "User Name"},
-            filterTypes: ["Reservation Status", "Provisioning Status", "Operation Status", "Bandwidth", "User Name",
-                "Start After Date", "End Before Date"],
+            newFilter: {id: 0, text: "", type: "Connection ID"},
+            filterTypes: [idFilter, userNameFilter, bandwidthFilter, startFilter, endFilter, resStatusFilter,
+                provStatusFilter, operStatusFilter],
             updateHeatMap: false
         };
         this.setState = this.setState.bind(this);
@@ -30,7 +39,7 @@ class ReservationListApp extends React.Component{
         this.handleFilterTypeSelect = this.handleFilterTypeSelect.bind(this);
         this.handleAddFilter = this.handleAddFilter.bind(this);
         this.handleDeleteFilter = this.handleDeleteFilter.bind(this);
-        this.handleFilterNameChange = this.handleFilterNameChange.bind(this);
+        this.handleFilterTextChange = this.handleFilterTextChange.bind(this);
     }
 
     componentDidMount(){
@@ -42,7 +51,8 @@ class ReservationListApp extends React.Component{
     }
 
     updateReservations(){
-        client.loadJSON({method: "GET", url: '/resv/list/allconnections'})
+        let combinedFilter = this.makeCombinedFilter(this.state.filters);
+        client.submit("POST", '/resv/list/filter', combinedFilter)
             .then(
                 (successResponse) => {
                     this.evaluateReservationList(successResponse);
@@ -52,6 +62,49 @@ class ReservationListApp extends React.Component{
                 }
         );
         timeoutId = setTimeout(this.updateReservations, 30000);   // Updates every 30 seconds
+    }
+
+    makeCombinedFilter(filters){
+        let combinedFilter = {
+            userNames: [],
+            connectionIds: [],
+            bandwidths: [],
+            startDates: [],
+            endDates: [],
+            resvStates: [],
+            provStates: [],
+            operStates: []
+        };
+        for(let i = 0; i < filters.length; i++){
+            let filter = filters[i];
+            switch(filter.type){
+                case userNameFilter:
+                    combinedFilter.userNames.push(filter.text);
+                    break;
+                case bandwidthFilter:
+                    combinedFilter.bandwidths.push(filter.text);
+                    break;
+                case idFilter:
+                    combinedFilter.connectionIds.push(filter.text);
+                    break;
+                case startFilter:
+                    combinedFilter.startDates.push(filter.text);
+                    break;
+                case endFilter:
+                    combinedFilter.endDates.push(filter.text);
+                    break;
+                case resStatusFilter:
+                    combinedFilter.resvStates.push(filter.text);
+                    break;
+                case provStatusFilter:
+                    combinedFilter.provStates.push(filter.text);
+                    break;
+                case operStatusFilter:
+                    combinedFilter.operStates.push(filter.text);
+                    break;
+            }
+        }
+        return combinedFilter;
     }
 
     evaluateReservationList(response){
@@ -64,15 +117,14 @@ class ReservationListApp extends React.Component{
         }
     }
 
-
     handleFilterTypeSelect(type){
-        this.setState({newFilter: {id: this.state.newFilter.id, name: this.state.newFilter.name, type: type}, updateHeatMap: false});
+        this.setState({newFilter: {id: this.state.newFilter.id, text: this.state.newFilter.text, type: type.value}, updateHeatMap: false});
     }
 
     handleAddFilter(){
         let filter = $.extend(true, {}, this.state.newFilter);
         this.state.filters.push(filter);
-        this.setState({newFilter: {id: filter.id + 1, name: "", type: filter.type}, updateHeatMap: false});
+        this.setState({newFilter: {id: filter.id + 1, text: "", type: filter.type}, updateHeatMap: false});
     }
 
     handleDeleteFilter(filter){
@@ -81,9 +133,9 @@ class ReservationListApp extends React.Component{
         this.setState({filters: filteredList, updateHeatMap: false});
     }
 
-    handleFilterNameChange(event){
-        let newName = event.target.value;
-        this.setState({newFilter: {id: this.state.newFilter.id, name: newName, type: this.state.newFilter.type}, updateHeatMap: false});
+    handleFilterTextChange(event){
+        let newText = event.target.value;
+        this.setState({newFilter: {id: this.state.newFilter.id, text: newText, type: this.state.newFilter.type}, updateHeatMap: false});
     }
 
     render() {
@@ -96,7 +148,7 @@ class ReservationListApp extends React.Component{
                              handleAddFilter={this.handleAddFilter}
                              handleDeleteFilter={this.handleDeleteFilter}
                              handleFilterTypeSelect={this.handleFilterTypeSelect}
-                             handleFilterNameChange={this.handleFilterNameChange}
+                             handleFilterTextChange={this.handleFilterTextChange}
                 />
                 <ReservationHeatMap updateHeatMap={this.state.updateHeatMap}/>
                 <p style={{marginLeft: '40px', color: '#2c5699'}}> Select a connection to view additional reservation details.</p>
@@ -113,7 +165,7 @@ class FilterPanel extends React.Component{
             <div>
                 <p>Filter Reservations By: </p>
                 <div style={{ display: "flex" }}>
-                    <input style={{ width: "10%" }} className="form-control input-md" value={this.props.newFilter.name} onChange={this.props.handleFilterNameChange}/>
+                    <input style={{ width: "10%" }} className="form-control input-md" value={this.props.newFilter.name} onChange={this.props.handleFilterTextChange}/>
                     <Dropdown options={this.props.filterTypes}
                               value={this.props.newFilter.type}
                               placeholder="Select a filter type"
@@ -150,7 +202,7 @@ class FilterItem extends React.Component{
                 onClick={this.props.handleDeleteFilter.bind(this, this.props.filter)}
                 className="btn btn-secondary"
                 style={{marginRight: "10px", backgroundColor: "lightBlue"}}
-            >{this.props.filter.name}</li>
+            >{this.props.filter.type + ": " + this.props.filter.text}</li>
         );
     }
 }

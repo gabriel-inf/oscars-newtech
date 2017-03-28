@@ -122,13 +122,16 @@ public class ResvController {
     @ResponseBody
     public Set<Connection> resvFilter(@RequestBody ConnectionFilter filter) {
         Set<Connection> result = new HashSet<>();
-        if (filter.getConnectionIds() != null) {
-
+        boolean atLeastOneParameterSet = false;
+        if (filter.getConnectionIds() != null && !filter.getConnectionIds().isEmpty()) {
+            atLeastOneParameterSet = true;
             for(String connId : filter.getConnectionIds()){
                 Optional<ConnectionE> c = resvService.findByConnectionId(connId);
                 c.ifPresent(connectionE -> result.add(this.convertConnToDto(connectionE)));
             }
-        } else if (filter.getResvStates() != null) {
+        }
+        if (filter.getResvStates() != null && !filter.getResvStates().isEmpty()) {
+            atLeastOneParameterSet = true;
             filter.getResvStates().forEach(st -> {
                 resvService.ofResvState(st).forEach(ce -> {
                     Connection c = this.convertConnToDto(ce);
@@ -137,7 +140,8 @@ public class ResvController {
 
             });
 
-        } else {
+        }
+        if(!atLeastOneParameterSet){
             for (ConnectionE eItem : resvService.findAll()) {
                 Connection dtoItem = convertConnToDto(eItem);
                 result.add(dtoItem);
