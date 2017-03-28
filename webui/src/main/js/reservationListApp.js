@@ -51,7 +51,7 @@ class ReservationListApp extends React.Component{
                     console.log("Error: " + failResponse.status + " - " + failResponse.statusText);
                 }
         );
-        timeoutId = setTimeout(this.updateReservations, 15000);   // Updates every 15 seconds
+        timeoutId = setTimeout(this.updateReservations, 30000);   // Updates every 30 seconds
     }
 
     evaluateReservationList(response){
@@ -77,7 +77,8 @@ class ReservationListApp extends React.Component{
 
     handleDeleteFilter(filter){
         let id = filter.id;
-        this.state.filters.filter((f) => {return f.id != id});
+        let filteredList = this.state.filters.filter((f) => {return f.id != id});
+        this.setState({filters: filteredList, updateHeatMap: false});
     }
 
     handleFilterNameChange(event){
