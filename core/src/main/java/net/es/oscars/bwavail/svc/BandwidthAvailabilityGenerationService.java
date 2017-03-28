@@ -17,10 +17,11 @@ public class BandwidthAvailabilityGenerationService {
     private DateService dateService;
 
     public BandwidthAvailabilityRequest generateBandwidthAvailabilityRequest(SimpleBandwidthAvailabilityRequest request){
+        Date start = dateService.parseDate(request.getStartDate());
+        Date end = dateService.parseDate(request.getEndDate());
         return generateBandwidthAvailabilityRequest(request.getSrcDevice(), request.getSrcPorts(), request.getDstDevice(),
                 request.getDstPorts(), request.getAzEros(), request.getZaEros(), request.getMinAzBandwidth(),
-                request.getMinZaBandwidth(), request.getNumPaths(), request.getDisjointPaths(), request.getStartDate(),
-                request.getEndDate());
+                request.getMinZaBandwidth(), request.getNumPaths(), request.getDisjointPaths(), start, end);
     }
 
     public BandwidthAvailabilityRequest generateBandwidthAvailabilityRequest(String srcDevice, Set<String> srcPorts,
@@ -28,9 +29,7 @@ public class BandwidthAvailabilityGenerationService {
                                                                              List<List<String>> azEROs, List<List<String>> zaEros,
                                                                              Integer minAzBandwidth, Integer minZaBandwidth,
                                                                              Integer numPaths, Boolean disjointPaths,
-                                                                             String startDate, String endDate){
-        Date start = dateService.parseDate(startDate);
-        Date end = dateService.parseDate(endDate);
+                                                                             Date start, Date end){
         return BandwidthAvailabilityRequest.builder()
                 .srcDevice(srcDevice)
                 .srcPorts(srcPorts)

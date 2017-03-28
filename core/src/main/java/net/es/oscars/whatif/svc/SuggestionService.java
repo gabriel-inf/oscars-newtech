@@ -6,19 +6,14 @@ import net.es.oscars.bwavail.svc.BandwidthAvailabilityService;
 import net.es.oscars.dto.bwavail.BandwidthAvailabilityRequest;
 import net.es.oscars.dto.bwavail.BandwidthAvailabilityResponse;
 import net.es.oscars.dto.resv.Connection;
-import net.es.oscars.pce.exc.PCEException;
-import net.es.oscars.pss.PSSException;
-import net.es.oscars.resv.rest.ResvController;
-import net.es.oscars.resv.svc.ConnectionGenerationService;
 import net.es.oscars.resv.svc.DateService;
 import net.es.oscars.whatif.dto.WhatifSpecification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -28,16 +23,14 @@ public class SuggestionService {
     DateService dateService;
 
     @Autowired
-    ConnectionGenerationService connectionGenerationService;
-
-    @Autowired
     BandwidthAvailabilityGenerationService bwAvailGenService;
 
     @Autowired
     BandwidthAvailabilityService bwAvailService;
 
+
     @Autowired
-    ResvController resvController;
+    SuggestionGenerator suggestionGenerator;
 
 
     /**
@@ -46,74 +39,78 @@ public class SuggestionService {
      * @return A list of viable connection options.
      */
     public List<Connection> generateSuggestions(WhatifSpecification spec) {
-        List<Connection> suggestions = new ArrayList<>();
-
         String startDate = spec.getStartDate();
         String endDate = spec.getEndDate();
         String srcDevice = spec.getSrcDevice();
         Set<String> srcPorts = spec.getSrcPorts();
         String dstDevice = spec.getDstDevice();
         Set<String> dstPorts = spec.getDstPorts();
+
+        Instant now = Instant.now().plus(5, ChronoUnit.MINUTES);
+        Date bwStartDate = startDate != null ? dateService.parseDate(startDate) : new Date(now.toEpochMilli());
+        Date bwEndDate = endDate != null ? dateService.parseDate(endDate) : new Date(now.plus(2, ChronoUnit.YEARS).toEpochMilli());
+        // Get the bandwidth availability along a path from srcDevice to dstDevice
+        BandwidthAvailabilityRequest bwAvailRequest = createBwAvailRequest(srcDevice, srcPorts, dstDevice, dstPorts,
+                0, 0, bwStartDate, bwEndDate);
+        BandwidthAvailabilityResponse bwResponse = bwAvailService.getBandwidthAvailabilityMap(bwAvailRequest);
+
+        return buildConnectionList(spec, bwResponse);
+
+
+    }
+
+    private List<Connection> buildConnectionList(WhatifSpecification spec, BandwidthAvailabilityResponse bwResponse){
+        List<Connection> connections = new ArrayList<>();
+        String startDate = spec.getStartDate();
+        String endDate = spec.getEndDate();
         Integer requestedBandwidth = spec.getBandwidthMbps();
         Integer requestedVolume = spec.getVolume();
         Long duration = spec.getDurationMinutes();
 
+        boolean specifiedStartEndVolume = startDate != null && endDate != null && requestedVolume != null;
+        boolean specifiedStartEnd = startDate != null && endDate != null;
+        boolean specifiedStartVolume = startDate != null && requestedVolume != null;
+        boolean specifiedEndVolume = endDate != null && requestedVolume != null;
+        boolean specifiedStartVolumeBandwidth = startDate != null && requestedVolume != null && requestedBandwidth != null;
+        boolean specifiedEndVolumeBandwidth = endDate != null && requestedVolume != null && requestedBandwidth != null;
+        boolean specifiedVolumeDuration = requestedVolume != null && duration != null;
+        boolean specifiedVolume = requestedVolume != null;
 
-
-        // Get the bandwidth availability along a path from srcDevice to dstDevice
-        BandwidthAvailabilityRequest bwAvailRequest = createBwAvailRequest(srcDevice, srcPorts, dstDevice, dstPorts,
-                0, 0, startDate, endDate);
-        BandwidthAvailabilityResponse bwResponse = bwAvailService.getBandwidthAvailabilityMap(bwAvailRequest);
-
-        // TODO: Generate a number of values for azMbps and zaMbps.
-
-
-        // Determine these values - Bandwidth from src -> dst (a -> z), and from dst -> src (z -> a)
-        // Values may be the same, or different
-        Integer azMbps = 0;
-        Integer zaMbps = 0;
-        // Each connection must have a unique id
-        String connectionId = "test";
-
-        // To determine if specific bandwidth values will work, you can create a connection object
-
-        // Create an initial connection from parameters
-        Connection initialConn = createInitialConnection(srcDevice, srcPorts, dstDevice, dstPorts, azMbps, zaMbps,
-                connectionId, startDate, endDate);
-
-        // Run a precheck
-        Connection result = null;
-        try {
-            result = resvController.preCheck(initialConn);
-            if(result != null){
-                // Determine if result is successful. If so, consider storing it as an option
-                if(result.getReserved().getVlanFlow().getAllPaths().size() > 0){
-                    // Success!
-                }
-            }
+        // Specified start & end & volume -> find the right bandwidth
+        if(specifiedStartEndVolume){
+            connections.addAll(suggestionGenerator.generateWithStartEndVolume(spec, bwResponse));
         }
-        catch(PCEException |PSSException e){
-            log.info("Connection precheck caused an exception.");
+        if(connections.size() == 0 && specifiedStartEnd){
+            connections.addAll(suggestionGenerator.generateWithStartEnd(spec, bwResponse));
+        }
+        if(connections.size() == 0 && specifiedStartVolume){
+            connections.addAll(suggestionGenerator.generateWithStartVolume(spec, bwResponse));
+        }
+        if(connections.size() == 0 && specifiedEndVolume){
+            connections.addAll(suggestionGenerator.generateWithEndVolume(spec, bwResponse));
+        }
+        if(connections.size() == 0 && specifiedStartVolumeBandwidth){
+            connections.addAll(suggestionGenerator.generateWithStartVolumeBandwidth(spec, bwResponse));
+        }
+        if(connections.size() == 0 && specifiedEndVolumeBandwidth){
+            connections.addAll(suggestionGenerator.generateWithEndVolumeBandwidth(spec, bwResponse));
+        }
+        if(connections.size() == 0 && specifiedVolumeDuration){
+            connections.addAll(suggestionGenerator.generateWithVolumeDuration(spec, bwResponse));
+        }
+        if(connections.size() == 0 && specifiedVolume){
+            connections.addAll(suggestionGenerator.generateWithVolume(spec, bwResponse));
         }
 
-
-        return suggestions;
+        return connections;
     }
 
-    private BandwidthAvailabilityRequest createBwAvailRequest(String srcDevice, Set<String> srcPorts, String dstDevice,
+    public BandwidthAvailabilityRequest createBwAvailRequest(String srcDevice, Set<String> srcPorts, String dstDevice,
                                                               Set<String> dstPorts, Integer minAzMbps, Integer minZaMbps,
-                                                              String startDate, String endDate) {
+                                                              Date startDate, Date endDate) {
        return bwAvailGenService.generateBandwidthAvailabilityRequest(srcDevice, srcPorts, dstDevice, dstPorts,
                new ArrayList<>(), new ArrayList<>(), minAzMbps, minZaMbps, 1, true, startDate, endDate);
     }
 
-    public Connection createInitialConnection(String srcDevice, Set<String> srcPorts, String dstDevice, Set<String> dstPorts,
-                                              Integer azMbps, Integer zaMbps, String connectionId, String startDate,
-                                              String endDate){
-        net.es.oscars.dto.spec.Specification spec = connectionGenerationService.generateSpecification(srcDevice, srcPorts, dstDevice, dstPorts,
-                "any", "any", azMbps, zaMbps, new ArrayList<>(), new ArrayList<>(), new HashSet<>(),
-                "PALINDROME", "NONE", 1, 1, 1, 1, connectionId,
-                startDate, endDate);
-        return connectionGenerationService.buildConnection(spec);
-    }
+
 }
