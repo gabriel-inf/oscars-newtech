@@ -3,9 +3,11 @@ package net.es.oscars.dto.resv;
 import lombok.*;
 import net.es.oscars.dto.spec.ReservedBlueprint;
 import net.es.oscars.dto.spec.Specification;
+import net.es.oscars.st.oper.OperState;
 import net.es.oscars.st.prov.ProvState;
 import net.es.oscars.st.resv.ResvState;
 
+import java.util.Date;
 import java.util.Set;
 
 
@@ -15,9 +17,19 @@ import java.util.Set;
 @AllArgsConstructor
 public class ConnectionFilter {
 
-    private String connectionId;
+    private Set<String> connectionIds;
 
     private Set<ResvState> resvStates;
 
+    private Set<OperState> operStates;
 
+    private Set<ProvState> provStates;
+
+    private Set<String> userNames;
+
+    private Set<Integer> bandwidths;
+
+    private Set<Date> startDates;
+
+    private Set<Date> endDates;
 }

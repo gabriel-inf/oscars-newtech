@@ -11,7 +11,11 @@ import net.es.oscars.dto.resv.precheck.PreCheckResponse;
 import net.es.oscars.dto.spec.RequestedVlanPipe;
 import net.es.oscars.dto.topo.BidirectionalPath;
 import net.es.oscars.dto.topo.Edge;
+import net.es.oscars.st.oper.OperState;
+import net.es.oscars.st.prov.ProvState;
+import net.es.oscars.st.resv.ResvState;
 import net.es.oscars.webui.dto.AdvancedRequest;
+import net.es.oscars.webui.dto.Filter;
 import net.es.oscars.webui.dto.MinimalRequest;
 import net.es.oscars.webui.ipc.ConnectionProvider;
 import net.es.oscars.webui.ipc.PreChecker;
@@ -29,6 +33,7 @@ import org.springframework.web.client.RestTemplate;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Controller
@@ -89,13 +94,34 @@ public class ReservationController {
     @ResponseBody
     public Set<Connection> resv_list_connections() {
         ConnectionFilter f = ConnectionFilter.builder().build();
-        Set<Connection> filteredConnections = connectionProvider.filtered(f);
+        return connectionProvider.filtered(f);
 
-        for (Connection c : filteredConnections) {
-            Set<RequestedVlanPipe> pipes = c.getSpecification().getRequested().getVlanFlow().getPipes();
-        }
+    }
 
-        return filteredConnections;
+    @RequestMapping(value = "/resv/list/filter", method = RequestMethod.POST)
+    @ResponseBody
+    public Set<Connection> resv_filter_connections(Filter filter) {
+        ConnectionFilter f = makeConnectionFilter(filter);
+        return connectionProvider.filtered(f);
+    }
+
+    private ConnectionFilter makeConnectionFilter(Filter filter) {
+
+        Set<Date> startDates = filter.getStartDates().stream().map(d-> new Date(d * 1000L)).collect(Collectors.toSet());
+        Set<Date> endDates = filter.getStartDates().stream().map(d-> new Date(d * 1000L)).collect(Collectors.toSet());
+        Set<ResvState> resvStates = filter.getResvStates().stream().map(s -> ResvState.get(s).orElse(ResvState.IDLE_WAIT)).collect(Collectors.toSet());
+        Set<ProvState> provStates = filter.getProvStates().stream().map(s -> ProvState.get(s).orElse(ProvState.BUILT_AUTO)).collect(Collectors.toSet());
+        Set<OperState> operStates = filter.getOperStates().stream().map(s -> OperState.get(s).orElse(OperState.ADMIN_UP_OPER_UP)).collect(Collectors.toSet());
+        return ConnectionFilter.builder()
+                .connectionIds(filter.getConnectionIds())
+                .userNames(filter.getUserNames())
+                .resvStates(resvStates)
+                .provStates(provStates)
+                .operStates(operStates)
+                .startDates(startDates)
+                .endDates(endDates)
+                .bandwidths(filter.getBandwidths())
+                .build();
     }
 
 

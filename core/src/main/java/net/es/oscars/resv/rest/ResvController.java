@@ -122,11 +122,11 @@ public class ResvController {
     @ResponseBody
     public Set<Connection> resvFilter(@RequestBody ConnectionFilter filter) {
         Set<Connection> result = new HashSet<>();
-        if (filter.getConnectionId() != null) {
+        if (filter.getConnectionIds() != null) {
 
-            Optional<ConnectionE> c = resvService.findByConnectionId(filter.getConnectionId());
-            if (c.isPresent()) {
-                result.add(this.convertConnToDto(c.get()));
+            for(String connId : filter.getConnectionIds()){
+                Optional<ConnectionE> c = resvService.findByConnectionId(connId);
+                c.ifPresent(connectionE -> result.add(this.convertConnToDto(connectionE)));
             }
         } else if (filter.getResvStates() != null) {
             filter.getResvStates().forEach(st -> {
