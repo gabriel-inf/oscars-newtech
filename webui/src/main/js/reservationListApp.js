@@ -7,6 +7,7 @@ const networkVis = require('./networkVis');
 const vis = require('../../../node_modules/vis/dist/vis');
 const ReservationList = require("./reservationList");
 import Dropdown from 'react-dropdown';
+const DateTime = require('react-datetime');
 
 let timeoutId = -1;
 let resStatusFilter = "Reservation Status";
@@ -40,6 +41,7 @@ class ReservationListApp extends React.Component{
         this.handleAddFilter = this.handleAddFilter.bind(this);
         this.handleDeleteFilter = this.handleDeleteFilter.bind(this);
         this.handleFilterTextChange = this.handleFilterTextChange.bind(this);
+        this.handleFilterDateChange = this.handleFilterDateChange.bind(this);
     }
 
     componentDidMount(){
@@ -118,7 +120,7 @@ class ReservationListApp extends React.Component{
     }
 
     handleFilterTypeSelect(type){
-        this.setState({newFilter: {id: this.state.newFilter.id, text: this.state.newFilter.text, type: type.value}, updateHeatMap: false});
+        this.setState({newFilter: {id: this.state.newFilter.id, text: "", type: type.value}, updateHeatMap: false});
     }
 
     handleAddFilter(){
@@ -138,6 +140,11 @@ class ReservationListApp extends React.Component{
         this.setState({newFilter: {id: this.state.newFilter.id, text: newText, type: this.state.newFilter.type}, updateHeatMap: false});
     }
 
+    handleFilterDateChange(newMoment){
+        let newDate = newMoment.toDate();
+        this.setState({newFilter: {id: this.state.newFilter.id, text: newDate, type: this.state.newFilter.type}, updateHeatMap: false});
+    }
+
     render() {
         return (
             <div>
@@ -149,6 +156,7 @@ class ReservationListApp extends React.Component{
                              handleDeleteFilter={this.handleDeleteFilter}
                              handleFilterTypeSelect={this.handleFilterTypeSelect}
                              handleFilterTextChange={this.handleFilterTextChange}
+                             handleFilterDateChange={this.handleFilterDateChange}
                 />
                 <ReservationHeatMap updateHeatMap={this.state.updateHeatMap}/>
                 <p style={{marginLeft: '40px', color: '#2c5699'}}> Select a connection to view additional reservation details.</p>
@@ -161,11 +169,21 @@ class ReservationListApp extends React.Component{
 class FilterPanel extends React.Component{
 
     render(){
+        let input = this.props.newFilter.type == startFilter || this.props.newFilter.type == endFilter ?
+            <DateTime
+                style={{ width: "25%" }}
+                value={this.props.newFilter.text}
+                onChange={this.props.handleFilterDateChange}/> :
+            <input style={{ width: "25%" }}
+                   className="form-control input-md"
+                   value={this.props.newFilter.text}
+                   onChange={this.props.handleFilterTextChange}/>;
+
         return(
             <div>
                 <p>Filter Reservations By: </p>
-                <div style={{ display: "flex" }}>
-                    <input style={{ width: "10%" }} className="form-control input-md" value={this.props.newFilter.name} onChange={this.props.handleFilterTextChange}/>
+                <div style={{ display: "flex", flexWrap: "wrap"}}>
+                    {input}
                     <Dropdown options={this.props.filterTypes}
                               value={this.props.newFilter.type}
                               placeholder="Select a filter type"
@@ -188,7 +206,7 @@ class FilterList extends React.Component{
         return(
             <div style={{ display: "flex" , marginTop: "20px"}}>
                 <p>Filter tags: <br/> (Click to delete)</p>
-                <ul style={{ display: "flex" , flexDirection: "row", listStyle: "none"}}>{listItems}</ul>
+                <ul style={{ display: "flex" , flexDirection: "row", listStyle: "none", flexWrap: "wrap"}}>{listItems}</ul>
             </div>
         );
     }
@@ -201,7 +219,7 @@ class FilterItem extends React.Component{
             <li key={this.props.filter.id}
                 onClick={this.props.handleDeleteFilter.bind(this, this.props.filter)}
                 className="btn btn-secondary"
-                style={{marginRight: "10px", backgroundColor: "lightBlue"}}
+                style={{marginRight: "10px", marginTop: "5px", backgroundColor: "lightBlue"}}
             >{this.props.filter.type + ": " + this.props.filter.text}</li>
         );
     }
