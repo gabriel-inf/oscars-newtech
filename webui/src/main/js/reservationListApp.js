@@ -125,8 +125,13 @@ class ReservationListApp extends React.Component{
 
     handleAddFilter(){
         let filter = $.extend(true, {}, this.state.newFilter);
-        this.state.filters.push(filter);
-        this.setState({newFilter: {id: filter.id + 1, text: "", type: filter.type}, updateHeatMap: false});
+        if(filter.text == "" || filter.type == bandwidthFilter && isNaN(filter.text)) {
+            console.log("Invalid filter input: must not be empty, and must not have non numeric characters for bandwidth.")
+        }
+        else{
+            this.state.filters.push(filter);
+            this.setState({newFilter: {id: filter.id + 1, text: "", type: filter.type}, updateHeatMap: false});
+        }
     }
 
     handleDeleteFilter(filter){
@@ -171,10 +176,9 @@ class FilterPanel extends React.Component{
     render(){
         let input = this.props.newFilter.type == startFilter || this.props.newFilter.type == endFilter ?
             <DateTime
-                style={{ width: "25%" }}
                 value={this.props.newFilter.text}
                 onChange={this.props.handleFilterDateChange}/> :
-            <input style={{ width: "25%" }}
+            <input style={{ width: "14.25em" }}
                    className="form-control input-md"
                    value={this.props.newFilter.text}
                    onChange={this.props.handleFilterTextChange}/>;
@@ -183,13 +187,12 @@ class FilterPanel extends React.Component{
             <div>
                 <p>Filter Reservations By: </p>
                 <div style={{ display: "flex", flexWrap: "wrap"}}>
-                    {input}
                     <Dropdown options={this.props.filterTypes}
                               value={this.props.newFilter.type}
                               placeholder="Select a filter type"
                               onChange={this.props.handleFilterTypeSelect}
-                              style={{ width: "10%"}}
                     />
+                    {input}
                     <input type="button" className="btn btn-primary" value="Add" onClick={this.props.handleAddFilter} />
                 </div>
                 <FilterList filters={this.props.filters} handleDeleteFilter={this.props.handleDeleteFilter}/>
