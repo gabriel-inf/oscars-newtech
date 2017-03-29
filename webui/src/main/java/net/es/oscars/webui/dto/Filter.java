@@ -24,7 +24,7 @@ public class Filter {
 
     private Set<Integer> bandwidths;
 
-    private Set<Integer> startDates;
+    private Set<String> startDates;
 
-    private Set<Integer> endDates;
+    private Set<String> endDates;
 }

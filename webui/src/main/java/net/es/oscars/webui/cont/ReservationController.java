@@ -2,6 +2,7 @@ package net.es.oscars.webui.cont;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.bwavail.PortBandwidthAvailabilityRequest;
 import net.es.oscars.dto.bwavail.PortBandwidthAvailabilityResponse;
@@ -32,6 +33,9 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -110,11 +114,27 @@ public class ReservationController {
 
         Set<String> userNames = filter.getUserNames() == null ? new HashSet<>() : filter.getUserNames();
 
-        Set<Date> startDates = filter.getStartDates() == null ? new HashSet<>() :
-                filter.getStartDates().stream().map(d-> new Date(d * 1000L)).collect(Collectors.toSet()) ;
-
-        Set<Date> endDates = filter.getEndDates() == null ? new HashSet<>() :
-                filter.getStartDates().stream().map(d-> new Date(d * 1000L)).collect(Collectors.toSet()) ;
+        DateFormat df = new ISO8601DateFormat();
+        Set<Date> startDates = new HashSet<>();
+        if(filter.getStartDates() != null){
+            for(String date : filter.getStartDates()){
+                try {
+                    startDates.add(df.parse(date));
+                } catch (ParseException e) {
+                    log.info("Invalid start date input for filter: " + date);
+                }
+            }
+        }
+        Set<Date> endDates = new HashSet<>();
+        if(filter.getEndDates() != null){
+            for(String date : filter.getEndDates()){
+                try {
+                    endDates.add(df.parse(date));
+                } catch (ParseException e) {
+                    log.info("Invalid end date input for filter: " + date);
+                }
+            }
+        }
 
         Set<ResvState> resvStates = filter.getResvStates() == null ? new HashSet<>() :
                 filter.getResvStates().stream().map(s -> ResvState.get(s).orElse(ResvState.IDLE_WAIT)).collect(Collectors.toSet());

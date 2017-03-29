@@ -16,7 +16,7 @@ let operStatusFilter = "Operation Status";
 let bandwidthFilter = "Bandwidth";
 let userNameFilter = "User Name";
 let startFilter = "Start After Date";
-let endFilter = "End After Date";
+let endFilter = "End Before Date";
 let idFilter = "Connection ID";
 
 class ReservationListApp extends React.Component{
