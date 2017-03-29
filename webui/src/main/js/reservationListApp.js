@@ -30,6 +30,11 @@ class ReservationListApp extends React.Component{
             newFilter: {id: 0, text: "", type: "Connection ID"},
             filterTypes: [idFilter, userNameFilter, bandwidthFilter, startFilter, endFilter, resStatusFilter,
                 provStatusFilter, operStatusFilter],
+            resvStates: ["IDLE_WAIT", "SUBMITTED", "HELD", "COMMITTING", "ABORTING", "ABORT_FAILED"],
+            provStates: ["INITIAL", "READY_TO_GENERATE", "GENERATING", "DISMANTLED_MANUAL", "DISMANTLED_AUTO",
+                "BUILDING_MANUAL", "BUILDING_AUTO", "BUILT_MANUAL", "BUILT_AUTO", "DISMANTLING_MANUAL", "DISMANTLING_AUTO",
+                "FAILED"],
+            operStates: ["ADMIN_DOWN_OPER_DOWN", "ADMIN_DOWN_OPER_UP", "ADMIN_UP_OPER_UP", "ADMIN_UP_OPER_DOWN"],
             updateHeatMap: false
         };
         this.setState = this.setState.bind(this);
@@ -42,6 +47,7 @@ class ReservationListApp extends React.Component{
         this.handleDeleteFilter = this.handleDeleteFilter.bind(this);
         this.handleFilterTextChange = this.handleFilterTextChange.bind(this);
         this.handleFilterDateChange = this.handleFilterDateChange.bind(this);
+        this.handleStateDropdownSelect = this.handleStateDropdownSelect.bind(this);
     }
 
     componentDidMount(){
@@ -140,6 +146,10 @@ class ReservationListApp extends React.Component{
         this.setState({filters: filteredList, updateHeatMap: false});
     }
 
+    handleStateDropdownSelect(type){
+        this.setState({newFilter: {id: this.state.newFilter.id, text: type.value, type: this.state.newFilter.type}, updateHeatMap: false});
+    }
+
     handleFilterTextChange(event){
         let newText = event.target.value;
         this.setState({newFilter: {id: this.state.newFilter.id, text: newText, type: this.state.newFilter.type}, updateHeatMap: false});
@@ -157,11 +167,15 @@ class ReservationListApp extends React.Component{
                 <FilterPanel newFilter={this.state.newFilter}
                              filters={this.state.filters}
                              filterTypes={this.state.filterTypes}
+                             resvStates={this.state.resvStates}
+                             provStates={this.state.provStates}
+                             operStates={this.state.operStates}
                              handleAddFilter={this.handleAddFilter}
                              handleDeleteFilter={this.handleDeleteFilter}
                              handleFilterTypeSelect={this.handleFilterTypeSelect}
                              handleFilterTextChange={this.handleFilterTextChange}
                              handleFilterDateChange={this.handleFilterDateChange}
+                             handleStateDropdownSelect={this.handleStateDropdownSelect}
                 />
                 <ReservationHeatMap updateHeatMap={this.state.updateHeatMap}/>
                 <p style={{marginLeft: '40px', color: '#2c5699'}}> Select a connection to view additional reservation details.</p>
@@ -174,14 +188,39 @@ class ReservationListApp extends React.Component{
 class FilterPanel extends React.Component{
 
     render(){
-        let input = this.props.newFilter.type == startFilter || this.props.newFilter.type == endFilter ?
-            <DateTime
-                value={this.props.newFilter.text}
-                onChange={this.props.handleFilterDateChange}/> :
-            <input style={{ width: "14.25em" }}
-                   className="form-control input-md"
-                   value={this.props.newFilter.text}
-                   onChange={this.props.handleFilterTextChange}/>;
+        let input = null;
+        switch(this.props.newFilter.type){
+            case startFilter:
+            case endFilter:
+                input = <DateTime
+                    value={this.props.newFilter.text}
+                    onChange={this.props.handleFilterDateChange}/>;
+                break;
+            case resStatusFilter:
+                input = <Dropdown options={this.props.resvStates}
+                          value={this.props.newFilter.text}
+                          placeholder="Select a Reservation Status."
+                          onChange={this.props.handleStateDropdownSelect}/>;
+                break;
+            case provStatusFilter:
+                input = <Dropdown options={this.props.provStates}
+                                  value={this.props.newFilter.text}
+                                  placeholder="Select a Provisioning Status."
+                                  onChange={this.props.handleStateDropdownSelect}/>;
+                break;
+            case operStatusFilter:
+                input = <Dropdown options={this.props.operStates}
+                                  value={this.props.newFilter.text}
+                                  placeholder="Select an Operation Status."
+                                  onChange={this.props.handleStateDropdownSelect}/>;
+                break;
+            default:
+                input = <input style={{ width: "14.25em" }}
+                       className="form-control input-md"
+                       value={this.props.newFilter.text}
+                       onChange={this.props.handleFilterTextChange}/>;
+        }
+
 
         return(
             <div>
