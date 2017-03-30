@@ -1,7 +1,6 @@
 package net.es.oscars.helpers;
 
 import lombok.extern.slf4j.Slf4j;
-import net.es.oscars.dto.topo.Edge;
 import net.es.oscars.dto.topo.enums.UrnType;
 import net.es.oscars.resv.ent.*;
 import net.es.oscars.topo.dao.UrnRepository;

@@ -977,7 +977,9 @@ class CalendarForm extends React.Component{
             <div className="form-group">
                 <label className="col-md-2 control-label">{this.props.name} at</label>
                 <div className="col-md-4 input-group" id={divId}>
-                    <DateTime value={this.props.date} onChange={this.props.handleDateChange}/>
+                    <DateTime value={this.props.date}
+                              onChange={this.props.handleDateChange}
+                              inputProps={{readOnly: true, style:{backgroundColor: "white"}}}/>
                 </div>
             </div>
         );

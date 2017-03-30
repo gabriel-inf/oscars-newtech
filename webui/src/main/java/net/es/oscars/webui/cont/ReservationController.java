@@ -2,6 +2,7 @@ package net.es.oscars.webui.cont;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.bwavail.PortBandwidthAvailabilityRequest;
 import net.es.oscars.dto.bwavail.PortBandwidthAvailabilityResponse;
@@ -11,7 +12,11 @@ import net.es.oscars.dto.resv.precheck.PreCheckResponse;
 import net.es.oscars.dto.spec.RequestedVlanPipe;
 import net.es.oscars.dto.topo.BidirectionalPath;
 import net.es.oscars.dto.topo.Edge;
+import net.es.oscars.st.oper.OperState;
+import net.es.oscars.st.prov.ProvState;
+import net.es.oscars.st.resv.ResvState;
 import net.es.oscars.webui.dto.AdvancedRequest;
+import net.es.oscars.webui.dto.Filter;
 import net.es.oscars.webui.dto.MinimalRequest;
 import net.es.oscars.webui.ipc.ConnectionProvider;
 import net.es.oscars.webui.ipc.PreChecker;
@@ -28,7 +33,11 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.time.Instant;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Controller
@@ -88,14 +97,69 @@ public class ReservationController {
     @RequestMapping(value = "/resv/list/allconnections", method = RequestMethod.GET)
     @ResponseBody
     public Set<Connection> resv_list_connections() {
-        ConnectionFilter f = ConnectionFilter.builder().build();
-        Set<Connection> filteredConnections = connectionProvider.filtered(f);
+        ConnectionFilter f = makeConnectionFilter(Filter.builder().build());
+        return connectionProvider.filtered(f);
+    }
 
-        for (Connection c : filteredConnections) {
-            Set<RequestedVlanPipe> pipes = c.getSpecification().getRequested().getVlanFlow().getPipes();
+    @RequestMapping(value = "/resv/list/filter", method = RequestMethod.POST)
+    @ResponseBody
+    public Set<Connection> resv_filter_connections(@RequestBody Filter filter) {
+        ConnectionFilter f = makeConnectionFilter(filter);
+        return connectionProvider.filtered(f);
+    }
+
+    private ConnectionFilter makeConnectionFilter(Filter filter) {
+        Integer numFilters = filter.getNumFilters() == null ? 0 : filter.getNumFilters();
+
+        Set<String> connectionIds = filter.getConnectionIds() == null ? new HashSet<>() : filter.getConnectionIds();
+
+        Set<String> userNames = filter.getUserNames() == null ? new HashSet<>() : filter.getUserNames();
+
+        DateFormat df = new ISO8601DateFormat();
+        Set<Date> startDates = new HashSet<>();
+        if(filter.getStartDates() != null){
+            for(String date : filter.getStartDates()){
+                try {
+                    startDates.add(df.parse(date));
+                } catch (ParseException e) {
+                    log.info("Invalid start date input for filter: " + date);
+                }
+            }
+        }
+        Set<Date> endDates = new HashSet<>();
+        if(filter.getEndDates() != null){
+            for(String date : filter.getEndDates()){
+                try {
+                    endDates.add(df.parse(date));
+                } catch (ParseException e) {
+                    log.info("Invalid end date input for filter: " + date);
+                }
+            }
         }
 
-        return filteredConnections;
+        Set<ResvState> resvStates = filter.getResvStates() == null ? new HashSet<>() :
+                filter.getResvStates().stream().map(s -> ResvState.get(s).orElse(ResvState.IDLE_WAIT)).collect(Collectors.toSet());
+
+        Set<ProvState> provStates = filter.getProvStates() == null ? new HashSet<>() :
+                filter.getProvStates().stream().map(s -> ProvState.get(s).orElse(ProvState.BUILT_AUTO)).collect(Collectors.toSet());
+
+        Set<OperState> operStates = filter.getOperStates() == null ? new HashSet<>() :
+                filter.getOperStates().stream().map(s -> OperState.get(s).orElse(OperState.ADMIN_UP_OPER_UP)).collect(Collectors.toSet());
+
+        Set<Integer> minBandwidths = filter.getMinBandwidths() == null ? new HashSet<>() : filter.getMinBandwidths();
+        Set<Integer> maxBandwidths = filter.getMaxBandwidths() == null ? new HashSet<>() : filter.getMaxBandwidths();
+        return ConnectionFilter.builder()
+                .numFilters(numFilters)
+                .connectionIds(connectionIds)
+                .userNames(userNames)
+                .resvStates(resvStates)
+                .provStates(provStates)
+                .operStates(operStates)
+                .startDates(startDates)
+                .endDates(endDates)
+                .minBandwidths(minBandwidths)
+                .maxBandwidths(maxBandwidths)
+                .build();
     }
 
 
@@ -225,8 +289,8 @@ public class ReservationController {
     private PreCheckResponse processPrecheckResponse(String connectionId, Connection c) {
         PreCheckResponse response = PreCheckResponse.builder()
                 .connectionId(connectionId)
-                .linksToHighlight(new ArrayList<>())
-                .nodesToHighlight(new ArrayList<>())
+                .linksToHighlight(new HashSet<>())
+                .nodesToHighlight(new HashSet<>())
                 .precheckResult(PreCheckResponse.PrecheckResult.SUCCESS)
                 .build();
 
@@ -242,40 +306,18 @@ public class ReservationController {
             for (BidirectionalPath biPath : allPaths) {
                 List<Edge> oneAzPath = biPath.getAzPath();
 
-                // path always goes:
-                // port -> device (always first)
-                // device -> port
-                // port -> port
-                // ...
-                //
-                // port -> port
-                // port -> device
-                // device -> port
-                // index 0 mod 3: origin is port, target is device
-                // index 1 mod 3: origin is device , target is port
-                // index 2 mod 3: origin is port, target is port
-
-                Integer idx = 0;
-                Set<String> nodesToHighlight = new HashSet<>();
-                Set<String> linksToHighlight = new HashSet<>();
-
                 for (Edge edge : oneAzPath) {
-                    if (idx % 3 == 0) {
-                        nodesToHighlight.add(edge.getTarget());
-                        log.info("highlight device " + edge.getTarget());
-                    } else if (idx % 3 == 2) {
-                        String linkName = edge.getOrigin() + " -- "+edge.getTarget();
-                        linksToHighlight.add(linkName);
-                        log.info("highlight link " + linkName);
-                    } else {
-                        log.info("highlight device " + edge.getOrigin());
-                        nodesToHighlight.add(edge.getOrigin());
-
+                    if(edge.getOriginType().equals("DEVICE")){
+                        response.getNodesToHighlight().add(edge.getOrigin());
                     }
-                    idx++;
+                    if(edge.getTargetType().equals("DEVICE")){
+                        response.getNodesToHighlight().add(edge.getTarget());
+                    }
+                    if(edge.getOriginType().equals("PORT") && edge.getTargetType().equals("PORT")){
+                        String linkName = edge.getOrigin() + " -- "+edge.getTarget();
+                        response.getLinksToHighlight().add(linkName);
+                    }
                 }
-                response.getNodesToHighlight().addAll(nodesToHighlight);
-                response.getLinksToHighlight().addAll(linksToHighlight);
             }
 
         }

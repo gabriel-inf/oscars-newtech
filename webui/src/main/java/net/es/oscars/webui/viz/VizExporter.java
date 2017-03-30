@@ -40,15 +40,22 @@ public class VizExporter {
 
         Set<String> nodes = new HashSet<>();
 
+        String[] colors = {"blue", "red", "green", "yellow", "purple", "pink", "lightblue", "darkgreen", "black",
+                "crimson", "chocolate", "firebrick", "orange", "slategray", "yellowgreen", "sienna", "peachpuff", "olive"};
+
         // TODO: visualize other things
         ReservedVlanFlow rvf = c.getReserved().getVlanFlow();
 
-        String[] colors = {"blue", "red", "green", "yellow", "purple", "pink", "lightblue", "darkgreen", "black",
-                "crimson", "chocolate", "firebrick", "orange", "slategray", "yellowgreen", "sienna", "peachpuff", "olive"};
         int i = 0;
 
-        List<Map<String, Set<String>>> edgeList = this.resvViewEthPipes(rvf, nodes, multilayer);
+        List<Map<String, Set<String>>> edgeList = new ArrayList<>();
+
+                this.resvViewEthPipes(rvf, nodes, multilayer);
         edgeList.addAll(this.resvViewMplsPipes(rvf, nodes, multilayer));
+
+        for (ReservedVlanJunction rvj : rvf.getJunctions()) {
+            nodes.add(rvj.getDeviceUrn());
+        }
         for (Map<String, Set<String>> edges : edgeList) {
             this.drawEdges(edges, g, colors[i]);
             i++;
@@ -57,9 +64,6 @@ public class VizExporter {
             }
         }
 
-        for (ReservedVlanJunction rvj : rvf.getJunctions()) {
-            nodes.add(rvj.getDeviceUrn());
-        }
 
         Set<TopoVertex> pathVertices = multilayer.getVertices().stream().filter(v -> nodes.contains(v.getUrn())).collect(Collectors.toSet());
         for (TopoVertex vertex: pathVertices) {
@@ -74,15 +78,9 @@ public class VizExporter {
                                                              Topology topology) {
         List<Map<String, Set<String>>> edgesSetList = new ArrayList<>();
         for (ReservedMplsPipe rep : rvf.getMplsPipes()) {
-            Map<String, Set<String>> edges = new HashMap<>();
             String a = rep.getAJunction().getDeviceUrn();
             String z = rep.getZJunction().getDeviceUrn();
-            nodes.add(a);
-            nodes.add(z);
-            List<String> azEro = devicesFromEro(a, rep.getAzERO(), z, topology);
-            List<String> zaEro = devicesFromEro(z, rep.getZaERO(), a, topology);
-            addEroToEdges(azEro, nodes, edges);
-            addEroToEdges(zaEro, nodes, edges);
+            Map<String, Set<String>> edges = getEdgeMap(a, z, rep.getAzERO(), rep.getZaERO(), topology, nodes);
             edgesSetList.add(edges);
         }
         return edgesSetList;
@@ -94,19 +92,25 @@ public class VizExporter {
                                                             Topology topology) {
         List<Map<String, Set<String>>> edgesSetList = new ArrayList<>();
         for (ReservedEthPipe rep : rvf.getEthPipes()) {
-            Map<String, Set<String>> edges = new HashMap<>();
             String a = rep.getAJunction().getDeviceUrn();
             String z = rep.getZJunction().getDeviceUrn();
-            nodes.add(a);
-            nodes.add(z);
-            List<String> azEro = devicesFromEro(a, rep.getAzERO(), z, topology);
-            List<String> zaEro = devicesFromEro(z, rep.getZaERO(), a, topology);
-            addEroToEdges(azEro, nodes, edges);
-            addEroToEdges(zaEro, nodes, edges);
+            Map<String, Set<String>> edges = getEdgeMap(a, z, rep.getAzERO(), rep.getZaERO(), topology, nodes);
             edgesSetList.add(edges);
         }
         return edgesSetList;
 
+    }
+
+    private Map<String, Set<String>> getEdgeMap(String a, String z, List<String> azERO, List<String> zaERO,
+                                                Topology topology, Set<String> nodes){
+        Map<String, Set<String>> edges = new HashMap<>();
+        nodes.add(a);
+        nodes.add(z);
+        List<String> azEro = devicesFromEro(a, azERO, z, topology);
+        List<String> zaEro = devicesFromEro(z, zaERO, a, topology);
+        addEroToEdges(azEro, nodes, edges);
+        addEroToEdges(zaEro, nodes, edges);
+        return edges;
     }
 
     private void drawEdges(Map<String, Set<String>> edges, VizGraph g, String color) {

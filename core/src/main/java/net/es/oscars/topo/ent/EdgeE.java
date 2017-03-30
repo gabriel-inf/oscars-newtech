@@ -17,6 +17,10 @@ public class EdgeE {
 
     private String origin;
 
+    private String originType;
+
     private String target;
+
+    private String targetType;
 
 }

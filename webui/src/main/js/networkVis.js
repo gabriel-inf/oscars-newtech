@@ -251,10 +251,17 @@ function highlight_links(network, linkIDs, isSelected, color)
 
     for(let l = 0; l < linkIDs.length; l++)
     {
-        if(isSelected)
-            network.edges.update([{id: linkIDs[l], color: {color: newColor}}]);
-        else
-            network.edges.update([{id: linkIDs[l], color: {color: normalEdgeColor}}]);
+        let link = linkIDs[l];
+        let splitLink = link.split(" -- ");
+        let reversedLink = splitLink[1] + " -- " + splitLink[0];
+        if(isSelected){
+            network.edges.update([{id: link, color: {color: newColor}}]);
+            network.edges.update([{id: reversedLink, color: {color: newColor}}]);
+        }
+        else {
+            network.edges.update([{id: link, color: {color: normalEdgeColor}}]);
+            network.edges.update([{id: reversedLink, color: {color: normalEdgeColor}}]);
+        }
     }
 }
 

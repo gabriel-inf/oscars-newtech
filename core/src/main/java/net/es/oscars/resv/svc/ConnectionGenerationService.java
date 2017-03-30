@@ -55,9 +55,12 @@ public class ConnectionGenerationService {
                 new HashSet<>(), "palindrome", "none", 1, Integer.MAX_VALUE);
         flows.add(flow);
 
+        Date start = dateService.parseDate(bcs.getStart());
+        Date end = dateService.parseDate(bcs.getEnd());
+
         RequestedBlueprint reqBlueprint = generateRequestedBlueprint(flows, 1, 1, bcs.getConnectionId());
         return  Specification.builder()
-                .scheduleSpec(generateScheduleSpecification(bcs.getStart(), bcs.getEnd()))
+                .scheduleSpec(generateScheduleSpecification(start, end))
                 .containerConnectionId(bcs.getConnectionId())
                 .description(bcs.getDescription())
                 .requested(reqBlueprint)
@@ -70,8 +73,8 @@ public class ConnectionGenerationService {
                                                String srcVlan, String dstVlan, Integer azMbps, Integer zaMbps,
                                                List<String> azRoute, List<String> zaRoute, Set<String> blacklist,
                                                String palindromic, String survivability, Integer numPaths, Integer priority,
-                                               Integer minFlows, Integer maxFlows, String connectionId, String startDate,
-                                               String endDate){
+                                               Integer minFlows, Integer maxFlows, String connectionId, Date startDate,
+                                               Date endDate){
         Set<CircuitFlow> flows = new HashSet<>();
         CircuitFlow flow = generateCircuitFlow(srcDevice, srcPorts, srcVlan, dstDevice, dstPorts, dstVlan,
                 azMbps, zaMbps, azRoute, zaRoute, blacklist, palindromic, survivability, numPaths, priority);
@@ -92,8 +95,11 @@ public class ConnectionGenerationService {
         RequestedBlueprint reqBlueprint = generateRequestedBlueprint(cs.getFlows(), cs.getMaxNumFlows(),
                 cs.getMinNumFlows(), cs.getConnectionId());
 
+        Date start = dateService.parseDate(cs.getStart());
+        Date end = dateService.parseDate(cs.getEnd());
+
         return  Specification.builder()
-                .scheduleSpec(generateScheduleSpecification(cs.getStart(), cs.getEnd()))
+                .scheduleSpec(generateScheduleSpecification(start, end))
                 .containerConnectionId(cs.getConnectionId())
                 .description(cs.getDescription())
                 .requested(reqBlueprint)
@@ -213,10 +219,7 @@ public class ConnectionGenerationService {
         return fixtures;
     }
 
-    public ScheduleSpecification generateScheduleSpecification(String start, String end){
-
-        Date startDate = dateService.parseDate(start);
-        Date endDate = dateService.parseDate(end);
+    public ScheduleSpecification generateScheduleSpecification(Date startDate, Date endDate){
 
         return ScheduleSpecification.builder()
                 .startDates(Collections.singletonList(startDate))

@@ -22,8 +22,9 @@ public class ConnectionProvider {
 
     private final String oscarsUrl = "https://localhost:8000";
 
-    public Set<Connection> filtered(ConnectionFilter filter) {
-        log.info("Listing connections");
+    public Set<Connection> filtered(ConnectionFilter filter)
+    {
+        log.info("Listing filtered connections");
 
         String submitUrl = "/resv/filter";
         String restPath = oscarsUrl + submitUrl;
