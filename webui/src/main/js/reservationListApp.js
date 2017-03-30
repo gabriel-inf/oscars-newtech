@@ -206,7 +206,8 @@ class FilterPanel extends React.Component{
             case endFilter:
                 input = <DateTime
                     value={this.props.newFilter.text}
-                    onChange={this.props.handleFilterDateChange}/>;
+                    onChange={this.props.handleFilterDateChange}
+                    inputProps={{readOnly: true, style:{backgroundColor: "white"}}}/>;
                 break;
             case resStatusFilter:
                 input = <Dropdown options={this.props.resvStates}
@@ -235,7 +236,7 @@ class FilterPanel extends React.Component{
 
 
         return(
-            <div>
+            <div style={{marginLeft: "5px"}}>
                 <p>Filter Reservations By: </p>
                 <div style={{ display: "flex", flexWrap: "wrap"}}>
                     <Dropdown options={this.props.filterTypes}
