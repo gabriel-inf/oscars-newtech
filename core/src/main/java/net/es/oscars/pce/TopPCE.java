@@ -5,6 +5,7 @@ import net.es.oscars.dto.spec.SurvivabilityType;
 import net.es.oscars.dto.topo.TopoVertex;
 import net.es.oscars.dto.topo.enums.DeviceType;
 import net.es.oscars.dto.topo.enums.Layer;
+import net.es.oscars.dto.topo.enums.VertexType;
 import net.es.oscars.pce.exc.InvalidUrnException;
 import net.es.oscars.pce.exc.PCEException;
 import net.es.oscars.pss.PSSException;
@@ -641,11 +642,17 @@ public class TopPCE {
      * @return A list of EdgeEs based on the TopoEdges
      */
     private List<EdgeE> convertTopoEdgePathToEdges(List<TopoEdge> topoEdges) {
-        return topoEdges
-                .stream()
-                .map(e -> EdgeE.builder().origin(e.getA().getUrn()).target(e.getZ().getUrn()).build())
-                .collect(Collectors.toList());
+        List<EdgeE> edges = new ArrayList<>();
+        for(TopoEdge topoEdge : topoEdges){
+            TopoVertex a = topoEdge.getA();
+            TopoVertex z = topoEdge.getZ();
+            String aType = a.getVertexType().equals(VertexType.PORT) ? "PORT" : "DEVICE";
+            String zType = z.getVertexType().equals(VertexType.PORT) ? "PORT" : "DEVICE";
+            edges.add(EdgeE.builder().origin(a.getUrn()).originType(aType).target(z.getUrn()).targetType(zType).build());
+        }
+        return edges;
     }
+
 
     /**
      * Given a list of EdgeEs, add all (Fixture, Device) edges that aren't already in the list.
@@ -660,13 +667,23 @@ public class TopPCE {
         // Add the fixtures at the A junction: to the beginning if AZ path, to the end if ZA path
         for(RequestedVlanFixtureE reqFix : aJunction.getFixtures()){
             if(isAzPath){
-                EdgeE fixEdge = EdgeE.builder().origin(reqFix.getPortUrn()).target(aJunction.getDeviceUrn()).build();
+                EdgeE fixEdge = EdgeE.builder()
+                        .origin(reqFix.getPortUrn())
+                        .originType("PORT")
+                        .target(aJunction.getDeviceUrn())
+                        .targetType("DEVICE")
+                        .build();
                 if(!edges.contains(fixEdge)){
                     edges.add(0, fixEdge);
                 }
             }
             if(!isAzPath){
-                EdgeE fixEdge = EdgeE.builder().origin(aJunction.getDeviceUrn()).target(reqFix.getPortUrn()).build();
+                EdgeE fixEdge = EdgeE.builder()
+                        .origin(aJunction.getDeviceUrn())
+                        .originType("DEVICE")
+                        .target(reqFix.getPortUrn())
+                        .targetType("PORT")
+                        .build();
                 if(!edges.contains(fixEdge)){
                     edges.add(fixEdge);
                 }
@@ -676,13 +693,23 @@ public class TopPCE {
         // Add the fixtures at the Z junction: to the end if AZ path, to the beginning if ZA path
         for(RequestedVlanFixtureE reqFix : zJunction.getFixtures()){
             if(isAzPath){
-                EdgeE fixEdge = EdgeE.builder().origin(zJunction.getDeviceUrn()).target(reqFix.getPortUrn()).build();
+                EdgeE fixEdge = EdgeE.builder()
+                        .origin(zJunction.getDeviceUrn())
+                        .originType("DEVICE")
+                        .target(reqFix.getPortUrn())
+                        .targetType("PORT")
+                        .build();
                 if(!edges.contains(fixEdge)){
                     edges.add(fixEdge);
                 }
             }
             if(!isAzPath){
-                EdgeE fixEdge = EdgeE.builder().origin(reqFix.getPortUrn()).target(zJunction.getDeviceUrn()).build();
+                EdgeE fixEdge = EdgeE.builder()
+                        .origin(reqFix.getPortUrn())
+                        .originType("PORT")
+                        .target(zJunction.getDeviceUrn())
+                        .targetType("DEVICE")
+                        .build();
                 if(!edges.contains(fixEdge)){
                     edges.add(0, fixEdge);
                 }

@@ -13,5 +13,9 @@ public class Edge {
 
     String origin;
 
+    String originType;
+
     String target;
+
+    String targetType;
 }
