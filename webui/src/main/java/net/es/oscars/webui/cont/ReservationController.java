@@ -97,9 +97,8 @@ public class ReservationController {
     @RequestMapping(value = "/resv/list/allconnections", method = RequestMethod.GET)
     @ResponseBody
     public Set<Connection> resv_list_connections() {
-        ConnectionFilter f = ConnectionFilter.builder().build();
+        ConnectionFilter f = makeConnectionFilter(Filter.builder().build());
         return connectionProvider.filtered(f);
-
     }
 
     @RequestMapping(value = "/resv/list/filter", method = RequestMethod.POST)
@@ -110,6 +109,8 @@ public class ReservationController {
     }
 
     private ConnectionFilter makeConnectionFilter(Filter filter) {
+        Integer numFilters = filter.getNumFilters() == null ? 0 : filter.getNumFilters();
+
         Set<String> connectionIds = filter.getConnectionIds() == null ? new HashSet<>() : filter.getConnectionIds();
 
         Set<String> userNames = filter.getUserNames() == null ? new HashSet<>() : filter.getUserNames();
@@ -148,6 +149,7 @@ public class ReservationController {
         Set<Integer> minBandwidths = filter.getMinBandwidths() == null ? new HashSet<>() : filter.getMinBandwidths();
         Set<Integer> maxBandwidths = filter.getMaxBandwidths() == null ? new HashSet<>() : filter.getMaxBandwidths();
         return ConnectionFilter.builder()
+                .numFilters(numFilters)
                 .connectionIds(connectionIds)
                 .userNames(userNames)
                 .resvStates(resvStates)
