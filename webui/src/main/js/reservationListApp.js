@@ -52,7 +52,7 @@ class ReservationListApp extends React.Component{
     }
 
     componentDidMount(){
-        return this.updateReservations();
+        this.updateReservations();
     }
 
     componentWillUnmount(){
@@ -75,6 +75,7 @@ class ReservationListApp extends React.Component{
 
     makeCombinedFilter(filters){
         let combinedFilter = {
+            numFilters: filters.length,
             userNames: [],
             connectionIds: [],
             minBandwidths: [],
@@ -142,6 +143,7 @@ class ReservationListApp extends React.Component{
         else{
             this.state.filters.push(filter);
             this.setState({newFilter: {id: filter.id + 1, text: "", type: filter.type}, updateHeatMap: false});
+            this.updateReservations();
         }
     }
 
@@ -149,6 +151,7 @@ class ReservationListApp extends React.Component{
         let id = filter.id;
         let filteredList = this.state.filters.filter((f) => {return f.id != id});
         this.setState({filters: filteredList, updateHeatMap: false});
+        this.updateReservations();
     }
 
     handleStateDropdownSelect(type){

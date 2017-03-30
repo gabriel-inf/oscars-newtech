@@ -12,6 +12,9 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Filter {
+
+    private Integer numFilters;
+
     private Set<String> connectionIds;
 
     private Set<String> resvStates;

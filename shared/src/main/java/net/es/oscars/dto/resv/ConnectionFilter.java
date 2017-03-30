@@ -17,6 +17,8 @@ import java.util.Set;
 @AllArgsConstructor
 public class ConnectionFilter {
 
+    private Integer numFilters;
+
     private Set<String> connectionIds;
 
     private Set<ResvState> resvStates;
