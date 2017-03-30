@@ -49,6 +49,7 @@ class ReservationListApp extends React.Component{
         this.handleFilterTextChange = this.handleFilterTextChange.bind(this);
         this.handleFilterDateChange = this.handleFilterDateChange.bind(this);
         this.handleStateDropdownSelect = this.handleStateDropdownSelect.bind(this);
+        this.updateReservationList = this.updateReservationList.bind(this);
     }
 
     componentDidMount(){
@@ -60,7 +61,12 @@ class ReservationListApp extends React.Component{
     }
 
     updateReservations(){
-        let combinedFilter = this.makeCombinedFilter(this.state.filters);
+        this.updateReservationList();
+        timeoutId = setTimeout(this.updateReservations, 30000);   // Updates every 30 seconds
+    }
+
+    updateReservationList(){
+        let combinedFilter = this.makeCombinedFilter();
         client.submit("POST", '/resv/list/filter', combinedFilter)
             .then(
                 (successResponse) => {
@@ -69,11 +75,11 @@ class ReservationListApp extends React.Component{
                 (failResponse) => {
                     console.log("Error: " + failResponse.status + " - " + failResponse.statusText);
                 }
-        );
-        timeoutId = setTimeout(this.updateReservations, 30000);   // Updates every 30 seconds
-    }
+            );
+    };
 
-    makeCombinedFilter(filters){
+    makeCombinedFilter(){
+        let filters = this.state.filters;
         let combinedFilter = {
             numFilters: filters.length,
             userNames: [],
@@ -142,16 +148,14 @@ class ReservationListApp extends React.Component{
         }
         else{
             this.state.filters.push(filter);
-            this.setState({newFilter: {id: filter.id + 1, text: "", type: filter.type}, updateHeatMap: false});
-            this.updateReservations();
+            this.setState({newFilter: {id: filter.id + 1, text: "", type: filter.type}, updateHeatMap: false}, this.updateReservationList);
         }
     }
 
     handleDeleteFilter(filter){
         let id = filter.id;
         let filteredList = this.state.filters.filter((f) => {return f.id != id});
-        this.setState({filters: filteredList, updateHeatMap: false});
-        this.updateReservations();
+        this.setState({filters: filteredList, updateHeatMap: false}, this.updateReservationList);
     }
 
     handleStateDropdownSelect(type){
@@ -255,7 +259,7 @@ class FilterList extends React.Component{
         let listItems = this.props.filters.map((filter) => <FilterItem key={filter.id} filter={filter} handleDeleteFilter={this.props.handleDeleteFilter}/>);
         return(
             <div style={{ display: "flex" , marginTop: "20px"}}>
-                <p>Filter tags: <br/> (Click to delete)</p>
+                <p>List connections that match at least one tag: <br/> (Click to delete)</p>
                 <ul style={{ display: "flex" , flexDirection: "row", listStyle: "none", flexWrap: "wrap"}}>{listItems}</ul>
             </div>
         );

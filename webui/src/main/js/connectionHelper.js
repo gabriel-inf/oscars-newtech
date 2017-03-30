@@ -6,6 +6,9 @@ function listHasChanged(oldConnectionList, newConnectionList) {
     if($.isEmptyObject(newConnectionList)){
         return !$.isEmptyObject(oldConnectionList);
     }
+    if($.isEmptyObject(oldConnectionList)){
+        return !$.isEmptyObject(newConnectionList);
+    }
 
     // Same size
     if(oldConnectionList.length !== newConnectionList.length)
