@@ -270,7 +270,7 @@ class FilterList extends React.Component{
         let listItems = this.props.filters.map((filter) => <FilterItem key={filter.id} filter={filter} handleDeleteFilter={this.props.handleDeleteFilter}/>);
         return(
             <div style={{ display: "flex" , marginTop: "20px"}}>
-                <p>List connections that match at least one tag: <br/> (Click to delete)</p>
+                <p>List connections that match these tags: <br/> (Click to delete)</p>
                 <ul style={{ display: "flex" , flexDirection: "row", listStyle: "none", flexWrap: "wrap"}}>{listItems}</ul>
             </div>
         );
