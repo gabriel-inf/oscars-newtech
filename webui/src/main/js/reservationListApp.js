@@ -50,6 +50,7 @@ class ReservationListApp extends React.Component{
         this.handleFilterDateChange = this.handleFilterDateChange.bind(this);
         this.handleStateDropdownSelect = this.handleStateDropdownSelect.bind(this);
         this.updateReservationList = this.updateReservationList.bind(this);
+        this.sortNewestSubmissionFirst = this.sortNewestSubmissionFirst.bind(this);
     }
 
     componentDidMount(){
@@ -130,16 +131,20 @@ class ReservationListApp extends React.Component{
     evaluateReservationList(response){
         let resvs = JSON.parse(response);
         if(connHelper.listHasChanged(this.state.reservations, resvs)){
-            let dateMap = {};
-            resvs.forEach((r) => {dateMap[r.connectionId] = new Date(r.schedule.submitted)});
-            resvs.sort((r1, r2) => {
-                return dateMap[r2.connectionId].getTime() -dateMap[r1.connectionId].getTime();
-            });
+            this.sortNewestSubmissionFirst(resvs);
             this.setState({reservations: resvs, updateHeatMap: true});
         }
         else{
             this.setState({updateHeatMap: false})
         }
+    }
+
+    sortNewestSubmissionFirst(resvs){
+        let dateMap = {};
+        resvs.forEach((r) => {dateMap[r.connectionId] = new Date(r.schedule.submitted)});
+        resvs.sort((r1, r2) => {
+            return dateMap[r2.connectionId].getTime() -dateMap[r1.connectionId].getTime();
+        });
     }
 
     handleFilterTypeSelect(type){
