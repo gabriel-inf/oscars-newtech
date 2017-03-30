@@ -130,6 +130,11 @@ class ReservationListApp extends React.Component{
     evaluateReservationList(response){
         let resvs = JSON.parse(response);
         if(connHelper.listHasChanged(this.state.reservations, resvs)){
+            let dateMap = {};
+            resvs.forEach((r) => {dateMap[r.connectionId] = new Date(r.schedule.submitted)});
+            resvs.sort((r1, r2) => {
+                return dateMap[r2.connectionId].getTime() -dateMap[r1.connectionId].getTime();
+            });
             this.setState({reservations: resvs, updateHeatMap: true});
         }
         else{
