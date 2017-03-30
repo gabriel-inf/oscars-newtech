@@ -22,7 +22,9 @@ public class Filter {
 
     private Set<String> userNames;
 
-    private Set<Integer> bandwidths;
+    private Set<Integer> minBandwidths;
+
+    private Set<Integer> maxBandwidths;
 
     private Set<String> startDates;
 

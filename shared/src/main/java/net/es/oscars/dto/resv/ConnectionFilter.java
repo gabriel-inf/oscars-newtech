@@ -27,7 +27,9 @@ public class ConnectionFilter {
 
     private Set<String> userNames;
 
-    private Set<Integer> bandwidths;
+    private Set<Integer> minBandwidths;
+
+    private Set<Integer> maxBandwidths;
 
     private Set<Date> startDates;
 

@@ -13,7 +13,8 @@ let timeoutId = -1;
 let resStatusFilter = "Reservation Status";
 let provStatusFilter = "Provision Status";
 let operStatusFilter = "Operation Status";
-let bandwidthFilter = "Bandwidth";
+let minBandwidthFilter = "Minimum Bandwidth (Mbps)";
+let maxBandwidthFilter = "Maximum Bandwidth (Mbps)";
 let userNameFilter = "User Name";
 let startFilter = "Start After Date";
 let endFilter = "End Before Date";
@@ -28,7 +29,7 @@ class ReservationListApp extends React.Component{
             timeoutId: -1,
             filters: [],
             newFilter: {id: 0, text: "", type: "Connection ID"},
-            filterTypes: [idFilter, userNameFilter, bandwidthFilter, startFilter, endFilter, resStatusFilter,
+            filterTypes: [idFilter, userNameFilter, minBandwidthFilter, maxBandwidthFilter, startFilter, endFilter, resStatusFilter,
                 provStatusFilter, operStatusFilter],
             resvStates: ["IDLE_WAIT", "SUBMITTED", "HELD", "COMMITTING", "ABORTING", "ABORT_FAILED"],
             provStates: ["INITIAL", "READY_TO_GENERATE", "GENERATING", "DISMANTLED_MANUAL", "DISMANTLED_AUTO",
@@ -76,7 +77,8 @@ class ReservationListApp extends React.Component{
         let combinedFilter = {
             userNames: [],
             connectionIds: [],
-            bandwidths: [],
+            minBandwidths: [],
+            maxBandwidths: [],
             startDates: [],
             endDates: [],
             resvStates: [],
@@ -89,8 +91,11 @@ class ReservationListApp extends React.Component{
                 case userNameFilter:
                     combinedFilter.userNames.push(filter.text);
                     break;
-                case bandwidthFilter:
-                    combinedFilter.bandwidths.push(filter.text);
+                case minBandwidthFilter:
+                    combinedFilter.minBandwidths.push(filter.text);
+                    break;
+                case maxBandwidthFilter:
+                    combinedFilter.maxBandwidths.push(filter.text);
                     break;
                 case idFilter:
                     combinedFilter.connectionIds.push(filter.text);
@@ -131,7 +136,7 @@ class ReservationListApp extends React.Component{
 
     handleAddFilter(){
         let filter = $.extend(true, {}, this.state.newFilter);
-        if(filter.text == "" || filter.type == bandwidthFilter && isNaN(filter.text)) {
+        if(filter.text == "" || (filter.type == minBandwidthFilter || filter.type == maxBandwidthFilter) && isNaN(filter.text)) {
             console.log("Invalid filter input: must not be empty, and must not have non numeric characters for bandwidth.")
         }
         else{

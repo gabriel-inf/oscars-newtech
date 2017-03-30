@@ -145,7 +145,8 @@ public class ReservationController {
         Set<OperState> operStates = filter.getOperStates() == null ? new HashSet<>() :
                 filter.getOperStates().stream().map(s -> OperState.get(s).orElse(OperState.ADMIN_UP_OPER_UP)).collect(Collectors.toSet());
 
-        Set<Integer> bandwidths = filter.getBandwidths() == null ? new HashSet<>() : filter.getBandwidths();
+        Set<Integer> minBandwidths = filter.getMinBandwidths() == null ? new HashSet<>() : filter.getMinBandwidths();
+        Set<Integer> maxBandwidths = filter.getMaxBandwidths() == null ? new HashSet<>() : filter.getMaxBandwidths();
         return ConnectionFilter.builder()
                 .connectionIds(connectionIds)
                 .userNames(userNames)
@@ -154,7 +155,8 @@ public class ReservationController {
                 .operStates(operStates)
                 .startDates(startDates)
                 .endDates(endDates)
-                .bandwidths(bandwidths)
+                .minBandwidths(minBandwidths)
+                .maxBandwidths(maxBandwidths)
                 .build();
     }
 
