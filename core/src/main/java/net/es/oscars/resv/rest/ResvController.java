@@ -14,17 +14,20 @@ import net.es.oscars.pce.exc.PCEException;
 import net.es.oscars.pce.exc.VlanNotFoundException;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.resv.ent.ConnectionE;
+import net.es.oscars.resv.ent.RequestedVlanFixtureE;
+import net.es.oscars.resv.ent.RequestedVlanJunctionE;
+import net.es.oscars.resv.ent.RequestedVlanPipeE;
 import net.es.oscars.resv.svc.ResvService;
 import net.es.oscars.st.resv.ResvState;
 import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Controller
@@ -121,27 +124,189 @@ public class ResvController {
     @RequestMapping(value = "/resv/filter", method = RequestMethod.POST)
     @ResponseBody
     public Set<Connection> resvFilter(@RequestBody ConnectionFilter filter) {
-        Set<Connection> result = new HashSet<>();
-        if (filter.getConnectionId() != null) {
 
-            Optional<ConnectionE> c = resvService.findByConnectionId(filter.getConnectionId());
-            if (c.isPresent()) {
-                result.add(this.convertConnToDto(c.get()));
+        List<ConnectionE> allConnections = resvService.findAll();
+        Set<Connection> result = new HashSet<>();;
+
+        // No Filters specified
+        if(filter.getNumFilters() == 0)
+        {
+            ;
+        }
+        else
+        {
+            /* Filter by exact matches */
+            // User Name
+            if(!filter.getUserNames().isEmpty())
+            {
+                allConnections = allConnections.stream()
+                        .filter(c -> filter.getUserNames().contains(c.getSpecification().getUsername()))
+                        .collect(Collectors.toList());
             }
-        } else if (filter.getResvStates() != null) {
-            filter.getResvStates().forEach(st -> {
-                resvService.ofResvState(st).forEach(ce -> {
-                    Connection c = this.convertConnToDto(ce);
-                    result.add(c);
-                });
 
-            });
-
-        } else {
-            for (ConnectionE eItem : resvService.findAll()) {
-                Connection dtoItem = convertConnToDto(eItem);
-                result.add(dtoItem);
+            // Resv State
+            if(!filter.getResvStates().isEmpty())
+            {
+                allConnections = allConnections.stream()
+                        .filter(c -> filter.getResvStates().contains(c.getStates().getResv()))
+                        .collect(Collectors.toList());
             }
+
+            // Oper State
+            if(!filter.getOperStates().isEmpty())
+            {
+                allConnections = allConnections.stream()
+                        .filter(c -> filter.getOperStates().contains(c.getStates().getOper()))
+                        .collect(Collectors.toList());
+            }
+
+            // Prov State
+            if(!filter.getProvStates().isEmpty())
+            {
+                allConnections = allConnections.stream()
+                        .filter(c -> filter.getProvStates().contains(c.getStates().getProv()))
+                        .collect(Collectors.toList());
+            }
+
+            // Connection ID
+            if(!filter.getConnectionIds().isEmpty())
+            {
+                allConnections = allConnections.stream()
+                        .filter(c -> filter.getConnectionIds().contains(c.getConnectionId()))
+                        .collect(Collectors.toList());
+            }
+
+
+            /* Filter by range values */
+            Set<Date> allStartDates = filter.getStartDates();
+            Set<Date> allEndDates = filter.getEndDates();
+            Set<Integer> allMinBWs = filter.getMinBandwidths();
+            Set<Integer> allMaxBWs = filter.getMaxBandwidths();
+
+            List<ConnectionE> connstoRemove = new ArrayList<>();
+
+            // Start Dates
+            if(!allStartDates.isEmpty())
+            {
+                Date earliestStart = allStartDates.stream().findFirst().get();
+
+                for(Date oneStartDate : allStartDates)
+                {
+                    if(oneStartDate.before(earliestStart))
+                        earliestStart = oneStartDate;
+                }
+
+                for(ConnectionE c : allConnections)
+                {
+                    if(earliestStart.after(c.getSpecification().getScheduleSpec().getStartDates().get(0)))  // Only checks the first requested Start Date.
+                        connstoRemove.add(c);
+                }
+            }
+
+            // End Dates
+            if(!allEndDates.isEmpty())
+            {
+                Date latestEnd = allEndDates.stream().findFirst().get();
+
+                for(Date oneEndDate : allEndDates)
+                {
+                    if(oneEndDate.after(latestEnd))
+                        latestEnd = oneEndDate;
+                }
+
+                for(ConnectionE c : allConnections)
+                {
+                    if(latestEnd.before(c.getSpecification().getScheduleSpec().getStartDates().get(0)))  // Only checks the first requested End Date.
+                        connstoRemove.add(c);
+                }
+            }
+
+            // Min/Max Bandwidth
+            Integer smallestMin = Integer.MAX_VALUE;
+            Integer largestMax = Integer.MIN_VALUE;
+
+            if(!allMinBWs.isEmpty())
+            {
+                for(Integer oneMin : allMinBWs)
+                {
+                    if(oneMin < smallestMin)
+                        smallestMin = oneMin;
+                }
+            }
+
+            if(!allMaxBWs.isEmpty())
+            {
+                for(Integer oneMax : allMaxBWs)
+                {
+                    if(oneMax > largestMax)
+                        largestMax = oneMax;
+                }
+            }
+
+            for(ConnectionE c : allConnections)
+            {
+                Set<RequestedVlanPipeE> allRequestedPipes = c.getSpecification().getRequested().getVlanFlow().getPipes();
+                Set<RequestedVlanJunctionE> allRequestedJunctions = c.getSpecification().getRequested().getVlanFlow().getJunctions();
+
+                Integer largestRequested = 0;
+                Integer smallestRequested = Integer.MAX_VALUE;
+
+                for(RequestedVlanPipeE onePipe : allRequestedPipes)
+                {
+                    if(onePipe.getAzMbps() > largestRequested)
+                        largestRequested = onePipe.getAzMbps();
+
+                    if(onePipe.getZaMbps() > largestRequested)
+                        largestRequested = onePipe.getZaMbps();
+
+                    if(onePipe.getAzMbps() < smallestRequested)
+                        smallestRequested = onePipe.getAzMbps();
+
+                    if(onePipe.getZaMbps() < smallestRequested)
+                        smallestRequested = onePipe.getZaMbps();
+                }
+
+                for(RequestedVlanJunctionE oneJunc : allRequestedJunctions)
+                {
+                    Set<RequestedVlanFixtureE> theRequestedFixtures = oneJunc.getFixtures();
+
+                    for(RequestedVlanFixtureE oneFix : theRequestedFixtures)
+                    {
+                        if(oneFix.getInMbps() > largestRequested)
+                            largestRequested = oneFix.getInMbps();
+
+                        if(oneFix.getEgMbps() > largestRequested)
+                            largestRequested = oneFix.getEgMbps();
+
+                        if(oneFix.getInMbps() < smallestRequested)
+                            smallestRequested = oneFix.getInMbps();
+
+                        if(oneFix.getEgMbps() < smallestRequested)
+                            smallestRequested = oneFix.getEgMbps();
+
+                    }
+                }
+
+                Integer correctedMin = smallestMin;
+                Integer correctedMax = largestMax;
+
+                if(smallestMin == Integer.MAX_VALUE)
+                    correctedMin = Integer.MIN_VALUE;
+
+                if(largestMax == Integer.MIN_VALUE)
+                    correctedMax = Integer.MAX_VALUE;
+
+                if(!(correctedMin <= largestRequested && correctedMax >= smallestRequested))
+                    connstoRemove.add(c);
+            }
+
+            allConnections.removeAll(connstoRemove);
+        }
+
+        for(ConnectionE oneConnectionE : allConnections)
+        {
+            Connection oneConnDTO = convertConnToDto(oneConnectionE);
+            result.add(oneConnDTO);
         }
 
         return result;

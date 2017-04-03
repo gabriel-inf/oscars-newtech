@@ -23,7 +23,9 @@ class ReservationHeatMap extends React.Component{
     }
 
     componentDidUpdate(){
-        this.initializeNetwork();
+        if(this.props.updateHeatMap){
+            this.initializeNetwork();
+        }
     }
 
     render() {

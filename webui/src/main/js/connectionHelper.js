@@ -1,6 +1,33 @@
 
 const deepEqual = require('deep-equal');
 
+function listHasChanged(oldConnectionList, newConnectionList) {
+    // If new list is empty, list has only changed if old was not empty
+    if($.isEmptyObject(newConnectionList)){
+        return !$.isEmptyObject(oldConnectionList);
+    }
+    if($.isEmptyObject(oldConnectionList)){
+        return !$.isEmptyObject(newConnectionList);
+    }
+
+    // Same size
+    if(oldConnectionList.length !== newConnectionList.length)
+        return true;
+
+    // Same Reservations - All properties unchanged
+    for(let o = 0; o < oldConnectionList.length; o++)
+    {
+        let oldConn = oldConnectionList[o];
+
+        let newIndex = connectionIndex(oldConn, newConnectionList);
+
+        if(newIndex === -1)
+            return true;
+    }
+
+    return false;
+}
+
 /** Determines equality of Connections by performing deep equality checks of all contained parameters, Requested/Reserved objects and collections **/
 function sameConnection(oldConn, newConn)
 {
@@ -448,4 +475,4 @@ function setsEqual(set1, set2)
     return true;
 }
 
-module.exports = {connectionIndex};
+module.exports = {connectionIndex, listHasChanged};

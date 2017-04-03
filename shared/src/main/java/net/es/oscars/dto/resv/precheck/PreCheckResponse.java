@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @Builder
@@ -19,6 +20,6 @@ public class PreCheckResponse {
     }
     private String connectionId;
     private PrecheckResult precheckResult;
-    private List<String> nodesToHighlight = new ArrayList<>();
-    private List<String> linksToHighlight = new ArrayList<>();
+    private Set<String> nodesToHighlight;
+    private Set<String> linksToHighlight;
 }
