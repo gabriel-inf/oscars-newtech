@@ -12,6 +12,7 @@ import net.es.oscars.whatif.dto.WhatifSpecification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.*;
 
 @Service
@@ -49,31 +50,71 @@ public class SuggestionGenerator {
 
         // Determine these values - Bandwidth from src -> dst (a -> z), and from dst -> src (z -> a)
         // Values may be the same, or different
-        Integer azMbps = 0;
-        Integer zaMbps = 0;
-        // Each connection must have a unique id
-        String connectionId = "test";
+        Integer secondsBetween = (int) ((end.getTime() - start.getTime()) / 1000);
+        Integer minimumRequiredBandwidth = (int) Math.ceil(1.0 * volume / secondsBetween);
 
-        // To determine if specific bandwidth values will work, you can create a connection object
+        Map<Instant, Integer> bwMap = bwResponse.getBwAvailabilityMap().get("Az1");
+        List<Integer> possibleBandwidths = new ArrayList<>();
+        Integer minimumBandwidth = null;
 
-        // Create an initial connection from parameters
-        Connection initialConn = createInitialConnection(spec.getSrcDevice(), spec.getSrcPorts(), spec.getDstDevice(),
-                spec.getDstPorts(), azMbps, zaMbps, connectionId, start, end);
-
-        // Run a precheck
-        Connection result = null;
-        try {
-            result = resvController.preCheck(initialConn);
-            if(result != null){
-                // Determine if result is successful. If so, consider storing it as an option
-                if(result.getReserved().getVlanFlow().getAllPaths().size() > 0){
-                    // Success!
-                }
+        // Go through all critical points in the bandwidth availability map
+        // Confirm that the available bandwidth does not drop below our minimum required
+        for(Instant instant : bwMap.keySet()) {
+            Integer bandwidth = bwMap.get(instant);
+            if(minimumBandwidth == null || bandwidth < minimumBandwidth) {
+                minimumBandwidth = bandwidth;
+            }
+            if(bandwidth < minimumRequiredBandwidth) {
+                return connections;  // OSCARS will generate results
             }
         }
-        catch(PCEException |PSSException e){
-            log.info("Connection precheck caused an exception.");
+
+        // If the program arrived at this point in the code, we have two possible values for bandwidth
+        // The first is the minimum required
+        if(minimumRequiredBandwidth > 0) {
+            possibleBandwidths.add(minimumRequiredBandwidth);
         }
+        // The second, if it is not the same as the previous bandwidth value,
+        // is the minimum bandwidth found on the bandwidth availability map
+        if(minimumBandwidth != minimumRequiredBandwidth) {
+            possibleBandwidths.add(minimumBandwidth);
+        }
+
+        // Now we can create a connection for all of the possible bandwidths
+        for(int i = 0; i < possibleBandwidths.size(); i++) {
+
+            Integer band = possibleBandwidths.get(i);
+
+            // For now, both directions on the path will have equal bandwidth
+            // It is possible we will want to change this in the future
+            Integer azMbps = band;
+            Integer zaMbps = band;
+
+            // Each connection must have a unique id
+            String connectionId = "startEndVolume" + i;
+
+            // Create an initial connection from parameters
+            Connection conn = createInitialConnection(spec.getSrcDevice(), spec.getSrcPorts(), spec.getDstDevice(),
+                    spec.getDstPorts(), azMbps, zaMbps, connectionId, start, end);
+
+            // Run a precheck
+            Connection result = null;
+            try {
+                result = resvController.preCheck(conn);
+                if(result != null){
+                    // Determine if result is successful. If so, consider storing it as an option
+                    if(result.getReserved().getVlanFlow().getAllPaths().size() > 0){
+                        // Success!  Now we can add this connection to our list
+                        connections.add(result);
+                    }
+                }
+            }
+            catch(PCEException |PSSException e){
+                log.info("Connection precheck caused an exception.");
+            }
+        }
+
+
         return connections;
     }
 
