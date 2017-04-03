@@ -17,14 +17,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class CoreApp {
     public static void main(String[] args) {
         ConfigurableApplicationContext app = SpringApplication.run(CoreApp.class, args);
-        Startup startup = (Startup)app.getBean("startup");
+        Startup startup = (Startup) app.getBean("startup");
 
         try {
-            Boolean consistent = startup.onStart();
-            if (!consistent) {
-                log.error("topology consistency error!");
-                System.exit(1);
-            }
+            startup.onStart();
         } catch (Exception ex) {
             log.error("startup error!", ex);
             System.exit(1);
