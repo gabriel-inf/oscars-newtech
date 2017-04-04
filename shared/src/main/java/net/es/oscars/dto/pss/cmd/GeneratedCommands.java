@@ -6,14 +6,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Map;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CommandResponse {
+public class GeneratedCommands {
     private String device;
-    private String connectionId;
-    private String commandId;
-
+    private Map<CommandType, String> generated;
 
 }

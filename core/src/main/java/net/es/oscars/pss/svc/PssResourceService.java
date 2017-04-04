@@ -47,8 +47,6 @@ public class PssResourceService {
         this.pssConfig = pssConfig;
     }
 
-    public void generateConfig(ConnectionE conn) throws PSSException {
-    }
 
     public void reserve(ConnectionE conn) throws PSSException {
         log.info("starting PSS resource reservation");

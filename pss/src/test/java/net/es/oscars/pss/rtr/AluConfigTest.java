@@ -65,7 +65,7 @@ public class AluConfigTest extends AbstractPssTest {
                 .ex(setupRts.getExParams())
                 .build();
         CommandStatus setupStatus = CommandStatus.builder()
-                .configStatus(ConfigStatus.SUBMITTING)
+                .configStatus(ConfigStatus.NONE)
                 .lifecycleStatus(LifecycleStatus.PROCESSING)
                 .device(setupRts.getDevice())
                 .type(CommandType.SETUP)
@@ -90,7 +90,7 @@ public class AluConfigTest extends AbstractPssTest {
                 .build();
         CommandStatus tdStatus = CommandStatus.builder()
                 .type(CommandType.TEARDOWN)
-                .configStatus(ConfigStatus.SUBMITTING)
+                .configStatus(ConfigStatus.NONE)
                 .device(tdRts.getDevice())
                 .commands("")
                 .output("")
@@ -125,7 +125,7 @@ public class AluConfigTest extends AbstractPssTest {
                     .ex(setupRts.getExParams())
                     .build();
             CommandStatus setupStatus = CommandStatus.builder()
-                    .configStatus(ConfigStatus.SUBMITTING)
+                    .configStatus(ConfigStatus.NONE)
                     .lifecycleStatus(LifecycleStatus.PROCESSING)
                     .device(setupRts.getDevice())
                     .type(CommandType.SETUP)
@@ -156,7 +156,7 @@ public class AluConfigTest extends AbstractPssTest {
                     .ex(setupRts.getExParams())
                     .build();
             CommandStatus setupStatus = CommandStatus.builder()
-                    .configStatus(ConfigStatus.SUBMITTING)
+                    .configStatus(ConfigStatus.NONE)
                     .lifecycleStatus(LifecycleStatus.PROCESSING)
                     .device(setupRts.getDevice())
                     .type(CommandType.TEARDOWN)

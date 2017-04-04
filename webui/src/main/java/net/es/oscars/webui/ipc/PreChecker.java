@@ -14,16 +14,19 @@ import org.springframework.web.client.RestTemplate;
  */
 @Slf4j
 @Component
-public class PreChecker
-{
+public class PreChecker {
+
     @Autowired
+    private PreChecker(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
+
     private RestTemplate restTemplate;
 
     private final String oscarsUrl = "https://localhost:8000";
 
 
-    public Connection preCheckMinimal(MinimalRequest minimalRequest)
-    {
+    public Connection preCheckMinimal(MinimalRequest minimalRequest) {
         log.info("Pre-checking minimal " + minimalRequest.getConnectionId());
 
         ConnectionBuilder connectionBuilder = new ConnectionBuilder();
@@ -31,8 +34,7 @@ public class PreChecker
         return preCheck(c);
     }
 
-    public Connection preCheckAdvanced(AdvancedRequest advancedRequest)
-    {
+    public Connection preCheckAdvanced(AdvancedRequest advancedRequest) {
         log.info("Pre-checking minimal " + advancedRequest.getConnectionId());
 
         ConnectionBuilder connectionBuilder = new ConnectionBuilder();
@@ -40,13 +42,13 @@ public class PreChecker
         return preCheck(c);
     }
 
-    public Connection preCheck(Connection c){
+    public Connection preCheck(Connection c) {
         String submitUrl = "/resv/connection/precheck";
         String restPath = oscarsUrl + submitUrl;
 
         Connection resultC = restTemplate.postForObject(restPath, c, Connection.class);
 
-        if(resultC == null)
+        if (resultC == null)
             log.info("Pre-Check result: UNSUCCESSFUL");
         else
             log.info("Pre-Check result: SUCCESS");

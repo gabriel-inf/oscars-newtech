@@ -3,6 +3,7 @@ package net.es.oscars.topo.svc;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.dto.topo.DevicePortMap;
 import net.es.oscars.dto.topo.TopoEdge;
 import net.es.oscars.dto.topo.TopoVertex;
 import net.es.oscars.dto.topo.Topology;
@@ -237,7 +238,7 @@ public class TopoService {
         return null;
     }
 
-    public Map<String, Set<String>> buildDeviceToPortMap() {
+    public DevicePortMap buildDeviceToPortMap() {
         Topology topo = getMultilayerTopology();
         Map<String, Set<String>> deviceToPortMap = new HashMap<>();
         Map<TopoVertex, Boolean> checkedMap = topo.getVertices().stream().collect(Collectors.toMap(v -> v, v -> false));
@@ -270,7 +271,8 @@ public class TopoService {
                 }
             }
         }
-        return deviceToPortMap;
+        return DevicePortMap.builder().map(deviceToPortMap).build();
+
     }
 
     public Map<String, String> buildPortToDeviceMap(Map<String, Set<String>> deviceToPortMap) {
@@ -294,7 +296,7 @@ public class TopoService {
         assert (deviceList.size() == 1);
         assert (deviceList.get(0).getDeviceType().equals(DeviceType.ROUTER));
 
-        Map<String, Set<String>> dToPMap = this.buildDeviceToPortMap();
+        Map<String, Set<String>> dToPMap = this.buildDeviceToPortMap().getMap();
         Set<String> portsOnDevice = dToPMap.get(deviceURN);
 
         for (String onePort : portsOnDevice) {

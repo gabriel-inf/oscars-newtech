@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.bwavail.PortBandwidthAvailabilityRequest;
 import net.es.oscars.dto.bwavail.PortBandwidthAvailabilityResponse;
+import net.es.oscars.dto.pss.cmd.CommandType;
+import net.es.oscars.dto.pss.cmd.GeneratedCommands;
 import net.es.oscars.dto.resv.Connection;
 import net.es.oscars.dto.resv.ConnectionFilter;
 import net.es.oscars.dto.resv.precheck.PreCheckResponse;
@@ -236,9 +238,13 @@ public class ReservationController {
         String restPath = oscarsUrl + "/pss/commands/" + connectionId + "/" + deviceUrn;
         log.info("rest :" + restPath);
 
-        Map<String, String> commands = restTemplate.getForObject(restPath, Map.class);
+        GeneratedCommands commands = restTemplate.getForObject(restPath, GeneratedCommands.class);
 
-        return commands;
+
+        // TODO: consume this on client side
+        Map<String, String> badstuff = new HashMap<>();
+        badstuff.put("commands", commands.getGenerated().get(CommandType.SETUP));
+        return badstuff;
     }
 
 

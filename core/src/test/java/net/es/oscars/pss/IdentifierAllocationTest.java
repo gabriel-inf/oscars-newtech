@@ -31,7 +31,6 @@ public class IdentifierAllocationTest extends AbstractCoreTest {
 
 
     @Test
-    @Category(QuickTests.class)
     public void testSingleJunction() throws PSSException {
         repoEntityBuilder.importEsnet();
 

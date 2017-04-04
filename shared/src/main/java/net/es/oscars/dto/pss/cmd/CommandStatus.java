@@ -29,7 +29,6 @@ public class CommandStatus {
     private LifecycleStatus lifecycleStatus;
     private ConfigStatus configStatus;
     private OperationalStatus operationalStatus;
-    private RollbackStatus rollbackStatus;
 
 
 }

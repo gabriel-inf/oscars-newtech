@@ -43,6 +43,10 @@
             <groupId>${project.groupId}</groupId>
         </dependency>
         <dependency>
+            <groupId>net.jodah</groupId>
+            <artifactId>concurrentunit</artifactId>
+        </dependency>
+        <dependency>
             <groupId>net.sf.jung</groupId>
             <artifactId>jung-graph-impl</artifactId>
         </dependency>
@@ -69,6 +73,14 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hashids</groupId>
+            <artifactId>hashids</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -151,6 +163,8 @@
                 </dependencies>
                 <configuration>
                     <groups>${testcase.groups}</groups>
+                    <parallel>classes</parallel>
+                    <threadCount>5</threadCount>
                 </configuration>
             </plugin>
         </plugins>

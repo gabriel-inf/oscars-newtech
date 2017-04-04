@@ -12,7 +12,7 @@ import java.util.Optional;
 public interface RouterCommandsRepository extends CrudRepository<RouterCommandsE, Long> {
 
     List<RouterCommandsE> findAll();
-    Optional<RouterCommandsE> findByConnectionIdAndDeviceUrn(String connectionId, String deviceUrn);
+    List<RouterCommandsE> findByConnectionIdAndDeviceUrn(String connectionId, String deviceUrn);
 
 
 }

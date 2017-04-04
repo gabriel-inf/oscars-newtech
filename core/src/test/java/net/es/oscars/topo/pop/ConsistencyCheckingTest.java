@@ -58,7 +58,6 @@ public class ConsistencyCheckingTest extends AbstractCoreTest {
     }
 
     @Test
-    @Category(QuickTests.class)
     public void checkAllTopologies() throws IOException, ConsistencyException {
 
         List<String> prefixes = new ArrayList<>();

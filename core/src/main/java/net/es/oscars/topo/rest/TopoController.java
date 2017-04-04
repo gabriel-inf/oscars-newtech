@@ -3,6 +3,7 @@ package net.es.oscars.topo.rest;
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.rsrc.ReservableBandwidth;
 import net.es.oscars.dto.spec.ReservedBandwidth;
+import net.es.oscars.dto.topo.DevicePortMap;
 import net.es.oscars.dto.topo.Topology;
 import net.es.oscars.dto.topo.enums.Layer;
 import net.es.oscars.resv.ent.ReservedBandwidthE;
@@ -77,7 +78,7 @@ public class TopoController {
 
     @RequestMapping(value = "/topo/device_port_map", method = RequestMethod.GET)
     @ResponseBody
-    public Map<String, Set<String>> devicePortMap() {
+    public DevicePortMap devicePortMap() {
         log.info("getting devicePortMap");
         return topoService.buildDeviceToPortMap();
     }
