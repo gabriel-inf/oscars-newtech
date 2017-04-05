@@ -75,7 +75,7 @@ public class ControlPlaneTest extends AbstractPssTest {
             for (String commandId : commandIds) {
                 log.debug("checking status for routerConfig " + commandId);
                 CommandStatus status = queuer.getStatus(commandId).orElseThrow(NoSuchElementException::new);
-                if (status.getLifecycleStatus().equals(LifecycleStatus.COMPLETED)) {
+                if (status.getLifecycleStatus().equals(LifecycleStatus.DONE)) {
                     ControlPlaneStatus st = status.getControlPlaneStatus();
                     log.debug("control plane status for " + status.getDevice() + " : " + st);
                     statusMap.put(status.getDevice(), st);
@@ -96,7 +96,7 @@ public class ControlPlaneTest extends AbstractPssTest {
 
         for (String device : statusMap.keySet()) {
             ControlPlaneStatus st = statusMap.get(device);
-            if (!st.equals(ControlPlaneStatus.VERIFIED)) {
+            if (!st.equals(ControlPlaneStatus.OK)) {
                 throw new ControlPlaneException("Could not verify " + device);
             }
 

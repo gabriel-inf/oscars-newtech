@@ -10,10 +10,11 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CommandResponse {
+public class GenerateResponse {
     private String device;
     private String connectionId;
-    private String commandId;
+    private String generated;
+    private CommandType commandType;
 
 
 }

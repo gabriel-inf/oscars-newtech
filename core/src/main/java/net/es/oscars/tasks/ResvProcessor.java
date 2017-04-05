@@ -3,6 +3,7 @@ package net.es.oscars.tasks;
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.pce.exc.PCEException;
 import net.es.oscars.pss.PSSException;
+import net.es.oscars.pss.svc.PSSAdapter;
 import net.es.oscars.pss.svc.PssResourceService;
 import net.es.oscars.resv.svc.ResvService;
 import net.es.oscars.st.prov.ProvState;
@@ -17,24 +18,28 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Component
 public class ResvProcessor {
+
+    @Autowired
+    public ResvProcessor(ResvService resvService,
+                         PSSAdapter pssAdapter,
+                         ProcessingProperties processingProperties) {
+        this.pssAdapter = pssAdapter;
+        this.processingProperties = processingProperties;
+        this.resvService = resvService;
+    }
+
     private ResvService resvService;
-
-    @Autowired
-    private PssResourceService pssResourceService;
-
-    @Autowired
     private ProcessingProperties processingProperties;
+    private PSSAdapter pssAdapter;
+
 
     private boolean started = false;
 
     public void startup() {
+        log.debug("started processing loop");
         this.started = true;
     }
 
-    @Autowired
-    public ResvProcessor(ResvService resvService) {
-        this.resvService = resvService;
-    }
 
     @Scheduled(fixedDelay = 5000)
     @Transactional
@@ -55,7 +60,7 @@ public class ResvProcessor {
         // time out expired HELD reservations
         Integer timeoutMs = processingProperties.getTimeoutHeldAfter() * 1000;
         resvService.ofHeldTimeout(timeoutMs).forEach(c -> {
-                    log.info("reservation " + c.getConnectionId() + " timing out from HELD after "+ timeoutMs + "ms");
+                    log.info("reservation " + c.getConnectionId() + " timing out from HELD after " + timeoutMs + "ms");
                     resvService.timeout(c);
                 }
         );
@@ -67,17 +72,12 @@ public class ResvProcessor {
                 }
         );
 
-        // process committing reservations
+        // generate config for reservations
         resvService.ofProvState(ProvState.READY_TO_GENERATE).forEach(c -> {
                     log.info("ready to generate config for " + c.getConnectionId());
-                    try {
-                        pssResourceService.generateConfig(c);
-                    } catch (PSSException e) {
-                        e.printStackTrace();
-                    }
+                    pssAdapter.generateConfig(c);
                 }
         );
-
 
 
         // process newly submitted reservations

@@ -17,7 +17,13 @@ import org.springframework.web.client.RestTemplate;
 public class AdminUserController {
 
     @Autowired
+    public AdminUserController(RestTemplate restTemplate, RestAuthProvider restAuthProvider) {
+        this.restTemplate = restTemplate;
+        this.restAuthProvider = restAuthProvider;
+    }
+
     private RestTemplate restTemplate;
+    private RestAuthProvider restAuthProvider;
 
     private final String oscarsUrl = "https://localhost:8000";
 
@@ -54,7 +60,7 @@ public class AdminUserController {
     @RequestMapping(value = "/admin/user_pwd_submit", method = RequestMethod.POST)
     public String admin_user_pwd_submit(@ModelAttribute User updatedUser) {
         String username = updatedUser.getUsername();
-        String encodedPassword = new RestAuthProvider().passwordEncoder().encode(updatedUser.getPassword());
+        String encodedPassword = restAuthProvider.passwordEncoder().encode(updatedUser.getPassword());
         log.info("changing pwd for " + username);
 
         String restPath = oscarsUrl + "/users/get/" + username;
@@ -76,7 +82,7 @@ public class AdminUserController {
         }
         String username = addedUser.getUsername();
         log.info("adding " + username);
-        String encodedPassword = new RestAuthProvider().passwordEncoder().encode(addedUser.getPassword());
+        String encodedPassword = restAuthProvider.passwordEncoder().encode(addedUser.getPassword());
         addedUser.setPassword(encodedPassword);
 
         String restPath = oscarsUrl + "/users/add";

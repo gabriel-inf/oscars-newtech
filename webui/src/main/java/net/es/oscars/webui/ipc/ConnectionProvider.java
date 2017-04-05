@@ -17,8 +17,14 @@ import java.util.Set;
 @Slf4j
 @Component
 public class ConnectionProvider {
-    @Autowired
     private RestTemplate restTemplate;
+
+
+    @Autowired
+    public ConnectionProvider(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
+
 
     private final String oscarsUrl = "https://localhost:8000";
 

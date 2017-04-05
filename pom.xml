@@ -96,7 +96,11 @@
                 <artifactId>spring-security-saml2-core</artifactId>
                 <version>1.0.2.RELEASE</version>
             </dependency>
-
+            <dependency>
+                <groupId>net.jodah</groupId>
+                <artifactId>concurrentunit</artifactId>
+                <version>0.4.2</version>
+            </dependency>
             <dependency>
                 <groupId>net.sf.jung</groupId>
                 <artifactId>jung-graph-impl</artifactId>

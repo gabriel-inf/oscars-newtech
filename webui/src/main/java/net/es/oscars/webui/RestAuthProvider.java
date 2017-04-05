@@ -23,9 +23,12 @@ import java.util.List;
 @Slf4j
 @Service(value = "restAuthProvider")
 public class RestAuthProvider implements AuthenticationProvider {
+    private RestTemplate restTemplate;
 
     @Autowired
-    private RestTemplate restTemplate;
+    public RestAuthProvider(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {

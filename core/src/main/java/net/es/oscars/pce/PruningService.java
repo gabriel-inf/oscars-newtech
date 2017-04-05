@@ -186,7 +186,7 @@ public class PruningService {
         Map<String, UrnE> urnMap = buildUrnMap(urns);
 
         // Get map of parent device vertex -> set of port vertices
-        Map<String, Set<String>> deviceToPortMap = topoService.buildDeviceToPortMap();
+        Map<String, Set<String>> deviceToPortMap = topoService.buildDeviceToPortMap().getMap();
         Map<String, String> portToDeviceMap = topoService.buildPortToDeviceMap(deviceToPortMap);
 
         // Build map of URN to resvVlan
@@ -242,7 +242,7 @@ public class PruningService {
         Map<String, UrnE> urnMap = buildUrnMap(urns);
 
         // Get map of parent device vertex -> set of port vertices
-        Map<String, Set<String>> deviceToPortMap = topoService.buildDeviceToPortMap();
+        Map<String, Set<String>> deviceToPortMap = topoService.buildDeviceToPortMap().getMap();
         Map<String, String> portToDeviceMap = topoService.buildPortToDeviceMap(deviceToPortMap);
 
         // Build map of URN to resvVlan

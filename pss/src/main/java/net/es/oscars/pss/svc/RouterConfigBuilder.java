@@ -20,6 +20,27 @@ public class RouterConfigBuilder {
         this.acg = acg;
     }
 
+    public String generate(Command command) throws ConfigException {
+        String result = "";
+        switch (command.getType()) {
+            case CONFIG_STATUS:
+                break;
+            case OPERATIONAL_STATUS:
+                break;
+            case CONTROL_PLANE_STATUS:
+                result = controlPlaneCheck(command.getDevice(), command.getModel()).getRouterConfig();
+                break;
+            case SETUP:
+                result = setup(command).getRouterConfig();
+                break;
+            case TEARDOWN:
+                result = teardown(command).getRouterConfig();
+                break;
+        }
+        return result;
+    }
+
+
     public RancidArguments controlPlaneCheck(String device, DeviceModel model) throws ConfigException {
         String routerConfig;
         switch (model) {
@@ -35,8 +56,8 @@ public class RouterConfigBuilder {
         }
 
         return buildRouterConfig(routerConfig, device, model);
-
     }
+
 
     public RancidArguments setup(Command command) throws ConfigException {
         String routerConfig = "";
@@ -76,7 +97,6 @@ public class RouterConfigBuilder {
         String execPath;
         String cloginrc = props.getCloginrc();
         String dir = props.getDir();
-
 
         switch (model) {
             case ALCATEL_SR7750:

@@ -1,19 +1,20 @@
-package net.es.oscars.webui;
+package net.es.oscars.rest;
 
-import net.es.oscars.rest.RestProperties;
-import net.es.oscars.rest.RestTemplateBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 @Component
-@ComponentScan(basePackageClasses=net.es.oscars.rest.RestProperties.class)
-public class WebuiRestUtil {
+public class RestBean {
+
+    private RestProperties restProperties;
 
     @Autowired
-    private RestProperties restProperties;
+    public RestBean(RestProperties restProperties) {
+        this.restProperties = restProperties;
+
+    }
 
     @Bean
     public RestTemplate rest() throws Exception {

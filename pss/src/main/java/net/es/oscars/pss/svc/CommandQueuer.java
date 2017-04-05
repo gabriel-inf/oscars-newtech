@@ -2,10 +2,7 @@ package net.es.oscars.pss.svc;
 
 import net.es.oscars.dto.pss.cmd.Command;
 import net.es.oscars.dto.pss.cmd.CommandStatus;
-import net.es.oscars.dto.pss.st.ConfigStatus;
-import net.es.oscars.dto.pss.st.LifecycleStatus;
-import net.es.oscars.dto.pss.st.OperationalStatus;
-import net.es.oscars.dto.pss.st.RollbackStatus;
+import net.es.oscars.dto.pss.st.*;
 import org.hashids.Hashids;
 import org.springframework.stereotype.Service;
 
@@ -17,14 +14,14 @@ import java.util.stream.Collectors;
 public class CommandQueuer {
     private ConcurrentHashMap<String, Command> commands = new ConcurrentHashMap<>();
     private ConcurrentHashMap<String, CommandStatus> statuses = new ConcurrentHashMap<>();
-    Hashids hashids = new Hashids("ESnet salt");
+    private Hashids hashids = new Hashids("ESnet salt");
 
     public String newCommand(Command command) {
         CommandStatus commandStatus = CommandStatus.builder()
-                .lifecycleStatus(LifecycleStatus.WAITING)
+                .lifecycleStatus(LifecycleStatus.INITIAL_STATE)
                 .configStatus(ConfigStatus.NONE)
                 .operationalStatus(OperationalStatus.NONE)
-                .rollbackStatus(RollbackStatus.NONE)
+                .controlPlaneStatus(ControlPlaneStatus.NONE)
                 .commands("")
                 .connectionId(command.getConnectionId())
                 .device(command.getDevice())
@@ -90,10 +87,6 @@ public class CommandQueuer {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    public Map<String, CommandStatus> ofRollbackStatus(RollbackStatus status) {
-        return statuses.entrySet().stream()
-                .filter(map -> map.getValue().getRollbackStatus().equals(status))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-    }
+
 
 }
