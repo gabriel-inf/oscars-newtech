@@ -163,8 +163,6 @@
                 </dependencies>
                 <configuration>
                     <groups>${testcase.groups}</groups>
-                    <parallel>classes</parallel>
-                    <threadCount>5</threadCount>
                 </configuration>
             </plugin>
         </plugins>
