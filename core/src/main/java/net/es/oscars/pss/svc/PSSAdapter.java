@@ -2,19 +2,18 @@ package net.es.oscars.pss.svc;
 
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.pss.cmd.*;
-import net.es.oscars.dto.pss.params.alu.AluParams;
+import net.es.oscars.dto.pss.st.LifecycleStatus;
 import net.es.oscars.pss.PSSException;
 import net.es.oscars.pss.dao.RouterCommandsRepository;
 import net.es.oscars.pss.ent.RouterCommandsE;
 import net.es.oscars.resv.ent.*;
-import net.es.oscars.topo.ent.UrnE;
-import net.es.oscars.topo.svc.TopoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 
 @Component
@@ -31,12 +30,79 @@ public class PSSAdapter {
         this.paramsAdapter = paramsAdapter;
     }
 
-    public void setup(ConnectionE conn) {
-        log.info("setting up");
+    public void setup(ConnectionE conn) throws PSSException {
+        log.info("setting up "+conn.getConnectionId());
         List<Command> commands = this.setupCommands(conn);
+        try {
+            List<CommandResponse> responses = parallelSubmit(commands);
+            List<String> commandIds = responses.stream()
+                    .map(CommandResponse::getCommandId).collect(Collectors.toList());
 
-
+        } catch (InterruptedException | ExecutionException ex) {
+            throw new PSSException("interrupted");
+        }
     }
+
+    public void teardown(ConnectionE conn) throws PSSException {
+        log.info("tearing down "+conn.getConnectionId());
+        List<Command> commands = this.teardownCommands(conn);
+        try {
+            List<CommandResponse> responses = parallelSubmit(commands);
+            List<String> commandIds = responses.stream()
+                    .map(CommandResponse::getCommandId).collect(Collectors.toList());
+            List<CommandStatus> statuses = pollUntilStable(commandIds);
+
+        } catch (InterruptedException | ExecutionException ex) {
+            throw new PSSException("interrupted");
+        }
+    }
+
+
+    public List<CommandStatus> pollUntilStable(List<String> commandIds)
+            throws PSSException {
+
+        boolean allDone = false;
+        boolean timedOut = false;
+        Integer timeoutMillis = 60000;
+        Integer elapsed = 0;
+        List<CommandStatus> statuses = new ArrayList<>();
+
+        try {
+            while (!allDone && !timedOut) {
+                log.info("polling PSS.. ");
+                statuses = pollStatuses(commandIds);
+                allDone = areAllDone(statuses);
+
+                if (!allDone) {
+                    Thread.sleep(1000);
+                    elapsed = elapsed + 1000;
+                    if (elapsed > timeoutMillis) {
+                        timedOut = true;
+                    }
+                }
+            }
+        } catch (InterruptedException | ExecutionException ex) {
+            log.error("interrupted!", ex);
+            throw new PSSException("PSS thread interrupted");
+        }
+
+        if (timedOut) {
+            throw new PSSException("timed out waiting for all routers to be stable");
+        }
+
+        return statuses;
+    }
+
+    public boolean areAllDone(List<CommandStatus> statuses) {
+        boolean allDone = true;
+        for (int j = 0; j < statuses.size(); j++) {
+            if (!statuses.get(j).getLifecycleStatus().equals(LifecycleStatus.DONE)) {
+                allDone = false;
+            }
+        }
+        return allDone;
+    }
+
 
     public List<CommandResponse> parallelSubmit(List<Command> commands)
             throws InterruptedException, ExecutionException {
@@ -54,15 +120,16 @@ public class PSSAdapter {
         for (int j = 0; j < threadNum; j++) {
             FutureTask<CommandResponse> futureTask = taskList.get(j);
             responses.add(taskList.get(j).get());
-            log.info("got response "+futureTask.get().getCommandId());
+            log.info("got response " + futureTask.get().getCommandId());
         }
         executor.shutdown();
         return responses;
     }
 
-    public List<CommandStatus> parallelStatus(List<String> commandIds)
-            throws InterruptedException, ExecutionException {
 
+    public List<CommandStatus> pollStatuses(List<String> commandIds)
+            throws InterruptedException, ExecutionException {
+        List<CommandStatus> statuses = new ArrayList<>();
         int threadNum = commandIds.size();
         ExecutorService executor = Executors.newFixedThreadPool(threadNum);
 
@@ -73,12 +140,9 @@ public class PSSAdapter {
             executor.execute(task);
         }
 
-        List<CommandStatus> statuses = new ArrayList<>();
-
         for (int j = 0; j < threadNum; j++) {
             FutureTask<CommandStatus> futureTask = taskList.get(j);
             statuses.add(taskList.get(j).get());
-            log.info("got command status for device "+futureTask.get().getDevice());
         }
         executor.shutdown();
         return statuses;
