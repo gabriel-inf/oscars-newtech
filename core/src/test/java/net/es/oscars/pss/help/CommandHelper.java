@@ -25,7 +25,7 @@ public class CommandHelper {
                 .device("someDevice")
                 .model(DeviceModel.ALCATEL_SR7750)
                 .alu(aluParams)
-                .type(CommandType.SETUP)
+                .type(CommandType.BUILD)
                 .build();
     }
 

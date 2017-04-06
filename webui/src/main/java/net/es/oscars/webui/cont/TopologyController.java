@@ -5,6 +5,7 @@ import net.es.oscars.dto.bwavail.BandwidthAvailabilityRequest;
 import net.es.oscars.dto.bwavail.BandwidthAvailabilityResponse;
 import net.es.oscars.dto.rsrc.ReservableBandwidth;
 import net.es.oscars.dto.spec.ReservedBandwidth;
+import net.es.oscars.dto.topo.ReservedBandwidths;
 import net.es.oscars.webui.dto.MinimalBwAvailRequest;
 import net.es.oscars.webui.ipc.TopologyProvider;
 import org.joda.time.DateTime;
@@ -12,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
@@ -22,8 +22,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Controller
-public class TopologyController
-{
+public class TopologyController {
     @Autowired
     private RestTemplate restTemplate;
 
@@ -32,34 +31,32 @@ public class TopologyController
 
     private final String oscarsUrl = "https://localhost:8000";
 
-    @RequestMapping(value="/topology/reservedbw", method = RequestMethod.GET)
+    @RequestMapping(value = "/topology/reservedbw", method = RequestMethod.GET)
     @ResponseBody
-    public List<ReservedBandwidth> getAllReservedBw()
-    {
-        String restPath = oscarsUrl + "/topo/reservedbw";
+    public List<ReservedBandwidth> getAllReservedBw() {
+        String restPath = oscarsUrl + "/topo/allreservedbw";
+        ReservedBandwidths rbs = restTemplate.getForObject(restPath, ReservedBandwidths.class);
 
-        return restTemplate.getForObject(restPath, List.class);
+        return rbs.getBandwidths();
+
     }
 
     @RequestMapping(value = "/topology/reservedbw", method = RequestMethod.POST)
     @ResponseBody
-    public List<ReservedBandwidth> get_reserved_bw(@RequestBody List<String> resUrns)
-    {
+    public List<ReservedBandwidth> get_reserved_bw(@RequestBody List<String> resUrns) {
         String restPath = oscarsUrl + "/topo/reservedbw";
 
-        HttpEntity<List<String>> requestEntity = new HttpEntity<>(resUrns);
-        ParameterizedTypeReference<List<ReservedBandwidth>> typeRef = new ParameterizedTypeReference<List<ReservedBandwidth>>() {};
-        ResponseEntity<List<ReservedBandwidth>> response = restTemplate.exchange(restPath, HttpMethod.POST, requestEntity, typeRef);
+        if (resUrns == null) {
+            resUrns = new ArrayList<>();
+        }
+        ReservedBandwidths rbs = restTemplate.postForObject(restPath, resUrns, ReservedBandwidths.class);
+        return rbs.getBandwidths();
 
-        List<ReservedBandwidth> relevantBwItems = response.getBody();
-
-        return relevantBwItems;
     }
 
-    @RequestMapping(value="/topology/bwcapacity", method = RequestMethod.GET)
+    @RequestMapping(value = "/topology/bwcapacity", method = RequestMethod.GET)
     @ResponseBody
-    public Map<String, Integer> getAllPortCapacity()
-    {
+    public Map<String, Integer> getAllPortCapacity() {
         List<ReservableBandwidth> bwCapList = topologyProvider.getPortCapacities();
 
         return bwCapList
@@ -70,9 +67,8 @@ public class TopologyController
 
     @RequestMapping(value = "/topology/bwcapacity", method = RequestMethod.POST)
     @ResponseBody
-    public Map<String, Integer> get_port_capacity(@RequestBody List<String> ports)
-    {
-        Map urn2CapMap = new HashMap<>();
+    public Map<String, Integer> get_port_capacity(@RequestBody List<String> ports) {
+        Map<String, Integer> urn2CapMap = new HashMap<>();
 
         List<ReservableBandwidth> bwCapList = topologyProvider.getPortCapacities();
 
@@ -80,9 +76,7 @@ public class TopologyController
                 .filter(bwCap -> ports.contains(bwCap.getTopoVertexUrn()))
                 .collect(Collectors.toList());
 
-        for(int p = 0; p < bwCapList.size(); p++)
-        {
-            ReservableBandwidth oneBW = bwCapList.get(p);
+        for (ReservableBandwidth oneBW : bwCapList) {
             Integer minCap = Math.min(oneBW.getIngressBw(), oneBW.getEgressBw());
             urn2CapMap.put(oneBW.getTopoVertexUrn(), minCap);
         }
@@ -91,11 +85,10 @@ public class TopologyController
     }
 
 
-    @RequestMapping( value = "/topology/bwavailability/path" , method = RequestMethod.POST)
+    @RequestMapping(value = "/topology/bwavailability/path", method = RequestMethod.POST)
     @ResponseBody
-    public BandwidthAvailabilityResponse getBwAvailability(@RequestBody MinimalBwAvailRequest minReq)
-    {
-        String restPath = oscarsUrl +  "/bwavail/path" ;
+    public BandwidthAvailabilityResponse getBwAvailability(@RequestBody MinimalBwAvailRequest minReq) {
+        String restPath = oscarsUrl + "/bwavail/path";
 
         List<List<String>> eroListAZ = new ArrayList<>();
         List<List<String>> eroListZA = new ArrayList<>();
@@ -120,31 +113,26 @@ public class TopologyController
         log.info("Start: " + bwRequest.getStartDate());
         log.info("End: " + bwRequest.getEndDate());
 
-        BandwidthAvailabilityResponse bwResponse = restTemplate.postForObject(restPath, bwRequest, BandwidthAvailabilityResponse.class);
-
-        return bwResponse;
+        return restTemplate.postForObject(restPath, bwRequest, BandwidthAvailabilityResponse.class);
     }
 
 
     @RequestMapping(value = "/topology/deviceportmap/full", method = RequestMethod.GET)
     @ResponseBody
-    public Map<String, Set<String>> get_device2port_map()
-    {
-        Map<String, Set<String>> fullPortMap = topologyProvider.devicePortMap();
+    public Map<String, Set<String>> get_device2port_map() {
 
-        return fullPortMap;
+        return topologyProvider.devicePortMap();
     }
 
 
     @RequestMapping(value = "/topology/deviceportmap/{deviceURN}", method = RequestMethod.GET)
     @ResponseBody
-    public Set<String> get_single_port_set(@PathVariable String deviceURN)
-    {
+    public Set<String> get_single_port_set(@PathVariable String deviceURN) {
         Map<String, Set<String>> fullPortMap = topologyProvider.devicePortMap();
 
         Set<String> portMap = fullPortMap.get(deviceURN);
 
-        if(portMap == null)
+        if (portMap == null)
             portMap = new HashSet<>();
 
         return portMap;
@@ -152,10 +140,8 @@ public class TopologyController
 
     @RequestMapping(value = "/topology/portdevicemap/full", method = RequestMethod.GET)
     @ResponseBody
-    public Map<String, String> get_port2device_map()
-    {
-        Map<String, String> fullDeviceMap = topologyProvider.portDeviceMap();
+    public Map<String, String> get_port2device_map() {
 
-        return fullDeviceMap;
+        return topologyProvider.portDeviceMap();
     }
 }

@@ -30,28 +30,28 @@ public class AluGenerationTest extends AbstractPssTest {
     @Category(UnitTests.class)
     public void makeAluConfigs() throws ConfigException, IOException {
 
-        log.info("testing setup");
-        List<RouterTestSpec> specs = loader.loadSpecs(CommandType.SETUP);
+        log.info("testing build");
+        List<RouterTestSpec> specs = loader.loadSpecs(CommandType.BUILD);
 
         for (RouterTestSpec spec : specs) {
             if (spec.getModel().equals(DeviceModel.ALCATEL_SR7750)) {
                 if (!spec.getShouldFail()) {
                     log.info("testing "+spec.getFilename());
-                    String config = commandGen.setup(spec.getAluParams());
+                    String config = commandGen.build(spec.getAluParams());
                     log.info("config generated: \n" + config);
                 }
             }
         }
 
-        log.info("testing teardown");
+        log.info("testing dismantle");
 
-        specs = loader.loadSpecs(CommandType.TEARDOWN);
+        specs = loader.loadSpecs(CommandType.DISMANTLE);
 
         for (RouterTestSpec spec : specs) {
             if (spec.getModel().equals(DeviceModel.ALCATEL_SR7750)) {
                 if (!spec.getShouldFail()) {
                     log.info("testing "+spec.getFilename());
-                    String config = commandGen.teardown(spec.getAluParams());
+                    String config = commandGen.dismantle(spec.getAluParams());
                     log.info("config generated: \n" + config);
                 }
             }
@@ -65,7 +65,7 @@ public class AluGenerationTest extends AbstractPssTest {
     public void failToMakeAluConfig() throws ConfigException, IOException {
         log.info("testing things that should fail");
 
-        List<RouterTestSpec> setupSpecs = loader.loadSpecs(CommandType.SETUP);
+        List<RouterTestSpec> setupSpecs = loader.loadSpecs(CommandType.BUILD);
         boolean anyFailScenariosFound = false;
 
 
@@ -73,7 +73,7 @@ public class AluGenerationTest extends AbstractPssTest {
             if (spec.getModel().equals(DeviceModel.ALCATEL_SR7750)) {
                 if (spec.getShouldFail()) {
                     log.info("testing "+spec.getFilename());
-                    commandGen.setup(spec.getAluParams());
+                    commandGen.build(spec.getAluParams());
                     anyFailScenariosFound = true;
                 }
             }

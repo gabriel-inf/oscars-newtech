@@ -7,6 +7,7 @@ import net.es.oscars.dto.topo.enums.DeviceModel;
 import net.es.oscars.dto.topo.enums.DeviceType;
 import net.es.oscars.dto.topo.enums.Layer;
 import net.es.oscars.dto.topo.enums.UrnType;
+import net.es.oscars.dto.viz.DevicePositions;
 import net.es.oscars.dto.viz.Position;
 import net.es.oscars.pss.dao.UrnAddressRepository;
 import net.es.oscars.pss.ent.UrnAddressE;
@@ -49,7 +50,7 @@ public class ConsistencyCheckingTest extends AbstractCoreTest {
     private void clear() {
         TopoProperties topoProperties = new TopoProperties();
         ui = new UIPopulator(topoProperties);
-        ui.setPositions(new HashMap<>());
+        ui.setPositions(DevicePositions.builder().positions(new HashMap<>()).build());
         urnRepo.deleteAll();
         adjcyRepo.deleteAll();
         urnAddrRepo.deleteAll();
@@ -90,10 +91,10 @@ public class ConsistencyCheckingTest extends AbstractCoreTest {
     public void testEverythingOk() throws ConsistencyException {
         this.clear();
         Position foo_pos = Position.builder().x(1).y(1).build();
-        ui.getPositions().put("foo-cr1", foo_pos);
+        ui.getPositions().getPositions().put("foo-cr1", foo_pos);
 
         Position bar_pos = Position.builder().x(1).y(1).build();
-        ui.getPositions().put("bar-cr1", bar_pos);
+        ui.getPositions().getPositions().put("bar-cr1", bar_pos);
 
         UrnE foo = UrnE.builder()
                 .capabilities(new HashSet<>())
@@ -384,7 +385,7 @@ public class ConsistencyCheckingTest extends AbstractCoreTest {
         this.clear();
 
         Position p = Position.builder().x(1).y(1).build();
-        ui.getPositions().put("foo-cr1", p);
+        ui.getPositions().getPositions().put("foo-cr1", p);
 
 
         ConsistencyChecker consistencyChecker = new ConsistencyChecker(adjcyRepo, urnRepo, urnAddrRepo, ui);

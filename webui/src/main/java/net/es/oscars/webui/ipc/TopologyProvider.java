@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.rsrc.ReservableBandwidth;
 import net.es.oscars.dto.topo.DevicePortMap;
 import net.es.oscars.dto.topo.Topology;
+import net.es.oscars.dto.viz.DevicePositions;
 import net.es.oscars.dto.viz.Position;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -66,11 +67,11 @@ public class TopologyProvider {
         if (positions == null) {
             positions = new HashMap<>();
             String restPath = oscarsUrl + "/ui/positions";
-            Map<String, Map<String, Integer>> rcvd = restTemplate.getForObject(restPath, Map.class);
+            DevicePositions rcvd = restTemplate.getForObject(restPath, DevicePositions.class);
 
-            rcvd.keySet().forEach(d -> {
-                Integer x = rcvd.get(d).get("x");
-                Integer y = rcvd.get(d).get("y");
+            rcvd.getPositions().keySet().forEach(d -> {
+                Integer x = rcvd.getPositions().get(d).getX();
+                Integer y = rcvd.getPositions().get(d).getY();
                 Position p = Position.builder().x(x).y(y).build();
                 positions.put(d, p);
             });

@@ -8,9 +8,9 @@ const validator = require('./validator');
 const deepEqual = require('deep-equal');
 import Dropdown from 'react-dropdown';
 
-class ReservationApp extends React.Component{
+class ReservationApp extends React.Component {
 
-    constructor(props){
+    constructor(props) {
         super(props);
         // Junction: {id: ~~, label: ~~, fixtures: {}}
         // fixtures: {id: {id: ~~, selected: true or false, bandwidth: ~~, vlan: ~~}, id: ~~, ....}
@@ -87,17 +87,20 @@ class ReservationApp extends React.Component{
         this.handleCommit = this.handleCommit.bind(this);
     }
 
-    componentDidMount(){
+    componentDidMount() {
         client.loadJSON({method: "GET", url: "/viz/topology/multilayer"}).then(this.initializeNetwork);
         this.initializeResGraph();
     }
 
-    componentDidUpdate(prevProps, prevState){
+    componentDidUpdate(prevProps, prevState) {
         // Only do verification and precheck if the reservation has changed
-        if(this.state.reservation.status === "UNHELD" && !deepEqual(prevState.reservation, this.state.reservation)){
+        if (this.state.reservation.status === "UNHELD" && !deepEqual(prevState.reservation, this.state.reservation)) {
             let reservationStatus = validator.validateReservation(this.state.reservation);
-            if(reservationStatus.isValid){
-                this.setState({message: "Reservation format valid. Prechecking resource availability...", messageBoxClass: "alert-success"});
+            if (reservationStatus.isValid) {
+                this.setState({
+                    message: "Reservation format valid. Prechecking resource availability...",
+                    messageBoxClass: "alert-success"
+                });
                 let preCheckResponse = client.submitReservation("/resv/advanced_precheck", this.state.reservation);
                 preCheckResponse.then(
                     (successResponse) => {
@@ -108,7 +111,7 @@ class ReservationApp extends React.Component{
                     }
                 );
             }
-            else{
+            else {
                 this.setState({
                     message: reservationStatus.errorMessages[0],
                     messageBoxClass: "alert-info",
@@ -119,18 +122,18 @@ class ReservationApp extends React.Component{
         }
     }
 
-    processPrecheck(response){
+    processPrecheck(response) {
         let data = JSON.parse(response);
         let preCheckRes = data["precheckResult"];
-        if(preCheckRes === "UNSUCCESSFUL"){
+        if (preCheckRes === "UNSUCCESSFUL") {
             this.setState({
-                    message: "Precheck Failed: Cannot establish reservation with current parameters! Updating topology. Please wait...",
-                    messageBoxClass: "alert-danger"
+                message: "Precheck Failed: Cannot establish reservation with current parameters! Updating topology. Please wait...",
+                messageBoxClass: "alert-danger"
             });
             networkVis.drawFailedLinksOnNetwork(this.state.networkVis, this.state.reservation);
             this.setState({message: "Precheck Failed: Cannot establish reservation with current parameters! Topology elements with insufficient bandwidth colored red."});
         }
-        else{
+        else {
             let nodesToHighlight = data["nodesToHighlight"];
             let linksToHighlight = data["linksToHighlight"];
             networkVis.drawPathOnNetwork(this.state.networkVis, nodesToHighlight, linksToHighlight);
@@ -143,7 +146,7 @@ class ReservationApp extends React.Component{
         }
     }
 
-    initializeNetwork(response){
+    initializeNetwork(response) {
         let jsonData = JSON.parse(response);
         let nodes = jsonData.nodes;
         let edges = jsonData.edges;
@@ -168,7 +171,7 @@ class ReservationApp extends React.Component{
         this.setState({networkVis: displayViz});
     }
 
-    initializeResGraph(){
+    initializeResGraph() {
         let networkElement = document.getElementById('reservation_viz');
         let nodes = [];
         let edges = [];
@@ -200,25 +203,25 @@ class ReservationApp extends React.Component{
         this.setState({resVis: resVis});
     }
 
-    handleAddJunction(reservation){
+    handleAddJunction(reservation) {
         let selectedJunctions = this.state.networkVis.network.getSelectedNodes();
 
         let nodeOrder = this.state.nodeOrder.slice();
         let pipeIdNumberDict = this.state.pipeIdNumberDict;
 
         // loop through all the selected junctions
-        if(selectedJunctions.length > 0){
+        if (selectedJunctions.length > 0) {
             let newNodeName = selectedJunctions[0];
             // Only add this node if it's not currently in the list
             if (!(newNodeName in reservation.junctions)) {
                 // Add a new pipe if there's at least one current junction before addition
                 // Connect previous last junction to new junction
                 let newPipe = null;
-                if(Object.keys(reservation.junctions).length > 0){
-                    let lastNodeName = nodeOrder[nodeOrder.length-1];
+                if (Object.keys(reservation.junctions).length > 0) {
+                    let lastNodeName = nodeOrder[nodeOrder.length - 1];
                     let pipeId = lastNodeName + " -- " + newNodeName;
                     // If this is the first pipe of its type, give it an id of _1
-                    if(!(pipeId in pipeIdNumberDict)){
+                    if (!(pipeId in pipeIdNumberDict)) {
                         pipeIdNumberDict[pipeId] = 0;
                     }
                     // Add a number of to the pipe ID to make them unique
@@ -230,15 +233,15 @@ class ReservationApp extends React.Component{
                 }
 
                 // Get list of fixture names if not retrieved already
-                if(!(newNodeName in this.state.junctionFixtureDict)){
-                    client.loadJSON({method: "GET", url: "/info/device/" + newNodeName+ "/vlanEdges"})
+                if (!(newNodeName in this.state.junctionFixtureDict)) {
+                    client.loadJSON({method: "GET", url: "/info/device/" + newNodeName + "/vlanEdges"})
                         .then((response) => {
-                            this.completeJunctionAddition(newNodeName, newPipe, reservation,  nodeOrder, pipeIdNumberDict, response);
-                        }
-                    );
+                                this.completeJunctionAddition(newNodeName, newPipe, reservation, nodeOrder, pipeIdNumberDict, response);
+                            }
+                        );
                 }
                 // Already have all possible fixtures for this junction
-                else{
+                else {
                     // Add the new junction
                     this.completeJunctionAddition(newNodeName, newPipe, reservation, nodeOrder, pipeIdNumberDict, null);
                 }
@@ -248,12 +251,12 @@ class ReservationApp extends React.Component{
     }
 
 
-    completeJunctionAddition(newNodeName, newPipe, reservation, nodeOrder, pipeIdNumberDict, response){
+    completeJunctionAddition(newNodeName, newPipe, reservation, nodeOrder, pipeIdNumberDict, response) {
         // Get the fixtures for this junction
         let junctionDict = this.state.junctionFixtureDict;
         // Add the new junction
         let newJunction = {id: newNodeName, label: newNodeName, fixtures: {}};
-        if(response != null){
+        if (response != null) {
             junctionDict[newNodeName] = JSON.parse(response);
         }
         newJunction.fixtures = this.createFixtureSet(newNodeName, junctionDict);
@@ -268,7 +271,7 @@ class ReservationApp extends React.Component{
 
         // Add these elements to the graph
         let newEdges = [];
-        if(newPipe != null){
+        if (newPipe != null) {
             newEdges.push(newPipe);
         }
         this.addElementsToResGraph([newJunction], newEdges);
@@ -276,31 +279,33 @@ class ReservationApp extends React.Component{
 
     // Each fixture looks like this:
     // {id: ~~, selected: true or false, azbw: ~~, vlan: ~~}
-    createFixtureSet(junctionName, junctionDict){
+    createFixtureSet(junctionName, junctionDict) {
         let fixtureNames = junctionDict[junctionName];
         let fixtureSet = {};
-        for(let i = 0; i < fixtureNames.length; i++){
+        for (let i = 0; i < fixtureNames.length; i++) {
             let fixtureName = fixtureNames[i];
-            fixtureSet[fixtureName] = {id: fixtureName, selected: false, azbw: 0, zabw: 0,
-                symmetricBw: true, vlan: "2-4094"};
+            fixtureSet[fixtureName] = {
+                id: fixtureName, selected: false, azbw: 0, zabw: 0,
+                symmetricBw: true, vlan: "2000-2999"
+            };
         }
         return fixtureSet;
     }
 
-    addElementsToResGraph(newJunctions, newPipes){
+    addElementsToResGraph(newJunctions, newPipes) {
         let resVis = this.state.resVis;
         resVis.datasource.edges.add(newPipes);
         resVis.datasource.nodes.add(newJunctions);
         resVis.network.stabilize();
     }
 
-    addPipeThroughResGraph(data, callback){
+    addPipeThroughResGraph(data, callback) {
         if (data.from != data.to) {
             let pipeId = data.from + " -- " + data.to;
             let pipeIdNumberDict = this.state.pipeIdNumberDict;
 
             // If this is the first pipe of its type, give it an id of _1
-            if(!(pipeId in pipeIdNumberDict)){
+            if (!(pipeId in pipeIdNumberDict)) {
                 pipeIdNumberDict[pipeId] = 0;
             }
 
@@ -318,16 +323,16 @@ class ReservationApp extends React.Component{
         }
     }
 
-    deleteResGraphElements(data, callback){
+    deleteResGraphElements(data, callback) {
         callback(data);
 
         let res = jQuery.extend(true, {}, this.state.reservation);
         let datasource = this.state.resVis.datasource;
 
         // Delete all selected pipes
-        for(let i = 0; i < data.edges.length; i++){
+        for (let i = 0; i < data.edges.length; i++) {
             let edgeId = data.edges[i];
-            if(edgeId in res.pipes) {
+            if (edgeId in res.pipes) {
                 this.deletePipe(res, datasource, edgeId);
             }
         }
@@ -336,25 +341,25 @@ class ReservationApp extends React.Component{
         let junctionDeleted = false;
         let nodeOrder = this.state.nodeOrder.slice();
 
-        for(let i = 0; i < data.nodes.length; i++){
+        for (let i = 0; i < data.nodes.length; i++) {
             let nodeId = data.nodes[i];
 
-            if(nodeId in res.junctions){
+            if (nodeId in res.junctions) {
                 // Delete the junction
                 this.deleteJunction(res, datasource, nodeId);
 
                 // Delete all pipes connected to this junction
                 let pipes = Object.keys(res.pipes);
-                for(let j = 0; j < pipes.length; j++){
+                for (let j = 0; j < pipes.length; j++) {
                     let edgeId = pipes[j];
-                    if(edgeId.includes(nodeId)){
+                    if (edgeId.includes(nodeId)) {
                         this.deletePipe(res, datasource, edgeId);
                     }
                 }
                 junctionDeleted = true;
                 // Remove this junction from the node ordering
                 let nodeIndex = nodeOrder.indexOf(nodeId);
-                if(nodeIndex != -1){
+                if (nodeIndex != -1) {
                     nodeOrder.splice(nodeIndex, 1);
                 }
             }
@@ -367,98 +372,98 @@ class ReservationApp extends React.Component{
         this.setState({reservation: res, nodeOrder: nodeOrder});
     }
 
-    deletePipe(res, datasource, edgeId){
+    deletePipe(res, datasource, edgeId) {
         delete(res.pipes[edgeId]);
         datasource.edges.remove(edgeId);
     }
 
-    deleteJunction(res, datasource, nodeId){
+    deleteJunction(res, datasource, nodeId) {
         delete(res.junctions[nodeId]);
         datasource.nodes.remove(nodeId);
     }
 
-    handleSandboxSelection(params){
+    handleSandboxSelection(params) {
         let edges = params.edges;
         let nodes = params.nodes;
 
-        if(edges.length == 0){
+        if (edges.length == 0) {
             this.setState({showPipePanel: false});
         }
-        else{
+        else {
             this.setState({showPipePanel: true});
         }
-        if(nodes.length == 0){
+        if (nodes.length == 0) {
             this.setState({showJunctionPanel: false});
         }
-        else{
+        else {
             this.setState({showJunctionPanel: true});
         }
 
         this.setState({selectedPipes: edges, selectedJunctions: nodes})
     }
 
-    handlePipeAzBw(pipe, reservation, event){
+    handlePipeAzBw(pipe, reservation, event) {
         pipe.azbw = event.target.value;
-        if(pipe.symmetricBw){
+        if (pipe.symmetricBw) {
             pipe.zabw = event.target.value;
         }
         reservation.pipes[pipe.id] = pipe;
         this.setState({reservation: reservation});
     }
 
-    handlePipeZaBw(pipe, reservation, event){
+    handlePipeZaBw(pipe, reservation, event) {
         pipe.zabw = event.target.value;
-        if(pipe.symmetricBw){
+        if (pipe.symmetricBw) {
             pipe.azbw = event.target.value;
         }
         reservation.pipes[pipe.id] = pipe;
         this.setState({reservation: reservation});
     }
 
-    handleSymmetricBwSelection(pipe, reservation, event){
+    handleSymmetricBwSelection(pipe, reservation, event) {
         pipe.symmetricBw = !pipe.symmetricBw;
-        if(pipe.symmetricBw){
+        if (pipe.symmetricBw) {
             pipe.zabw = pipe.azbw;
         }
         reservation.pipes[pipe.id] = pipe;
         this.setState({reservation: reservation});
     }
 
-    handlePalindromicSelection(pipe, reservation, event){
+    handlePalindromicSelection(pipe, reservation, event) {
         pipe.palindromicPath = !pipe.palindromicPath;
         reservation.pipes[pipe.id] = pipe;
         this.setState({reservation: reservation});
     }
 
-    handleSurvivabilitySelection(pipe, reservation, option){
+    handleSurvivabilitySelection(pipe, reservation, option) {
         pipe.survivabilityType = option.value;
         reservation.pipes[pipe.id] = pipe;
         this.setState({reservation: reservation});
     }
 
-    handleNumPaths(pipe, reservation, event){
+    handleNumPaths(pipe, reservation, event) {
         pipe.numPaths = event.target.value;
         reservation.pipes[pipe.id] = pipe;
         this.setState({reservation: reservation});
     }
 
-    handleFixtureSelection(fixture, junction, reservation, event){
+    handleFixtureSelection(fixture, junction, reservation, event) {
         fixture.selected = !fixture.selected;
         junction.fixtures[fixture.id] = fixture;
         reservation.junctions[junction.id] = junction;
         this.setState({reservation: reservation});
     }
 
-    handleFixtureBwChange(fixture, junction, reservation, event){
+    handleFixtureBwChange(fixture, junction, reservation, event) {
         fixture.bw = event.target.value;
         junction.fixtures[fixture.id] = fixture;
         reservation.junctions[junction.id] = junction;
         this.setState({reservation: reservation});
     }
 
-    handleFixtureAzBw(fixture, junction, reservation, event){
+    handleFixtureAzBw(fixture, junction, reservation, event) {
         fixture.azbw = event.target.value;
-        if(fixture.symmetricBw){
+        if (fixture.symmetricBw) {
             fixture.zabw = event.target.value;
         }
         junction.fixtures[fixture.id] = fixture;
@@ -466,9 +471,9 @@ class ReservationApp extends React.Component{
         this.setState({reservation: reservation});
     }
 
-    handleFixtureZaBw(fixture, junction, reservation, event){
+    handleFixtureZaBw(fixture, junction, reservation, event) {
         fixture.zabw = event.target.value;
-        if(fixture.symmetricBw){
+        if (fixture.symmetricBw) {
             fixture.azbw = event.target.value;
         }
         junction.fixtures[fixture.id] = fixture;
@@ -476,9 +481,9 @@ class ReservationApp extends React.Component{
         this.setState({reservation: reservation});
     }
 
-    handleFixtureSymmetricBw(fixture, junction, reservation, event){
+    handleFixtureSymmetricBw(fixture, junction, reservation, event) {
         fixture.symmetricBw = !fixture.symmetricBw;
-        if(fixture.symmetricBw){
+        if (fixture.symmetricBw) {
             fixture.zabw = fixture.azbw;
         }
         junction.fixtures[fixture.id] = fixture;
@@ -486,33 +491,33 @@ class ReservationApp extends React.Component{
         this.setState({reservation: reservation});
     }
 
-    handleFixtureVlanChange(fixture, junction, reservation, event){
+    handleFixtureVlanChange(fixture, junction, reservation, event) {
         fixture.vlan = event.target.value;
         junction.fixtures[fixture.id] = fixture;
         reservation.junctions[junction.id] = junction;
         this.setState({reservation: reservation});
     }
 
-    handleStartDateChange(newMoment){
+    handleStartDateChange(newMoment) {
         let reservation = this.state.reservation;
         reservation.startAt = newMoment.toDate();
         this.setState({reservation: reservation});
     }
 
-    handleEndDateChange(newMoment){
+    handleEndDateChange(newMoment) {
         let reservation = this.state.reservation;
         reservation.endAt = newMoment.toDate();
         this.setState({reservation: reservation});
     }
 
-    handleDescriptionChange(reservation, event){
+    handleDescriptionChange(reservation, event) {
         reservation.description = event.target.value;
         this.setState({reservation: reservation})
     }
 
-    handleHold(reservation){
+    handleHold(reservation) {
         reservation.status = "HELD";
-        let holdResponse = client.submitReservation( "/resv/advanced_hold", reservation);
+        let holdResponse = client.submitReservation("/resv/advanced_hold", reservation);
         holdResponse.then(
             (successResponse) => {
                 this.setState(
@@ -530,7 +535,7 @@ class ReservationApp extends React.Component{
         );
     }
 
-    handleCommit(reservation){
+    handleCommit(reservation) {
         reservation.status = "COMMITTED";
         let commitResponse = client.submit("POST", "/resv/commit/", reservation.connectionId);
         commitResponse.then(
@@ -542,7 +547,7 @@ class ReservationApp extends React.Component{
                         enableCommit: false,
                         message: "Reservation committed. Redirecting to show reservation details..."
                     });
-                this.context.router.push("/react/resv/view/"+ reservation.connectionId);
+                this.context.router.push("/react/resv/view/" + reservation.connectionId);
             },
             (failResponse) => {
                 console.log("Error: " + failResponse.status + " - " + failResponse.statusText);
@@ -551,9 +556,9 @@ class ReservationApp extends React.Component{
         );
     }
 
-    render(){
+    render() {
         let reservation = $.extend(true, {}, this.state.reservation);
-        return(
+        return (
             <div>
                 <NavBar isAuthenticated={this.props.route.isAuthenticated} isAdmin={this.props.route.isAdmin}/>
                 <NetworkPanel reservation={reservation} handleAddJunction={this.handleAddJunction}/>
@@ -593,42 +598,45 @@ ReservationApp.contextTypes = {
     router: React.PropTypes.object
 };
 
-class NetworkPanel extends React.Component{
+class NetworkPanel extends React.Component {
 
-    constructor(props){
+    constructor(props) {
         super(props);
 
         this.state = {showPanel: true};
         this.handleHeadingClick = this.handleHeadingClick.bind(this);
     }
 
-    handleHeadingClick(){
+    handleHeadingClick() {
         this.setState({showPanel: !this.state.showPanel});
     }
 
-    render(){
-        return(
+    render() {
+        return (
             <div className="panel-group">
                 <div className="panel panel-default">
                     <Heading title={"Show / hide network"} onClick={() => this.handleHeadingClick()}/>
-                    <div id="network_panel" className="panel-body collapse in" style={this.state.showPanel ? {} : { display: "none" }}>
+                    <div id="network_panel" className="panel-body collapse in"
+                         style={this.state.showPanel ? {} : {display: "none"}}>
                         <NetworkMap />
                         <AddNodeButton onClick={this.props.handleAddJunction.bind(this, this.props.reservation)}/>
-                    </div> : <div />
+                    </div>
+                    :
+                    <div />
                 </div>
             </div>
         );
     }
 }
 
-class NetworkMap extends React.Component{
+class NetworkMap extends React.Component {
 
-    constructor(props){
+    constructor(props) {
         super(props);
     }
 
-    render(){
-        return(
+    render() {
+        return (
             <div id="network_viz" className="col-md-10">
                 <div className="viz-network">Network map</div>
             </div>
@@ -636,20 +644,21 @@ class NetworkMap extends React.Component{
     }
 }
 
-class AddNodeButton extends React.Component{
+class AddNodeButton extends React.Component {
 
-    render(){
-        return(
+    render() {
+        return (
             <div id="add_junction_div" className="col-md-2 affix-top">
-                <input type="button" id="add_junction_btn" className="btn btn-primary active" onClick={this.props.onClick} value="Add to request" />
+                <input type="button" id="add_junction_btn" className="btn btn-primary active"
+                       onClick={this.props.onClick} value="Add to request"/>
             </div>
         );
     }
 }
 
-class ReservationDetailsPanel extends React.Component{
+class ReservationDetailsPanel extends React.Component {
 
-    constructor(props){
+    constructor(props) {
         super(props);
         this.state = {
             showReservationPanel: true,
@@ -657,25 +666,26 @@ class ReservationDetailsPanel extends React.Component{
         this.handleHeadingClick = this.handleHeadingClick.bind(this);
     }
 
-    handleHeadingClick(){
+    handleHeadingClick() {
         this.setState({showReservationPanel: !this.state.showReservationPanel});
     }
 
-    render(){
+    render() {
         let selectedPipe = null;
         let selectedJunction = null;
-        if(this.props.selectedPipes.length > 0){
+        if (this.props.selectedPipes.length > 0) {
             selectedPipe = this.props.reservation.pipes[this.props.selectedPipes[0]];
         }
-        if(this.props.selectedJunctions.length > 0){
+        if (this.props.selectedJunctions.length > 0) {
             selectedJunction = this.props.reservation.junctions[this.props.selectedJunctions[0]];
         }
 
-        return(
+        return (
             <div className="panel-group">
                 <div className="panel panel-default">
                     <Heading title={"Show / hide reservation"} onClick={() => this.handleHeadingClick()}/>
-                    <div id="reservation_panel" className="panel-body collapse collapse in" style={this.state.showReservationPanel ? {} : { display: "none" }}>
+                    <div id="reservation_panel" className="panel-body collapse collapse in"
+                         style={this.state.showReservationPanel ? {} : {display: "none"}}>
                         <Sandbox />
                         <ParameterForm
                             reservation={this.props.reservation}
@@ -689,15 +699,17 @@ class ReservationDetailsPanel extends React.Component{
                             handleHold={this.props.handleHold}
                             handleCommit={this.props.handleCommit}
                         />
-                    </div> : <div />
+                    </div>
+                    :
+                    <div />
                 </div>
-                <div style={this.state.showReservationPanel ? {} : { display: "none" }}>
+                <div style={this.state.showReservationPanel ? {} : {display: "none"}}>
                     {selectedPipe != null ?
                         <PipePanel
                             reservation={this.props.reservation}
                             pipe={selectedPipe}
                             key={selectedPipe.id}
-                            style={(this.props.showPipePanel) ? {} : { display: "none" }}
+                            style={(this.props.showPipePanel) ? {} : {display: "none"}}
                             handlePipeAzBw={this.props.handlePipeAzBw}
                             handlePipeZaBw={this.props.handlePipeZaBw}
                             handleSymmetricBwSelection={this.props.handleSymmetricBwSelection}
@@ -712,7 +724,7 @@ class ReservationDetailsPanel extends React.Component{
                             reservation={this.props.reservation}
                             junction={selectedJunction}
                             key={selectedJunction.id}
-                            style={(this.props.showJunctionPanel) ? {} : { display: "none" }}
+                            style={(this.props.showJunctionPanel) ? {} : {display: "none"}}
                             handleFixtureSelection={this.props.handleFixtureSelection}
                             handleFixtureAzBw={this.props.handleFixtureAzBw}
                             handleFixtureZaBw={this.props.handleFixtureZaBw}
@@ -726,10 +738,10 @@ class ReservationDetailsPanel extends React.Component{
     }
 }
 
-class PipePanel extends React.Component{
+class PipePanel extends React.Component {
 
-    render(){
-        return(
+    render() {
+        return (
             <div id="pipe_card" className="panel panel-default">
                 <div className="panel-heading">
                     <h4 className="panel-title">Pipe Parameters: {this.props.pipe.id.split("_")[0]}</h4>
@@ -738,42 +750,52 @@ class PipePanel extends React.Component{
                     <form className="form-inline" id="pipe_form">
                         <table className="table table-striped table-bordered table-hover">
                             <thead>
-                            <tr><td>Src -> Dest</td>
+                            <tr>
+                                <td>Src -> Dest</td>
                                 <td>Src -> Dest Bandwidth</td>
                                 <td>Dest -> Src Bandwidth <br/>
-                                    <input id="pipe_different_za_bw" type="checkbox" className="form-check-input" checked={!this.props.pipe.symmetricBw}
+                                    <input id="pipe_different_za_bw" type="checkbox" className="form-check-input"
+                                           checked={!this.props.pipe.symmetricBw}
                                            onChange={this.props.handleSymmetricBwSelection.bind(this, this.props.pipe, this.props.reservation)}/>
                                     &nbsp;(Check to enable editing)
                                 </td>
                                 <td>Enable unrestricted Dest -> Src pathfinding?</td>
                                 <td>Survivability</td>
                                 <td>Num. Paths</td>
-                            </tr></thead>
+                            </tr>
+                            </thead>
                             <tbody>
                             <tr>
-                                <td><input id="pipe_az" type="text"  readOnly={true} className="form-control input-md"
+                                <td><input id="pipe_az" type="text" readOnly={true} className="form-control input-md"
                                            value={this.props.pipe.a + " -> " + this.props.pipe.z}/>
                                 </td>
-                                <td><input id="pipe_azbw" type="text" className="form-control input-md" value={this.props.pipe.azbw}
-                                           onChange={this.props.handlePipeAzBw.bind(this, this.props.pipe, this.props.reservation)}/></td>
+                                <td><input id="pipe_azbw" type="text" className="form-control input-md"
+                                           value={this.props.pipe.azbw}
+                                           onChange={this.props.handlePipeAzBw.bind(this, this.props.pipe, this.props.reservation)}/>
+                                </td>
                                 <td>
-                                    <input id="pipe_zabw" type="text" className="form-control input-md" value={this.props.pipe.zabw}
+                                    <input id="pipe_zabw" type="text" className="form-control input-md"
+                                           value={this.props.pipe.zabw}
                                            disabled={this.props.pipe.symmetricBw}
                                            onChange={this.props.handlePipeZaBw.bind(this, this.props.pipe, this.props.reservation)}/>
                                 </td>
-                                <td><input id="pipe_different_za_path" type="checkbox" className="form-check-input" checked={!this.props.pipe.palindromicPath}
+                                <td><input id="pipe_different_za_path" type="checkbox" className="form-check-input"
+                                           checked={!this.props.pipe.palindromicPath}
                                            onChange={this.props.handlePalindromicSelection.bind(this, this.props.pipe, this.props.reservation)}/>
                                 </td>
-                                <td><Dropdown options={this.props.survivabilityTypes} value={this.props.pipe.survivabilityType}
+                                <td><Dropdown options={this.props.survivabilityTypes}
+                                              value={this.props.pipe.survivabilityType}
                                               placeholder="Select a SurvivabilityType"
                                               onChange={this.props.handleSurvivabilitySelection.bind(this, this.props.pipe, this.props.reservation)}/>
                                 </td>
                                 <td>
-                                    <input id="pipe_numpaths" type="text" className="form-control input-md" value={this.props.pipe.numPaths}
+                                    <input id="pipe_numpaths" type="text" className="form-control input-md"
+                                           value={this.props.pipe.numPaths}
                                            onChange={this.props.handleNumPaths.bind(this, this.props.pipe, this.props.reservation)}/>
                                 </td>
 
-                            </tr></tbody>
+                            </tr>
+                            </tbody>
                         </table>
                     </form>
                 </div>
@@ -782,12 +804,12 @@ class PipePanel extends React.Component{
     }
 }
 
-class JunctionPanel extends React.Component{
+class JunctionPanel extends React.Component {
 
-    render(){
+    render() {
         const rows = [];
         let fixtureIds = Object.keys(this.props.junction.fixtures).sort();
-        for(let i = 0; i < fixtureIds.length; i++){
+        for (let i = 0; i < fixtureIds.length; i++) {
             let fixture = this.props.junction.fixtures[fixtureIds[i]];
             rows.push(
                 <FixtureRow
@@ -803,7 +825,7 @@ class JunctionPanel extends React.Component{
                 />
             );
         }
-        return(
+        return (
             <div id="junction_card" className="panel panel-default">
                 <div className="panel-heading">
                     <h4 className="panel-title">Junction parameters: {this.props.junction.id}</h4>
@@ -831,14 +853,14 @@ class JunctionPanel extends React.Component{
     }
 }
 
-class FixtureRow extends React.Component{
+class FixtureRow extends React.Component {
     // Each fixture looks like this:
     // {id: ~~, selected: true or false, bandwidth: ~~, vlan: ~~}
-    render(){
+    render() {
         let checkboxId = "use_" + this.props.fixture.id;
         let bwInputId = "bw_" + this.props.fixture.bw;
         let vlanInputId = "vlan_" + this.props.fixture.vlan;
-        return(
+        return (
             <tr>
                 <td>{this.props.fixture.id}</td>
                 <td>
@@ -889,10 +911,10 @@ class FixtureRow extends React.Component{
     }
 }
 
-class Heading extends React.Component{
+class Heading extends React.Component {
 
-    render(){
-        return(
+    render() {
+        return (
             <div className="panel-heading">
                 <h4 className="panel-title">
                     <a href="#" onClick={() => this.props.onClick()}>{this.props.title}</a>
@@ -902,10 +924,10 @@ class Heading extends React.Component{
     }
 }
 
-class Sandbox extends React.Component{
+class Sandbox extends React.Component {
 
-    render(){
-        return(
+    render() {
+        return (
             <div id="reservation_viz" className="panel-body collapse collapse in col-md-6">
                 Sandbox
             </div>
@@ -913,10 +935,10 @@ class Sandbox extends React.Component{
     }
 }
 
-class ParameterForm extends React.Component{
+class ParameterForm extends React.Component {
 
-    render(){
-        return(
+    render() {
+        return (
             <div id="resv_common_params_form" className="panel panel-default col-md-6 ">
                 <div className="panel-heading">
                     <h4 className="panel-title">Reservation parameters</h4>
@@ -969,27 +991,27 @@ class ParameterForm extends React.Component{
     }
 }
 
-class CalendarForm extends React.Component{
+class CalendarForm extends React.Component {
 
-    render(){
+    render() {
         let divId = this.props.name + "_at_dtp";
-        return(
+        return (
             <div className="form-group">
                 <label className="col-md-2 control-label">{this.props.name} at</label>
                 <div className="col-md-4 input-group" id={divId}>
                     <DateTime value={this.props.date}
                               onChange={this.props.handleDateChange}
-                              inputProps={{readOnly: true, style:{backgroundColor: "white"}}}/>
+                              inputProps={{readOnly: true, style: {backgroundColor: "white"}}}/>
                 </div>
             </div>
         );
     }
 }
 
-class ParameterFormButton extends React.Component{
+class ParameterFormButton extends React.Component {
 
-    render(){
-        return(
+    render() {
+        return (
             <input
                 type="button"
                 id={this.props.buttonId}
@@ -1002,7 +1024,7 @@ class ParameterFormButton extends React.Component{
     }
 }
 
-function createPipe(pipeId, number, aName, zName, azBw, zaBw, symmetric, palindromic, survivabiliyType, numPaths, azERO, zaERO, blacklist){
+function createPipe(pipeId, number, aName, zName, azBw, zaBw, symmetric, palindromic, survivabiliyType, numPaths, azERO, zaERO, blacklist) {
     return {
         id: pipeId + "_" + number,
         a: aName,

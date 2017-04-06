@@ -4,4 +4,4 @@ function tabname {
 }
 tabname "oscars core"
 
-java -Xmx512m -jar target/core-0.7.0.jar $1 $2 $3 $4 $5
+java -Xmx512m -jar target/core-1.0.0-beta.jar $1 $2 $3 $4 $5

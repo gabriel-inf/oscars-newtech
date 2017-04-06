@@ -24,36 +24,39 @@ public class AluCommandGenerator {
     @Autowired
     private Assembler assembler;
 
-    public String teardown(AluParams params) throws ConfigException {
+    public String dismantle(AluParams params) throws ConfigException {
         this.protectVsNulls(params);
         this.verifyAluQosParams(params);
         this.verifySdpIds(params);
         this.verifyPaths(params);
 
         AluTemplatePaths atp = AluTemplatePaths.builder()
-                .lsp("alu/alu-mpls_lsp-teardown.ftl")
-                .qos("alu/alu-qos-teardown.ftl")
-                .sdp("alu/alu-sdp-teardown.ftl")
-                .path("alu/alu-mpls_path-teardown.ftl")
-                .vpls("alu/alu-vpls_service-teardown.ftl")
-                .loopback("alu/alu-vpls_loopback-teardown.ftl")
+                .lsp("alu/dismantle-alu-mpls-lsp.ftl")
+                .qos("alu/dismantle-alu-qos.ftl")
+                .sdp("alu/dismantle-alu-sdp.ftl")
+                .path("alu/dismantle-alu-mpls-path.ftl")
+                .vpls("alu/dismantle-alu-vpls-service.ftl")
+                .loopback("alu/dismantle-alu-vpls-loopback.ftl")
                 .build();
         return fill(atp, params, true);
     }
 
-    public String setup(AluParams params) throws ConfigException {
+    public String build(AluParams params) throws ConfigException {
+        if (params == null) {
+            throw new ConfigException("null ALU params!");
+        }
         this.protectVsNulls(params);
         this.verifyAluQosParams(params);
         this.verifySdpIds(params);
         this.verifyPaths(params);
 
         AluTemplatePaths atp = AluTemplatePaths.builder()
-                .lsp("alu/alu-mpls_lsp-setup.ftl")
-                .qos("alu/alu-qos-setup.ftl")
-                .sdp("alu/alu-sdp-setup.ftl")
-                .path("alu/alu-mpls_path-setup.ftl")
-                .vpls("alu/alu-vpls_service-setup.ftl")
-                .loopback("alu/alu-vpls_loopback-setup.ftl")
+                .lsp("alu/build-alu-mpls-lsp.ftl")
+                .qos("alu/build-alu-qos.ftl")
+                .sdp("alu/build-alu-sdp.ftl")
+                .path("alu/build-alu-mpls-path.ftl")
+                .vpls("alu/build-alu-vpls-service.ftl")
+                .loopback("alu/build-alu-vpls-loopback.ftl")
                 .build();
         return fill(atp, params, false);
     }
@@ -151,7 +154,16 @@ public class AluCommandGenerator {
         }
     }
 
+
     private void protectVsNulls(AluParams params) {
+
+        if (params == null) {
+            log.error("whoa whoa whoa there, no passing null params!");
+            params = AluParams.builder().build();
+        }
+        if (params.getAluVpls() == null) {
+            params.setAluVpls(AluVpls.builder().build());
+        }
         if (params.getSdps() == null) {
             params.setSdps(new ArrayList<>());
         }
@@ -172,13 +184,11 @@ public class AluCommandGenerator {
     private void verifyPaths(AluParams params) throws ConfigException {
 
 
-        Set<String> lspNamesFromSdps  = new HashSet<>();
+        Set<String> lspNamesFromSdps = new HashSet<>();
         Set<String> lspNamesFromLsps = new HashSet<>();
 
         Set<String> pathNamesFromLsps = new HashSet<>();
         Set<String> pathNamesFromPaths = new HashSet<>();
-
-
 
 
         for (AluSdp sdp : params.getSdps()) {
@@ -241,12 +251,12 @@ public class AluCommandGenerator {
             }
             if (qos.getType().equals(AluQosType.SAP_INGRESS)) {
                 if (inQosIds.contains(qos.getPolicyId())) {
-                    throw new ConfigException("duplicate ingress qos policy id");
+                    throw new ConfigException("duplicate ingress qos policy id " + qos.getPolicyId());
                 }
                 inQosIds.add(qos.getPolicyId());
-            } else {
+            } else if (qos.getType().equals(AluQosType.SAP_EGRESS)) {
                 if (egQosIds.contains(qos.getPolicyId())) {
-                    throw new ConfigException("duplicate egress qos policy id");
+                    throw new ConfigException("duplicate egress qos policy id" + qos.getPolicyId());
                 }
                 egQosIds.add(qos.getPolicyId());
             }

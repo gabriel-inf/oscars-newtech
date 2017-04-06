@@ -76,6 +76,16 @@ public class ResvService {
     // business logic
 
 
+    public void provFailed(ConnectionE c) {
+        c.getStates().setProv(ProvState.FAILED);
+        connRepo.save(c);
+    }
+
+    public void generated(ConnectionE c) {
+        c.getStates().setProv(ProvState.GENERATED);
+        connRepo.save(c);
+    }
+
     public void abort(ConnectionE c) {
         this.deleteReserved(c);
 
@@ -96,7 +106,8 @@ public class ResvService {
         c.getStates().setResv(ResvState.IDLE_WAIT);
         try {
             pssResourceService.reserve(c);
-            c.getStates().setProv(ProvState.READY_TO_GENERATE);
+            c.getStates().setProv(ProvState.READY);
+            log.info("reserved PSS resources");
         } catch (PSSException ex) {
             log.error("PSS resource reservation error", ex);
             c.getStates().setProv(ProvState.FAILED);

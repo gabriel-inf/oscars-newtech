@@ -11,7 +11,6 @@ import net.es.oscars.dto.pss.cmd.GeneratedCommands;
 import net.es.oscars.dto.resv.Connection;
 import net.es.oscars.dto.resv.ConnectionFilter;
 import net.es.oscars.dto.resv.precheck.PreCheckResponse;
-import net.es.oscars.dto.spec.RequestedVlanPipe;
 import net.es.oscars.dto.topo.BidirectionalPath;
 import net.es.oscars.dto.topo.Edge;
 import net.es.oscars.st.oper.OperState;
@@ -23,7 +22,6 @@ import net.es.oscars.webui.dto.MinimalRequest;
 import net.es.oscars.webui.ipc.ConnectionProvider;
 import net.es.oscars.webui.ipc.PreChecker;
 import net.es.oscars.webui.ipc.Requester;
-import org.apache.commons.lang3.StringUtils;
 import org.hashids.Hashids;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -33,11 +31,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.text.DateFormat;
 import java.text.ParseException;
-import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -143,7 +138,7 @@ public class ReservationController {
                 filter.getResvStates().stream().map(s -> ResvState.get(s).orElse(ResvState.IDLE_WAIT)).collect(Collectors.toSet());
 
         Set<ProvState> provStates = filter.getProvStates() == null ? new HashSet<>() :
-                filter.getProvStates().stream().map(s -> ProvState.get(s).orElse(ProvState.BUILT_AUTO)).collect(Collectors.toSet());
+                filter.getProvStates().stream().map(s -> ProvState.get(s).orElse(ProvState.BUILT)).collect(Collectors.toSet());
 
         Set<OperState> operStates = filter.getOperStates() == null ? new HashSet<>() :
                 filter.getOperStates().stream().map(s -> OperState.get(s).orElse(OperState.ADMIN_UP_OPER_UP)).collect(Collectors.toSet());
@@ -243,7 +238,7 @@ public class ReservationController {
 
         // TODO: consume this on client side
         Map<String, String> badstuff = new HashMap<>();
-        badstuff.put("commands", commands.getGenerated().get(CommandType.SETUP));
+        badstuff.put("commands", commands.getGenerated().get(CommandType.BUILD));
         return badstuff;
     }
 

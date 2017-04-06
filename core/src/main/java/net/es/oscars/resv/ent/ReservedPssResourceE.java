@@ -23,6 +23,7 @@ public class ReservedPssResourceE {
     @NonNull
     private ResourceType resourceType;
 
+    @NonNull
     private Integer resource;
 
     private Instant beginning;

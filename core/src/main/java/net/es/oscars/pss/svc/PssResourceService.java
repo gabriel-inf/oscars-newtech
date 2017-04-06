@@ -81,6 +81,8 @@ public class PssResourceService {
         log.info("reserving PSS resources for an isolated junction, device: " + rvj.getDeviceUrn());
         UrnE device = topoService.device(rvj.getDeviceUrn());
         Set<ReservedPssResourceE> junctionResources = new HashSet<>();
+        Set<Integer> inQosIds = new HashSet<>();
+        Set<Integer> egQosIds = new HashSet<>();
         switch (device.getDeviceModel()) {
             case JUNIPER_EX:
                 // no further identifiers to reserve
@@ -91,16 +93,19 @@ public class PssResourceService {
             case ALCATEL_SR7750:
                 // we do need a service ID
                 Integer svcId = this.chooseSvcId(rvj.getDeviceUrn(), beginning, ending);
+                log.info("reserving an ALU service id: "+svcId+ " at "+rvj.getDeviceUrn());
                 junctionResources.add(ReservedPssResourceE.makeSvcIdResource(rvj.getDeviceUrn(), svcId, beginning, ending));
-                log.info("reserving Alcatel fixtures");
-                rvj.getFixtures().forEach(f -> {
-                    Integer inQosId = this.chooseQosId(rvj.getDeviceUrn(), ResourceType.ALU_INGRESS_POLICY_ID, beginning, ending);
-                    Integer egQosId = this.chooseQosId(rvj.getDeviceUrn(), ResourceType.ALU_EGRESS_POLICY_ID, beginning, ending);
+                log.info("reserving Alcatel fixtures at "+rvj.getDeviceUrn());
+                for (ReservedVlanFixtureE rvf: rvj.getFixtures()) {
+                    Integer inQosId = this.chooseQosId(rvj.getDeviceUrn(), inQosIds, ResourceType.ALU_INGRESS_POLICY_ID, beginning, ending);
+                    Integer egQosId = this.chooseQosId(rvj.getDeviceUrn(), egQosIds, ResourceType.ALU_EGRESS_POLICY_ID, beginning, ending);
+                    inQosIds.add(inQosId);
+                    egQosIds.add(egQosId);
                     ReservedPssResourceE inQosIdRes = ReservedPssResourceE.makeQosIdResource(rvj.getDeviceUrn(), inQosId, ResourceType.ALU_INGRESS_POLICY_ID, beginning, ending);
-                    ReservedPssResourceE egQosIdRes = ReservedPssResourceE.makeQosIdResource(rvj.getDeviceUrn(), egQosId, ResourceType.ALU_INGRESS_POLICY_ID, beginning, ending);
-                    f.getReservedPssResources().add(inQosIdRes);
-                    f.getReservedPssResources().add(egQosIdRes);
-                });
+                    ReservedPssResourceE egQosIdRes = ReservedPssResourceE.makeQosIdResource(rvj.getDeviceUrn(), egQosId, ResourceType.ALU_EGRESS_POLICY_ID, beginning, ending);
+                    rvf.getReservedPssResources().add(inQosIdRes);
+                    rvf.getReservedPssResources().add(egQosIdRes);
+                };
                 break;
         }
         rvj.getReservedPssResources().addAll(junctionResources);
@@ -112,6 +117,8 @@ public class PssResourceService {
 
     private void reserveMplsPipe(ReservedMplsPipeE rmp, Instant beginning, Instant ending) throws PSSException {
         // we will need a vcId for the pipe, so reserve one
+        Set<Integer> inQosIds = new HashSet<>();
+        Set<Integer> egQosIds = new HashSet<>();
 
         Integer vcId = chooseVcId(beginning, ending);
         log.info("decided to use vcId " + vcId + " for MPLS pipe");
@@ -144,15 +151,17 @@ public class PssResourceService {
                     rvj.getReservedPssResources().add(ReservedPssResourceE.makeSdpIdResource(rvj.getDeviceUrn(), sdpId, beginning, ending));
                     log.info("reserved sdpId " + sdpId + " in junction for " + rvj.getDeviceUrn());
                     log.info("reserving Alcatel fixtures (qos Ids etc) in junction for " + rvj.getDeviceUrn());
-                    rvj.getFixtures().forEach(f -> {
-                        Integer inQosId = this.chooseQosId(rvj.getDeviceUrn(), ResourceType.ALU_INGRESS_POLICY_ID, beginning, ending);
-                        Integer egQosId = this.chooseQosId(rvj.getDeviceUrn(), ResourceType.ALU_EGRESS_POLICY_ID, beginning, ending);
+                    for (ReservedVlanFixtureE rvf: rvj.getFixtures()) {
+                        Integer inQosId = this.chooseQosId(rvj.getDeviceUrn(), inQosIds, ResourceType.ALU_INGRESS_POLICY_ID, beginning, ending);
+                        Integer egQosId = this.chooseQosId(rvj.getDeviceUrn(), egQosIds, ResourceType.ALU_EGRESS_POLICY_ID, beginning, ending);
                         log.info("qosIds : " + inQosId + " " + egQosId);
+                        inQosIds.add(inQosId);
+                        egQosIds.add(egQosId);
                         ReservedPssResourceE inQosIdRes = ReservedPssResourceE.makeQosIdResource(rvj.getDeviceUrn(), inQosId, ResourceType.ALU_INGRESS_POLICY_ID, beginning, ending);
                         ReservedPssResourceE egQosIdRes = ReservedPssResourceE.makeQosIdResource(rvj.getDeviceUrn(), egQosId, ResourceType.ALU_EGRESS_POLICY_ID, beginning, ending);
-                        f.getReservedPssResources().add(inQosIdRes);
-                        f.getReservedPssResources().add(egQosIdRes);
-                    });
+                        rvf.getReservedPssResources().add(inQosIdRes);
+                        rvf.getReservedPssResources().add(egQosIdRes);
+                    };
                     break;
             }
         }
@@ -171,8 +180,30 @@ public class PssResourceService {
 
     }
 
-    private Integer chooseQosId(String deviceUrn, ResourceType rt, Instant beginning, Instant ending) {
-        return 6000;
+    private Integer chooseQosId(String deviceUrn, Set<Integer> alreadySelected,
+                                ResourceType rt, Instant beginning, Instant ending) throws PSSException {
+        String qosIdRangeExpr = pssConfig.getAluQosidRange();
+
+        if (!IntRangeParsing.isValidIntRangeInput(qosIdRangeExpr)) {
+            throw new PSSException("invalid qos id range");
+        }
+        List<IntRange> ranges = IntRangeParsing.retrieveIntRanges(qosIdRangeExpr);
+        if (ranges.size() != 1) {
+            throw new PSSException("only one range supported for QOS IDs");
+        }
+        IntRange range = ranges.get(0);
+        log.info("choosing a Qos ID in this range: " + qosIdRangeExpr);
+
+        Set<Integer> reserved = alreadySelected;
+
+        Set<ReservedPssResourceE> reservedQosIds = this.findOverlappingReservedIds(beginning, ending, rt);
+        // can double-book qos ids as long as they are on different devices
+        for (ReservedPssResourceE resQosId : reservedQosIds) {
+            if (resQosId.getResourceType().equals(rt) && resQosId.getUrn().equals(deviceUrn)) {
+                reserved.add(resQosId.getResource());
+            }
+        }
+        return choose(range, reserved);
     }
 
     private Integer chooseSdpId(Instant beginning, Instant ending) {

@@ -73,9 +73,17 @@ public class ResvProcessor {
         );
 
         // generate config for reservations
-        resvService.ofProvState(ProvState.READY_TO_GENERATE).forEach(c -> {
+        resvService.ofProvState(ProvState.READY).forEach(c -> {
+            // TODO: retries or something?
                     log.info("ready to generate config for " + c.getConnectionId());
-                    pssAdapter.generateConfig(c);
+                    try {
+                        pssAdapter.generateConfig(c);
+                        resvService.generated(c);
+                    } catch (PSSException ex) {
+                        log.error("PSS problem", ex);
+                        resvService.provFailed(c);
+                    }
+
                 }
         );
 

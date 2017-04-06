@@ -44,15 +44,15 @@ public class CommandRunner {
                     ControlPlaneResult res = cplStatus(command.getDevice(), command.getModel());
                     status.setControlPlaneStatus(res.getStatus());
                     break;
-                case SETUP:
+                case BUILD:
                     status.setConfigStatus(ConfigStatus.NONE);
-                    args = builder.setup(command);
+                    args = builder.build(command);
                     confRes = configure(args);
                     status.setConfigStatus(confRes.getStatus());
                     break;
-                case TEARDOWN:
+                case DISMANTLE:
                     status.setConfigStatus(ConfigStatus.NONE);
-                    args = builder.teardown(command);
+                    args = builder.dismantle(command);
                     confRes = configure(args);
                     status.setConfigStatus(confRes.getStatus());
                     break;
