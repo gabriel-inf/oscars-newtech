@@ -5,8 +5,9 @@ import net.es.oscars.authnz.pop.AuthnzPopulator;
 import net.es.oscars.conf.pop.ConfigPopulator;
 import net.es.oscars.pss.pop.UrnAddressImporter;
 import net.es.oscars.tasks.ResvProcessor;
+import net.es.oscars.topo.pop.ConsistencyException;
 import net.es.oscars.topo.pop.TopoFileImporter;
-import net.es.oscars.topo.svc.ConsistencyChecker;
+import net.es.oscars.topo.pop.ConsistencyChecker;
 import net.es.oscars.ui.pop.UIPopulator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -47,7 +48,7 @@ public class Startup {
         this.consistencyChecker = consistencyChecker;
     }
 
-    public boolean onStart() throws IOException {
+    void onStart() throws IOException, ConsistencyException {
         importer.startup();
         uiPopulator.startup();
         urnAddressImporter.startup();
@@ -55,7 +56,7 @@ public class Startup {
         configPopulator.startup();
         authnzPopulator.startup();
 
-        return consistencyChecker.checkConsistency();
+        consistencyChecker.checkConsistency();
     }
 
 }

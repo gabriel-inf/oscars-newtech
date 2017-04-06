@@ -260,7 +260,7 @@ public class TopPCE {
 
 
         // Get map of parent device vertex -> set of port vertices
-        Map<String, Set<String>> deviceToPortMap = topoService.buildDeviceToPortMap();
+        Map<String, Set<String>> deviceToPortMap = topoService.buildDeviceToPortMap().getMap();
         Map<String, String> portToDeviceMap = topoService.buildPortToDeviceMap(deviceToPortMap);
 
         // Initialize the bandwidth availability map

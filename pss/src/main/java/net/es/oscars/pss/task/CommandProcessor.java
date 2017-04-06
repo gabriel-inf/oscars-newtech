@@ -27,7 +27,8 @@ public class CommandProcessor {
     @Scheduled(fixedDelay = 1000)
     public void processsCommands() throws InterruptedException {
 
-        queuer.ofLifecycleStatus(LifecycleStatus.WAITING).entrySet().forEach(e -> {
+        // serially process everything
+        queuer.ofLifecycleStatus(LifecycleStatus.INITIAL_STATE).entrySet().forEach(e -> {
             String commandId = e.getKey();
             CommandStatus status = e.getValue();
             log.info("processing a command with id "+commandId);
@@ -35,7 +36,7 @@ public class CommandProcessor {
             log.info("running command "+commandId);
             queuer.getCommand(commandId).ifPresent(cmd -> runner.run(status, cmd));
             log.info("completed command "+commandId);
-            status.setLifecycleStatus(LifecycleStatus.COMPLETED);
+            status.setLifecycleStatus(LifecycleStatus.DONE);
             queuer.setCommandStatus(commandId, status);
         });
 

@@ -27,7 +27,7 @@ public class MainController {
 
     @RequestMapping("/")
     public String home(Model model) {
-        return "redirect:/resv/list";
+        return "redirect:/react";
     }
 
     @RequestMapping("/login")

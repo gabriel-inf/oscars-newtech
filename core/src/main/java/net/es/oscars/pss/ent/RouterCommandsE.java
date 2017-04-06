@@ -1,6 +1,7 @@
 package net.es.oscars.pss.ent;
 
 import lombok.*;
+import net.es.oscars.dto.pss.cmd.CommandType;
 
 import javax.persistence.*;
 
@@ -20,6 +21,9 @@ public class RouterCommandsE {
 
     @NonNull
     private String connectionId;
+
+    @NonNull
+    private CommandType type;
 
     @NonNull
     @Column(length = 65536)

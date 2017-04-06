@@ -32,11 +32,11 @@ public class ParamsLoader {
         ObjectMapper mapper = new ObjectMapper();
         String prefix = "";
         switch (type) {
-            case SETUP:
-                prefix = "setup";
+            case BUILD:
+                prefix = "build";
                 break;
-            case TEARDOWN:
-                prefix = "teardown";
+            case DISMANTLE:
+                prefix = "dismantle";
                 break;
             case OPERATIONAL_STATUS:
                 prefix = "op_status";

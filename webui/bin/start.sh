@@ -4,4 +4,4 @@ function tabname {
 }
 tabname "oscars web ui"
 
-SPRING_APPLICATION_JSON=$(curl -k -s https://oscars:oscars-shared@localhost:8000/configs/get/webui) java -jar target/webui-0.7.0.jar
+SPRING_APPLICATION_JSON=$(curl -k -s https://oscars:oscars-shared@localhost:8000/configs/get/webui) java -jar target/webui-1.0.0-beta.jar

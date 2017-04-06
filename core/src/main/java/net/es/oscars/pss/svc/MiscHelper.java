@@ -46,7 +46,7 @@ public class MiscHelper {
         return pssResourceOfType(rvj.getReservedPssResources(), ResourceType.ALU_SDP_ID);
     }
 
-    public Optional<Integer> pssResourceOfType(Set<ReservedPssResourceE> resources, ResourceType rt) {
+    private Optional<Integer> pssResourceOfType(Set<ReservedPssResourceE> resources, ResourceType rt) {
         Optional<Integer> resource = Optional.empty();
 
         for (ReservedPssResourceE rps : resources) {
@@ -102,11 +102,9 @@ public class MiscHelper {
             hops.add(hop);
         }
 
-        MplsPath path = MplsPath.builder()
+        return MplsPath.builder()
                 .name(name)
                 .hops(hops)
                 .build();
-
-        return path;
     }
 }

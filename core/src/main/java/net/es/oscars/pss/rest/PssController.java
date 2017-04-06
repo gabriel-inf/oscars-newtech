@@ -1,9 +1,9 @@
 package net.es.oscars.pss.rest;
 
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.dto.pss.cmd.GeneratedCommands;
 import net.es.oscars.pss.dao.RouterCommandsRepository;
 import net.es.oscars.pss.ent.RouterCommandsE;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -16,8 +16,11 @@ import java.util.*;
 public class PssController {
 
     @Autowired
-    private RouterCommandsRepository rcRepo;
+    public PssController(RouterCommandsRepository rcRepo) {
+        this.rcRepo = rcRepo;
+    }
 
+    private RouterCommandsRepository rcRepo;
 
     @ExceptionHandler(NoSuchElementException.class)
     @ResponseStatus(value = HttpStatus.NOT_FOUND)
@@ -28,21 +31,20 @@ public class PssController {
 
     @RequestMapping(value = "/pss/commands/{connectionId}/{deviceUrn}", method = RequestMethod.GET)
     @ResponseBody
-    public Map<String, String> commands(@PathVariable("connectionId") String connectionId,
-                                        @PathVariable("deviceUrn") String deviceUrn) {
+    public GeneratedCommands commands(@PathVariable("connectionId") String connectionId,
+                                      @PathVariable("deviceUrn") String deviceUrn) {
         log.info("retrieving commands for " + connectionId + " " + deviceUrn);
-        Map<String, String> result = new HashMap<>();
 
-        Optional<RouterCommandsE> maybeRce = rcRepo.findByConnectionIdAndDeviceUrn(connectionId, deviceUrn);
-        if (maybeRce.isPresent()) {
-            result.put("commands", maybeRce.get().getContents());
 
-        } else {
-            result.put("commands", "");
+        GeneratedCommands gc = GeneratedCommands.builder()
+                .generated(new HashMap<>())
+                .build();
 
+        List<RouterCommandsE> rcs = rcRepo.findByConnectionIdAndDeviceUrn(connectionId, deviceUrn);
+        for (RouterCommandsE rc : rcs) {
+            gc.getGenerated().put(rc.getType(), rc.getContents());
         }
-        return result;
-
+        return gc;
     }
 
 

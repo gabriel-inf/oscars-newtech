@@ -44,15 +44,15 @@ public class CommandRunner {
                     ControlPlaneResult res = cplStatus(command.getDevice(), command.getModel());
                     status.setControlPlaneStatus(res.getStatus());
                     break;
-                case SETUP:
-                    status.setConfigStatus(ConfigStatus.SUBMITTING);
-                    args = builder.setup(command);
+                case BUILD:
+                    status.setConfigStatus(ConfigStatus.NONE);
+                    args = builder.build(command);
                     confRes = configure(args);
                     status.setConfigStatus(confRes.getStatus());
                     break;
-                case TEARDOWN:
-                    status.setConfigStatus(ConfigStatus.SUBMITTING);
-                    args = builder.teardown(command);
+                case DISMANTLE:
+                    status.setConfigStatus(ConfigStatus.NONE);
+                    args = builder.dismantle(command);
                     confRes = configure(args);
                     status.setConfigStatus(confRes.getStatus());
                     break;
@@ -60,7 +60,7 @@ public class CommandRunner {
             }
         } catch (ControlPlaneException | ConfigException ex) {
             log.error("error", ex);
-            status.setControlPlaneStatus(ControlPlaneStatus.UNKNOWN);
+            status.setControlPlaneStatus(ControlPlaneStatus.ERROR);
         }
     }
 
@@ -70,11 +70,11 @@ public class CommandRunner {
 
         try {
             rancidRunner.runRancid(args);
-            result.setStatus(ConfigStatus.VERIFIED);
+            result.setStatus(ConfigStatus.OK);
 
         } catch (IOException | InterruptedException | TimeoutException | ControlPlaneException ex) {
             log.error("Rancid error", ex);
-            result.setStatus(ConfigStatus.FAILED);
+            result.setStatus(ConfigStatus.ERROR);
 
         }
         return result;
@@ -87,13 +87,13 @@ public class CommandRunner {
         try {
             RancidArguments args = builder.controlPlaneCheck(device, model);
             rancidRunner.runRancid(args);
-            healthService.getHealth().getDeviceStatus().put(device, ControlPlaneStatus.VERIFIED);
-            result.setStatus(ControlPlaneStatus.VERIFIED);
+            healthService.getHealth().getDeviceStatus().put(device, ControlPlaneStatus.OK);
+            result.setStatus(ControlPlaneStatus.OK);
 
         } catch (IOException | InterruptedException | TimeoutException | ControlPlaneException | ConfigException ex) {
             log.error("Rancid error", ex);
-            healthService.getHealth().getDeviceStatus().put(device, ControlPlaneStatus.FAILED);
-            result.setStatus(ControlPlaneStatus.FAILED);
+            healthService.getHealth().getDeviceStatus().put(device, ControlPlaneStatus.ERROR);
+            result.setStatus(ControlPlaneStatus.ERROR);
         }
         return result;
 

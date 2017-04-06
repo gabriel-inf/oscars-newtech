@@ -29,13 +29,13 @@ class ReservationViewApp extends React.Component{
         return(
             <div>
                 <NavBar isAuthenticated={this.props.route.isAuthenticated} isAdmin={this.props.route.isAdmin}/>
+                <div><a href={`/resv/view/${this.props.params.connectionId}`}>More details</a></div>
                 <ReservationList reservations={this.state.reservations} alwaysExpanded={true}/>
+
             </div>
         );
     }
 }
-
-
 
 
 module.exports = ReservationViewApp;

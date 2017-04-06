@@ -2,7 +2,9 @@ package net.es.oscars.webui.ipc;
 
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.rsrc.ReservableBandwidth;
+import net.es.oscars.dto.topo.DevicePortMap;
 import net.es.oscars.dto.topo.Topology;
+import net.es.oscars.dto.viz.DevicePositions;
 import net.es.oscars.dto.viz.Position;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -36,29 +38,19 @@ public class TopologyProvider {
         if (devicePortMap == null) {
             devicePortMap = new HashMap<>();
             String restPath = oscarsUrl + "/topo/device_port_map";
-
-            Map<String, List<String>> receivedMap = restTemplate.getForObject(restPath, Map.class);
-            receivedMap.keySet().forEach(d -> {
-                devicePortMap.put(d, new HashSet<>());
-                devicePortMap.get(d).addAll(receivedMap.get(d));
-
-            });
-
+            DevicePortMap dpm = restTemplate.getForObject(restPath, DevicePortMap.class);
+            devicePortMap = dpm.getMap();
         }
-
         return devicePortMap;
     }
 
     // Reverse of devicePortMap: Key = port, Value = corresponding device
-    public Map<String, String> portDeviceMap()
-    {
+    public Map<String, String> portDeviceMap() {
         Map<String, String> p2d = new HashMap<>();
         Map<String, Set<String>> d2p = devicePortMap();
 
-        for (String d : d2p.keySet())
-        {
-            for (String p : d2p.get(d))
-            {
+        for (String d : d2p.keySet()) {
+            for (String p : d2p.get(d)) {
                 p2d.put(p, d);
             }
         }
@@ -75,11 +67,11 @@ public class TopologyProvider {
         if (positions == null) {
             positions = new HashMap<>();
             String restPath = oscarsUrl + "/ui/positions";
-            Map<String, Map<String,Integer>> rcvd = restTemplate.getForObject(restPath, Map.class);
+            DevicePositions rcvd = restTemplate.getForObject(restPath, DevicePositions.class);
 
-            rcvd.keySet().forEach(d -> {
-                Integer x = rcvd.get(d).get("x");
-                Integer y = rcvd.get(d).get("y");
+            rcvd.getPositions().keySet().forEach(d -> {
+                Integer x = rcvd.getPositions().get(d).getX();
+                Integer y = rcvd.getPositions().get(d).getY();
                 Position p = Position.builder().x(x).y(y).build();
                 positions.put(d, p);
             });
@@ -88,8 +80,7 @@ public class TopologyProvider {
         return positions;
     }
 
-    public List<ReservableBandwidth> getPortCapacities()
-    {
+    public List<ReservableBandwidth> getPortCapacities() {
         String restPath = oscarsUrl + "/topo/allport/bwcapacity";
 
         ReservableBandwidth[] portBW = restTemplate.getForObject(restPath, ReservableBandwidth[].class);
@@ -98,14 +89,13 @@ public class TopologyProvider {
     }
 
 
-    public Integer computeLinkCapacity(String portA, String portZ, List<ReservableBandwidth> portCapacities)
-    {
+    public Integer computeLinkCapacity(String portA, String portZ, List<ReservableBandwidth> portCapacities) {
         // Compute link capacities from port capacities //
         List<ReservableBandwidth> portCaps = portCapacities.stream()
                 .filter(p -> p.getTopoVertexUrn().equals(portA) || p.getTopoVertexUrn().equals(portZ))
                 .collect(Collectors.toList());
 
-        assert(portCaps.size() == 2);
+        assert (portCaps.size() == 2);
 
         ReservableBandwidth bw1 = portCaps.get(0);
         ReservableBandwidth bw2 = portCaps.get(1);
@@ -116,15 +106,12 @@ public class TopologyProvider {
 
         Integer minCap;
 
-        if(bw1.getTopoVertexUrn().equals(portA))
-        {
+        if (bw1.getTopoVertexUrn().equals(portA)) {
             aCapIn = bw1.getIngressBw();
             aCapEg = bw1.getEgressBw();
             zCapIn = bw2.getIngressBw();
             zCapEg = bw2.getEgressBw();
-        }
-        else
-        {
+        } else {
             aCapIn = bw2.getIngressBw();
             aCapEg = bw2.getEgressBw();
             zCapIn = bw1.getIngressBw();

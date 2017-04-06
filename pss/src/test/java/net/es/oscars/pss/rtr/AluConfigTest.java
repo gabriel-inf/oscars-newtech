@@ -37,7 +37,7 @@ public class AluConfigTest extends AbstractPssTest {
     @Before
     public void before() throws InterruptedException {
         System.out.println("==============================================================================");
-        System.out.println("Ready to run setup / teardown tests! These WILL attempt to configure routers.");
+        System.out.println("Ready to run build / dismantle tests! These WILL attempt to configure routers.");
         System.out.println("Make sure you have configured test.properties correctly. ");
         System.out.println("Starting in 3 seconds. Ctrl-C to abort.");
         System.out.println("==============================================================================");
@@ -53,22 +53,22 @@ public class AluConfigTest extends AbstractPssTest {
         String prefix = pssTestConfig.getCaseDirectory();
 
 
-        RouterTestSpec setupRts = loader.loadSpec(prefix + "/setup-alu-single.json");
+        RouterTestSpec setupRts = loader.loadSpec(prefix + "/build-alu-single.json");
 
 
         Command setupCmd = Command.builder()
                 .device(setupRts.getDevice())
                 .model(setupRts.getModel())
-                .type(CommandType.SETUP)
+                .type(CommandType.BUILD)
                 .alu(setupRts.getAluParams())
                 .mx(setupRts.getMxParams())
                 .ex(setupRts.getExParams())
                 .build();
         CommandStatus setupStatus = CommandStatus.builder()
-                .configStatus(ConfigStatus.SUBMITTING)
+                .configStatus(ConfigStatus.NONE)
                 .lifecycleStatus(LifecycleStatus.PROCESSING)
                 .device(setupRts.getDevice())
-                .type(CommandType.SETUP)
+                .type(CommandType.BUILD)
                 .lastUpdated(new Date())
                 .commands("")
                 .output("")
@@ -77,20 +77,20 @@ public class AluConfigTest extends AbstractPssTest {
 
         runner.run(setupStatus, setupCmd);
 
-        RouterTestSpec tdRts = loader.loadSpec(prefix + "/teardown-alu-single.json");
+        RouterTestSpec tdRts = loader.loadSpec(prefix + "/dismantle-alu-single.json");
 
 
         Command tdCmd = Command.builder()
                 .device(tdRts.getDevice())
                 .model(tdRts.getModel())
-                .type(CommandType.TEARDOWN)
+                .type(CommandType.DISMANTLE)
                 .alu(tdRts.getAluParams())
                 .mx(tdRts.getMxParams())
                 .ex(tdRts.getExParams())
                 .build();
         CommandStatus tdStatus = CommandStatus.builder()
-                .type(CommandType.TEARDOWN)
-                .configStatus(ConfigStatus.SUBMITTING)
+                .type(CommandType.DISMANTLE)
+                .configStatus(ConfigStatus.NONE)
                 .device(tdRts.getDevice())
                 .commands("")
                 .output("")
@@ -109,26 +109,26 @@ public class AluConfigTest extends AbstractPssTest {
         String prefix = pssTestConfig.getCaseDirectory();
 
 
-        log.info("starting two ALU test: setup");
+        log.info("starting two ALU test: build");
         List<String> setups = new ArrayList<>();
-        setups.add(prefix + "/setup-2_a-z.json");
-        setups.add(prefix + "/setup-2_z-a.json");
+        setups.add(prefix + "/build-2_a-z.json");
+        setups.add(prefix + "/build-2_z-a.json");
 
         for (String setup : setups) {
             RouterTestSpec setupRts = loader.loadSpec(setup);
             Command setupCmd = Command.builder()
                     .device(setupRts.getDevice())
                     .model(setupRts.getModel())
-                    .type(CommandType.SETUP)
+                    .type(CommandType.BUILD)
                     .alu(setupRts.getAluParams())
                     .mx(setupRts.getMxParams())
                     .ex(setupRts.getExParams())
                     .build();
             CommandStatus setupStatus = CommandStatus.builder()
-                    .configStatus(ConfigStatus.SUBMITTING)
+                    .configStatus(ConfigStatus.NONE)
                     .lifecycleStatus(LifecycleStatus.PROCESSING)
                     .device(setupRts.getDevice())
-                    .type(CommandType.SETUP)
+                    .type(CommandType.BUILD)
                     .lastUpdated(new Date())
                     .commands("")
                     .output("")
@@ -141,8 +141,8 @@ public class AluConfigTest extends AbstractPssTest {
         Thread.sleep(10000);
 
         List<String> teardowns = new ArrayList<>();
-        teardowns.add(prefix + "/teardown-2_a-z.json");
-        teardowns.add(prefix + "/teardown-2_z-a.json");
+        teardowns.add(prefix + "/dismantle-2_a-z.json");
+        teardowns.add(prefix + "/dismantle-2_z-a.json");
 
         for (String teardown : teardowns) {
             RouterTestSpec setupRts = loader.loadSpec(teardown);
@@ -150,16 +150,16 @@ public class AluConfigTest extends AbstractPssTest {
             Command setupCmd = Command.builder()
                     .device(setupRts.getDevice())
                     .model(setupRts.getModel())
-                    .type(CommandType.TEARDOWN)
+                    .type(CommandType.DISMANTLE)
                     .alu(setupRts.getAluParams())
                     .mx(setupRts.getMxParams())
                     .ex(setupRts.getExParams())
                     .build();
             CommandStatus setupStatus = CommandStatus.builder()
-                    .configStatus(ConfigStatus.SUBMITTING)
+                    .configStatus(ConfigStatus.NONE)
                     .lifecycleStatus(LifecycleStatus.PROCESSING)
                     .device(setupRts.getDevice())
-                    .type(CommandType.TEARDOWN)
+                    .type(CommandType.DISMANTLE)
                     .lastUpdated(new Date())
                     .commands("")
                     .output("")
