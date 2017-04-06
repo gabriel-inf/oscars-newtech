@@ -96,6 +96,11 @@ public class ConsistencyChecker {
 
     }
 
+    // TODO
+    private void checkPortUrnFormat() {
+
+    }
+
 
     private void mergeErrors(ConsistencyException top, ConsistencyException other) {
         other.getErrorMap().forEach((k, v) -> {
@@ -105,7 +110,7 @@ public class ConsistencyChecker {
 
     void checkAllDevicesHavePositions() throws ConsistencyException {
         log.debug("checking that all devices have positions ..");
-        Set<String> devicesInPositions = this.ui.getPositions().keySet();
+        Set<String> devicesInPositions = this.ui.getPositions().getPositions().keySet();
         Set<String> devicesInUrns = this.urnRepo.findAll().stream()
                 .filter(t -> t.getUrnType().equals(UrnType.DEVICE))
                 .map(UrnE::getUrn)
@@ -129,7 +134,7 @@ public class ConsistencyChecker {
 
     void checkAllPositionsHaveDevices() throws ConsistencyException {
         log.debug("checking that all position entries match a device Urn..");
-        Set<String> devicesInPositions = this.ui.getPositions().keySet();
+        Set<String> devicesInPositions = this.ui.getPositions().getPositions().keySet();
         Set<String> devicesInUrns = this.urnRepo.findAll().stream()
                 .filter(t -> t.getUrnType().equals(UrnType.DEVICE))
                 .map(UrnE::getUrn)

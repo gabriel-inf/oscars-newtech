@@ -1,6 +1,7 @@
 package net.es.oscars.pss.rest;
 
-import jdk.nashorn.internal.runtime.regexp.joni.Config;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.pss.cmd.Command;
 import net.es.oscars.dto.pss.cmd.CommandResponse;
@@ -35,6 +36,16 @@ public class PssController {
         // LOG.warn("user requested a strResource which didn't exist", ex);
     }
 
+    @ResponseBody
+    @ExceptionHandler(ConfigException.class)
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+    public Map<String, Object> handleConfigException(ConfigException ex) {
+        HashMap<String, Object> result = new HashMap<>();
+        result.put("error_message", ex.getMessage());
+        result.put("error", true);
+        log.error(ex.getMessage());
+        return result;
+    }
 
     @RequestMapping(value = "/command", method = RequestMethod.POST)
     public CommandResponse command(@RequestBody Command cmd) {
@@ -45,8 +56,13 @@ public class PssController {
     }
 
     @RequestMapping(value = "/generate", method = RequestMethod.POST)
-    public GenerateResponse generate(@RequestBody Command cmd) throws ConfigException {
-        log.info("generating router configs");
+    public GenerateResponse generate(@RequestBody Command cmd) throws ConfigException, JsonProcessingException {
+        log.info("generating router config");
+
+        ObjectMapper mapper = new ObjectMapper();
+        String pretty = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(cmd);
+        log.info(pretty);
+
         String generated = routerConfigBuilder.generate(cmd);
         return GenerateResponse.builder()
                 .connectionId(cmd.getConnectionId())

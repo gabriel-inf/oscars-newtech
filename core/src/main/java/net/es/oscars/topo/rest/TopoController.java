@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.es.oscars.dto.rsrc.ReservableBandwidth;
 import net.es.oscars.dto.spec.ReservedBandwidth;
 import net.es.oscars.dto.topo.DevicePortMap;
+import net.es.oscars.dto.topo.ReservedBandwidths;
 import net.es.oscars.dto.topo.Topology;
 import net.es.oscars.dto.topo.enums.Layer;
 import net.es.oscars.resv.ent.ReservedBandwidthE;
@@ -44,7 +45,6 @@ public class TopoController {
     }
 
 
-
     @RequestMapping(value = "/topo/vlanEdges", method = RequestMethod.GET)
     @ResponseBody
     public List<String> vlanEdges() {
@@ -70,7 +70,7 @@ public class TopoController {
 
     @RequestMapping(value = "/topo/all", method = RequestMethod.GET)
     @ResponseBody
-    public Topology topology(){
+    public Topology topology() {
         log.info("Getting entire topology");
         return topoService.getMultilayerTopology();
     }
@@ -92,13 +92,11 @@ public class TopoController {
 
     @RequestMapping(value = "/topo/allport/bwcapacity", method = RequestMethod.GET)
     @ResponseBody
-    public List<ReservableBandwidth> portCapacity()
-    {
+    public List<ReservableBandwidth> portCapacity() {
         List<ReservableBandwidthE> portCapacity = topoService.reservableBandwidths();
         List<ReservableBandwidth> portCapDTO = new ArrayList<>();
 
-        for(ReservableBandwidthE oneCap : portCapacity)
-        {
+        for (ReservableBandwidthE oneCap : portCapacity) {
             ReservableBandwidth oneDTO = ReservableBandwidth.builder()
                     .ingressBw(oneCap.getIngressBw())
                     .egressBw(oneCap.getEgressBw())
@@ -113,41 +111,25 @@ public class TopoController {
 
     @RequestMapping(value = "/topo/reservedbw", method = RequestMethod.POST)
     @ResponseBody
-    public List<ReservedBandwidth> reservedBandwidth(@RequestBody List<String> resUrns)
-    {
-        List<ReservedBandwidthE> allResBwE = topoService.reservedBandwidths();
-
-        List<ReservedBandwidth> allResBwDTO = new ArrayList<>();
-
-        for(ReservedBandwidthE oneBwE : allResBwE)
-        {
-            ReservedBandwidth oneBwDTO = new ReservedBandwidth();
-            modelMapper.map(oneBwE, oneBwDTO);
-
-            allResBwDTO.add(oneBwDTO);
-        }
-
-        allResBwDTO.removeIf(bw -> !resUrns.contains(bw.getContainerConnectionId()));
-
-        return allResBwDTO;
+    public ReservedBandwidths reservedBandwidth(@RequestBody List<String> resUrns) {
+        ReservedBandwidths rbws = this.getAllReservedBandwidth();
+        rbws.getBandwidths().removeIf(bw -> !resUrns.contains(bw.getContainerConnectionId()));
+        return rbws;
     }
 
-    @RequestMapping(value = "/topo/reservedbw", method = RequestMethod.GET)
+    @RequestMapping(value = "/topo/allreservedbw", method = RequestMethod.GET)
     @ResponseBody
-    public List<ReservedBandwidth> getAllReservedBandwidth()
-    {
+    public ReservedBandwidths getAllReservedBandwidth() {
         List<ReservedBandwidthE> allResBwE = topoService.reservedBandwidths();
 
         List<ReservedBandwidth> allResBwDTO = new ArrayList<>();
 
-        for(ReservedBandwidthE oneBwE : allResBwE)
-        {
+        for (ReservedBandwidthE oneBwE : allResBwE) {
             ReservedBandwidth oneBwDTO = new ReservedBandwidth();
             modelMapper.map(oneBwE, oneBwDTO);
 
             allResBwDTO.add(oneBwDTO);
         }
-
-        return allResBwDTO;
+        return ReservedBandwidths.builder().bandwidths(allResBwDTO).build();
     }
 }

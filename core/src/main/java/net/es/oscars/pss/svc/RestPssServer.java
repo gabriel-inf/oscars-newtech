@@ -31,9 +31,11 @@ public class RestPssServer implements PSSProxy {
 
         this.pssConfig = pssConfig;
         this.restTemplate = restTemplate;
+        log.info("PSS server URL: "+pssConfig.getUrl());
     }
 
     public CommandResponse submitCommand(Command cmd) {
+        log.info("submit command - conn id "+cmd.getConnectionId());
         String pssUrl = pssConfig.getUrl();
         String submitUrl = "/command";
         String restPath = pssUrl + submitUrl;
@@ -42,6 +44,7 @@ public class RestPssServer implements PSSProxy {
     }
 
     public GenerateResponse generate(Command cmd) {
+        log.info("generate - conn id "+cmd.getConnectionId());
         String pssUrl = pssConfig.getUrl();
         String submitUrl = "/generate";
         String restPath = pssUrl + submitUrl;
@@ -49,6 +52,7 @@ public class RestPssServer implements PSSProxy {
     }
 
     public CommandStatus status(String commandId) {
+        log.info("status - cmd id "+commandId);
         String pssUrl = pssConfig.getUrl();
         String submitUrl = "/status?commandId="+commandId;
         String restPath = pssUrl + submitUrl;

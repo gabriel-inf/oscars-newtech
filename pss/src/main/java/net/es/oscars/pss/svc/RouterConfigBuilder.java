@@ -30,11 +30,11 @@ public class RouterConfigBuilder {
             case CONTROL_PLANE_STATUS:
                 result = controlPlaneCheck(command.getDevice(), command.getModel()).getRouterConfig();
                 break;
-            case SETUP:
-                result = setup(command).getRouterConfig();
+            case BUILD:
+                result = build(command).getRouterConfig();
                 break;
-            case TEARDOWN:
-                result = teardown(command).getRouterConfig();
+            case DISMANTLE:
+                result = dismantle(command).getRouterConfig();
                 break;
         }
         return result;
@@ -59,12 +59,12 @@ public class RouterConfigBuilder {
     }
 
 
-    public RancidArguments setup(Command command) throws ConfigException {
+    public RancidArguments build(Command command) throws ConfigException {
         String routerConfig = "";
         DeviceModel model = command.getModel();
         switch (model) {
             case ALCATEL_SR7750:
-                routerConfig = acg.setup(command.getAlu());
+                routerConfig = acg.build(command.getAlu());
                 break;
             case JUNIPER_MX:
             case JUNIPER_EX:
@@ -76,12 +76,12 @@ public class RouterConfigBuilder {
         return buildRouterConfig(routerConfig, command.getDevice(), command.getModel());
     }
 
-    public RancidArguments teardown(Command command) throws ConfigException {
+    public RancidArguments dismantle(Command command) throws ConfigException {
         String routerConfig = "";
         DeviceModel model = command.getModel();
         switch (model) {
             case ALCATEL_SR7750:
-                routerConfig = acg.teardown(command.getAlu());
+                routerConfig = acg.dismantle(command.getAlu());
                 break;
             case JUNIPER_MX:
             case JUNIPER_EX:

@@ -6,7 +6,7 @@
     <parent>
         <artifactId>newtech</artifactId>
         <groupId>net.es.oscars</groupId>
-        <version>0.7.0</version>
+        <version>1.0.0-beta</version>
     </parent>
     <properties>
         <testcase.groups>net.es.oscars.pss.ctg.UnitTests</testcase.groups>
@@ -87,7 +87,7 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-jetty</artifactId>
+            <artifactId>spring-boot-starter-undertow</artifactId>
         </dependency>
 
         <dependency>
