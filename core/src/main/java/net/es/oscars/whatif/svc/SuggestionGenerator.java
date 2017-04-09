@@ -126,7 +126,54 @@ public class SuggestionGenerator {
      * @return A list of connections that could satisfy the demand.
      */
     public List<Connection> generateWithStartEnd(WhatifSpecification spec, BandwidthAvailabilityResponse bwResponse) {
-        return new ArrayList<>();
+        List<Connection> connections = new ArrayList<>();
+        Date start = dateService.parseDate(spec.getStartDate());
+        Date end = dateService.parseDate(spec.getEndDate());
+
+        Map<Instant, Integer> bwMap = bwResponse.getBwAvailabilityMap().get("Az1");
+        Integer minimumBandwidth = null;
+
+        // Go through all critical points in the bandwidth availability map
+        // Calculate the minimum bandwidth available across the map
+        for(Instant instant : bwMap.keySet()) {
+            Integer bandwidth = bwMap.get(instant);
+            if (minimumBandwidth == null || bandwidth < minimumBandwidth) {
+                minimumBandwidth = bandwidth;
+                if(minimumBandwidth == 0) {
+                    return connections;
+                }
+            }
+        }
+
+        // For now, both directions on the path will have equal bandwidth
+        // It is possible we will want to change this in the future
+        Integer azMbps = minimumBandwidth;
+        Integer zaMbps = minimumBandwidth;
+
+        // Each connection must have a unique id
+        String connectionId = "startEnd0";
+
+        // Create an initial connection from parameters
+        Connection conn = createInitialConnection(spec.getSrcDevice(), spec.getSrcPorts(), spec.getDstDevice(),
+                spec.getDstPorts(), azMbps, zaMbps, connectionId, start, end);
+
+        // Run a precheck
+        Connection result = null;
+        try {
+            result = resvController.preCheck(conn);
+            if(result != null){
+                // Determine if result is successful. If so, consider storing it as an option
+                if(result.getReserved().getVlanFlow().getAllPaths().size() > 0){
+                    // Success!  Now we can add this connection to our list
+                    connections.add(result);
+                }
+            }
+        }
+        catch(PCEException |PSSException e){
+            log.info("Connection precheck caused an exception.");
+        }
+
+        return connections;
     }
 
     /**
