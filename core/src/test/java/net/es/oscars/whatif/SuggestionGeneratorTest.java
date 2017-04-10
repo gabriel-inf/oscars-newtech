@@ -10,14 +10,10 @@ import net.es.oscars.dto.spec.ReservedBandwidth;
 import net.es.oscars.dto.spec.ReservedEthPipe;
 import net.es.oscars.dto.spec.ReservedMplsPipe;
 import net.es.oscars.dto.spec.ReservedVlanJunction;
-import net.es.oscars.dto.topo.BidirectionalPath;
-import net.es.oscars.dto.topo.Edge;
 import net.es.oscars.pce.helpers.RepoEntityBuilder;
 import net.es.oscars.pce.helpers.TopologyBuilder;
 import net.es.oscars.resv.dao.ReservedBandwidthRepository;
 import net.es.oscars.resv.svc.DateService;
-import net.es.oscars.topo.dao.UrnRepository;
-import net.es.oscars.topo.ent.UrnE;
 import net.es.oscars.whatif.dto.WhatifSpecification;
 import net.es.oscars.whatif.svc.SuggestionGenerator;
 import net.es.oscars.whatif.svc.SuggestionService;
@@ -27,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Transactional
@@ -124,10 +119,7 @@ public class SuggestionGeneratorTest  extends AbstractCoreTest {
                 .durationMinutes(durationMinutes)
                 .build();
 
-
-        BandwidthAvailabilityResponse bwResponse = getBwMap(srcDevice, srcPorts, dstDevice, dstPorts, startDate, endDate);
-
-        List<Connection> suggestions = suggestionGenerator.generateWithStartEndVolume(spec, bwResponse);
+        List<Connection> suggestions = suggestionGenerator.generateWithStartEndVolume(spec);
 
         assert(suggestions.size() == 2);
 
@@ -170,10 +162,7 @@ public class SuggestionGeneratorTest  extends AbstractCoreTest {
                 .durationMinutes(durationMinutes)
                 .build();
 
-
-        BandwidthAvailabilityResponse bwResponse = getBwMap(srcDevice, srcPorts, dstDevice, dstPorts, startDate, endDate);
-
-        List<Connection> suggestions = suggestionGenerator.generateWithStartEndVolume(spec, bwResponse);
+        List<Connection> suggestions = suggestionGenerator.generateWithStartEndVolume(spec);
 
         assert(suggestions.size() == 2);
 
@@ -216,10 +205,7 @@ public class SuggestionGeneratorTest  extends AbstractCoreTest {
                 .durationMinutes(durationMinutes)
                 .build();
 
-
-        BandwidthAvailabilityResponse bwResponse = getBwMap(srcDevice, srcPorts, dstDevice, dstPorts, startDate, endDate);
-
-        List<Connection> suggestions = suggestionGenerator.generateWithStartEndVolume(spec, bwResponse);
+        List<Connection> suggestions = suggestionGenerator.generateWithStartEndVolume(spec);
 
         assert(suggestions.size() == 0);
     }
@@ -260,10 +246,7 @@ public class SuggestionGeneratorTest  extends AbstractCoreTest {
                 .durationMinutes(durationMinutes)
                 .build();
 
-
-        BandwidthAvailabilityResponse bwResponse = getBwMap(srcDevice, srcPorts, dstDevice, dstPorts, startDate, endDate);
-
-        List<Connection> suggestions = suggestionGenerator.generateWithStartEndVolume(spec, bwResponse);
+        List<Connection> suggestions = suggestionGenerator.generateWithStartEndVolume(spec);
 
         assert(suggestions.size() == 1);
 
@@ -296,10 +279,7 @@ public class SuggestionGeneratorTest  extends AbstractCoreTest {
                 .durationMinutes(durationMinutes)
                 .build();
 
-
-        BandwidthAvailabilityResponse bwResponse = getBwMap(srcDevice, srcPorts, dstDevice, dstPorts, startDate, endDate);
-
-        List<Connection> suggestions = suggestionGenerator.generateWithStartEnd(spec, bwResponse);
+        List<Connection> suggestions = suggestionGenerator.generateWithStartEnd(spec);
 
         assert(suggestions.size() == 1);
 
@@ -343,9 +323,7 @@ public class SuggestionGeneratorTest  extends AbstractCoreTest {
                 .build();
 
 
-        BandwidthAvailabilityResponse bwResponse = getBwMap(srcDevice, srcPorts, dstDevice, dstPorts, startDate, endDate);
-
-        List<Connection> suggestions = suggestionGenerator.generateWithStartEnd(spec, bwResponse);
+        List<Connection> suggestions = suggestionGenerator.generateWithStartEnd(spec);
 
         assert(suggestions.size() == 1);
 
@@ -391,10 +369,7 @@ public class SuggestionGeneratorTest  extends AbstractCoreTest {
                 .durationMinutes(durationMinutes)
                 .build();
 
-
-        BandwidthAvailabilityResponse bwResponse = getBwMap(srcDevice, srcPorts, dstDevice, dstPorts, startDate, endDate);
-
-        List<Connection> suggestions = suggestionGenerator.generateWithStartEnd(spec, bwResponse);
+        List<Connection> suggestions = suggestionGenerator.generateWithStartEnd(spec);
 
         assert(suggestions.size() == 1);
 
@@ -440,10 +415,7 @@ public class SuggestionGeneratorTest  extends AbstractCoreTest {
                 .durationMinutes(durationMinutes)
                 .build();
 
-
-        BandwidthAvailabilityResponse bwResponse = getBwMap(srcDevice, srcPorts, dstDevice, dstPorts, startDate, endDate);
-
-        List<Connection> suggestions = suggestionGenerator.generateWithStartEnd(spec, bwResponse);
+        List<Connection> suggestions = suggestionGenerator.generateWithStartEnd(spec);
 
         assert(suggestions.size() == 1);
 
@@ -490,17 +462,10 @@ public class SuggestionGeneratorTest  extends AbstractCoreTest {
                 .build();
 
 
-        BandwidthAvailabilityResponse bwResponse = getBwMap(srcDevice, srcPorts, dstDevice, dstPorts, startDate, endDate);
-
-        List<Connection> suggestions = suggestionGenerator.generateWithStartEnd(spec, bwResponse);
+        List<Connection> suggestions = suggestionGenerator.generateWithStartEnd(spec);
 
         assert(suggestions.size() == 0);
     }
 
-    private BandwidthAvailabilityResponse getBwMap(String srcDevice, Set<String> srcPorts, String dstDevice, Set<String> dstPorts,
-                                                   String startDate, String endDate){
-        BandwidthAvailabilityRequest bwRequest = suggestionService.createBwAvailRequest(srcDevice, srcPorts, dstDevice,
-                dstPorts, 0, 0, dateService.parseDate(startDate), dateService.parseDate(endDate));
-        return bandwidthAvailabilityService.getBandwidthAvailabilityMap(bwRequest);
-    }
+
 }

@@ -1,6 +1,9 @@
 package net.es.oscars.whatif.svc;
 
 import lombok.extern.slf4j.Slf4j;
+import net.es.oscars.bwavail.svc.BandwidthAvailabilityGenerationService;
+import net.es.oscars.bwavail.svc.BandwidthAvailabilityService;
+import net.es.oscars.dto.bwavail.BandwidthAvailabilityRequest;
 import net.es.oscars.dto.bwavail.BandwidthAvailabilityResponse;
 import net.es.oscars.dto.resv.Connection;
 import net.es.oscars.pce.exc.PCEException;
@@ -13,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @Service
@@ -24,14 +28,20 @@ public class SuggestionGenerator {
 
     ResvController resvController;
 
-
     DateService dateService;
 
+    BandwidthAvailabilityGenerationService bwAvailGenService;
+
+    BandwidthAvailabilityService bwAvailService;
+
     @Autowired
-    public SuggestionGenerator(ConnectionGenerationService connectionGenerationService, ResvController resvController, DateService dateService) {
+    public SuggestionGenerator(ConnectionGenerationService connectionGenerationService, ResvController resvController, DateService dateService,
+                               BandwidthAvailabilityGenerationService bwAvailGenService, BandwidthAvailabilityService bwAvailService) {
         this.connectionGenerationService = connectionGenerationService;
         this.resvController = resvController;
         this.dateService = dateService;
+        this.bwAvailGenService = bwAvailGenService;
+        this.bwAvailService = bwAvailService;
     }
 
 
@@ -39,10 +49,9 @@ public class SuggestionGenerator {
      * Generate a list of viable connections given a Start Date, End Date, and requested transfer Volume.
      * Provide the minimum needed bandwidth, and the maximum possible.
      * @param spec - Submitted request specification.
-     * @param bwResponse - Container for a bandwidth availability map.
      * @return A list of connections that could satisfy the demand.
      */
-    public List<Connection> generateWithStartEndVolume(WhatifSpecification spec, BandwidthAvailabilityResponse bwResponse){
+    public List<Connection> generateWithStartEndVolume(WhatifSpecification spec){
         List<Connection> connections = new ArrayList<>();
         Date start = dateService.parseDate(spec.getStartDate());
         Date end = dateService.parseDate(spec.getEndDate());
@@ -52,6 +61,11 @@ public class SuggestionGenerator {
         // Values may be the same, or different
         Integer secondsBetween = (int) ((end.getTime() - start.getTime()) / 1000);
         Integer minimumRequiredBandwidth = (int) Math.ceil(1.0 * volume / secondsBetween);
+
+        // Get the bandwidth availability along a path from srcDevice to dstDevice
+        BandwidthAvailabilityRequest bwAvailRequest = createBwAvailRequest(spec.getSrcDevice(), spec.getSrcPorts(),
+                spec.getDstDevice(), spec.getDstPorts(), minimumRequiredBandwidth, minimumRequiredBandwidth, start, end);
+        BandwidthAvailabilityResponse bwResponse = bwAvailService.getBandwidthAvailabilityMap(bwAvailRequest);
 
         Map<Instant, Integer> bwMap = bwResponse.getBwAvailabilityMap().get("Az1");
         List<Integer> possibleBandwidths = new ArrayList<>();
@@ -122,13 +136,16 @@ public class SuggestionGenerator {
      * Generate a list of viable connections given a Start Date, and End Date.
      * Get the maximum bandwidth possible.
      * @param spec - Submitted request specification.
-     * @param bwResponse - Container for a bandwidth availability map.
      * @return A list of connections that could satisfy the demand.
      */
-    public List<Connection> generateWithStartEnd(WhatifSpecification spec, BandwidthAvailabilityResponse bwResponse) {
+    public List<Connection> generateWithStartEnd(WhatifSpecification spec) {
         List<Connection> connections = new ArrayList<>();
         Date start = dateService.parseDate(spec.getStartDate());
         Date end = dateService.parseDate(spec.getEndDate());
+
+        BandwidthAvailabilityRequest bwAvailRequest = createBwAvailRequest(spec.getSrcDevice(), spec.getSrcPorts(),
+                spec.getDstDevice(), spec.getDstPorts(), 0, 0, start, end);
+        BandwidthAvailabilityResponse bwResponse = bwAvailService.getBandwidthAvailabilityMap(bwAvailRequest);
 
         Map<Instant, Integer> bwMap = bwResponse.getBwAvailabilityMap().get("Az1");
         Integer minimumBandwidth = null;
@@ -180,10 +197,9 @@ public class SuggestionGenerator {
      * Generate a list of viable connections given a Start Date, and requested transfer volume.
      * Complete as early as possible.
      * @param spec - Submitted request specification.
-     * @param bwResponse - Container for a bandwidth availability map.
      * @return A list of connections that could satisfy the demand.
      */
-    public List<Connection> generateWithStartVolume(WhatifSpecification spec, BandwidthAvailabilityResponse bwResponse) {
+    public List<Connection> generateWithStartVolume(WhatifSpecification spec) {
         return new ArrayList<>();
     }
 
@@ -191,10 +207,9 @@ public class SuggestionGenerator {
      * Generate a list of viable connections given an End Date, and requested transfer volume.
      * Complete transfer by deadline.
      * @param spec - Submitted request specification.
-     * @param bwResponse - Container for a bandwidth availability map.
      * @return A list of connections that could satisfy the demand.
      */
-    public List<Connection> generateWithEndVolume(WhatifSpecification spec, BandwidthAvailabilityResponse bwResponse) {
+    public List<Connection> generateWithEndVolume(WhatifSpecification spec) {
         return new ArrayList<>();
     }
 
@@ -202,10 +217,9 @@ public class SuggestionGenerator {
      * Generate a list of viable connections given a Start Date, requested transfer volume, and desired bandwidth.
      * Complete as early as possible.
      * @param spec - Submitted request specification.
-     * @param bwResponse - Container for a bandwidth availability map.
      * @return A list of connections that could satisfy the demand.
      */
-    public List<Connection> generateWithStartVolumeBandwidth(WhatifSpecification spec, BandwidthAvailabilityResponse bwResponse) {
+    public List<Connection> generateWithStartVolumeBandwidth(WhatifSpecification spec) {
         return new ArrayList<>();
     }
 
@@ -213,10 +227,9 @@ public class SuggestionGenerator {
      * Generate a list of viable connections given an End Date, requested transfer volume, and desired bandwidth.
      * Complete transfer by deadline.
      * @param spec - Submitted request specification.
-     * @param bwResponse - Container for a bandwidth availability map.
      * @return A list of connections that could satisfy the demand.
      */
-    public List<Connection> generateWithEndVolumeBandwidth(WhatifSpecification spec, BandwidthAvailabilityResponse bwResponse) {
+    public List<Connection> generateWithEndVolumeBandwidth(WhatifSpecification spec) {
         return new ArrayList<>();
     }
 
@@ -224,10 +237,9 @@ public class SuggestionGenerator {
      * Generate a list of viable connections given a requested transfer volume, and a transfer duration.
      * Find contiguous time periods to perform transfer.
      * @param spec - Submitted request specification.
-     * @param bwResponse - Container for a bandwidth availability map.
      * @return A list of connections that could satisfy the demand.
      */
-    public List<Connection> generateWithVolumeDuration(WhatifSpecification spec, BandwidthAvailabilityResponse bwResponse) {
+    public List<Connection> generateWithVolumeDuration(WhatifSpecification spec) {
         return new ArrayList<>();
     }
 
@@ -235,10 +247,9 @@ public class SuggestionGenerator {
      * Generate a list of viable connections given just a requested transfer volume.
      * Complete transfer as early as possible.
      * @param spec - Submitted request specification.
-     * @param bwResponse - Container for a bandwidth availability map.
      * @return A list of connections that could satisfy the demand.
      */
-    public List<Connection> generateWithVolume(WhatifSpecification spec, BandwidthAvailabilityResponse bwResponse) {
+    public List<Connection> generateWithVolume(WhatifSpecification spec) {
         return new ArrayList<>();
     }
 
@@ -250,6 +261,13 @@ public class SuggestionGenerator {
                 "PALINDROME", "NONE", 1, 1, 1, 1, connectionId,
                 startDate, endDate);
         return connectionGenerationService.buildConnection(spec);
+    }
+
+    public BandwidthAvailabilityRequest createBwAvailRequest(String srcDevice, Set<String> srcPorts, String dstDevice,
+                                                             Set<String> dstPorts, Integer minAzMbps, Integer minZaMbps,
+                                                             Date startDate, Date endDate) {
+        return bwAvailGenService.generateBandwidthAvailabilityRequest(srcDevice, srcPorts, dstDevice, dstPorts,
+                new ArrayList<>(), new ArrayList<>(), minAzMbps, minZaMbps, 1, true, startDate, endDate);
     }
 
 
