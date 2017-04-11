@@ -21,18 +21,11 @@ public class SuggestionService {
 
     DateService dateService;
 
-    BandwidthAvailabilityGenerationService bwAvailGenService;
-
-    BandwidthAvailabilityService bwAvailService;
-
     SuggestionGenerator suggestionGenerator;
 
     @Autowired
-    public SuggestionService(DateService dateService, BandwidthAvailabilityGenerationService bwAvailGenService,
-                             BandwidthAvailabilityService bwAvailService, SuggestionGenerator suggestionGenerator) {
+    public SuggestionService(DateService dateService, SuggestionGenerator suggestionGenerator) {
         this.dateService = dateService;
-        this.bwAvailGenService = bwAvailGenService;
-        this.bwAvailService = bwAvailService;
         this.suggestionGenerator = suggestionGenerator;
     }
 
@@ -43,27 +36,10 @@ public class SuggestionService {
      * @return A list of viable connection options.
      */
     public List<Connection> generateSuggestions(WhatifSpecification spec) {
-        String startDate = spec.getStartDate();
-        String endDate = spec.getEndDate();
-        String srcDevice = spec.getSrcDevice();
-        Set<String> srcPorts = spec.getSrcPorts();
-        String dstDevice = spec.getDstDevice();
-        Set<String> dstPorts = spec.getDstPorts();
-
-        Instant now = Instant.now().plus(5, ChronoUnit.MINUTES);
-        Date bwStartDate = startDate != null ? dateService.parseDate(startDate) : new Date(now.toEpochMilli());
-        Date bwEndDate = endDate != null ? dateService.parseDate(endDate) : new Date(now.plus(2, ChronoUnit.YEARS).toEpochMilli());
-        // Get the bandwidth availability along a path from srcDevice to dstDevice
-        BandwidthAvailabilityRequest bwAvailRequest = createBwAvailRequest(srcDevice, srcPorts, dstDevice, dstPorts,
-                0, 0, bwStartDate, bwEndDate);
-        BandwidthAvailabilityResponse bwResponse = bwAvailService.getBandwidthAvailabilityMap(bwAvailRequest);
-
-        return buildConnectionList(spec, bwResponse);
-
-
+        return buildConnectionList(spec);
     }
 
-    private List<Connection> buildConnectionList(WhatifSpecification spec, BandwidthAvailabilityResponse bwResponse){
+    private List<Connection> buildConnectionList(WhatifSpecification spec){
         List<Connection> connections = new ArrayList<>();
         String startDate = spec.getStartDate();
         String endDate = spec.getEndDate();
@@ -82,39 +58,33 @@ public class SuggestionService {
 
         // Specified start & end & volume -> find the right bandwidth
         if(specifiedStartEndVolume){
-            connections.addAll(suggestionGenerator.generateWithStartEndVolume(spec, bwResponse));
+            connections.addAll(suggestionGenerator.generateWithStartEndVolume(spec));
         }
         if(connections.size() == 0 && specifiedStartEnd){
-            connections.addAll(suggestionGenerator.generateWithStartEnd(spec, bwResponse));
+            connections.addAll(suggestionGenerator.generateWithStartEnd(spec));
         }
         if(connections.size() == 0 && specifiedStartVolume){
-            connections.addAll(suggestionGenerator.generateWithStartVolume(spec, bwResponse));
+            connections.addAll(suggestionGenerator.generateWithStartVolume(spec));
         }
         if(connections.size() == 0 && specifiedEndVolume){
-            connections.addAll(suggestionGenerator.generateWithEndVolume(spec, bwResponse));
+            connections.addAll(suggestionGenerator.generateWithEndVolume(spec));
         }
         if(connections.size() == 0 && specifiedStartVolumeBandwidth){
-            connections.addAll(suggestionGenerator.generateWithStartVolumeBandwidth(spec, bwResponse));
+            connections.addAll(suggestionGenerator.generateWithStartVolumeBandwidth(spec));
         }
         if(connections.size() == 0 && specifiedEndVolumeBandwidth){
-            connections.addAll(suggestionGenerator.generateWithEndVolumeBandwidth(spec, bwResponse));
+            connections.addAll(suggestionGenerator.generateWithEndVolumeBandwidth(spec));
         }
         if(connections.size() == 0 && specifiedVolumeDuration){
-            connections.addAll(suggestionGenerator.generateWithVolumeDuration(spec, bwResponse));
+            connections.addAll(suggestionGenerator.generateWithVolumeDuration(spec));
         }
         if(connections.size() == 0 && specifiedVolume){
-            connections.addAll(suggestionGenerator.generateWithVolume(spec, bwResponse));
+            connections.addAll(suggestionGenerator.generateWithVolume(spec));
         }
 
         return connections;
     }
 
-    public BandwidthAvailabilityRequest createBwAvailRequest(String srcDevice, Set<String> srcPorts, String dstDevice,
-                                                              Set<String> dstPorts, Integer minAzMbps, Integer minZaMbps,
-                                                              Date startDate, Date endDate) {
-       return bwAvailGenService.generateBandwidthAvailabilityRequest(srcDevice, srcPorts, dstDevice, dstPorts,
-               new ArrayList<>(), new ArrayList<>(), minAzMbps, minZaMbps, 1, true, startDate, endDate);
-    }
 
 
 }

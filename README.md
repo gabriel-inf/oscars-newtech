@@ -45,8 +45,7 @@ You may start all OSCARS services (core and webui) with the following command:
 
 If on windows, an alternative python script can be used.
 It has the following dependencies:
-* [Python](https://www.python.org/) 3.6+
-* [Requests](http://docs.python-requests.org/en/master/) library for Python
+* [Python](https://www.python.org/) 2.7+ or 3.6+
 
 ```bash
  python ./bin/win_start.py
