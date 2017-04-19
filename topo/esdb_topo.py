@@ -1,5 +1,16 @@
 #!/usr/bin/env python
 # encoding: utf-8
+#
+# Query ESDB for the current network topology snapshot.  Similar to
+# esnet_topo.py.
+#
+# Requires an API key that is specified in one of the following ways:
+#
+# o Literally via the --token argument
+# o Literally via the ESDB_TOKEN environment variable
+# o Contained in the file specified via the --token-path argument
+# o Contained in the file specified via the ESDB_TOKEN_PATH environment variable
+#
 
 import json
 import pprint
@@ -56,6 +67,12 @@ def main():
                         help="API authentication token")
     parser.add_argument('--token-path', default=None,
                         help="Path to file containing API authentication token")
+    parser.add_argument('--output-devices', default=OUTPUT_DEVICES,
+                        help="Path to devices output file")
+    parser.add_argument('--output-adjacencies', default=OUTPUT_ADJCIES,
+                        help="Path to IS-IS adjacencies output file")
+    parser.add_argument('--output-addresses', default=OUTPUT_ADDRS,
+                        help="Path to addresses file")
 
     opts = parser.parse_args()
 
@@ -68,35 +85,23 @@ def main():
     if r.status_code != requests.codes.ok:
         print "error:  " + r.text
         exit(1)
-    # Note that id is at r.json()['topology_snapshots'][0]['id']
+    # Get the first snapshot that got returned.  Since we didn't ask for one
+    # in particular, we should have gotten only the current snapshot.
     snapshot = r.json()['topology_snapshots'][0]['data']
     today = snapshot['today']
 
-    # in_str = open(INPUT_DEVICES).read()
-    # in_devices = json.loads(in_str)
-    #
-    # in_str = open(INPUT_ISIS).read()
-    # isis_adjcies = json.loads(in_str)
-    #
-    # in_str = open(INPUT_PORTS).read()
-    # in_ports = json.loads(in_str)
-    #
-    # in_str = open(INPUT_ADDRS).read()
-    # addrs = json.loads(in_str)
 
-    # Post-processing of today.json
+    # Post-processing of today.json.
+    # Get information about routers, ISIS adjacencies, router ports, and IPv4 addresses.
+    # These are basically the same data that are in the input files taken by esnet_topo.py.
     in_devices = get_devices(today['router_system'])
-    # print json.dumps(in_devices, indent=2)
 
     isis = get_isis_neighbors(today['ipv4net'], snapshot['latency'])
     isis_adjcies = make_isis_graph(isis)
-    #print json.dumps(isis_adjcies, indent=2)
 
     in_ports = get_ports_by_rtr(today['ipv4net'])
-    # print json.dumps(in_ports, indent=2)
 
     addrs = get_ip_addrs(today['ipv4net'])
-    # print json.dumps(addrs, indent=2)
 
     oscars_devices = transform_devices(in_devices=in_devices)
 
@@ -110,13 +115,14 @@ def main():
 
     urn_addrs = make_urn_addrs(addrs=addrs, isis_adjcies=isis_adjcies)
 
-    with open(OUTPUT_DEVICES, 'w') as outfile:
+    # Dump output files
+    with open(opts.output_devices, 'w') as outfile:
         json.dump(oscars_devices, outfile, indent=2)
 
-    with open(OUTPUT_ADJCIES, 'w') as outfile:
+    with open(opts.output_adjacencies, 'w') as outfile:
         json.dump(oscars_adjcies, outfile, indent=2)
 
-    with open(OUTPUT_ADDRS, 'w') as outfile:
+    with open(opts.output_addresses, 'w') as outfile:
         json.dump(urn_addrs, outfile, indent=2)
 
 
